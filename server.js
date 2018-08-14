@@ -87,6 +87,20 @@ const coop_stage2txt = (key) => {
   }
 };
 const weaponsUrl = 'https://stat.ink/api/v2/weapon';
+
+const bukiTypes = {
+  'シューター':'shooter',
+  'ブラスター':'blaster',
+  'シェルター':'brella',
+  'フデ':'brush',
+  'チャージャー':'charger',
+  'マニューバー':'maneuver',
+  'リールガン':'reelgun',
+  'ローラー':'roller',
+  'スロッシャー':'slosher',
+  'スピナー':'splatling'
+};
+
 const weapon2txt = (key) => {
   switch (key) {
     case '0': return 'ボールドマーカー';
@@ -380,13 +394,47 @@ client.on('message', async msg => {
   if (msg.content.startsWith('buki')) {
     const args = msg.content.split(" ");
     args.shift();
-    var kazu = Number(args[0]);
-    if(kazu) {
-      var buki = random(bukiList, kazu).join('\n');
-      msg.channel.send(buki);
+
+    let amount = 1;
+    let bukiType = '';
+
+    if (args[0] === 'help') {
+      let txt = 'ブキをランダムに抽選します\n\n'
+      + 'n個のブキをランダムに選びます\n```\nbuki n\n例: buki 3```\n'
+      + 'ブキを種類縛りでランダムに選びます\n```\nbuki 種類(' + Object.keys(bukiTypes).join(`・`) + ')\n例: buki シューター```\n';
+      msg.channel.send(txt);
     } else {
-      var buki = bukiList[Math.floor(Math.random() * bukiList.length)];
-      msg.reply(buki);
+      if (bukiTypes[args[0]]) { // e.g. buki シューター
+        bukiType = bukiTypes[args[0]];
+        amount = 0;
+      } else { // e.g. buki 8
+        amount = Number(args[0])
+      }
+      request.get(weaponsUrl, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          const weapons = JSON.parse(body);
+          let bukis = weapons.filter(function(value) {
+            if (bukiType !== '') { // 特定のbukiTypeが指定されているとき
+              return bukiType === value.type.key
+            } else {
+              return true;
+            }
+          })
+          let bukiNames = bukis.map(function(value) {
+            return value.name.ja_JP;
+          })
+
+          if (amount) {
+            var buki = random(bukiNames, amount).join('\n');
+              msg.channel.send(buki);
+            } else {
+              var buki = random(bukiNames, 1)[0];
+              msg.reply(buki);
+            }
+        } else {
+          msg.channel.send('なんかエラーでてるわ');
+        }
+      })
     }
   };
 
