@@ -86,7 +86,7 @@ const coop_stage2txt = (key) => {
     case '/images/coop_stage/6d68f5baa75f3a94e5e9bfb89b82e7377e3ecd2c.png': return '海上集落シャケト場';
   }
 };
-
+const weaponsUrl = 'https://stat.ink/api/v2/weapon';
 const weapon2txt = (key) => {
   switch (key) {
     case '0': return 'ボールドマーカー';
@@ -343,7 +343,7 @@ client.on('message', async msg => {
     var message = sakana[Math.floor(Math.random() * sakana.length)];
     msg.reply(message);
   };
-  
+
   if (msg.content=='fish rap') {
     var lyrics = fish_rap_lyrics[Math.floor(Math.random() * fish_rap_lyrics.length)];
     msg.channel.send('GYO!オレはうにくる!');
@@ -811,12 +811,12 @@ client.on('message', async msg => {
   //   await msg.react('👍');
   //   await msg.react('👎');
   // }
-  
+
   // let reaction = await msg.react('💩');
   // // メッセージへリアクション
   // reaction.remove();
   // // リアクションを取り消し
-  
+
   // console.log(msg.reactions.find(reaction => reaction.emoji.name === '👍').count);
 });
 
