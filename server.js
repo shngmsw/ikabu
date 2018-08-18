@@ -86,6 +86,20 @@ const coop_stage2txt = (key) => {
     case '/images/coop_stage/6d68f5baa75f3a94e5e9bfb89b82e7377e3ecd2c.png': return '海上集落シャケト場';
   }
 };
+const weaponsUrl = 'https://stat.ink/api/v2/weapon';
+
+const bukiTypes = {
+  'シューター':'shooter',
+  'ブラスター':'blaster',
+  'シェルター':'brella',
+  'フデ':'brush',
+  'チャージャー':'charger',
+  'マニューバー':'maneuver',
+  'リールガン':'reelgun',
+  'ローラー':'roller',
+  'スロッシャー':'slosher',
+  'スピナー':'splatling'
+};
 
 const weapon2txt = (key) => {
   switch (key) {
@@ -343,7 +357,7 @@ client.on('message', async msg => {
     var message = sakana[Math.floor(Math.random() * sakana.length)];
     msg.reply(message);
   };
-  
+
   if (msg.content=='fish rap') {
     var lyrics = fish_rap_lyrics[Math.floor(Math.random() * fish_rap_lyrics.length)];
     msg.channel.send('GYO!オレはうにくる!');
@@ -380,13 +394,47 @@ client.on('message', async msg => {
   if (msg.content.startsWith('buki')) {
     const args = msg.content.split(" ");
     args.shift();
-    var kazu = Number(args[0]);
-    if(kazu) {
-      var buki = random(bukiList, kazu).join('\n');
-      msg.channel.send(buki);
+
+    let amount = 1;
+    let bukiType = '';
+
+    if (args[0] === 'help') {
+      let txt = 'ブキをランダムに抽選します\n\n'
+      + 'n個のブキをランダムに選びます\n```\nbuki n\n例: buki 3```\n'
+      + 'ブキを種類縛りでランダムに選びます\n```\nbuki 種類(' + Object.keys(bukiTypes).join(`・`) + ')\n例: buki シューター```\n';
+      msg.channel.send(txt);
     } else {
-      var buki = bukiList[Math.floor(Math.random() * bukiList.length)];
-      msg.reply(buki);
+      if (bukiTypes[args[0]]) { // e.g. buki シューター
+        bukiType = bukiTypes[args[0]];
+        amount = 0;
+      } else { // e.g. buki 8
+        amount = Number(args[0])
+      }
+      request.get(weaponsUrl, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          const weapons = JSON.parse(body);
+          let bukis = weapons.filter(function(value) {
+            if (bukiType !== '') { // 特定のbukiTypeが指定されているとき
+              return bukiType === value.type.key
+            } else {
+              return true;
+            }
+          })
+          let bukiNames = bukis.map(function(value) {
+            return value.name.ja_JP;
+          })
+
+          if (amount) {
+            var buki = random(bukiNames, amount).join('\n');
+              msg.channel.send(buki);
+            } else {
+              var buki = random(bukiNames, 1)[0];
+              msg.reply(buki);
+            }
+        } else {
+          msg.channel.send('なんかエラーでてるわ');
+        }
+      })
     }
   };
 
@@ -402,6 +450,7 @@ client.on('message', async msg => {
       msg.reply(buki);
     }
   };
+
   // if (msg.content.startsWith('vote')) {
   //   const args = msg.content.split(" ");
   //   args.shift();
@@ -417,107 +466,121 @@ client.on('message', async msg => {
   //   })
   // };
 
-  if (msg.content.startsWith('fes a')) {
+
+  if (msg.content.startsWith('fes')) {
+    const role_id_a = msg.guild.roles.find("name", "きのこの山派");
+    const role_id_b = msg.guild.roles.find("name", "たけのこの里派");
+    
     const args = msg.content.split(" ");
     args.shift();
-    args.shift();
-    if(args[0]=="〆") {
-      msg.guild.channels.find("name", "ナワバリ・フェス募集")
-      .send(msg.author.username + 'たんの募集 〆');
-    } else {
-      request.get('https://splatoon2.ink/data/festivals.json', function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          const data = JSON.parse(body);
-          let txt = '@everyone 【フェス募集：ヒメ派】\n' + msg.author.username + 'たんがフェスメン募集中！\n'
-            + data.jp.festivals[0].names.alpha_short
-            + '派のみなさん、いかがですか？';
-          const date = ''
-            + unixTime2mdwhm(data.jp.festivals[0].times.start) + ' – '
-            + unixTime2mdwhm(data.jp.festivals[0].times.end);
-          let desc = '[参加条件] ';
-          if (args.length > 0) {
-            desc +=  args.join(" ");
-          } else {
-            desc +=  'なし';
-          }
-          const image = 'https://splatoon2.ink/assets/splatnet' + data.jp.festivals[0].images.alpha;
-          const title = data.jp.festivals[0].names.alpha_long;
-          const color = parseInt(rgbToHex(
-            Math.round(data.jp.festivals[0].colors.alpha.r * 255),
-            Math.round(data.jp.festivals[0].colors.alpha.g * 255),
-            Math.round(data.jp.festivals[0].colors.alpha.b * 255)
-          ), 16)
-          msg.guild.channels.find("name", "ナワバリ・フェス募集")
-          .send(txt, {
-            embed: {
-              "color": color,
-              "author": {
-                "name": title,
-                "icon_url": 'https://cdn.wikimg.net/en/splatoonwiki/images/thumb/9/9a/S2_Splatfest_Logo.svg/45px-S2_Splatfest_Logo.svg.png'
-              },
-              "title": date,
-              "description": desc,
-              "thumbnail": {
-                "url": image
-              }
+  
+    if ((msg.member.roles.has(role_id_a.id) && args[0] != 'b') || msg.content.startsWith('fes a')) {
+      if(args[0]=="〆") {
+        msg.guild.channels.find("name", "ナワバリ・フェス募集")
+        .send(msg.author.username + 'たんの募集 〆');
+      } else {
+        request.get('https://splatoon2.ink/data/festivals.json', function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+            
+            const data = JSON.parse(body);
+            let txt = role_id_a.toString() + ' 【フェス募集：ヒメ派】\n' + msg.author.username + 'たんがフェスメン募集中！\n'
+              + data.jp.festivals[0].names.alpha_short
+              + '派のみなさん、いかがですか？';
+            const date = ''
+              + unixTime2mdwhm(data.jp.festivals[0].times.start) + ' – '
+              + unixTime2mdwhm(data.jp.festivals[0].times.end);
+            let desc = '[参加条件] ';
+            
+            if (msg.content.startsWith('fes a')) {
+              args.shift();
             }
-          });
-        } else { msg.channel.send('なんかエラーでてるわ') }
-      })
+            
+            if (args.length > 0) {
+              desc +=  args.join(" ");
+            } else {
+              desc +=  'なし';
+            }
+            const image = 'https://splatoon2.ink/assets/splatnet' + data.jp.festivals[0].images.alpha;
+            const title = data.jp.festivals[0].names.alpha_long;
+            const color = parseInt(rgbToHex(
+              Math.round(data.jp.festivals[0].colors.alpha.r * 255),
+              Math.round(data.jp.festivals[0].colors.alpha.g * 255),
+              Math.round(data.jp.festivals[0].colors.alpha.b * 255)
+            ), 16)
+            msg.guild.channels.find("name", "ナワバリ・フェス募集")
+            .send(txt, {
+              embed: {
+                "color": color,
+                "author": {
+                  "name": title,
+                  "icon_url": 'https://cdn.wikimg.net/en/splatoonwiki/images/thumb/9/9a/S2_Splatfest_Logo.svg/45px-S2_Splatfest_Logo.svg.png'
+                },
+                "title": date,
+                "description": desc,
+                "thumbnail": {
+                  "url": image
+                }
+              }
+            });
+          } else { msg.channel.send('なんかエラーでてるわ') }
+        })
+      }
+    }
+
+    if ((msg.member.roles.has(role_id_b.id) && args[0] != 'a') || msg.content.startsWith('fes b')) {
+      if(args[0]=="〆") {
+        msg.guild.channels.find("name", "ナワバリ・フェス募集")
+        .send(msg.author.username + 'たんの募集 〆');
+      } else {
+        request.get('https://splatoon2.ink/data/festivals.json', function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+            const data = JSON.parse(body);
+            let txt = role_id_b.toString() + ' 【フェス募集：イイダ派】\n' + msg.author.username + 'たんがフェスメン募集中！\n'
+              + data.jp.festivals[0].names.bravo_short
+              + '派のみなさん、いかがですか？';
+            const date = ''
+              + unixTime2mdwhm(data.jp.festivals[0].times.start) + ' – '
+              + unixTime2mdwhm(data.jp.festivals[0].times.end);
+            
+            let desc = '[参加条件] ';
+            
+            if (msg.content.startsWith('fes b')) {
+              args.shift();
+            }
+            if (args.length > 0) {
+              desc +=  args.join(" ");
+            } else {
+              desc +=  'なし';
+            }
+            const image = 'https://splatoon2.ink/assets/splatnet' + data.jp.festivals[0].images.bravo;
+            const title = data.jp.festivals[0].names.bravo_long;
+            const color = parseInt(rgbToHex(
+              Math.round(data.jp.festivals[0].colors.bravo.r * 255),
+              Math.round(data.jp.festivals[0].colors.bravo.g * 255),
+              Math.round(data.jp.festivals[0].colors.bravo.b * 255)
+            ), 16)
+            msg.guild.channels.find("name", "ナワバリ・フェス募集")
+            .send(txt, {
+              embed: {
+                "color": color,
+                "author": {
+                  "name": title,
+                  "icon_url": 'https://cdn.wikimg.net/en/splatoonwiki/images/thumb/9/9a/S2_Splatfest_Logo.svg/45px-S2_Splatfest_Logo.svg.png'
+                },
+                "title": date,
+                "description": desc,
+                "thumbnail": {
+                  "url": image
+                }
+              }
+            });
+          } else { msg.channel.send('なんかエラーでてるわ') }
+        })
+      }
     }
   };
 
-  if (msg.content.startsWith('fes b')) {
-    const args = msg.content.split(" ");
-    args.shift();
-    args.shift();
-    if(args[0]=="〆") {
-      msg.guild.channels.find("name", "ナワバリ・フェス募集")
-      .send(msg.author.username + 'たんの募集 〆');
-    } else {
-      request.get('https://splatoon2.ink/data/festivals.json', function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          const data = JSON.parse(body);
-          let txt = '@everyone 【フェス募集：イイダ派】\n' + msg.author.username + 'たんがフェスメン募集中！\n'
-            + data.jp.festivals[0].names.bravo_short
-            + '派のみなさん、いかがですか？';
-          const date = ''
-            + unixTime2mdwhm(data.jp.festivals[0].times.start) + ' – '
-            + unixTime2mdwhm(data.jp.festivals[0].times.end);
-          let desc = '[参加条件] ';
-          if (args.length > 0) {
-            desc +=  args.join(" ");
-          } else {
-            desc +=  'なし';
-          }
-          const image = 'https://splatoon2.ink/assets/splatnet' + data.jp.festivals[0].images.bravo;
-          const title = data.jp.festivals[0].names.bravo_long;
-          const color = parseInt(rgbToHex(
-            Math.round(data.jp.festivals[0].colors.bravo.r * 255),
-            Math.round(data.jp.festivals[0].colors.bravo.g * 255),
-            Math.round(data.jp.festivals[0].colors.bravo.b * 255)
-          ), 16)
-          msg.guild.channels.find("name", "ナワバリ・フェス募集")
-          .send(txt, {
-            embed: {
-              "color": color,
-              "author": {
-                "name": title,
-                "icon_url": 'https://cdn.wikimg.net/en/splatoonwiki/images/thumb/9/9a/S2_Splatfest_Logo.svg/45px-S2_Splatfest_Logo.svg.png'
-              },
-              "title": date,
-              "description": desc,
-              "thumbnail": {
-                "url": image
-              }
-            }
-          });
-        } else { msg.channel.send('なんかエラーでてるわ') }
-      })
-    }
-  };
-
-  if (msg.content.startsWith('next')) {
+if (msg.content.startsWith('next')) {
     const args = msg.content.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -546,7 +609,7 @@ client.on('message', async msg => {
     }
   };
 
-	if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
+if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
     const args = msg.content.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -692,6 +755,7 @@ client.on('message', async msg => {
     + 'ブキをランダムで選出\n```buki 複数の場合は数字を記入```\n'
     + 'ヒメ派のフェスメンバーを募集\n```fes a 参加条件があれば記載```\n'
     + 'イイダ派のフェスメンバーを募集\n```fes b 参加条件があれば記載```\n'
+    + '役職に応じて自動でフェスメンバーを募集\n※ヒメ派、イイダ派どちらかを投票して役職がついてる場合のみ\n```fes 参加条件があれば記載```\n'
     + '選択肢の中からランダム選出\n```pick 複数選出の場合は数字を記入 選択肢を半スペ空けで記入```\n'
     + '接続してるボイチャから数字分のヒトをランダム抽出\n```vpick 複数選出の場合は数字を記入```\n'
     + 'Fortniteのメンバーを募集\n```fn 参加条件があれば記載```\n'
@@ -811,12 +875,12 @@ client.on('message', async msg => {
   //   await msg.react('👍');
   //   await msg.react('👎');
   // }
-  
+
   // let reaction = await msg.react('💩');
   // // メッセージへリアクション
   // reaction.remove();
   // // リアクションを取り消し
-  
+
   // console.log(msg.reactions.find(reaction => reaction.emoji.name === '👍').count);
 });
 
