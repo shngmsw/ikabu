@@ -450,6 +450,7 @@ client.on('message', async msg => {
       msg.reply(buki);
     }
   };
+
   // if (msg.content.startsWith('vote')) {
   //   const args = msg.content.split(" ");
   //   args.shift();
@@ -469,6 +470,7 @@ client.on('message', async msg => {
   if (msg.content.startsWith('fes')) {
     const role_id_a = msg.guild.roles.find("name", "きのこの山派");
     const role_id_b = msg.guild.roles.find("name", "たけのこの里派");
+    
     const args = msg.content.split(" ");
     args.shift();
   
@@ -479,6 +481,7 @@ client.on('message', async msg => {
       } else {
         request.get('https://splatoon2.ink/data/festivals.json', function (error, response, body) {
           if (!error && response.statusCode == 200) {
+            
             const data = JSON.parse(body);
             let txt = role_id_a.toString() + ' 【フェス募集：ヒメ派】\n' + msg.author.username + 'たんがフェスメン募集中！\n'
               + data.jp.festivals[0].names.alpha_short
@@ -487,7 +490,11 @@ client.on('message', async msg => {
               + unixTime2mdwhm(data.jp.festivals[0].times.start) + ' – '
               + unixTime2mdwhm(data.jp.festivals[0].times.end);
             let desc = '[参加条件] ';
-            args.shift();
+            
+            if (msg.content.startsWith('fes a')) {
+              args.shift();
+            }
+            
             if (args.length > 0) {
               desc +=  args.join(" ");
             } else {
@@ -534,8 +541,12 @@ client.on('message', async msg => {
             const date = ''
               + unixTime2mdwhm(data.jp.festivals[0].times.start) + ' – '
               + unixTime2mdwhm(data.jp.festivals[0].times.end);
+            
             let desc = '[参加条件] ';
-            args.shift();
+            
+            if (msg.content.startsWith('fes b')) {
+              args.shift();
+            }
             if (args.length > 0) {
               desc +=  args.join(" ");
             } else {
