@@ -567,8 +567,37 @@ client.on('message', async msg => {
       }
     }
   };
+	
+if (msg.content.startsWith('next')) {
+    const args = msg.content.split(" ");
+    args.shift();
+    if(args[0]=="〆") {
+      msg.guild.channels.find("name", "リグマ募集")
+      .send(msg.author.username + 'たんの募集 〆');
+    } else {
+      request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          const data = JSON.parse(body);
+          let txt = '@everyone 【リグマ募集】\n' + msg.author.username + 'たんがリグメン募集中！\n';
+          if (args.length > 0) txt += '[参加条件] ' + args.join(" ") + '\n';
+          txt += ''
+            + unixTime2hm(data.league[1].start_time) + ' – '
+            + unixTime2hm(data.league[1].end_time) + ' '
+            + rule2txt(data.league[1].rule.key) + '\n'
+            + stage2txt(data.league[1].stage_a.id) + '\n'
+            + stage2txt(data.league[1].stage_b.id);
+          const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.league[1].stage_a.image;
+          const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.league[1].stage_b.image;
+          msg.guild.channels.find("name", "リグマ募集")
+          .send(txt, {
+            files: [stage_a, stage_b]
+          });
+        } else { msg.channel.send('なんかエラーでてるわ') }
+      })
+    }
+  };
 
-	if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
+if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
     const args = msg.content.split(" ");
     args.shift();
     if(args[0]=="〆") {
