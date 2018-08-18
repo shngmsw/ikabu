@@ -468,10 +468,10 @@ client.on('message', async msg => {
   if (msg.content.startsWith('fes')) {
     const role_id_a = msg.guild.roles.find("name", "きのこの山派");
     const role_id_b = msg.guild.roles.find("name", "たけのこの里派");
+    const args = msg.content.split(" ");
+    args.shift();
   
-    if (msg.member.roles.has(role_id_a.id)) {
-      const args = msg.content.split(" ");
-      args.shift();
+    if ((msg.member.roles.has(role_id_a.id) && args[0] != 'b') || msg.content=='fes a') {
       if(args[0]=="〆") {
         msg.guild.channels.find("name", "ナワバリ・フェス募集")
         .send(msg.author.username + 'たんの募集 〆');
@@ -518,9 +518,7 @@ client.on('message', async msg => {
       }
     }
 
-    if (msg.member.roles.has(role_id_b.id)) {
-      const args = msg.content.split(" ");
-      args.shift();
+    if ((msg.member.roles.has(role_id_b.id) && args[0] != 'a') || msg.content=='fes b') {
       if(args[0]=="〆") {
         msg.guild.channels.find("name", "ナワバリ・フェス募集")
         .send(msg.author.username + 'たんの募集 〆');
@@ -567,7 +565,7 @@ client.on('message', async msg => {
       }
     }
   };
-	
+
 if (msg.content.startsWith('next')) {
     const args = msg.content.split(" ");
     args.shift();
