@@ -343,12 +343,6 @@ const random = (array, num) => {
   }
   return r;
 }
-  /* 関数 'myFunc' を宣言 */
-//function toSpaceNarrow(str) {
-//  var result;
-//  result = str.replace('　', ' ');
-//  return result;
-//};  
 
 client.on('message', async msg => {
 
