@@ -320,6 +320,7 @@ const fish_rap_lyrics = [
   "この世界は脆弱!静寂!情弱!孔雀!!",
   "テキストは誤字多数\n昼夜はもちろん逆転中\n深夜寝るやつは脆弱、情弱\nそんな俺は日々寝落ち中、求めてるぜお前からのチュー",
   "オレが時代の最先端！\nキメルゼ、オレのうにビーム",
+  "Uは「う」って読んだんですよ←わかる\nNIで「に」じゃないですか←わかる\nＱを「く」って読んだんですよ←わかる\nだから「UNIQLO」で「うにくる」なんです←？？？？？？？？？？？？？"
 ];
 
 // const icon = [
@@ -368,6 +369,7 @@ client.on('message', async msg => {
     var lyrics = fish_rap_lyrics[Math.floor(Math.random() * fish_rap_lyrics.length)];
     msg.channel.send('GYO!オレはうにくる!');
     msg.channel.send(lyrics);
+    msg.channel.send('yeah!');
   };
 
   if (msg.content.startsWith('pick')) {
