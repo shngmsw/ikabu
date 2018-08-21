@@ -342,6 +342,10 @@ const random = (array, num) => {
   }
   return r;
 }
+  /* 関数 'myFunc' を宣言 */
+function toSpaceNarrow(msg) {
+  msg.replace('　', ' ');
+}
 
 client.on('message', async msg => {
 
@@ -470,7 +474,7 @@ client.on('message', async msg => {
   if (msg.content.startsWith('fes')) {
     const role_id_a = msg.guild.roles.find("name", "きのこの山派");
     const role_id_b = msg.guild.roles.find("name", "たけのこの里派");
-    
+    msg = toSpaceNarrow(msg)
     const args = msg.content.split(" ");
     args.shift();
   
@@ -581,6 +585,7 @@ client.on('message', async msg => {
   };
 
 if (msg.content.startsWith('next')) {
+    msg = toSpaceNarrow(msg)
     const args = msg.content.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -610,6 +615,7 @@ if (msg.content.startsWith('next')) {
   };
 
 if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
+    msg = toSpaceNarrow(msg)
     const args = msg.content.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -638,7 +644,8 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
     }
   };
 
-	if (msg.content.startsWith('nawabari')) {
+if (msg.content.startsWith('nawabari')) {
+    msg = toSpaceNarrow(msg)
     const args = msg.content.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -685,6 +692,7 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
   };
 
   if (msg.content.startsWith('run')) {
+    msg = toSpaceNarrow(msg)
     const args = msg.content.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -746,7 +754,7 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
     }
   };
 
-	if (msg.content === 'help') {
+  if (msg.content === 'help') {
     const txt = 'botのコメンド一覧を表示\n```help```\n'
     + '現在のリグマ情報を表示して募集\n```now 参加条件があれば記載```\n'
     + '次回のリグマ情報を表示して募集\n```next 参加条件があれば記載```\n'
@@ -763,7 +771,8 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
     msg.channel.send(txt);
   };
 
-	if (msg.content.startsWith('fn')) {
+  if (msg.content.startsWith('fn')) {
+    msg = toSpaceNarrow(msg)
     const args = msg.content.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -780,6 +789,7 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
   };
 
   if (msg.content.startsWith('mk')) {
+    msg = toSpaceNarrow(msg)
     const args = msg.content.split(" ");
     args.shift();
     if(args[0]=="〆") {
