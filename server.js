@@ -342,6 +342,12 @@ const random = (array, num) => {
   }
   return r;
 }
+  /* 関数 'myFunc' を宣言 */
+//function toSpaceNarrow(str) {
+//  var result;
+//  result = str.replace('　', ' ');
+//  return result;
+//};  
 
 client.on('message', async msg => {
 
@@ -365,7 +371,8 @@ client.on('message', async msg => {
   };
 
   if (msg.content.startsWith('pick')) {
-    const args = msg.content.split(" ");
+    var strCmd = msg.content.replace(/　/g ," ");
+    const args = strCmd.split(" ");
     args.shift();
     var picked = args[Math.floor(Math.random() * args.length)];
     var kazu = Number(args[0]);
@@ -381,7 +388,8 @@ client.on('message', async msg => {
   // 発言したヒトが接続してるボイチャから数字分のヒトをランダム抽出
   // 数字なしの場合は１人をランダム抽出
   if (msg.content.startsWith('vpick')) {
-    const args = msg.content.split(" ");
+    var strCmd = msg.content.replace(/　/g ," ");
+    const args = strCmd.split(" ");
     args.shift();
     var kazu = Number(args[0]);
     if(kazu) {
@@ -392,7 +400,8 @@ client.on('message', async msg => {
   };
 
   if (msg.content.startsWith('buki')) {
-    const args = msg.content.split(" ");
+    var strCmd = msg.content.replace(/　/g ," ");
+    const args = strCmd.split(" ");
     args.shift();
 
     let amount = 1;
@@ -470,11 +479,11 @@ client.on('message', async msg => {
   if (msg.content.startsWith('fes')) {
     const role_id_a = msg.guild.roles.find("name", "きのこの山派");
     const role_id_b = msg.guild.roles.find("name", "たけのこの里派");
-    
-    const args = msg.content.split(" ");
+    var strCmd = msg.content.replace(/　/g ," ");
+    const args = strCmd.split(" ");
     args.shift();
   
-    if ((msg.member.roles.has(role_id_a.id) && args[0] != 'b') || msg.content.startsWith('fes a')) {
+    if ((msg.member.roles.has(role_id_a.id) && args[0] != 'b') || strCmd.startsWith('fes a')) {
       if(args[0]=="〆") {
         msg.guild.channels.find("name", "ナワバリ・フェス募集")
         .send(msg.author.username + 'たんの募集 〆');
@@ -491,7 +500,7 @@ client.on('message', async msg => {
               + unixTime2mdwhm(data.jp.festivals[0].times.end);
             let desc = '[参加条件] ';
             
-            if (msg.content.startsWith('fes a')) {
+            if (strCmd.startsWith('fes a')) {
               args.shift();
             }
             
@@ -527,7 +536,7 @@ client.on('message', async msg => {
       }
     }
 
-    if ((msg.member.roles.has(role_id_b.id) && args[0] != 'a') || msg.content.startsWith('fes b')) {
+    if ((msg.member.roles.has(role_id_b.id) && args[0] != 'a') || strCmd.startsWith('fes b')) {
       if(args[0]=="〆") {
         msg.guild.channels.find("name", "ナワバリ・フェス募集")
         .send(msg.author.username + 'たんの募集 〆');
@@ -544,7 +553,7 @@ client.on('message', async msg => {
             
             let desc = '[参加条件] ';
             
-            if (msg.content.startsWith('fes b')) {
+            if (strCmd.startsWith('fes b')) {
               args.shift();
             }
             if (args.length > 0) {
@@ -581,7 +590,8 @@ client.on('message', async msg => {
   };
 
 if (msg.content.startsWith('next')) {
-    const args = msg.content.split(" ");
+    var strCmd = msg.content.replace(/　/g ," ");
+    const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
       msg.guild.channels.find("name", "リグマ募集")
@@ -610,7 +620,8 @@ if (msg.content.startsWith('next')) {
   };
 
 if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
-    const args = msg.content.split(" ");
+    var strCmd = msg.content.replace(/　/g ," ");
+    const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
       msg.guild.channels.find("name", "リグマ募集")
@@ -638,8 +649,9 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
     }
   };
 
-	if (msg.content.startsWith('nawabari')) {
-    const args = msg.content.split(" ");
+if (msg.content.startsWith('nawabari')) {
+    var strCmd = msg.content.replace(/　/g ," ");
+    const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
       msg.guild.channels.find("name", "ナワバリ・フェス募集")
@@ -685,7 +697,8 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
   };
 
   if (msg.content.startsWith('run')) {
-    const args = msg.content.split(" ");
+    var strCmd = msg.content.replace(/　/g ," ");
+    const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
       msg.guild.channels.find("name", "サーモン募集")
@@ -746,7 +759,7 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
     }
   };
 
-	if (msg.content === 'help') {
+  if (msg.content === 'help') {
     const txt = 'botのコメンド一覧を表示\n```help```\n'
     + '現在のリグマ情報を表示して募集\n```now 参加条件があれば記載```\n'
     + '次回のリグマ情報を表示して募集\n```next 参加条件があれば記載```\n'
@@ -763,8 +776,9 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
     msg.channel.send(txt);
   };
 
-	if (msg.content.startsWith('fn')) {
-    const args = msg.content.split(" ");
+  if (msg.content.startsWith('fn')) {
+    var strCmd = msg.content.replace(/　/g ," ");
+    const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
       msg.guild.channels.find("name", "別ゲー募集")
@@ -780,7 +794,8 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
   };
 
   if (msg.content.startsWith('mk')) {
-    const args = msg.content.split(" ");
+    var strCmd = msg.content.replace(/　/g ," ");
+    const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
       msg.guild.channels.find("name", "別ゲー募集")
