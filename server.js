@@ -191,143 +191,11 @@ const rgbToHex = (r, g, b) => [r, g, b].map(x => {
   return hex.length === 1 ? '0' + hex : hex
 }).join('');
 
-const bukiList = [
-  "わかばシューター",
-  "スプラシューター",
-  "スプラチャージャー",
-  "スプラローラー",
-  "スプラシューターコラボ",
-  "スプラマニューバー",
-  "もみじシューター",
-  "パブロ",
-  "ホットブラスター",
-  "バケットスロッシャー",
-  "プロモデラーMG",
-  "カーボンローラー",
-  "パブロ・ヒュー",
-  "バレルスピナー",
-  "バケットスロッシャーデコ",
-  "N-ZAP85",
-  "パラシェルター",
-  "ボールドマーカー",
-  "ホクサイ",
-  "カーボンローラーデコ",
-  "プライムシューター",
-  "オーバーフロッシャー",
-  "スプラマニューバーコラボ",
-  "N-ZAP89",
-  "スクイックリンα",
-  "デュアルスイーパー",
-  "スプラローラーコラボ",
-  "バレルスピナーデコ",
-  "スパイガジェット",
-  "ラピッドブラスター",
-  "スクリュースロッシャー",
-  "ロングブラスター",
-  ".52ガロン",
-  "クアッドホッパーブラック",
-  "スプラスコープ",
-  "パラシェルターソレーラ",
-  "ホクサイ・ヒュー",
-  "ヒッセン",
-  "ラピッドブラスターデコ",
-  "スプラチャージャーコラボ",
-  "ボトルガイザー",
-  "デュアルスイーパーカスタム",
-  "ケルビン525",
-  "ヒッセン・ヒュー",
-  "ジェットスイーパー",
-  "スクイックリンβ",
-  "ボールドマーカーネオ",
-  "ロングブラスターカスタム",
-  "14式竹筒銃・甲",
-  "L3リールガン",
-  "エクスプロッシャー",
-  "スクリュースロッシャーネオ",
-  "ノヴァブラスター",
-  "スパイガジェットソレーラ",
-  "ダイナモローラー",
-  "プライムシューターコラボ",
-  "リッター4K",
-  "14式竹筒銃・乙",
-  ".96ガロン",
-  "クアッドホッパーホワイト",
-  "Rブラスターエリート",
-  ".52ガロンデコ",
-  "ソイチューバー",
-  "スプラスピナー",
-  "キャンピングシェルター",
-  "L3リールガンD",
-  "ノヴァブラスターネオ",
-  "ヴァリアブルローラー",
-  "Rブラスターエリートデコ",
-  "ケルビン525デコ",
-  "ダイナモローラーテスラ",
-  "シャープマーカー",
-  "ボトルガイザーフォイル",
-  "クーゲルシュライバー",
-  "スプラスコープコラボ",
-  "スプラスピナーコラボ",
-  "リッター4Kカスタム",
-  "ノーチラス47",
-  ".96ガロンデコ",
-  "スパッタリー",
-  "シャープマーカーネオ",
-  "ハイドラント",
-  "ジェットスイーパーカスタム",
-  "ホットブラスターカスタム",
-  "ヴァリアブルローラーフォイル",
-  "ソイチューバーカスタム",
-  "プロモデラーRG",
-  "キャンピングシェルターソレーラ",
-  "H3リールガン",
-  "ハイドラントカスタム",
-  "スパッタリー・ヒュー",
-  "クラッシュブラスター",
-  "クラッシュブラスターネオ",
-  "4Kスコープ",
-  "4Kスコープカスタム",
-  "H3リールガンD"
-];
-
-const blasterList = [
-  "ホットブラスター",
-  "ラピッドブラスター",
-  "ロングブラスター",
-  "ラピッドブラスターデコ",
-  "ロングブラスターカスタム",
-  "ノヴァブラスター",
-  "Rブラスターエリート",
-  "ノヴァブラスターネオ",
-  "Rブラスターエリートデコ",
-  "クラッシュブラスター",
-  "クラッシュブラスターネオ",
-];
-
 const responseObject = {
   "aaa": "AAA?",
   "bbb": "BBB?",
   "ccc": "CCC?"
 };
-
-const sakana = [
-  "起きてます",
-  "寝てないです",
-  "寝てます"
-];
-
-const fish_rap_lyrics = [
-  "この世界は脆弱!静寂!情弱!孔雀!!",
-  "テキストは誤字多数\n昼夜はもちろん逆転中\n深夜寝るやつは脆弱、情弱\nそんな俺は日々寝落ち中、求めてるぜお前からのチュー",
-  "オレが時代の最先端！\nキメルゼ、オレのうにビーム",
-  "Uは「う」って読んだんですよ←わかる\nNIで「に」じゃないですか←わかる\nＱを「く」って読んだんですよ←わかる\nだから「UNIQLO」で「うにくる」なんです←？？？？？？？？？？？？？"
-];
-
-// const icon = [
-//   "👍",
-//   "👎",
-//   "💩"
-// ];
 
 const random = (array, num) => {
   var a = array;
@@ -352,18 +220,6 @@ client.on('message', async msg => {
 
   if (msg.content.includes('すてきやん') && msg.author.id==418680715882790912) {
     await msg.react('💩');
-  };
-
-  if (msg.content.startsWith('さかなたん起き')) {
-    var message = sakana[Math.floor(Math.random() * sakana.length)];
-    msg.reply(message);
-  };
-
-  if (msg.content=='fish rap') {
-    var lyrics = fish_rap_lyrics[Math.floor(Math.random() * fish_rap_lyrics.length)];
-    msg.channel.send('GYO!オレはうにくる!');
-    msg.channel.send(lyrics);
-    msg.channel.send('yeah!');
   };
 
   if (msg.content.startsWith('pick')) {
@@ -455,22 +311,6 @@ client.on('message', async msg => {
       msg.reply(buki);
     }
   };
-
-  // if (msg.content.startsWith('vote')) {
-  //   const args = msg.content.split(" ");
-  //   args.shift();
-  //   let txt = args[0];
-  //   args.shift();
-  //   for (let i = 0; i < args.length; i++) {
-  //     txt += '\n' + icon[i] + ' ' + args[i];
-  //   }
-  //   msg.channel.send(txt).then(function (msg) {
-  //     for (let e = 0; e < args.length; e++) {
-  //       msg.react(icon[e]);
-  //     }
-  //   })
-  // };
-
 
   if (msg.content.startsWith('fes')) {
     const role_id_a = msg.guild.roles.find("name", "きのこの山派");
@@ -703,14 +543,6 @@ if (msg.content.startsWith('nawabari')) {
       request.get('https://splatoon2.ink/data/coop-schedules.json', function (error, response, body) {
         if (!error && response.statusCode == 200) {
           const data = JSON.parse(body);
-          // let txt = '@everyone\n' + msg.author.username + 'さんがバイト中です！\nよければ合流しませんか？\n'
-          //   + unixTime2mdwhm(data.details[0].start_time) + ' – '
-          //   + unixTime2mdwhm(data.details[0].end_time) + ' '
-          //   + coop_stage2txt(data.details[0].stage.image) + '\n'
-          //   + weapon2txt(data.details[0].weapons[0].id) + '・'
-          //   + weapon2txt(data.details[0].weapons[1].id) + '・'
-          //   + weapon2txt(data.details[0].weapons[2].id) + '・'
-          //   + weapon2txt(data.details[0].weapons[3].id);
           const stage = 'https://splatoon2.ink/assets/splatnet' + data.details[0].stage.image;
           let txt = '@everyone 【バイト募集】\n' + msg.author.username + 'たんがバイト中です！\n';
           if (args.length > 0) txt += '[参加条件] ' + args.join(" ") + '\n';
@@ -718,18 +550,11 @@ if (msg.content.startsWith('nawabari')) {
           const date =  unixTime2mdwhm(data.details[0].start_time) + ' – '
             + unixTime2mdwhm(data.details[0].end_time);
           const coop_stage = coop_stage2txt(data.details[0].stage.image) + '\n';
-          // const weapons = weapon2txt(data.details[0].weapons[0].id) + '・'
-          //   + weapon2txt(data.details[0].weapons[1].id) + '・'
-          //   + weapon2txt(data.details[0].weapons[2].id) + '・'
-          //   + weapon2txt(data.details[0].weapons[3].id);
           const weapons = (data.details[0].weapons[0] ? weapon2txt(data.details[0].weapons[0].id) : '？') + '・'
           + (data.details[0].weapons[1] ? weapon2txt(data.details[0].weapons[1].id) : '？') + '・'
           + (data.details[0].weapons[2] ? weapon2txt(data.details[0].weapons[2].id) : '？') + '・'
           + (data.details[0].weapons[3] ? weapon2txt(data.details[0].weapons[3].id) : '？');
 
-          // msg.channel.send(txt, {
-          //   files: [stage]
-          // });
           msg.guild.channels.find("name", "サーモン募集")
           .send(txt, {
             "embed": {
@@ -805,94 +630,6 @@ if (msg.content.startsWith('nawabari')) {
       });
     }
   };
-
-  // if (msg.content === 'test') {
-  //   msg.channel.send({embed: {
-  //     "color": 15740285,
-  //     "author": {
-  //       "name": "ガチホコバトル　AM1:00 – AM3:00",
-  //       "icon_url": "https://cdn.wikimg.net/en/splatoonwiki/images/thumb/f/fe/Mode_Icon_Rainmaker.png/36px-Mode_Icon_Rainmaker.png"
-  //     },
-  //     "description": "ステージ中央の「ガチホコ」を持って相手陣地のゴールに運ぼう。ガチホコを持っている間は、専用の「ガチホコショット」が撃てるぞ。ガチホコを持っていられる時間には制限がある。時間が０になると、その場でガチホコが爆発してしまうぞ。大事なことはとにかく積極的に前進すること！ ガチホコを確保したら強気で攻めていこう。",
-  //     "thumbnail": {
-  //       "url": "https://cdn.wikimg.net/en/splatoonwiki/images/9/9b/Symbol_LeagueF.png"
-  //     }
-  //   }}).then(function (msg) {
-  //     msg.channel.send({embed: {
-  //       "title": "チョウザメ造船",
-  //       "image": {
-  //         "url": "https://cdn.discordapp.com/attachments/436232309247836181/436818058800267285/bc794e337900afd763f8a88359f83df5679ddf12.png"
-  //       }
-  //     }}).then(function (msg) {
-  //       msg.channel.send({embed: {
-  //         "title": "デボン海洋博物館",
-  //         "image": {
-  //           "url": "https://cdn.discordapp.com/attachments/436232309247836181/436818058158276609/23259c80272f45cea2d5c9e60bc0cedb6ce29e46.png"
-  //         }
-  //       }})
-  //     })
-  //   });
-  // };
-
-  // if (msg.content === 'hoko') {
-  //   msg.channel.send({
-  //     embed: {
-  //       "color": 15740285,
-  //       "author": {
-  //         "name": "ガチホコバトル　AM1:00 – AM3:00",
-  //         "icon_url": "https://cdn.glitch.com/2f605507-e50e-41c7-95dc-6a159c862c19%2Frainmaker.png"
-  //       },
-  //       "title": "チョウザメ造船\nデボン海洋博物館",
-  //       "description": "ステージ中央の「ガチホコ」を持って相手陣地のゴールに運ぼう。ガチホコを持っている間は、専用の「ガチホコショット」が撃てるぞ。ガチホコを持っていられる時間には制限がある。時間が０になると、その場でガチホコが爆発してしまうぞ。大事なことはとにかく積極的に前進すること！ ガチホコを確保したら強気で攻めていこう。",
-  //       "thumbnail": {
-  //         "url": "https://cdn.wikimg.net/en/splatoonwiki/images/9/9b/Symbol_LeagueF.png"
-  //       }
-  //     }
-  //   }).then(function (msg) {
-  //     msg.channel.send({
-  //       files: [
-  //         "https://cdn.glitch.com/2f605507-e50e-41c7-95dc-6a159c862c19%2Fturf-wars-stage-7_2x.jpg",
-  //         "https://cdn.glitch.com/2f605507-e50e-41c7-95dc-6a159c862c19%2Fturf-wars-stage-8_2x.jpg"
-  //       ]
-  //     })
-  //   });
-  // };
-
-  // function send2Embeds(message) {
-  //   let embed1 = new Discord.RichEmbed({
-  //       title: "チョウザメ造船",
-  //       image: {
-  //         url: "https://cdn.glitch.com/2f605507-e50e-41c7-95dc-6a159c862c19%2Fturf-wars-stage-8_2x.jpg"
-  //       }
-  //   });
-  //   let embed2 = new Discord.RichEmbed({
-  //       title: "デボン海洋博物館",
-  //       color: 15740285,
-  //       image: {
-  //         url: "https://cdn.glitch.com/2f605507-e50e-41c7-95dc-6a159c862c19%2Fturf-wars-stage-7_2x.jpg"
-  //       }
-  //   });
-  //   message.channel.send(embed1)
-  //   .then(msg => {
-  //       message.channel.send(embed2);
-  //   });
-  // };
-
-  // if (msg.content === 'stage') {
-  //   send2Embeds(msg);
-  // };
-
-  // if (msg.content === 'judge') {
-  //   await msg.react('👍');
-  //   await msg.react('👎');
-  // }
-
-  // let reaction = await msg.react('💩');
-  // // メッセージへリアクション
-  // reaction.remove();
-  // // リアクションを取り消し
-
-  // console.log(msg.reactions.find(reaction => reaction.emoji.name === '👍').count);
 });
 
 client.on("guildMemberAdd", (member) => {
@@ -901,14 +638,5 @@ client.on("guildMemberAdd", (member) => {
   .send(`${member.user.username}たん、よろしくお願いします！\nまずは ${guild.channels.find("name","イカ部心得")} と ${guild.channels.find("name","各部屋の説明")} をよく読んでから ${guild.channels.find("name","フレンドコード部屋")} で自己紹介も兼ねて自分のフレコを貼ってください\n\n${guild.name}のみんなが歓迎していますよ〜`)
   .then(sentMessage => sentMessage.react('👍'));
 });
-
-// client.on('messageReactionAdd', async (messageReaction, user) => {
-//   messageReaction.channel.send('pong');
-// });
-
-// if (process.env.DISCORD_BOT_TOKEN == undefined) {
-//   console.log('please set ENV: DISCORD_BOT_TOKEN');
-//   process.exit(0);
-// }
 
 client.login(process.env.DISCORD_BOT_TOKEN);
