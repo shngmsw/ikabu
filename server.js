@@ -299,35 +299,21 @@ client.on('message', async msg => {
     }
   };
 
-  if (msg.content.startsWith('blaster')) {
-    const args = msg.content.split(" ");
-    args.shift();
-    var kazu = Number(args[0]);
-    if(kazu) {
-      var buki = random(blasterList, kazu).join('\n');
-      msg.channel.send(buki);
-    } else {
-      var buki = blasterList[Math.floor(Math.random() * blasterList.length)];
-      msg.reply(buki);
-    }
-  };
-
   if (msg.content.startsWith('fes')) {
-    const role_id_a = msg.guild.roles.find("name", "きのこの山派");
-    const role_id_b = msg.guild.roles.find("name", "たけのこの里派");
-    var strCmd = msg.content.replace(/　/g ," ");
-    const args = strCmd.split(" ");
-    args.shift();
-  
-    if ((msg.member.roles.has(role_id_a.id) && args[0] != 'b') || strCmd.startsWith('fes a')) {
-      if(args[0]=="〆") {
-        msg.guild.channels.find("name", "ナワバリ・フェス募集")
-        .send(msg.author.username + 'たんの募集 〆');
-      } else {
-        request.get('https://splatoon2.ink/data/festivals.json', function (error, response, body) {
-          if (!error && response.statusCode == 200) {
-            
-            const data = JSON.parse(body);
+    request.get('https://splatoon2.ink/data/festivals.json', function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        const data = JSON.parse(body);
+        const role_id_a = msg.guild.roles.find("name", data.jp.festivals[0].names.alpha_short);
+        const role_id_b = msg.guild.roles.find("name", data.jp.festivals[0].names.bravo_short);
+        var strCmd = msg.content.replace(/　/g, " ");
+        const args = strCmd.split(" ");
+        args.shift();
+
+        if ((msg.member.roles.has(role_id_a.id) && args[0] != 'b') || strCmd.startsWith('fes a')) {
+          if (args[0] == "〆") {
+            msg.guild.channels.find("name", "ナワバリ・フェス募集")
+              .send(msg.author.username + 'たんの募集 〆');
+          } else {
             let txt = role_id_a.toString() + ' 【フェス募集：ヒメ派】\n' + msg.author.username + 'たんがフェスメン募集中！\n'
               + data.jp.festivals[0].names.alpha_short
               + '派のみなさん、いかがですか？';
@@ -335,15 +321,15 @@ client.on('message', async msg => {
               + unixTime2mdwhm(data.jp.festivals[0].times.start) + ' – '
               + unixTime2mdwhm(data.jp.festivals[0].times.end);
             let desc = '[参加条件] ';
-            
+
             if (strCmd.startsWith('fes a')) {
               args.shift();
             }
-            
+
             if (args.length > 0) {
-              desc +=  args.join(" ");
+              desc += args.join(" ");
             } else {
-              desc +=  'なし';
+              desc += 'なし';
             }
             const image = 'https://splatoon2.ink/assets/splatnet' + data.jp.festivals[0].images.alpha;
             const title = data.jp.festivals[0].names.alpha_long;
@@ -353,49 +339,44 @@ client.on('message', async msg => {
               Math.round(data.jp.festivals[0].colors.alpha.b * 255)
             ), 16)
             msg.guild.channels.find("name", "ナワバリ・フェス募集")
-            .send(txt, {
-              embed: {
-                "color": color,
-                "author": {
-                  "name": title,
-                  "icon_url": 'https://cdn.wikimg.net/en/splatoonwiki/images/thumb/9/9a/S2_Splatfest_Logo.svg/45px-S2_Splatfest_Logo.svg.png'
-                },
-                "title": date,
-                "description": desc,
-                "thumbnail": {
-                  "url": image
+              .send(txt, {
+                embed: {
+                  "color": color,
+                  "author": {
+                    "name": title,
+                    "icon_url": 'https://cdn.wikimg.net/en/splatoonwiki/images/thumb/9/9a/S2_Splatfest_Logo.svg/45px-S2_Splatfest_Logo.svg.png'
+                  },
+                  "title": date,
+                  "description": desc,
+                  "thumbnail": {
+                    "url": image
+                  }
                 }
-              }
-            });
-          } else { msg.channel.send('なんかエラーでてるわ') }
-        })
-      }
-    }
+              });
+          }
+        }
 
-    if ((msg.member.roles.has(role_id_b.id) && args[0] != 'a') || strCmd.startsWith('fes b')) {
-      if(args[0]=="〆") {
-        msg.guild.channels.find("name", "ナワバリ・フェス募集")
-        .send(msg.author.username + 'たんの募集 〆');
-      } else {
-        request.get('https://splatoon2.ink/data/festivals.json', function (error, response, body) {
-          if (!error && response.statusCode == 200) {
-            const data = JSON.parse(body);
+        if ((msg.member.roles.has(role_id_b.id) && args[0] != 'a') || strCmd.startsWith('fes b')) {
+          if (args[0] == "〆") {
+            msg.guild.channels.find("name", "ナワバリ・フェス募集")
+              .send(msg.author.username + 'たんの募集 〆');
+          } else {
             let txt = role_id_b.toString() + ' 【フェス募集：イイダ派】\n' + msg.author.username + 'たんがフェスメン募集中！\n'
               + data.jp.festivals[0].names.bravo_short
               + '派のみなさん、いかがですか？';
             const date = ''
               + unixTime2mdwhm(data.jp.festivals[0].times.start) + ' – '
               + unixTime2mdwhm(data.jp.festivals[0].times.end);
-            
+
             let desc = '[参加条件] ';
-            
+
             if (strCmd.startsWith('fes b')) {
               args.shift();
             }
             if (args.length > 0) {
-              desc +=  args.join(" ");
+              desc += args.join(" ");
             } else {
-              desc +=  'なし';
+              desc += 'なし';
             }
             const image = 'https://splatoon2.ink/assets/splatnet' + data.jp.festivals[0].images.bravo;
             const title = data.jp.festivals[0].names.bravo_long;
@@ -405,24 +386,24 @@ client.on('message', async msg => {
               Math.round(data.jp.festivals[0].colors.bravo.b * 255)
             ), 16)
             msg.guild.channels.find("name", "ナワバリ・フェス募集")
-            .send(txt, {
-              embed: {
-                "color": color,
-                "author": {
-                  "name": title,
-                  "icon_url": 'https://cdn.wikimg.net/en/splatoonwiki/images/thumb/9/9a/S2_Splatfest_Logo.svg/45px-S2_Splatfest_Logo.svg.png'
-                },
-                "title": date,
-                "description": desc,
-                "thumbnail": {
-                  "url": image
+              .send(txt, {
+                embed: {
+                  "color": color,
+                  "author": {
+                    "name": title,
+                    "icon_url": 'https://cdn.wikimg.net/en/splatoonwiki/images/thumb/9/9a/S2_Splatfest_Logo.svg/45px-S2_Splatfest_Logo.svg.png'
+                  },
+                  "title": date,
+                  "description": desc,
+                  "thumbnail": {
+                    "url": image
+                  }
                 }
-              }
-            });
-          } else { msg.channel.send('なんかエラーでてるわ') }
-        })
-      }
-    }
+              });
+          }
+        }
+      } else { msg.channel.send('なんかエラーでてるわ') }
+    })
   };
 
 if (msg.content.startsWith('next')) {
