@@ -282,7 +282,7 @@ client.on('message', async msg => {
             }
           })
           let bukiNames = bukis.map(function(value) {
-            return value.name.ja_JP;
+            return value.name.ja_JP + " (" + value.sub.name.ja_JP + " / " + value.special.name.ja_JP + ")";
           })
 
           if (amount) {
