@@ -616,7 +616,7 @@ if (msg.content.startsWith('nawabari')) {
 client.on("guildMemberAdd", (member) => {
   const guild = member.guild;
   guild.channels.find("name", "雑談部屋")
-  .send(`${member.user.username}たん、よろしくお願いします！\nまずは ${guild.channels.find("name","イカ部心得")} と ${guild.channels.find("name","各部屋の説明")} をよく読んでから ${guild.channels.find("name","フレンドコード部屋")} で自己紹介も兼ねて自分のフレコを貼ってください\n\n${guild.name}のみんなが歓迎していますよ〜`)
+  .send(`${member.user.username}たん、よろしくお願いします！\nまずは ${guild.channels.find("id","477067128479023115")} と ${guild.channels.find("id","477067552015515658")} をよく読んでから ${guild.channels.find("name","フレンドコード部屋")} で自己紹介も兼ねて自分のフレコを貼ってください\n\n${guild.name}のみんなが歓迎していますよ〜`)
   .then(sentMessage => sentMessage.react('👍'));
 });
 
