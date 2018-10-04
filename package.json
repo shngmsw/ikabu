@@ -10,15 +10,15 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "discord.js": "^11.3.2",
+    "discord.js": "^11.4.2",
     "express": "^4.16.3",
-    "request": "^2.87.0"
+    "request": "^2.88.0"
   },
   "engines": {
     "node": "8.x"
   },
   "repository": {
-    "url": "https://glitch.com/edit/#!/ikabu"
+    "url": "https://glitch.com/edit/#!/ikabu2ß"
   },
   "license": "MIT",
   "keywords": [
