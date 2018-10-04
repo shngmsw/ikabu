@@ -74,6 +74,7 @@ const stage2txt = (key) => {
     case '19': return 'ホテルニューオートロ';
     case '20': return 'スメーシーワールド';
     case '21': return 'アンチョビットゲームズ';
+    case '22': return 'ムツゴ楼';
     case '9999': return 'ミステリーゾーン';
   }
 };
@@ -306,6 +307,7 @@ client.on('message', async msg => {
         const role_id_a = msg.guild.roles.find("name", data.jp.festivals[0].names.alpha_short);
         const role_id_b = msg.guild.roles.find("name", data.jp.festivals[0].names.bravo_short);
         var strCmd = msg.content.replace(/　/g, " ");
+        strCmd = strCmd.replace("  ", " ");
         const args = strCmd.split(" ");
         args.shift();
 
@@ -408,6 +410,7 @@ client.on('message', async msg => {
 
 if (msg.content.startsWith('next')) {
     var strCmd = msg.content.replace(/　/g ," ");
+    strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -438,6 +441,7 @@ if (msg.content.startsWith('next')) {
 
 if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
     var strCmd = msg.content.replace(/　/g ," ");
+    strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -468,6 +472,7 @@ if (msg.content.startsWith('now')||msg.content.startsWith('nou')) {
 
 if (msg.content.startsWith('nawabari')) {
     var strCmd = msg.content.replace(/　/g ," ");
+    strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -515,6 +520,7 @@ if (msg.content.startsWith('nawabari')) {
 
   if (msg.content.startsWith('run')) {
     var strCmd = msg.content.replace(/　/g ," ");
+    strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -580,6 +586,7 @@ if (msg.content.startsWith('nawabari')) {
 
   if (msg.content.startsWith('fn')) {
     var strCmd = msg.content.replace(/　/g ," ");
+    strCmd = strCmd.content.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -597,6 +604,7 @@ if (msg.content.startsWith('nawabari')) {
 
   if (msg.content.startsWith('mk')) {
     var strCmd = msg.content.replace(/　/g ," ");
+    strCmd = strCmd.content.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
