@@ -586,7 +586,7 @@ if (msg.content.startsWith('nawabari')) {
 
   if (msg.content.startsWith('fn')) {
     var strCmd = msg.content.replace(/　/g ," ");
-    strCmd = strCmd.content.replace("  ", " ");
+    strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
@@ -604,7 +604,7 @@ if (msg.content.startsWith('nawabari')) {
 
   if (msg.content.startsWith('mk')) {
     var strCmd = msg.content.replace(/　/g ," ");
-    strCmd = strCmd.content.replace("  ", " ");
+    strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
     if(args[0]=="〆") {
