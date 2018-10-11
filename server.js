@@ -580,13 +580,182 @@ if (msg.content.startsWith('nawabari')) {
       });
     }
   };
+  
+  if (msg.content === 'check now') {
+    request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        const data = JSON.parse(body);
+        let date =  unixTime2mdwhm(data.league[0].start_time) + ' – '
+          + unixTime2mdwhm(data.league[0].end_time);
+        let gachi_stage = stage2txt(data.league[0].stage_a.id) + '\n'
+          + stage2txt(data.league[0].stage_b.id) + '\n';
+        msg.channel.send({
+            "embed": {
+              "author": {
+                "name": "現在のリーグマッチ",
+                "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+              },
+              "color": 0xf02d7d,
+              "fields": [
+                {
+                  "name": date + '　' + rule2txt(data.league[0].rule.key),
+                  "value": stage2txt(data.league[1].stage_a.id) + '\n'+ stage2txt(data.league[0].stage_b.id)
+                }
+              ],
+              "thumbnail": {
+                "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+              }
+            }
+          })
+        
+        date =  unixTime2mdwhm(data.gachi[0].start_time) + ' – '
+          + unixTime2mdwhm(data.gachi[0].end_time);
+        gachi_stage = stage2txt(data.gachi[0].stage_a.id) + '\n'
+          + stage2txt(data.gachi[0].stage_b.id) + '\n';
+        msg.channel.send({
+            "embed": {
+              "author": {
+                "name": "現在のガチマッチ",
+                "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
+              },
+              "color": 0xf54910,
+              "fields": [
+                {
+                  "name": date + '　' + rule2txt(data.gachi[0].rule.key),
+                  "value": stage2txt(data.gachi[0].stage_a.id) + '\n'+ stage2txt(data.gachi[0].stage_b.id)
+                }
+              ],
+              "thumbnail": {
+                "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
+              }
+            }
+          })      } else { msg.channel.send('なんかエラーでてるわ') }
+    })
+  } else if(msg.content === 'check next') {
+    request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        const data = JSON.parse(body);
+        let date =  unixTime2mdwhm(data.league[1].start_time) + ' – '
+          + unixTime2mdwhm(data.league[1].end_time);
+        let gachi_stage = stage2txt(data.league[1].stage_a.id) + '\n'
+          + stage2txt(data.league[1].stage_b.id) + '\n';
+        msg.channel.send({
+            "embed": {
+              "author": {
+                "name": "次のリーグマッチ",
+                "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+              },
+              "color": 0xf02d7d,
+              "fields": [
+                {
+                  "name": date + '　' + rule2txt(data.league[1].rule.key),
+                  "value": stage2txt(data.league[1].stage_a.id) + '\n'+ stage2txt(data.league[1].stage_b.id)
+                }
+              ],
+              "thumbnail": {
+                "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+              }
+            }
+          })
+        
+        date =  unixTime2mdwhm(data.gachi[1].start_time) + ' – '
+          + unixTime2mdwhm(data.gachi[1].end_time);
+        gachi_stage = stage2txt(data.gachi[1].stage_a.id) + '\n'
+          + stage2txt(data.gachi[1].stage_b.id) + '\n';
+        msg.channel.send({
+            "embed": {
+              "author": {
+                "name": "次のガチマッチ",
+                "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
+              },
+              "color": 0xf54910,
+              "fields": [
+                {
+                  "name": date + '　' + rule2txt(data.gachi[1].rule.key),
+                  "value": stage2txt(data.gachi[1].stage_a.id) + '\n'+ stage2txt(data.gachi[1].stage_b.id)
+                }
+              ],
+              "thumbnail": {
+                "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
+              }
+            }
+          })
+      } else { msg.channel.send('なんかエラーでてるわ') }
+    })
+  } else if(msg.content === 'check nawabari') {
+      request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          const data = JSON.parse(body);
+          const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_a.image;
+          const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_b.image;
+          const date =  unixTime2mdwhm(data.regular[0].start_time) + ' – '
+            + unixTime2mdwhm(data.regular[0].end_time);
+          const regular_stage = stage2txt(data.regular[0].stage_a.id) + '\n'
+            + stage2txt(data.regular[0].stage_b.id) + '\n';
 
+          msg.channel.send({
+            "embed": {
+              "author": {
+                "name": "レギュラーマッチ",
+                "icon_url": "https://splatoon2.ink/assets/img/battle-regular.01b5ef.png"
+              },
+              "color": 1693465,
+              "fields": [
+                {
+                  "name": date,
+                  "value": regular_stage
+                }
+              ],
+              "thumbnail": {
+                "url": "https://splatoon2.ink/assets/img/battle-regular.01b5ef.png"
+              }
+            }
+          })
+      } else { msg.channel.send('なんかエラーでてるわ') }
+    })
+  } else if(msg.content === 'check run') {
+      request.get('https://splatoon2.ink/data/coop-schedules.json', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          const data = JSON.parse(body);
+          const stage = 'https://splatoon2.ink/assets/splatnet' + data.details[0].stage.image;
+          const date =  unixTime2mdwhm(data.details[0].start_time) + ' – '
+            + unixTime2mdwhm(data.details[0].end_time);
+          const coop_stage = coop_stage2txt(data.details[0].stage.image) + '\n';
+          const weapons = (data.details[0].weapons[0] ? weapon2txt(data.details[0].weapons[0].id) : '？') + '・'
+          + (data.details[0].weapons[1] ? weapon2txt(data.details[0].weapons[1].id) : '？') + '・'
+          + (data.details[0].weapons[2] ? weapon2txt(data.details[0].weapons[2].id) : '？') + '・'
+          + (data.details[0].weapons[3] ? weapon2txt(data.details[0].weapons[3].id) : '？');
+
+          msg.channel
+          .send('', {
+            "embed": {
+              "author": {
+                "name": "SALMON RUN",
+                "icon_url": "https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png"
+              },
+              "title": date,
+              "color": 16733696,
+              "fields": [
+                {
+                  "name": weapons,
+                  "value": coop_stage
+                }
+              ],
+              "image": {
+                "url": stage
+              }
+            }
+          })
+        } else { msg.channel.send('なんかエラーでてるわ') }
+      });
+  };  
   if (msg.content === 'help') {
     const txt = 'botのコメンド一覧を表示\n```help```\n'
     + '現在のリグマ情報を表示して募集\n```now 参加条件があれば記載```\n'
     + '次回のリグマ情報を表示して募集\n```next 参加条件があれば記載```\n'
     + '現在のナワバリ情報を表示して募集\n```nawabari 参加条件があれば記載```\n'
     + '現在のサーモンランを表示して募集\n```run 参加条件があれば記載```\n'
+    + 'ステージ情報を表示[now / next / nawabari / run]\n```check ○○○```\n'
     + 'ブキをランダムで選出\n```buki 複数の場合は数字を記入```\n'
     + 'ガチルールをランダムで選出\n```rule```\n'
     + 'ヒメ派のフェスメンバーを募集\n```fes a 参加条件があれば記載```\n'
