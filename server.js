@@ -198,6 +198,16 @@ const responseObject = {
   "ccc": "CCC?"
 };
 
+const rules = {
+  "0": "ガチエリア",
+  "1": "ガチヤグラ",
+  "2": "ガチホコ",
+  "3": "ガチアサリ",
+  "5": "ガチエリア",
+  "4": "ガチヤグラ",
+  "6": "ガチホコ"
+};
+
 const random = (array, num) => {
   var a = array;
   var t = [];
@@ -229,8 +239,8 @@ client.on('message', async msg => {
     args.shift();
     var picked = args[Math.floor(Math.random() * args.length)];
     var kazu = Number(args[0]);
-    args.shift();
     if(kazu) {
+      args.shift();
       var picked = random(args, kazu).join('\n');
     } else {
       var picked = args[Math.floor(Math.random() * args.length)];
@@ -251,7 +261,12 @@ client.on('message', async msg => {
       msg.channel.send(msg.member.voiceChannel.members.random(1));
     }
   };
-
+  
+  if (msg.content.startsWith('rule')) {
+    var rule = rules[Math.floor(Math.random() * 7)];
+    msg.channel.send(rule);    
+  }
+  
   if (msg.content.startsWith('buki')) {
     var strCmd = msg.content.replace(/　/g ," ");
     const args = strCmd.split(" ");
@@ -304,13 +319,12 @@ client.on('message', async msg => {
     request.get('https://splatoon2.ink/data/festivals.json', function (error, response, body) {
       if (!error && response.statusCode == 200) {
         const data = JSON.parse(body);
-        const role_id_a = msg.guild.roles.find("name", data.jp.festivals[0].names.alpha_short);
-        const role_id_b = msg.guild.roles.find("name", data.jp.festivals[0].names.bravo_short);
+        const role_id_a = msg.guild.roles.find("name", 'ヒメ派');
+        const role_id_b = msg.guild.roles.find("name", 'イイダ派');
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
         const args = strCmd.split(" ");
         args.shift();
-
         if ((msg.member.roles.has(role_id_a.id) && args[0] != 'b') || strCmd.startsWith('fes a')) {
           if (args[0] == "〆") {
             msg.guild.channels.find("name", "ナワバリ・フェス募集")
@@ -574,6 +588,7 @@ if (msg.content.startsWith('nawabari')) {
     + '現在のナワバリ情報を表示して募集\n```nawabari 参加条件があれば記載```\n'
     + '現在のサーモンランを表示して募集\n```run 参加条件があれば記載```\n'
     + 'ブキをランダムで選出\n```buki 複数の場合は数字を記入```\n'
+    + 'ガチルールをランダムで選出\n```rule```\n'
     + 'ヒメ派のフェスメンバーを募集\n```fes a 参加条件があれば記載```\n'
     + 'イイダ派のフェスメンバーを募集\n```fes b 参加条件があれば記載```\n'
     + '役職に応じて自動でフェスメンバーを募集\n※ヒメ派、イイダ派どちらかを投票して役職がついてる場合のみ\n```fes 参加条件があれば記載```\n'
