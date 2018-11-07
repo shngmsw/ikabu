@@ -275,6 +275,7 @@ client.on('message', async msg => {
 
   if (msg.content.startsWith('pick')) {
     var strCmd = msg.content.replace(/　/g, " ");
+    strCmd = msg.content.replace(/\r?\n/g, " ");
     const args = strCmd.split(" ");
     args.shift();
     // Math.random() * ( 最大値 - 最小値 ) + 最小値;
@@ -286,7 +287,7 @@ client.on('message', async msg => {
     } else {
       var picked = args[Math.floor(Math.random() * args.length)];
     }
-    msg.channel.send(picked);
+    msg.channel.send(picked+'でし！');
   };
 
   // 発言したヒトが接続してるボイチャから数字分のヒトをランダム抽出
@@ -305,7 +306,7 @@ client.on('message', async msg => {
 
   if (msg.content.startsWith('rule')) {
     var rule = rules[Math.floor(Math.random() * 7)];
-    msg.channel.send(rule);
+    msg.channel.send(rule+'でし！');
   }
 
   if (msg.content.startsWith('buki')) {
@@ -538,6 +539,7 @@ client.on('message', async msg => {
         if (!error && response.statusCode == 200) {
           const data = JSON.parse(body);
           const stage = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_a.image;
+          const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_b.image;
           let txt = '@everyone 【ナワバリ募集】\n' + msg.author.username + 'たんがナワバリ中でし！\n';
           if (args.length > 0) txt += '[参加条件] ' + args.join(" ") + '\n';
           txt += 'よければ合流しませんか？';
@@ -640,7 +642,7 @@ client.on('message', async msg => {
             "fields": [
               {
                 "name": date + '　' + rule2txt(data.league[0].rule.key),
-                "value": stage2txt(data.league[1].stage_a.id) + '\n' + stage2txt(data.league[0].stage_b.id)
+                "value": stage2txt(data.league[0].stage_a.id) + '\n' + stage2txt(data.league[0].stage_b.id)
               }
             ],
             "thumbnail": {
@@ -803,7 +805,7 @@ client.on('message', async msg => {
       + 'ヒメ派のフェスメンバーを募集\n```fes a 参加条件があれば記載```\n'
       + 'イイダ派のフェスメンバーを募集\n```fes b 参加条件があれば記載```\n'
       + '役職に応じて自動でフェスメンバーを募集\n※ヒメ派、イイダ派どちらかを投票して役職がついてる場合のみ\n```fes 参加条件があれば記載```\n'
-      + '選択肢の中からランダム選出\n```pick 複数選出の場合は数字を記入 選択肢を半スペ空けで記入```\n'
+      + '選択肢の中からランダム選出\n```pick 複数選出の場合は数字を記入 選択肢を半スペ空け or 改行してで記入```\n'
       + '接続してるボイチャから数字分のヒトをランダム抽出\n```vpick 複数選出の場合は数字を記入```\n'
       + 'Fortniteのメンバーを募集\n```fn 参加条件があれば記載```\n'
       + 'マリオカートのメンバーを募集\n```mk 参加条件があれば記載```'
@@ -889,7 +891,7 @@ client.on('message', async msg => {
 client.on("guildMemberAdd", (member) => {
   const guild = member.guild;
   guild.channels.find("name", "雑談部屋")
-    .send(`${member.user.username}たん、よろしくお願いします！\nまずは ${guild.channels.find("id", "477067128479023115")} と ${guild.channels.find("id", "477067552015515658")} をよく読んでから ${guild.channels.find("name", "フレンドコード部屋")} で自己紹介も兼ねて自分のフレコを貼ってください\n\n${guild.name}のみんなが歓迎していますよ〜`)
+    .send(`${member.user.username} たん、よろしくお願いします！\nまずは ${guild.channels.find("id", "477067128479023115")} と ${guild.channels.find("id", "477067552015515658")} をよく読んでから ${guild.channels.find("name", "フレンドコード部屋")} で自己紹介も兼ねて自分のフレコを貼ってください\n\n${guild.name}のみんなが歓迎していますよ〜`)
     .then(sentMessage => sentMessage.react('👍'));
 });
 
