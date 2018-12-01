@@ -89,6 +89,7 @@ const coop_stage2txt = (key) => {
     case '/images/coop_stage/65c68c6f0641cc5654434b78a6f10b0ad32ccdee.png': return 'シェケナダム';
     case '/images/coop_stage/e07d73b7d9f0c64e552b34a2e6c29b8564c63388.png': return '難破船ドン・ブラコ';
     case '/images/coop_stage/6d68f5baa75f3a94e5e9bfb89b82e7377e3ecd2c.png': return '海上集落シャケト場';
+    case '/images/coop_stage/50064ec6e97aac91e70df5fc2cfecf61ad8615fd.png': return '朽ちた箱舟 ポラリス';
   }
 };
 const weaponsUrl = 'https://stat.ink/api/v2/weapon';
@@ -215,6 +216,36 @@ const rules = {
   "6": "ガチホコ"
 };
 
+const subweapons = {
+  "0": "スプラッシュボム",
+  "1": "キューバンボム",
+  "2": "クイックボム",
+  "3": "スプリンクラー",
+  "4": "ジャンプビーコン",
+  "5": "スプラッシュシールド",
+  "6": "ポイントセンサー",
+  "7": "トラップ",
+  "8": "カーリングボム",
+  "9": "ロボットボム",
+  "10": "ポイズンミスト",
+  "11": "タンサンボム",
+  "12": "トーピード"
+};
+
+const specialweapons = {
+  "0": "ジェットパック",
+  "1": "スーパーチャクチ",
+  "2": "マルチミサイル",
+  "3": "ハイパープレッサー",
+  "4": "アメフラシ",
+  "5": "ボムピッチャー",
+  "6": "インクアーマー",
+  "7": "イカスフィア",
+  "8": "バブルランチャー",
+  "9": "ナイスダマ",
+  "10": "ウルトラハンコ",
+};
+
 const random = (array, num) => {
   var a = array;
   var t = [];
@@ -240,7 +271,7 @@ client.on('message', async msg => {
     await msg.react('💩');
   };
 
-  if (msg.content.startsWith('timer')) {
+  if (msg.content.startsWith('timer ')) {
     var strCmd = msg.content.replace(/　/g, " ");
     const args = strCmd.split(" ");
     args.shift();
@@ -249,9 +280,9 @@ client.on('message', async msg => {
     var countdown = function () {
       count--;
       if (count != 0) {
-        msg.channel.send('残り' + count + '分でし')
+        msg.reply('残り' + count + '分でし')
       } else {
-        msg.channel.send('時間でし！');
+        msg.reply('時間でし！');
       }
     }
     var id = setInterval(function () {
@@ -268,11 +299,13 @@ client.on('message', async msg => {
     args.shift();
     var str = args[0];
     if (str === 'cancel') {
-      msg.channel.send('キャンセルします');
+      msg.reply('キャンセルします');
       clearInterval(id);
     }
   }
-
+  // **********************************
+  // pick
+  // **********************************
   if (msg.content.startsWith('pick')) {
     var strCmd = msg.content.replace(/　/g, " ");
     strCmd = msg.content.replace(/\r?\n/g, " ");
@@ -287,7 +320,7 @@ client.on('message', async msg => {
     } else {
       var picked = args[Math.floor(Math.random() * args.length)];
     }
-    msg.channel.send(picked+'でし！');
+    msg.channel.send(picked + 'でし！');
   };
 
   // 発言したヒトが接続してるボイチャから数字分のヒトをランダム抽出
@@ -304,10 +337,51 @@ client.on('message', async msg => {
     }
   };
 
+  if (msg.content.startsWith('poll')) {
+    var strCmd = msg.content.replace(/　/g, " ");
+    strCmd = msg.content.replace(/\r?\n/g, " ");
+    const args = strCmd.split(" ");
+    args.shift();
+    var pollCmd = '/poll " ' + msg.author.username + 'たんのアンケート" ';
+    for (let i = 0; i < args.length; i++) {
+      pollCmd = pollCmd + '"' + args[i] + '" ';
+    }
+    msg.channel.send(pollCmd);
+  };
+  
+  if (msg.content.startsWith('/poll')) {
+	  if (msg.author.username === 'ikabu_bot') {
+      console.log(msg.author.username);
+      msg.delete();
+    }
+  };
+
+  // **********************************
+  // ランダム系
+  // ルール、サブ、スペシャル、ブキ
+  // **********************************
   if (msg.content.startsWith('rule')) {
     var rule = rules[Math.floor(Math.random() * 7)];
-    msg.channel.send(rule+'でし！');
+    msg.channel.send('`' + rule + '`でし！');
   }
+
+  if (msg.content.startsWith('sub')) {
+    var sub = subweapons[Math.floor(Math.random() * 12)];
+    msg.channel.send('`' + sub + '`でし！');
+  }
+
+  if (msg.content.startsWith('special')) {
+    var special = specialweapons[Math.floor(Math.random() * 10)];
+    msg.channel.send('`' + special + '`でし！');
+  }
+
+  if (msg.content.startsWith('re')) {
+    //var strCmd = msg.content.replace(/　/g, " ");
+    const args = msg.content.split('|');
+    args.shift();
+
+    msg.channel.send(args[0]);
+  };
 
   if (msg.content.startsWith('buki')) {
     var strCmd = msg.content.replace(/　/g, " ");
@@ -345,10 +419,10 @@ client.on('message', async msg => {
 
           if (amount) {
             var buki = random(bukiNames, amount).join('\n');
-            msg.channel.send(buki);
+            msg.channel.send('```' + buki + '```');
           } else {
             var buki = random(bukiNames, 1)[0];
-            msg.reply(buki);
+            msg.reply('`' + buki + '`');
           }
         } else {
           msg.channel.send('なんかエラーでてるわ');
@@ -357,6 +431,12 @@ client.on('message', async msg => {
     }
   };
 
+
+
+
+  // **********************************
+  // 募集コマンド
+  // **********************************
   if (msg.content.startsWith('fes')) {
     request.get('https://splatoon2.ink/data/festivals.json', function (error, response, body) {
       if (!error && response.statusCode == 200) {
@@ -370,7 +450,7 @@ client.on('message', async msg => {
         if ((msg.member.roles.has(role_id_a.id) && args[0] != 'b') || strCmd.startsWith('fes a')) {
           if (args[0] == "〆") {
             msg.guild.channels.find("name", "ナワバリ・フェス募集")
-              .send(msg.author.username + 'たんの募集 〆');
+              .send('@here ' + msg.author.username + 'たんの募集 〆');
           } else {
             let txt = role_id_a.toString() + ' 【フェス募集：ヒメ派】\n' + msg.author.username + 'たんがフェスメン募集中でし！\n'
               + data.jp.festivals[0].names.alpha_short
@@ -417,7 +497,7 @@ client.on('message', async msg => {
         if ((msg.member.roles.has(role_id_b.id) && args[0] != 'a') || strCmd.startsWith('fes b')) {
           if (args[0] == "〆") {
             msg.guild.channels.find("name", "ナワバリ・フェス募集")
-              .send(msg.author.username + 'たんの募集 〆');
+              .send('@here ' + msg.author.username + 'たんの募集 〆');
           } else {
             let txt = role_id_b.toString() + ' 【フェス募集：イイダ派】\n' + msg.author.username + 'たんがフェスメン募集中でし！\n'
               + data.jp.festivals[0].names.bravo_short
@@ -471,7 +551,7 @@ client.on('message', async msg => {
     args.shift();
     if (args[0] == "〆") {
       msg.guild.channels.find("name", "リグマ募集")
-        .send(msg.author.username + 'たんの募集 〆');
+        .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -502,7 +582,7 @@ client.on('message', async msg => {
     args.shift();
     if (args[0] == "〆") {
       msg.guild.channels.find("name", "リグマ募集")
-        .send(msg.author.username + 'たんの募集 〆');
+        .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -533,7 +613,7 @@ client.on('message', async msg => {
     args.shift();
     if (args[0] == "〆") {
       msg.guild.channels.find("name", "ナワバリ・フェス募集")
-        .send(msg.author.username + 'たんの募集 〆');
+        .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -582,7 +662,7 @@ client.on('message', async msg => {
     args.shift();
     if (args[0] == "〆") {
       msg.guild.channels.find("name", "サーモン募集")
-        .send(msg.author.username + 'たんの募集 〆');
+        .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       request.get('https://splatoon2.ink/data/coop-schedules.json', function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -624,6 +704,9 @@ client.on('message', async msg => {
     }
   };
 
+  // **********************************
+  // ステージ情報
+  // **********************************
   if (msg.content === 'show now') {
     request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
       if (!error && response.statusCode == 200) {
@@ -781,7 +864,11 @@ client.on('message', async msg => {
               "color": 16733696,
               "fields": [
                 {
-                  "name": weapons,
+                  "name": "支給ブキ",
+                  "value": weapons
+                },
+                {
+                  "name": "ステージ",
                   "value": coop_stage
                 }
               ],
@@ -793,26 +880,7 @@ client.on('message', async msg => {
       } else { msg.channel.send('なんかエラーでてるわ') }
     });
   };
-  if (msg.content === 'help') {
-    const txt = 'botのコメンド一覧を表示\n```help```\n'
-      + '現在のリグマ情報を表示して募集\n```now 参加条件があれば記載```\n'
-      + '次回のリグマ情報を表示して募集\n```next 参加条件があれば記載```\n'
-      + '現在のナワバリ情報を表示して募集\n```nawabari 参加条件があれば記載```\n'
-      + '現在のサーモンランを表示して募集\n```run 参加条件があれば記載```\n'
-      + 'ステージ情報を表示[now / next / nawabari / run]\n```show ○○○```\n'
-      + 'ブキをランダムで選出\n```buki 複数の場合は数字を記入```\n'
-      + 'ガチルールをランダムで選出\n```rule```\n'
-      + 'ヒメ派のフェスメンバーを募集\n```fes a 参加条件があれば記載```\n'
-      + 'イイダ派のフェスメンバーを募集\n```fes b 参加条件があれば記載```\n'
-      + '役職に応じて自動でフェスメンバーを募集\n※ヒメ派、イイダ派どちらかを投票して役職がついてる場合のみ\n```fes 参加条件があれば記載```\n'
-      + '選択肢の中からランダム選出\n```pick 複数選出の場合は数字を記入 選択肢を半スペ空け or 改行してで記入```\n'
-      + '接続してるボイチャから数字分のヒトをランダム抽出\n```vpick 複数選出の場合は数字を記入```\n'
-      + 'Fortniteのメンバーを募集\n```fn 参加条件があれば記載```\n'
-      + 'マリオカートのメンバーを募集\n```mk 参加条件があれば記載```'
-      + 'MINECRAFTのメンバーを募集\n```mc 参加条件があれば記載```';
-    + 'オーバークック2のメンバーを募集\n```oc 参加条件があれば記載```';
-    msg.channel.send(txt);
-  };
+
 
   if (msg.content.startsWith('fn')) {
     var strCmd = msg.content.replace(/　/g, " ");
@@ -821,7 +889,7 @@ client.on('message', async msg => {
     args.shift();
     if (args[0] == "〆") {
       msg.guild.channels.find("name", "別ゲー募集")
-        .send(msg.author.username + 'たんの募集 〆');
+        .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       let txt = '@everyone 【Fortnite募集】\n' + msg.author.username + 'たんがFortniteメンバー募集中でし！\n';
       if (args.length > 0) txt += '[参加条件] ' + args.join(" ");
@@ -839,7 +907,7 @@ client.on('message', async msg => {
     args.shift();
     if (args[0] == "〆") {
       msg.guild.channels.find("name", "別ゲー募集")
-        .send(msg.author.username + 'たんの募集 〆');
+        .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       let txt = '@everyone 【マリオカート募集】\n' + msg.author.username + 'たんがマリオカート参加者募集中でし！\n';
       if (args.length > 0) txt += '[参加条件] ' + args.join(" ");
@@ -858,7 +926,7 @@ client.on('message', async msg => {
     args.shift();
     if (args[0] == "〆") {
       msg.guild.channels.find("name", "別ゲー募集")
-        .send(msg.author.username + 'たんの募集 〆');
+        .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       let txt = '@everyone 【MINECRAFT募集】\n' + msg.author.username + 'たんがMINECRAFT参加者募集中でし！\n';
       if (args.length > 0) txt += '[参加条件] ' + args.join(" ");
@@ -876,7 +944,7 @@ client.on('message', async msg => {
     args.shift();
     if (args[0] == "〆") {
       msg.guild.channels.find("name", "別ゲー募集")
-        .send(msg.author.username + 'たんの募集 〆');
+        .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       let txt = '@everyone 【オーバークック2募集】\n' + msg.author.username + 'たんがオーバークック2参加者募集中でし！\n';
       if (args.length > 0) txt += '[参加条件] ' + args.join(" ");
@@ -886,6 +954,33 @@ client.on('message', async msg => {
         });
     }
   };
+
+  // **********************************
+  // ヘルプ
+  // **********************************
+  if (msg.content === 'help') {
+    const txt = 'botのコメンド一覧を表示\n```help```\n'
+      + '現在のリグマ情報を表示して募集\n```now 参加条件があれば記載```\n'
+      + '次回のリグマ情報を表示して募集\n```next 参加条件があれば記載```\n'
+      + '現在のナワバリ情報を表示して募集\n```nawabari 参加条件があれば記載```\n'
+      + '現在のサーモンランを表示して募集\n```run 参加条件があれば記載```\n'
+      + 'ステージ情報を表示[now / next / nawabari / run]\n```show ○○○```\n'
+      + 'ブキをランダムで選出\n```buki 複数の場合は数字を記入```\n'
+      + 'ガチルールをランダムで選出\n```rule```\n'
+      + 'サブウェポンをランダムで選出\n```sub```\n'
+      + 'スペシャルウェポンをランダムで選出\n```special```\n'
+      + 'ヒメ派のフェスメンバーを募集\n```fes a 参加条件があれば記載```\n'
+      + 'イイダ派のフェスメンバーを募集\n```fes b 参加条件があれば記載```\n'
+      + '役職に応じて自動でフェスメンバーを募集\n※ヒメ派、イイダ派どちらかを投票して役職がついてる場合のみ\n```fes 参加条件があれば記載```\n'
+      + '選択肢の中からランダム選出\n```pick 複数選出の場合は数字を記入 選択肢を半スペ空け or 改行してで記入```\n'
+      + '接続してるボイチャから数字分のヒトをランダム抽出\n```vpick 複数選出の場合は数字を記入```\n'
+      + 'Fortniteのメンバーを募集\n```fn 参加条件があれば記載```\n'
+      + 'マリオカートのメンバーを募集\n```mk 参加条件があれば記載```'
+      + 'MINECRAFTのメンバーを募集\n```mc 参加条件があれば記載```';
+    + 'オーバークック2のメンバーを募集\n```oc 参加条件があれば記載```';
+    msg.channel.send(txt);
+  };
+
 });
 
 client.on("guildMemberAdd", (member) => {
