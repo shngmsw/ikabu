@@ -213,7 +213,10 @@ const rules = {
   "3": "ガチアサリ",
   "5": "ガチエリア",
   "4": "ガチヤグラ",
-  "6": "ガチホコ"
+  "6": "ガチホコ",
+  "7": "ガチエリア",
+  "8": "ガチヤグラ",
+  "9": "ガチホコ"
 };
 
 const subweapons = {
@@ -277,20 +280,25 @@ client.on('message', async msg => {
     args.shift();
     var kazu = Number(args[0]);
     var count = kazu;
-    var countdown = function () {
-      count--;
-      if (count != 0) {
-        msg.reply('残り' + count + '分でし')
-      } else {
-        msg.reply('時間でし！');
+    if (count <= 10 && count > 0 && isInteger(kazu)) {
+      msg.reply('タイマーを' + count + '分後にセットしたでし！')
+      var countdown = function () {
+        count--;
+        if (count != 0) {
+          msg.reply('残り' + count + '分でし')
+        } else {
+          msg.reply('時間でし！');
+        }
       }
+      var id = setInterval(function () {
+        countdown();
+        if (count <= 0) {
+          clearInterval(id);
+        }
+      }, 60000);
+    } else {
+      msg.reply('10分以内しか入力できないでし！正の整数以外もダメでし！')
     }
-    var id = setInterval(function () {
-      countdown();
-      if (count == 0) {
-        clearInterval(id);
-      }
-    }, 60000);
   }
 
   if (msg.content.startsWith('timer')) {
@@ -361,10 +369,15 @@ client.on('message', async msg => {
   // ルール、サブ、スペシャル、ブキ
   // **********************************
   if (msg.content.startsWith('rule')) {
-    var rule = rules[Math.floor(Math.random() * 7)];
+    var rule = rules[Math.floor(Math.random() * 10)];
     msg.channel.send('`' + rule + '`でし！');
   }
 
+  if (msg.content.startsWith('rule stage')) {
+    var stage = stage2txt(Math.floor(Math.random() * 23).toString());
+    msg.channel.send('`' + stage + '`でし！');
+  }
+  
   if (msg.content.startsWith('sub')) {
     var sub = subweapons[Math.floor(Math.random() * 12)];
     msg.channel.send('`' + sub + '`でし！');
@@ -448,9 +461,9 @@ client.on('message', async msg => {
         const args = strCmd.split(" ");
         args.shift();
         if ((msg.member.roles.has(role_id_a.id) && args[0] != 'b') || strCmd.startsWith('fes a')) {
-          if (args[0] == "〆") {
+          if (strCmd.match("〆")) {
             msg.guild.channels.find("name", "ナワバリ・フェス募集")
-              .send('@here ' + msg.author.username + 'たんの募集 〆');
+              .send(role_id_a.toString()+ msg.author.username + 'たんの募集 〆');
           } else {
             let txt = role_id_a.toString() + ' 【フェス募集：ヒメ派】\n' + msg.author.username + 'たんがフェスメン募集中でし！\n'
               + data.jp.festivals[0].names.alpha_short
@@ -495,9 +508,9 @@ client.on('message', async msg => {
         }
 
         if ((msg.member.roles.has(role_id_b.id) && args[0] != 'a') || strCmd.startsWith('fes b')) {
-          if (args[0] == "〆") {
+          if (strCmd.match("〆")) {
             msg.guild.channels.find("name", "ナワバリ・フェス募集")
-              .send('@here ' + msg.author.username + 'たんの募集 〆');
+              .send(role_id_b.toString()+ msg.author.username + 'たんの募集 〆');
           } else {
             let txt = role_id_b.toString() + ' 【フェス募集：イイダ派】\n' + msg.author.username + 'たんがフェスメン募集中でし！\n'
               + data.jp.festivals[0].names.bravo_short
@@ -549,27 +562,21 @@ client.on('message', async msg => {
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
-    if (args[0] == "〆") {
+    if (strCmd.match("〆")) {
       msg.guild.channels.find("name", "リグマ募集")
         .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
         if (!error && response.statusCode == 200) {
           const data = JSON.parse(body);
+          const l_args = getLeague(data,1).split(",");
           let txt = '@everyone 【リグマ募集】\n' + msg.author.username + 'たんがリグメン募集中でし！\n';
           if (args.length > 0) txt += '[参加条件] ' + args.join(" ") + '\n';
-          txt += ''
-            + unixTime2hm(data.league[1].start_time) + ' – '
-            + unixTime2hm(data.league[1].end_time) + ' '
-            + rule2txt(data.league[1].rule.key) + '\n'
-            + stage2txt(data.league[1].stage_a.id) + '\n'
-            + stage2txt(data.league[1].stage_b.id);
           const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.league[1].stage_a.image;
           const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.league[1].stage_b.image;
+          sendLeagueMatch(msg,txt,l_args);          
           msg.guild.channels.find("name", "リグマ募集")
-            .send(txt, {
-              files: [stage_a, stage_b]
-            });
+            .send({files: [stage_a, stage_b]});
         } else { msg.channel.send('なんかエラーでてるわ') }
       })
     }
@@ -580,27 +587,21 @@ client.on('message', async msg => {
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
-    if (args[0] == "〆") {
+    if (strCmd.match("〆")) {
       msg.guild.channels.find("name", "リグマ募集")
         .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
         if (!error && response.statusCode == 200) {
           const data = JSON.parse(body);
+          const l_args = getLeague(data,0).split(",");
           let txt = '@everyone 【リグマ募集】\n' + msg.author.username + 'たんがリグメン募集中でし！\n';
           if (args.length > 0) txt += '[参加条件] ' + args.join(" ") + '\n';
-          txt += ''
-            + unixTime2hm(data.league[0].start_time) + ' – '
-            + unixTime2hm(data.league[0].end_time) + ' '
-            + rule2txt(data.league[0].rule.key) + '\n'
-            + stage2txt(data.league[0].stage_a.id) + '\n'
-            + stage2txt(data.league[0].stage_b.id);
           const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.league[0].stage_a.image;
-          const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.league[0].stage_b.image;
+          const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.league[0].stage_b.image;          
+          sendLeagueMatch(msg,txt,l_args);
           msg.guild.channels.find("name", "リグマ募集")
-            .send(txt, {
-              files: [stage_a, stage_b]
-            });
+            .send({files: [stage_a, stage_b]});
         } else { msg.channel.send('なんかエラーでてるわ') }
       })
     }
@@ -611,14 +612,14 @@ client.on('message', async msg => {
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
-    if (args[0] == "〆") {
+    if (strCmd.match("〆")) {
       msg.guild.channels.find("name", "ナワバリ・フェス募集")
         .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
       request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
         if (!error && response.statusCode == 200) {
           const data = JSON.parse(body);
-          const stage = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_a.image;
+          const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_a.image;
           const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_b.image;
           let txt = '@everyone 【ナワバリ募集】\n' + msg.author.username + 'たんがナワバリ中でし！\n';
           if (args.length > 0) txt += '[参加条件] ' + args.join(" ") + '\n';
@@ -644,12 +645,11 @@ client.on('message', async msg => {
                 ],
                 "thumbnail": {
                   "url": "https://splatoon2.ink/assets/img/battle-regular.01b5ef.png"
-                },
-                "image": {
-                  "url": stage
                 }
               }
             })
+          msg.guild.channels.find("name", "ナワバリ・フェス募集")
+            .send({files: [stage_a, stage_b]});
         } else { msg.channel.send('なんかエラーでてるわ') }
       })
     }
@@ -660,7 +660,7 @@ client.on('message', async msg => {
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
     args.shift();
-    if (args[0] == "〆") {
+    if (strCmd.match("〆")) {
       msg.guild.channels.find("name", "サーモン募集")
         .send('@here ' + msg.author.username + 'たんの募集 〆');
     } else {
@@ -707,108 +707,33 @@ client.on('message', async msg => {
   // **********************************
   // ステージ情報
   // **********************************
+  
   if (msg.content === 'show now') {
+    
     request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
       if (!error && response.statusCode == 200) {
         const data = JSON.parse(body);
-        let date = unixTime2mdwhm(data.league[0].start_time) + ' – '
-          + unixTime2mdwhm(data.league[0].end_time);
-        let gachi_stage = stage2txt(data.league[0].stage_a.id) + '\n'
-          + stage2txt(data.league[0].stage_b.id) + '\n';
-        msg.channel.send({
-          "embed": {
-            "author": {
-              "name": "現在のリーグマッチ",
-              "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
-            },
-            "color": 0xf02d7d,
-            "fields": [
-              {
-                "name": date + '　' + rule2txt(data.league[0].rule.key),
-                "value": stage2txt(data.league[0].stage_a.id) + '\n' + stage2txt(data.league[0].stage_b.id)
-              }
-            ],
-            "thumbnail": {
-              "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
-            }
-          }
-        })
-
-        date = unixTime2mdwhm(data.gachi[0].start_time) + ' – '
-          + unixTime2mdwhm(data.gachi[0].end_time);
-        gachi_stage = stage2txt(data.gachi[0].stage_a.id) + '\n'
-          + stage2txt(data.gachi[0].stage_b.id) + '\n';
-        msg.channel.send({
-          "embed": {
-            "author": {
-              "name": "現在のガチマッチ",
-              "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
-            },
-            "color": 0xf54910,
-            "fields": [
-              {
-                "name": date + '　' + rule2txt(data.gachi[0].rule.key),
-                "value": stage2txt(data.gachi[0].stage_a.id) + '\n' + stage2txt(data.gachi[0].stage_b.id)
-              }
-            ],
-            "thumbnail": {
-              "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
-            }
-          }
-        })
-      } else { msg.channel.send('なんかエラーでてるわ') }
+        const l_args = getLeague(data,0).split(",");
+        const g_args = getGachi(data,0).split(",");
+        sendStageInfo(msg, "　現在", l_args, g_args)
+      } else {
+        console.log('なんかエラーでてるわ') 
+      }
     })
+
   } else if (msg.content === 'show next') {
+    
     request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
       if (!error && response.statusCode == 200) {
         const data = JSON.parse(body);
-        let date = unixTime2mdwhm(data.league[1].start_time) + ' – '
-          + unixTime2mdwhm(data.league[1].end_time);
-        let gachi_stage = stage2txt(data.league[1].stage_a.id) + '\n'
-          + stage2txt(data.league[1].stage_b.id) + '\n';
-        msg.channel.send({
-          "embed": {
-            "author": {
-              "name": "次のリーグマッチ",
-              "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
-            },
-            "color": 0xf02d7d,
-            "fields": [
-              {
-                "name": date + '　' + rule2txt(data.league[1].rule.key),
-                "value": stage2txt(data.league[1].stage_a.id) + '\n' + stage2txt(data.league[1].stage_b.id)
-              }
-            ],
-            "thumbnail": {
-              "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
-            }
-          }
-        })
-
-        date = unixTime2mdwhm(data.gachi[1].start_time) + ' – '
-          + unixTime2mdwhm(data.gachi[1].end_time);
-        gachi_stage = stage2txt(data.gachi[1].stage_a.id) + '\n'
-          + stage2txt(data.gachi[1].stage_b.id) + '\n';
-        msg.channel.send({
-          "embed": {
-            "author": {
-              "name": "次のガチマッチ",
-              "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
-            },
-            "color": 0xf54910,
-            "fields": [
-              {
-                "name": date + '　' + rule2txt(data.gachi[1].rule.key),
-                "value": stage2txt(data.gachi[1].stage_a.id) + '\n' + stage2txt(data.gachi[1].stage_b.id)
-              }
-            ],
-            "thumbnail": {
-              "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
-            }
-          }
-        })
-      } else { msg.channel.send('なんかエラーでてるわ') }
+        const l_args = getLeague(data,1).split(",");
+        const g_args = getGachi(data,1).split(",");
+        sendStageInfo(msg, "次", l_args, g_args)
+      } else {
+        console.log('なんかエラーでてるわ') 
+      }
     })
+    
   } else if (msg.content === 'show nawabari') {
     request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
       if (!error && response.statusCode == 200) {
@@ -955,32 +880,98 @@ client.on('message', async msg => {
     }
   };
 
+  if (msg.content.startsWith('sb')) {
+    var strCmd = msg.content.replace(/　/g, " ");
+    strCmd = strCmd.replace("  ", " ");
+    const args = strCmd.split(" ");
+    args.shift();
+    if (args[0] == "〆") {
+      msg.guild.channels.find("name", "別ゲー募集")
+        .send('@here ' + msg.author.username + 'たんの募集 〆');
+    } else {
+      let txt = '@everyone 【スマブラSP募集】\n' + msg.author.username + 'たんがスマブラSP参加者募集中でし！\n';
+      if (args.length > 0) txt += '[参加条件] ' + args.join(" ");
+      msg.guild.channels.find("name", "別ゲー募集")
+        .send(txt, {
+          files: ["https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fsmash.jpg"]
+        });
+    }
+  };
+
   // **********************************
   // ヘルプ
   // **********************************
   if (msg.content === 'help') {
-    const txt = 'botのコメンド一覧を表示\n```help```\n'
-      + '現在のリグマ情報を表示して募集\n```now 参加条件があれば記載```\n'
-      + '次回のリグマ情報を表示して募集\n```next 参加条件があれば記載```\n'
-      + '現在のナワバリ情報を表示して募集\n```nawabari 参加条件があれば記載```\n'
-      + '現在のサーモンランを表示して募集\n```run 参加条件があれば記載```\n'
-      + 'ステージ情報を表示[now / next / nawabari / run]\n```show ○○○```\n'
-      + 'ブキをランダムで選出\n```buki 複数の場合は数字を記入```\n'
-      + 'ガチルールをランダムで選出\n```rule```\n'
-      + 'サブウェポンをランダムで選出\n```sub```\n'
-      + 'スペシャルウェポンをランダムで選出\n```special```\n'
-      + 'ヒメ派のフェスメンバーを募集\n```fes a 参加条件があれば記載```\n'
-      + 'イイダ派のフェスメンバーを募集\n```fes b 参加条件があれば記載```\n'
-      + '役職に応じて自動でフェスメンバーを募集\n※ヒメ派、イイダ派どちらかを投票して役職がついてる場合のみ\n```fes 参加条件があれば記載```\n'
-      + '選択肢の中からランダム選出\n```pick 複数選出の場合は数字を記入 選択肢を半スペ空け or 改行してで記入```\n'
-      + '接続してるボイチャから数字分のヒトをランダム抽出\n```vpick 複数選出の場合は数字を記入```\n'
-      + 'Fortniteのメンバーを募集\n```fn 参加条件があれば記載```\n'
-      + 'マリオカートのメンバーを募集\n```mk 参加条件があれば記載```'
-      + 'MINECRAFTのメンバーを募集\n```mc 参加条件があれば記載```';
-    + 'オーバークック2のメンバーを募集\n```oc 参加条件があれば記載```';
-    msg.channel.send(txt);
+    msg.channel.send('', {
+      "embed": {
+        "author": {
+          "name": "ikabu_botの使い方",
+          "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg"
+        },
+        "title": "ikabu_botの使い方",
+        "color": 0x1bc2a5,
+        "fields": [
+          {
+            "name": "botのコメンド一覧を表示",
+            "value": "```help```\n"
+          },
+          {
+            "name": "現在のリグマ情報を表示して募集",
+            "value": "```now 参加条件があれば記載```\n"
+          },
+          {
+            "name": "次回のリグマ情報を表示して募集",
+            "value": "```next 参加条件があれば記載```\n"
+          },
+          {
+            "name": "現在のナワバリ情報を表示して募集",
+            "value": "```nawabari 参加条件があれば記載```\n"
+          },
+          {
+            "name": "ステージ情報を表示[now / next / nawabari / run]",
+            "value": "```show ○○○```\n"
+          },
+          {
+            "name": "別ゲー募集コマンド",
+            "value": "フォートナイト：```fn 参加条件があれば記載```\n"
+            + "マリオカート：```mk 参加条件があれば記載```\n"
+            + "MINECRAFT：```mc 参加条件があれば記載```\n"
+            + "オーバークック2：```oc 参加条件があれば記載```\n"
+            + "スマブラSP：```sb 参加条件があれば記載```\n"
+          },
+          {
+            "name": "ランダム系コマンド",
+            "value": "ブキをランダムで選出：```buki 複数の場合は数字を記入```\n"
+            + "ブキ種別ごとのランダム選出方法を表示：```buki help```\n"
+            + "ガチルールをランダムで選出：```rule```\n"
+            + "ガチルールとステージをランダムで選出：```rule stage```\n"
+            + "サブウェポンをランダムで選出：```sub```\n"
+            + "スペシャルウェポンをランダムで選出：```special```"
+          },
+          {
+            "name": "選択肢の中からランダム選出",
+            "value": "```pick 複数選出の場合は数字を記入 選択肢を半スペ空け or 改行して記入```"
+          },
+          {
+            "name": "接続してるボイチャから数字分のヒトをランダム抽出",
+            "value": "```vpick 複数選出の場合は数字を記入```"
+          },
+          {
+            "name": "ヒメ派のフェスメンバーを募集",
+            "value": "```fes a 参加条件があれば記載```"
+          },
+          {
+            "name": "イイダ派のフェスメンバーを募集",
+            "value": "```fes b 参加条件があれば記載```"
+          },
+          {
+            "name": "役職に応じて自動でフェスメンバーを募集\n※ヒメ派、イイダ派どちらかを投票して役職がついてる場合のみ",
+            "value": "```fes 参加条件があれば記載```"
+          },
+        ],
+      }
+    })
   };
-
 });
 
 client.on("guildMemberAdd", (member) => {
@@ -991,3 +982,111 @@ client.on("guildMemberAdd", (member) => {
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
+
+function isInteger(x) {
+    return Math.round(x) === x;
+}
+
+function getLeague(data,x) {
+ 
+  let stage;
+  let date;
+  let rule;
+  let rstr;
+  date = unixTime2mdwhm(data.league[x].start_time) + ' – '
+    + unixTime2mdwhm(data.league[x].end_time)
+  rule = rule2txt(data.league[x].rule.key)
+  stage = stage2txt(data.league[x].stage_a.id) + '\n'
+    + stage2txt(data.league[x].stage_b.id) + '\n'
+  rstr = date + "," + rule + "," + stage  
+  console.log(rstr);
+  return rstr;
+}
+
+
+function getGachi(data,x) {
+ 
+  let stage;
+  let date;
+  let rule;
+  let rstr;
+  date = unixTime2mdwhm(data.gachi[x].start_time) + ' – '
+    + unixTime2mdwhm(data.gachi[x].end_time)
+  rule = rule2txt(data.gachi[x].rule.key)
+  stage = stage2txt(data.gachi[x].stage_a.id) + '\n'
+    + stage2txt(data.gachi[x].stage_b.id) + '\n'
+  rstr = date + "," + rule + "," + stage  
+  console.log(rstr);
+  return rstr;
+}
+
+function sendStageInfo(msg,title,l_args,g_args) {
+  var l_date = l_args[0];
+  var l_rule = l_args[1];
+  var l_stage = l_args[2];
+  var g_date = g_args[0];
+  var g_rule = g_args[1];
+  var g_stage = g_args[2];
+
+  msg.channel.send({
+    "embed": {
+      "author": {
+        "name": title + "のリーグマッチ",
+        "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+      },
+      "color": 0xf02d7d,
+      "fields": [
+        {
+          "name": l_date + '　' + l_rule,
+          "value": l_stage
+        }
+      ],
+      "thumbnail": {
+        "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+      }
+    }
+  })
+  msg.channel.send({
+    "embed": {
+      "author": {
+        "name": title + "のガチマッチ",
+        "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
+      },
+      "color": 0xf02d7d,
+      "fields": [
+        {
+          "name": g_date + '　' + g_rule,
+          "value": g_stage
+        }
+      ],
+      "thumbnail": {
+        "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
+      }
+    }
+  })
+}
+function sendLeagueMatch(msg,txt,l_args) {
+  var l_date = l_args[0];
+  var l_rule = l_args[1];
+  var l_stage = l_args[2];
+  
+    msg.guild.channels.find("name", "リグマ募集")
+      .send(txt, {
+        "embed": {
+          "author": {
+            "name": "リーグマッチ",
+            "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+          },
+          "color": 0xf02d7d,
+          "fields": [
+            {
+              "name": l_date + '　' + l_rule,
+              "value": l_stage
+            }
+          ],
+          "thumbnail": {
+            "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+          }
+        }
+      })
+}
