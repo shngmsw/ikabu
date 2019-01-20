@@ -358,7 +358,7 @@ client.on('message', async msg => {
   };
   
   if (msg.content.startsWith('/poll')) {
-	  if (msg.author.username === 'ikabu_bot') {
+	  if (msg.author.username === 'ブキチ') {
       console.log(msg.author.username);
       msg.delete();
     }
