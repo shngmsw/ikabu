@@ -14,6 +14,7 @@ http.createServer(function (request, response) {
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const request = require('request');
+const Combinatorics = require('js-combinatorics');
 
 // play youtube
 const streamOptions = { seek: 0, volume: 1 };
@@ -273,7 +274,13 @@ client.on('message', async msg => {
   if (msg.content.includes('すてきやん') && msg.author.id == 418680715882790912) {
     await msg.react('💩');
   };
-
+  
+  if (msg.content.includes('watchers')) {
+    var cmb, a;
+    cmb = Combinatorics.combination(['1','2','3','4','5','6','7','8','9','10'], 2);
+    while(a = cmb.next()) console.log(a);
+  }
+          
   if (msg.content.startsWith('timer ')) {
     var strCmd = msg.content.replace(/　/g, " ");
     const args = strCmd.split(" ");
@@ -403,11 +410,13 @@ client.on('message', async msg => {
 
     let amount = 1;
     let bukiType = '';
+    let isQuiz = false;
 
     if (args[0] === 'help') {
       let txt = 'ブキをランダムに抽選します\n\n'
         + 'n個のブキをランダムに選びます\n```\nbuki n\n例: buki 3```\n'
-        + 'ブキを種類縛りでランダムに選びます\n```\nbuki 種類(' + Object.keys(bukiTypes).join(`・`) + ')\n例: buki シューター```\n';
+        + 'ブキを種類縛りでランダムに選びます\n```\nbuki 種類(' + Object.keys(bukiTypes).join(`・`) + ')\n例: buki シューター```\n'
+        + 'ブキのサブスペクイズを出題します\n```\nbuki quiz```';
       msg.channel.send(txt);
     } else {
       if (bukiTypes[args[0]]) { // e.g. buki シューター
@@ -415,6 +424,10 @@ client.on('message', async msg => {
         amount = 0;
       } else { // e.g. buki 8
         amount = Number(args[0])
+      }
+      // ブキサブスペクイズ判定
+      if (args[0] === 'quiz') {
+        isQuiz = true;
       }
       request.get(weaponsUrl, function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -429,10 +442,15 @@ client.on('message', async msg => {
           let bukiNames = bukis.map(function (value) {
             return value.name.ja_JP + " (" + value.sub.name.ja_JP + " / " + value.special.name.ja_JP + ")";
           })
+            console.log(amount);
 
           if (amount) {
             var buki = random(bukiNames, amount).join('\n');
             msg.channel.send('```' + buki + '```');
+          } else if(isQuiz) {
+            var buki = random(bukiNames, 1)[0];
+            console.log(amount);
+            msg.reply(buki.replace("(", "(||").replace(")", "||)"));
           } else {
             var buki = random(bukiNames, 1)[0];
             msg.reply('`' + buki + '`');
@@ -456,14 +474,23 @@ client.on('message', async msg => {
         const data = JSON.parse(body);
         const role_id_a = msg.guild.roles.find("name", 'ヒメ派');
         const role_id_b = msg.guild.roles.find("name", 'イイダ派');
+        var teamId = "";
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
         const args = strCmd.split(" ");
         args.shift();
-        if ((msg.member.roles.has(role_id_a.id) && args[0] != 'b') || strCmd.startsWith('fes a')) {
+        
+        if (strCmd.startsWith('fes a') || (msg.member.roles.has(role_id_a.id) && args[0] != 'b')) {
+          teamId = "a"
+        } else if(strCmd.startsWith('fes b') || (msg.member.roles.has(role_id_b.id) && args[0] != 'a')) {
+          teamId = "b"
+        } else {
+          msg.reply(`${msg.guild.channels.find("name", "フェス投票所！")}`+"で投票してから募集するでし！\nもしくは`fes a`でヒメ派、`fes b`でイイダ派の募集ができるでし！")
+        }
+        if (teamId==="a") {
           if (strCmd.match("〆")) {
             msg.guild.channels.find("name", "ナワバリ・フェス募集")
-              .send(role_id_a.toString()+ msg.author.username + 'たんの募集 〆');
+              .send(role_id_a.toString() + ' ' + msg.author.username + 'たんの募集 〆');
           } else {
             let txt = role_id_a.toString() + ' 【フェス募集：ヒメ派】\n' + msg.author.username + 'たんがフェスメン募集中でし！\n'
               + data.jp.festivals[0].names.alpha_short
@@ -507,10 +534,10 @@ client.on('message', async msg => {
           }
         }
 
-        if ((msg.member.roles.has(role_id_b.id) && args[0] != 'a') || strCmd.startsWith('fes b')) {
+        if (teamId==="b") {
           if (strCmd.match("〆")) {
             msg.guild.channels.find("name", "ナワバリ・フェス募集")
-              .send(role_id_b.toString()+ msg.author.username + 'たんの募集 〆');
+              .send(role_id_b.toString() + ' ' + msg.author.username + 'たんの募集 〆');
           } else {
             let txt = role_id_b.toString() + ' 【フェス募集：イイダ派】\n' + msg.author.username + 'たんがフェスメン募集中でし！\n'
               + data.jp.festivals[0].names.bravo_short
@@ -901,7 +928,7 @@ client.on('message', async msg => {
   // **********************************
   // ヘルプ
   // **********************************
-  if (msg.content === 'help') {
+  if (msg.content.startsWith('help')) {
     msg.channel.send('', {
       "embed": {
         "author": {
@@ -935,8 +962,8 @@ client.on('message', async msg => {
             "name": "別ゲー募集コマンド",
             "value": "フォートナイト：```fn 参加条件があれば記載```\n"
             + "マリオカート：```mk 参加条件があれば記載```\n"
-            + "MINECRAFT：```mc 参加条件があれば記載```\n"
-            + "オーバークック2：```oc 参加条件があれば記載```\n"
+            // + "MINECRAFT：```mc 参加条件があれば記載```\n"
+            // + "オーバークック2：```oc 参加条件があれば記載```\n"
             + "スマブラSP：```sb 参加条件があれば記載```\n"
           },
           {
@@ -976,7 +1003,7 @@ client.on('message', async msg => {
 
 client.on("guildMemberAdd", (member) => {
   const guild = member.guild;
-  guild.channels.find("name", "雑談部屋")
+  guild.channels.find("name", "イカ部ロビー")
     .send(`${member.user.username} たん、よろしくお願いします！\nまずは ${guild.channels.find("id", "477067128479023115")} と ${guild.channels.find("id", "477067552015515658")} をよく読んでから ${guild.channels.find("name", "フレンドコード部屋")} で自己紹介も兼ねて自分のフレコを貼ってください\n\n${guild.name}のみんなが歓迎していますよ〜`)
     .then(sentMessage => sentMessage.react('👍'));
 });
@@ -1002,7 +1029,6 @@ function getLeague(data,x) {
   console.log(rstr);
   return rstr;
 }
-
 
 function getGachi(data,x) {
  
@@ -1065,28 +1091,42 @@ function sendStageInfo(msg,title,l_args,g_args) {
     }
   })
 }
+
 function sendLeagueMatch(msg,txt,l_args) {
   var l_date = l_args[0];
   var l_rule = l_args[1];
   var l_stage = l_args[2];
+  var tuhmbnail_url;
   
-    msg.guild.channels.find("name", "リグマ募集")
-      .send(txt, {
-        "embed": {
-          "author": {
-            "name": "リーグマッチ",
-            "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
-          },
-          "color": 0xf02d7d,
-          "fields": [
-            {
-              "name": l_date + '　' + l_rule,
-              "value": l_stage
-            }
-          ],
-          "thumbnail": {
-            "url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+  if (l_rule=='ガチエリア') {
+    tuhmbnail_url = "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png"
+  } else if (l_rule=='ガチヤグラ') {
+    tuhmbnail_url = "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png"
+  } else if (l_rule=='ガチホコバトル') {
+    tuhmbnail_url = "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png"
+  } else if (l_rule=='ガチアサリ') {
+    tuhmbnail_url = "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png"
+  } else {
+    tuhmbnail_url = "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+  }
+  
+  msg.guild.channels.find("name", "リグマ募集")
+    .send(txt, {
+      "embed": {
+        "author": {
+          "name": "リーグマッチ",
+          "icon_url": "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+        },
+        "color": 0xf02d7d,
+        "fields": [
+          {
+            "name": l_date + '　' + l_rule,
+            "value": l_stage
           }
+        ],
+        "thumbnail": {
+          "url": tuhmbnail_url
         }
-      })
+      }
+    })
 }
