@@ -275,11 +275,61 @@ client.on('message', async msg => {
     await msg.react('💩');
   };
   
-  if (msg.content.includes('watchers')) {
-    var cmb, a;
-    cmb = Combinatorics.combination(['1','2','3','4','5','6','7','8','9','10'], 2);
-    while(a = cmb.next()) console.log(a);
+  
+  if (msg.content.startsWith('kansen ')) {
+    var strCmd = msg.content.replace(/　/g, " ");
+    const args = strCmd.split(" ");
+    args.shift();
+    
+    var how_many_times = Number(args[0]);
+    var resultList = new Array();
+    var cmb = Combinatorics.combination(['1','2','3','4','5','6','7','8', '9', '10'], 2);
+    var tmp_watching_list = cmb.toArray();
+    var result = '';
+    
+    for (let i = 0; i < how_many_times; i++) {
+      // next watchersが一人になったらリストを再生成
+      if (tmp_watching_list.length <= 1 ) {
+        var baseNum = 0;
+        var choose_comb = tmp_watching_list[baseNum];
+        resultList.push('`' + (i + 1) + '回目：'+ choose_comb + '`');
+        var tmp_watching_list = cmb.toArray();
+      } else {
+        var baseNum = Math.floor(Math.random() * tmp_watching_list.length);
+        var choose_comb = tmp_watching_list[baseNum];
+       
+        resultList.push('`' + (i + 1) + '回目：'+ choose_comb + '`');
+        
+        console.log('\n== now watchers ==');
+        console.log(resultList);
+        console.log('\n== next watchers ==');
+        // now watching usersをnext watchersから取り除く
+        tmp_watching_list = tmp_watching_list.filter(function exclude_previous_watcher(players) {
+          if (players[0] != choose_comb[0]) {
+            return players;
+          }
+        });
+        tmp_watching_list = tmp_watching_list.filter(function exclude_previous_watcher(players) {
+          if (players[1] != choose_comb[0]) {
+            return players;
+          }
+        });
+        tmp_watching_list = tmp_watching_list.filter(function exclude_previous_watcher(players) {
+          if (players[0] != choose_comb[1]) {
+            return players;
+          }
+        });
+        tmp_watching_list = tmp_watching_list.filter(function exclude_previous_watcher(players) {
+          if (players[1] != choose_comb[1]) {
+            return players;
+          }
+        });
+        console.log(tmp_watching_list);
+      }
+    }
+    msg.channel.send(resultList);
   }
+
           
   if (msg.content.startsWith('timer ')) {
     var strCmd = msg.content.replace(/　/g, " ");
