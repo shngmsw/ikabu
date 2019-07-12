@@ -405,7 +405,7 @@ client.on("message", async msg => {
       wikipedia
         .page(data.results[0])
         .then(page => page.summary())
-        .then(value => msg.channel.send(value));
+        .then(value => msg.channel.send('```' + value + '```'));
     });
   }
 
