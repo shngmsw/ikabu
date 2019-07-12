@@ -17,6 +17,7 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const request = require("request");
 const Combinatorics = require("js-combinatorics");
+const wiki = require("wikijs").default;
 
 // play youtube
 const streamOptions = { seek: 0, volume: 1 };
@@ -393,11 +394,19 @@ client.on("message", async msg => {
     msg.channel.send(strCmd);
   }
 
-  if (
-    msg.content.includes("すてきやん") &&
-    msg.author.id == 418680715882790912
-  ) {
-    await msg.react("💩");
+  if (msg.content.startsWith("wiki ")) {
+    var strCmd = msg.content.replace(/　/g, " ");
+    const args = strCmd.split(" ");
+    args.shift();
+    let word = args[0];
+    let wikipedia = wiki({ apiUrl: "http://ja.wikipedia.org/w/api.php" });
+
+    wikipedia.search(word).then(data => {
+      wikipedia
+        .page(data.results[0])
+        .then(page => page.summary())
+        .then(value => msg.channel.send(value));
+    });
   }
 
   if (msg.content.startsWith("kansen ")) {
@@ -1370,6 +1379,10 @@ client.on("message", async msg => {
             {
               name: "アンケートを実施(スペースで区切れば何個でも)",
               value: "```poll 選択肢1 選択肢2```"
+            },
+            {
+              name: "wikipediaで調べる",
+              value: "```wiki 〇〇```"
             }
           ]
         }
