@@ -330,13 +330,7 @@ const rules = {
   "0": "ガチエリア",
   "1": "ガチヤグラ",
   "2": "ガチホコ",
-  "3": "ガチアサリ",
-  "5": "ガチエリア",
-  "4": "ガチヤグラ",
-  "6": "ガチホコ",
-  "7": "ガチエリア",
-  "8": "ガチヤグラ",
-  "9": "ガチホコ"
+  "3": "ガチアサリ"
 };
 
 const subweapons = {
@@ -400,12 +394,16 @@ client.on("message", async msg => {
     args.shift();
     let word = args[0];
     let wikipedia = wiki({ apiUrl: "http://ja.wikipedia.org/w/api.php" });
-
+    
     wikipedia.search(word).then(data => {
       wikipedia
         .page(data.results[0])
         .then(page => page.summary())
         .then(value => msg.channel.send('```' + value + '```'));
+      wikipedia
+        .page(data.results[0])
+        .then(page => page.url())
+        .then(value => msg.channel.send(value));
     });
   }
 
@@ -569,7 +567,7 @@ client.on("message", async msg => {
   // ルール、サブ、スペシャル、ブキ
   // **********************************
   if (msg.content.startsWith("rule")) {
-    var rule = rules[Math.floor(Math.random() * 10)];
+    var rule = rules[Math.floor(Math.random() * 4)];
     msg.channel.send("`" + rule + "`でし！");
   }
 
@@ -1445,6 +1443,36 @@ client.on("message", async msg => {
       });
     }
   }
+  
+  if (msg.content.startsWith("!ban") && msg.member.hasPermission("BAN_MEMBERS")) {
+    var strCmd = msg.content.replace(/　/g, " ");
+    const args = strCmd.split(" ");
+    args.shift();
+    let user = client.users.get(args[0]);
+    if (user == null) {
+        msg.guild.channels.find("name", "精神とテクの部屋").send("そんなユーザーいないでし");
+        
+    } else {
+      let reason = "イカ部の管理人です。以下の理由によりイカ部から退部とさせていただきました。```"
+      + args[1]
+      + "```"
+      + "申し訳ありませんが、質問等は受け付けておりませんので、よろしくお願いいたします。";
+      user.createDM()
+      .then((DMChannel) => {
+        // We have now a channel ready.
+        // Send the message.
+        DMChannel
+          .send(reason)
+          .then(() => {
+            // Message sent, time to kick.
+            msg.guild.ban(user.id,reason);
+          }).then((user,reason) => {
+              msg.guild.channels.find("name", "精神とテクの部屋")
+          .send(user.username + "さんを以下の理由によりBANしました。\n" + reason);
+        });
+      });
+    }
+  }
 });
 
 client.on("guildMemberAdd", member => {
@@ -1468,6 +1496,32 @@ client.on("guildMemberAdd", member => {
       }のみんなが歓迎していますよ〜`
     )
     .then(sentMessage => sentMessage.react("👍"));
+});
+
+client.on("guildMemberRemove", member => {
+  const guild = member.guild;
+  guild.channels
+    .find("id", "451272874268033034")
+    .send(
+        member.user.nickname + "さんが退部しました。"
+    );
+});
+client.on("guildBanAdd", (guild,user) => {
+  let id = user.id;
+  guild.fetchBans(true)
+    .then(bans =>{
+    bans.forEach(function ( value ) {
+      console.log(value.user.id);
+        if (value.user.id === id) {
+          console.log(value.user.username);    
+          console.log(value.reason);
+          guild.channels.find("name", "精神とテクの部屋")
+            .send(value.user.username + "さんを以下の理由によりBANしました。\n" + value.reason);
+        }
+      });
+    })
+    .catch(console.error)
+    .then(guild.unban(user));
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
