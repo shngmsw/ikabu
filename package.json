@@ -10,15 +10,20 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "discord.js": "^11.4.2",
+    "discord.js": "^11.5.1",
     "express": "^4.16.3",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "node-gyp": "^5.0.3",
+    "opusscript": "^0.0.6",
+    "ytdl-core": "^0.29.5",
+    "js-combinatorics": "^0.5.4",
+    "wikijs": "^6.0.0"
   },
   "engines": {
     "node": "8.x"
   },
   "repository": {
-    "url": "https://glitch.com/edit/#!/ikabu2ß"
+    "url": "https://glitch.com/edit/#!/ikabu2"
   },
   "license": "MIT",
   "keywords": [
