@@ -14,6 +14,10 @@ client.on("message", async msg => {
                 msg.delete();
             }
         }
+        // ステージ情報
+        if (msg.content === "show next") {
+              Handler.call(msg);
+        }
         return;
     }
     Handler.call(msg);
