@@ -70,6 +70,12 @@ function call(msg) {
         case '!ban':
             handleBan(msg);
             break;
+        case '!cc':
+            handleCreateChannel(msg);
+            break;
+        case '!setUserLimit':
+            handleSetUserLimit(msg);
+            break;
     }
 }
 
@@ -473,6 +479,27 @@ function handleBan(msg) {
             });
         }
     }
+}
+
+function handleCreateChannel(msg) {
+  if (msg.member.hasPermission('ADMINISTRATOR')) {
+    var strCmd = msg.content.replace(/　/g, ' ');
+    const args = strCmd.split(' ');
+    args.shift();
+    var chName = args[0];
+    msg.guild.createChannel(chName, { type: 'text' }).then(ch => msg.guild.setChannelPosition(ch, 99, false)).catch(console.error);
+    msg.guild.createChannel(chName, { type: 'voice' }).then(ch => msg.guild.setChannelPosition(ch, 90, false).then(ch => ch.setUserLimit(2))).catch(console.error);
+  }  
+}
+
+function handleSetUserLimit(msg) {
+  if (msg.member.hasPermission('ADMINISTRATOR')) {
+    var strCmd = msg.content.replace(/　/g, ' ');
+    const args = strCmd.split(' ');
+    args.shift();
+    var chName = args[0];
+    msg.guild.channels.find('name', chName).then(console.log()).then(ch => ch.setUserLimit(args[1]));
+  }  
 }
 
 const weaponsUrl = 'https://stat.ink/api/v2/weapon';
