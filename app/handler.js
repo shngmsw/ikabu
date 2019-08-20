@@ -70,11 +70,11 @@ function call(msg) {
         case '!ban':
             handleBan(msg);
             break;
+        case '!id':
+            handleIDCheck(msg);
+            break;
         case '!cc':
             handleCreateChannel(msg);
-            break;
-        case '!setUserLimit':
-            handleSetUserLimit(msg);
             break;
     }
 }
@@ -146,7 +146,7 @@ function handleTimer(msg, args) {
     var count = kazu;
     if (count <= 10 && count > 0 && common.isInteger(kazu)) {
         msg.reply('タイマーを' + count + '分後にセットしたでし！');
-        var countdown = function () {
+        var countdown = function() {
             count--;
             if (count != 0) {
                 msg.reply('残り' + count + '分でし');
@@ -154,7 +154,7 @@ function handleTimer(msg, args) {
                 msg.reply('時間でし！');
             }
         };
-        var id = setInterval(function () {
+        var id = setInterval(function() {
             countdown();
             if (count <= 0) {
                 clearInterval(id);
@@ -259,15 +259,19 @@ function handleBuki(msg) {
         } else {
             // e.g. buki 8
             amount = Number(args[0]);
+            if (amount > 10) {
+                amount = 10;
+                msg.channel.send("1度に出せるのは10個まででし！");
+            }
         }
         // ブキサブスペクイズ判定
         if (args[0] === 'quiz') {
             isQuiz = true;
         }
-        request.get(weaponsUrl, function (error, response, body) {
+        request.get(weaponsUrl, function(error, response, body) {
             if (!error && response.statusCode == 200) {
                 const weapons = JSON.parse(body);
-                let bukis = weapons.filter(function (value) {
+                let bukis = weapons.filter(function(value) {
                     if (bukiType !== '') {
                         // 特定のbukiTypeが指定されているとき
                         return bukiType === value.type.key;
@@ -275,20 +279,37 @@ function handleBuki(msg) {
                         return true;
                     }
                 });
-                let bukiNames = bukis.map(function (value) {
-                    return value.name.ja_JP + ' (' + value.sub.name.ja_JP + ' / ' + value.special.name.ja_JP + ')';
+                let bukiNames = bukis.map(function(value) {
+                    return {
+                        embed: {
+                            author: {
+                                name: msg.author.username + "のブキ",
+                                icon_url: msg.author.avatarURL
+                            },
+                            color: 0xf02d7d,
+                            fields: [
+                                { name: value.name.ja_JP, value: value.sub.name.ja_JP + " / " + value.special.name.ja_JP },
+                                // { name: "Sub", value: value.sub.name.ja_JP, inline: true },
+                                // { name: "Special", value: value.special.name.ja_JP, inline: true }
+                            ]
+                        }
+                    }
+
                 });
                 console.log(amount);
                 if (amount) {
-                    var buki = random(bukiNames, amount).join('\n');
-                    msg.channel.send('```' + buki + '```');
+                    // var buki = random(size, amount).join('\n');
+                    var length = bukiNames.length;
+                    for (let i = 0; i < amount; i++) {
+                        msg.channel.send(bukiNames[Math.floor(Math.random() * length)]);
+                    }
                 } else if (isQuiz) {
-                    var buki = random(bukiNames, 1)[0];
-                    console.log(amount);
-                    msg.reply(buki.replace('(', '(||').replace(')', '||)'));
+                    // var buki = random(bukiNames, 1)[0];
+                    // console.log(amount);
+                    // msg.reply(buki.replace('(', '(||').replace(')', '||)'));
                 } else {
                     var buki = random(bukiNames, 1)[0];
-                    msg.reply('`' + buki + '`');
+                    msg.channel.send(buki);
                 }
             } else {
                 msg.channel.send('なんかエラーでてるわ');
@@ -298,7 +319,7 @@ function handleBuki(msg) {
 }
 
 function handleShow(msg, args) {
-    request.get('https://splatoon2.ink/data/schedules.json', function (error, response, body) {
+    request.get('https://splatoon2.ink/data/schedules.json', function(error, response, body) {
         if (!error && response.statusCode == 200) {
             const data = JSON.parse(body);
             if (args == `now`) {
@@ -328,14 +349,14 @@ function handleShow(msg, args) {
                         fields: [{
                             name: date,
                             value: regular_stage,
-                        },],
+                        }, ],
                         thumbnail: {
                             url: 'https://splatoon2.ink/assets/img/battle-regular.01b5ef.png',
                         },
                     },
                 });
             } else if (msg.content === "show run") {
-                request.get("https://splatoon2.ink/data/coop-schedules.json", function (
+                request.get("https://splatoon2.ink/data/coop-schedules.json", function(
                     error,
                     response,
                     body
@@ -350,33 +371,31 @@ function handleShow(msg, args) {
                             common.unixTime2mdwhm(data.details[0].end_time);
                         const coop_stage = common.coop_stage2txt(data.details[0].stage.image) + "\n";
                         const weapons =
-                            (data.details[0].weapons[0]
-                                ? common.weapon2txt(data.details[0].weapons[0].id)
-                                : "？") +
+                            (data.details[0].weapons[0] ?
+                                common.weapon2txt(data.details[0].weapons[0].id) :
+                                "？") +
                             "・" +
-                            (data.details[0].weapons[1]
-                                ? common.weapon2txt(data.details[0].weapons[1].id)
-                                : "？") +
+                            (data.details[0].weapons[1] ?
+                                common.weapon2txt(data.details[0].weapons[1].id) :
+                                "？") +
                             "・" +
-                            (data.details[0].weapons[2]
-                                ? common.weapon2txt(data.details[0].weapons[2].id)
-                                : "？") +
+                            (data.details[0].weapons[2] ?
+                                common.weapon2txt(data.details[0].weapons[2].id) :
+                                "？") +
                             "・" +
-                            (data.details[0].weapons[3]
-                                ? common.weapon2txt(data.details[0].weapons[3].id)
-                                : "？");
+                            (data.details[0].weapons[3] ?
+                                common.weapon2txt(data.details[0].weapons[3].id) :
+                                "？");
 
                         msg.channel.send("", {
                             embed: {
                                 author: {
                                     name: "SALMON RUN",
-                                    icon_url:
-                                        "https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png"
+                                    icon_url: "https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png"
                                 },
                                 title: date,
                                 color: 16733696,
-                                fields: [
-                                    {
+                                fields: [{
                                         name: "支給ブキ",
                                         value: weapons
                                     },
@@ -425,7 +444,7 @@ function sendStageInfo(msg, data, scheduleNum) {
             fields: [{
                 name: l_date + '　' + l_rule,
                 value: l_stage,
-            },],
+            }, ],
             thumbnail: {
                 url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png',
             },
@@ -441,7 +460,7 @@ function sendStageInfo(msg, data, scheduleNum) {
             fields: [{
                 name: g_date + '　' + g_rule,
                 value: g_stage,
-            },],
+            }, ],
             thumbnail: {
                 url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png',
             },
@@ -454,15 +473,21 @@ function handleBan(msg) {
         var strCmd = msg.content.replace(/　/g, ' ');
         const args = strCmd.split(' ');
         args.shift();
-        let user = client.users.get(args[0]);
-        if (user == null) {
-            msg.guild.channels.find('name', '精神とテクの部屋').send('そんなユーザーいないでし');
+        let members = [];
+        msg.guild.members.forEach(member => {
+            if (args[0] == member.id) {
+                members.push(member.user);
+            }
+        });
+        if (members) {
+            msg.guild.channels.find('name', 'banコマンド').send('そんなユーザーいないでし');
         } else {
             let reason =
                 'イカ部の管理人です。以下の理由によりイカ部から退部とさせていただきました。```' +
                 args[1] +
                 '```' +
                 '申し訳ありませんが、質問等は受け付けておりませんので、よろしくお願いいたします。';
+            let user = members[0].user;
             user.createDM().then(DMChannel => {
                 // We have now a channel ready.
                 // Send the message.
@@ -473,7 +498,7 @@ function handleBan(msg) {
                     })
                     .then((user, reason) => {
                         msg.guild.channels
-                            .find('name', '精神とテクの部屋')
+                            .find('name', 'banコマンド')
                             .send(user.username + 'さんを以下の理由によりBANしました。\n' + reason);
                     });
             });
@@ -481,25 +506,31 @@ function handleBan(msg) {
     }
 }
 
-function handleCreateChannel(msg) {
-  if (msg.member.hasPermission('ADMINISTRATOR')) {
+function handleIDCheck(msg) {
     var strCmd = msg.content.replace(/　/g, ' ');
     const args = strCmd.split(' ');
     args.shift();
-    var chName = args[0];
-    msg.guild.createChannel(chName, { type: 'text' }).then(ch => msg.guild.setChannelPosition(ch, 99, false)).catch(console.error);
-    msg.guild.createChannel(chName, { type: 'voice' }).then(ch => msg.guild.setChannelPosition(ch, 90, false).then(ch => ch.setUserLimit(2))).catch(console.error);
-  }  
+    let members = [];
+    msg.guild.members.forEach(member => {
+        if (args[0] == member.id) {
+            members.push(member.user.username);
+        }
+    });
+    if (members) {
+        members.push('このIDのユーザーは存在しません');
+    }
+    msg.channel.send(members);
 }
 
-function handleSetUserLimit(msg) {
-  if (msg.member.hasPermission('ADMINISTRATOR')) {
-    var strCmd = msg.content.replace(/　/g, ' ');
-    const args = strCmd.split(' ');
-    args.shift();
-    var chName = args[0];
-    msg.guild.channels.find('name', chName).then(console.log()).then(ch => ch.setUserLimit(args[1]));
-  }  
+function handleCreateChannel(msg) {
+    if (msg.member.hasPermission('ADMINISTRATOR')) {
+        var strCmd = msg.content.replace(/　/g, ' ');
+        const args = strCmd.split(' ');
+        args.shift();
+        var chName = args[0];
+        msg.guild.createChannel(chName, { type: 'text' }).then(ch => msg.guild.setChannelPosition(ch, 99, false)).catch(console.error);
+        msg.guild.createChannel(chName, { type: 'voice' }).then(ch => msg.guild.setChannelPosition(ch, 90, false).then(ch => ch.setUserLimit(2))).catch(console.error);
+    }
 }
 
 const weaponsUrl = 'https://stat.ink/api/v2/weapon';

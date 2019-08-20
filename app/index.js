@@ -16,7 +16,7 @@ client.on("message", async msg => {
         }
         // ステージ情報
         if (msg.content === "show next") {
-              Handler.call(msg);
+            Handler.call(msg);
         }
         return;
     }
@@ -53,24 +53,6 @@ client.on("guildMemberRemove", member => {
         .send(
             member.user.nickname + "さんが退部しました。"
         );
-});
-
-client.on("guildBanAdd", (guild, user) => {
-    let id = user.id;
-    guild.fetchBans(true)
-        .then(bans => {
-            bans.forEach(function(value) {
-                console.log(value.user.id);
-                if (value.user.id === id) {
-                    console.log(value.user.username);
-                    console.log(value.reason);
-                    guild.channels.find("name", "精神とテクの部屋")
-                        .send(value.user.username + "さんを以下の理由によりBANしました。\n" + value.reason);
-                }
-            });
-        })
-        .catch(console.error)
-        .then(guild.unban(user));
 });
 
 client.on("ready", () => {
