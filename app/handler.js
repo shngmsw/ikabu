@@ -2,15 +2,15 @@ const Combinatorics = require('js-combinatorics');
 const wiki = require('wikijs').default;
 const common = require('./common.js');
 const help = require('./help.js');
-const request = require("request");
-const recruit = require("./recruit.js");
+const request = require('request');
+const recruit = require('./recruit.js');
 const ytdl = require('ytdl-core');
-const Discord = require("discord.js");
+const Discord = require('discord.js');
 const client = new Discord.Client();
 
 module.exports = {
-    call: call
-}
+    call: call,
+};
 
 function call(msg) {
     var strCmd = msg.content.replace(/　/g, ' ');
@@ -261,7 +261,7 @@ function handleBuki(msg) {
             amount = Number(args[0]);
             if (amount > 10) {
                 amount = 10;
-                msg.channel.send("1度に出せるのは10個まででし！");
+                msg.channel.send('1度に出せるのは10個まででし！');
             }
         }
         // ブキサブスペクイズ判定
@@ -283,18 +283,19 @@ function handleBuki(msg) {
                     return {
                         embed: {
                             author: {
-                                name: msg.author.username + "のブキ",
-                                icon_url: msg.author.avatarURL
+                                name: msg.author.username + 'のブキ',
+                                icon_url: msg.author.avatarURL,
                             },
                             color: 0xf02d7d,
-                            fields: [
-                                { name: value.name.ja_JP, value: value.sub.name.ja_JP + " / " + value.special.name.ja_JP },
+                            fields: [{
+                                    name: value.name.ja_JP,
+                                    value: value.sub.name.ja_JP + ' / ' + value.special.name.ja_JP,
+                                },
                                 // { name: "Sub", value: value.sub.name.ja_JP, inline: true },
                                 // { name: "Special", value: value.special.name.ja_JP, inline: true }
-                            ]
-                        }
-                    }
-
+                            ],
+                        },
+                    };
                 });
                 console.log(amount);
                 if (amount) {
@@ -355,59 +356,46 @@ function handleShow(msg, args) {
                         },
                     },
                 });
-            } else if (msg.content === "show run") {
-                request.get("https://splatoon2.ink/data/coop-schedules.json", function(
-                    error,
-                    response,
-                    body
-                ) {
+            } else if (msg.content === 'show run') {
+                request.get('https://splatoon2.ink/data/coop-schedules.json', function(error, response, body) {
                     if (!error && response.statusCode == 200) {
                         const data = JSON.parse(body);
-                        const stage =
-                            "https://splatoon2.ink/assets/splatnet" + data.details[0].stage.image;
+                        const stage = 'https://splatoon2.ink/assets/splatnet' + data.details[0].stage.image;
                         const date =
                             common.unixTime2mdwhm(data.details[0].start_time) +
-                            " – " +
+                            ' – ' +
                             common.unixTime2mdwhm(data.details[0].end_time);
-                        const coop_stage = common.coop_stage2txt(data.details[0].stage.image) + "\n";
+                        const coop_stage = common.coop_stage2txt(data.details[0].stage.image) + '\n';
                         const weapons =
-                            (data.details[0].weapons[0] ?
-                                common.weapon2txt(data.details[0].weapons[0].id) :
-                                "？") +
-                            "・" +
-                            (data.details[0].weapons[1] ?
-                                common.weapon2txt(data.details[0].weapons[1].id) :
-                                "？") +
-                            "・" +
-                            (data.details[0].weapons[2] ?
-                                common.weapon2txt(data.details[0].weapons[2].id) :
-                                "？") +
-                            "・" +
-                            (data.details[0].weapons[3] ?
-                                common.weapon2txt(data.details[0].weapons[3].id) :
-                                "？");
+                            (data.details[0].weapons[0] ? common.weapon2txt(data.details[0].weapons[0].id) : '？') +
+                            '・' +
+                            (data.details[0].weapons[1] ? common.weapon2txt(data.details[0].weapons[1].id) : '？') +
+                            '・' +
+                            (data.details[0].weapons[2] ? common.weapon2txt(data.details[0].weapons[2].id) : '？') +
+                            '・' +
+                            (data.details[0].weapons[3] ? common.weapon2txt(data.details[0].weapons[3].id) : '？');
 
-                        msg.channel.send("", {
+                        msg.channel.send('', {
                             embed: {
                                 author: {
-                                    name: "SALMON RUN",
-                                    icon_url: "https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png"
+                                    name: 'SALMON RUN',
+                                    icon_url: 'https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png',
                                 },
                                 title: date,
                                 color: 16733696,
                                 fields: [{
-                                        name: "支給ブキ",
-                                        value: weapons
+                                        name: '支給ブキ',
+                                        value: weapons,
                                     },
                                     {
-                                        name: "ステージ",
-                                        value: coop_stage
-                                    }
+                                        name: 'ステージ',
+                                        value: coop_stage,
+                                    },
                                 ],
                                 image: {
-                                    url: stage
-                                }
-                            }
+                                    url: stage,
+                                },
+                            },
                         });
                     } else {
                         console.log('なんかエラーでてるわ');
@@ -415,7 +403,7 @@ function handleShow(msg, args) {
                 });
             }
         }
-    })
+    });
 }
 
 function sendStageInfo(msg, data, scheduleNum) {
@@ -479,7 +467,7 @@ function handleBan(msg) {
                 members.push(member.user);
             }
         });
-        if (members) {
+        if (members.length <= 0) {
             msg.guild.channels.find('name', 'banコマンド').send('そんなユーザーいないでし');
         } else {
             let reason =
@@ -487,7 +475,8 @@ function handleBan(msg) {
                 args[1] +
                 '```' +
                 '申し訳ありませんが、質問等は受け付けておりませんので、よろしくお願いいたします。';
-            let user = members[0].user;
+            console.log(members);
+            let user = members[0];
             user.createDM().then(DMChannel => {
                 // We have now a channel ready.
                 // Send the message.
@@ -496,7 +485,8 @@ function handleBan(msg) {
                         // Message sent, time to kick.
                         msg.guild.ban(user.id, reason);
                     })
-                    .then((user, reason) => {
+                    .then(() => {
+                        console.log(user);
                         msg.guild.channels
                             .find('name', 'banコマンド')
                             .send(user.username + 'さんを以下の理由によりBANしました。\n' + reason);
@@ -516,7 +506,7 @@ function handleIDCheck(msg) {
             members.push(member.user.username);
         }
     });
-    if (members) {
+    if (members.length <= 0) {
         members.push('このIDのユーザーは存在しません');
     }
     msg.channel.send(members);
@@ -528,8 +518,14 @@ function handleCreateChannel(msg) {
         const args = strCmd.split(' ');
         args.shift();
         var chName = args[0];
-        msg.guild.createChannel(chName, { type: 'text' }).then(ch => msg.guild.setChannelPosition(ch, 99, false)).catch(console.error);
-        msg.guild.createChannel(chName, { type: 'voice' }).then(ch => msg.guild.setChannelPosition(ch, 90, false).then(ch => ch.setUserLimit(2))).catch(console.error);
+        msg.guild
+            .createChannel(chName, { type: 'text' })
+            .then(ch => msg.guild.setChannelPosition(ch, 99, false))
+            .catch(console.error);
+        msg.guild
+            .createChannel(chName, { type: 'voice' })
+            .then(ch => msg.guild.setChannelPosition(ch, 90, false).then(ch => ch.setUserLimit(2)))
+            .catch(console.error);
     }
 }
 
