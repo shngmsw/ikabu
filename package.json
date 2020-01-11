@@ -10,14 +10,17 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "data-utils": "0.0.2",
+    "date-utils": "^1.2.21",
     "discord.js": "^11.5.1",
     "express": "^4.16.3",
-    "request": "^2.88.0",
+    "js-combinatorics": "^0.5.4",
     "node-gyp": "^5.0.3",
     "opusscript": "^0.0.6",
-    "ytdl-core": "^0.29.5",
-    "js-combinatorics": "^0.5.4",
-    "wikijs": "^6.0.0"
+    "request": "^2.88.0",
+    "sqlite3": "^4.1.1",
+    "wikijs": "^6.0.0",
+    "ytdl-core": "^0.29.5"
   },
   "engines": {
     "node": "8.x"
