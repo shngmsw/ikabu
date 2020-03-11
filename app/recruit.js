@@ -2,7 +2,7 @@ const request = require("request");
 const common = require("./common.js");
 
 module.exports = {
-    handleRecruit: handleRecruit
+  handleRecruit: handleRecruit
 }
 
 function handleRecruit(msg) {
@@ -473,7 +473,7 @@ function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels
                 .find("name", "別ゲー募集")
-                .send(`<@!${msg.author.id}>たんの募集 〆`);
+                .send("``` " + msg.author.username + "たんの募集 〆```");
         } else {
             let txt =
                 "@everyone 【オーバークック2募集】\n" +
@@ -497,7 +497,7 @@ function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels
                 .find("name", "別ゲー募集")
-                .send("@here " + msg.author.username + "たんの募集 〆");
+                .send("``` " + msg.author.username + "たんの募集 〆```");
         } else {
             const role_id = msg.guild.roles.find("name", "ファイター");
             let txt =
@@ -512,6 +512,84 @@ function handleRecruit(msg) {
                 ]
             });
         }
+    }
+
+    if (msg.content.startsWith("mh")) {
+        var strCmd = msg.content.replace(/　/g, " ");
+        strCmd = strCmd.replace("  ", " ");
+        const args = strCmd.split(" ");
+        args.shift();
+        if (args[0] == "〆") {
+            msg.react("👌");
+            msg.guild.channels
+                .find("name", "別ゲー募集")
+                .send("``` " + msg.author.username + "たんの募集 〆```");
+        } else {
+            const role_id = msg.guild.roles.find("name", "ハンター");
+            let txt =
+                role_id.toString() +
+                " 【モンハンワールド募集】\n" +
+                msg.author.username +
+                "たんがモンハンワールド参加者募集中でし！\n";
+            if (args.length > 0) txt += "[参加条件] " + args.join(" ");
+            msg.guild.channels.find("name", "別ゲー募集").send(txt, {
+                files: [
+                    "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fmhw.jpg"
+                ]
+            });
+        }
+    }
+
+  if (msg.content.startsWith("!apex")) {
+        var strCmd = msg.content.replace(/　/g, " ");
+        strCmd = strCmd.replace("  ", " ");
+        const args = strCmd.split(" ");
+        args.shift();
+        if (args[0] == "〆") {
+            msg.react("👌");
+            msg.guild.channels
+                .find("name", "別ゲー募集")
+                .send("``` " + msg.author.username + "たんの募集 〆```");
+        } else {
+            const role_id = msg.guild.roles.find("name", "レジェンド");
+            let txt =
+                role_id.toString() +
+                " 【ApexLegends募集】\n" +
+                msg.author.username +
+                "たんがApexLegendsの参加者募集中でし！\n";
+            if (args.length > 0) txt += "[参加条件] " + args.join(" ");
+            msg.guild.channels.find("name", "別ゲー募集").send(txt, {
+                files: [
+                    "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fapex.jpg"
+                ]
+            });
+        }
+    }
+  
+    if (msg.content.startsWith("!dbd")) {
+      var strCmd = msg.content.replace(/　/g, " ");
+      strCmd = strCmd.replace("  ", " ");
+      const args = strCmd.split(" ");
+      args.shift();
+      if (args[0] == "〆") {
+        msg.react("👌");
+        msg.guild.channels
+          .find("name", "別ゲー募集")
+          .send("``` " + msg.author.username + "たんの募集 〆```");
+      } else {
+        const role_id = msg.guild.roles.find("name", "DbD");
+        let txt =
+          role_id.toString() +
+          " 【Dead by Daylight募集】\n" +
+          msg.author.username +
+          "たんがDbD参加者募集中でし！\n";
+        if (args.length > 0) txt += ">>> [参加条件] " + args.join(" ");
+        msg.guild.channels.find("name", "別ゲー募集").send(txt, {
+          files: [
+            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fdbd.png"
+          ]
+        });
+      }
     }
 }
 
