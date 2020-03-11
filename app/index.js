@@ -7,16 +7,21 @@ const Handler = require('./handler.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on("message", async msg => {
-    if (msg.author.bot) {
-        if (msg.content.startsWith("/poll")) {
-            if (msg.author.username === "ブキチ") {
-                console.log(msg.author.username);
-                msg.delete();
-            }
-        }
-        return;
+  if (msg.author.bot) {
+    if (msg.content.startsWith("/poll")) {
+      if (msg.author.username === "ブキチ") {
+        console.log(msg.author.username);
+        msg.delete();
+      }
+    }      
+    // ステージ情報
+    if (msg.content === "stageinfo") {
+      Handler.call(msg);
+      msg.delete();
     }
-    Handler.call(msg);
+    return;
+  }
+  Handler.call(msg);
 });
 
 client.on("guildMemberAdd", member => {
@@ -43,30 +48,10 @@ client.on("guildMemberAdd", member => {
 });
 
 client.on("guildMemberRemove", member => {
-    const guild = member.guild;
-    guild.channels
-        .find("id", "451272874268033034")
-        .send(
-            member.user.nickname + "さんが退部しました。"
-        );
-});
-
-client.on("guildBanAdd", (guild, user) => {
-    let id = user.id;
-    guild.fetchBans(true)
-        .then(bans => {
-            bans.forEach(function(value) {
-                console.log(value.user.id);
-                if (value.user.id === id) {
-                    console.log(value.user.username);
-                    console.log(value.reason);
-                    guild.channels.find("name", "精神とテクの部屋")
-                        .send(value.user.username + "さんを以下の理由によりBANしました。\n" + value.reason);
-                }
-            });
-        })
-        .catch(console.error)
-        .then(guild.unban(user));
+  const guild = member.guild;
+  guild.channels
+    .find("id", "451272874268033034")
+    .send(`${member}さんが退部しました。`);
 });
 
 client.on("ready", () => {

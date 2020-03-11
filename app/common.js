@@ -18,7 +18,8 @@ function rgbToHex (r, g, b){
         return hex.length === 1 ? '0' + hex : hex;
     })
     .join('');
-} 
+}
+
 function unixTime2hm (intTime) {
     const d = new Date(intTime * 1000 + 9 * 60 * 60 * 1000);
     const month = d.getUTCMonth() + 1;
