@@ -50,8 +50,8 @@ client.on("guildMemberAdd", member => {
 client.on("guildMemberRemove", member => {
   const guild = member.guild;
   guild.channels
-    .find("id", "451272874268033034")
-    .send(`${member}さんが退部しました。`);
+    .find("id", "709400703751422074")
+    .send(`${member.user.tag}さんが退部しました。`);
 });
 
 client.on("ready", () => {
