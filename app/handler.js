@@ -781,70 +781,53 @@ async function handleFriendCodeInsert(msg) {
 }
 
 
-function handleBan(msg) {
+async function handleBan(msg) {
   if (msg.member.hasPermission("BAN_MEMBERS")) {
+    console.log(msg.mentions.members.size);
+    if (msg.mentions.members.size < 1) {
+      return msg.channel.send("BANするメンバーを1人指定してください");
+    }
+    
     var strCmd = msg.content.replace(/　/g, " ");
     const args = strCmd.split(" ");
     args.shift();
-    let members = [];
+    const user = await msg.mentions.members.first();
     let id = args[0];
     console.log(id);
-    msg.guild.members.forEach(member => {
-      if (id == member.id) {
-        members.push(member.user);
-      }
+    
+    let reason =
+      "イカ部の管理人です。以下の理由によりイカ部から退部とさせていただきました。```" +
+      args[1] +
+      "```" +
+      "申し訳ありませんが、質問等は受け付けておりませんので、よろしくお願いいたします。";
+      
+    user.createDM().then(DMChannel => {
+      // We have now a channel ready.
+      // Send the message.
+      DMChannel.send(reason)
+        .then(async () => {
+          // Message sent, time to kick.
+          const banmember = await msg.guild.ban(user.id, reason);
+          console.log(banmember);
+          msg.guild.channels
+            .find("name", "banコマンド")
+            .send(
+              `${banmember.username}さんを以下の理由によりBANしました。\n` + reason
+            );
+        });
     });
-    if (members.length <= 0) {
-      msg.guild.channels
-        .find("name", "banコマンド")
-        .send("そんなユーザーいないでし");
-    } else {
-      let reason =
-        "イカ部の管理人です。以下の理由によりイカ部から退部とさせていただきました。```" +
-        args[1] +
-        "```" +
-        "申し訳ありませんが、質問等は受け付けておりませんので、よろしくお願いいたします。";
-      console.log(members);
-      let user = members[0];
-      user.createDM().then(DMChannel => {
-        // We have now a channel ready.
-        // Send the message.
-        DMChannel.send(reason)
-          .then(() => {
-            // Message sent, time to kick.
-            msg.guild.ban(user.id, reason);
-          })
-          .then(() => {
-            console.log(user);
-            msg.guild.channels
-              .find("name", "banコマンド")
-              .send(
-                user.username + "さんを以下の理由によりBANしました。\n" + reason
-              );
-          });
-      });
-    }
+  } else {
+    return msg.channel.send("BANする権限がないでし！");
   }
 }
 
-function handleBantest(msg) {
-  var strCmd = msg.content.replace(/　/g, " ");
-  const args = strCmd.split(" ");
-  args.shift();
-  let members = [];
-  let id = args[0];
-  console.log(id);
-  msg.guild.members.forEach(member => {
-    if (id == member.id) {
-      members.push(member.user);
-    }
-  });
-  
-  msg.guild.fetchMember(msg.mentions.users.first())
-  .then(gmember => console.log(gmember.user.username))
-  .catch(console.error);
-  
-  msg.channel.send(members.username);
+async function handleBantest(msg) {
+  if (!msg.member.hasPermission("BAN_MEMBERS"))
+    return msg.channel.send("BANする権限がありません");
+  if (msg.mentions.members.size !== 1)
+    return msg.channel.send("BANするメンバーを1人指定してください");
+  const member = await msg.mentions.members.first().ban();
+  msg.channel.send(`${member.user.tag}をBANしました`);
 }
 
 function handleCreateChannel(msg) {
