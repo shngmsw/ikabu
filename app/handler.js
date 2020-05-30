@@ -109,9 +109,13 @@ function handleSF(msg) {
       const data = JSON.parse(body);
       const embedStr = getEmbed(data.league);
       embedStr.setAuthor("リーグマッチ","https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png", "https://splatoon2.ink");
+      embedStr.setImage("https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png");
+      embedStr.setColor("#ED2D7C");
       msg.channel.send(embedStr);
       const embedStr_gachi = getEmbed(data.gachi);
       embedStr_gachi.setAuthor('ガチマッチ', 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png',  "https://splatoon2.ink");
+      embedStr_gachi.setImage("https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png");
+      embedStr_gachi.setColor("#F54910");
       msg.channel.send(embedStr_gachi);
     } else {
       console.log("なんかエラーでてるわ");
@@ -139,7 +143,7 @@ function handleStageInfo(msg) {
       msg.channel.send(embedStr_gachi);
     } else {
         msg.channel.send(
-            "フレンドコード部屋に投稿がないか、投稿した日時が古すぎて検索できないでし"
+            "なんかエラーでてるわ"
         );
       console.log("なんかエラーでてるわ");
     }
