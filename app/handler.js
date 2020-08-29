@@ -793,7 +793,6 @@ async function handleBan(msg) {
     }
     
     var strCmd = msg.content.replace(/　/g, " ");
-    strCmd = strCmd.replace("\x20+", " ");
     const args = strCmd.split(" ");
     args.shift();
     const user = await msg.mentions.members.first();
