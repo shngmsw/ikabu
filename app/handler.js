@@ -108,13 +108,25 @@ function handleSF(msg) {
     if (!error && response.statusCode == 200) {
       const data = JSON.parse(body);
       const embedStr = getEmbed(data.league);
-      embedStr.setAuthor("リーグマッチ","https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png", "https://splatoon2.ink");
-      embedStr.setImage("https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png");
+      embedStr.setAuthor(
+        "リーグマッチ",
+        "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png",
+        "https://splatoon2.ink"
+      );
+      embedStr.setImage(
+        "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+      );
       embedStr.setColor("#ED2D7C");
       msg.channel.send(embedStr);
       const embedStr_gachi = getEmbed(data.gachi);
-      embedStr_gachi.setAuthor('ガチマッチ', 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png',  "https://splatoon2.ink");
-      embedStr_gachi.setImage("https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png");
+      embedStr_gachi.setAuthor(
+        "ガチマッチ",
+        "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png",
+        "https://splatoon2.ink"
+      );
+      embedStr_gachi.setImage(
+        "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
+      );
       embedStr_gachi.setColor("#F54910");
       msg.channel.send(embedStr_gachi);
     } else {
@@ -132,19 +144,29 @@ function handleStageInfo(msg) {
     if (!error && response.statusCode == 200) {
       const data = JSON.parse(body);
       const embedStr = getEmbed(data.league);
-      embedStr.setAuthor("リーグマッチ","https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png", "https://splatoon2.ink");
-      embedStr.setImage("https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png");
+      embedStr.setAuthor(
+        "リーグマッチ",
+        "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png",
+        "https://splatoon2.ink"
+      );
+      embedStr.setImage(
+        "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+      );
       embedStr.setColor("#ED2D7C");
       msg.channel.send(embedStr);
       const embedStr_gachi = getEmbed(data.gachi);
-      embedStr_gachi.setAuthor('ガチマッチ', 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png',  "https://splatoon2.ink");
-      embedStr_gachi.setImage("https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png");
+      embedStr_gachi.setAuthor(
+        "ガチマッチ",
+        "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png",
+        "https://splatoon2.ink"
+      );
+      embedStr_gachi.setImage(
+        "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
+      );
       embedStr_gachi.setColor("#F54910");
       msg.channel.send(embedStr_gachi);
     } else {
-        msg.channel.send(
-            "なんかエラーでてるわ"
-        );
+      msg.channel.send("なんかエラーでてるわ");
       console.log("なんかエラーでてるわ");
     }
   });
@@ -188,7 +210,7 @@ async function handleWiki(msg, word) {
   let info = await page.info();
   let imageURL = await page.mainImage();
   let url = await page.url();
-  
+
   var emb = {
     embed: {
       color: 0xf02d7d,
@@ -219,7 +241,7 @@ async function handleKansen(msg, args) {
     msg.reply("20回未満じゃないとダメでし！");
     return;
   }
-  
+
   for (let i = 0; i < how_many_times; i++) {
     // next watchersが一人になったらリストを再生成
     if (tmp_watching_list.length <= 1) {
@@ -389,74 +411,80 @@ function handleBuki(msg) {
   args.shift();
 
   let amount = 1;
-  let bukiType = '';
+  let bukiType = "";
   let isQuiz = false;
 
-  if (args[0] === 'help') {
-    let txt = 'ブキをランダムに抽選します\n\n'
-      + 'n個のブキをランダムに選びます\n```\nbuki n\n例: buki 3```\n'
-      + 'ブキを種類縛りでランダムに選びます\n```\nbuki 種類(' + Object.keys(bukiTypes).join(`・`) + ')\n例: buki シューター```\n'
-      + 'ブキのサブスペクイズを出題します\n```\nbuki quiz```';
+  if (args[0] === "help") {
+    let txt =
+      "ブキをランダムに抽選します\n\n" +
+      "n個のブキをランダムに選びます\n```\nbuki n\n例: buki 3```\n" +
+      "ブキを種類縛りでランダムに選びます\n```\nbuki 種類(" +
+      Object.keys(bukiTypes).join(`・`) +
+      ")\n例: buki シューター```\n" +
+      "ブキのサブスペクイズを出題します\n```\nbuki quiz```";
     msg.channel.send(txt);
   } else {
-    if (bukiTypes[args[0]]) { // e.g. buki シューター
+    if (bukiTypes[args[0]]) {
+      // e.g. buki シューター
       bukiType = bukiTypes[args[0]];
       amount = 0;
-    } else { // e.g. buki 8
-      amount = Number(args[0])
+    } else {
+      // e.g. buki 8
+      amount = Number(args[0]);
     }
     // ブキサブスペクイズ判定
-    if (args[0] === 'quiz') {
+    if (args[0] === "quiz") {
       isQuiz = true;
     }
-    request.get(weaponsUrl, function (error, response, body) {
-
-          if (!error && response.statusCode == 200) {
-              const weapons = JSON.parse(body);
-              let bukis = weapons.filter(function(value) {
-                  if (bukiType !== '') {
-                      // 特定のbukiTypeが指定されているとき
-                      return bukiType === value.type.key;
-                  } else if (!~value.name.ja_JP.indexOf('ヒーロー')) {
-                  // } else {
-                      return true;
-                  }
-              });
-              let bukiNames = bukis.map(function(value) {
-                  return {
-                      embed: {
-                          author: {
-                              name: msg.author.username + "のブキ",
-                              icon_url: msg.author.avatarURL
-                          },
-                          color: 0xf02d7d,
-                          title: value.name.ja_JP,
-                          fields: [
-                              { value: value.name.en_US, name: value.sub.name.ja_JP + " / " +value.special.name.ja_JP},
-                          ]
-                      }
-                  }
-
-              });
-              console.log(amount);
-              if (amount) {
-                  // var buki = random(size, amount).join('\n');
-                var length = bukiNames.length;
-                for (let i = 0; i < amount; i++) {
-                  msg.channel.send(bukiNames[Math.floor(Math.random() * length)]);
-                }
-              } else if (isQuiz) {
-                  // var buki = random(bukiNames, 1)[0];
-                  // console.log(amount);
-                  // msg.reply(buki.replace('(', '(||').replace(')', '||)'));
-              } else {
-                  var buki = random(bukiNames, 1)[0];
-                  msg.channel.send(buki);
-              }
-          } else {
-              msg.channel.send('なんかエラーでてるわ');
+    request.get(weaponsUrl, function(error, response, body) {
+      if (!error && response.statusCode == 200) {
+        const weapons = JSON.parse(body);
+        let bukis = weapons.filter(function(value) {
+          if (bukiType !== "") {
+            // 特定のbukiTypeが指定されているとき
+            return bukiType === value.type.key;
+          } else if (!~value.name.ja_JP.indexOf("ヒーロー")) {
+            // } else {
+            return true;
           }
-    })
+        });
+        let bukiNames = bukis.map(function(value) {
+          return {
+            embed: {
+              author: {
+                name: msg.author.username + "のブキ",
+                icon_url: msg.author.avatarURL
+              },
+              color: 0xf02d7d,
+              title: value.name.ja_JP,
+              fields: [
+                {
+                  value: value.name.en_US,
+                  name: value.sub.name.ja_JP + " / " + value.special.name.ja_JP
+                }
+              ]
+            }
+          };
+        });
+        console.log(amount);
+        if (amount) {
+          // var buki = random(size, amount).join('\n');
+          var length = bukiNames.length;
+          for (let i = 0; i < amount; i++) {
+            msg.channel.send(bukiNames[Math.floor(Math.random() * length)]);
+          }
+        } else if (isQuiz) {
+          // var buki = random(bukiNames, 1)[0];
+          // console.log(amount);
+          // msg.reply(buki.replace('(', '(||').replace(')', '||)'));
+        } else {
+          var buki = random(bukiNames, 1)[0];
+          msg.channel.send(buki);
+        }
+      } else {
+        msg.channel.send("なんかエラーでてるわ");
+      }
+    });
   }
 }
 function handleWeapon(msg) {
@@ -470,11 +498,11 @@ function handleWeapon(msg) {
 
   if (args[0] === "help") {
     let txt =
-      "Choose a weapon randomly\n```\weapon```" +
-      "Choose N weapons randomly\n```\weapon n\ne.g. weapon 3```\n" +
+      "Choose a weapon randomly\n```weapon```" +
+      "Choose N weapons randomly\n```weapon n\ne.g. weapon 3```\n" +
       "Specify a type and choose at random\n```\nweapon type(" +
       Object.values(weaponTypes).join(`・`) +
-      ")\ne.g. weapon shooter```\n" ;
+      ")\ne.g. weapon shooter```\n";
     msg.channel.send(txt);
   } else {
     if (weaponTypes[args[0]]) {
@@ -719,71 +747,70 @@ function sendStageInfo(msg, data, scheduleNum) {
 }
 
 async function handleFriendCode(msg) {
-    var strCmd = msg.content.replace(/　/g, " ");
-    const args = strCmd.split(" ");
-    args.shift();
-    // let id = args[0].replace('<@', '').replace('>','');
-    let id = msg.mentions.users.first().id;
-    let ch = await msg.guild.channels.find("name", "自己紹介");
-    let messages = await ch.fetchMessages({ limit: 100 }).catch(console.error);
-    let list = await messages.filter(m => m.author.id === id);
-    let result = list.map(function (value) {
-        return value.content;
-    });
-  
-    if (result.length == 0) {
-        let fc = await fc_select.getFC(id, msg, args[0]);
-        console.log("getFC:" + fc);
-        if (fc != null) {
-            msg.channel.send("", {
-                embed: {
-                    author: {
-                        name: msg.mentions.users.first().username + "のフレコ",
-                        icon_url: msg.mentions.users.first().avatarURL
-                    },
-                    color: 0xf02d7d,
-                    title: fc
-                }
-            });
-            return;
+  var strCmd = msg.content.replace(/　/g, " ");
+  const args = strCmd.split(" ");
+  args.shift();
+  // let id = args[0].replace('<@', '').replace('>','');
+  let id = msg.mentions.users.first().id;
+  let ch = await msg.guild.channels.find("name", "自己紹介");
+  let messages = await ch.fetchMessages({ limit: 100 }).catch(console.error);
+  let list = await messages.filter(m => m.author.id === id);
+  let result = list.map(function(value) {
+    return value.content;
+  });
+
+  if (result.length == 0) {
+    let fc = await fc_select.getFC(id, msg, args[0]);
+    console.log("getFC:" + fc);
+    if (fc != null) {
+      msg.channel.send("", {
+        embed: {
+          author: {
+            name: msg.mentions.users.first().username + "のフレコ",
+            icon_url: msg.mentions.users.first().avatarURL
+          },
+          color: 0xf02d7d,
+          title: fc
         }
+      });
+      return;
     }
-    if (result.length > 0) {
-        for (var r of result) {
-            msg.channel.send("", {
-                embed: {
-                    author: {
-                        name: msg.mentions.users.first().username + "のフレコ",
-                        icon_url: msg.mentions.users.first().avatarURL
-                    },
-                    color: 0xf02d7d,
-                    fields: [
-                        {
-                            name: "自己紹介チャンネルより引用",
-                            value: r
-                        },
-                    ]
-                }
-            });
+  }
+  if (result.length > 0) {
+    for (var r of result) {
+      msg.channel.send("", {
+        embed: {
+          author: {
+            name: msg.mentions.users.first().username + "のフレコ",
+            icon_url: msg.mentions.users.first().avatarURL
+          },
+          color: 0xf02d7d,
+          fields: [
+            {
+              name: "自己紹介チャンネルより引用",
+              value: r
+            }
+          ]
         }
-    } else {
-        msg.channel.send(
-            "自己紹介チャンネルに投稿がないか、投稿した日時が古すぎて検索できないでし"
-        );
+      });
     }
+  } else {
+    msg.channel.send(
+      "自己紹介チャンネルに投稿がないか、投稿した日時が古すぎて検索できないでし"
+    );
+  }
 }
 async function handleFriendCodeInsert(msg) {
-    var strCmd = msg.content.replace(/　/g, " ");
-    const args = strCmd.split(" ");
-    args.shift();
-    // let id = args[0].replace('<@', '').replace('>','');
-    let id = msg.author.id;
-    let code = args[0]
-    console.log("handle_fc:" + id + "/" + code);
-    fc_insert.insert(id, code);
-    msg.channel.send("覚えたでし！");
+  var strCmd = msg.content.replace(/　/g, " ");
+  const args = strCmd.split(" ");
+  args.shift();
+  // let id = args[0].replace('<@', '').replace('>','');
+  let id = msg.author.id;
+  let code = args[0];
+  console.log("handle_fc:" + id + "/" + code);
+  fc_insert.insert(id, code);
+  msg.channel.send("覚えたでし！");
 }
-
 
 async function handleBan(msg) {
   if (msg.member.hasPermission("BAN_MEMBERS")) {
@@ -791,35 +818,39 @@ async function handleBan(msg) {
     if (msg.mentions.members.size < 1) {
       return msg.channel.send("BANするメンバーを1人指定してください");
     }
-    
+
     var strCmd = msg.content.replace(/　/g, " ");
+    strCmd = strCmd.replace("\x20+", " ");
     const args = strCmd.split(" ");
     args.shift();
     const user = await msg.mentions.members.first();
     let id = args[0];
     console.log(id);
-    
-    let reason =
-      "イカ部の管理人です。以下の理由によりイカ部から退部とさせていただきました。```" +
-      args[1] +
-      "```" +
-      "申し訳ありませんが、質問等は受け付けておりませんので、よろしくお願いいたします。";
-      
-    user.createDM().then(DMChannel => {
-      // We have now a channel ready.
-      // Send the message.
-      DMChannel.send(reason)
-        .then(async () => {
+    if (args[1]) {
+      let reason =
+        "イカ部の管理人です。以下の理由によりイカ部から退部とさせていただきました。```" +
+        args[1] +
+        "```" +
+        "申し訳ありませんが、質問等は受け付けておりませんので、よろしくお願いいたします。";
+
+      user.createDM().then(DMChannel => {
+        // We have now a channel ready.
+        // Send the message.
+        DMChannel.send(reason).then(async () => {
           // Message sent, time to kick.
           const banmember = await msg.guild.ban(user.id, reason);
           console.log(banmember);
           msg.guild.channels
             .find("name", "banコマンド")
             .send(
-              `${banmember.username}さんを以下の理由によりBANしました。\n` + reason
+              `${banmember.username}さんを以下の理由によりBANしました。\n` +
+                reason
             );
         });
-    });
+      });
+    } else {
+      return msg.channel.send("理由を入れるでし！");
+    }
   } else {
     return msg.channel.send("BANする権限がないでし！");
   }
