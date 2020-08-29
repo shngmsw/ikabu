@@ -168,7 +168,7 @@ function handleRecruit(msg) {
         });
     }
 
-    if (msg.content.startsWith("next")) {
+    if (msg.content.startsWith("next") && msg.channel.name != "botコマンド") {
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
         const args = strCmd.split(" ");
@@ -475,8 +475,10 @@ function handleRecruit(msg) {
                 .find("name", "別ゲー募集")
                 .send("``` " + msg.author.username + "たんの募集 〆```");
         } else {
+            const role_id = msg.guild.roles.find("name", "シェフ");
             let txt =
-                "@everyone 【オーバークック2募集】\n" +
+                role_id.toString() +
+                " 【オーバークック2募集】\n" +
                 msg.author.username +
                 "たんがオーバークック2参加者募集中でし！\n";
             if (args.length > 0) txt += "[参加条件] " + args.join(" ");
