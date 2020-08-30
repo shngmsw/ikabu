@@ -1,24 +1,25 @@
-var sqlite = require('./db.js'),
-    fc_init = require('./fc_init.js'),
-    db = sqlite.init('./fc.sqlite3');
+var { getPostgresClient } = require('./db.js');
 
 module.exports = {
     insert: insert
 };
 
-function insert(id, code) {
-    console.log("insert:" + id + "/" + code);
-    db.serialize(() => {
-        // テーブルがなければ作る
-        fc_init.init();
-        console.log("insert:" + code);
-        // or replace は PK重複したら対象業を削除して登録
-        db.run('insert or replace into friend_code (user_id, code) values ($i, $c)',
-            {
-                $i: id,
-                $c: code
-            }
-        );
-    });
-}
+async function insert(id, code) {
+    const db = await getPostgresClient();
+    try {
+        const sql = "INSERT INTO friend_code (user_id, code) VALUES ($1, $2) "
+            + "ON CONFLICT ON CONSTRAINT friend_code_pkey "
+            + "DO UPDATE SET code=$2";
+        const params = [id, code];
 
+        await db.begin();
+        await db.execute(sql, params);
+        await db.commit();
+
+    } catch (e) {
+        await db.rollback();
+        throw e;
+    } finally {
+        await db.release();
+    }
+}

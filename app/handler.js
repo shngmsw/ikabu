@@ -100,7 +100,7 @@ function call(msg) {
 }
 
 function handleSF(msg) {
-  request.get("https://splatoon2.ink/data/schedules.json", function(
+  request.get("https://splatoon2.ink/data/schedules.json", function (
     error,
     response,
     body
@@ -136,7 +136,7 @@ function handleSF(msg) {
 }
 
 function handleStageInfo(msg) {
-  request.get("https://splatoon2.ink/data/schedules.json", function(
+  request.get("https://splatoon2.ink/data/schedules.json", function (
     error,
     response,
     body
@@ -300,10 +300,10 @@ async function handleKansen(msg, args) {
   pin_msg.pin();
   var count = how_many_times * 8;
   if (count > 0) {
-    var countdown = function() {
+    var countdown = function () {
       count--;
     };
-    var id = setInterval(function() {
+    var id = setInterval(function () {
       countdown();
       if (count <= 0) {
         clearInterval(id);
@@ -318,7 +318,7 @@ function handleTimer(msg, args) {
   var count = kazu;
   if (count <= 10 && count > 0 && common.isInteger(kazu)) {
     msg.reply("タイマーを" + count + "分後にセットしたでし！");
-    var countdown = function() {
+    var countdown = function () {
       count--;
       if (count != 0) {
         msg.reply("残り" + count + "分でし");
@@ -326,7 +326,7 @@ function handleTimer(msg, args) {
         msg.reply("時間でし！");
       }
     };
-    var id = setInterval(function() {
+    var id = setInterval(function () {
       countdown();
       if (count <= 0) {
         clearInterval(id);
@@ -436,10 +436,10 @@ function handleBuki(msg) {
     if (args[0] === "quiz") {
       isQuiz = true;
     }
-    request.get(weaponsUrl, function(error, response, body) {
+    request.get(weaponsUrl, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         const weapons = JSON.parse(body);
-        let bukis = weapons.filter(function(value) {
+        let bukis = weapons.filter(function (value) {
           if (bukiType !== "") {
             // 特定のbukiTypeが指定されているとき
             return bukiType === value.type.key;
@@ -448,7 +448,7 @@ function handleBuki(msg) {
             return true;
           }
         });
-        let bukiNames = bukis.map(function(value) {
+        let bukiNames = bukis.map(function (value) {
           return {
             embed: {
               author: {
@@ -521,10 +521,10 @@ function handleWeapon(msg) {
     if (args[0] === "quiz") {
       isQuiz = true;
     }
-    request.get(weaponsUrl, function(error, response, body) {
+    request.get(weaponsUrl, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         const weapons = JSON.parse(body);
-        let bukis = weapons.filter(function(value) {
+        let bukis = weapons.filter(function (value) {
           if (bukiType !== "") {
             // 特定のbukiTypeが指定されているとき
             return bukiType === value.type.key;
@@ -532,7 +532,7 @@ function handleWeapon(msg) {
             return true;
           }
         });
-        let bukiNames = bukis.map(function(value) {
+        let bukiNames = bukis.map(function (value) {
           return {
             embed: {
               author: {
@@ -574,7 +574,7 @@ function handleWeapon(msg) {
 }
 
 function handleShow(msg, args) {
-  request.get("https://splatoon2.ink/data/schedules.json", function(
+  request.get("https://splatoon2.ink/data/schedules.json", function (
     error,
     response,
     body
@@ -622,7 +622,7 @@ function handleShow(msg, args) {
           }
         });
       } else if (msg.content === "show run") {
-        request.get("https://splatoon2.ink/data/coop-schedules.json", function(
+        request.get("https://splatoon2.ink/data/coop-schedules.json", function (
           error,
           response,
           body
@@ -755,14 +755,14 @@ async function handleFriendCode(msg) {
   let ch = await msg.guild.channels.find("name", "自己紹介");
   let messages = await ch.fetchMessages({ limit: 100 }).catch(console.error);
   let list = await messages.filter(m => m.author.id === id);
-  let result = list.map(function(value) {
+  let result = list.map(function (value) {
     return value.content;
   });
 
   if (result.length == 0) {
     let fc = await fc_select.getFC(id, msg, args[0]);
-    console.log("getFC:" + fc);
-    if (fc != null) {
+    console.log("getFC:" + fc[0].code);
+    if (fc[0] != null) {
       msg.channel.send("", {
         embed: {
           author: {
@@ -770,7 +770,7 @@ async function handleFriendCode(msg) {
             icon_url: msg.mentions.users.first().avatarURL
           },
           color: 0xf02d7d,
-          title: fc
+          title: fc[0].code
         }
       });
       return;
@@ -800,6 +800,7 @@ async function handleFriendCode(msg) {
     );
   }
 }
+
 async function handleFriendCodeInsert(msg) {
   var strCmd = msg.content.replace(/　/g, " ");
   const args = strCmd.split(" ");
@@ -844,7 +845,7 @@ async function handleBan(msg) {
             .find("name", "banコマンド")
             .send(
               `${banmember.username}さんを以下の理由によりBANしました。\n` +
-                reason
+              reason
             );
         });
       });
