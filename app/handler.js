@@ -81,9 +81,6 @@ function call(msg) {
     case "!ban":
       handleBan(msg);
       break;
-    case "!bantest":
-      handleBantest(msg);
-      break;
     case "fc":
     case "fcadd":
       handleFriendCode(msg);
@@ -95,13 +92,4 @@ function call(msg) {
       handleStageInfo(msg);
       break;
   }
-}
-
-async function handleBantest(msg) {
-  if (!msg.member.hasPermission("BAN_MEMBERS"))
-      return msg.channel.send("BAN??????????");
-  if (msg.mentions.members.size !== 1)
-      return msg.channel.send("BAN???????1?????????");
-  const member = await msg.mentions.members.first().ban();
-  msg.channel.send(`${member.user.tag}?BAN????`);
 }

@@ -1,4 +1,5 @@
 const request = require("request");
+const common = require("./common.js");
 const weaponsUrl = "https://stat.ink/api/v2/weapon";
 
 const bukiTypes = {
@@ -50,8 +51,7 @@ function buki(msg) {
             "n個のブキをランダムに選びます\n```\nbuki n\n例: buki 3```\n" +
             "ブキを種類縛りでランダムに選びます\n```\nbuki 種類(" +
             Object.keys(bukiTypes).join(`・`) +
-            ")\n例: buki シューター```\n" +
-            "ブキのサブスペクイズを出題します\n```\nbuki quiz```";
+            ")\n例: buki シューター```\n";
         msg.channel.send(txt);
     } else {
         if (bukiTypes[args[0]]) {
@@ -83,7 +83,7 @@ function buki(msg) {
                         embed: {
                             author: {
                                 name: msg.author.username + "のブキ",
-                                icon_url: msg.author.avatarURL
+                                icon_url: msg.author.avatarURL()
                             },
                             color: 0xf02d7d,
                             title: value.name.ja_JP,
@@ -108,7 +108,7 @@ function buki(msg) {
                     // console.log(amount);
                     // msg.reply(buki.replace('(', '(||').replace(')', '||)'));
                 } else {
-                    var buki = random(bukiNames, 1)[0];
+                    var buki = common.random(bukiNames, 1)[0];
                     msg.channel.send(buki);
                 }
             } else {
@@ -168,7 +168,7 @@ function weapon(msg) {
                         embed: {
                             author: {
                                 name: msg.author.username + "'s weapon",
-                                icon_url: msg.author.avatarURL
+                                icon_url: msg.author.avatarURL()
                             },
                             color: 0xf02d7d,
                             fields: [
@@ -203,18 +203,3 @@ function weapon(msg) {
         });
     }
 }
-
-const random = (array, num) => {
-    var a = array;
-    var t = [];
-    var r = [];
-    var l = a.length;
-    var n = num < l ? num : l;
-    while (n-- > 0) {
-        var i = (Math.random() * l) | 0;
-        r[n] = t[i] || a[i];
-        --l;
-        t[i] = t[l] || a[l];
-    }
-    return r;
-};

@@ -15,8 +15,8 @@ async function selectFriendCode(msg) {
     args.shift();
     // let id = args[0].replace('<@', '').replace('>','');
     let id = msg.mentions.users.first().id;
-    let ch = await msg.guild.channels.find("name", "自己紹介");
-    let messages = await ch.fetchMessages({ limit: 100 }).catch(console.error);
+    let ch = await msg.guild.channels.cache.find(channel => channel.name === "自己紹介");
+    let messages = await ch.messages.fetch({ limit: 100 }).catch(console.error);
     let list = await messages.filter(m => m.author.id === id);
     let result = list.map(function (value) {
         return value.content;
@@ -30,7 +30,7 @@ async function selectFriendCode(msg) {
                 embed: {
                     author: {
                         name: msg.mentions.users.first().username + "のフレコ",
-                        icon_url: msg.mentions.users.first().avatarURL
+                        icon_url: msg.mentions.users.first().avatarURL()
                     },
                     color: 0xf02d7d,
                     title: fc[0].code
@@ -45,7 +45,7 @@ async function selectFriendCode(msg) {
                 embed: {
                     author: {
                         name: msg.mentions.users.first().username + "のフレコ",
-                        icon_url: msg.mentions.users.first().avatarURL
+                        icon_url: msg.mentions.users.first().avatarURL()
                     },
                     color: 0xf02d7d,
                     fields: [

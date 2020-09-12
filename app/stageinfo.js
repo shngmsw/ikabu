@@ -86,7 +86,7 @@ function getEmbed(data) {
     let x = 0;
     const field_s = "";
     const field_e = "";
-    const stageEmbed = new Discord.RichEmbed().setTitle("ステージ情報");
+    const stageEmbed = new Discord.MessageEmbed().setTitle("ステージ情報");
     // const field_s = 'fields: [';
     // const field_e = "]";
     let field_content = "";

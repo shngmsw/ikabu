@@ -24,14 +24,12 @@ module.exports = async function handleBan(msg) {
                 // Send the message.
                 DMChannel.send(reason).then(async () => {
                     // Message sent, time to kick.
-                    const banmember = await msg.guild.ban(user.id, reason);
+                    const banmember = await msg.guild.members.ban(user.id, reason);
                     console.log(banmember);
-                    msg.guild.channels
-                        .find("name", "banコマンド")
-                        .send(
-                            `${banmember.username}さんを以下の理由によりBANしました。\n` +
-                            reason
-                        );
+                    msg.guild.channels.cache.find(channel => channel.name === "banコマンド").send(
+                        `${banmember.username}さんを以下の理由によりBANしました。\n` +
+                        reason
+                    );
                 });
             });
         } else {
