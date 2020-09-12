@@ -32,12 +32,12 @@ client.on("message", async msg => {
 
 client.on("guildMemberAdd", member => {
   const guild = member.guild;
-  const roby = guild.channels.cache.find(channel => channel.id === "711489272066080831");
-  const rules = guild.channels.cache.find(channel => channel.id === "711489271709827121");
-  const channelDiscription = guild.channels.cache.find(channel => channel.id === "711489272066080828");
-  const introduction = guild.channels.cache.find(channel => channel.id === "711489272066080832");
+  const roby = guild.channels.cache.find(channel => channel.id === "414095683746922517");
+  const rules = guild.channels.cache.find(channel => channel.id === "477067128479023115");
+  const channelDiscription = guild.channels.cache.find(channel => channel.id === "477067552015515658");
+  const introduction = guild.channels.cache.find(channel => channel.id === "417591840250920971");
 
-  guild.channels.cache.find(channel => channel.id === "711489272066080831")
+  guild.channels.cache.find(channel => channel.id === "414095683746922517")
     .send(
       `<@!${member.user.id}> たん、よろしくお願いします！\n` +
       `まずは ${rules} と ${channelDiscription} をよく読んでから${introduction} で自己紹介も兼ねて自分のフレコを貼ってください\n\n` +
@@ -49,7 +49,7 @@ client.on("guildMemberAdd", member => {
 client.on("guildMemberRemove", member => {
   const guild = member.guild;
   guild.channels.cache.
-    find(channel => channel.id === "711489273475366924")
+    find(channel => channel.id === "709400703751422074")
     .send(`${member.user.tag}さんが退部しました。`);
 });
 
