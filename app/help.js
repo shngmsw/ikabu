@@ -1,8 +1,4 @@
-module.exports = {
-  handleHelp: handleHelp
-}
-
-function handleHelp(msg) {
+module.exports = function handleHelp(msg) {
     var strCmd = msg.content.replace(/　/g, ' ');
     strCmd = strCmd.replace('  ', ' ');
     const args = strCmd.split(' ');

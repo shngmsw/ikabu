@@ -1,7 +1,6 @@
 // Discord bot implements
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const request = require("request");
 const Handler = require('./handler.js');
 
 client.login(process.env.DISCORD_BOT_TOKEN);

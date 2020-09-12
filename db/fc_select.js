@@ -1,10 +1,6 @@
 var { getPostgresClient } = require('./db.js');
 
-module.exports = {
-    getFC: getFC
-};
-
-async function getFC(id, msg, name) {
+module.exports = async function getFC(id, msg, name) {
     const db = await getPostgresClient();
     let result;
     try {

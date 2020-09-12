@@ -1,11 +1,7 @@
 const request = require("request");
 const common = require("./common.js");
 
-module.exports = {
-  handleRecruit: handleRecruit
-}
-
-function handleRecruit(msg) {
+module.exports = function handleRecruit(msg) {
 
     if (msg.content.startsWith("fes")) {
         request.get("https://splatoon2.ink/data/festivals.json", function (
@@ -542,7 +538,7 @@ function handleRecruit(msg) {
         }
     }
 
-  if (msg.content.startsWith("!apex")) {
+    if (msg.content.startsWith("!apex")) {
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
         const args = strCmd.split(" ");
@@ -567,31 +563,31 @@ function handleRecruit(msg) {
             });
         }
     }
-  
+
     if (msg.content.startsWith("!dbd")) {
-      var strCmd = msg.content.replace(/　/g, " ");
-      strCmd = strCmd.replace("  ", " ");
-      const args = strCmd.split(" ");
-      args.shift();
-      if (args[0] == "〆") {
-        msg.react("👌");
-        msg.guild.channels
-          .find("name", "別ゲー募集")
-          .send("``` " + msg.author.username + "たんの募集 〆```");
-      } else {
-        const role_id = msg.guild.roles.find("name", "DbD");
-        let txt =
-          role_id.toString() +
-          " 【Dead by Daylight募集】\n" +
-          msg.author.username +
-          "たんがDbD参加者募集中でし！\n";
-        if (args.length > 0) txt += ">>> [参加条件] " + args.join(" ");
-        msg.guild.channels.find("name", "別ゲー募集").send(txt, {
-          files: [
-            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fdbd.png"
-          ]
-        });
-      }
+        var strCmd = msg.content.replace(/　/g, " ");
+        strCmd = strCmd.replace("  ", " ");
+        const args = strCmd.split(" ");
+        args.shift();
+        if (args[0] == "〆") {
+            msg.react("👌");
+            msg.guild.channels
+                .find("name", "別ゲー募集")
+                .send("``` " + msg.author.username + "たんの募集 〆```");
+        } else {
+            const role_id = msg.guild.roles.find("name", "DbD");
+            let txt =
+                role_id.toString() +
+                " 【Dead by Daylight募集】\n" +
+                msg.author.username +
+                "たんがDbD参加者募集中でし！\n";
+            if (args.length > 0) txt += ">>> [参加条件] " + args.join(" ");
+            msg.guild.channels.find("name", "別ゲー募集").send(txt, {
+                files: [
+                    "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fdbd.png"
+                ]
+            });
+        }
     }
 }
 
