@@ -1,6 +1,5 @@
 const insert = require("../db/fc_insert.js");
 const getFC = require("../db/fc_select.js");
-const e = require("express");
 
 module.exports = function handleFriendCode(msg) {
     if (msg.content.startsWith("fcadd")) {
@@ -83,7 +82,7 @@ async function insertFriendCode(msg) {
 }
 
 async function sendDM(msg) {
-    const introduction = msg.guild.channels.cache.find(channel => channel.id === "711489272066080832");
+    const introduction = msg.guild.channels.cache.find(channel => channel.id === "417591840250920971");
     const botCmd = msg.guild.channels.cache.find(channel => channel.id === "465031112318517248");
     msg.author.createDM().then(DMChannel => {
         // We have now a channel ready.
