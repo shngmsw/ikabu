@@ -1,9 +1,15 @@
 const insert = require("../db/fc_insert.js");
 const getFC = require("../db/fc_select.js");
+const e = require("express");
 
 module.exports = function handleFriendCode(msg) {
     if (msg.content.startsWith("fcadd")) {
-        insertFriendCode(msg);
+        if (msg.channel.name === "自己紹介") {
+            msg.delete();
+            sendDM(msg);
+        } else {
+            insertFriendCode(msg);
+        }
     } else if (msg.content.startsWith("fc")) {
         selectFriendCode(msg);
     }
@@ -74,4 +80,19 @@ async function insertFriendCode(msg) {
     console.log("handle_fc:" + id + "/" + code);
     insert(id, code);
     msg.channel.send("覚えたでし！");
+}
+
+async function sendDM(msg) {
+    const introduction = msg.guild.channels.cache.find(channel => channel.id === "711489272066080832");
+    const botCmd = msg.guild.channels.cache.find(channel => channel.id === "465031112318517248");
+    msg.author.createDM().then(DMChannel => {
+        // We have now a channel ready.
+        // Send the message.
+        DMChannel.send(
+            `\`fcadd\`は ${introduction} 以外のチャンネル(無難なのは ${botCmd} )で使用してください。 \n`
+            + `${introduction} の直近100件までに投稿された内容は \`fc @自分\` で表示することができます。\n`
+            + `${introduction} でコマンド \`fcadd\` を使用すると、検索対象の書き込みが減ってしまいます。ご協力お願いします。`
+        );
+    });
+
 }
