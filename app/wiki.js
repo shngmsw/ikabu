@@ -6,8 +6,8 @@ module.exports = async function handleWiki(msg, word) {
         let data = await wikipedia.search(word);
         let page = await wikipedia.page(data.results[0]);
         let summary = await page.summary();
-        let imageURL = await page.mainImage();
-        let url = await page.url();
+        // let imageURL = await page.mainImage();
+        let url = page.url();
 
         var emb = {
             embed: {
@@ -15,9 +15,9 @@ module.exports = async function handleWiki(msg, word) {
                 title: page.raw.title,
                 url: decodeURI(url),
                 fields: [{ name: "概要", value: summary }],
-                image: {
-                    url: decodeURI(imageURL)
-                }
+                // image: {
+                //     url: decodeURI(imageURL)
+                // }
             }
         };
         msg.channel.send(emb);
