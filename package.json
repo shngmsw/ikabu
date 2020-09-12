@@ -12,7 +12,7 @@
   "dependencies": {
     "data-utils": "0.0.2",
     "date-utils": "^1.2.21",
-    "discord.js": "^11.5.1",
+    "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "js-combinatorics": "^0.5.5",
@@ -23,7 +23,7 @@
     "ytdl-core": "^2.0.0"
   },
   "engines": {
-    "node": "8.x"
+    "node": "12.x"
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/ikabu2"

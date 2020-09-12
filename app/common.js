@@ -8,7 +8,8 @@ module.exports = {
   stage2txt: stage2txt,
   coop_stage2txt: coop_stage2txt,
   weapon2txt: weapon2txt,
-  rgbToHex: rgbToHex
+  rgbToHex: rgbToHex,
+  random: randomSelect
 }
 
 function rgbToHex (r, g, b){
@@ -20,7 +21,7 @@ function rgbToHex (r, g, b){
     .join('');
 }
 
-function unixTime2hm (intTime) {
+function unixTime2hm(intTime) {
     const d = new Date(intTime * 1000 + 9 * 60 * 60 * 1000);
     const month = d.getUTCMonth() + 1;
     const day = d.getUTCDate();
@@ -31,7 +32,7 @@ function unixTime2hm (intTime) {
     return hour + ':' + min;
 };
 
-function unixTime2mdwhm (intTime) {
+function unixTime2mdwhm(intTime) {
     const d = new Date(intTime * 1000 + 9 * 60 * 60 * 1000);
     const month = d.getUTCMonth() + 1;
     const day = d.getUTCDate();
@@ -42,7 +43,7 @@ function unixTime2mdwhm (intTime) {
     return month + '/' + day + '(' + week + ') ' + hour + ':' + min;
 };
 
-function rule2txt (key) {
+function rule2txt(key) {
     switch (key) {
         case 'tower_control':
             return 'ガチヤグラ';
@@ -55,7 +56,7 @@ function rule2txt (key) {
     }
 };
 
-function stage2txt (key) {
+function stage2txt(key) {
     switch (key) {
         case '0':
             return 'バッテラストリート';
@@ -108,7 +109,7 @@ function stage2txt (key) {
     }
 };
 
-function coop_stage2txt (key) {
+function coop_stage2txt(key) {
     switch (key) {
         case '/images/coop_stage/e9f7c7b35e6d46778cd3cbc0d89bd7e1bc3be493.png':
             return 'トキシラズいぶし工房';
@@ -123,7 +124,7 @@ function coop_stage2txt (key) {
     }
 };
 
-function weapon2txt (key) {
+function weapon2txt(key) {
     switch (key) {
         case '0':
             return 'ボールドマーカー';
@@ -331,3 +332,18 @@ function getGachi(data, x) {
 function isInteger(x) {
     return Math.round(x) === x;
 }
+
+function randomSelect(array, num) {
+    var a = array;
+    var t = [];
+    var r = [];
+    var l = a.length;
+    var n = num < l ? num : l;
+    while (n-- > 0) {
+        var i = (Math.random() * l) | 0;
+        r[n] = t[i] || a[i];
+        --l;
+        t[i] = t[l] || a[l];
+    }
+    return r;
+};

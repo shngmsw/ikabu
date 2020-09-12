@@ -1,8 +1,4 @@
-module.exports = {
-  handleHelp: handleHelp
-}
-
-function handleHelp(msg) {
+module.exports = function handleHelp(msg) {
     var strCmd = msg.content.replace(/　/g, ' ');
     strCmd = strCmd.replace('  ', ' ');
     const args = strCmd.split(' ');
@@ -14,7 +10,6 @@ function handleHelp(msg) {
                     name: 'ikabu_botの使い方(2/2)',
                     icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
                 },
-                title: 'ikabu_botの使い方(2/2)',
                 color: 0x1bc2a5,
                 fields: [{
                         name: 'ステージ情報を表示[now / next / nawabari / run]',
@@ -24,6 +19,8 @@ function handleHelp(msg) {
                         name: 'ランダム系コマンド',
                         value: 'ブキをランダムで選出：```buki 複数の場合は数字を記入```\n' +
                             'ブキ種別ごとのランダム選出方法を表示：```buki help```\n' +
+                            'Choose a weapon randomly:```weapon```\n' +
+                            'Choose a weapon randomly help:```weapon help```\n' +
                             'ガチルールをランダムで選出：```rule```\n' +
                             'ガチルールとステージをランダムで選出：```rule stage```\n' +
                             'サブウェポンをランダムで選出：```sub```\n' +
@@ -67,7 +64,6 @@ function handleHelp(msg) {
                     name: 'ikabu_botの使い方(1/2)',
                     icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
                 },
-                title: 'ikabu_botの使い方(1/2)',
                 color: 0x1bc2a5,
                 fields: [{
                         name: 'botのコメンド一覧を表示',
