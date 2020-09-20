@@ -41,7 +41,7 @@ async function fetchMessageFromId(guild, chId, msgId) {
 function composeEmbed(message) {
     const embed = new Discord.MessageEmbed();
     embed.setDescription(message.content);
-    embed.setTimestamp(message.created_at);
+    embed.setTimestamp(message.createdAt);
     embed.setAuthor(
         name = message.author.username,
         iconURL = message.author.avatarURL()
