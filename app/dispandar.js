@@ -20,7 +20,7 @@ async function dispand(message) {
 
 async function extractMessages(message) {
     let messages = new Array();
-    let matches = message.content.match(regexDiscrdMessageUrl).groups;
+    let matches = message.content.match(regexDiscrdMessageUrl);
     if (!matches) {
         return;
     }
