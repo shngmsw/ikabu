@@ -25,10 +25,10 @@ async function extractMessages(message) {
         return;
     }
     const guild = message.guild;
-    if (guild.id != matches.guild) {
+    if (guild.id != matches.groups.guild) {
         return;
     }
-    fetchedMessage = await fetchMessageFromId(guild, matches.channel, matches.message);
+    fetchedMessage = await fetchMessageFromId(guild, matches.groups.channel, matches.groups.message);
     messages.push(fetchedMessage);
     return messages;
 }
