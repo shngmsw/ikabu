@@ -1,5 +1,6 @@
 const insert = require("../db/fc_insert.js");
 const getFC = require("../db/fc_select.js");
+const Discord = require("discord.js");
 
 module.exports = function handleFriendCode(msg) {
     if (msg.content.startsWith("fcadd")) {
@@ -31,42 +32,34 @@ async function selectFriendCode(msg) {
         let fc = await getFC(id, msg, args[0]);
         console.log("getFC:" + fc[0].code);
         if (fc[0] != null) {
-            msg.channel.send("", {
-                embed: {
-                    author: {
-                        name: msg.mentions.users.first().username + "のフレコ",
-                        icon_url: msg.mentions.users.first().avatarURL()
-                    },
-                    color: 0xf02d7d,
-                    title: fc[0].code
-                }
-            });
+            msg.channel.send(composeEmbed(msg.mentions.users.first(), fc[0].code, true));
             return;
         }
     }
     if (result.length > 0) {
         for (var r of result) {
-            msg.channel.send("", {
-                embed: {
-                    author: {
-                        name: msg.mentions.users.first().username + "のフレコ",
-                        icon_url: msg.mentions.users.first().avatarURL()
-                    },
-                    color: 0xf02d7d,
-                    fields: [
-                        {
-                            name: "自己紹介チャンネルより引用",
-                            value: r
-                        }
-                    ]
-                }
-            });
+            msg.channel.send(composeEmbed(msg.mentions.users.first(), r, false));
         }
     } else {
         msg.channel.send(
             "自己紹介チャンネルに投稿がないか、投稿した日時が古すぎて検索できないでし"
         );
     }
+}
+
+function composeEmbed(users, fc, isDatabase) {
+    const embed = new Discord.MessageEmbed();
+    embed.setDescription(fc);
+    embed.setAuthor(
+        name = users.username,
+        iconURL = users.avatarURL()
+    );
+    if (!isDatabase) {
+        embed.setFooter(
+            text = "自己紹介チャンネルより引用"
+        );
+    }
+    return embed;
 }
 
 async function insertFriendCode(msg) {
