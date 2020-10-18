@@ -124,23 +124,11 @@ module.exports = function handleShow(msg, args) {
                             common.unixTime2mdwhm(data.details[0].end_time);
                         const coop_stage =
                             common.coop_stage2txt(data.details[0].stage.image) + "\n";
-                        const weapons =
-                            (data.details[0].weapons[0]
-                                ? common.weapon2txt(data.details[0].weapons[0].id)
-                                : "？") +
-                            "・" +
-                            (data.details[0].weapons[1]
-                                ? common.weapon2txt(data.details[0].weapons[1].id)
-                                : "？") +
-                            "・" +
-                            (data.details[0].weapons[2]
-                                ? common.weapon2txt(data.details[0].weapons[2].id)
-                                : "？") +
-                            "・" +
-                            (data.details[0].weapons[3]
-                                ? common.weapon2txt(data.details[0].weapons[3].id)
-                                : "？");
-
+                        const weapons = weapon2txt(data.details[0].weapons[0]) + "・" +
+                        weapon2txt(data.details[0].weapons[1]) + "・" +
+                        weapon2txt(data.details[0].weapons[2]) + "・" +
+                        weapon2txt(data.details[0].weapons[3]);
+                        
                         msg.channel.send("", {
                             embed: {
                                 author: {
@@ -172,4 +160,15 @@ module.exports = function handleShow(msg, args) {
             }
         }
     });
+}
+
+function weapon2txt(weapon_id) {
+    let weapon_txt;
+    if (weapon_id === true
+        && weapon_id != "undefined") {
+        weapon_txt = common.weapon2txt(weapon_id);
+    } else {
+        weapon_txt = ":question:";
+    }
+    return weapon_txt;
 }
