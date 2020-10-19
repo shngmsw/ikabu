@@ -88,8 +88,5 @@ function call(msg) {
     case "stage":
       handleStageInfo(msg);
       break;
-    case "stageinfo":
-      handleStageInfo(msg);
-      break;
   }
 }

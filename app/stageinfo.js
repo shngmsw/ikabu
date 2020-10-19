@@ -10,6 +10,7 @@ module.exports = function handleStageInfo(msg) {
     }
 }
 function sf(msg) {
+
     request.get("https://splatoon2.ink/data/schedules.json", function (
         error,
         response,
@@ -46,6 +47,9 @@ function sf(msg) {
 }
 
 function stageinfo(msg) {
+    // 過去分は削除
+    msgDelete(msg);
+
     request.get("https://splatoon2.ink/data/schedules.json", function (
         error,
         response,
@@ -111,4 +115,11 @@ function getEmbed(data) {
     stageEmbed.setTimestamp();
     stageEmbed.setFooter("StageInfo by splatoon2.ink");
     return stageEmbed;
+}
+
+async function msgDelete(message) {
+    // コマンドが送信されたチャンネルから直近100件(上限)メッセージを取得する
+    const messages = await message.channel.messages.fetch({ limit: 100 })
+    // それらのメッセージを一括削除
+    message.channel.bulkDelete(messages)
 }
