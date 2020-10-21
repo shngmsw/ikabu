@@ -3,6 +3,7 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const Handler = require('./handler.js');
 const Dispandar = require('./dispandar.js');
+const privateChat = require('./secretchat.js')
 const handleStageInfo = require("./stageinfo.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
@@ -54,6 +55,8 @@ client.on("guildMemberRemove", member => {
     find(channel => channel.id === "709400703751422074")
     .send(`${member.user.tag}さんが退部しました。`);
 });
+
+client.on('voiceStateUpdate', (oldState, newState) => privateChat.onVoiceStateUpdate(oldState, newState));
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
