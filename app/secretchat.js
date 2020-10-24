@@ -17,7 +17,7 @@ module.exports = {
 
 const CHANNEL_PREFIX = "bot用";
 const BOT_ROLE_NAME = "bot";
-const pattern = /^[a-b]|^bot用/
+const pattern = /^[a-m]|^bot用/
 async function onVoiceStateUpdate(oldState, newState) {
 
   if (oldState.channelID === newState.channelID) {
