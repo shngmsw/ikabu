@@ -26,7 +26,6 @@
     "config-reloadable": "^1.0.8",
     "ffmpeg-static": "^4.2.7",
     "voice-text": "^0.1.2"
-    "ytdl-core": "^3.4.1"
   },
   "engines": {
     "node": "12.x"
