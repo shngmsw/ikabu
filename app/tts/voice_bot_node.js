@@ -230,7 +230,7 @@ function main(message) {
     if (message.content === `${prefix}kill`) {
         if (context && context.status !== 4) {
             context.disconnect();
-            message.channel.send(':death:');
+            message.channel.send(':dash:');
         } else {
             message.reply('Botはボイスチャンネルに接続していないようでし');
         }
