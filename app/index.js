@@ -31,7 +31,7 @@ client.on("message", async msg => {
   }
   Handler.call(msg);
   Dispandar.dispand(msg);
-  TTS.main(msg);
+  //TTS.main(msg);
 });
 
 client.on("guildMemberAdd", member => {
