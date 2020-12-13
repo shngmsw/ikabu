@@ -3,11 +3,50 @@ module.exports = function handleHelp(msg) {
     strCmd = strCmd.replace('  ', ' ');
     const args = strCmd.split(' ');
     args.shift();
-    if (args[0] == '2') {
+    if (args[0] == 'voice') {
         msg.channel.send('', {
             embed: {
                 author: {
-                    name: 'ikabu_botの使い方(2/2)',
+                    name: 'ブキチの使い方(読み上げbot)',
+                    icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
+                },
+                color: 0x1bc2a5,
+                fields: [{
+                        name: 'ボイスチャンネルにブキチを参加',
+                        value: '```/join```\n',
+                    },
+                    {
+                        name: 'ボイスチャンネルへ再接続',
+                        value: '```/reconnect```\n',
+                    },
+                    {
+                        name: '読み上げに利用するTTSのAPIを変更します',
+                        value: '```/mode```\n',
+                    },
+                    {
+                        name: 'APIで利用可能な音声タイプを一覧表示します',
+                        value: '```/type```\n',
+                    },
+                    {
+                        name: '音声タイプを変更します',
+                        value: '```/voice```\n',
+                    },
+                    {
+                        name: '音声の速度を変更します(0～200の数値) ',
+                        value: '```/speed```\n',
+                    },
+                    {
+                        name: '音声の高さを変更します(0～200の数値)',
+                        value: '```/pitch```\n',
+                    },
+                ],
+            },
+        });
+    } else if (args[0] == '2') {
+        msg.channel.send('', {
+            embed: {
+                author: {
+                    name: 'ブキチの使い方(2/2)',
                     icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
                 },
                 color: 0x1bc2a5,
@@ -61,13 +100,13 @@ module.exports = function handleHelp(msg) {
         msg.channel.send('', {
             embed: {
                 author: {
-                    name: 'ikabu_botの使い方(1/2)',
+                    name: 'ブキチの使い方(1/2)',
                     icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
                 },
                 color: 0x1bc2a5,
                 fields: [{
-                        name: 'botのコメンド一覧を表示',
-                        value: '```help または help 2```',
+                        name: 'botのコマンド一覧を表示',
+                        value: '```help または help 2 または help voice```',
                     },
                     {
                         name: '現在のリグマ情報を表示して募集',
@@ -90,7 +129,7 @@ module.exports = function handleHelp(msg) {
                         value: 'フォートナイト：```fn 参加条件があれば記載```\n' +
                             'マリオカート：```mk 参加条件があれば記載```\n' +
                             // + "MINECRAFT：```mc 参加条件があれば記載```\n"
-                            // + "オーバークック2：```oc 参加条件があれば記載```\n"
+                            'オーバークック2：```oc 参加条件があれば記載```\n' +
                             'スマブラSP：```sb 参加条件があれば記載```\n' +
                             'Dead by Daylight：```!dbd 参加条件があれば記載```\n' +
                             'モンスターハンター：```mh 参加条件があれば記載```\n' +
