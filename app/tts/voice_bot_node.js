@@ -107,6 +107,7 @@ readConfig();
 let voicePattern1 = voiceType; //初期時のよみあげ音声
 let mode = apiType;
 const voiceText = new VoiceText(voiceTextApiKey); //Voice Text API key
+let readChannelId = null;
 
 module.exports = {
     main: main
@@ -139,7 +140,7 @@ function main(message) {
         return bots ? message.author.bot : false;
     };
 
-    const isRead = (id) => readMe === false ? id !== message.author.id : readMe;
+    const isRead = (id) => readMe === false ? id === readChannelId : readMe;
 
     const url_delete = (str) => {
         const pat = /(https?:\/\/[\x21-\x7e]+)/g;
@@ -196,6 +197,7 @@ function main(message) {
                     message.channel.send('ボイスチャンネルへ接続したでし', { code: true });
                     message.reply(`\nチャットの読み上げ準備ができたでし。切断時は${prefix}killでし\n${prefix}mode で読み上げAPIを変更できるでし\。\n ${prefix
                         }voiceで読み上げ音声を選択できるでし。\n 音声が読み上げられない場合は${prefix}reconnectを試してみるでし。`);
+                    readChannelId = message.channel.id;
                 }
             } else {
                 message.reply('既にボイスチャンネルへ接続済みでし');
@@ -214,6 +216,7 @@ function main(message) {
                     if (voiceChanelJoin(message.member.voice.channel)) {
                         //console.log('ボイスチャンネルへ再接続したでし');
                         message.channel.send('ボイスチャンネルへ再接続したでし', { code: true });
+                        readChannelId = message.channel.id;
                     }
                 }, 5000);
             } else {
@@ -227,7 +230,7 @@ function main(message) {
     if (message.content === `${prefix}kill`) {
         if (context && context.status !== 4) {
             context.disconnect();
-            message.channel.send(':dash:');
+            message.channel.send(':death:');
         } else {
             message.reply('Botはボイスチャンネルに接続していないようでし');
         }
@@ -255,7 +258,6 @@ function main(message) {
             }
             message.reply(modeNames);
         }
-
     }
 
     if (message.content === `${prefix}type`) {
@@ -324,7 +326,7 @@ function main(message) {
         }
     }
 
-    if (!(isBot() || isBlackListsFromID(message.member.id) || isBlackListsFromPrefixes(message.content))) {
+    if (!(isBot() || isBlackListsFromID(message.member.id) || isBlackListsFromPrefixes(message.content)) && isRead(message.channel.id)) {
         try {
             yomiage({
                 message: mention_replace(emoji_delete(url_delete(`${message.content}。`))),
