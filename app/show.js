@@ -124,23 +124,11 @@ module.exports = function handleShow(msg, args) {
                             common.unixTime2mdwhm(data.details[0].end_time);
                         const coop_stage =
                             common.coop_stage2txt(data.details[0].stage.image) + "\n";
-                        const weapons =
-                            (data.details[0].weapons[0]
-                                ? common.weapon2txt(data.details[0].weapons[0].id)
-                                : "？") +
-                            "・" +
-                            (data.details[0].weapons[1]
-                                ? common.weapon2txt(data.details[0].weapons[1].id)
-                                : "？") +
-                            "・" +
-                            (data.details[0].weapons[2]
-                                ? common.weapon2txt(data.details[0].weapons[2].id)
-                                : "？") +
-                            "・" +
-                            (data.details[0].weapons[3]
-                                ? common.weapon2txt(data.details[0].weapons[3].id)
-                                : "？");
-
+                        const weapons = common.weapon2txt(data.details[0].weapons[0].id) + "・" +
+                        common.weapon2txt(data.details[0].weapons[1].id) + "・" +
+                        common.weapon2txt(data.details[0].weapons[2].id) + "・" +
+                        common.weapon2txt(data.details[0].weapons[3].id);
+                        
                         msg.channel.send("", {
                             embed: {
                                 author: {
