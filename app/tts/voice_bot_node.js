@@ -143,8 +143,9 @@ function main(message) {
     const isRead = (id) => readMe === false ? id === readChannelId : readMe;
 
     const w_replace = (str) => {
-        const pat = /(ww)/g;
-        if (pat.exec) {
+        const judge = /.*w$/g;
+        if (str.match(judge)) {
+            const pat = /(w)/g;
             return str.replace(pat, 'わらあた');
         }
         return str;
@@ -337,7 +338,7 @@ function main(message) {
     if (!(isBot() || isBlackListsFromID(message.member.id) || isBlackListsFromPrefixes(message.content)) && isRead(message.channel.id)) {
         try {
             yomiage({
-                message: mention_replace(w_replace(emoji_delete(url_delete(`${message.content}。`)))),
+                message: mention_replace(w_replace(emoji_delete(url_delete(`${message.content}`)))),
                 cons: context
             });
         } catch (error) {
