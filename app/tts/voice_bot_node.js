@@ -142,6 +142,8 @@ function main(message) {
 
     const isRead = (id) => readMe === false ? id === readChannelId : readMe;
 
+    const isNotEmpty = (message) => message.length === 0 ? false : true;
+
     const w_replace = (str) => {
         const judge = /.*w$/g;
         if (str.match(judge)) {
@@ -335,10 +337,13 @@ function main(message) {
         }
     }
 
-    if (!(isBot() || isBlackListsFromID(message.member.id) || isBlackListsFromPrefixes(message.content)) && isRead(message.channel.id)) {
+    const yomiage_message = mention_replace(w_replace(emoji_delete(url_delete(`${message.content}`))));
+
+    if (!(isBot() || isBlackListsFromID(message.member.id) || isBlackListsFromPrefixes(message.content)) 
+        && isRead(message.channel.id) && isNotEmpty(yomiage_message)) {
         try {
             yomiage({
-                message: mention_replace(w_replace(emoji_delete(url_delete(`${message.content}`)))),
+                message: yomiage_message,
                 cons: context
             });
         } catch (error) {
