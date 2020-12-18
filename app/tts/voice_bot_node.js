@@ -122,7 +122,7 @@ module.exports = {
 //     //console.log('Bot準備完了');
 // });
 
-function main(message) {
+async function main(message) {
     if (!message.guild) return;
 
     const isBlackListsFromPrefixes = (cont) => {
@@ -143,6 +143,8 @@ function main(message) {
     const isRead = (id) => readMe === false ? id === readChannelId : readMe;
 
     const isNotEmpty = (message) => message.length === 0 ? false : true;
+
+    const isNotLengthOver = (message) => message.length >= 200 ? false : true;
 
     const w_replace = (str) => {
         const judge = /.*w$/g;
@@ -337,10 +339,10 @@ function main(message) {
         }
     }
 
-    const yomiage_message = mention_replace(w_replace(emoji_delete(url_delete(`${message.content}`))));
+    const yomiage_message = await mention_replace(w_replace(emoji_delete(url_delete(`${message.content}`))));
 
-    if (!(isBot() || isBlackListsFromID(message.member.id) || isBlackListsFromPrefixes(message.content)) 
-        && isRead(message.channel.id) && isNotEmpty(yomiage_message)) {
+    if (!(isBot() || isBlackListsFromID(message.member.id) || isBlackListsFromPrefixes(message.content))
+        && isRead(message.channel.id) && isNotEmpty(yomiage_message) && isNotLengthOver(yomiage_message)) {
         try {
             yomiage({
                 message: yomiage_message,
