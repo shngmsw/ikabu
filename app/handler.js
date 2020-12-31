@@ -5,6 +5,7 @@ const handleSpecial = require("./special.js");
 const handleHelp = require("./help.js");
 const handleKansen = require("./kansen.js");
 const handlePick = require("./pick.js");
+const handleOmikuji = require("./omikuji.js");
 const handlePoll = require("./poll.js");
 const handleRecruit = require("./recruit.js");
 const handleRule = require("./rule.js");
@@ -36,6 +37,9 @@ function call(msg) {
       break;
     case "pick":
       handlePick(msg);
+      break;
+    case "omikuji":
+      handleOmikuji(msg);
       break;
     case "vpick":
       handleVoicePick(msg);
