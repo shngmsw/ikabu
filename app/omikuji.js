@@ -10,5 +10,5 @@ const kujis = {
   };
   module.exports = function handleOmikuji(msg) {
     const kuji = kujis[Math.floor(Math.random() * 7)];
-    msg.channel.send("`" + kuji + "`でし！");
+    msg.reply("`" + kuji + "`でし！");
 }
