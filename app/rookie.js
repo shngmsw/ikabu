@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 
 module.exports = function removeRookie(msg) {
   const dt = new Date();
-  const lastMonth = dt.setMonth(dt.getMonth() + 1);
+  const lastMonth = dt.setMonth(dt.getMonth() - 1);
   const beginnerRole = msg.guild.roles.cache.find(
     (role) => role.name === "🔰新入部員"
   );
