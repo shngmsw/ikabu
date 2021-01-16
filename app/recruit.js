@@ -1,8 +1,12 @@
 const request = require("request");
 const common = require("./common.js");
+const Discord = require("discord.js");
 
 module.exports = function handleRecruit(msg) {
 
+    /**
+     * フェス
+     */
     if (msg.content.startsWith("fes")) {
         request.get("https://splatoon2.ink/data/festivals.json", function (
             error,
@@ -40,15 +44,15 @@ module.exports = function handleRecruit(msg) {
                         msg.react("👌");
                         msg.guild.channels.cache
                             .find(channel => channel.name === "ナワバリ・フェス募集")
-                            .send("```" + msg.author.username + "たんの募集 〆```");
+                            .send(getCloseEmbed(msg));
                     } else {
-                        // let txt = '@everyone 【フェス募集：ヒメ派】\n' + msg.author.username + 'たんがフェスメン募集中でし！\n'
+                        // let txt = '@everyone 【フェス募集：ヒメ派】\n' + `<@${msg.author.id}>` + 'たんがフェスメン募集中でし！\n'
                         //   + data.jp.festivals[0].names.alpha_short
                         //   + '派のみなさん、いかがですか？';
                         let txt =
                             role_id_a.toString() +
                             " 【フェス募集：ヒメ派】\n" +
-                            msg.author.username +
+                            `<@${msg.author.id}>` +
                             "たんがフェスメン募集中でし！\n" +
                             data.jp.festivals[0].names.alpha_short +
                             "派のみなさん、いかがですか？";
@@ -102,15 +106,12 @@ module.exports = function handleRecruit(msg) {
                         msg.react("👌");
                         msg.guild.channels.cache
                             .find(channel => channel.name === "ナワバリ・フェス募集")
-                            .send("```" + msg.author.username + "たんの募集 〆```");
+                            .send(getCloseEmbed(msg));
                     } else {
-                        // let txt = '@everyone 【フェス募集：イイダ派】\n' + msg.author.username + 'たんがフェスメン募集中でし！\n'
-                        //   + data.jp.festivals[0].names.bravo_short
-                        //   + '派のみなさん、いかがですか？';
                         let txt =
                             role_id_b.toString() +
                             " 【フェス募集：イイダ派】\n" +
-                            msg.author.username +
+                            `<@${msg.author.id}>` +
                             "たんがフェスメン募集中でし！\n" +
                             data.jp.festivals[0].names.bravo_short +
                             "派のみなさん、いかがですか？";
@@ -164,6 +165,9 @@ module.exports = function handleRecruit(msg) {
         });
     }
 
+    /**
+     * リグマ
+     */
     if (msg.content.startsWith("next") && msg.channel.name != "botコマンド") {
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
@@ -173,7 +177,7 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "リグマ募集")
-                .send("``` " + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             request.get("https://splatoon2.ink/data/schedules.json", function (
                 error,
@@ -185,7 +189,7 @@ module.exports = function handleRecruit(msg) {
                     const l_args = common.getLeague(data, 1).split(",");
                     let txt =
                         "@everyone 【リグマ募集】\n" +
-                        msg.author.username +
+                        `<@${msg.author.id}>` +
                         "たんがリグメン募集中でし！\n";
                     if (args.length > 0) txt += "[参加条件] " + args.join(" ") + "\n";
                     const stage_a =
@@ -205,6 +209,9 @@ module.exports = function handleRecruit(msg) {
         }
     }
 
+    /**
+     * リグマ
+     */
     if (msg.content.startsWith("now") || msg.content.startsWith("nou")) {
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
@@ -214,7 +221,7 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "リグマ募集")
-                .send("``` " + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             request.get("https://splatoon2.ink/data/schedules.json", function (
                 error,
@@ -226,7 +233,7 @@ module.exports = function handleRecruit(msg) {
                     const l_args = common.getLeague(data, 0).split(",");
                     let txt =
                         "@everyone 【リグマ募集】\n" +
-                        msg.author.username +
+                        `<@${msg.author.id}>` +
                         "たんがリグメン募集中でし！\n";
                     if (args.length > 0) txt += "[参加条件] " + args.join(" ") + "\n";
                     const stage_a =
@@ -246,6 +253,9 @@ module.exports = function handleRecruit(msg) {
         }
     }
 
+    /**
+     * ナワバリ
+     */
     if (msg.content.startsWith("nawabari")) {
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
@@ -255,7 +265,7 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "ナワバリ・フェス募集")
-                .send("```" + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             request.get("https://splatoon2.ink/data/schedules.json", function (
                 error,
@@ -272,7 +282,7 @@ module.exports = function handleRecruit(msg) {
                         data.regular[0].stage_b.image;
                     let txt =
                         "@everyone 【ナワバリ募集】\n" +
-                        msg.author.username +
+                        `<@${msg.author.id}>` +
                         "たんがナワバリ中でし！\n";
                     if (args.length > 0) txt += "[参加条件] " + args.join(" ") + "\n";
                     txt += "よければ合流しませんか？";
@@ -312,6 +322,9 @@ module.exports = function handleRecruit(msg) {
         }
     }
 
+    /**
+     * サーモン
+     */
     if (msg.content.startsWith("run")) {
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
@@ -321,7 +334,7 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "サーモン募集")
-                .send("``` " + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             request.get("https://splatoon2.ink/data/coop-schedules.json", function (
                 error,
@@ -335,7 +348,7 @@ module.exports = function handleRecruit(msg) {
                         data.details[0].stage.image;
                     let txt =
                         "@everyone 【バイト募集】\n" +
-                        msg.author.username +
+                        `<@${msg.author.id}>` +
                         "たんがバイト中でし！\n";
                     if (args.length > 0) txt += "[参加条件] " + args.join(" ") + "\n";
                     txt += "よければ合流しませんか？";
@@ -373,7 +386,10 @@ module.exports = function handleRecruit(msg) {
             });
         }
     }
-
+    
+    /**
+     * 別ゲー
+     */
     if (msg.content.startsWith("fn")) {
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
@@ -383,13 +399,13 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "別ゲー募集")
-                .send("```" + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             const role_id = msg.guild.roles.cache.find(role => role.name === "建築士");
             let txt =
                 role_id.toString() +
                 " 【Fortnite募集】\n" +
-                msg.author.username +
+                `<@${msg.author.id}>` +
                 "たんがFortniteメンバー募集中でし！\n";
             if (args.length > 0) txt += "[参加条件] " + args.join(" ");
             msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
@@ -409,13 +425,13 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "別ゲー募集")
-                .send("``` " + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             const role_id = msg.guild.roles.cache.find(role => role.name === "走り屋");
             let txt =
                 role_id.toString() +
                 "  【マリオカート募集】\n" +
-                msg.author.username +
+                `<@${msg.author.id}>` +
                 "たんがマリオカート参加者募集中でし！\n";
             if (args.length > 0) txt += "[参加条件] " + args.join(" ");
             msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
@@ -434,11 +450,11 @@ module.exports = function handleRecruit(msg) {
         if (args[0] == "〆") {
             msg.guild.channels.cache
                 .find(channel => channel.name === "別ゲー募集")
-                .send("``` " + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             let txt =
                 "@everyone 【MINECRAFT募集】\n" +
-                msg.author.username +
+                `<@${msg.author.id}>` +
                 "たんがMINECRAFT参加者募集中でし！\n";
             if (args.length > 0) txt += "[参加条件] " + args.join(" ");
             msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
@@ -458,13 +474,13 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "別ゲー募集")
-                .send("``` " + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             const role_id = msg.guild.roles.cache.find(role => role.name === "シェフ");
             let txt =
                 role_id.toString() +
                 " 【オーバークック2募集】\n" +
-                msg.author.username +
+                `<@${msg.author.id}>` +
                 "たんがオーバークック2参加者募集中でし！\n";
             if (args.length > 0) txt += "[参加条件] " + args.join(" ");
             msg.guild.channels.cache.find( channel => channel.name === "別ゲー募集").send(txt, {
@@ -484,13 +500,13 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "別ゲー募集")
-                .send("``` " + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             const role_id = msg.guild.roles.cache.find(role => role.name === "ファイター");
             let txt =
                 role_id.toString() +
                 " 【スマブラSP募集】\n" +
-                msg.author.username +
+                `<@${msg.author.id}>` +
                 "たんがスマブラSP参加者募集中でし！\n";
             if (args.length > 0) txt += "[参加条件] " + args.join(" ");
             msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
@@ -510,13 +526,13 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "別ゲー募集")
-                .send("``` " + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             const role_id = msg.guild.roles.cache.find(role => role.name === "ハンター");
             let txt =
                 role_id.toString() +
                 " 【モンハンワールド募集】\n" +
-                msg.author.username +
+                `<@${msg.author.id}>` +
                 "たんがモンハンワールド参加者募集中でし！\n";
             if (args.length > 0) txt += "[参加条件] " + args.join(" ");
             msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
@@ -536,13 +552,13 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "別ゲー募集")
-                .send("``` " + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             const role_id = msg.guild.roles.cache.find(role => role.name === "レジェンド");
             let txt =
                 role_id.toString() +
                 " 【ApexLegends募集】\n" +
-                msg.author.username +
+                `<@${msg.author.id}>` +
                 "たんがApexLegendsの参加者募集中でし！\n";
             if (args.length > 0) txt += "[参加条件] " + args.join(" ");
             msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
@@ -562,13 +578,13 @@ module.exports = function handleRecruit(msg) {
             msg.react("👌");
             msg.guild.channels.cache
                 .find(channel => channel.name === "別ゲー募集")
-                .send("``` " + msg.author.username + "たんの募集 〆```");
+                .send(getCloseEmbed(msg));
         } else {
             const role_id = msg.guild.roles.cache.find(role => role.name === "DbD");
             let txt =
                 role_id.toString() +
                 " 【Dead by Daylight募集】\n" +
-                msg.author.username +
+                `<@${msg.author.id}>` +
                 "たんがDbD参加者募集中でし！\n";
             if (args.length > 0) txt += ">>> [参加条件] " + args.join(" ");
             msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
@@ -619,4 +635,10 @@ function sendLeagueMatch(msg, txt, l_args) {
             }
         }
     });
+}
+
+function getCloseEmbed(msg) {
+    const stageEmbed = new Discord.MessageEmbed();
+    stageEmbed.setDescription(`<@${msg.author.id}>たんの募集 〆`);
+    return stageEmbed;
 }
