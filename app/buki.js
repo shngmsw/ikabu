@@ -194,7 +194,7 @@ function weapon(msg) {
                     // console.log(amount);
                     // msg.reply(buki.replace('(', '(||').replace(')', '||)'));
                 } else {
-                    var buki = random(bukiNames, 1)[0];
+                    var buki = common.random(bukiNames, 1)[0];
                     msg.channel.send(buki);
                 }
             } else {
