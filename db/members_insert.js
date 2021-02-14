@@ -5,7 +5,7 @@ module.exports = async function insertMembers(id, count) {
     try {
         const sql = "INSERT INTO members (user_id, message_count) VALUES ($1, $2) "
             + "ON CONFLICT ON CONSTRAINT members_pkey "
-            + "DO UPDATE SET code=$2";
+            + "DO UPDATE SET message_count=$2";
         const params = [id, count];
 
         await db.begin();

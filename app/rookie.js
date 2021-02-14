@@ -1,14 +1,14 @@
 const Discord = require("discord.js");
 const getMember = require("../db/members_select.js");
-module.exports = function removeRookie(msg) {
+module.exports = async function removeRookie(msg) {
   const dt = new Date();
   const lastMonth = dt.setMonth(dt.getMonth() - 1);
   const beginnerRole = msg.guild.roles.cache.find(
     (role) => role.name === "🔰新入部員"
   );
-  const messageCount = getMessageCount(msg.member.id);
+  const messageCount = await getMessageCount(msg.member.id);
   if (msg.member.joinedTimestamp < lastMonth
-    || messageCount > 100) {
+    || messageCount > 99) {
     const hasBeginnerRole = msg.member.roles.cache.find(
       (role) => role.id === beginnerRole.id
     );
@@ -28,10 +28,9 @@ module.exports = function removeRookie(msg) {
 };
 
 async function getMessageCount(id) {
-  let result = await getMember(id);
-  let messageCount = 0;
-  if (result != null) {
-    messageCount = result[0].meessage_count;
+  const result = await getMember(id);
+  if (result[0] != null) {
+      return result[0].message_count;
   }
-  return messageCount;
+  return 0;
 }
