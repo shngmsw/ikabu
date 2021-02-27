@@ -8,6 +8,7 @@ const privateChat = require("./secretchat.js");
 const handleStageInfo = require("./stageinfo.js");
 const removeRookie = require("./rookie.js");
 const chatCountUp = require("./members.js");
+const suggestionBox = require("./suggestion-box.js");
 const join = require("./join.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
@@ -36,9 +37,12 @@ client.on("message", async (msg) => {
 
   Handler.call(msg);
   Dispandar.dispand(msg);
-  TTS.main(msg);
-  chatCountUp(msg);
-  removeRookie(msg);
+  const hasSuggestion = suggestionBox(msg);
+  if (!hasSuggestion) {
+    TTS.main(msg);
+    chatCountUp(msg);
+    removeRookie(msg);
+  }
 });
 
 client.on("guildMemberAdd", (member) => {

@@ -1,3 +1,5 @@
+const Discord = require("discord.js");
+
 module.exports = {
   isInteger: isInteger,
   getGachi: getGachi,
@@ -9,7 +11,26 @@ module.exports = {
   coop_stage2txt: coop_stage2txt,
   weapon2txt: weapon2txt,
   rgbToHex: rgbToHex,
-  random: randomSelect
+  random: randomSelect,
+  composeEmbed: composeEmbed
+}
+
+function composeEmbed(message) {
+    const embed = new Discord.MessageEmbed();
+    embed.setDescription(message.content);
+    embed.setTimestamp(message.createdAt);
+    embed.setAuthor(
+        name = message.author.username,
+        iconURL = message.author.avatarURL()
+    );
+    embed.setFooter(
+        text = message.channel.name,
+        iconURL = message.guild.iconURL()
+    );
+    if (message.attachments.size > 0 && message.attachments[0].proxyURL) {
+        embed.setImage(message.message.attachments[0].proxyURL);
+    }
+    return embed;
 }
 
 function rgbToHex (r, g, b){
