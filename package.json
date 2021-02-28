@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
-    "config": "^3.3.2",
+    "config": "^3.3.4",
     "config-reloadable": "^1.0.8",
     "data-utils": "0.0.2",
     "date-utils": "^1.2.21",
@@ -30,13 +30,9 @@
   "engines": {
     "node": "12.x"
   },
-  "repository": {
-    "url": "https://glitch.com/edit/#!/ikabu2"
-  },
   "license": "MIT",
   "keywords": [
     "node",
-    "glitch",
     "express"
   ]
 }

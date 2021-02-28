@@ -26,14 +26,12 @@ module.exports = async function guildMemberAddEvent(member) {
         }
     }
 
-    guild.channels.cache
-        .find((channel) => channel.id === "414095683746922517")
-        .send(
-            `<@!${member.user.id}> たん、よろしくお願いします！\n` +
-            `最初の10分間は閲覧しかできません、その間に ${rules} と ${channelDiscription} をよく読んでくださいね\n` +
-            `10分経ったら、書き込めるようになります。 ${introduction} で自己紹介も兼ねて自分のフレコを貼ってください\n\n` +
-            `${guild.name}のみんなが歓迎していますよ〜`
-        )
+    roby.send(
+        `<@!${member.user.id}> たん、よろしくお願いします！\n` +
+        `最初の10分間は閲覧しかできません、その間に ${rules} と ${channelDiscription} をよく読んでくださいね\n` +
+        `10分経ったら、書き込めるようになります。 ${introduction} で自己紹介も兼ねて自分のフレコを貼ってください\n\n` +
+        `${guild.name}のみんなが歓迎していますよ〜`
+    )
         .then((sentMessage) => sentMessage.react("👍"));
 }
 
