@@ -35,6 +35,7 @@ module.exports = async function suggestionBox(msg) {
             m => sendChannel.send(common.composeEmbed(m))
         );
         txChHide(msg);
+        return true;
     }
     return false;
 }
