@@ -37,12 +37,14 @@ client.on("message", async (msg) => {
 
   Handler.call(msg);
   Dispandar.dispand(msg);
-  const hasSuggestion = suggestionBox(msg);
-  if (!hasSuggestion) {
-    TTS.main(msg);
-    chatCountUp(msg);
-    removeRookie(msg);
-  }
+  TTS.main(msg);
+  suggestionBox(msg).then((result) => {
+    if (!result) {
+      chatCountUp(msg);
+      removeRookie(msg);
+    }
+  });
+
 });
 
 client.on("guildMemberAdd", (member) => {
