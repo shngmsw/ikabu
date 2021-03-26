@@ -71,7 +71,8 @@ function call(msg) {
     case "mc":
     case "oc":
     case "sb":
-    case "mh":
+    case "mhr":
+    case "mhw":
     case "!apex":
     case "!dbd":
       handleRecruit(msg);
