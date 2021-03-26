@@ -13,31 +13,31 @@ module.exports = function handleHelp(msg) {
                 color: 0x1bc2a5,
                 fields: [{
                         name: 'ボイスチャンネルにブキチを参加',
-                        value: '```/join```\n',
+                        value: '```!join```\n',
                     },
                     {
                         name: 'ボイスチャンネルへ再接続',
-                        value: '```/reconnect```\n',
+                        value: '```!reconnect```\n',
                     },
                     {
                         name: '読み上げに利用するTTSのAPIを変更します',
-                        value: '```/mode```\n',
+                        value: '```!mode```\n',
                     },
                     {
                         name: 'APIで利用可能な音声タイプを一覧表示します',
-                        value: '```/type```\n',
+                        value: '```!type```\n',
                     },
                     {
                         name: '音声タイプを変更します',
-                        value: '```/voice```\n',
+                        value: '```!voice```\n',
                     },
                     {
                         name: '音声の速度を変更します(0～200の数値) ',
-                        value: '```/speed```\n',
+                        value: '```!speed```\n',
                     },
                     {
                         name: '音声の高さを変更します(0～200の数値)',
-                        value: '```/pitch```\n',
+                        value: '```!pitch```\n',
                     },
                 ],
             },

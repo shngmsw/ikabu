@@ -3,7 +3,7 @@
     "discordToken": "",
     "voiceTextApiKey": ""
   },
-  "Prefix": "/",
+  "Prefix": "!",
   "AutoRestart": true,
   "ReadMe": false,
   "Defalut": {
