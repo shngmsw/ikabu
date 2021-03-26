@@ -517,7 +517,7 @@ module.exports = function handleRecruit(msg) {
         }
     }
 
-    if (msg.content.startsWith("mh")) {
+    if (msg.content.startsWith("mhw")) {
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
         const args = strCmd.split(" ");
