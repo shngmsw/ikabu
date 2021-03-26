@@ -543,6 +543,32 @@ module.exports = function handleRecruit(msg) {
         }
     }
 
+    if (msg.content.startsWith("mhr")) {
+        var strCmd = msg.content.replace(/　/g, " ");
+        strCmd = strCmd.replace("  ", " ");
+        const args = strCmd.split(" ");
+        args.shift();
+        if (args[0] == "〆") {
+            msg.react("👌");
+            msg.guild.channels.cache
+                .find(channel => channel.name === "別ゲー募集")
+                .send(getCloseEmbed(msg));
+        } else {
+            const role_id = msg.guild.roles.cache.find(role => role.name === "ハンター");
+            let txt =
+                role_id.toString() +
+                " 【モンハンライズ募集】\n" +
+                `<@${msg.author.id}>` +
+                "たんがモンハンライズ参加者募集中でし！\n";
+            if (args.length > 0) txt += "[参加条件] " + args.join(" ");
+            msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
+                files: [
+                    "https://cdn.glitch.com/10652966-57f9-4b23-8909-a9d93dfe6d26%2Fmhrize-title.jpeg"
+                ]
+            });
+        }
+    }
+
     if (msg.content.startsWith("!apex")) {
         var strCmd = msg.content.replace(/　/g, " ");
         strCmd = strCmd.replace("  ", " ");
