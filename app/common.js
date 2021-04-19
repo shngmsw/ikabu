@@ -1,18 +1,18 @@
 const Discord = require("discord.js");
 
 module.exports = {
-  isInteger: isInteger,
-  getGachi: getGachi,
-  getLeague: getLeague,
-  unixTime2hm: unixTime2hm,
-  unixTime2mdwhm: unixTime2mdwhm,
-  rule2txt: rule2txt,
-  stage2txt: stage2txt,
-  coop_stage2txt: coop_stage2txt,
-  weapon2txt: weapon2txt,
-  rgbToHex: rgbToHex,
-  random: randomSelect,
-  composeEmbed: composeEmbed
+    isInteger: isInteger,
+    getGachi: getGachi,
+    getLeague: getLeague,
+    unixTime2hm: unixTime2hm,
+    unixTime2mdwhm: unixTime2mdwhm,
+    rule2txt: rule2txt,
+    stage2txt: stage2txt,
+    coop_stage2txt: coop_stage2txt,
+    weapon2txt: weapon2txt,
+    rgbToHex: rgbToHex,
+    random: randomSelect,
+    composeEmbed: composeEmbed
 }
 
 function composeEmbed(message) {
@@ -27,19 +27,21 @@ function composeEmbed(message) {
         text = message.channel.name,
         iconURL = message.guild.iconURL()
     );
-    if (message.attachments.size > 0 && message.attachments[0].proxyURL) {
-        embed.setImage(message.message.attachments[0].proxyURL);
+    if (message.attachments.size > 0) {
+        message.attachments.forEach(Attachment => {
+            embed.setImage(Attachment.proxyURL);
+        })
     }
     return embed;
 }
 
-function rgbToHex (r, g, b){
-  [r, g, b]
-    .map(x => {
-        const hex = x.toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-    })
-    .join('');
+function rgbToHex(r, g, b) {
+    [r, g, b]
+        .map(x => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        })
+        .join('');
 }
 
 function unixTime2hm(intTime) {
