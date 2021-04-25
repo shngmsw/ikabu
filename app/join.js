@@ -18,12 +18,14 @@ module.exports = async function guildMemberAddEvent(member) {
     const beginnerRole = guild.roles.cache.find(
         (role) => role.name === "🔰新入部員"
     );
-    const messageCount = await getMessageCount(member.id);
-    const friendCode = await getFriendCode(member.id);
-    if (beginnerRole) {
-        if (messageCount == 0 && friendCode.length == 0) {
-            member.roles.set([beginnerRole.id]).then(console.log).catch(console.error);
-        }
+    var setRookieRole = function(beginnerRole) {
+        const messageCount = await getMessageCount(member.id);
+        const friendCode = await getFriendCode(member.id);
+            if (beginnerRole) {
+            if (messageCount == 0 && friendCode.length == 0) {
+                member.roles.set([beginnerRole.id]).then(console.log).catch(console.error);
+            }
+        }    
     }
 
     roby.send(
@@ -33,6 +35,7 @@ module.exports = async function guildMemberAddEvent(member) {
         `${guild.name}のみんなが歓迎していますよ〜`
     )
         .then((sentMessage) => sentMessage.react("👍"));
+    setTimeout(setRookieRole, 600000);
 }
 
 
