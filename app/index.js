@@ -54,7 +54,7 @@ client.on("guildMemberAdd", (member) => {
 client.on("guildMemberRemove", (member) => {
   const guild = member.guild;
   guild.channels.cache
-    .find((channel) => channel.id === "709400703751422074")
+    .find((channel) => channel.id === process.env.CHANNEL_ID_RETIRE_LOG)
     .send(`${member.user.tag}さんが退部しました。`);
 });
 
