@@ -66,13 +66,7 @@ function call(msg) {
     case "next":
     case "run":
     case "nawabari":
-    case "fn":
-    case "mk":
-    case "mc":
-    case "oc":
-    case "sb":
-    case "mhr":
-    case "mhw":
+    case "!mhr":
     case "!apex":
     case "!dbd":
       handleRecruit(msg);
