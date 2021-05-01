@@ -41,6 +41,10 @@ module.exports = function handleRecruit(msg) {
 }
 
 function festival(msg) {
+    const channelName = "ナワバリ・フェス募集";
+    if (isNotThisChannel(msg, channelName)) {
+        return;
+    }
     request.get("https://splatoon2.ink/data/festivals.json", function (
         error,
         response,
@@ -199,6 +203,10 @@ function festival(msg) {
 }
 
 function nextLeagueMatch(msg) {
+    const channelName = "リグマ募集";
+    if (isNotThisChannel(msg, channelName)) {
+        return;
+    }
     var strCmd = msg.content.replace(/　/g, " ");
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
@@ -240,6 +248,11 @@ function nextLeagueMatch(msg) {
 }
 
 function nowLeagueMatch(msg) {
+    const channelName = "リグマ募集";
+    if (isNotThisChannel(msg, channelName)) {
+        return;
+    }
+
     var strCmd = msg.content.replace(/　/g, " ");
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
@@ -281,6 +294,10 @@ function nowLeagueMatch(msg) {
 }
 
 function regularMatch(msg) {
+    const channelName = "ナワバリ・フェス募集";
+    if (isNotThisChannel(msg, channelName)) {
+        return;
+    }
     var strCmd = msg.content.replace(/　/g, " ");
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
@@ -347,6 +364,10 @@ function regularMatch(msg) {
 }
 
 function salmonRun(msg) {
+    const channelName = "サーモン募集";
+    if (isNotThisChannel(msg, channelName)) {
+        return;
+    }
     var strCmd = msg.content.replace(/　/g, " ");
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
@@ -409,6 +430,10 @@ function salmonRun(msg) {
 }
 
 function monsterHunterRize(msg) {
+    const channelName = "別ゲー募集";
+    if (isNotThisChannel(msg, channelName)) {
+        return;
+    }
     var strCmd = msg.content.replace(/　/g, " ");
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
@@ -435,6 +460,10 @@ function monsterHunterRize(msg) {
 }
 
 function apexLegends(msg) {
+    const channelName = "別ゲー募集";
+    if (isNotThisChannel(msg, channelName)) {
+        return;
+    }
     var strCmd = msg.content.replace(/　/g, " ");
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
@@ -461,6 +490,10 @@ function apexLegends(msg) {
 }
 
 function deadByDayLight(msg) {
+    const channelName = "別ゲー募集";
+    if (isNotThisChannel(msg, channelName)) {
+        return;
+    }
     var strCmd = msg.content.replace(/　/g, " ");
     strCmd = strCmd.replace("  ", " ");
     const args = strCmd.split(" ");
@@ -532,4 +565,13 @@ function getCloseEmbed(msg) {
     const stageEmbed = new Discord.MessageEmbed();
     stageEmbed.setDescription(`<@${msg.author.id}>たんの募集 〆`);
     return stageEmbed;
+}
+
+function isNotThisChannel(msg, channelName) {
+    const msgSendedChannelName = msg.channel.name;
+    if (!msgSendedChannelName.match(channelName)) {
+        msg.channel.send("このコマンドはこのチャンネルでは使えないでし！");
+        return true;
+    }
+    return false;
 }
