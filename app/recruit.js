@@ -11,7 +11,6 @@ module.exports = function handleRecruit(msg) {
     if (msg.content.startsWith("next") && msg.channel.name != "botコマンド") {
         nextLeagueMatch(msg);
     }
-
     if (msg.content.startsWith("now") || msg.content.startsWith("nou")) {
         nowLeagueMatch(msg);
     }
@@ -30,11 +29,9 @@ module.exports = function handleRecruit(msg) {
     if (msg.content.startsWith("!mhr")) {
         monsterHunterRize(msg);
     }
-
     if (msg.content.startsWith("!apex")) {
         apexLegends(msg);
     }
-
     if (msg.content.startsWith("!dbd")) {
         deadByDayLight(msg)
     }
@@ -79,13 +76,8 @@ function festival(msg) {
             if (teamId === "a") {
                 if (strCmd.match("〆")) {
                     msg.react("👌");
-                    msg.guild.channels.cache
-                        .find(channel => channel.name === "ナワバリ・フェス募集")
-                        .send(getCloseEmbed(msg));
+                    msg.channel.send(getCloseEmbed(msg));
                 } else {
-                    // let txt = '@everyone 【フェス募集：ヒメ派】\n' + `<@${msg.author.id}>` + 'たんがフェスメン募集中でし！\n'
-                    //   + data.jp.festivals[0].names.alpha_short
-                    //   + '派のみなさん、いかがですか？';
                     let txt =
                         role_id_a.toString() +
                         " 【フェス募集：ヒメ派】\n" +
@@ -121,7 +113,7 @@ function festival(msg) {
                         ),
                         16
                     );
-                    msg.guild.channels.cache.find(channel => channel.name === "ナワバリ・フェス募集").send(txt, {
+                    msg.channel.send(txt, {
                         embed: {
                             color: color,
                             author: {
@@ -141,9 +133,7 @@ function festival(msg) {
             if (teamId === "b") {
                 if (strCmd.match("〆")) {
                     msg.react("👌");
-                    msg.guild.channels.cache
-                        .find(channel => channel.name === "ナワバリ・フェス募集")
-                        .send(getCloseEmbed(msg));
+                    msg.channel.send(getCloseEmbed(msg));
                 } else {
                     let txt =
                         role_id_b.toString() +
@@ -180,7 +170,7 @@ function festival(msg) {
                         ),
                         16
                     );
-                    msg.guild.channels.cache.find(channel => channel.name === "ナワバリ・フェス募集").send(txt, {
+                    msg.channel.send(txt, {
                         embed: {
                             color: color,
                             author: {
@@ -213,9 +203,7 @@ function nextLeagueMatch(msg) {
     args.shift();
     if (strCmd.match("〆")) {
         msg.react("👌");
-        msg.guild.channels.cache
-            .find(channel => channel.name === "リグマ募集")
-            .send(getCloseEmbed(msg));
+        msg.channel.send(getCloseEmbed(msg));
     } else {
         request.get("https://splatoon2.ink/data/schedules.json", function (
             error,
@@ -237,9 +225,7 @@ function nextLeagueMatch(msg) {
                     "https://splatoon2.ink/assets/splatnet" +
                     data.league[1].stage_b.image;
                 sendLeagueMatch(msg, txt, l_args);
-                msg.guild.channels.cache
-                    .find(channel => channel.name === "リグマ募集")
-                    .send({ files: [stage_a, stage_b] });
+                msg.channel.send({ files: [stage_a, stage_b] });
             } else {
                 msg.channel.send("なんかエラーでてるわ");
             }
@@ -259,9 +245,7 @@ function nowLeagueMatch(msg) {
     args.shift();
     if (strCmd.match("〆")) {
         msg.react("👌");
-        msg.guild.channels.cache
-            .find(channel => channel.name === "リグマ募集")
-            .send(getCloseEmbed(msg));
+        msg.channel.send(getCloseEmbed(msg));
     } else {
         request.get("https://splatoon2.ink/data/schedules.json", function (
             error,
@@ -283,9 +267,7 @@ function nowLeagueMatch(msg) {
                     "https://splatoon2.ink/assets/splatnet" +
                     data.league[0].stage_b.image;
                 sendLeagueMatch(msg, txt, l_args);
-                msg.guild.channels.cache
-                    .find(channel => channel.name === "リグマ募集")
-                    .send({ files: [stage_a, stage_b] });
+                msg.channel.send({ files: [stage_a, stage_b] });
             } else {
                 msg.channel.send("なんかエラーでてるわ");
             }
@@ -304,9 +286,7 @@ function regularMatch(msg) {
     args.shift();
     if (strCmd.match("〆")) {
         msg.react("👌");
-        msg.guild.channels.cache
-            .find(channel => channel.name === "ナワバリ・フェス募集")
-            .send(getCloseEmbed(msg));
+        msg.channel.send(getCloseEmbed(msg));
     } else {
         request.get("https://splatoon2.ink/data/schedules.json", function (
             error,
@@ -337,7 +317,7 @@ function regularMatch(msg) {
                     common.stage2txt(data.regular[0].stage_b.id) +
                     "\n";
 
-                msg.guild.channels.cache.find(channel => channel.name === "ナワバリ・フェス募集").send(txt, {
+                msg.channel.send(txt, {
                     embed: {
                         author: {
                             name: "レギュラーマッチ",
@@ -353,9 +333,7 @@ function regularMatch(msg) {
                         }
                     }
                 });
-                msg.guild.channels.cache
-                    .find(channel => channel.name === "ナワバリ・フェス募集")
-                    .send({ files: [stage_a, stage_b] });
+                msg.channel.send({ files: [stage_a, stage_b] });
             } else {
                 msg.channel.send("なんかエラーでてるわ");
             }
@@ -374,9 +352,7 @@ function salmonRun(msg) {
     args.shift();
     if (strCmd.match("〆")) {
         msg.react("👌");
-        msg.guild.channels.cache
-            .find(channel => channel.name === "サーモン募集")
-            .send(getCloseEmbed(msg));
+        msg.channel.send(getCloseEmbed(msg));
     } else {
         request.get("https://splatoon2.ink/data/coop-schedules.json", function (
             error,
@@ -405,7 +381,7 @@ function salmonRun(msg) {
                     common.weapon2txt(data.details[0].weapons[2].id) + "・" +
                     common.weapon2txt(data.details[0].weapons[3].id);
 
-                msg.guild.channels.cache.find(channel => channel.name === "サーモン募集").send(txt, {
+                msg.channel.send(txt, {
                     embed: {
                         author: {
                             name: "SALMON RUN",
@@ -440,9 +416,7 @@ function monsterHunterRize(msg) {
     args.shift();
     if (args[0] == "〆") {
         msg.react("👌");
-        msg.guild.channels.cache
-            .find(channel => channel.name === "別ゲー募集")
-            .send(getCloseEmbed(msg));
+        msg.channel.send(getCloseEmbed(msg));
     } else {
         const role_id = msg.guild.roles.cache.find(role => role.name === "ハンター");
         let txt =
@@ -451,7 +425,7 @@ function monsterHunterRize(msg) {
             `<@${msg.author.id}>` +
             "たんがモンハンライズ参加者募集中でし！\n";
         if (args.length > 0) txt += "[参加条件] " + args.join(" ");
-        msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
+        msg.channel.send(txt, {
             files: [
                 "https://cdn.glitch.com/10652966-57f9-4b23-8909-a9d93dfe6d26%2Fmhrize-title.jpeg"
             ]
@@ -470,9 +444,7 @@ function apexLegends(msg) {
     args.shift();
     if (args[0] == "〆") {
         msg.react("👌");
-        msg.guild.channels.cache
-            .find(channel => channel.name === "別ゲー募集")
-            .send(getCloseEmbed(msg));
+        msg.channel.send(getCloseEmbed(msg));
     } else {
         const role_id = msg.guild.roles.cache.find(role => role.name === "レジェンド");
         let txt =
@@ -481,7 +453,7 @@ function apexLegends(msg) {
             `<@${msg.author.id}>` +
             "たんがApexLegendsの参加者募集中でし！\n";
         if (args.length > 0) txt += "[参加条件] " + args.join(" ");
-        msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
+        msg.channel.send(txt, {
             files: [
                 "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fapex.jpg"
             ]
@@ -500,9 +472,7 @@ function deadByDayLight(msg) {
     args.shift();
     if (args[0] == "〆") {
         msg.react("👌");
-        msg.guild.channels.cache
-            .find(channel => channel.name === "別ゲー募集")
-            .send(getCloseEmbed(msg));
+        msg.channel.send(getCloseEmbed(msg));
     } else {
         const role_id = msg.guild.roles.cache.find(role => role.name === "DbD");
         let txt =
@@ -511,7 +481,7 @@ function deadByDayLight(msg) {
             `<@${msg.author.id}>` +
             "たんがDbD参加者募集中でし！\n";
         if (args.length > 0) txt += ">>> [参加条件] " + args.join(" ");
-        msg.guild.channels.cache.find(channel => channel.name === "別ゲー募集").send(txt, {
+        msg.channel.send(txt, {
             files: [
                 "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fdbd.png"
             ]
@@ -542,7 +512,7 @@ function sendLeagueMatch(msg, txt, l_args) {
             "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png";
     }
 
-    msg.guild.channels.cache.find(channel => channel.name === "リグマ募集").send(txt, {
+    msg.channel.send(txt, {
         embed: {
             author: {
                 name: "リーグマッチ",
