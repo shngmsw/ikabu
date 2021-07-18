@@ -411,7 +411,6 @@ function getLeague(data, x) {
         stage2txt(data.league[x].stage_b.id) +
         "\n";
     rstr = date + "," + rule + "," + stage;
-    console.log(rstr);
     return rstr;
 }
 
@@ -431,7 +430,6 @@ function getGachi(data, x) {
         stage2txt(data.gachi[x].stage_b.id) +
         "\n";
     rstr = date + "," + rule + "," + stage;
-    console.log(rstr);
     return rstr;
 }
 
