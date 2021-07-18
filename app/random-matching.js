@@ -31,7 +31,7 @@ function nextLeagueMatch(msg) {
                 const l_args = common.getLeague(data, 1).split(",");
                 let txt =
                     "@here 【ランダムマッチング】リグマ募集\n" +
-                    "参加人数が4人以上の場合、4人チームをランダムでマッチングさせるでし！\n" +
+                    "参加人数が4人以上の場合、4人ずつのチームにランダムで振り分けるでし！\n" +
                     "マッチングしたら原則欠席はNGでし！\n" +
                     "✅リアクションで参加表明するでし！\n";
                 sendLeagueMatch(msg, txt, l_args);
