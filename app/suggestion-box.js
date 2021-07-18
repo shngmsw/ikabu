@@ -1,4 +1,4 @@
-const BOT_ROLE_NAME = "bot";
+const BOT_ROLE_NAME = "BOT";
 const common = require("./common.js");
 const suggestionChannelParentId = process.env.CATEGORY_PARENT_ID_SUGGESTION_BOX;
 const infomationChannelId = process.env.CHANNEL_ID_INFOMATION;
