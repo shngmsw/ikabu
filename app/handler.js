@@ -15,7 +15,6 @@ const handleSub = require("./sub.js");
 const handleTimer = require("./timer.js");
 const handleVoicePick = require("./vpick.js");
 const handleWiki = require("./wiki.js");
-const handleRandomMatching = require("./random-matching.js");
 
 module.exports = {
   call: call
@@ -87,9 +86,6 @@ function call(msg) {
       break;
     case "stage":
       handleStageInfo(msg);
-      break;
-    case "randommatch":
-      handleRandomMatching(msg);
       break;
   }
 }

@@ -9,6 +9,7 @@ const handleStageInfo = require("./stageinfo.js");
 const removeRookie = require("./rookie.js");
 const chatCountUp = require("./members.js");
 const suggestionBox = require("./suggestion-box.js");
+const handleRandomMatching = require("./random-matching.js");
 const join = require("./join.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
@@ -23,6 +24,10 @@ client.on("message", async (msg) => {
     // ステージ情報
     if (msg.content === "stageinfo") {
       handleStageInfo(msg);
+    }
+    // ランダムマッチング
+    if (msg.content === 'randommatch') {
+      handleRandomMatching(msg);
     }
     return;
   }

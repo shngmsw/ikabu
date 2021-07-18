@@ -82,6 +82,7 @@ function sendLeagueMatch(msg, txt, l_args) {
             }
         }
     }).then((sentMessage) => {
+        msg.delete();
         sentMessage.react('✅');
         const filter = (reaction, user) => {
             return reaction.emoji.name === '✅';
@@ -153,7 +154,6 @@ function sendLeagueMatch(msg, txt, l_args) {
             sentMessage.delete();
         });
     });
-    msg.delete();
 }
 
 function isNotThisChannel(msg, channelName) {
