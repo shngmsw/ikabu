@@ -146,7 +146,7 @@ function sendLeagueMatch(msg, txt, l_args) {
             let matchResultEmbed = new Discord.MessageEmbed()
                 .setTitle('ランダムマッチング結果')
                 .setColor(0x008080)
-                .setDescription('マッチングしたチームは空いている各ボイスチャンネルに入り、リグマを始めるでし！\n★がついている人がリードしてくれるとありがたいでし！')
+                .setDescription('マッチングしたチームは空いているボイスチャンネルに入り、リグマを始めるでし！\nリグマ開始までの進行は★がついている人がリードしてくれるとありがたいでし！')
                 .thumbnail(tuhmbnail_url)
                 .addFields(fieldsList);
 
