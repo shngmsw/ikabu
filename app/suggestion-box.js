@@ -23,7 +23,7 @@ module.exports = {
     },
     create: async function suggestionBox(msg, user) {
         const newChannel = await txChCreate(msg, user);
-        newChannel.send("＠everyone " + `<@${user.id}>` + "さん専用のチャンネルでし\n問い合わせ内容を入力してほしいでし\n`(管理者のみ)!close`で問い合わせを終了してアーカイブできるでし");
+        newChannel.send("@everyone " + `<@${user.id}>` + "さん専用のチャンネルでし\n問い合わせ内容を入力してほしいでし\n`(管理者のみ)!close`で問い合わせを終了してアーカイブできるでし");
         return;
     },
     archive: async function suggestionBoxArchive(msg) {
