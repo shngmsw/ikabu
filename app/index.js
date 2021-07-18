@@ -43,13 +43,10 @@ client.on("message", async (msg) => {
   Handler.call(msg);
   Dispandar.dispand(msg);
   TTS.main(msg);
-  suggestionBox(msg).then((result) => {
-    if (!result) {
-      chatCountUp(msg);
-      removeRookie(msg);
-    }
-  });
-
+  suggestionBox.archive(msg);
+  suggestionBox.init(msg);
+  chatCountUp(msg);
+  removeRookie(msg);
 });
 
 client.on("guildMemberAdd", (member) => {
@@ -69,4 +66,28 @@ client.on("voiceStateUpdate", (oldState, newState) =>
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
+});
+
+client.on('messageReactionAdd', async (reaction, user) => {
+  // When a reaction is received, check if the structure is partial
+  if (reaction.partial) {
+    // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
+    try {
+      await reaction.fetch();
+    } catch (error) {
+      console.error('Something went wrong when fetching the message: ', error);
+      // Return as `reaction.message.author` may be undefined/null
+      return;
+    }
+  }
+
+  if (reaction.message.channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX) {
+    if (reaction.emoji.name == '📭' && user.bot == false) {
+      suggestionBox.create(reaction.message, user);
+      reaction.remove();
+      reaction.message.react('📭');
+    } else if (reaction.emoji.name != '📭' && user.bot == false) {
+      reaction.remove();
+    }
+  }
 });
