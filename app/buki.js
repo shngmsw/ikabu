@@ -182,7 +182,6 @@ function weapon(msg) {
                         }
                     };
                 });
-                console.log(amount);
                 if (amount) {
                     // var buki = random(size, amount).join('\n');
                     var length = bukiNames.length;

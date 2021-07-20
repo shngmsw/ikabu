@@ -30,7 +30,7 @@ async function selectFriendCode(msg) {
 
     if (result.length == 0) {
         let fc = await getFC(id, msg, args[0]);
-        console.log("getFC:" + fc[0].code);
+        // console.log("getFC:" + fc[0].code);
         if (fc[0] != null) {
             msg.channel.send(composeEmbed(msg.mentions.users.first(), fc[0].code, true));
             return;
@@ -69,7 +69,7 @@ async function insertFriendCode(msg) {
     // let id = args[0].replace('<@', '').replace('>','');
     let id = msg.author.id;
     let code = args[0];
-    console.log("handle_fc:" + id + "/" + code);
+    // console.log("handle_fc:" + id + "/" + code);
     insert(id, code);
     msg.channel.send("覚えたでし！");
 }
