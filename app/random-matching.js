@@ -89,7 +89,7 @@ function sendLeagueMatch(msg, txt, l_args) {
             return reaction.emoji.name === '✅';
         };
 
-        const collector = sentMessage.createReactionCollector(filter, { time: 1500000 });
+        const collector = sentMessage.createReactionCollector(filter, { time: 15000 });
 
         collector.on('collect', (reaction, user) => {
             console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
@@ -148,7 +148,7 @@ function sendLeagueMatch(msg, txt, l_args) {
                 .setTitle('ランダムマッチング結果')
                 .setColor(0x008080)
                 .setDescription('マッチングしたチームは空いているボイスチャンネルに入り、リグマを始めるでし！\nリグマ開始までの進行は★がついている人がリードしてくれるとありがたいでし！')
-                .thumbnail(tuhmbnail_url)
+                .setThumbnail(tuhmbnail_url)
                 .addFields(fieldsList);
 
             sentMessage.channel.send(mentionList.join(','), { embed: matchResultEmbed });

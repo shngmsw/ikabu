@@ -18,11 +18,8 @@ module.exports = async function removeRookie(msg) {
       embed.setDescription(
         "新入部員期間が終わったでし！\nこれからもイカ部心得を守ってイカ部生活をエンジョイするでし！"
       );
-      embed.setAuthor(
-        (name = msg.author.username),
-        (iconURL = msg.author.avatarURL())
-      );
-      msg.channel.send(embed);
+      embed.setAuthor(msg.author.username, msg.author.avatarURL());
+      msg.channel.send(embed).catch();
     }
   }
 };

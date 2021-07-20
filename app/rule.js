@@ -7,7 +7,7 @@ const rules = {
   };
 
   module.exports = function handleRule(msg) {
-    console.log(rules);
+    // console.log(rules);
     if (msg.content.startsWith("rule stage")) {
         var stage = common.stage2txt(Math.floor(Math.random() * 23).toString());
         msg.channel.send("`" + stage + "`でし！");

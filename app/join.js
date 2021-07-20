@@ -31,7 +31,7 @@ module.exports = async function guildMemberAddEvent(member) {
     var setRookieRole = function (beginnerRole, messageCount, friendCode) {
         if (beginnerRole) {
             if (messageCount == 0 && friendCode.length == 0) {
-                member.roles.set([beginnerRole.id]).then(console.log).catch(console.error);
+                member.roles.set([beginnerRole.id]).catch(console.error);
             }
         }
     }
