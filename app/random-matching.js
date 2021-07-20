@@ -89,7 +89,7 @@ function sendLeagueMatch(msg, txt, l_args) {
             return reaction.emoji.name === '✅';
         };
 
-        const collector = sentMessage.createReactionCollector(filter, { time: 15000 });
+        const collector = sentMessage.createReactionCollector(filter, { time: 1500000  });
 
         collector.on('collect', (reaction, user) => {
             console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
