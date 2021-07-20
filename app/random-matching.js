@@ -30,7 +30,7 @@ function nextLeagueMatch(msg) {
                 const data = JSON.parse(body);
                 const l_args = common.getLeague(data, 1).split(",");
                 let txt =
-                    "@here 【ランダムマッチング】リグマ募集\n" +
+                    "@everyone 【ランダムマッチング】リグマ募集\n" +
                     "リグマのルール変更時間の30分前から5分前まで募集\n" +
                     "5分前時点で参加人数が4人以上の場合、4人ずつのチームにランダムで振り分けるでし！\n" +
                     "マッチングしたら原則欠席はNGでし！\nβ版なのでウデマエとVC有無は考慮せずにランダムで振り分けるのでエンジョイで楽しめる人のみ参加してほしいでし！\n" +
