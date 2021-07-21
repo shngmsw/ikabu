@@ -5,7 +5,7 @@ module.exports = async function guildMemberAddEvent(member) {
     const guild = member.guild;
     const roby = guild.channels.cache.find(
         (channel) => channel.id === process.env.CHANNEL_ID_ROBY
-    );
+    ) || await guild.channels.fetch(process.env.CHANNEL_ID_ROBY);
     const rules = guild.channels.cache.find(
         (channel) => channel.id === process.env.CHANNEL_ID_RULE
     );
@@ -17,14 +17,14 @@ module.exports = async function guildMemberAddEvent(member) {
     );
     const beginnerRole = guild.roles.cache.find(
         (role) => role.name === "🔰新入部員"
-    );
+    ) || await guild.roles.fetch('🔰新入部員');
 
     roby.send(
         `<@!${member.user.id}> たん、よろしくお願いします！\n` +
         `最初の10分間は閲覧しかできません、その間に ${rules} と ${channelDiscription} をよく読んでくださいね\n` +
         `10分経ったら、書き込めるようになります。 ${introduction} で自己紹介も兼ねて自分のフレコを貼ってください\n\n` +
         `${guild.name}のみんなが歓迎していますよ〜`
-    ).then((sentMessage) => sentMessage.react("👍"));
+    ).then((sentMessage) => sentMessage.react("👍")).catch(console.error);
 
     const messageCount = await getMessageCount(member.id);
     const friendCode = await getFriendCode(member.id);
