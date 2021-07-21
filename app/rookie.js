@@ -5,7 +5,7 @@ module.exports = async function removeRookie(msg) {
   const lastMonth = dt.setMonth(dt.getMonth() - 1);
   const beginnerRole = msg.guild.roles.cache.find(
     (role) => role.name === "🔰新入部員"
-  );
+  ) || await guild.roles.fetch('🔰新入部員');
   const messageCount = await getMessageCount(msg.member.id);
   if (msg.member.joinedTimestamp < lastMonth
     || messageCount > 99) {
@@ -27,7 +27,7 @@ module.exports = async function removeRookie(msg) {
 async function getMessageCount(id) {
   const result = await getMember(id);
   if (result[0] != null) {
-      return result[0].message_count;
+    return result[0].message_count;
   }
   return 0;
 }
