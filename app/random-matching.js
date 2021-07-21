@@ -107,8 +107,7 @@ function sendLeagueMatch(msg, txt, l_args) {
             });
 
             if (userList.length < TEAM_MEMBER_NUM) {
-                sentMessage.channel.send('4人以上集まらなかったでし…');
-                sentMessage.reactions.removeAll().catch();
+                sentMessage.delete();
                 return;
             }
 
