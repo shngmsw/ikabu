@@ -54,13 +54,10 @@ client.on("message", async (msg) => {
   Handler.call(msg);
   Dispandar.dispand(msg);
   TTS.main(msg);
-  suggestionBox(msg).then((result) => {
-    if (!result) {
-      chatCountUp(msg);
-      removeRookie(msg);
-    }
-  });
-
+  suggestionBox.archive(msg);
+  suggestionBox.init(msg);
+  chatCountUp(msg);
+  removeRookie(msg);
 });
 
 client.on("guildMemberAdd", (member) => {
@@ -90,21 +87,26 @@ client.on('messageReactionAdd', async (reaction, user) => {
       await reaction.fetch();
     } catch (error) {
       console.error('Something went wrong when fetching the message:', error);
-      // Return as `reaction.message.author` may be undefined/null
       return;
     }
   }
   if(!user.bot) {
     await randomMatching.reactionUserInsert(reaction.message, user.id);
   }
-  // Now the message has been cached and is fully available
-  // console.log(`${reaction.message.author}'s message "${reaction.message.content}" gained a reaction!`);
-  // The reaction is now also fully available and the properties will be reflected accurately:
-  // console.log(`${reaction.count} user(s) have given the same reaction to this message!`);
+  
+  if (reaction.message.channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX) {
+    if (reaction.emoji.name == '📭' && user.bot == false) {
+      suggestionBox.create(reaction.message, user);
+      reaction.remove();
+      reaction.message.react('📭');
+    } else if (reaction.emoji.name != '📭' && user.bot == false) {
+      reaction.remove();
+    }
+  }
 });
 
 client.on('messageReactionRemove', async (reaction, user) => {
   if(!user.bot) {
     await randomMatching.reactionUserDelete(reaction.message, user.id);
   }
-})
+});
