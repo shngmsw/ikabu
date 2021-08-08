@@ -9,7 +9,7 @@ const handleStageInfo = require("./stageinfo.js");
 const removeRookie = require("./rookie.js");
 const chatCountUp = require("./members.js");
 const suggestionBox = require("./suggestion-box.js");
-const handleRandomMatching = require("./random-matching.js");
+const randomMatching = require("./random-matching.js");
 const join = require("./join.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
@@ -27,11 +27,22 @@ client.on("message", async (msg) => {
     }
     // ランダムマッチング
     if (msg.content === 'randommatch') {
-      handleRandomMatching(msg);
+      randomMatching.handleRandomMatching(msg);
+    }
+    if (msg.content === 'randommatchresult') {
+      randomMatching.announcementResult(msg);
     }
     return;
+  } else {
+    // ランダムマッチング
+    if (msg.member.hasPermission("ADMINISTRATOR") && msg.content === 'randommatch') {
+      randomMatching.handleRandomMatching(msg);
+    }
+    if (msg.member.hasPermission("ADMINISTRATOR") && msg.content === 'randommatchresult') {
+      randomMatching.announcementResult(msg);
+    }
   }
-if (msg.content.match("ボーリング")) {
+  if (msg.content.match("ボーリング")) {
     msg.channel.send(
       "```「ボウリング」とは、前方に正三角形に並べられた10本のピンと呼ばれる棒をめがけボールを転がし、倒れたピンの数によって得られる得点を競うスポーツでし。" +
       "専用施設のボウリング場に設置された細長いレーンの上で行われる屋内競技で、レーンの長さが約23m、ピンまでの距離は約18mで行われるのが一般的でし。" +
@@ -75,12 +86,14 @@ client.on('messageReactionAdd', async (reaction, user) => {
     try {
       await reaction.fetch();
     } catch (error) {
-      console.error('Something went wrong when fetching the message: ', error);
-      // Return as `reaction.message.author` may be undefined/null
+      console.error('Something went wrong when fetching the message:', error);
       return;
     }
   }
-
+  if(!user.bot) {
+    await randomMatching.reactionUserInsert(reaction.message, user.id);
+  }
+  
   if (reaction.message.channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX) {
     if (reaction.emoji.name == '📭' && user.bot == false) {
       suggestionBox.create(reaction.message, user);
@@ -89,5 +102,11 @@ client.on('messageReactionAdd', async (reaction, user) => {
     } else if (reaction.emoji.name != '📭' && user.bot == false) {
       reaction.remove();
     }
+  }
+});
+
+client.on('messageReactionRemove', async (reaction, user) => {
+  if(!user.bot) {
+    await randomMatching.reactionUserDelete(reaction.message, user.id);
   }
 });
