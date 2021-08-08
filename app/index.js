@@ -35,10 +35,10 @@ client.on("message", async (msg) => {
     return;
   } else {
     // ランダムマッチング
-    if (msg.content === 'randommatch') {
+    if (msg.member.hasPermission("ADMINISTRATOR") && msg.content === 'randommatch') {
       randomMatching.handleRandomMatching(msg);
     }
-    if (msg.content === 'randommatchresult') {
+    if (msg.member.hasPermission("ADMINISTRATOR") && msg.content === 'randommatchresult') {
       randomMatching.announcementResult(msg);
     }
   }
