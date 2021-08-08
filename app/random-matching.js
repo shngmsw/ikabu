@@ -6,7 +6,7 @@ const reactionInsert = require("../db/rmr_insert.js");
 const reactionDelete = require("../db/rmr_delete.js");
 const getReactionUsers = require("../db/rmr_select.js");
 const getRandomMatchingReactions = require("../db/rm_select.js");
-const deleteRandomMatchingReactions = require("../db/rm_delete.js");
+const deleteRandomMatching = require("../db/rm_delete.js");
 
 var l_date;
 var l_rule;
@@ -18,7 +18,8 @@ const TEAM_MEMBER_NUM = process.env.TEAM_MEMBER_NUM;
 module.exports = {
     handleRandomMatching,
     announcementResult,
-    reactionUserInsert
+    reactionUserInsert,
+    reactionUserDelete
 }
 
 function handleRandomMatching(msg) {
@@ -30,7 +31,7 @@ function handleRandomMatching(msg) {
 async function announcementResult(msg) {
     if (msg.content.startsWith("randommatchresult") && msg.channel.name != "botコマンド") {
         const messageId = await getRandomMatchingReactions();
-        if (messageId == null) return;
+        if (messageId.length == 0) return;
         let result = await getReactionUsers(messageId[0]['message_id']);
         let userList = [];
         for (var data of result) {
@@ -49,6 +50,10 @@ async function announcementResult(msg) {
 
 function reactionUserInsert(message, userId) {
     reactionInsert(message.id, userId);
+}
+
+function reactionUserDelete(message, userId) {
+    reactionDelete.deleteRandomMatchingReactionsUser(message.id, userId);
 }
 
 function randomMatching(msg) {
@@ -129,8 +134,8 @@ function sendLeagueMatch(msg, txt, l_args) {
         sentMessage.react('✅');
 
         const messageId = sentMessage.id;
-        await reactionDelete();
-        await deleteRandomMatchingReactions();
+        await reactionDelete.deleteRandomMatchingReactions();
+        await deleteRandomMatching();
         await messageInsert(messageId);
 
         const filter = (reaction, user) => {
@@ -175,6 +180,9 @@ async function randomGrouping(sentMessage, userList) {
                 console.error('Failed to delete the message:', error);
             }
         });
+        // データ削除
+        await reactionDelete.deleteRandomMatchingReactions();
+        await deleteRandomMatching();
 
         return;
     }
@@ -219,8 +227,8 @@ async function randomGrouping(sentMessage, userList) {
             console.error('Failed to delete the message:', error);
         }
     });
-
     // データ削除
-    await reactionDelete();
-    await deleteRandomMatchingReactions();
+    await reactionDelete.deleteRandomMatchingReactions();
+    await deleteRandomMatching();
+
 }

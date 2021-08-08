@@ -102,3 +102,9 @@ client.on('messageReactionAdd', async (reaction, user) => {
   // The reaction is now also fully available and the properties will be reflected accurately:
   // console.log(`${reaction.count} user(s) have given the same reaction to this message!`);
 });
+
+client.on('messageReactionRemove', async (reaction, user) => {
+  if(!user.bot) {
+    await randomMatching.reactionUserDelete(reaction.message, user.id);
+  }
+})
