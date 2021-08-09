@@ -31,6 +31,12 @@ client.on("message", async (msg) => {
     }
     if (msg.content === 'randommatchresult') {
       randomMatching.announcementResult(msg);
+      msg.delete().catch(error => {
+        // Only log the error if it is not an Unknown Message error
+        if (error.code !== 10008) {
+          console.error('Failed to delete the message:', error);
+        }
+      });
     }
     return;
   } else {
@@ -90,10 +96,10 @@ client.on('messageReactionAdd', async (reaction, user) => {
       return;
     }
   }
-  if(!user.bot) {
+  if (!user.bot) {
     await randomMatching.reactionUserInsert(reaction.message, user.id);
   }
-  
+
   if (reaction.message.channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX) {
     if (reaction.emoji.name == '📭' && user.bot == false) {
       suggestionBox.create(reaction.message, user);
@@ -106,7 +112,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 });
 
 client.on('messageReactionRemove', async (reaction, user) => {
-  if(!user.bot) {
+  if (!user.bot) {
     await randomMatching.reactionUserDelete(reaction.message, user.id);
   }
 });
