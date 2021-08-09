@@ -147,19 +147,7 @@ function sendLeagueMatch(msg, txt, l_args) {
         collector.on('collect', (reaction, user) => {
             console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
         });
-
-        collector.on('end', collected => {
-            let userList = [];
-            collected.forEach(function (value) {
-                value.users.cache.forEach(function (user) {
-                    if (user.bot == false) {
-                        userList.push(user.id);
-                    }
-                });
-            });
-            randomGrouping(sentMessage, userList);
-        });
-    });
+);
 }
 
 function isNotThisChannel(msg, channelName) {
