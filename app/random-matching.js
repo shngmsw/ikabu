@@ -147,7 +147,7 @@ function sendLeagueMatch(msg, txt, l_args) {
         collector.on('collect', (reaction, user) => {
             console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
         });
-);
+    });
 }
 
 function isNotThisChannel(msg, channelName) {
