@@ -92,8 +92,6 @@ async function chJoin(ch, user) {
         READ_MESSAGE_HISTORY: false
       });
     return target;
-  } else {
-    console.log("チャンネルがないンゴ");
   }
 }
 
@@ -101,7 +99,5 @@ async function chHide(ch) {
   let target = await chFind(ch);
   if (target != null) {
     target.updateOverwrite(ch.guild.roles.everyone, { VIEW_CHANNEL: false });
-  } else {
-    console.log("チャンネルがないンゴ");
   }
 }
