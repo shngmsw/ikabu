@@ -113,6 +113,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
 client.on('messageReactionRemove', async (reaction, user) => {
   if (!user.bot) {
+    console.log(`Removed ${reaction.emoji.name} from ${user.tag}`);
     await randomMatching.reactionUserDelete(reaction.message, user.id);
   }
 });
