@@ -45,7 +45,13 @@ client.on("message", async (msg) => {
       randomMatching.handleRandomMatching(msg);
     }
     if (msg.member.hasPermission("ADMINISTRATOR") && msg.content === 'randommatchresult') {
-      randomMatching.announcementResult(msg);
+      await randomMatching.announcementResult(msg);
+      msg.delete().catch(error => {
+        // Only log the error if it is not an Unknown Message error
+        if (error.code !== 10008) {
+          console.error('Failed to delete the message:', error);
+        }
+      });
     }
   }
   if (msg.content.match("ボーリング")) {
