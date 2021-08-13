@@ -160,7 +160,8 @@ function isNotThisChannel(msg, channelName) {
 }
 
 async function randomGrouping(sentMessage, userList) {
-
+    console.log(`TEAM_MEMBER_NUM:${TEAM_MEMBER_NUM}`);
+    console.log(`userlist.length:${userList.length}`);
     if (userList.length < TEAM_MEMBER_NUM) {
         sentMessage.delete().catch(error => {
             // Only log the error if it is not an Unknown Message error
