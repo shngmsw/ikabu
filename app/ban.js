@@ -20,7 +20,7 @@ module.exports = async function handleBan(msg) {
                 "申し訳ありませんが、質問等は受け付けておりませんので、よろしくお願いいたします。";
 
             let DMChannel = await member.createDM();
-            await DMChannel.send(reasonText).catch(err);
+            await DMChannel.send(reasonText).catch(console.error);
 
             await member.ban({ reason: reasonText }).catch(console.error);
 
