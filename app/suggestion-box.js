@@ -69,6 +69,11 @@ async function txChCreate(msg, user) {
                     id: msg.author.id,
                     allow: ["VIEW_CHANNEL"]
                 },
+                ,
+                {
+                    id: user.id,
+                    allow: ["VIEW_CHANNEL"]
+                },
                 {
                     id: botRole.id,
                     allow: ["VIEW_CHANNEL"]
