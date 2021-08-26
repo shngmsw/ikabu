@@ -66,11 +66,6 @@ async function txChCreate(msg, user) {
                     deny: ["VIEW_CHANNEL"]
                 },
                 {
-                    id: msg.author.id,
-                    allow: ["VIEW_CHANNEL"]
-                },
-                ,
-                {
                     id: user.id,
                     allow: ["VIEW_CHANNEL"]
                 },
