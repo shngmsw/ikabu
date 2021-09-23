@@ -26,7 +26,7 @@ client.on("message", async (msg) => {
       handleStageInfo(msg);
     }
     // ランダムマッチング
-    if (msg.content === 'randommatch') {
+    if (msg.content === 'randommatch' || msg.content === 'randommatchhalf') {
       randomMatching.handleRandomMatching(msg);
     }
     if (msg.content === 'randommatchresult') {
@@ -41,7 +41,7 @@ client.on("message", async (msg) => {
     return;
   } else {
     // ランダムマッチング
-    if (msg.member.hasPermission("ADMINISTRATOR") && msg.content === 'randommatch') {
+    if (msg.member.hasPermission("ADMINISTRATOR") && (msg.content === 'randommatch' || msg.content === 'randommatchhalf')) {
       randomMatching.handleRandomMatching(msg);
     }
     if (msg.member.hasPermission("ADMINISTRATOR") && msg.content === 'randommatchresult') {
