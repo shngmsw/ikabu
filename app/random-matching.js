@@ -88,7 +88,7 @@ function randomMatching(msg, getLeagueNumber) {
     if (!error && response.statusCode == 200) {
       const data = JSON.parse(body);
       const l_args = common.getLeague(data, getLeagueNumber).split(",");
-      let txt = "@everyone 【ランダムマッチング】リグマ募集";
+      let txt = "【ランダムマッチング】リグマ募集";
       if (getLeagueNumber == 1) {
         txt += "【前半1時間】";
       } else {
