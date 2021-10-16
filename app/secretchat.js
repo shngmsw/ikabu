@@ -89,7 +89,7 @@ async function chJoin(ch, user) {
     target.updateOverwrite(ch.guild.roles.everyone, 
       {
         VIEW_CHANNEL: true ,
-        READ_MESSAGE_HISTORY: false
+        READ_MESSAGE_HISTORY: true
       });
     return target;
   }
