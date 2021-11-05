@@ -9,7 +9,7 @@ const handleStageInfo = require("./stageinfo.js");
 const removeRookie = require("./rookie.js");
 const chatCountUp = require("./members.js");
 const suggestionBox = require("./suggestion-box.js");
-const randomMatching = require("./random-matching.js");
+const oneHourLeague = require("./one_hour_league.js");
 const join = require("./join.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
@@ -26,11 +26,11 @@ client.on("message", async (msg) => {
       handleStageInfo(msg);
     }
     // ランダムマッチング
-    if (msg.content === 'randommatch' || msg.content === 'randommatchhalf') {
-      randomMatching.handleRandomMatching(msg);
+    if (msg.content === 'oneHourLeague' || msg.content === 'oneHourLeagueHalf') {
+      oneHourLeague.handleOneHourLeague(msg);
     }
-    if (msg.content === 'randommatchresult') {
-      await randomMatching.announcementResult(msg);
+    if (msg.content === 'oneHourLeagueResult') {
+      await oneHourLeague.announcementResult(msg);
       msg.delete().catch(error => {
         // Only log the error if it is not an Unknown Message error
         if (error.code !== 10008) {
@@ -41,11 +41,11 @@ client.on("message", async (msg) => {
     return;
   } else {
     // ランダムマッチング
-    if (msg.member.hasPermission("ADMINISTRATOR") && (msg.content === 'randommatch' || msg.content === 'randommatchhalf')) {
-      randomMatching.handleRandomMatching(msg);
+    if (msg.member.hasPermission("ADMINISTRATOR") && (msg.content === 'oneHourLeague' || msg.content === 'oneHourLeagueHalf')) {
+      oneHourLeague.handleOneHourLeague(msg);
     }
-    if (msg.member.hasPermission("ADMINISTRATOR") && msg.content === 'randommatchresult') {
-      await randomMatching.announcementResult(msg);
+    if (msg.member.hasPermission("ADMINISTRATOR") && msg.content === 'oneHourLeagueResult') {
+      await oneHourLeague.announcementResult(msg);
       msg.delete().catch(error => {
         // Only log the error if it is not an Unknown Message error
         if (error.code !== 10008) {
@@ -103,7 +103,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
     }
   }
   if (!user.bot) {
-    await randomMatching.reactionUserInsert(reaction.message, user.id);
+    await oneHourLeague.reactionUserInsert(reaction.message, user.id);
   }
 
   if (reaction.message.channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX) {
@@ -120,6 +120,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 client.on('messageReactionRemove', async (reaction, user) => {
   if (!user.bot) {
     console.log(`Removed ${reaction.emoji.name} from ${user.tag}`);
-    await randomMatching.reactionUserDelete(reaction.message, user.id);
+    await oneHourLeague.reactionUserDelete(reaction.message, user.id);
   }
 });
+oneHourLeague
