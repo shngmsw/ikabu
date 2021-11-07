@@ -123,4 +123,3 @@ client.on('messageReactionRemove', async (reaction, user) => {
     await oneHourLeague.reactionUserDelete(reaction.message, user.id);
   }
 });
-oneHourLeague
