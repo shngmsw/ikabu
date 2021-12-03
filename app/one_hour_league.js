@@ -14,7 +14,7 @@ var l_rule;
 var l_stage;
 var thumbnail_url;
 
-const recruit_num = 2;
+const recruit_num = 4;
 
 const TEAM_MEMBER_NUM = process.env.TEAM_MEMBER_NUM;
 module.exports = {
