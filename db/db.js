@@ -1,5 +1,9 @@
 const { Pool } = require("pg");
 require("dotenv").config();
+const local_pool = new Pool({
+  connectionString: process.env.DATABASE_LOCAL_URL,
+  ssl: false
+});
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: true,
@@ -17,8 +21,12 @@ class Postgres {
      * Poolからclientを取得
      * @return {Promise<void>}
      */
-  async init() {
-    this.client = await pool.connect();
+   async init() {
+    if (process.env.DATABASE_URL) {
+      this.client = await pool.connect();
+    } else {
+      this.client = await local_pool.connect();
+    }
   }
 
   /**
