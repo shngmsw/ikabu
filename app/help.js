@@ -117,6 +117,10 @@ module.exports = function handleHelp(msg) {
                         value: '```next 参加条件があれば記載```\n',
                     },
                     {
+                        name: '現在のリグマ情報を表示して1時間だけリグマ募集',
+                        value: '```1h```\n',
+                    },
+                    {
                         name: '現在のナワバリ情報を表示して募集',
                         value: '```nawabari 参加条件があれば記載```\n',
                     },
@@ -126,7 +130,7 @@ module.exports = function handleHelp(msg) {
                     },
                     {
                         name: '別ゲー募集コマンド',
-                        value: 
+                        value:
                             'Dead by Daylight：```!dbd 参加条件があれば記載```\n' +
                             'モンスターハンターライズ：```!mhr 参加条件があれば記載```\n' +
                             'ApexLegends：```!apex 参加条件があれば記載```\n'
