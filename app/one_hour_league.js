@@ -39,6 +39,8 @@ async function getReactionUsersList(messageId) {
 }
 
 async function reactionUserInsert(message, userId) {
+  let reactionUsers = await getReactionUsers.getReactionUsers(messageId);
+  if (reactionUsers.length == 0) return;
   let result = await getReactionUsers.getReactionUserByUserId(userId);
   if (result.length > 0 && result[0]["user_id"] === userId) return;
 
