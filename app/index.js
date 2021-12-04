@@ -83,7 +83,11 @@ client.on("messageReactionAdd", async (reaction, user) => {
     }
   }
   if (!user.bot) {
-    await oneHourLeague.reactionUserInsert(reaction.message, user.id);
+    if (reaction.emoji.name == "✅" && user.bot == false) {
+      await oneHourLeague.reactionUserInsert(reaction.message, user.id);
+    } else if (reaction.emoji.name == "✖" && user.bot == false) {
+      await oneHourLeague.cancel(reaction.message, user.id);
+    }
   }
 
   if (reaction.message.channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX) {
