@@ -13,6 +13,7 @@ const chatCountUp = require("./members.js");
 const suggestionBox = require("./suggestion-box.js");
 const oneHourLeague = require("./one_hour_league.js");
 const join = require("./join.js");
+const deleteToken = require("./delete_token.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on("message", async msg => {
@@ -43,6 +44,7 @@ client.on("message", async msg => {
     );
   }
 
+  deleteToken(msg);
   Handler.call(msg);
   Dispandar.dispand(msg);
   TTS.main(msg);
