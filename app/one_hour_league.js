@@ -208,7 +208,7 @@ function isNotThisChannel(msg, channelName) {
 
 async function cancel(message, userId) {
 
-  let result = await getRandomMessage.getRandomMatchingMessagesByAuthorId(userId);
+  let result = await getRandomMessage.getRandomMatchingMessagesByAuthorId(message.id, userId);
   if (result.length > 0 && result[0]["author_id"] === userId) {
     await reactionDelete.deleteRandomMatchingReactionMessage(message.id);
     await deleteRandomMatching.deleteRandomMatchingMessage(message.id);
@@ -220,8 +220,8 @@ async function cancel(message, userId) {
     await message.reactions.cache.map(async function(reaction) {
       reaction.fetch().then(r => {
            r.users.cache.map(item => {
-              if(!item.bot && item.id === userId) {
-                r.remove(userId);
+              if(!item.bot && item.id === userId && r.emoji.name === "❌") {
+                r.remove();
                 message.react("❌");
               }
           })
