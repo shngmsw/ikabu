@@ -20,7 +20,8 @@ const TEAM_MEMBER_NUM = process.env.TEAM_MEMBER_NUM;
 module.exports = {
   handleOneHourLeague,
   reactionUserInsert,
-  reactionUserDelete
+  reactionUserDelete,
+  cancel
 };
 
 async function handleOneHourLeague(msg) {
@@ -139,7 +140,7 @@ function sendLeagueMatch(msg, l_args) {
         description:
           `どんなに相性がよくて楽しかったメンバーだとしてもリグマするのは原則【1時間】のみ！\n` +
           `物足りない人は ${channelLeague} で募集してみるでし！\n\n` +
-          `先着順で4人揃い次第募集は締め切り！\n`,
+          `先着順で4人揃い次第募集は締め切り！\n✖リアクションで募集主のみキャンセルできるでし！`,
         color: 0xf02d7d,
         title: "1時間リグマ募集とは",
         url:
@@ -171,7 +172,7 @@ function sendLeagueMatch(msg, l_args) {
           },
           {
             name: "✅リアクションで参加表明するでし！\n",
-            value: "リアクションの数はブキチを含むので5なら1チーム成立でし！"
+            value: "募集主はリアクションしなくて大丈夫でし！"
           }
         ],
         thumbnail: {
@@ -188,6 +189,7 @@ function sendLeagueMatch(msg, l_args) {
       });
 
       sentMessage.react("✅");
+      sentMessage.react("✖");
 
       const messageId = sentMessage.id;
       await messageInsert(messageId);
@@ -202,4 +204,15 @@ function isNotThisChannel(msg, channelName) {
     return true;
   }
   return false;
+}
+
+async function cancel(message, userId) {
+  let result = await getReactionUsers.getReactionUserByUserId(userId);
+  if (result.length > 0 && result[0]["user_id"] === userId) {
+    await reactionDelete.deleteRandomMatchingReactionMessage(message.id);
+    await deleteRandomMatching.deleteRandomMatchingMessage(message.id);
+    message.reactions.removeAll().catch(error => console.log(error));
+    let txt = `<@${userId}> の募集〆`;
+    message.reply(txt);
+  };
 }
