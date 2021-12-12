@@ -6,7 +6,7 @@ const messageInsert = require("../db/rm_insert.js");
 const reactionInsert = require("../db/rmr_insert.js");
 const reactionDelete = require("../db/rmr_delete.js");
 const getReactionUsers = require("../db/rmr_select.js");
-const getReactions = require("../db/rm_select.js");
+const getRandomMessage = require("../db/rm_select.js");
 const deleteRandomMatching = require("../db/rm_delete.js");
 
 var l_date;
@@ -190,7 +190,7 @@ function sendLeagueMatch(msg, l_args) {
       sentMessage.react("✖");
 
       const messageId = sentMessage.id;
-      await messageInsert(messageId);
+      await messageInsert(messageId, msg.author.id);
       await reactionInsert(messageId, msg.author.id);
     });
 }
@@ -205,8 +205,8 @@ function isNotThisChannel(msg, channelName) {
 }
 
 async function cancel(message, userId) {
-  let result = await getReactionUsers.getReactionUserByUserId(userId);
-  if (result.length > 0 && result[0]["user_id"] === userId) {
+  let result = await getRandomMessage.getRandomMatchingMessagesByAuthorId(userId);
+  if (result.length > 0 && result[0]["author_id"] === userId) {
     await reactionDelete.deleteRandomMatchingReactionMessage(message.id);
     await deleteRandomMatching.deleteRandomMatchingMessage(message.id);
     message.reactions.removeAll().catch(error => console.log(error));
