@@ -10,9 +10,10 @@ CREATE TABLE IF NOT EXISTS members (
 
 CREATE TABLE IF NOT EXISTS random_matching_reactions (
     message_id varchar(20)
-    ,user_id varchar(20) primary key
+    ,user_id varchar(20)
 );
 
 CREATE TABLE IF NOT EXISTS random_matching_message (
     message_id varchar(20) primary key
+    ,author_id varchar(20)
 );
