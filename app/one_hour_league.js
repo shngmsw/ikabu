@@ -72,7 +72,9 @@ const createMentionList = userIdList => {
 };
 
 async function reactionUserDelete(message, userId) {
-  reactionDelete.deleteRandomMatchingReactionsUser(message.id, userId);
+  const msg = await channel.messages.fetch(message);
+  await msg.reactions.resolve("one hour league cancel").users.remove(userId);
+  await reactionDelete.deleteRandomMatchingReactionsUser(message.id, userId);
   let userList = await getReactionUsersList(message.id);
   if (userList.length == 0) return;
 }
@@ -140,7 +142,7 @@ function sendLeagueMatch(msg, l_args) {
         description:
           `どんなに相性がよくて楽しかったメンバーだとしてもリグマするのは原則【1時間】のみ！\n` +
           `物足りない人は ${channelLeague} で募集してみるでし！\n\n` +
-          `先着順で4人揃い次第募集は締め切り！\n✖リアクションで募集主のみキャンセルできるでし！`,
+          `先着順で4人揃い次第募集は締め切り！\n❌リアクションで募集主のみキャンセルできるでし！`,
         color: 0xf02d7d,
         title: "1時間リグマ募集とは",
         url:
@@ -189,7 +191,7 @@ function sendLeagueMatch(msg, l_args) {
       });
 
       sentMessage.react("✅");
-      sentMessage.react("✖");
+      sentMessage.react("❌");
 
       const messageId = sentMessage.id;
       await messageInsert(messageId, msg.author.id);
@@ -207,12 +209,25 @@ function isNotThisChannel(msg, channelName) {
 }
 
 async function cancel(message, userId) {
-  let result = await getRandomMessage.getRandomMatchingMessagesByAuthorId(userId);
+
+  let result = await getRandomMessage.getRandomMatchingMessagesByAuthorId(message.id, userId);
   if (result.length > 0 && result[0]["author_id"] === userId) {
     await reactionDelete.deleteRandomMatchingReactionMessage(message.id);
     await deleteRandomMatching.deleteRandomMatchingMessage(message.id);
     message.reactions.removeAll().catch(error => console.log(error));
     let txt = `<@${userId}> の募集〆`;
     message.reply(txt);
-  };
+  } else {
+    // 募集主でも募集主以外でも✖押したときに✖のリアクションは削除
+    await message.reactions.cache.map(async function(reaction) {
+      reaction.fetch().then(r => {
+           r.users.cache.map(item => {
+              if(!item.bot && item.id === userId && r.emoji.name === "❌") {
+                r.remove();
+                message.react("❌");
+              }
+          })
+      });
+    });
+  }
 }

@@ -18,13 +18,13 @@ async function getRandomMatchingMessages() {
   }
 };
 
-async function getRandomMatchingMessagesByAuthorId(author_id) {
+async function getRandomMatchingMessagesByAuthorId(message_id, author_id) {
   const db = await getPostgresClient();
   let result;
   try {
     const sql =
-      "SELECT author_id FROM random_matching_message where author_id = $1";
-    const params = [author_id];
+      "SELECT author_id FROM random_matching_message where message_id = $1 and author_id = $2";
+    const params = [message_id, author_id];
 
     result = await db.execute(sql, params);
   } finally {
