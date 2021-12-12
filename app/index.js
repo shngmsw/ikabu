@@ -83,9 +83,9 @@ client.on("messageReactionAdd", async (reaction, user) => {
     }
   }
   if (!user.bot) {
-    if (reaction.emoji.name == "✅" && user.bot == false) {
+    if (reaction.emoji.name === "✅" && user.bot == false) {
       await oneHourLeague.reactionUserInsert(reaction.message, user.id);
-    } else if (reaction.emoji.name == "✖" && user.bot == false) {
+    } else if (reaction.emoji.name === "❌" && user.bot == false) {
       await oneHourLeague.cancel(reaction.message, user.id);
     }
   }
@@ -103,7 +103,9 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
 client.on("messageReactionRemove", async (reaction, user) => {
   if (!user.bot) {
-    console.log(`Removed ${reaction.emoji.name} from ${user.tag}`);
-    await oneHourLeague.reactionUserDelete(reaction.message, user.id);
+    if (reaction.emoji.name === "✅" && user.bot == false) {
+      await oneHourLeague.reactionUserDelete(reaction.message, user.id);
+      console.log(`Removed ${reaction.emoji.name} from ${user.tag}`);
+    }
   }
 });
