@@ -60,7 +60,6 @@ function call(msg) {
     case "weapon":
       handleBuki(command, msg);
       break;
-    case "fes":
     case "now":
     case "nou":
     case "next":
