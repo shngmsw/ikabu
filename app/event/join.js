@@ -1,5 +1,5 @@
-const getMember = require("../db/members_select.js");
-const getFC = require("../db/fc_select.js");
+const getMember = require("../../db/members_select.js");
+const getFC = require("../../db/fc_select.js");
 
 module.exports = async function guildMemberAddEvent(member) {
     const guild = member.guild;
