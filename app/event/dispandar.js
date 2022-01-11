@@ -1,4 +1,4 @@
-const common = require("./common.js");
+const common = require("../common.js");
 const regexDiscrdMessageUrl = 'https://(ptb.|canary.)?discord(app)?.com/channels/' +
     '(?<guild>[0-9]{18})/(?<channel>[0-9]{18})/(?<message>[0-9]{18})'
 

@@ -1,5 +1,5 @@
 const Combinatorics = require("js-combinatorics");
-const common = require("./common.js");
+const common = require("../common.js");
 
 module.exports = async function handleKansen(msg, args) {
     var how_many_times = Number(args);
