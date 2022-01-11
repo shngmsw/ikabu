@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const getMember = require("../db/members_select.js");
+const getMember = require("../../db/members_select.js");
 module.exports = async function removeRookie(msg) {
   const dt = new Date();
   const lastMonth = dt.setMonth(dt.getMonth() - 1);
@@ -18,7 +18,10 @@ module.exports = async function removeRookie(msg) {
       embed.setDescription(
         "新入部員期間が終わったでし！\nこれからもイカ部心得を守ってイカ部生活をエンジョイするでし！"
       );
-      embed.setAuthor(msg.author.username, msg.author.avatarURL());
+      embed.setAuthor(options = {
+        name = msg.author.username,
+        iconURL =  msg.author.avatarURL()
+      });
       msg.channel.send(embed).catch();
     }
   }

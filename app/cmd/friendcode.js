@@ -1,5 +1,5 @@
-const insert = require("../db/fc_insert.js");
-const getFC = require("../db/fc_select.js");
+const insert = require("../../db/fc_insert.js");
+const getFC = require("../../db/fc_select.js");
 const Discord = require("discord.js");
 
 module.exports = function handleFriendCode(msg) {
@@ -32,13 +32,13 @@ async function selectFriendCode(msg) {
         let fc = await getFC(id, msg, args[0]);
         // console.log("getFC:" + fc[0].code);
         if (fc[0] != null) {
-            msg.channel.send(composeEmbed(msg.mentions.users.first(), fc[0].code, true));
+            msg.channel.send({ embeds: composeEmbed(msg.mentions.users.first(), fc[0].code, true) });
             return;
         }
     }
     if (result.length > 0) {
         for (var r of result) {
-            msg.channel.send(composeEmbed(msg.mentions.users.first(), r, false));
+            msg.channel.send({ embeds: composeEmbed(msg.mentions.users.first(), r, false) });
         }
     } else {
         msg.channel.send(
@@ -50,13 +50,11 @@ async function selectFriendCode(msg) {
 function composeEmbed(users, fc, isDatabase) {
     const embed = new Discord.MessageEmbed();
     embed.setDescription(fc);
-    embed.setAuthor(
-        name = users.username,
-        iconURL = users.avatarURL()
-    );
+    embed.setAuthor(options = { name: users.username, iconURL: users.avatarURL });
     if (!isDatabase) {
-        embed.setFooter(
+        embed.setFooter(options = {
             text = "自己紹介チャンネルより引用"
+        }
         );
     }
     return embed;
