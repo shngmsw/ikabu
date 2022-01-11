@@ -11,11 +11,12 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
+    "@discordjs/voice": "^0.7.5",
     "config": "^3.3.4",
     "config-reloadable": "^1.0.8",
     "data-utils": "0.0.2",
     "date-utils": "^1.2.21",
-    "discord.js": "^12.5.1",
+    "discord.js": "^13.5.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "ffmpeg-static": "^4.2.7",
@@ -28,7 +29,7 @@
     "ytdl-core": "^3.4.1"
   },
   "engines": {
-    "node": "12.x"
+    "node": "16.x"
   },
   "license": "MIT",
   "keywords": [
