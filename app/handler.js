@@ -1,20 +1,20 @@
 const handleBan = require("./ban.js");
 const handleBuki = require("./buki.js");
-const handleFriendCode = require("./friendcode.js");
-const handleSpecial = require("./special.js");
+const handleFriendCode = require("./cmd/friendcode.js");
+const handleSpecial = require("./cmd/special.js");
 const handleHelp = require("./help.js");
-const handleKansen = require("./kansen.js");
-const handlePick = require("./pick.js");
+const handleKansen = require("./cmd/kansen.js");
+const handlePick = require("./cmd/pick.js");
 const handleOmikuji = require("./omikuji.js");
-const handlePoll = require("./poll.js");
-const handleRecruit = require("./recruit.js");
+const handlePoll = require("./cmd/poll.js");
+const handleRecruit = require("./cmd/recruit.js");
 const handleRule = require("./rule.js");
 const handleShow = require("./show.js");
 const handleStageInfo = require("./stageinfo.js");
-const handleSub = require("./sub.js");
+const handleSub = require("./cmd/sub.js");
 const handleTimer = require("./timer.js");
-const handleVoicePick = require("./vpick.js");
-const handleWiki = require("./wiki.js");
+const handleVoicePick = require("./cmd/vpick.js");
+const handleWiki = require("./cmd/wiki.js");
 
 module.exports = {
   call: call
