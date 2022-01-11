@@ -4,16 +4,16 @@ const client = new Discord.Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION"]
 });
 const Handler = require("./handler.js");
-const Dispandar = require("./dispandar.js");
+const Dispandar = require("./event/dispandar.js");
 const TTS = require("./tts/voice_bot_node.js");
-const privateChat = require("./secretchat.js");
+const privateChat = require("./voice/secretchat.js");
 const handleStageInfo = require("./stageinfo.js");
-const removeRookie = require("./rookie.js");
-const chatCountUp = require("./members.js");
-const suggestionBox = require("./suggestion-box.js");
+const removeRookie = require("./event/rookie.js");
+const chatCountUp = require("./event/members.js");
+const suggestionBox = require("./reaction/suggestion-box.js");
 const oneHourLeague = require("./one_hour_league.js");
-const join = require("./join.js");
-const deleteToken = require("./delete_token.js");
+const join = require("./event/join.js");
+const deleteToken = require("./event/delete_token.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on("message", async msg => {
