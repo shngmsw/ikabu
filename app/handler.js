@@ -17,7 +17,7 @@ const handleVoicePick = require("./cmd/vpick.js");
 const handleWiki = require("./cmd/wiki.js");
 
 module.exports = {
-  call: call
+  call: call,
 };
 
 function call(msg) {

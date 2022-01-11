@@ -3,7 +3,7 @@ var { getPostgresClient } = require("./db.js");
 module.exports = {
   deleteRandomMatchingReactions,
   deleteRandomMatchingReactionsUser,
-  deleteRandomMatchingReactionMessage
+  deleteRandomMatchingReactionMessage,
 };
 
 async function deleteRandomMatchingReactions() {

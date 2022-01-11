@@ -2,7 +2,7 @@ var { getPostgresClient } = require("./db.js");
 
 module.exports = {
   getReactionUsers,
-  getReactionUserByUserId
+  getReactionUserByUserId,
 };
 
 async function getReactionUsers(messageId) {

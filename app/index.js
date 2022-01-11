@@ -1,7 +1,7 @@
 // Discord bot implements
 const Discord = require("discord.js");
 const client = new Discord.Client({
-  partials: ["MESSAGE", "CHANNEL", "REACTION"]
+  partials: ["MESSAGE", "CHANNEL", "REACTION"],
 });
 const Handler = require("./handler.js");
 const Dispandar = require("./event/dispandar.js");
@@ -16,7 +16,7 @@ const join = require("./event/join.js");
 const deleteToken = require("./event/delete_token.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
-client.on("messageCreate", async msg => {
+client.on("messageCreate", async (msg) => {
   if (msg.author.bot) {
     if (msg.content.startsWith("/poll")) {
       if (msg.author.username === "ブキチ") {
@@ -54,14 +54,14 @@ client.on("messageCreate", async msg => {
   removeRookie(msg);
 });
 
-client.on("guildMemberAdd", member => {
+client.on("guildMemberAdd", (member) => {
   join(member);
 });
 
-client.on("guildMemberRemove", member => {
+client.on("guildMemberRemove", (member) => {
   const guild = member.guild;
   guild.channels.cache
-    .find(channel => channel.id === process.env.CHANNEL_ID_RETIRE_LOG)
+    .find((channel) => channel.id === process.env.CHANNEL_ID_RETIRE_LOG)
     .send(`${member.user.tag}さんが退部しました。`);
 });
 
