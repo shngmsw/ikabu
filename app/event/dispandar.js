@@ -11,10 +11,10 @@ async function dispand(message) {
   messages = await extractMessages(message);
   for (var m in messages) {
     if (message.content) {
-      await message.channel.send(common.composeEmbed(messages[m]));
+      await message.channel.send({ embeds: [common.composeEmbed(messages[m])] });
     }
     for (var embed in messages[m].embeds) {
-      await message.channel.send(messages[m].embeds[embed]);
+      await message.channel.send({ embeds: [messages[m].embeds[embed]] });
     }
   }
 }

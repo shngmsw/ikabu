@@ -32,13 +32,13 @@ async function selectFriendCode(msg) {
         let fc = await getFC(id, msg, args[0]);
         // console.log("getFC:" + fc[0].code);
         if (fc[0] != null) {
-            msg.channel.send({ embeds: composeEmbed(msg.mentions.users.first(), fc[0].code, true) });
+            msg.channel.send({ embeds: [composeEmbed(msg.mentions.users.first(), fc[0].code, true)] });
             return;
         }
     }
     if (result.length > 0) {
         for (var r of result) {
-            msg.channel.send({ embeds: composeEmbed(msg.mentions.users.first(), r, false) });
+            msg.channel.send({ embeds: [composeEmbed(msg.mentions.users.first(), r, false)] });
         }
     } else {
         msg.channel.send(

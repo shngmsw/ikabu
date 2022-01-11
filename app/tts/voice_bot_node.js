@@ -188,9 +188,10 @@ async function main(message) {
         .catch((error) => {
           //console.log('error ->');
           console.error(error);
-          message.channel.send(
-            `${modeList1[mode]}の呼び出しにエラーが発生したでし\nエラー内容:${error.details[0].message}`,
-            { code: true }
+          message.channel.send({
+            content:
+              `${modeList1[mode]}の呼び出しにエラーが発生したでし\nエラー内容:${error.details[0].message}`,
+          }
           );
         });
     } else {
@@ -223,9 +224,7 @@ async function main(message) {
       if (!context || (context && context.status === 4)) {
         if (voiceChanelJoin(message.member.voice.channel)) {
           //console.log('ボイスチャンネルへ接続したでし');
-          message.channel.send("ボイスチャンネルへ接続したでし", {
-            code: true,
-          });
+          message.channel.send("ボイスチャンネルへ接続したでし");
           message.reply(
             `\nチャットの読み上げ準備ができたでし。切断時は${prefix}killでし\n${prefix}mode で読み上げAPIを変更できるでし\。\n ${prefix}voiceで読み上げ音声を選択できるでし。\n 音声が読み上げられない場合は${prefix}reconnectを試してみるでし。`
           );
@@ -242,16 +241,12 @@ async function main(message) {
   if (message.content === `${prefix}reconnect`) {
     if (context && context.status !== 4) {
       context.disconnect();
-      message.channel.send("5秒後にボイスチャンネルへ再接続するでし", {
-        code: true,
-      });
+      message.channel.send("5秒後にボイスチャンネルへ再接続するでし");
       if (message.member.voice.channel) {
         setTimeout(() => {
           if (voiceChanelJoin(message.member.voice.channel)) {
             //console.log('ボイスチャンネルへ再接続したでし');
-            message.channel.send("ボイスチャンネルへ再接続したでし", {
-              code: true,
-            });
+            message.channel.send("ボイスチャンネルへ再接続したでし");
             readChannelId = message.channel.id;
           }
         }, 5000);
@@ -279,9 +274,8 @@ async function main(message) {
     if (1 < split.length) {
       if (modeList1[split[1]] != null) {
         mode = Number(split[1]);
-        const modeMessage = `読み上げAPIを${split[1]} : ${
-          modeList1[split[1]]
-        }に設定したでし`;
+        const modeMessage = `読み上げAPIを${split[1]} : ${modeList1[split[1]]
+          }に設定したでし`;
         message.reply(modeMessage);
         yomiage({
           message: modeMessage,
@@ -306,9 +300,8 @@ async function main(message) {
     let typeMessage = "\n音声タイプ -> その説明\n";
     if (mode === 1) {
       for (const voiceLists1Key in voiceLists1) {
-        typeMessage = `${typeMessage + voiceLists1Key}->${
-          voiceLists1[voiceLists1Key]
-        }\n`;
+        typeMessage = `${typeMessage + voiceLists1Key}->${voiceLists1[voiceLists1Key]
+          }\n`;
       }
     } else {
       typeMessage = `${typeMessage}APIが不正でし`;
@@ -322,9 +315,8 @@ async function main(message) {
       if (1 < split.length) {
         if (voiceLists1[split[1]] != null) {
           voicePattern1 = split[1];
-          const voiceMessage = `読み上げ音声を${split[1]} : ${
-            voiceLists1[split[1]]
-          }に設定したでし`;
+          const voiceMessage = `読み上げ音声を${split[1]} : ${voiceLists1[split[1]]
+            }に設定したでし`;
           message.reply(voiceMessage);
           yomiage({
             message: voiceMessage,
@@ -355,8 +347,7 @@ async function main(message) {
         if (split[1] <= 200 && split[1] >= 50) {
           pitch = Number(split[1]);
           message.channel.send(
-            `読み上げ音声の高さを${split[1]}に変更したでし`,
-            { code: true }
+            `読み上げ音声の高さを${split[1]}に変更したでし`
           );
         } else {
           message.reply(
@@ -374,8 +365,7 @@ async function main(message) {
         if (split[1] <= 200 && split[1] >= 50) {
           speed = Number(split[1]);
           message.channel.send(
-            `読み上げ音声の速度を${split[1]}に変更したでし`,
-            { code: true }
+            `読み上げ音声の速度を${split[1]}に変更したでし`
           );
         } else {
           message.reply(
@@ -407,7 +397,7 @@ async function main(message) {
       });
     } catch (error) {
       //console.log(error.message);
-      message.channel.send(error.message, { code: true });
+      message.channel.send(error.message);
     }
   } else {
     //console.log('読み上げ対象外のチャットでし');

@@ -29,7 +29,7 @@ function sf(msg) {
                 "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
             );
             embedStr.setColor("#ED2D7C");
-            msg.channel.send(embedStr);
+            msg.channel.send({ embeds: [embedStr] });
             const embedStr_gachi = getEmbed(data.gachi);
             embedStr_gachi.setAuthor(options = {
                 name = "ガチマッチ",
@@ -41,7 +41,7 @@ function sf(msg) {
                 "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
             );
             embedStr_gachi.setColor("#F54910");
-            msg.channel.send(embedStr_gachi);
+            msg.channel.send({ embeds: [embedStr_gachi] });
         } else {
             console.log("なんかエラーでてるわ");
         }
@@ -70,7 +70,7 @@ function stageinfo(msg) {
                 "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
             );
             embedStr.setColor("#ED2D7C");
-            msg.channel.send(embedStr);
+            msg.channel.send({ embeds: [embedStr] });
             const embedStr_gachi = getEmbed(data.gachi);
             embedStr_gachi.setAuthor(options = {
                 name = "ガチマッチ",
@@ -82,7 +82,7 @@ function stageinfo(msg) {
                 "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
             );
             embedStr_gachi.setColor("#F54910");
-            msg.channel.send(embedStr_gachi);
+            msg.channel.send({ embeds: [embedStr_gachi] });
         } else {
             msg.channel.send("なんかエラーでてるわ");
             console.log("なんかエラーでてるわ");

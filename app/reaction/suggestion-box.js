@@ -16,22 +16,24 @@ module.exports = {
         .setColor(0x008080)
         .setDescription(
           "イカ部に関するご意見や、メンバーからの嫌がらせなどを通報するにはこのメッセージに📭リアクションをしてください。\n" +
-            "あなたと管理者だけしか閲覧できないプライベートチャンネルが作成されます。\n" +
-            "頂いたご意見、通報内容の全てに対応できる訳ではございませんので、ご了承くださいませ。" +
-            `ご意見の一部は <#${infomationChannelId}> にて回答させて頂く場合がございます。`
+          "あなたと管理者だけしか閲覧できないプライベートチャンネルが作成されます。\n" +
+          "頂いたご意見、通報内容の全てに対応できる訳ではございませんので、ご了承くださいませ。" +
+          `ご意見の一部は <#${infomationChannelId}> にて回答させて頂く場合がございます。`
         );
       msg.channel
-        .send(messgeEmbed)
+        .send({ embeds: [messgeEmbed] })
         .then((sentMessage) => sentMessage.react("📭"));
       msg.delete();
     }
   },
   create: async function suggestionBox(msg, user) {
     const newChannel = await txChCreate(msg, user);
-    newChannel.send(
-      "@everyone " +
+    newChannel.send({
+      content:
+        "@everyone " +
         `<@${user.id}>` +
         "さん専用のチャンネルでし\n問い合わせ内容を入力してほしいでし\n`(管理者のみ)!close`で問い合わせを終了してアーカイブできるでし"
+    }
     );
     return;
   },
@@ -55,7 +57,7 @@ module.exports = {
         (channel) =>
           channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX_ARCHIVE
       );
-      messages.map((m) => sendChannel.send(common.composeEmbed(m)));
+      messages.map((m) => sendChannel.send({ embeds: [common.composeEmbed(m)] }));
       txChHide(msg);
       return;
     }

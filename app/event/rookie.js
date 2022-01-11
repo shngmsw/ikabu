@@ -22,7 +22,7 @@ module.exports = async function removeRookie(msg) {
         name = msg.author.username,
         iconURL =  msg.author.avatarURL()
       });
-      msg.channel.send(embed).catch();
+      msg.channel.send({ embeds: [embed] }).catch();
     }
   }
 };

@@ -127,8 +127,8 @@ module.exports = function handleShow(msg, args) {
                   "・" +
                   common.weapon2txt(data.details[0].weapons[3].id);
 
-                msg.channel.send("", {
-                  embed: {
+                msg.channel.send({
+                  embeds: {
                     author: {
                       name: "SALMON RUN",
                       icon_url:

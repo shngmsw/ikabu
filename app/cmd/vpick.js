@@ -6,8 +6,8 @@ module.exports = function handleVoicePick(msg) {
   args.shift();
   var kazu = Number(args[0]);
   if (kazu) {
-    msg.channel.send(msg.member.voice.channel.members.random(kazu));
+    msg.channel.send({ content: msg.member.voice.channel.members.random(kazu) });
   } else {
-    msg.channel.send(msg.member.voice.channel.members.random(1));
+    msg.channel.send({ content: msg.member.voice.channel.members.random(1) });
   }
 };

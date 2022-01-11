@@ -20,7 +20,7 @@ module.exports = async function handleWiki(msg, word) {
         // }
       },
     };
-    msg.channel.send(emb);
+    msg.channel.send({ embeds: [emb] });
   } catch (err) {
     console.log(err.name + ": " + err.message);
   }
