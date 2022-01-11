@@ -16,7 +16,7 @@ const join = require("./event/join.js");
 const deleteToken = require("./event/delete_token.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
-client.on("message", async msg => {
+client.on("messageCreate", async msg => {
   if (msg.author.bot) {
     if (msg.content.startsWith("/poll")) {
       if (msg.author.username === "ブキチ") {
