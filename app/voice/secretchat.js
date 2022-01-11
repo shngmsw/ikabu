@@ -20,19 +20,19 @@ const BOT_ROLE_NAME = "bot";
 const pattern = /^[a-m]|^bot用/
 async function onVoiceStateUpdate(oldState, newState) {
 
-  if (oldState.channelID === newState.channelID) {
+  if (oldState.channelId === newState.channelId) {
     return;
   }
 
-  if (oldState.channelID != null) {
-    const oldChannel = oldState.guild.channels.cache.get(oldState.channelID);
+  if (oldState.channelId != null) {
+    const oldChannel = oldState.guild.channels.cache.get(oldState.channelId);
     if (oldChannel.members.size == 0) {
       await chHide(oldChannel);
     }
   }
 
-  if (newState.channelID != null) {
-    const newChannel = newState.guild.channels.cache.get(newState.channelID);
+  if (newState.channelId != null) {
+    const newChannel = newState.guild.channels.cache.get(newState.channelId);
     if (!newChannel.name.match(pattern)) {
       return;
     }
