@@ -1,4 +1,4 @@
-const common = require("./common.js");
+const common = require("../common.js");
 const rules = {
   0: "ガチエリア",
   1: "ガチヤグラ",

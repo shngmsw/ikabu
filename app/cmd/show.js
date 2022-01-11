@@ -1,5 +1,5 @@
 const request = require("request");
-const common = require("./common.js");
+const common = require("../common.js");
 
 function sendStageInfo(msg, data, scheduleNum) {
   const l_args = common.getLeague(data, scheduleNum).split(",");

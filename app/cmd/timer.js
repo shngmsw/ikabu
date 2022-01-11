@@ -1,4 +1,4 @@
-const common = require("./common.js");
+const common = require("../common.js");
 
 module.exports = function handleTimer(msg, args) {
   var kazu = Number(args);
