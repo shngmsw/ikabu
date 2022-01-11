@@ -1,4 +1,4 @@
-const common = require("./common.js");
+const common = require("../common.js");
 module.exports = function handlePick(msg) {
     var strCmd = msg.content.replace(/　/g, " ");
     strCmd = msg.content.replace(/\r?\n/g, " ");

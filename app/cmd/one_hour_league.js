@@ -1,13 +1,13 @@
 const request = require("request");
-const common = require("./common.js");
+const common = require("../common.js");
 const Discord = require("discord.js");
 const { MessageEmbed } = require("discord.js");
-const messageInsert = require("../db/rm_insert.js");
-const reactionInsert = require("../db/rmr_insert.js");
-const reactionDelete = require("../db/rmr_delete.js");
-const getReactionUsers = require("../db/rmr_select.js");
-const getRandomMessage = require("../db/rm_select.js");
-const deleteRandomMatching = require("../db/rm_delete.js");
+const messageInsert = require("../../db/rm_insert.js");
+const reactionInsert = require("../../db/rmr_insert.js");
+const reactionDelete = require("../../db/rmr_delete.js");
+const getReactionUsers = require("../../db/rmr_select.js");
+const getRandomMessage = require("../../db/rm_select.js");
+const deleteRandomMatching = require("../../db/rm_delete.js");
 
 var l_date;
 var l_rule;

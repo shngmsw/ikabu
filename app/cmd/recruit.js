@@ -1,5 +1,5 @@
 const request = require("request");
-const common = require("./common.js");
+const common = require("../common.js");
 const Discord = require("discord.js");
 
 module.exports = function handleRecruit(msg) {
