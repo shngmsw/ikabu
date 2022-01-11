@@ -19,14 +19,14 @@ function composeEmbed(message) {
     const embed = new Discord.MessageEmbed();
     embed.setDescription(message.content);
     embed.setTimestamp(message.createdAt);
-    embed.setAuthor(options = {
-        name = message.author.username,
-        iconURL = message.author.avatarURL()
+    embed.setAuthor({
+        name: message.author.username,
+        iconURL: message.author.avatarURL()
     }
     );
-    embed.setFooter(options = {
-        text = message.channel.name,
-        iconURL = message.guild.iconURL()
+    embed.setFooter({
+        text: message.channel.name,
+        iconURL: message.guild.iconURL()
     }
     );
     if (message.attachments.size > 0) {

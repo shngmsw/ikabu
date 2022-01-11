@@ -50,10 +50,10 @@ async function selectFriendCode(msg) {
 function composeEmbed(users, fc, isDatabase) {
     const embed = new Discord.MessageEmbed();
     embed.setDescription(fc);
-    embed.setAuthor(options = { name: users.username, iconURL: users.avatarURL });
+    embed.setAuthor({ name: users.username, iconURL: users.avatarURL });
     if (!isDatabase) {
-        embed.setFooter(options = {
-            text = "自己紹介チャンネルより引用"
+        embed.setFooter({
+            text: "自己紹介チャンネルより引用"
         }
         );
     }

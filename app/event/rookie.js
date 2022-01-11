@@ -18,9 +18,9 @@ module.exports = async function removeRookie(msg) {
       embed.setDescription(
         "新入部員期間が終わったでし！\nこれからもイカ部心得を守ってイカ部生活をエンジョイするでし！"
       );
-      embed.setAuthor(options = {
-        name = msg.author.username,
-        iconURL =  msg.author.avatarURL()
+      embed.setAuthor({
+        name: msg.author.username,
+        iconURL: msg.author.avatarURL()
       });
       msg.channel.send({ embeds: [embed] }).catch();
     }

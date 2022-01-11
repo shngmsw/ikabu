@@ -355,7 +355,7 @@ function sendLeagueMatch(msg, txt, l_args, stageImages) {
 
 function sendCloseMessage(msg) {
     const embed = getCloseEmbed(msg);
-    msg.channel.send({ embeds: { [embed] } });
+    msg.channel.send({ embeds: [embed] });
 }
 function getCloseEmbed(msg) {
     const stageEmbed = new Discord.MessageEmbed();
