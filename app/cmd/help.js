@@ -11,7 +11,7 @@ module.exports = function handleHelp(msg) {
                 new MessageEmbed()
                     .setAuthor({
                         name: 'ブキチの使い方(読み上げbot)',
-                        icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg'
+                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg'
                     },
                     )
                     .setColor(0x1bc2a5)
@@ -52,7 +52,7 @@ module.exports = function handleHelp(msg) {
                 new MessageEmbed()
                     .setAuthor({
                         name: 'ブキチの使い方(2/2)',
-                        icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg'
+                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg'
                     },
                     )
                     .setColor(0x1bc2a5)
@@ -107,7 +107,7 @@ module.exports = function handleHelp(msg) {
                 new MessageEmbed()
                     .setAuthor({
                         name: 'ブキチの使い方(1/2)',
-                        icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg'
+                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg'
                     },
                     )
                     .setColor(0x1bc2a5)
