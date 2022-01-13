@@ -11,14 +11,14 @@ async function dispand(message) {
   messages = await extractMessages(message);
   for (var m in messages) {
     if (message.content) {
-      await message.channel.send({ embeds: [common.composeEmbed(messages[m])] });
+      await message.channel.send({ embeds: [common.composeEmbed(messages[m], message.content)] });
     }
     for (var embed in messages[m].embeds) {
       await message.channel.send({ embeds: [messages[m].embeds[embed]] });
     }
+    message.delete();
   }
 }
-
 async function extractMessages(message) {
   let messages = new Array();
   let matches = message.content.match(regexDiscrdMessageUrl);

@@ -14,5 +14,5 @@ const specialweapons = {
 
 module.exports = function handleSpecial(msg) {
   var special = specialweapons[Math.floor(Math.random() * 10)];
-  msg.channel.send("`" + special + "`でし！");
+  msg.reply("`" + special + "`でし！");
 };

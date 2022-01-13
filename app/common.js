@@ -15,13 +15,15 @@ module.exports = {
     composeEmbed: composeEmbed
 }
 
-function composeEmbed(message) {
+function composeEmbed(message, url) {
     const embed = new Discord.MessageEmbed();
     embed.setDescription(message.content);
     embed.setTimestamp(message.createdAt);
+    embed.setTitle('引用元へジャンプ')
+    embed.setURL(url)
     embed.setAuthor({
         name: message.author.username,
-        iconURL: message.author.avatarURL()
+        iconURL: message.author.displayAvatarURL()
     }
     );
     embed.setFooter({

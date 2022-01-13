@@ -1,12 +1,21 @@
 // Discord bot implements
-const { Client, Intents } = require("discord.js");
+const { joinVoiceChannel,
+  createAudioPlayer,
+  createAudioResource,
+  entersState,
+  StreamType,
+  AudioPlayerStatus,
+  VoiceConnectionStatus, } = require("@discordjs/voice");
+const { Client, Intents, VoiceChannel } = require("discord.js");
 const client = new Client({
-  intents: [Intents.FLAGS.GUILDS,
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.GUILD_BANS,
-  Intents.FLAGS.GUILD_PRESENCES,
-  Intents.FLAGS.GUILD_VOICE_STATES,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+  intents: [
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.GUILD_BANS,
+    Intents.FLAGS.GUILD_PRESENCES,
+    Intents.FLAGS.GUILD_VOICE_STATES,
+    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+    Intents.FLAGS.GUILD_MEMBERS,
   ],
 });
 const Handler = require("./handler.js");
@@ -36,7 +45,7 @@ client.on("messageCreate", async (msg) => {
     return;
   }
   if (msg.content.match("ボーリング")) {
-    msg.channel.send(
+    msg.reply(
       "```「ボウリング」とは、前方に正三角形に並べられた10本のピンと呼ばれる棒をめがけボールを転がし、倒れたピンの数によって得られる得点を競うスポーツでし。" +
       "専用施設のボウリング場に設置された細長いレーンの上で行われる屋内競技で、レーンの長さが約23m、ピンまでの距離は約18mで行われるのが一般的でし。" +
       "英語では “bowling” と書き、球を意味する “ball” ではなく、ラテン語で「泡」や「こぶ」を意味する “bowl” が語源とされているでし。" +

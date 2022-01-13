@@ -7,7 +7,7 @@ const Discord = require("discord.js");
 module.exports = {
   init: async function suggestionBox(msg, user) {
     if (
-      msg.member.hasPermission("ADMINISTRATOR") &&
+      msg.member.permissions.has("ADMINISTRATOR") &&
       suggestionChannelParentId == msg.channel.parent.id &&
       msg.content === "!init"
     ) {
@@ -39,7 +39,7 @@ module.exports = {
   },
   archive: async function suggestionBoxArchive(msg) {
     if (
-      msg.member.hasPermission("ADMINISTRATOR") &&
+      msg.member.permissions.has("ADMINISTRATOR") &&
       suggestionChannelParentId == msg.channel.parent.id &&
       msg.content === "!close"
     ) {
@@ -57,7 +57,8 @@ module.exports = {
         (channel) =>
           channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX_ARCHIVE
       );
-      messages.map((m) => sendChannel.send({ embeds: [common.composeEmbed(m)] }));
+      let url = await m.url();
+      messages.map((m) => sendChannel.send({ embeds: [common.composeEmbed(m, url)] }));
       txChHide(msg);
       return;
     }

@@ -5,9 +5,11 @@ module.exports = function handleVoicePick(msg) {
   const args = strCmd.split(" ");
   args.shift();
   var kazu = Number(args[0]);
+  let user = '';
   if (kazu) {
-    msg.channel.send({ content: msg.member.voice.channel.members.random(kazu) });
+    user = msg.member.voice.channel.members.random(kazu);
   } else {
-    msg.channel.send({ content: msg.member.voice.channel.members.random(1) });
+    user = msg.member.voice.channel.members.random(1);
   }
+  msg.channel.send({ content: `${user}` });
 };

@@ -32,9 +32,6 @@ module.exports = async function handleKansen(msg, args) {
 
             resultList.push(i + 1 + "回目：" + choose_comb);
 
-            // console.log("\n== now watchers ==");
-            // console.log(resultList);
-            // console.log("\n== next watchers ==");
             // now watching usersをnext watchersから取り除く
             tmp_watching_list = tmp_watching_list.filter(
                 function exclude_previous_watcher(players) {
@@ -64,13 +61,12 @@ module.exports = async function handleKansen(msg, args) {
                     }
                 }
             );
-            // console.log(tmp_watching_list);
         }
     }
 
     var emb = new MessageEmbed()
         .setColor(0xf02d7d)
-        .addField([{ name: "観戦の人", value: resultList.join("\n") }]);
+        .addFields([{ name: "観戦の人", value: resultList.join("\n") }]);
 
     var pin_msg = await msg.channel.send({ embeds: [emb] });
     pin_msg.pin();

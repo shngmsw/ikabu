@@ -1,13 +1,14 @@
 const request = require("request");
 const common = require("../common.js");
-const Discord = require("discord.js");
+const { MessageEmbed } = require("discord.js");
+
 
 module.exports = function handleRecruit(msg) {
     if (msg.content.startsWith("next") && msg.channel.name != "botコマンド") {
-        nextLeagueMatch(msg);
+        recruitLeagueMatch(msg, 1);
     }
     if (msg.content.startsWith("now") || msg.content.startsWith("nou")) {
-        nowLeagueMatch(msg);
+        recruitLeagueMatch(msg, 0);
     }
 
     if (msg.content.startsWith("nawabari")) {
@@ -32,46 +33,8 @@ module.exports = function handleRecruit(msg) {
     }
 };
 
-function nextLeagueMatch(msg) {
-    const channelName = "リグマ募集";
-    if (isNotThisChannel(msg, channelName)) {
-        return;
-    }
-    var strCmd = msg.content.replace(/　/g, " ");
-    strCmd = strCmd.replace("  ", " ");
-    const args = strCmd.split(" ");
-    args.shift();
-    if (strCmd.match("〆")) {
-        sendCloseMessage(msg);
-    } else {
-        request.get(
-            "https://splatoon2.ink/data/schedules.json",
-            function (error, response, body) {
-                if (!error && response.statusCode == 200) {
-                    const data = JSON.parse(body);
-                    const l_args = common.getLeague(data, 1).split(",");
-                    let txt =
-                        "@everyone 【リグマ募集】\n" +
-                        `<@${msg.author.id}>` +
-                        "たんがリグメン募集中でし！\n";
-                    if (args.length > 0) txt += "[参加条件] " + args.join(" ") + "\n";
-                    const stage_a =
-                        "https://splatoon2.ink/assets/splatnet" +
-                        data.league[1].stage_a.image;
-                    const stage_b =
-                        "https://splatoon2.ink/assets/splatnet" +
-                        data.league[1].stage_b.image;
-                    const stageImages = [stage_a, stage_b];
-                    sendLeagueMatch(msg, txt, l_args, stageImages);
-                } else {
-                    msg.channel.send("なんかエラーでてるわ");
-                }
-            }
-        );
-    }
-}
 
-function nowLeagueMatch(msg) {
+function recruitLeagueMatch(msg, type) {
     const channelName = "リグマ募集";
     if (isNotThisChannel(msg, channelName)) {
         return;
@@ -89,20 +52,21 @@ function nowLeagueMatch(msg) {
             function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     const data = JSON.parse(body);
-                    const l_args = common.getLeague(data, 0).split(",");
+                    const l_args = common.getLeague(data, type).split(",");
+                    let condition = 'なし'
                     let txt =
                         "@everyone 【リグマ募集】\n" +
                         `<@${msg.author.id}>` +
                         "たんがリグメン募集中でし！\n";
-                    if (args.length > 0) txt += "[参加条件] " + args.join(" ") + "\n";
+                    if (args.length > 0) condition = args.join("\n") + "\n";
                     const stage_a =
                         "https://splatoon2.ink/assets/splatnet" +
-                        data.league[0].stage_a.image;
+                        data.league[type].stage_a.image;
                     const stage_b =
                         "https://splatoon2.ink/assets/splatnet" +
-                        data.league[0].stage_b.image;
+                        data.league[type].stage_b.image;
                     const stageImages = [stage_a, stage_b];
-                    sendLeagueMatch(msg, txt, l_args, stageImages);
+                    sendLeagueMatch(msg, txt, condition, l_args, stageImages);
                 } else {
                     msg.channel.send("なんかエラーでてるわ");
                 }
@@ -134,11 +98,12 @@ function regularMatch(msg) {
                     const stage_b =
                         "https://splatoon2.ink/assets/splatnet" +
                         data.regular[0].stage_b.image;
+                    let condition = 'なし';
                     let txt =
                         "@everyone 【ナワバリ募集】\n" +
                         `<@${msg.author.id}>` +
                         "たんがナワバリ中でし！\n";
-                    if (args.length > 0) txt += "[参加条件] " + args.join(" ") + "\n";
+                    if (args.length > 0) condition = args.join("\n") + "\n";
                     txt += "よければ合流しませんか？";
                     const date =
                         common.unixTime2mdwhm(data.regular[0].start_time) +
@@ -149,26 +114,26 @@ function regularMatch(msg) {
                         "\n" +
                         common.stage2txt(data.regular[0].stage_b.id) +
                         "\n";
+                    const embed = new MessageEmbed()
+                        .setAuthor({
+                            name: "レギュラーマッチ",
+                            iconURL:
+                                "https://splatoon2.ink/assets/img/battle-regular.01b5ef.png",
+                        })
+                        .setColor(1693465)
+                        .addFields({
+                            name: date,
+                            value: regular_stage,
+                        })
+                        .addFields({
+                            name: '参加条件',
+                            value: condition,
+                        })
+                        .setThumbnail("https://splatoon2.ink/assets/img/battle-regular.01b5ef.png");
 
                     msg.channel.send({
                         content: txt,
-                        embed: {
-                            author: {
-                                name: "レギュラーマッチ",
-                                icon_url:
-                                    "https://splatoon2.ink/assets/img/battle-regular.01b5ef.png",
-                            },
-                            color: 1693465,
-                            fields: [
-                                {
-                                    name: date,
-                                    value: regular_stage,
-                                },
-                            ],
-                            thumbnail: {
-                                url: "https://splatoon2.ink/assets/img/battle-regular.01b5ef.png",
-                            },
-                        },
+                        embeds: [embed],
                         files: [stage_a, stage_b]
                     });
                 } else {
@@ -199,11 +164,12 @@ function salmonRun(msg) {
                     const stage =
                         "https://splatoon2.ink/assets/splatnet" +
                         data.details[0].stage.image;
+                    let condition = 'なし';
                     let txt =
                         "@everyone 【バイト募集】\n" +
                         `<@${msg.author.id}>` +
                         "たんがバイト中でし！\n";
-                    if (args.length > 0) txt += "[参加条件] " + args.join(" ") + "\n";
+                    if (args.length > 0) condition = args.join("\n") + "\n";
                     txt += "よければ合流しませんか？";
                     const date =
                         common.unixTime2mdwhm(data.details[0].start_time) +
@@ -220,27 +186,36 @@ function salmonRun(msg) {
                         "・" +
                         common.weapon2txt(data.details[0].weapons[3].id);
 
+                    const embed = new MessageEmbed()
+                        .setAuthor({
+                            name: "SALMON RUN",
+                            iconURL:
+                                "https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png",
+                        })
+                        .setColor(16733696)
+                        .addFields({
+                            name: '日時',
+                            value: date,
+                        })
+                        .addFields({
+                            name: '支給ブキ',
+                            value: weapons,
+                        })
+                        .addFields({
+                            name: 'ステージ',
+                            value: coop_stage,
+                        })
+                        .addFields({
+                            name: '参加条件',
+                            value: condition,
+                        })
+                        .setImage(stage);
+
                     msg.channel.send({
                         content: txt,
-                        embed: {
-                            author: {
-                                name: "SALMON RUN",
-                                icon_url:
-                                    "https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png",
-                            },
-                            title: date,
-                            color: 16733696,
-                            fields: [
-                                {
-                                    name: weapons,
-                                    value: coop_stage,
-                                },
-                            ],
-                            image: {
-                                url: stage,
-                            },
-                        },
+                        embeds: [embed]
                     });
+
                 } else {
                     msg.channel.send("なんかエラーでてるわ");
                 }
@@ -307,48 +282,50 @@ function sendOtherGames(msg, txt, image) {
     }
 }
 
-function sendLeagueMatch(msg, txt, l_args, stageImages) {
+function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     var l_date = l_args[0];
     var l_rule = l_args[1];
     var l_stage = l_args[2];
-    var tuhmbnail_url;
-
-    if (l_rule == "ガチエリア") {
-        tuhmbnail_url =
-            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png";
-    } else if (l_rule == "ガチヤグラ") {
-        tuhmbnail_url =
-            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png";
-    } else if (l_rule == "ガチホコバトル") {
-        tuhmbnail_url =
-            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png";
-    } else if (l_rule == "ガチアサリ") {
-        tuhmbnail_url =
-            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png";
-    } else {
-        tuhmbnail_url =
-            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png";
+    var thumbnail_url;
+    switch (l_rule) {
+        case "ガチエリア":
+            thumbnail_url =
+                "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png";
+            break;
+        case "ガチヤグラ":
+            thumbnail_url =
+                "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.pn";
+            break;
+        case "ガチホコバトル":
+            thumbnail_url =
+                "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png";
+            break;
+        case "ガチアサリ":
+            thumbnail_url =
+                "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png";
+            break;
+        default:
+            thumbnail_url =
+                "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png";
+            break;
     }
+
+    const embed = new MessageEmbed()
+        .setAuthor({
+            name: "リーグマッチ",
+            iconURL:
+                "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png",
+        })
+        .setColor(0xf02d7d)
+        .addFields({
+            name: l_date + "　" + l_rule,
+            value: l_stage,
+        }, { name: '参加条件', value: condition })
+        .setThumbnail(thumbnail_url);
 
     msg.channel.send({
         content: txt,
-        embeds: {
-            author: {
-                name: "リーグマッチ",
-                icon_url:
-                    "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png",
-            },
-            color: 0xf02d7d,
-            fields: [
-                {
-                    name: l_date + "　" + l_rule,
-                    value: l_stage,
-                },
-            ],
-            thumbnail: {
-                url: tuhmbnail_url,
-            },
-        },
+        embeds: [embed],
         files: stageImages
     });
 }
@@ -356,9 +333,10 @@ function sendLeagueMatch(msg, txt, l_args, stageImages) {
 function sendCloseMessage(msg) {
     const embed = getCloseEmbed(msg);
     msg.channel.send({ embeds: [embed] });
+    msg.delete();
 }
 function getCloseEmbed(msg) {
-    const stageEmbed = new Discord.MessageEmbed();
+    const stageEmbed = new MessageEmbed();
     stageEmbed.setDescription(`<@${msg.author.id}>たんの募集 〆`);
     return stageEmbed;
 }
@@ -366,7 +344,7 @@ function getCloseEmbed(msg) {
 function isNotThisChannel(msg, channelName) {
     const msgSendedChannelName = msg.channel.name;
     if (!msgSendedChannelName.match(channelName)) {
-        msg.channel.send("このコマンドはこのチャンネルでは使えないでし！");
+        msg.reply("このコマンドはこのチャンネルでは使えないでし！");
         return true;
     }
     return false;

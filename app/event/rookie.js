@@ -20,7 +20,7 @@ module.exports = async function removeRookie(msg) {
       );
       embed.setAuthor({
         name: msg.author.username,
-        iconURL: msg.author.avatarURL()
+        iconURL: msg.author.displayAvatarURL()
       });
       msg.channel.send({ embeds: [embed] }).catch();
     }

@@ -41,7 +41,7 @@ async function selectFriendCode(msg) {
             msg.channel.send({ embeds: [composeEmbed(msg.mentions.users.first(), r, false)] });
         }
     } else {
-        msg.channel.send(
+        msg.reply(
             "自己紹介チャンネルに投稿がないか、投稿した日時が古すぎて検索できないでし"
         );
     }
@@ -50,7 +50,7 @@ async function selectFriendCode(msg) {
 function composeEmbed(users, fc, isDatabase) {
     const embed = new Discord.MessageEmbed();
     embed.setDescription(fc);
-    embed.setAuthor({ name: users.username, iconURL: users.avatarURL });
+    embed.setAuthor({ name: users.username, iconURL: users.displayAvatarURL() });
     if (!isDatabase) {
         embed.setFooter({
             text: "自己紹介チャンネルより引用"
@@ -69,19 +69,20 @@ async function insertFriendCode(msg) {
     let code = args[0];
     // console.log("handle_fc:" + id + "/" + code);
     insert(id, code);
-    msg.channel.send("覚えたでし！");
+    msg.reply("覚えたでし！");
 }
 
 async function sendDM(msg) {
-    const introduction = msg.guild.channels.cache.find(channel => channel.id === "417591840250920971");
-    const botCmd = msg.guild.channels.cache.find(channel => channel.id === "465031112318517248");
+    const introduction = msg.guild.channels.cache.find(channel => channel.id === process.env.CHANNEL_ID_INTRODUCTION);
+    const botCmd = msg.guild.channels.cache.find(channel => channel.id === process.env.CHANNEL_ID_BOT_CMD);
     msg.author.createDM().then(DMChannel => {
         // We have now a channel ready.
         // Send the message.
         DMChannel.send(
-            `\`fcadd\`は ${introduction} 以外のチャンネル(無難なのは ${botCmd} )で使用してください。 \n`
-            + `${introduction} の直近100件までに投稿された内容は \`fc @自分\` で表示することができます。\n`
-            + `${introduction} でコマンド \`fcadd\` を使用すると、検索対象の書き込みが減ってしまいます。ご協力お願いします。`
+            `このメッセージは${introduction}チャンネルで\`fcadd\`コマンドを使った方に送信しています。 \n`
+            + ` \`fcadd\`コマンドは${introduction} 以外のチャンネル(無難なのは ${botCmd} )で使用してください。 \n`
+            + ` \`fc @自分\` と打つことで${introduction} の直近100件までに投稿された内容を表示することができます。\n`
+            + `そのため、自己紹介以外の投稿があると検索対象の書き込みが減ってしまいます。ご協力お願いします。`
         );
     });
 

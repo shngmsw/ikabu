@@ -10,9 +10,10 @@ module.exports = function handleRule(msg) {
   // console.log(rules);
   if (msg.content.startsWith("rule stage")) {
     var stage = common.stage2txt(Math.floor(Math.random() * 23).toString());
-    msg.channel.send("`" + stage + "`でし！");
+    var rule = rules[Math.floor(Math.random() * 4)];
+    msg.reply("`" + stage + 'で' + rule + "`でし！");
   } else if (msg.content.startsWith("rule")) {
     var rule = rules[Math.floor(Math.random() * 4)];
-    msg.channel.send("`" + rule + "`でし！");
+    msg.reply("`" + rule + "`でし！");
   }
 };

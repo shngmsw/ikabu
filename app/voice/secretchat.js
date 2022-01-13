@@ -7,6 +7,8 @@
 ・vc接続時は全員に見えるから秘密のお喋りでもない
 */
 // Discord bot implements
+const { joinVoiceChannel, entersState, VoiceConnectionStatus } = require("@discordjs/voice");
+
 const Discord = require("discord.js");
 const { Client, Intents } = require("discord.js");
 const client = new Client({
@@ -96,7 +98,7 @@ function chFind(voiceChannel) {
 async function chJoin(ch, user) {
   let target = await chFind(ch);
   if (target != null) {
-    target.updateOverwrite(ch.guild.roles.everyone, {
+    target.permissionOverwrites.edit(ch.guild.roles.everyone, {
       VIEW_CHANNEL: true,
       READ_MESSAGE_HISTORY: true,
     });
@@ -107,6 +109,6 @@ async function chJoin(ch, user) {
 async function chHide(ch) {
   let target = await chFind(ch);
   if (target != null) {
-    target.updateOverwrite(ch.guild.roles.everyone, { VIEW_CHANNEL: false });
+    target.permissionOverwrites.edit(ch.guild.roles.everyone, { VIEW_CHANNEL: false });
   }
 }

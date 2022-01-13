@@ -16,5 +16,5 @@ const subweapons = {
 
 module.exports = function handleSub(msg) {
   var sub = subweapons[Math.floor(Math.random() * 12)];
-  msg.channel.send("`" + sub + "`でし！");
+  msg.reply("`" + sub + "`でし！");
 };
