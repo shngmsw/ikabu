@@ -17,7 +17,6 @@ const handleStageInfo = require("./cmd/stageinfo.js");
 const removeRookie = require("./event/rookie.js");
 const chatCountUp = require("./event/members.js");
 const suggestionBox = require("./reaction/suggestion-box.js");
-const oneHourLeague = require("./cmd/one_hour_league.js");
 const join = require("./event/join.js");
 const deleteToken = require("./event/delete_token.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
@@ -35,11 +34,6 @@ client.on("messageCreate", async (msg) => {
       handleStageInfo(msg);
     }
     return;
-  } else {
-    // ランダムマッチング
-    if (msg.content === "1h") {
-      oneHourLeague.handleOneHourLeague(msg);
-    }
   }
   if (msg.content.match("ボーリング")) {
     msg.channel.send(
@@ -90,14 +84,6 @@ client.on("messageReactionAdd", async (reaction, user) => {
       return;
     }
   }
-  if (!user.bot) {
-    if (reaction.emoji.name === "✅" && user.bot == false) {
-      await oneHourLeague.reactionUserInsert(reaction.message, user.id);
-    } else if (reaction.emoji.name === "❌" && user.bot == false) {
-      await oneHourLeague.cancel(reaction.message, user.id);
-    }
-  }
-
   if (reaction.message.channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX) {
     if (reaction.emoji.name == "📭" && user.bot == false) {
       suggestionBox.create(reaction.message, user);
@@ -111,9 +97,5 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
 client.on("messageReactionRemove", async (reaction, user) => {
   if (!user.bot) {
-    if (reaction.emoji.name === "✅" && user.bot == false) {
-      await oneHourLeague.reactionUserDelete(reaction.message, user.id);
-      console.log(`Removed ${reaction.emoji.name} from ${user.tag}`);
-    }
   }
 });
