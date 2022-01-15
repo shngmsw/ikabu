@@ -1,7 +1,7 @@
 const request = require("request");
 const common = require("../common.js");
-const { MessageEmbed } = require("discord.js");
-
+const { URLSearchParams } = require('url');
+const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
 
 module.exports = function handleRecruit(msg) {
     if (msg.content.startsWith("next") && msg.channel.name != "botコマンド") {
@@ -137,7 +137,8 @@ function regularMatch(msg) {
 
                     msg.channel.send({
                         content: txt,
-                        embeds: [embed, imageEmbedA, imageEmbedB]
+                        embeds: [embed, imageEmbedA, imageEmbedB],
+                        components: [recruitActionRow(msg)],
                     });
                 } else {
                     msg.channel.send("なんかエラーでてるわ");
@@ -216,7 +217,8 @@ function salmonRun(msg) {
 
                     msg.channel.send({
                         content: txt,
-                        embeds: [embed]
+                        embeds: [embed],
+                        components: [recruitActionRow(msg)]
                     });
 
                 } else {
@@ -276,8 +278,10 @@ function sendOtherGames(msg, txt, image) {
         sendCloseMessage(msg);
     } else {
         if (args.length > 0) txt += ">>> [参加条件] " + args.join(" ");
+
         msg.channel.send({
             content: txt,
+            components: [recruitActionRow(msg)],
             files: [
                 image,
             ],
@@ -333,8 +337,8 @@ function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     msg.channel.send({
         content: txt,
         embeds: [embed, imageEmbedA, imageEmbedB],
+        components: [recruitActionRow(msg)]
     });
-
 }
 
 function sendCloseMessage(msg) {
@@ -355,4 +359,28 @@ function isNotThisChannel(msg, channelName) {
         return true;
     }
     return false;
+}
+
+function recruitActionRow(msg) {
+    const joinParams = new URLSearchParams();
+    joinParams.append('d', 'jr');
+    joinParams.append('mid', msg.id);
+
+    const cancelParams = new URLSearchParams();
+    cancelParams.append('d', 'cr');
+    cancelParams.append('mid', msg.id);
+
+    return new MessageActionRow()
+        .addComponents(
+            [
+                new MessageButton()
+                    .setCustomId(joinParams.toString())
+                    .setLabel("参加表明")
+                    .setStyle("PRIMARY"),
+                new MessageButton()
+                    .setCustomId(cancelParams.toString())
+                    .setLabel("キャンセル")
+                    .setStyle("DANGER")
+            ]
+        );
 }

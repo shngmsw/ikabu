@@ -7,6 +7,7 @@ const { joinVoiceChannel,
   AudioPlayerStatus,
   VoiceConnectionStatus, } = require("@discordjs/voice");
 const { Client, Intents, VoiceChannel } = require("discord.js");
+const { URLSearchParams } = require('url');
 const client = new Client({
   intents: [
     Intents.FLAGS.GUILDS,
@@ -28,6 +29,7 @@ const chatCountUp = require("./event/members.js");
 const suggestionBox = require("./reaction/suggestion-box.js");
 const join = require("./event/join.js");
 const deleteToken = require("./event/delete_token.js");
+const recruitButton = require("./event/recruit_button.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on("messageCreate", async (msg) => {
@@ -80,6 +82,10 @@ client.on("voiceStateUpdate", (oldState, newState) =>
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
+  // ready後にready以前に実行されたinteractionのinteractionCreateがemitされるが、
+  // そのときにはinteractionがtimeoutしておりfollowupで失敗することがよくある。
+  // そのようなことを避けるためready内でハンドラを登録する。
+  client.on("interactionCreate", (interaction) => onInteraction(interaction).catch(err => console.error(err)));
 });
 
 client.on("messageReactionAdd", async (reaction, user) => {
@@ -108,3 +114,22 @@ client.on("messageReactionRemove", async (reaction, user) => {
   if (!user.bot) {
   }
 });
+
+
+// buttonごとに呼び出すファンクション
+const buttons = {
+  jr: recruitButton.join,
+  cr: recruitButton.cancel
+};
+/**
+ * 
+ * @param {Discord.Interaction} interaction 
+ */
+async function onInteraction(interaction) {
+  if (!interaction.isButton()) {
+    return;
+  }
+  const params = new URLSearchParams(interaction.customId);
+  await buttons[params.get("d")](interaction, params);
+}
+client.on("interactionCreate", (interaction) => onInteraction(interaction).catch(err => console.error(err)));
