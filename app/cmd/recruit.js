@@ -130,11 +130,14 @@ function regularMatch(msg) {
                             value: condition,
                         })
                         .setThumbnail("https://splatoon2.ink/assets/img/battle-regular.01b5ef.png");
+                    const imageEmbedA = new MessageEmbed()
+                        .setImage(stage_a);
+                    const imageEmbedB = new MessageEmbed()
+                        .setImage(stage_b);
 
                     msg.channel.send({
                         content: txt,
-                        embeds: [embed],
-                        files: [stage_a, stage_b]
+                        embeds: [embed, imageEmbedA, imageEmbedB]
                     });
                 } else {
                     msg.channel.send("なんかエラーでてるわ");
@@ -322,12 +325,16 @@ function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
             value: l_stage,
         }, { name: '参加条件', value: condition })
         .setThumbnail(thumbnail_url);
+    const imageEmbedA = new MessageEmbed()
+        .setImage(stageImages[0]);
+    const imageEmbedB = new MessageEmbed()
+        .setImage(stageImages[1]);
 
     msg.channel.send({
         content: txt,
-        embeds: [embed],
-        files: stageImages
+        embeds: [embed, imageEmbedA, imageEmbedB],
     });
+
 }
 
 function sendCloseMessage(msg) {
