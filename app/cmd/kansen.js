@@ -1,5 +1,6 @@
+const { MessageEmbed } = require("discord.js");
 const Combinatorics = require("js-combinatorics");
-const common = require("./common.js");
+const common = require("../common.js");
 
 module.exports = async function handleKansen(msg, args) {
     var how_many_times = Number(args);
@@ -31,9 +32,6 @@ module.exports = async function handleKansen(msg, args) {
 
             resultList.push(i + 1 + "回目：" + choose_comb);
 
-            // console.log("\n== now watchers ==");
-            // console.log(resultList);
-            // console.log("\n== next watchers ==");
             // now watching usersをnext watchersから取り除く
             tmp_watching_list = tmp_watching_list.filter(
                 function exclude_previous_watcher(players) {
@@ -63,16 +61,14 @@ module.exports = async function handleKansen(msg, args) {
                     }
                 }
             );
-            // console.log(tmp_watching_list);
         }
     }
-    var emb = {
-        embed: {
-            color: 0xf02d7d,
-            fields: [{ name: "観戦の人", value: resultList.join("\n") }]
-        }
-    };
-    var pin_msg = await msg.channel.send(emb);
+
+    var emb = new MessageEmbed()
+        .setColor(0xf02d7d)
+        .addFields([{ name: "観戦の人", value: resultList.join("\n") }]);
+
+    var pin_msg = await msg.channel.send({ embeds: [emb] });
     pin_msg.pin();
     var count = how_many_times * 8;
     if (count > 0) {
@@ -87,4 +83,4 @@ module.exports = async function handleKansen(msg, args) {
             }
         }, 60000);
     }
-}
+};

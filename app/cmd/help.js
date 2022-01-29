@@ -1,17 +1,21 @@
+const { MessageEmbed } = require("discord.js");
+
 module.exports = function handleHelp(msg) {
     var strCmd = msg.content.replace(/　/g, ' ');
     strCmd = strCmd.replace('  ', ' ');
     const args = strCmd.split(' ');
     args.shift();
     if (args[0] == 'voice') {
-        msg.channel.send('', {
-            embed: {
-                author: {
-                    name: 'ブキチの使い方(読み上げbot)',
-                    icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
-                },
-                color: 0x1bc2a5,
-                fields: [{
+        msg.channel.send({
+            embeds: [
+                new MessageEmbed()
+                    .setAuthor({
+                        name: 'ブキチの使い方(読み上げbot)',
+                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg'
+                    },
+                    )
+                    .setColor(0x1bc2a5)
+                    .addFields([{
                         name: 'ボイスチャンネルにブキチを参加',
                         value: '```!join```\n',
                     },
@@ -39,18 +43,20 @@ module.exports = function handleHelp(msg) {
                         name: '音声の高さを変更します(0～200の数値)',
                         value: '```!pitch```\n',
                     },
-                ],
-            },
+                    ])
+            ]
         });
     } else if (args[0] == '2') {
-        msg.channel.send('', {
-            embed: {
-                author: {
-                    name: 'ブキチの使い方(2/2)',
-                    icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
-                },
-                color: 0x1bc2a5,
-                fields: [{
+        msg.channel.send({
+            embeds: [
+                new MessageEmbed()
+                    .setAuthor({
+                        name: 'ブキチの使い方(2/2)',
+                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg'
+                    },
+                    )
+                    .setColor(0x1bc2a5)
+                    .addFields([{
                         name: 'ステージ情報を表示[now / next / nawabari / run]',
                         value: '```show ○○○```\n',
                     },
@@ -92,19 +98,20 @@ module.exports = function handleHelp(msg) {
                     {
                         name: 'wikipediaで調べる',
                         value: '```wiki 〇〇```',
-                    },
-                ],
-            },
+                    }
+                    ])]
         });
     } else {
-        msg.channel.send('', {
-            embed: {
-                author: {
-                    name: 'ブキチの使い方(1/2)',
-                    icon_url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
-                },
-                color: 0x1bc2a5,
-                fields: [{
+        msg.channel.send({
+            embeds: [
+                new MessageEmbed()
+                    .setAuthor({
+                        name: 'ブキチの使い方(1/2)',
+                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg'
+                    },
+                    )
+                    .setColor(0x1bc2a5)
+                    .addFields([{
                         name: 'botのコマンド一覧を表示',
                         value: '```help または help 2 または help voice```',
                     },
@@ -146,9 +153,9 @@ module.exports = function handleHelp(msg) {
                     {
                         name: '役職に応じて自動でフェスメンバーを募集\n※ヒメ派、イイダ派どちらかを投票して役職がついてる場合のみ',
                         value: '```fes 参加条件があれば記載```',
-                    },
-                ],
-            },
+                    }
+                    ])
+            ]
         });
     }
 }

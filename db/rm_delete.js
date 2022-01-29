@@ -1,7 +1,7 @@
 var { getPostgresClient } = require("./db.js");
 module.exports = {
   deleteRandomMatchingMessages,
-  deleteRandomMatchingMessage
+  deleteRandomMatchingMessage,
 };
 async function deleteRandomMatchingMessages() {
   const db = await getPostgresClient();
