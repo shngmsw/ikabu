@@ -370,6 +370,10 @@ function recruitActionRow(msg) {
     cancelParams.append('d', 'cr');
     cancelParams.append('mid', msg.id);
 
+    const closeParams = new URLSearchParams();
+    closeParams.append('d', 'close');
+    closeParams.append('mid', msg.id);
+
     return new MessageActionRow()
         .addComponents(
             [
@@ -380,7 +384,11 @@ function recruitActionRow(msg) {
                 new MessageButton()
                     .setCustomId(cancelParams.toString())
                     .setLabel("キャンセル")
-                    .setStyle("DANGER")
+                    .setStyle("DANGER"),
+                new MessageButton()
+                    .setCustomId(closeParams.toString())
+                    .setLabel("〆")
+                    .setStyle("SECONDARY")
             ]
         );
 }

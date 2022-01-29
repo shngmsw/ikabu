@@ -119,7 +119,8 @@ client.on("messageReactionRemove", async (reaction, user) => {
 // buttonごとに呼び出すファンクション
 const buttons = {
   jr: recruitButton.join,
-  cr: recruitButton.cancel
+  cr: recruitButton.cancel,
+  close: recruitButton.close
 };
 /**
  * 
