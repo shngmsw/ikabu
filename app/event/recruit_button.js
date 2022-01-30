@@ -1,4 +1,4 @@
-const { MessageEmbed, Client } = require("discord.js");
+const { MessageEmbed, MessageActionRow, MessageButton, Client } = require("discord.js");
 const client = new Client({ intents: 0, partials: ["GUILD_MEMBER", "USER"] });
 module.exports = {
     join: join,
@@ -20,12 +20,6 @@ async function handleError(err, { interaction }) {
     if (err.code === 10062) {
         return;
     }
-    const guild = await interaction.guild.fetch();
-    const support =
-        guild.channels.cache.find(
-            (channel) => channel.id === process.env.CHANNEL_ID_SUPPORT
-        )
-    // interaction.followUp(`参加表明に失敗しました。\n ${support}に連絡してください。`).catch(() => { });
     throw err;
 }
 
@@ -79,7 +73,7 @@ async function cancel(interaction, params) {
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
         const host_mention = `<@${cmd_message.author.id}>`;
         if (member.user.id === cmd_message.author.id) {
-            await interaction.update({ content: `${host_mention}たんの募集はキャンセルされたでし！`, components: [] });
+            await interaction.update({ content: `${host_mention}たんの募集はキャンセルされたでし！`, components: [disableButtons()] });
         } else {
             await interaction.deferReply({
                 ephemeral: true
@@ -112,7 +106,7 @@ async function close(interaction, params) {
         const host_mention = `<@${cmd_message.author.id}>`;
         const embed = new MessageEmbed().setDescription(`${host_mention}たんの募集〆`);
         if (member.user.id === cmd_message.author.id) {
-            await interaction.update({ content: `${host_mention}たんの募集は〆！`, components: [] });
+            await interaction.update({ content: `${host_mention}たんの募集は〆！`, components: [disableButtons()] });
             interaction.message.reply({ embeds: [embed] });
         } else {
             interaction.followUp({
@@ -122,4 +116,25 @@ async function close(interaction, params) {
     } catch (err) {
         handleError(err, { interaction })
     }
+}
+
+function disableButtons() {
+    let buttons = new MessageActionRow()
+        .addComponents(
+            [
+                new MessageButton()
+                    .setCustomId("join")
+                    .setLabel("参加表明")
+                    .setStyle("PRIMARY").setDisabled(),
+                new MessageButton()
+                    .setCustomId("cancel")
+                    .setLabel("キャンセル")
+                    .setStyle("DANGER").setDisabled(),
+                new MessageButton()
+                    .setCustomId("close")
+                    .setLabel("〆")
+                    .setStyle("SECONDARY").setDisabled()
+            ]
+        );
+    return buttons;
 }
