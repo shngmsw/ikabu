@@ -379,7 +379,7 @@ function recruitActionRow(msg) {
             [
                 new MessageButton()
                     .setCustomId(joinParams.toString())
-                    .setLabel("参加表明")
+                    .setLabel("参加")
                     .setStyle("PRIMARY"),
                 new MessageButton()
                     .setCustomId(cancelParams.toString())

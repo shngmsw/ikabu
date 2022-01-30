@@ -124,7 +124,7 @@ function disableButtons() {
             [
                 new MessageButton()
                     .setCustomId("join")
-                    .setLabel("参加表明")
+                    .setLabel("参加")
                     .setStyle("PRIMARY").setDisabled(),
                 new MessageButton()
                     .setCustomId("cancel")
