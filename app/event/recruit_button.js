@@ -20,7 +20,7 @@ async function handleError(err, { interaction }) {
     if (err.code === 10062) {
         return;
     }
-    throw err;
+    console.log(err);
 }
 
 /**
