@@ -111,7 +111,10 @@ async function close(interaction, params) {
             await interaction.update({ content: `${host_mention}たんの募集は〆！`, components: [disableButtons()] });
             interaction.message.reply({ embeds: [embed] });
         } else {
-            interaction.followUp({
+            await interaction.deferReply({
+                ephemeral: true
+            });
+            await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`
             });
         }
