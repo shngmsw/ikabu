@@ -72,8 +72,10 @@ async function cancel(interaction, params) {
         const msg_id = params.get("mid");
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
         const host_mention = `<@${cmd_message.author.id}>`;
+        const embed = new MessageEmbed().setDescription(`${host_mention}たんの募集〆`);
         if (member.user.id === cmd_message.author.id) {
             await interaction.update({ content: `${host_mention}たんの募集はキャンセルされたでし！`, components: [disableButtons()] });
+            interaction.message.reply({ embeds: [embed] });
         } else {
             await interaction.deferReply({
                 ephemeral: true
