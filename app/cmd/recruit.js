@@ -213,12 +213,14 @@ function salmonRun(msg) {
                             value: condition,
                         })
                         .setImage(stage);
-
-                    msg.channel.send({
-                        content: txt,
-                        embeds: [embed]
-                    });
-
+                    try {
+                        msg.channel.send({
+                            content: txt,
+                            embeds: [embed]
+                        });
+                    } catch (error) {
+                        console.log(error);
+                    }
                 } else {
                     msg.channel.send("なんかエラーでてるわ");
                 }
@@ -276,12 +278,16 @@ function sendOtherGames(msg, txt, image) {
         sendCloseMessage(msg);
     } else {
         if (args.length > 0) txt += ">>> [参加条件] " + args.join(" ");
-        msg.channel.send({
-            content: txt,
-            files: [
-                image,
-            ],
-        });
+        try {
+            msg.channel.send({
+                content: txt,
+                files: [
+                    image,
+                ],
+            });
+        } catch (error) {
+            console.log(error);
+        }
     }
 }
 
@@ -329,18 +335,24 @@ function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
         .setImage(stageImages[0]);
     const imageEmbedB = new MessageEmbed()
         .setImage(stageImages[1]);
-
-    msg.channel.send({
-        content: txt,
-        embeds: [embed, imageEmbedA, imageEmbedB],
-    });
-
+    try {
+        msg.channel.send({
+            content: txt,
+            embeds: [embed, imageEmbedA, imageEmbedB],
+        });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 function sendCloseMessage(msg) {
-    const embed = getCloseEmbed(msg);
-    msg.channel.send({ embeds: [embed] });
-    msg.delete();
+    try {
+        const embed = getCloseEmbed(msg);
+        msg.channel.send({ embeds: [embed] });
+        msg.delete();
+    } catch (error) {
+        console.log(error);
+    }
 }
 function getCloseEmbed(msg) {
     const stageEmbed = new MessageEmbed();
