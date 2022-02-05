@@ -58,7 +58,7 @@ function recruitLeagueMatch(msg, type) {
                         "@everyone 【リグマ募集】\n" +
                         `<@${msg.author.id}>` +
                         "たんがリグメン募集中でし！\n";
-                    if (args.length > 0) condition = args.join("\n") + "\n";
+                    if (args.length > 0) condition = args.join("") + "\n";
                     const stage_a =
                         "https://splatoon2.ink/assets/splatnet" +
                         data.league[type].stage_a.image;
@@ -103,7 +103,7 @@ function regularMatch(msg) {
                         "@everyone 【ナワバリ募集】\n" +
                         `<@${msg.author.id}>` +
                         "たんがナワバリ中でし！\n";
-                    if (args.length > 0) condition = args.join("\n") + "\n";
+                    if (args.length > 0) condition = args.join("") + "\n";
                     txt += "よければ合流しませんか？";
                     const date =
                         common.unixTime2mdwhm(data.regular[0].start_time) +
@@ -173,7 +173,7 @@ function salmonRun(msg) {
                         "@everyone 【バイト募集】\n" +
                         `<@${msg.author.id}>` +
                         "たんがバイト中でし！\n";
-                    if (args.length > 0) condition = args.join("\n") + "\n";
+                    if (args.length > 0) condition = args.join("") + "\n";
                     txt += "よければ合流しませんか？";
                     const date =
                         common.unixTime2mdwhm(data.details[0].start_time) +
