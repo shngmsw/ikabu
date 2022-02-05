@@ -21,10 +21,10 @@ const modeList1 = {
   1: "HOYA VoiceText API",
 };
 const pitchList = [
-  50, 65, 80, 95, 110, 126, 135, 150, 165, 180
+  70, 80, 90, 100, 110, 120, 130, 140, 150, 160
 ];
 const speedList = [
-  50, 65, 80, 95, 110, 126, 135, 150, 165, 180
+  70, 80, 90, 100, 110, 120, 130, 140, 150, 160
 ];
 let context;
 let discordToken = null;
