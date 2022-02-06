@@ -30,6 +30,7 @@ const suggestionBox = require("./reaction/suggestion-box.js");
 const join = require("./event/join.js");
 const deleteToken = require("./event/delete_token.js");
 const recruitButton = require("./event/recruit_button.js");
+const handleIkabuExperience = require("./cmd/experience.js");
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on("messageCreate", async (msg) => {
@@ -63,6 +64,10 @@ client.on("messageCreate", async (msg) => {
   suggestionBox.init(msg);
   chatCountUp(msg);
   removeRookie(msg);
+  if (msg.mentions.has(client.user)
+   && msg.content.includes("イカ部歴")) {
+    handleIkabuExperience(msg);
+  }
 });
 
 client.on("guildMemberAdd", (member) => {
@@ -71,9 +76,10 @@ client.on("guildMemberAdd", (member) => {
 
 client.on("guildMemberRemove", (member) => {
   const guild = member.guild;
+  const period = Math.round((Date.now() - member.joinedAt) / 86400000) // サーバーに居た期間を日数にして計算
   guild.channels.cache
     .find((channel) => channel.id === process.env.CHANNEL_ID_RETIRE_LOG)
-    .send(`${member.user.tag}さんが退部しました。`);
+    .send(`${member.user.tag}さんが退部しました。入部期間：${period}日間`);
 });
 
 client.on("voiceStateUpdate", (oldState, newState) =>
