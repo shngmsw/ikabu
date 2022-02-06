@@ -20,6 +20,12 @@ const voiceLists1 = {
 const modeList1 = {
   1: "HOYA VoiceText API",
 };
+const pitchList = [
+  70, 80, 90, 100, 110, 120, 130, 140, 150, 160
+];
+const speedList = [
+  70, 80, 90, 100, 110, 120, 130, 140, 150, 160
+];
 let context;
 let discordToken = null;
 let voiceTextApiKey = null;
@@ -391,6 +397,11 @@ async function main(message) {
     isNotLengthOver(yomiage_message)
   ) {
     try {
+      // ユーザーによって音声変える
+      let selectPitch = message.author.id.substr(17, 1);
+      let selectSpeed = message.author.id.substr(16, 1);
+      pitch = pitchList[selectPitch];
+      speed = speedList[selectSpeed];
       yomiage({
         message: yomiage_message,
         cons: context,
