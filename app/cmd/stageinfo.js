@@ -1,6 +1,7 @@
-const request = require("request");
+const fetch = require("node-fetch");
 const common = require("../common.js");
 const Discord = require("discord.js");
+const schedule_url = 'https://splatoon2.ink/data/schedules.json';
 
 module.exports = function handleStageInfo(msg) {
     if (msg.content.startsWith("stageinfo")) {
@@ -9,85 +10,76 @@ module.exports = function handleStageInfo(msg) {
         sf(msg);
     }
 }
-function sf(msg) {
-
-    request.get("https://splatoon2.ink/data/schedules.json", function (
-        error,
-        response,
-        body
-    ) {
-        if (!error && response.statusCode == 200) {
-            const data = JSON.parse(body);
-            const embedStr = getEmbed(data.league);
-            embedStr.setAuthor({
-                name: "リーグマッチ",
-                iconURL: "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png",
-                url: "https://splatoon2.ink"
-            }
-            );
-            embedStr.setImage(
-                "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
-            );
-            embedStr.setColor("#ED2D7C");
-            msg.channel.send({ embeds: [embedStr] });
-            const embedStr_gachi = getEmbed(data.gachi);
-            embedStr_gachi.setAuthor({
-                name: "ガチマッチ",
-                iconURL: "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png",
-                url: "https://splatoon2.ink"
-            }
-            );
-            embedStr_gachi.setImage(
-                "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
-            );
-            embedStr_gachi.setColor("#F54910");
-            msg.channel.send({ embeds: [embedStr_gachi] });
-        } else {
-            console.log("なんかエラーでてるわ");
+async function sf(msg) {
+    try {
+        const response = await fetch(schedule_url);
+        const data = await response.json();
+        const embedStr = getEmbed(data.league);
+        embedStr.setAuthor({
+            name: "リーグマッチ",
+            iconURL: "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png",
+            url: "https://splatoon2.ink"
         }
-    });
+        );
+        embedStr.setImage(
+            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+        );
+        embedStr.setColor("#ED2D7C");
+        msg.channel.send({ embeds: [embedStr] });
+        const embedStr_gachi = getEmbed(data.gachi);
+        embedStr_gachi.setAuthor({
+            name: "ガチマッチ",
+            iconURL: "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png",
+            url: "https://splatoon2.ink"
+        }
+        );
+        embedStr_gachi.setImage(
+            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
+        );
+        embedStr_gachi.setColor("#F54910");
+        msg.channel.send({ embeds: [embedStr_gachi] });
+    } catch (error) {
+        msg.channel.send("なんかエラーでてるわ");
+        console.error(error);
+    }
 }
 
-function stageinfo(msg) {
+async function stageinfo(msg) {
     // 過去分は削除
     msgDelete(msg);
 
-    request.get("https://splatoon2.ink/data/schedules.json", function (
-        error,
-        response,
-        body
-    ) {
-        if (!error && response.statusCode == 200) {
-            const data = JSON.parse(body);
-            const embedStr = getEmbed(data.league);
-            embedStr.setAuthor({
-                name: "リーグマッチ",
-                iconURL: "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png",
-                url: "https://splatoon2.ink"
-            }
-            );
-            embedStr.setImage(
-                "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
-            );
-            embedStr.setColor("#ED2D7C");
-            msg.channel.send({ embeds: [embedStr] });
-            const embedStr_gachi = getEmbed(data.gachi);
-            embedStr_gachi.setAuthor({
-                name: "ガチマッチ",
-                iconURL: "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png",
-                url: "https://splatoon2.ink"
-            }
-            );
-            embedStr_gachi.setImage(
-                "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
-            );
-            embedStr_gachi.setColor("#F54910");
-            msg.channel.send({ embeds: [embedStr_gachi] });
-        } else {
-            msg.channel.send("なんかエラーでてるわ");
-            console.log("なんかエラーでてるわ");
+    try {
+        const response = await fetch(schedule_url);
+        const data = await response.json();
+
+        const embedStr = getEmbed(data.league);
+        embedStr.setAuthor({
+            name: "リーグマッチ",
+            iconURL: "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png",
+            url: "https://splatoon2.ink"
         }
-    });
+        );
+        embedStr.setImage(
+            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png"
+        );
+        embedStr.setColor("#ED2D7C");
+        msg.channel.send({ embeds: [embedStr] });
+        const embedStr_gachi = getEmbed(data.gachi);
+        embedStr_gachi.setAuthor({
+            name: "ガチマッチ",
+            iconURL: "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png",
+            url: "https://splatoon2.ink"
+        }
+        );
+        embedStr_gachi.setImage(
+            "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png"
+        );
+        embedStr_gachi.setColor("#F54910");
+        msg.channel.send({ embeds: [embedStr_gachi] });
+    } catch (error) {
+        msg.channel.send("なんかエラーでてるわ");
+        console.error(error);
+    }
 }
 
 function getEmbed(data) {

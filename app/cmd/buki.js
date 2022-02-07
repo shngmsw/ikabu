@@ -1,4 +1,4 @@
-const request = require("request");
+const fetch = require("node-fetch");
 const common = require("../common.js");
 const weaponsUrl = "https://stat.ink/api/v2/weapon";
 const { MessageEmbed } = require("discord.js");
@@ -37,7 +37,7 @@ module.exports = function handleBuki(command, msg) {
     }
 };
 
-function buki(msg) {
+async function buki(msg) {
     var strCmd = msg.content.replace(/　/g, " ");
     const args = strCmd.split(" ");
     args.shift();
@@ -62,51 +62,51 @@ function buki(msg) {
             // e.g. buki 8
             amount = Number(args[0]);
         }
-        request.get(weaponsUrl, function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                const weapons = JSON.parse(body);
-                let bukis = weapons.filter(function (value) {
-                    if (bukiType !== "") {
-                        // 特定のbukiTypeが指定されているとき
-                        return bukiType === value.type.key;
-                    } else if (!~value.name.ja_JP.indexOf("ヒーロー")) {
-                        return true;
-                    }
-                });
-                let bukiNames = bukis.map(function (value) {
-                    const embed = new MessageEmbed()
-                        .setAuthor({
-                            name: msg.author.username + "のブキ",
-                            iconURL: msg.author.displayAvatarURL()
-                        })
-                        .setColor(0xf02d7d)
-                        .setTitle(value.name.ja_JP)
-                        .addFields({
-                            value: value.name.en_US,
-                            name: value.sub.name.ja_JP + " / " + value.special.name.ja_JP,
-                        });
-                    return embed;
-                });
+        try {
+            const response = await fetch(weaponsUrl);
+            const weapons = await response.json();
+            let bukis = weapons.filter(function (value) {
+                if (bukiType !== "") {
+                    // 特定のbukiTypeが指定されているとき
+                    return bukiType === value.type.key;
+                } else if (!~value.name.ja_JP.indexOf("ヒーロー")) {
+                    return true;
+                }
+            });
+            let bukiNames = bukis.map(function (value) {
+                const embed = new MessageEmbed()
+                    .setAuthor({
+                        name: msg.author.username + "のブキ",
+                        iconURL: msg.author.displayAvatarURL()
+                    })
+                    .setColor(0xf02d7d)
+                    .setTitle(value.name.ja_JP)
+                    .addFields({
+                        value: value.name.en_US,
+                        name: value.sub.name.ja_JP + " / " + value.special.name.ja_JP,
+                    });
+                return embed;
+            });
 
-                if (amount) {
-                    var length = bukiNames.length;
-                    for (let i = 0; i < amount; i++) {
-                        msg.channel.send({
-                            embeds: [bukiNames[Math.floor(Math.random() * length)]],
-                        });
-                    }
-                } else {
-                    var buki = common.random(bukiNames, 1)[0];
-                    msg.channel.send({ embeds: [buki] });
+            if (amount) {
+                var length = bukiNames.length;
+                for (let i = 0; i < amount; i++) {
+                    msg.channel.send({
+                        embeds: [bukiNames[Math.floor(Math.random() * length)]],
+                    });
                 }
             } else {
-                msg.channel.send("なんかエラーでてるわ");
+                var buki = common.random(bukiNames, 1)[0];
+                msg.channel.send({ embeds: [buki] });
             }
-        });
+        } catch (error) {
+            msg.channel.send("なんかエラーでてるわ");
+            console.error(error);
+        }
     }
 }
 
-function weapon(msg) {
+async function weapon(msg) {
     var strCmd = msg.content.replace(/　/g, " ");
     const args = strCmd.split(" ");
     args.shift();
@@ -136,47 +136,47 @@ function weapon(msg) {
             }
         }
 
-        request.get(weaponsUrl, function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                const weapons = JSON.parse(body);
-                let bukis = weapons.filter(function (value) {
-                    if (bukiType !== "") {
-                        // 特定のbukiTypeが指定されているとき
-                        return bukiType === value.type.key;
-                    } else {
-                        return true;
-                    }
-                });
-                let bukiNames = bukis.map(function (value) {
-                    const embed = new MessageEmbed()
-                        .setAuthor({
-                            name: msg.author.username + "'s weapon",
-                            iconURL: msg.author.displayAvatarURL()
-                        })
-                        .setColor(0xf02d7d)
-                        .setTitle(value.name.en_US)
-                        .addFields({
-                            value: value.name.ja_JP,
-                            name: value.sub.name.en_US + " / " + value.special.name.en_US,
-                        });
-                    return embed;
-                });
-
-                if (amount) {
-                    // var buki = random(size, amount).join('\n');
-                    var length = bukiNames.length;
-                    for (let i = 0; i < amount; i++) {
-                        msg.channel.send({
-                            embeds: bukiNames[Math.floor(Math.random() * length)],
-                        });
-                    }
+        try {
+            const response = await fetch(weaponsUrl);
+            const weapons = await response.json();
+            let bukis = weapons.filter(function (value) {
+                if (bukiType !== "") {
+                    // 特定のbukiTypeが指定されているとき
+                    return bukiType === value.type.key;
                 } else {
-                    var buki = common.random(bukiNames, 1)[0];
-                    msg.channel.send({ embeds: [buki] });
+                    return true;
+                }
+            });
+            let bukiNames = bukis.map(function (value) {
+                const embed = new MessageEmbed()
+                    .setAuthor({
+                        name: msg.author.username + "'s weapon",
+                        iconURL: msg.author.displayAvatarURL()
+                    })
+                    .setColor(0xf02d7d)
+                    .setTitle(value.name.en_US)
+                    .addFields({
+                        value: value.name.ja_JP,
+                        name: value.sub.name.en_US + " / " + value.special.name.en_US,
+                    });
+                return embed;
+            });
+
+            if (amount) {
+                // var buki = random(size, amount).join('\n');
+                var length = bukiNames.length;
+                for (let i = 0; i < amount; i++) {
+                    msg.channel.send({
+                        embeds: bukiNames[Math.floor(Math.random() * length)],
+                    });
                 }
             } else {
-                msg.channel.send("なんかエラーでてるわ");
+                var buki = common.random(bukiNames, 1)[0];
+                msg.channel.send({ embeds: [buki] });
             }
-        });
+        } catch (error) {
+            msg.channel.send("なんかエラーでてるわ");
+            console.error(error);
+        }
     }
 }
