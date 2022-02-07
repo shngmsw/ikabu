@@ -29,9 +29,9 @@
     "express": "^4.17.1",
     "ffmpeg-static": "^4.2.7",
     "js-combinatorics": "^0.5.5",
+    "node-fetch": "^2.6.7",
     "opusscript": "^0.0.7",
     "pg": "^8.4.1",
-    "request": "^2.88.2",
     "voice-text": "^0.1.2",
     "wikijs": "^6.0.1",
     "ytdl-core": "^3.4.1"
