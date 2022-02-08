@@ -48,8 +48,10 @@ async function recruitLeagueMatch(msg, type) {
     sendCloseMessage(msg);
   } else {
     try {
+      console.log('before fetch');
       const response = await fetch(schedule_url);
       const data = await response.json();
+      console.log('after fetch');
       const l_args = common.getLeague(data, type).split(",");
       let condition = "なし";
       let txt =
@@ -64,7 +66,9 @@ async function recruitLeagueMatch(msg, type) {
         "https://splatoon2.ink/assets/splatnet" +
         data.league[type].stage_b.image;
       const stageImages = [stage_a, stage_b];
+      console.log('before call sendLeagueMatch');
       sendLeagueMatch(msg, txt, condition, l_args, stageImages);
+      console.log('after call sendLeagueMatch');
     } catch (error) {
       msg.channel.send("なんかエラーでてるわ");
       console.error(error);
@@ -323,10 +327,12 @@ function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
   const imageEmbedA = new MessageEmbed().setImage(stageImages[0]);
   const imageEmbedB = new MessageEmbed().setImage(stageImages[1]);
   try {
+    console.log('before msg channel send');
     msg.reply({
       content: txt,
       embeds: [embed, imageEmbedA, imageEmbedB],
     });
+    console.log('after msg channel send');
   } catch (error) {
     console.log(error);
   }
