@@ -21,7 +21,6 @@ const client = new Client({
         Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
     ],
 });
-const request = require('request');
 
 module.exports = {
     onVoiceStateUpdate: onVoiceStateUpdate,
