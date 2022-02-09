@@ -7,27 +7,28 @@
 ・vc接続時は全員に見えるから秘密のお喋りでもない
 */
 // Discord bot implements
-const { joinVoiceChannel, entersState, VoiceConnectionStatus } = require("@discordjs/voice");
+const { joinVoiceChannel, entersState, VoiceConnectionStatus } = require('@discordjs/voice');
 
-const Discord = require("discord.js");
-const { Client, Intents } = require("discord.js");
+const Discord = require('discord.js');
+const { Client, Intents } = require('discord.js');
 const client = new Client({
-  intents: [Intents.FLAGS.GUILDS,
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.GUILD_BANS,
-  Intents.FLAGS.GUILD_PRESENCES,
-  Intents.FLAGS.GUILD_VOICE_STATES,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+  intents: [
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.GUILD_BANS,
+    Intents.FLAGS.GUILD_PRESENCES,
+    Intents.FLAGS.GUILD_VOICE_STATES,
+    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
   ],
 });
-const request = require("request");
+const request = require('request');
 
 module.exports = {
   onVoiceStateUpdate: onVoiceStateUpdate,
 };
 
-const CHANNEL_PREFIX = "bot用";
-const BOT_ROLE_NAME = "bot";
+const CHANNEL_PREFIX = 'bot用';
+const BOT_ROLE_NAME = 'bot';
 const pattern = /^[a-m]|^bot用/;
 async function onVoiceStateUpdate(oldState, newState) {
   if (oldState.channelId === newState.channelId) {
@@ -48,10 +49,7 @@ async function onVoiceStateUpdate(oldState, newState) {
     }
     let txtChannel;
     let chName = CHANNEL_PREFIX + newChannel.name;
-    if (
-      newChannel.members.size == 1 &&
-      !newState.guild.channels.cache.some((ch) => ch.name === chName)
-    ) {
+    if (newChannel.members.size == 1 && !newState.guild.channels.cache.some((ch) => ch.name === chName)) {
       txtChannel = await txChCreate(newChannel, newState.member);
     } else {
       txtChannel = await chJoin(newChannel, newState.member);
@@ -66,19 +64,19 @@ async function txChCreate(voiceChannel, voiceJoinedMember) {
     let botRole = guild.roles.cache.find((val) => val.name === BOT_ROLE_NAME);
     let result = await guild.channels.create(chName, {
       parent: voiceChannel.parent,
-      type: "text",
+      type: 'text',
       permissionOverwrites: [
         {
           id: guild.roles.everyone.id,
-          deny: ["READ_MESSAGE_HISTORY"],
+          deny: ['READ_MESSAGE_HISTORY'],
         },
         {
           id: voiceJoinedMember.id,
-          allow: ["VIEW_CHANNEL"],
+          allow: ['VIEW_CHANNEL'],
         },
         {
           id: botRole.id,
-          allow: ["VIEW_CHANNEL"],
+          allow: ['VIEW_CHANNEL'],
         },
       ],
     });
@@ -109,6 +107,8 @@ async function chJoin(ch, user) {
 async function chHide(ch) {
   let target = await chFind(ch);
   if (target != null) {
-    target.permissionOverwrites.edit(ch.guild.roles.everyone, { VIEW_CHANNEL: false });
+    target.permissionOverwrites.edit(ch.guild.roles.everyone, {
+      VIEW_CHANNEL: false,
+    });
   }
 }
