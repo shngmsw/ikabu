@@ -1,4 +1,4 @@
-var { getPostgresClient } = require("./db.js");
+var { getPostgresClient } = require('./db.js');
 
 module.exports = {
   getRandomMatchingMessages,
@@ -9,7 +9,7 @@ async function getRandomMatchingMessages() {
   const db = await getPostgresClient();
   let result;
   try {
-    const sql = "SELECT message_id, author_id FROM random_matching_message";
+    const sql = 'SELECT message_id, author_id FROM random_matching_message';
 
     result = await db.execute(sql);
   } finally {
@@ -22,8 +22,7 @@ async function getRandomMatchingMessagesByAuthorId(message_id, author_id) {
   const db = await getPostgresClient();
   let result;
   try {
-    const sql =
-      "SELECT author_id FROM random_matching_message where message_id = $1 and author_id = $2";
+    const sql = 'SELECT author_id FROM random_matching_message where message_id = $1 and author_id = $2';
     const params = [message_id, author_id];
 
     result = await db.execute(sql, params);

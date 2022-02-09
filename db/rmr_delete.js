@@ -1,4 +1,4 @@
-var { getPostgresClient } = require("./db.js");
+var { getPostgresClient } = require('./db.js');
 
 module.exports = {
   deleteRandomMatchingReactions,
@@ -9,7 +9,7 @@ module.exports = {
 async function deleteRandomMatchingReactions() {
   const db = await getPostgresClient();
   try {
-    const sql = "DELETE from random_matching_reactions";
+    const sql = 'DELETE from random_matching_reactions';
 
     await db.begin();
     await db.execute(sql);
@@ -25,8 +25,7 @@ async function deleteRandomMatchingReactions() {
 async function deleteRandomMatchingReactionsUser(messageId, userId) {
   const db = await getPostgresClient();
   try {
-    const sql =
-      "DELETE from random_matching_reactions where message_id = $1 and user_id = $2";
+    const sql = 'DELETE from random_matching_reactions where message_id = $1 and user_id = $2';
     const params = [messageId, userId];
     await db.begin();
     await db.execute(sql, params);
@@ -42,7 +41,7 @@ async function deleteRandomMatchingReactionsUser(messageId, userId) {
 async function deleteRandomMatchingReactionMessage(messageId) {
   const db = await getPostgresClient();
   try {
-    const sql = "DELETE from random_matching_reactions where message_id = $1";
+    const sql = 'DELETE from random_matching_reactions where message_id = $1';
     const params = [messageId];
     await db.begin();
     await db.execute(sql, params);

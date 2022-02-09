@@ -1,5 +1,5 @@
-const { Pool } = require("pg");
-require("dotenv").config();
+const { Pool } = require('pg');
+require('dotenv').config();
 const local_pool = new Pool({
   connectionString: process.env.DATABASE_LOCAL_URL,
   ssl: false,
@@ -52,7 +52,7 @@ class Postgres {
    * @return {Promise<void>}
    */
   async begin() {
-    await this.client.query("BEGIN");
+    await this.client.query('BEGIN');
   }
 
   /**
@@ -60,7 +60,7 @@ class Postgres {
    * @return {Promise<void>}
    */
   async commit() {
-    await this.client.query("COMMIT");
+    await this.client.query('COMMIT');
   }
 
   /**
@@ -68,7 +68,7 @@ class Postgres {
    * @return {Promise<void>}
    */
   async rollback() {
-    await this.client.query("ROLLBACK");
+    await this.client.query('ROLLBACK');
   }
 }
 
