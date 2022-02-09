@@ -32,9 +32,9 @@
     "install": "^0.13.0",
     "js-combinatorics": "^0.5.5",
     "npm": "^8.4.1",
+    "node-fetch": "^2.6.7",
     "opusscript": "^0.0.7",
     "pg": "^8.4.1",
-    "request": "^2.88.2",
     "voice-text": "^0.1.2",
     "wikijs": "^6.0.1",
     "ytdl-core": "^3.4.1"
