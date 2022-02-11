@@ -24,24 +24,12 @@ module.exports = function handleHelp(msg) {
                             value: '```!reconnect```\n',
                         },
                         {
-                            name: '読み上げに利用するTTSのAPIを変更します',
-                            value: '```!mode```\n',
-                        },
-                        {
                             name: 'APIで利用可能な音声タイプを一覧表示します',
                             value: '```!type```\n',
                         },
                         {
                             name: '音声タイプを変更します',
                             value: '```!voice```\n',
-                        },
-                        {
-                            name: '音声の速度を変更します(0～200の数値) ',
-                            value: '```!speed```\n',
-                        },
-                        {
-                            name: '音声の高さを変更します(0～200の数値)',
-                            value: '```!pitch```\n',
                         },
                     ]),
             ],
@@ -97,6 +85,10 @@ module.exports = function handleHelp(msg) {
                             value: '```fcadd 0000-0000-0000```\nもう一度登録すると上書きされます。他人のは登録できません。',
                         },
                         {
+                            name: '自分のイカ部歴を表示',
+                            value: '```@ブキチ イカ部歴```\n',
+                        },
+                        {
                             name: 'wikipediaで調べる',
                             value: '```wiki 〇〇```',
                         },
@@ -126,10 +118,6 @@ module.exports = function handleHelp(msg) {
                             value: '```next 参加条件があれば記載```\n',
                         },
                         {
-                            name: '現在のリグマ情報を表示して1時間だけリグマ募集',
-                            value: '```1h```\n',
-                        },
-                        {
                             name: '現在のナワバリ情報を表示して募集',
                             value: '```nawabari 参加条件があれば記載```\n',
                         },
@@ -143,18 +131,6 @@ module.exports = function handleHelp(msg) {
                                 'Dead by Daylight：```!dbd 参加条件があれば記載```\n' +
                                 'モンスターハンターライズ：```!mhr 参加条件があれば記載```\n' +
                                 'ApexLegends：```!apex 参加条件があれば記載```\n',
-                        },
-                        {
-                            name: 'ヒメ派のフェスメンバーを募集',
-                            value: '```fes a 参加条件があれば記載```',
-                        },
-                        {
-                            name: 'イイダ派のフェスメンバーを募集',
-                            value: '```fes b 参加条件があれば記載```',
-                        },
-                        {
-                            name: '役職に応じて自動でフェスメンバーを募集\n※ヒメ派、イイダ派どちらかを投票して役職がついてる場合のみ',
-                            value: '```fes 参加条件があれば記載```',
                         },
                     ]),
             ],
