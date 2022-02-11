@@ -1,4 +1,4 @@
-const Discord = require("discord.js");
+const Discord = require('discord.js');
 
 module.exports = {
     isInteger: isInteger,
@@ -12,36 +12,34 @@ module.exports = {
     weapon2txt: weapon2txt,
     rgbToHex: rgbToHex,
     random: randomSelect,
-    composeEmbed: composeEmbed
-}
+    composeEmbed: composeEmbed,
+};
 
 function composeEmbed(message, url) {
     const embed = new Discord.MessageEmbed();
     embed.setDescription(message.content);
     embed.setTimestamp(message.createdAt);
-    embed.setTitle('引用元へジャンプ')
-    embed.setURL(url)
+    embed.setTitle('引用元へジャンプ');
+    embed.setURL(url);
     embed.setAuthor({
         name: message.author.username,
-        iconURL: message.author.displayAvatarURL()
-    }
-    );
+        iconURL: message.author.displayAvatarURL(),
+    });
     embed.setFooter({
         text: message.channel.name,
-        iconURL: message.guild.iconURL()
-    }
-    );
+        iconURL: message.guild.iconURL(),
+    });
     if (message.attachments.size > 0) {
-        message.attachments.forEach(Attachment => {
+        message.attachments.forEach((Attachment) => {
             embed.setImage(Attachment.proxyURL);
-        })
+        });
     }
     return embed;
 }
 
 function rgbToHex(r, g, b) {
     [r, g, b]
-        .map(x => {
+        .map((x) => {
             const hex = x.toString(16);
             return hex.length === 1 ? '0' + hex : hex;
         })
@@ -57,7 +55,7 @@ function unixTime2hm(intTime) {
     const dow = d.getUTCDay();
     const week = ['日', '月', '火', '水', '木', '金', '土'][dow];
     return hour + ':' + min;
-};
+}
 
 function unixTime2mdwhm(intTime) {
     const d = new Date(intTime * 1000 + 9 * 60 * 60 * 1000);
@@ -68,7 +66,7 @@ function unixTime2mdwhm(intTime) {
     const dow = d.getUTCDay();
     const week = ['日', '月', '火', '水', '木', '金', '土'][dow];
     return month + '/' + day + '(' + week + ') ' + hour + ':' + min;
-};
+}
 
 function rule2txt(key) {
     switch (key) {
@@ -81,7 +79,7 @@ function rule2txt(key) {
         case 'clam_blitz':
             return 'ガチアサリ';
     }
-};
+}
 
 function stage2txt(key) {
     switch (key) {
@@ -134,7 +132,7 @@ function stage2txt(key) {
         case '9999':
             return 'ミステリーゾーン';
     }
-};
+}
 
 function coop_stage2txt(key) {
     switch (key) {
@@ -149,7 +147,7 @@ function coop_stage2txt(key) {
         case '/images/coop_stage/50064ec6e97aac91e70df5fc2cfecf61ad8615fd.png':
             return '朽ちた箱舟 ポラリス';
     }
-};
+}
 
 function weapon2txt(key) {
     switch (key) {
@@ -394,27 +392,20 @@ function weapon2txt(key) {
             return 'スパイガジェットソレーラ';
             break;
         default:
-            return ":question:";
+            return ':question:';
             break;
     }
-};
+}
 
 function getLeague(data, x) {
     let stage;
     let date;
     let rule;
     let rstr;
-    date =
-        unixTime2mdwhm(data.league[x].start_time) +
-        " – " +
-        unixTime2hm(data.league[x].end_time);
+    date = unixTime2mdwhm(data.league[x].start_time) + ' – ' + unixTime2hm(data.league[x].end_time);
     rule = rule2txt(data.league[x].rule.key);
-    stage =
-        stage2txt(data.league[x].stage_a.id) +
-        "\n" +
-        stage2txt(data.league[x].stage_b.id) +
-        "\n";
-    rstr = date + "," + rule + "," + stage;
+    stage = stage2txt(data.league[x].stage_a.id) + '\n' + stage2txt(data.league[x].stage_b.id) + '\n';
+    rstr = date + ',' + rule + ',' + stage;
     return rstr;
 }
 
@@ -423,17 +414,10 @@ function getGachi(data, x) {
     let date;
     let rule;
     let rstr;
-    date =
-        unixTime2mdwhm(data.gachi[x].start_time) +
-        " – " +
-        unixTime2hm(data.gachi[x].end_time);
+    date = unixTime2mdwhm(data.gachi[x].start_time) + ' – ' + unixTime2hm(data.gachi[x].end_time);
     rule = rule2txt(data.gachi[x].rule.key);
-    stage =
-        stage2txt(data.gachi[x].stage_a.id) +
-        "\n" +
-        stage2txt(data.gachi[x].stage_b.id) +
-        "\n";
-    rstr = date + "," + rule + "," + stage;
+    stage = stage2txt(data.gachi[x].stage_a.id) + '\n' + stage2txt(data.gachi[x].stage_b.id) + '\n';
+    rstr = date + ',' + rule + ',' + stage;
     return rstr;
 }
 
@@ -454,4 +438,4 @@ function randomSelect(array, num) {
         t[i] = t[l] || a[l];
     }
     return r;
-};
+}
