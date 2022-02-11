@@ -291,6 +291,7 @@ function sendCloseMessage(msg) {
         console.log(error);
     }
 }
+
 function getCloseEmbed(msg) {
     const stageEmbed = new MessageEmbed();
     stageEmbed.setDescription(`<@${msg.author.id}>たんの募集 〆`);
@@ -305,6 +306,7 @@ function isNotThisChannel(msg, channelName) {
     }
     return false;
 }
+
 function recruitActionRow(msg) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
