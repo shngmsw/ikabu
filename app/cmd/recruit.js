@@ -188,26 +188,35 @@ async function salmonRun(msg) {
 
 function monsterHunterRize(msg) {
     const role_id = msg.guild.roles.cache.find((role) => role.name === 'ハンター');
+    let title = 'MONSTER HUNTER RISE';
     let txt = role_id.toString() + ' 【モンハンライズ募集】\n' + `<@${msg.author.id}>` + 'たんがモンハンライズ参加者募集中でし！\n';
-    const image = 'https://cdn.glitch.com/10652966-57f9-4b23-8909-a9d93dfe6d26%2Fmhrize-title.jpeg';
-    sendOtherGames(msg, txt, image);
+    let color = '#3ce3f5';
+    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/MonsterHunterRise.jpeg';
+    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/MonsterHunterRise_logo.png';
+    sendOtherGames(msg, title, txt, color, image, logo);
 }
 
 function apexLegends(msg) {
     const role_id = msg.guild.roles.cache.find((role) => role.name === 'レジェンド');
-    let txt = role_id.toString() + ' 【ApexLegends募集】\n' + `<@${msg.author.id}>` + 'たんがApexLegendsの参加者募集中でし！\n';
-    const image = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fapex.jpg';
-    sendOtherGames(msg, txt, image);
+    let title = 'Apex Legends';
+    let txt = role_id.toString() + ' 【Apex Legends募集】\n' + `<@${msg.author.id}>` + 'たんがApexLegendsの参加者募集中でし！\n';
+    let color = '#F30100';
+    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/ApexLegends.jpg';
+    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/ApexLegends_logo.png';
+    sendOtherGames(msg, title, txt, color, image, logo);
 }
 
 function deadByDayLight(msg) {
     const role_id = msg.guild.roles.cache.find((role) => role.name === 'DbD');
+    let title = 'Dead by Daylight';
     const txt = role_id.toString() + ' 【Dead by Daylight募集】\n' + `<@${msg.author.id}>` + 'たんがDbD参加者募集中でし！\n';
-    const image = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fdbd.png';
-    sendOtherGames(msg, txt, image);
+    let color = '#84331F';
+    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/DeadByDaylight.jpg';
+    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/deadbydaylight_logo.png';
+    sendOtherGames(msg, title, txt, color, image, logo);
 }
 
-function sendOtherGames(msg, txt, image) {
+function sendOtherGames(msg, title, txt, color, image, logo) {
     const channelName = '別ゲー募集';
     if (isNotThisChannel(msg, channelName)) {
         return;
@@ -219,12 +228,26 @@ function sendOtherGames(msg, txt, image) {
     if (args[0] == '〆') {
         sendCloseMessage(msg);
     } else {
-        if (args.length > 0) txt += '>>> [参加条件] ' + args.join(' ');
+        let condition = 'なし';
+        if (args.length > 0) condition = args.join('') + '\n';
+        const embed = new MessageEmbed()
+            .setAuthor({
+                name: title,
+                iconURL: logo,
+            })
+            .setColor(color)
+            .addFields({
+                name: '参加条件',
+                value: condition,
+            })
+            .setImage(image)
+            .setThumbnail(logo);
+
         try {
             msg.channel.send({
                 content: txt,
+                embeds: [embed],
                 components: [recruitActionRow(msg)],
-                files: [image],
             });
         } catch (error) {
             console.log(error);
