@@ -20,6 +20,13 @@ async function selectFriendCode(msg) {
     const args = strCmd.split(' ');
     args.shift();
     // let id = args[0].replace('<@', '').replace('>','');
+
+    // check if mention is included
+    if (msg.mentions.members.size != 1) {
+        msg.reply('フレンドコードを検索したい人のメンションを1つつけるでし');
+        return;
+    }
+
     let id = msg.mentions.users.first().id;
     let ch = await msg.guild.channels.cache.find((channel) => channel.name === '自己紹介');
     let messages = await ch.messages.fetch({ limit: 100 }).catch(console.error);
