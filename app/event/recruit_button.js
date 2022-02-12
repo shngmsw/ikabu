@@ -43,15 +43,21 @@ async function join(interaction, params) {
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
-        const member_mention = `<@${member.user.id}>`;
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
-        const host_mention = `<@${cmd_message.author.id}>`;
-        interaction.message.reply({
-            content: `${host_mention}\n${member_mention}たんが参加表明したでし！`,
-        });
-        interaction.followUp({
-            content: `${host_mention}からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
-        });
+        if (member.user.id === cmd_message.author.id) {
+            interaction.followUp({
+                content: `募集主は参加表明できないでし！`,
+            });
+        } else {
+            const member_mention = `<@${member.user.id}>`;
+            const host_mention = `<@${cmd_message.author.id}>`;
+            interaction.message.reply({
+                content: `${host_mention}\n${member_mention}たんが参加表明したでし！`,
+            });
+            interaction.followUp({
+                content: `${host_mention}からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
+            });
+        }
     } catch (err) {
         handleError(err, { interaction });
     }
