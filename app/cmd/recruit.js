@@ -54,7 +54,7 @@ async function recruitLeagueMatch(msg, type) {
             const l_args = common.getLeague(data, type).split(',');
             let condition = 'なし';
             let txt = '@everyone 【リグマ募集】\n' + `<@${msg.author.id}>` + 'たんがリグメン募集中でし！\n';
-            if (args.length > 0) condition = args.join('') + '\n';
+            if (args.length > 0) condition = args.join(' ') + '\n';
             const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_a.image;
             const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_b.image;
             const stageImages = [stage_a, stage_b];
@@ -85,7 +85,7 @@ async function regularMatch(msg) {
             const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_b.image;
             let condition = 'なし';
             let txt = '@everyone 【ナワバリ募集】\n' + `<@${msg.author.id}>` + 'たんがナワバリ中でし！\n';
-            if (args.length > 0) condition = args.join('') + '\n';
+            if (args.length > 0) condition = args.join(' ') + '\n';
             txt += 'よければ合流しませんか？';
             const date = common.unixTime2mdwhm(data.regular[0].start_time) + ' – ' + common.unixTime2mdwhm(data.regular[0].end_time);
             const regular_stage = common.stage2txt(data.regular[0].stage_a.id) + '\n' + common.stage2txt(data.regular[0].stage_b.id) + '\n';
@@ -137,7 +137,7 @@ async function salmonRun(msg) {
             const stage = 'https://splatoon2.ink/assets/splatnet' + data.details[0].stage.image;
             let condition = 'なし';
             let txt = '@everyone 【バイト募集】\n' + `<@${msg.author.id}>` + 'たんがバイト中でし！\n';
-            if (args.length > 0) condition = args.join('') + '\n';
+            if (args.length > 0) condition = args.join(' ') + '\n';
             txt += 'よければ合流しませんか？';
             const date = common.unixTime2mdwhm(data.details[0].start_time) + ' – ' + common.unixTime2mdwhm(data.details[0].end_time);
             const coop_stage = common.coop_stage2txt(data.details[0].stage.image) + '\n';
@@ -229,7 +229,7 @@ function sendOtherGames(msg, title, txt, color, image, logo) {
         sendCloseMessage(msg);
     } else {
         let condition = 'なし';
-        if (args.length > 0) condition = args.join('') + '\n';
+        if (args.length > 0) condition = args.join(' ') + '\n';
         const embed = new MessageEmbed()
             .setAuthor({
                 name: title,
