@@ -107,7 +107,7 @@ async function regularMatch(msg) {
             const imageEmbedA = new MessageEmbed().setImage(stage_a);
             const imageEmbedB = new MessageEmbed().setImage(stage_b);
 
-            msg.channel.send({
+            await msg.channel.send({
                 content: txt,
                 embeds: [embed, imageEmbedA, imageEmbedB],
                 components: [recruitActionRow(msg)],
@@ -174,7 +174,7 @@ async function salmonRun(msg) {
                 })
                 .setImage(stage);
 
-            msg.channel.send({
+            await msg.channel.send({
                 content: txt,
                 embeds: [embed],
                 components: [recruitActionRow(msg)],
@@ -255,7 +255,7 @@ function sendOtherGames(msg, title, txt, color, image, logo) {
     }
 }
 
-function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
+async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     var l_date = l_args[0];
     var l_rule = l_args[1];
     var l_stage = l_args[2];
@@ -295,7 +295,7 @@ function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     const imageEmbedA = new MessageEmbed().setImage(stageImages[0]);
     const imageEmbedB = new MessageEmbed().setImage(stageImages[1]);
     try {
-        msg.channel.send({
+        await msg.channel.send({
             content: txt,
             embeds: [embed, imageEmbedA, imageEmbedB],
             components: [recruitActionRow(msg)],
