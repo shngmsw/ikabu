@@ -107,20 +107,11 @@ async function regularMatch(msg) {
             const imageEmbedA = new MessageEmbed().setImage(stage_a);
             const imageEmbedB = new MessageEmbed().setImage(stage_b);
 
-            msg.channel
-                .send({
-                    content: txt,
-                    embeds: [embed, imageEmbedA, imageEmbedB],
-                    components: [recruitActionRow(msg)],
-                })
-                .then((sentMessage) => {
-                    // if duplicate bot message then delete
-                    msg.channel.messages.fetch({ before: sentMessage.id, limit: 1 }).then((messages) => {
-                        if (messages.first().author.bot) {
-                            sentMessage.delete();
-                        }
-                    });
-                });
+            msg.channel.send({
+                content: txt,
+                embeds: [embed, imageEmbedA, imageEmbedB],
+                components: [recruitActionRow(msg)],
+            });
         } catch (error) {
             msg.channel.send('なんかエラーでてるわ');
             console.error(error);
@@ -183,20 +174,11 @@ async function salmonRun(msg) {
                 })
                 .setImage(stage);
 
-            msg.channel
-                .send({
-                    content: txt,
-                    embeds: [embed],
-                    components: [recruitActionRow(msg)],
-                })
-                .then((sentMessage) => {
-                    // if duplicate bot message then delete
-                    msg.channel.messages.fetch({ before: sentMessage.id, limit: 1 }).then((messages) => {
-                        if (messages.first().author.bot) {
-                            sentMessage.delete();
-                        }
-                    });
-                });
+            msg.channel.send({
+                content: txt,
+                embeds: [embed],
+                components: [recruitActionRow(msg)],
+            });
         } catch (error) {
             msg.channel.send('なんかエラーでてるわ');
             console.error(error);
@@ -312,21 +294,17 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
         .setThumbnail(thumbnail_url);
     const imageEmbedA = new MessageEmbed().setImage(stageImages[0]);
     const imageEmbedB = new MessageEmbed().setImage(stageImages[1]);
+    txt += '日時：`' + l_date + '`\n';
+    txt += 'ルール：\n`' + l_rule + '`\n';
+    txt += 'ステージ：\n`' + l_stage + '`\n';
+    txt += '参加条件：\n`' + condition + '`\n';
     try {
-        msg.channel
-            .send({
-                content: txt,
-                embeds: [embed, imageEmbedA, imageEmbedB],
-                components: [recruitActionRow(msg)],
-            })
-            .then((sentMessage) => {
-                // if duplicate bot message then delete
-                msg.channel.messages.fetch({ before: sentMessage.id, limit: 1 }).then((messages) => {
-                    if (messages.first().author.bot) {
-                        sentMessage.delete();
-                    }
-                });
-            });
+        msg.channel.send({
+            content: txt,
+            files: [stageImages[0], stageImages[1]],
+            // embeds: [embed, imageEmbedA, imageEmbedB],
+            // components: [recruitActionRow(msg)],
+        });
     } catch (error) {
         console.log(error);
     }
