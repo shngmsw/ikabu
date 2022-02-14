@@ -303,7 +303,7 @@ function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
             content: txt,
             files: [stageImages[0], stageImages[1]],
             // embeds: [embed, imageEmbedA, imageEmbedB],
-            // components: [recruitActionRow(msg)],
+            components: [recruitActionRow(msg)],
         });
     } catch (error) {
         console.log(error);
