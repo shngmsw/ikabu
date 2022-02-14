@@ -255,7 +255,7 @@ function sendOtherGames(msg, title, txt, color, image, logo) {
     }
 }
 
-async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
+function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     var l_date = l_args[0];
     var l_rule = l_args[1];
     var l_stage = l_args[2];
