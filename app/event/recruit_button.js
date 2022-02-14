@@ -20,7 +20,7 @@ async function handleError(err, { interaction }) {
     if (err.code === 10062) {
         return;
     }
-    console.log(err);
+    // console.log(err);
 }
 
 /**
@@ -47,6 +47,7 @@ async function join(interaction, params) {
         if (member.user.id === cmd_message.author.id) {
             interaction.followUp({
                 content: `募集主は参加表明できないでし！`,
+                ephemeral: true,
             });
         } else {
             const member_mention = `<@${member.user.id}>`;
@@ -56,6 +57,7 @@ async function join(interaction, params) {
             });
             interaction.followUp({
                 content: `${host_mention}からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
+                ephemeral: true,
             });
         }
     } catch (err) {
@@ -92,6 +94,7 @@ async function cancel(interaction, params) {
             });
             await interaction.followUp({
                 content: `キャンセルするときぐらい、自分の言葉で伝えましょう！\n${host_mention}たんにメンションつきで伝えるでし！`,
+                ephemeral: true,
             });
         }
     } catch (err) {
@@ -129,6 +132,7 @@ async function close(interaction, params) {
             });
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
+                ephemeral: true,
             });
         }
     } catch (err) {
