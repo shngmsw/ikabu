@@ -1,11 +1,15 @@
 const fetch = require('node-fetch');
+const Canvas = require('canvas');
 const common = require('../common.js');
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { MessageAttachment, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 const schedule_url = 'https://splatoon2.ink/data/schedules.json';
 const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
 const { URLSearchParams } = require('url');
 
 module.exports = function handleRecruit(msg) {
+    Canvas.registerFont('./fonts/Splatfont.ttf', { family: 'Splatfont' });
+    Canvas.registerFont('./fonts/NotoSansJP-Black.otf', { family: 'NotoSans' });
+
     if (msg.content.startsWith('next') && msg.channel.name != 'botコマンド') {
         recruitLeagueMatch(msg, 1);
     }
@@ -54,7 +58,7 @@ async function recruitLeagueMatch(msg, type) {
             const l_args = common.getLeague(data, type).split(',');
             let condition = 'なし';
             let txt = '@everyone 【リグマ募集】\n' + `<@${msg.author.id}>` + 'たんがリグメン募集中でし！\n';
-            if (args.length > 0) condition = args.join(' ') + '\n';
+            if (args.length > 0) condition = args.join(' ');
             const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_a.image;
             const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_b.image;
             const stageImages = [stage_a, stage_b];
@@ -255,59 +259,188 @@ function sendOtherGames(msg, title, txt, color, image, logo) {
     }
 }
 
-function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
+async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     var l_date = l_args[0];
     var l_rule = l_args[1];
     var l_stage = l_args[2];
     var thumbnail_url;
+    var thumbnailXP;
+    var thumbnailYP;
     switch (l_rule) {
         case 'ガチエリア':
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
+            var thumbnailXP = 680;
+            var thumbnailYP = 240;
+            var thumbScaleX = 0.7;
+            var thumbScaleY = 0.7;
             break;
         case 'ガチヤグラ':
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.pn';
+            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
+            var thumbnailXP = 420;
+            var thumbnailYP = 85;
+            var thumbScaleX = 1.0;
+            var thumbScaleY = 1.0;
             break;
         case 'ガチホコバトル':
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
+            var thumbnailXP = 470;
+            var thumbnailYP = 170;
+            var thumbScaleX = 0.9;
+            var thumbScaleY = 0.9;
             break;
         case 'ガチアサリ':
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
+            var thumbnailXP = 450;
+            var thumbnailYP = 120;
+            var thumbScaleX = 1.0;
+            var thumbScaleY = 1.0;
             break;
         default:
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png';
+            var thumbnailXP = 380;
+            var thumbnailYP = 90;
+            var thumbScaleX = 1.0;
+            var thumbScaleY = 1.0;
             break;
     }
 
-    const embed = new MessageEmbed()
-        .setAuthor({
-            name: 'リーグマッチ',
-            iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png',
-        })
-        .setColor(0xf02d7d)
-        .addFields(
-            {
-                name: l_date + '　' + l_rule,
-                value: l_stage,
-            },
-            { name: '参加条件', value: condition },
-        )
-        .setThumbnail(thumbnail_url);
-    const imageEmbedA = new MessageEmbed().setImage(stageImages[0]);
-    const imageEmbedB = new MessageEmbed().setImage(stageImages[1]);
-    txt += '日時：`' + l_date + '`\n';
-    txt += 'ルール：\n`' + l_rule + '`\n';
-    txt += 'ステージ：\n`' + l_stage + '`\n';
-    txt += '参加条件：\n`' + condition + '`\n';
+    const recruitCanvas = Canvas.createCanvas(720, 550);
+    const recruitCtx = recruitCanvas.getContext('2d');
+
+    createRoundRect(recruitCtx, 1, 1, 718, 548, 30);
+    recruitCtx.fillStyle = '#2F3136';
+    recruitCtx.fill();
+
+    var icon = await Canvas.loadImage('https://cdn.glitch.me/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png');
+    recruitCtx.drawImage(icon, 15, 15, 90, 90);
+
+    recruitCtx.font = '50px Splatfont';
+    recruitCtx.fillStyle = '#F02D7E';
+    recruitCtx.fillText('リーグマッチ', 120, 80);
+    recruitCtx.strokeStyle = '#FFFFFF';
+    recruitCtx.lineWidth = 1.5;
+    recruitCtx.strokeText('リーグマッチ', 120, 80);
+
+    recruitCtx.font = '36px NotoSans';
+    recruitCtx.fillStyle = '#FFFFFF';
+    recruitCtx.fillText(l_date, 40, 150);
+
+    recruitCtx.font = '45px Splatfont';
+    recruitCtx.fillStyle = '#FFFFFF';
+    recruitCtx.fillText(l_rule, 40, 220);
+    recruitCtx.strokeStyle = '#000000';
+    recruitCtx.lineWidth = 2.0;
+    recruitCtx.strokeText(l_rule, 40, 220);
+
+    recruitCtx.save();
+    recruitCtx.scale(thumbScaleX, thumbScaleY);
+    var rule = await Canvas.loadImage(thumbnail_url);
+    recruitCtx.drawImage(rule, thumbnailXP, thumbnailYP);
+    recruitCtx.restore();
+
+    recruitCtx.font = '35px NotoSans';
+    recruitCtx.fillStyle = '#FFFFFF';
+    recruitCtx.fillText(l_stage, 80, 277);
+
+    recruitCtx.font = '45px Splatfont';
+    recruitCtx.fillStyle = '#FFFFFF';
+    recruitCtx.fillText('参加条件', 40, 385);
+    recruitCtx.strokeStyle = '#000000';
+    recruitCtx.lineWidth = 2.0;
+    recruitCtx.strokeText('参加条件', 40, 385);
+
+    recruitCtx.font = '30px NotoSans';
+    const width = 600;
+    const size = 40;
+    var column = [''];
+    var line = 0;
+    var text = condition.replace('{br}', '\n', 'gm');
+
+    for (var i = 0; i < text.length; i++) {
+        var char = text.charAt(i);
+
+        if (char == '\n' || recruitCtx.measureText(column[line] + char).width > width) {
+            line++;
+            column[line] = '';
+        } else {
+            column[line] += char;
+        }
+    }
+
+    if (column.length > 3) {
+        column[2] += '…';
+    }
+
+    for (var j = 0; j < column.length; j++) {
+        if (j < 3) {
+            recruitCtx.fillText(column[j], 80, 430 + size * j);
+        }
+    }
+
+    const recruit = new MessageAttachment(recruitCanvas.toBuffer(), 'ikabu_recruit.png');
+
+    const stageCanvas = Canvas.createCanvas(720, 480);
+    const stageCtx = stageCanvas.getContext('2d');
+
+    createRoundRect(stageCtx, 1, 1, 718, 478, 30);
+    stageCtx.clip();
+
+    var stage1_img = await Canvas.loadImage(stageImages[0]);
+    stageCtx.save();
+    stageCtx.beginPath();
+    stageCtx.moveTo(0, 0);
+    stageCtx.lineTo(450, 0);
+    stageCtx.lineTo(270, 480);
+    stageCtx.lineTo(0, 480);
+    stageCtx.lineTo(0, 0);
+    stageCtx.closePath();
+    stageCtx.clip();
+    stageCtx.drawImage(stage1_img, 0, 0, 720, 480);
+    stageCtx.restore();
+
+    var stage2_img = await Canvas.loadImage(stageImages[1]);
+    stageCtx.save();
+    stageCtx.beginPath();
+    stageCtx.moveTo(450, 0);
+    stageCtx.lineTo(270, 480);
+    stageCtx.lineTo(720, 480);
+    stageCtx.lineTo(720, 0);
+    stageCtx.lineTo(450, 0);
+    stageCtx.closePath();
+    stageCtx.clip();
+    stageCtx.drawImage(stage2_img, 0, 0, 720, 480);
+    stageCtx.restore();
+
+    const stage = new MessageAttachment(stageCanvas.toBuffer(), 'stages.png');
+
     try {
         msg.channel.send({
             content: txt,
-            files: [stageImages[0], stageImages[1]],
-            // embeds: [embed, imageEmbedA, imageEmbedB],
+            files: [recruit, stage],
             components: [recruitActionRow(msg)],
         });
     } catch (error) {
         console.log(error);
     }
+}
+
+/*
+ 角が丸い四角形を作成
+ x,yは座標
+ width,heightは幅と高さ
+ radiusは角丸の半径
+*/
+function createRoundRect(ctx, x, y, width, height, radius) {
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.arcTo(x + width, y, x + width, y + radius, radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
+    ctx.lineTo(x + radius, y + height);
+    ctx.arcTo(x, y + height, x, y + height - radius, radius);
+    ctx.lineTo(x, y + radius);
+    ctx.arcTo(x, y, x + radius, y, radius);
+    ctx.closePath();
 }
 
 function sendCloseMessage(msg) {
