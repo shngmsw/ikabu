@@ -122,12 +122,21 @@ async function regularMatch(msg) {
 
             const stage = new MessageAttachment(await stageDoubleCanvas(stageImages), 'stages.png');
 
-            msg.channel.send({
-                content: txt,
-                // embeds: [embed, imageEmbedA, imageEmbedB],
-                files: [recruit, stage],
-                components: [recruitActionRow(msg)],
-            });
+            msg.channel
+                .send({
+                    content: txt,
+                    // embeds: [embed, imageEmbedA, imageEmbedB],
+                    files: [recruit, stage],
+                    components: [recruitActionRow(msg)],
+                })
+                .then((sentMessage) => {
+                    // if duplicate bot message then delete
+                    msg.channel.messages.fetch({ before: sentMessage.id, limit: 1 }).then((messages) => {
+                        if (messages.first().author.bot) {
+                            sentMessage.delete();
+                        }
+                    });
+                });
         } catch (error) {
             msg.channel.send('なんかエラーでてるわ');
             console.error(error);
@@ -209,12 +218,21 @@ async function salmonRun(msg) {
 
             const stageImage = new MessageAttachment(await stageCanvas(stage), 'stages.png');
 
-            msg.channel.send({
-                content: txt,
-                // embeds: [embed],
-                files: [recruit, stageImage],
-                components: [recruitActionRow(msg)],
-            });
+            msg.channel
+                .send({
+                    content: txt,
+                    // embeds: [embed],
+                    files: [recruit, stageImage],
+                    components: [recruitActionRow(msg)],
+                })
+                .then((sentMessage) => {
+                    // if duplicate bot message then delete
+                    msg.channel.messages.fetch({ before: sentMessage.id, limit: 1 }).then((messages) => {
+                        if (messages.first().author.bot) {
+                            sentMessage.delete();
+                        }
+                    });
+                });
         } catch (error) {
             msg.channel.send('なんかエラーでてるわ');
             console.error(error);
@@ -345,11 +363,20 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     const stage = new MessageAttachment(await stageDoubleCanvas(stageImages), 'stages.png');
 
     try {
-        msg.channel.send({
-            content: txt,
-            files: [recruit, stage],
-            components: [recruitActionRow(msg)],
-        });
+        msg.channel
+            .send({
+                content: txt,
+                files: [recruit, stage],
+                components: [recruitActionRow(msg)],
+            })
+            .then((sentMessage) => {
+                // if duplicate bot message then delete
+                msg.channel.messages.fetch({ before: sentMessage.id, limit: 1 }).then((messages) => {
+                    if (messages.first().author.bot) {
+                        sentMessage.delete();
+                    }
+                });
+            });
     } catch (error) {
         console.log(error);
     }
