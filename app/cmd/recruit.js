@@ -103,7 +103,7 @@ async function regularMatch(msg) {
 
             msg.channel.send({
                 content: txt,
-                embeds: [embed, imageEmbedA, imageEmbedB],
+                files: [recruit, stage],
                 components: [recruitActionRow(msg)],
             });
         } catch (error) {
