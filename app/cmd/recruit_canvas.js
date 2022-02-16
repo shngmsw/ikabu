@@ -70,9 +70,12 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     for (var i = 0; i < text.length; i++) {
         var char = text.charAt(i);
 
-        if (char == '\n' || recruitCtx.measureText(column[line] + char).width > width) {
+        if (char == '\n') {
             line++;
             column[line] = '';
+        } else if (recruitCtx.measureText(column[line] + char).width > width) {
+            line++;
+            column[line] = char;
         } else {
             column[line] += char;
         }
