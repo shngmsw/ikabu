@@ -7,9 +7,6 @@ const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
 const { URLSearchParams } = require('url');
 
 module.exports = function handleRecruit(msg) {
-    Canvas.registerFont('./fonts/Splatfont.ttf', { family: 'Splatfont' });
-    Canvas.registerFont('./fonts/NotoSansJP-Black.otf', { family: 'NotoSans' });
-
     if (msg.content.startsWith('next') && msg.channel.name != 'botコマンド') {
         recruitLeagueMatch(msg, 1);
     }
