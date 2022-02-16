@@ -288,32 +288,11 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
 
     const stage = new MessageAttachment(await stageDoubleCanvas(stageImages), 'stages.png');
 
-    const embed = new MessageEmbed()
-        .setAuthor({
-            name: 'リーグマッチ',
-            iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png',
-        })
-        .setColor(0xf02d7d)
-        .addFields(
-            {
-                name: l_date + '　' + l_rule,
-                value: l_stage,
-            },
-            { name: '参加条件', value: condition },
-        )
-        .setThumbnail(thumbnail_url);
-    const imageEmbedA = new MessageEmbed().setImage(stageImages[0]);
-    const imageEmbedB = new MessageEmbed().setImage(stageImages[1]);
-    txt += '日時：`' + l_date + '`\n';
-    txt += 'ルール：\n`' + l_rule + '`\n';
-    txt += 'ステージ：\n`' + l_stage + '`\n';
-    txt += '参加条件：\n`' + condition + '`\n';
     try {
         msg.channel.send({
             content: txt,
-            files: [stageImages[0], stageImages[1]],
-            // embeds: [embed, imageEmbedA, imageEmbedB],
-            // components: [recruitActionRow(msg)],
+            files: [recruit, stage],
+            components: [recruitActionRow(msg)],
         });
     } catch (error) {
         console.log(error);
