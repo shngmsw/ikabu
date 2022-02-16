@@ -1,5 +1,4 @@
 const fetch = require('node-fetch');
-const Canvas = require('canvas');
 const common = require('../common.js');
 const { MessageAttachment, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 const { recruitCanvas, stageCanvas, stageDoubleCanvas } = require('./recruit_canvas.js');
@@ -380,25 +379,6 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     } catch (error) {
         console.log(error);
     }
-}
-
-/*
- 角が丸い四角形を作成
- x,yは座標
- width,heightは幅と高さ
- radiusは角丸の半径
-*/
-function createRoundRect(ctx, x, y, width, height, radius) {
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.arcTo(x + width, y, x + width, y + radius, radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
-    ctx.lineTo(x + radius, y + height);
-    ctx.arcTo(x, y + height, x, y + height - radius, radius);
-    ctx.lineTo(x, y + radius);
-    ctx.arcTo(x, y, x + radius, y, radius);
-    ctx.closePath();
 }
 
 function sendCloseMessage(msg) {
