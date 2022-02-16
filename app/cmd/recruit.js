@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const common = require('../common.js');
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { MessageAttachment, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { recruitCanvas, stageCanvas, stageDoubleCanvas } = require('./recruit_canvas.js');
 const schedule_url = 'https://splatoon2.ink/data/schedules.json';
 const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
 const { URLSearchParams } = require('url');
@@ -54,7 +55,7 @@ async function recruitLeagueMatch(msg, type) {
             const l_args = common.getLeague(data, type).split(',');
             let condition = 'なし';
             let txt = '@everyone 【リグマ募集】\n' + `<@${msg.author.id}>` + 'たんがリグメン募集中でし！\n';
-            if (args.length > 0) condition = args.join(' ') + '\n';
+            if (args.length > 0) condition = args.join(' ');
             const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_a.image;
             const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_b.image;
             const stageImages = [stage_a, stage_b];
@@ -83,33 +84,26 @@ async function regularMatch(msg) {
             const data = await response.json();
             const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_a.image;
             const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_b.image;
+            const stageImages = [stage_a, stage_b];
             let condition = 'なし';
             let txt = '@everyone 【ナワバリ募集】\n' + `<@${msg.author.id}>` + 'たんがナワバリ中でし！\n';
             if (args.length > 0) condition = args.join(' ') + '\n';
             txt += 'よければ合流しませんか？';
             const date = common.unixTime2mdwhm(data.regular[0].start_time) + ' – ' + common.unixTime2mdwhm(data.regular[0].end_time);
             const regular_stage = common.stage2txt(data.regular[0].stage_a.id) + '\n' + common.stage2txt(data.regular[0].stage_b.id) + '\n';
-            const embed = new MessageEmbed()
-                .setAuthor({
-                    name: 'レギュラーマッチ',
-                    iconURL: 'https://splatoon2.ink/assets/img/battle-regular.01b5ef.png',
-                })
-                .setColor(1693465)
-                .addFields({
-                    name: date,
-                    value: regular_stage,
-                })
-                .addFields({
-                    name: '参加条件',
-                    value: condition,
-                })
-                .setThumbnail('https://splatoon2.ink/assets/img/battle-regular.01b5ef.png');
-            const imageEmbedA = new MessageEmbed().setImage(stage_a);
-            const imageEmbedB = new MessageEmbed().setImage(stage_b);
+
+            const title = ['レギュラーマッチ', '#CFF622', '#45520B'];
+            const icon = ['https://splatoon2.ink/assets/img/battle-regular.01b5ef.png', 22, 20, 80, 80];
+            const thumbnail = ['https://splatoon2.ink/assets/img/battle-regular.01b5ef.png', 400, 160, 1.3, 1.3];
+
+            const recruitBuffer = await recruitCanvas(title, icon, date, 'ステージ', thumbnail, regular_stage, condition);
+            const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
+
+            const stage = new MessageAttachment(await stageDoubleCanvas(stageImages), 'stages.png');
 
             msg.channel.send({
                 content: txt,
-                embeds: [embed, imageEmbedA, imageEmbedB],
+                files: [recruit, stage],
                 components: [recruitActionRow(msg)],
             });
         } catch (error) {
@@ -141,42 +135,28 @@ async function salmonRun(msg) {
             txt += 'よければ合流しませんか？';
             const date = common.unixTime2mdwhm(data.details[0].start_time) + ' – ' + common.unixTime2mdwhm(data.details[0].end_time);
             const coop_stage = common.coop_stage2txt(data.details[0].stage.image) + '\n';
+
             const weapons =
                 common.weapon2txt(data.details[0].weapons[0].id) +
                 '・' +
                 common.weapon2txt(data.details[0].weapons[1].id) +
-                '・' +
+                '\n' +
                 common.weapon2txt(data.details[0].weapons[2].id) +
                 '・' +
                 common.weapon2txt(data.details[0].weapons[3].id);
 
-            const embed = new MessageEmbed()
-                .setAuthor({
-                    name: 'SALMON RUN',
-                    iconURL: 'https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png',
-                })
-                .setColor(16733696)
-                .addFields({
-                    name: '日時',
-                    value: date,
-                })
-                .addFields({
-                    name: '支給ブキ',
-                    value: weapons,
-                })
-                .addFields({
-                    name: 'ステージ',
-                    value: coop_stage,
-                })
-                .addFields({
-                    name: '参加条件',
-                    value: condition,
-                })
-                .setImage(stage);
+            const title = ['サーモンラン', '#FF5600', '#FFFFFF'];
+            const icon = ['https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png', 22, 35, 80, 52.8];
+            const thumbnail = ['https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png', 296, 424, 0.8, 0.8];
+
+            const recruitBuffer = await recruitCanvas(title, icon, date, coop_stage, thumbnail, weapons, condition);
+            const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
+
+            const stageImage = new MessageAttachment(await stageCanvas(stage), 'stages.png');
 
             msg.channel.send({
                 content: txt,
-                embeds: [embed],
+                files: [recruit, stageImage],
                 components: [recruitActionRow(msg)],
             });
         } catch (error) {
@@ -255,54 +235,63 @@ function sendOtherGames(msg, title, txt, color, image, logo) {
     }
 }
 
-function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
+async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     var l_date = l_args[0];
     var l_rule = l_args[1];
     var l_stage = l_args[2];
     var thumbnail_url;
+    var thumbnailXP;
+    var thumbnailYP;
     switch (l_rule) {
         case 'ガチエリア':
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
+            var thumbnailXP = 680;
+            var thumbnailYP = 240;
+            var thumbScaleX = 0.7;
+            var thumbScaleY = 0.7;
             break;
         case 'ガチヤグラ':
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.pn';
+            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
+            var thumbnailXP = 420;
+            var thumbnailYP = 85;
+            var thumbScaleX = 1.0;
+            var thumbScaleY = 1.0;
             break;
         case 'ガチホコバトル':
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
+            var thumbnailXP = 640;
+            var thumbnailYP = 230;
+            var thumbScaleX = 0.75;
+            var thumbScaleY = 0.65;
             break;
         case 'ガチアサリ':
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
+            var thumbnailXP = 450;
+            var thumbnailYP = 120;
+            var thumbScaleX = 1.0;
+            var thumbScaleY = 1.0;
             break;
         default:
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png';
+            var thumbnailXP = 380;
+            var thumbnailYP = 90;
+            var thumbScaleX = 1.0;
+            var thumbScaleY = 1.0;
             break;
     }
+    const title = ['リーグマッチ', '#F02D7E', '#FFFFFF'];
+    const icon = ['https://cdn.glitch.me/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png', 15, 15, 90, 90];
+    const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
-    const embed = new MessageEmbed()
-        .setAuthor({
-            name: 'リーグマッチ',
-            iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png',
-        })
-        .setColor(0xf02d7d)
-        .addFields(
-            {
-                name: l_date + '　' + l_rule,
-                value: l_stage,
-            },
-            { name: '参加条件', value: condition },
-        )
-        .setThumbnail(thumbnail_url);
-    const imageEmbedA = new MessageEmbed().setImage(stageImages[0]);
-    const imageEmbedB = new MessageEmbed().setImage(stageImages[1]);
-    txt += '日時：`' + l_date + '`\n';
-    txt += 'ルール：\n`' + l_rule + '`\n';
-    txt += 'ステージ：\n`' + l_stage + '`\n';
-    txt += '参加条件：\n`' + condition + '`\n';
+    const recruitBuffer = await recruitCanvas(title, icon, l_date, l_rule, thumbnail, l_stage, condition);
+    const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
+
+    const stage = new MessageAttachment(await stageDoubleCanvas(stageImages), 'stages.png');
+
     try {
         msg.channel.send({
             content: txt,
-            files: [stageImages[0], stageImages[1]],
-            // embeds: [embed, imageEmbedA, imageEmbedB],
+            files: [recruit, stage],
             components: [recruitActionRow(msg)],
         });
     } catch (error) {
