@@ -156,7 +156,7 @@ async function salmonRun(msg) {
 
             msg.channel.send({
                 content: txt,
-                embeds: [embed],
+                files: [recruit, stageImage],
                 components: [recruitActionRow(msg)],
             });
         } catch (error) {
