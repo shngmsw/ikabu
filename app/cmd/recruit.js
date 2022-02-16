@@ -91,23 +91,6 @@ async function regularMatch(msg) {
             txt += 'よければ合流しませんか？';
             const date = common.unixTime2mdwhm(data.regular[0].start_time) + ' – ' + common.unixTime2mdwhm(data.regular[0].end_time);
             const regular_stage = common.stage2txt(data.regular[0].stage_a.id) + '\n' + common.stage2txt(data.regular[0].stage_b.id) + '\n';
-            // const embed = new MessageEmbed()
-            //     .setAuthor({
-            //         name: 'レギュラーマッチ',
-            //         iconURL: 'https://splatoon2.ink/assets/img/battle-regular.01b5ef.png',
-            //     })
-            //     .setColor(1693465)
-            //     .addFields({
-            //         name: date,
-            //         value: regular_stage,
-            //     })
-            //     .addFields({
-            //         name: '参加条件',
-            //         value: condition,
-            //     })
-            //     .setThumbnail('https://splatoon2.ink/assets/img/battle-regular.01b5ef.png');
-            // const imageEmbedA = new MessageEmbed().setImage(stage_a);
-            // const imageEmbedB = new MessageEmbed().setImage(stage_b);
 
             const title = ['レギュラーマッチ', '#CFF622', '#45520B'];
             const icon = ['https://splatoon2.ink/assets/img/battle-regular.01b5ef.png', 22, 20, 80, 80];
@@ -171,39 +154,6 @@ async function salmonRun(msg) {
                 common.weapon2txt(data.details[0].weapons[2].id) +
                 '・' +
                 common.weapon2txt(data.details[0].weapons[3].id);
-
-            // const weapons =
-            //     common.weapon2txt(data.details[0].weapons[0].id) +
-            //     '・' +
-            //     common.weapon2txt(data.details[0].weapons[1].id) +
-            //     '・' +
-            //     common.weapon2txt(data.details[0].weapons[2].id) +
-            //     '・' +
-            //     common.weapon2txt(data.details[0].weapons[3].id);
-
-            // const embed = new MessageEmbed()
-            //     .setAuthor({
-            //         name: 'SALMON RUN',
-            //         iconURL: 'https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png',
-            //     })
-            //     .setColor(16733696)
-            //     .addFields({
-            //         name: '日時',
-            //         value: date,
-            //     })
-            //     .addFields({
-            //         name: '支給ブキ',
-            //         value: weapons,
-            //     })
-            //     .addFields({
-            //         name: 'ステージ',
-            //         value: coop_stage,
-            //     })
-            //     .addFields({
-            //         name: '参加条件',
-            //         value: condition,
-            //     })
-            //     .setImage(stage);
 
             const title = ['サーモンラン', '#FF5600', '#FFFFFF'];
             const icon = ['https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png', 22, 35, 80, 52.8];
