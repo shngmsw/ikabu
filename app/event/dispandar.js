@@ -19,7 +19,7 @@ async function dispand(message) {
         for (var embed in messages[m].embeds) {
             await message.channel.send({ embeds: [messages[m].embeds[embed]] });
         }
-        if (message.content == url) {
+        if (message.content === url[0]) {
             message.delete();
         }
     }
