@@ -2,11 +2,9 @@
  * MIT License
  * Copyright (c) 2020 noriokun4649
  */
-// const Discord = require('discord.js');
 const { VoiceText } = require('voice-text');
 const { Readable } = require('stream');
 const conf = require('config-reloadable');
-// const client = new Discord.Client();
 
 let config = conf();
 const voiceLists1 = {
@@ -55,57 +53,6 @@ const readConfig = () => {
     return true;
 };
 
-// const autoRestartFunc = () => {
-//     //console.log(`${timeout}秒後に再接続処理開始`);
-//     setTimeout(() => {
-//         discordLogin();
-//     }, timeout * 1000);
-//     timeout *= 2;
-// };
-
-const voiceChanelJoin = async (channelId) => {
-    channelHistory = channelId;
-    await channelId
-        .join()
-        .then((connection) => {
-            context = connection;
-        })
-        .catch((err) => {
-            //console.log(err);
-            return false;
-        });
-    return true;
-};
-
-// const onErrorListen = (error) => {
-//     if (context && context.status !== 4) context.disconnect();
-//     // client.destroy();
-//     console.error(error.name);
-//     console.error(error.message);
-//     console.error(error.code);
-//     console.error(error);
-//     if (client.status != null) {
-//         message.user.send(error, {code: true});
-//     } else {
-//         console.error('NOT CONNECT');
-//         if (error.code === 'TOKEN_INVALID') process.exit(1);
-//         autoRestart ? autoRestartFunc() : process.exit(1);
-//     }
-// };
-
-// const discordLogin = async () => {
-//     //console.log('DiscordBotログイン処理を実行');
-//     await client.login(discordToken); //Discord login token
-//     //console.log('DiscordBotログイン処理を完了');
-//     //console.log('ボイスチャンネルへの接続を試行');
-//     if (channelHistory && await voiceChanelJoin(channelHistory)) {
-//         //console.log('ボイスチャンネルへ再接続成功');
-//     } else {
-//         //console.log('直前に接続していたボイスチャンネル無し');
-//     }
-//     timeout = timeoutOffset;
-// };
-
 readConfig();
 let voicePattern1 = voiceType; //初期時のよみあげ音声
 let mode = apiType;
@@ -115,15 +62,6 @@ let readChannelId = null;
 module.exports = {
     main: main,
 };
-// discordLogin();
-
-// process.on('uncaughtException', onErrorListen);
-
-// process.on('unhandledRejection', onErrorListen);
-
-// client.on('ready', () => {
-//     //console.log('Bot準備完了');
-// });
 
 async function main(message) {
     if (!message.guild) return;
@@ -180,6 +118,14 @@ async function main(message) {
             mode_api(obj)
                 .then((buffer) => {
                     obj.cons.play(bufferToStream(buffer)); //保存されたWAV再生
+
+                    const resource = createAudioResource(buffer, {
+                        inputType: StreamType.Arbitrary,
+                    });
+                    const player = createAudioPlayer({
+                        behaviors: NoSubscriberBehavior.Pause,
+                    });
+                    player.play(resource);
                     //console.log(`${obj.message}の読み上げ完了`);
                 })
                 .catch((error) => {
@@ -190,7 +136,7 @@ async function main(message) {
                     });
                 });
         } else {
-            //console.log('Botがボイスチャンネルへ接続してません。');
+            console.log('Botがボイスチャンネルへ接続してません。');
         }
     };
 
@@ -214,53 +160,53 @@ async function main(message) {
         return stream;
     };
 
-    if (message.content === `${prefix}join`) {
-        if (message.member.voice.channel) {
-            if (!context || (context && context.status === 4)) {
-                if (voiceChanelJoin(message.member.voice.channel)) {
-                    //console.log('ボイスチャンネルへ接続したでし');
-                    message.channel.send('ボイスチャンネルへ接続したでし');
-                    message.reply(
-                        `\nチャットの読み上げ準備ができたでし。切断時は${prefix}killでし\n${prefix}mode で読み上げAPIを変更できるでし\。\n ${prefix}voiceで読み上げ音声を選択できるでし。\n 音声が読み上げられない場合は${prefix}reconnectを試してみるでし。`,
-                    );
-                    readChannelId = message.channel.id;
-                }
-            } else {
-                message.reply('既にボイスチャンネルへ接続済みでし');
-            }
-        } else {
-            message.reply('まずあなたがボイスチャンネルへ接続している必要があるでし');
-        }
-    }
+    // if (message.content === `${prefix}join`) {
+    //     if (message.member.voice.channel) {
+    //         if (!context || (context && context.status === 4)) {
+    //             if (voiceChanelJoin(message.guild.id, message.member.voice.channel, message.guild.voiceAdapterCreator)) {
+    //                 //console.log('ボイスチャンネルへ接続したでし');
+    //                 message.channel.send('ボイスチャンネルへ接続したでし');
+    //                 message.reply(
+    //                     `\nチャットの読み上げ準備ができたでし。切断時は${prefix}killでし\n${prefix}mode で読み上げAPIを変更できるでし\。\n ${prefix}voiceで読み上げ音声を選択できるでし。\n 音声が読み上げられない場合は${prefix}reconnectを試してみるでし。`,
+    //                 );
+    //                 readChannelId = message.channel.id;
+    //             }
+    //         } else {
+    //             message.reply('既にボイスチャンネルへ接続済みでし');
+    //         }
+    //     } else {
+    //         message.reply('まずあなたがボイスチャンネルへ接続している必要があるでし');
+    //     }
+    // }
 
-    if (message.content === `${prefix}reconnect`) {
-        if (context && context.status !== 4) {
-            context.disconnect();
-            message.channel.send('5秒後にボイスチャンネルへ再接続するでし');
-            if (message.member.voice.channel) {
-                setTimeout(() => {
-                    if (voiceChanelJoin(message.member.voice.channel)) {
-                        //console.log('ボイスチャンネルへ再接続したでし');
-                        message.channel.send('ボイスチャンネルへ再接続したでし');
-                        readChannelId = message.channel.id;
-                    }
-                }, 5000);
-            } else {
-                message.reply('まずあなたがボイスチャンネルへ接続している必要があるでし');
-            }
-        } else {
-            message.reply('Botはボイスチャンネルに接続していないようでし');
-        }
-    }
+    // if (message.content === `${prefix}reconnect`) {
+    //     if (context && context.status !== 4) {
+    //         context.disconnect();
+    //         message.channel.send('5秒後にボイスチャンネルへ再接続するでし');
+    //         if (message.member.voice.channel) {
+    //             setTimeout(() => {
+    //                 if (voiceChanelJoin(message.guild.id, message.member.voice.channel, message.guild.voiceAdapterCreator)) {
+    //                     //console.log('ボイスチャンネルへ再接続したでし');
+    //                     message.channel.send('ボイスチャンネルへ再接続したでし');
+    //                     readChannelId = message.channel.id;
+    //                 }
+    //             }, 5000);
+    //         } else {
+    //             message.reply('まずあなたがボイスチャンネルへ接続している必要があるでし');
+    //         }
+    //     } else {
+    //         message.reply('Botはボイスチャンネルに接続していないようでし');
+    //     }
+    // }
 
-    if (message.content === `${prefix}kill`) {
-        if (context && context.status !== 4) {
-            context.disconnect();
-            message.channel.send(':dash:');
-        } else {
-            message.reply('Botはボイスチャンネルに接続していないようでし');
-        }
-    }
+    // if (message.content === `${prefix}kill`) {
+    //     if (context && context.status !== 4) {
+    //         context.disconnect();
+    //         message.channel.send(':dash:');
+    //     } else {
+    //         message.reply('Botはボイスチャンネルに接続していないようでし');
+    //     }
+    // }
 
     if (message.content.indexOf(`${prefix}mode`) === 0) {
         const split = message.content.split(' ');
@@ -368,12 +314,13 @@ async function main(message) {
             let selectSpeed = message.author.id.substr(16, 1);
             pitch = pitchList[selectPitch];
             speed = speedList[selectSpeed];
-            yomiage({
-                message: yomiage_message,
-                cons: context,
-            });
+
+            // yomiage({
+            //     message: yomiage_message,
+            //     cons: context,
+            // });
         } catch (error) {
-            //console.log(error.message);
+            console.log(error.message);
             message.channel.send(error.message);
         }
     } else {

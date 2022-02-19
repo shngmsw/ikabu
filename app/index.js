@@ -24,6 +24,7 @@ const client = new Client({
 const Handler = require('./handler.js');
 const Dispandar = require('./event/dispandar.js');
 const TTS = require('./tts/voice_bot_node.js');
+const VOICE = require('./tts/discordjs_voice.js');
 const privateChat = require('./voice/secretchat.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
 const removeRookie = require('./event/rookie.js');
@@ -61,7 +62,8 @@ client.on('messageCreate', async (msg) => {
     deleteToken(msg);
     Handler.call(msg);
     Dispandar.dispand(msg);
-    TTS.main(msg);
+    // TTS.main(msg);
+    VOICE.onPlay(msg);
     suggestionBox.archive(msg);
     suggestionBox.init(msg);
     chatCountUp(msg);
