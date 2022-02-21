@@ -163,10 +163,6 @@ async function setting(message) {
                     voicePattern1 = split[1];
                     const voiceMessage = `読み上げ音声を${split[1]} : ${voiceLists1[split[1]]}に設定したでし`;
                     message.reply(voiceMessage);
-                    yomiage({
-                        message: voiceMessage,
-                        cons: context,
-                    });
                 } else {
                     message.reply(`指定された読み上げ音声タイプが不正でし指定可能な音声タイプは${prefix}typeで見ることが可能でし`);
                 }
