@@ -67,10 +67,10 @@ const kill = async (msg) => {
     const { guildId } = msg;
     let subscription = subscriptions.get(guildId);
     if (subscription) {
-    subscription.connection.destroy();
-    subscriptions.delete(guildId);
-    channels.delete(guildId);
-    msg.channel.send(':dash:');
+        subscription.connection.destroy();
+        subscriptions.delete(guildId);
+        channels.delete(guildId);
+        msg.channel.send(':dash:');
     }
 };
 
@@ -79,15 +79,19 @@ function handleVoiceCommand(msg) {
     let strCmd = content.replace(/ /g, ' ');
     const args = strCmd.split(' ');
     const command = args.shift().toLowerCase();
-    switch (command) {
-        case '!join':
-            join(msg);
-            break;
-        case '!kill':
-            kill(msg);
-            break;
-        default:
-            play(msg);
-            break;
+    try {
+        switch (command) {
+            case '!join':
+                join(msg);
+                break;
+            case '!kill':
+                kill(msg);
+                break;
+            default:
+                play(msg);
+                break;
+        }
+    } catch (err) {
+        kill(msg);
     }
 }
