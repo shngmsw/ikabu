@@ -27,6 +27,10 @@ module.exports = function handleHelp(msg) {
                             name: '音声タイプを変更します',
                             value: '```!voice```\n',
                         },
+                        {
+                            name: 'ボイスチャンネルからブキチを切断',
+                            value: '```!kill```\n',
+                        },
                     ]),
             ],
         });
