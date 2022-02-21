@@ -48,7 +48,7 @@ const join = async (msg) => {
 const play = async (msg) => {
     const { guildId, member, channelId } = msg;
     let subscription = subscriptions.get(guildId);
-    if (subscription) {
+    if (subscription && channels.get(guildId) === channelId) {
         // メッセージから音声ファイルを取得
         const buffer = await mode_api(msg);
         const stream = await bufferToStream(buffer);
