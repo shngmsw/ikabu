@@ -3,3 +3,4 @@ launch.json
 .env
 local/*
 package-lock.json
+.history/

@@ -1,13 +1,4 @@
 // Discord bot implements
-const {
-    joinVoiceChannel,
-    createAudioPlayer,
-    createAudioResource,
-    entersState,
-    StreamType,
-    AudioPlayerStatus,
-    VoiceConnectionStatus,
-} = require('@discordjs/voice');
 const { Client, Intents, VoiceChannel } = require('discord.js');
 const { URLSearchParams } = require('url');
 const client = new Client({
@@ -23,7 +14,8 @@ const client = new Client({
 });
 const Handler = require('./handler.js');
 const Dispandar = require('./event/dispandar.js');
-const TTS = require('./tts/voice_bot_node.js');
+const VOICE_API = require('./tts/voice_bot_node.js');
+const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const privateChat = require('./voice/secretchat.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
 const removeRookie = require('./event/rookie.js');
@@ -61,7 +53,8 @@ client.on('messageCreate', async (msg) => {
     deleteToken(msg);
     Handler.call(msg);
     Dispandar.dispand(msg);
-    TTS.main(msg);
+    VOICE_API.setting(msg);
+    DISCORD_VOICE.handleVoiceCommand(msg);
     suggestionBox.archive(msg);
     suggestionBox.init(msg);
     chatCountUp(msg);
