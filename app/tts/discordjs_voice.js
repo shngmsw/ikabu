@@ -18,7 +18,7 @@ const subscriptions = new Map();
 const channels = new Map();
 
 module.exports = {
-    handleVoiceCommand: handleVoiceCommand
+    handleVoiceCommand: handleVoiceCommand,
 };
 
 const join = async (msg) => {
@@ -28,12 +28,12 @@ const join = async (msg) => {
         // yoshi-taroがボイスチャンネルに入っていなければ参加
         if (!member.voice.channelId) {
             // メンバーがVCにいるかチェック
-            msg.channel.send('ボイチャに参加した状態でコマンド叩いてね😘');
+            msg.channel.send('ボイチャに参加してからコマンドを使うでし！');
             return;
         }
         const connection = joinVoiceChannel({
             selfMute: false,
-            channelId: member.voice.channelId,// メンバーが居るVCのチャンネル
+            channelId: member.voice.channelId, // メンバーが居るVCのチャンネル
             guildId: guildId,
             adapterCreator: member.voice.guild.voiceAdapterCreator,
         });
@@ -41,141 +41,50 @@ const join = async (msg) => {
         connection.on('error', console.warn);
         subscriptions.set(guildId, subscription);
         channels.set(guildId, channelId);
-        msg.channel.send('ワイはヨシ太郎や！"$yoshi help"で使い方表示するで！');
+        msg.channel.send('ボイスチャンネルに接続したでし！`help voice`で使い方を説明するでし！');
     }
-}
+};
 
 const play = async (msg) => {
+    const { guildId, member, channelId } = msg;
+    let subscription = subscriptions.get(guildId);
     if (subscription) {
         // メッセージから音声ファイルを取得
-        const replacedMessage = messageReplace(msg);
-        const buffer = mode_api(replacedMessage);
-        const stream = bufferToStream(buffer);
+        const buffer = await mode_api(msg);
+        const stream = await bufferToStream(buffer);
 
         // ボイスチャットセッションの音声プレイヤーに音声ファイルのURLを指定して再生させます。
         const player = subscription.player;
-        const resource = createAudioResource(stream, {
+        const resource = await createAudioResource(stream, {
             inputType: StreamType.Arbitrary,
         });
         player.play(resource);
     }
-}
+};
 
 const kill = async (msg) => {
     const { guildId } = msg;
+    let subscription = subscriptions.get(guildId);
     subscription.connection.destroy();
     subscriptions.delete(guildId);
     channels.delete(guildId);
     msg.channel.send(':dash:');
-}
+};
 
-const handleVoiceCommand = (msg) => {
+function handleVoiceCommand(msg) {
+    const { content } = msg;
     let strCmd = content.replace(/ /g, ' ');
     const args = strCmd.split(' ');
-    args.shift();
     const command = args.shift().toLowerCase();
     switch (command) {
-        case 'join':
+        case '!join':
             join(msg);
             break;
-        case 'kill':
+        case '!kill':
             kill(msg);
             break;
-        case 'play':
+        default:
             play(msg);
             break;
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-async function play(message) {
-    const guild = message.guild;
-    const member = await guild.members.fetch(message.member.id);
-    const memberVC = member.voice.channel;
-    if (!memberVC) {
-        return message.reply({
-            content: '接続先のVCが見つかりません。',
-        });
-    }
-    if (!memberVC.joinable) {
-        return message.reply({
-            content: 'VCに接続できません。',
-        });
-    }
-    if (!memberVC.speakable) {
-        return message.reply({
-            content: 'VCで音声を再生する権限がありません。',
-        });
-    }
-    const status = ['●Loading Sounds...', `●Connecting to ${memberVC}...`];
-    const p = message.reply(status.join('\n'));
-    const connection = joinVoiceChannel({
-        guildId: guild.id,
-        channelId: memberVC.id,
-        adapterCreator: guild.voiceAdapterCreator,
-        selfMute: false,
-    });
-    const resource = createAudioResource(bufferStream, {
-        inputType: StreamType.Arbitrary,
-    });
-    const player = createAudioPlayer({
-        behaviors: {
-            noSubscriber: NoSubscriberBehavior.Pause,
-        },
-    });
-    player.play(resource);
-    const promises = [];
-    promises.push(entersState(player, AudioPlayerStatus.AutoPaused, 1000 * 10).then(() => (status[0] += 'Done!')));
-    promises.push(entersState(connection, VoiceConnectionStatus.Ready, 1000 * 10).then(() => (status[1] += 'Done!')));
-    await Promise.race(promises);
-    await p;
-    await Promise.all([...promises, message.reply(status.join('\n'))]);
-    connection.subscribe(player);
-    await entersState(player, AudioPlayerStatus.Playing, 100);
-
-    await entersState(player, AudioPlayerStatus.Idle, 2 ** 31 - 1);
-    connection.destroy();
-}
-
-async function onPlay(message) {
-    try {
-        await play(message);
-    } catch (err) {
-        if (message.replied) {
-            message.edit('エラーが発生しました。').catch(() => { });
-        } else {
-            message.reply('エラーが発生しました。').catch(() => { });
-        }
-        throw err;
     }
 }
