@@ -113,8 +113,12 @@ async function messageReplace(message) {
     };
 
     const over200_cut = (str) => {
-        const str200 = str.substr(0, 195) + '以下略';
-        return str200;
+        if (str.length > 200) {
+            const str200 = str.substr(0, 195) + '以下略';
+            return str200;
+        } else {
+            return str;
+        }
     };
 
     const yomiage_message = await mention_replace(w_replace(over200_cut(emoji_delete(url_delete(`${message.content}`)))));
