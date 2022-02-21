@@ -66,10 +66,12 @@ const play = async (msg) => {
 const kill = async (msg) => {
     const { guildId } = msg;
     let subscription = subscriptions.get(guildId);
+    if (subscription) {
     subscription.connection.destroy();
     subscriptions.delete(guildId);
     channels.delete(guildId);
     msg.channel.send(':dash:');
+    }
 };
 
 function handleVoiceCommand(msg) {
