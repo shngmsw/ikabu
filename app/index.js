@@ -1,13 +1,4 @@
 // Discord bot implements
-const {
-    joinVoiceChannel,
-    createAudioPlayer,
-    createAudioResource,
-    entersState,
-    StreamType,
-    AudioPlayerStatus,
-    VoiceConnectionStatus,
-} = require('@discordjs/voice');
 const { Client, Intents, VoiceChannel } = require('discord.js');
 const { URLSearchParams } = require('url');
 const client = new Client({
@@ -23,8 +14,8 @@ const client = new Client({
 });
 const Handler = require('./handler.js');
 const Dispandar = require('./event/dispandar.js');
-const TTS = require('./tts/voice_bot_node.js');
-const VOICE = require('./tts/discordjs_voice.js');
+const VOICE_API = require('./tts/voice_bot_node.js');
+const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const privateChat = require('./voice/secretchat.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
 const removeRookie = require('./event/rookie.js');
@@ -53,17 +44,17 @@ client.on('messageCreate', async (msg) => {
     if (msg.content.match('ボーリング')) {
         msg.reply(
             '```「ボウリング」とは、前方に正三角形に並べられた10本のピンと呼ばれる棒をめがけボールを転がし、倒れたピンの数によって得られる得点を競うスポーツでし。' +
-                '専用施設のボウリング場に設置された細長いレーンの上で行われる屋内競技で、レーンの長さが約23m、ピンまでの距離は約18mで行われるのが一般的でし。' +
-                '英語では “bowling” と書き、球を意味する “ball” ではなく、ラテン語で「泡」や「こぶ」を意味する “bowl” が語源とされているでし。' +
-                '\n文部科学省は国語審議会で、球技を指す場合は「ボウリング」表記を用い、掘削を意味する「ボーリング」と区別することを推奨しているでし。```',
+            '専用施設のボウリング場に設置された細長いレーンの上で行われる屋内競技で、レーンの長さが約23m、ピンまでの距離は約18mで行われるのが一般的でし。' +
+            '英語では “bowling” と書き、球を意味する “ball” ではなく、ラテン語で「泡」や「こぶ」を意味する “bowl” が語源とされているでし。' +
+            '\n文部科学省は国語審議会で、球技を指す場合は「ボウリング」表記を用い、掘削を意味する「ボーリング」と区別することを推奨しているでし。```',
         );
     }
 
     deleteToken(msg);
     Handler.call(msg);
     Dispandar.dispand(msg);
-    // TTS.main(msg);
-    VOICE.onPlay(msg);
+    VOICE_API.setting(msg);
+    DISCORD_VOICE.handleVoiceCommand(msg);
     suggestionBox.archive(msg);
     suggestionBox.init(msg);
     chatCountUp(msg);

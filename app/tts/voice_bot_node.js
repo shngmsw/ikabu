@@ -2,43 +2,55 @@
  * MIT License
  * Copyright (c) 2020 noriokun4649
  */
+module.exports = {
+    setting: setting,
+    mode_api: mode_api,
+    messageReplace: messageReplace,
+    bufferToStream: bufferToStream
+};
+
 const { VoiceText } = require('voice-text');
 const { Readable } = require('stream');
 const conf = require('config-reloadable');
 
-let config = conf();
-const voiceLists1 = {
-    hikari: 'ひかり（女性）',
-    haruka: 'はるか（女性）',
-    takeru: 'たける（男性）',
-    santa: 'サンタ',
-    bear: '凶暴なクマ',
-    show: 'ショウ（男性）',
-};
-const modeList1 = {
-    1: 'HOYA VoiceText API',
-};
-const pitchList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
-const speedList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
-let context;
-let discordToken = null;
-let voiceTextApiKey = null;
-let prefix = '/';
-let autoRestart = true;
-let readMe = false;
-let apiType = 1;
-let voiceType = 'haruka';
-let blackList;
-let channelHistory;
-let speed = 100;
-let pitch = 100;
-const timeoutOffset = 5;
-let timeout = timeoutOffset;
+const initConfig = () => {
+    let config = conf();
+    const voiceLists1 = {
+        hikari: 'ひかり（女性）',
+        haruka: 'はるか（女性）',
+        takeru: 'たける（男性）',
+        santa: 'サンタ',
+        bear: '凶暴なクマ',
+        show: 'ショウ（男性）',
+    };
+    const modeList1 = {
+        1: 'HOYA VoiceText API',
+    };
+    const pitchList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
+    const speedList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
+    let context;
+    let voiceTextApiKey = null;
+    let prefix = '/';
+    let autoRestart = true;
+    let readMe = false;
+    let apiType = 1;
+    let voiceType = 'haruka';
+    let blackList;
+    let channelHistory;
+    let speed = 100;
+    let pitch = 100;
+    const timeoutOffset = 5;
+    let timeout = timeoutOffset;
+
+    readConfig();
+    let voicePattern1 = voiceType; //初期時のよみあげ音声
+    let mode = apiType;
+    const voiceText = new VoiceText(voiceTextApiKey); //Voice Text API key
+    let readChannelId = null;
+
+}
 
 const readConfig = () => {
-    //discordToken = config.get('Api.discordToken');
-    discordToken = process.env.DISCORD_BOT_TOKEN;
-    //voiceTextApiKey = config.get('Api.voiceTextApiKey');
     voiceTextApiKey = process.env.VOICE_TEXT_API_KEY;
     prefix = config.get('Prefix');
     autoRestart = config.get('AutoRestart');
@@ -53,40 +65,32 @@ const readConfig = () => {
     return true;
 };
 
-readConfig();
-let voicePattern1 = voiceType; //初期時のよみあげ音声
-let mode = apiType;
-const voiceText = new VoiceText(voiceTextApiKey); //Voice Text API key
-let readChannelId = null;
-
-module.exports = {
-    main: main,
+const mode_api = (msg) => {
+    if (mode === 1) {
+        // ユーザーによって音声変える
+        let selectPitch = msg.author.id.substr(17, 1);
+        let selectSpeed = msg.author.id.substr(16, 1);
+        pitch = pitchList[selectPitch];
+        speed = speedList[selectSpeed];
+        return voiceText.fetchBuffer(msg, {
+            format: 'wav',
+            speaker: voicePattern1,
+            pitch,
+            speed,
+        });
+    } else {
+        throw Error(`不明なAPIが選択されています:${mode}`);
+    }
 };
 
-async function main(message) {
-    if (!message.guild) return;
+const bufferToStream = (buffer) => {
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+    return stream;
+};
 
-    const isBlackListsFromPrefixes = (cont) => {
-        const prefixes = blackList.get('prefixes');
-        return prefixes.find((prefix) => cont.indexOf(prefix) === 0);
-    };
-
-    const isBlackListsFromID = (menId) => {
-        const memberIds = blackList.get('memberIds');
-        return memberIds.find((id) => menId === id);
-    };
-
-    const isBot = () => {
-        const bots = blackList.get('bots');
-        return bots ? message.author.bot : false;
-    };
-
-    const isRead = (id) => (readMe === false ? id === readChannelId : readMe);
-
-    const isNotEmpty = (message) => (message.length === 0 ? false : true);
-
-    const isNotLengthOver = (message) => (message.length >= 200 ? false : true);
-
+const messageReplace = async (message) => {
     const w_replace = (str) => {
         const judge = /.*w$/g;
         if (str.match(judge)) {
@@ -113,100 +117,12 @@ async function main(message) {
         return str.replace(pat, message.mentions.users.first().username);
     };
 
-    const yomiage = (obj) => {
-        if (obj.cons && obj.cons.status === 0 && message.guild.id === context.channel.guild.id) {
-            mode_api(obj)
-                .then((buffer) => {
-                    obj.cons.play(bufferToStream(buffer)); //保存されたWAV再生
+    const yomiage_message = await mention_replace(w_replace(emoji_delete(url_delete(`${message.content}`))));
+    return yomiage_message;
+}
 
-                    const resource = createAudioResource(buffer, {
-                        inputType: StreamType.Arbitrary,
-                    });
-                    const player = createAudioPlayer({
-                        behaviors: NoSubscriberBehavior.Pause,
-                    });
-                    player.play(resource);
-                    //console.log(`${obj.message}の読み上げ完了`);
-                })
-                .catch((error) => {
-                    //console.log('error ->');
-                    console.error(error);
-                    message.channel.send({
-                        content: `${modeList1[mode]}の呼び出しにエラーが発生したでし\nエラー内容:${error.details[0].message}`,
-                    });
-                });
-        } else {
-            console.log('Botがボイスチャンネルへ接続してません。');
-        }
-    };
-
-    const mode_api = (obj) => {
-        if (mode === 1) {
-            return voiceText.fetchBuffer(obj.message, {
-                format: 'wav',
-                speaker: voicePattern1,
-                pitch,
-                speed,
-            });
-        } else {
-            throw Error(`不明なAPIが選択されています:${mode}`);
-        }
-    };
-
-    const bufferToStream = (buffer) => {
-        const stream = new Readable();
-        stream.push(buffer);
-        stream.push(null);
-        return stream;
-    };
-
-    // if (message.content === `${prefix}join`) {
-    //     if (message.member.voice.channel) {
-    //         if (!context || (context && context.status === 4)) {
-    //             if (voiceChanelJoin(message.guild.id, message.member.voice.channel, message.guild.voiceAdapterCreator)) {
-    //                 //console.log('ボイスチャンネルへ接続したでし');
-    //                 message.channel.send('ボイスチャンネルへ接続したでし');
-    //                 message.reply(
-    //                     `\nチャットの読み上げ準備ができたでし。切断時は${prefix}killでし\n${prefix}mode で読み上げAPIを変更できるでし\。\n ${prefix}voiceで読み上げ音声を選択できるでし。\n 音声が読み上げられない場合は${prefix}reconnectを試してみるでし。`,
-    //                 );
-    //                 readChannelId = message.channel.id;
-    //             }
-    //         } else {
-    //             message.reply('既にボイスチャンネルへ接続済みでし');
-    //         }
-    //     } else {
-    //         message.reply('まずあなたがボイスチャンネルへ接続している必要があるでし');
-    //     }
-    // }
-
-    // if (message.content === `${prefix}reconnect`) {
-    //     if (context && context.status !== 4) {
-    //         context.disconnect();
-    //         message.channel.send('5秒後にボイスチャンネルへ再接続するでし');
-    //         if (message.member.voice.channel) {
-    //             setTimeout(() => {
-    //                 if (voiceChanelJoin(message.guild.id, message.member.voice.channel, message.guild.voiceAdapterCreator)) {
-    //                     //console.log('ボイスチャンネルへ再接続したでし');
-    //                     message.channel.send('ボイスチャンネルへ再接続したでし');
-    //                     readChannelId = message.channel.id;
-    //                 }
-    //             }, 5000);
-    //         } else {
-    //             message.reply('まずあなたがボイスチャンネルへ接続している必要があるでし');
-    //         }
-    //     } else {
-    //         message.reply('Botはボイスチャンネルに接続していないようでし');
-    //     }
-    // }
-
-    // if (message.content === `${prefix}kill`) {
-    //     if (context && context.status !== 4) {
-    //         context.disconnect();
-    //         message.channel.send(':dash:');
-    //     } else {
-    //         message.reply('Botはボイスチャンネルに接続していないようでし');
-    //     }
-    // }
+async function setting(message) {
+    if (!message.guild) return;
 
     if (message.content.indexOf(`${prefix}mode`) === 0) {
         const split = message.content.split(' ');
@@ -298,32 +214,5 @@ async function main(message) {
                 }
             }
         }
-    }
-
-    const yomiage_message = await mention_replace(w_replace(emoji_delete(url_delete(`${message.content}`))));
-
-    if (
-        !(isBot() || isBlackListsFromID(message.member.id) || isBlackListsFromPrefixes(message.content)) &&
-        isRead(message.channel.id) &&
-        isNotEmpty(yomiage_message) &&
-        isNotLengthOver(yomiage_message)
-    ) {
-        try {
-            // ユーザーによって音声変える
-            let selectPitch = message.author.id.substr(17, 1);
-            let selectSpeed = message.author.id.substr(16, 1);
-            pitch = pitchList[selectPitch];
-            speed = speedList[selectSpeed];
-
-            // yomiage({
-            //     message: yomiage_message,
-            //     cons: context,
-            // });
-        } catch (error) {
-            console.log(error.message);
-            message.channel.send(error.message);
-        }
-    } else {
-        //console.log('読み上げ対象外のチャットでし');
     }
 }
