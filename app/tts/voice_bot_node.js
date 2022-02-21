@@ -112,7 +112,12 @@ async function messageReplace(message) {
         return str.replace(pat, message.mentions.users.first().username);
     };
 
-    const yomiage_message = await mention_replace(w_replace(emoji_delete(url_delete(`${message.content}`))));
+    const over200_cut = (str) => {
+        const str200 = str.substr(0, 195) + '以下略';
+        return str200;
+    };
+
+    const yomiage_message = await mention_replace(w_replace(over200_cut(emoji_delete(url_delete(`${message.content}`)))));
     return yomiage_message;
 }
 

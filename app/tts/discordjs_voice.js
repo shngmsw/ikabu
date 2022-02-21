@@ -42,13 +42,17 @@ const join = async (msg) => {
         subscriptions.set(guildId, subscription);
         channels.set(guildId, channelId);
         msg.channel.send('ボイスチャンネルに接続したでし！`help voice`で使い方を説明するでし！');
+    } else if (channels.get(guildId) === channelId) {
+        msg.channel.send('既に接続済みでし！');
+    } else {
+        msg.channel.send('他の部屋で営業中でし！');
     }
 };
 
 const play = async (msg) => {
-    const { guildId, member, channelId } = msg;
+    const { guildId, channelId } = msg;
     let subscription = subscriptions.get(guildId);
-    if (subscription) {
+    if (subscription && channels.get(guildId) === channelId) {
         // メッセージから音声ファイルを取得
         const buffer = await mode_api(msg);
         const stream = await bufferToStream(buffer);
@@ -59,16 +63,21 @@ const play = async (msg) => {
             inputType: StreamType.Arbitrary,
         });
         player.play(resource);
+        await entersState(player, AudioPlayerStatus.Ready, 1000 * 900);
     }
 };
 
 const kill = async (msg) => {
-    const { guildId } = msg;
+    const { guildId, channelId } = msg;
     let subscription = subscriptions.get(guildId);
-    subscription.connection.destroy();
-    subscriptions.delete(guildId);
-    channels.delete(guildId);
-    msg.channel.send(':dash:');
+    if (subscription && channels.get(guildId) === channelId) {
+        subscription.connection.destroy();
+        subscriptions.delete(guildId);
+        channels.delete(guildId);
+        msg.channel.send(':dash:');
+    } else if (channels.get(guildId) != channelId) {
+        msg.channel.send('他の部屋で営業中でし！');
+    }
 };
 
 function handleVoiceCommand(msg) {
@@ -76,15 +85,19 @@ function handleVoiceCommand(msg) {
     let strCmd = content.replace(/ /g, ' ');
     const args = strCmd.split(' ');
     const command = args.shift().toLowerCase();
-    switch (command) {
-        case '!join':
-            join(msg);
-            break;
-        case '!kill':
-            kill(msg);
-            break;
-        default:
-            play(msg);
-            break;
+    try {
+        switch (command) {
+            case '!join':
+                join(msg);
+                break;
+            case '!kill':
+                kill(msg);
+                break;
+            default:
+                play(msg);
+                break;
+        }
+    } catch (err) {
+        kill(msg);
     }
 }
