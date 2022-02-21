@@ -42,6 +42,8 @@ const join = async (msg) => {
         subscriptions.set(guildId, subscription);
         channels.set(guildId, channelId);
         msg.channel.send('ボイスチャンネルに接続したでし！`help voice`で使い方を説明するでし！');
+    } else {
+        msg.channel.send('既に接続済みでし！');
     }
 };
 
@@ -71,6 +73,8 @@ const kill = async (msg) => {
         subscriptions.delete(guildId);
         channels.delete(guildId);
         msg.channel.send(':dash:');
+    } else {
+        msg.channel.send('VCに接続してないでし！');
     }
 };
 
