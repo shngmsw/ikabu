@@ -42,13 +42,15 @@ const join = async (msg) => {
         subscriptions.set(guildId, subscription);
         channels.set(guildId, channelId);
         msg.channel.send('ボイスチャンネルに接続したでし！`help voice`で使い方を説明するでし！');
-    } else {
+    } else if (channels.get(guildId) === channelId) {
         msg.channel.send('既に接続済みでし！');
+    } else {
+        msg.channel.send('他の部屋で営業中でし！');
     }
 };
 
 const play = async (msg) => {
-    const { guildId, member, channelId } = msg;
+    const { guildId, channelId } = msg;
     let subscription = subscriptions.get(guildId);
     if (subscription && channels.get(guildId) === channelId) {
         // メッセージから音声ファイルを取得
@@ -66,15 +68,15 @@ const play = async (msg) => {
 };
 
 const kill = async (msg) => {
-    const { guildId } = msg;
+    const { guildId, channelId } = msg;
     let subscription = subscriptions.get(guildId);
-    if (subscription) {
+    if (subscription && channels.get(guildId) === channelId) {
         subscription.connection.destroy();
         subscriptions.delete(guildId);
         channels.delete(guildId);
         msg.channel.send(':dash:');
-    } else {
-        msg.channel.send('VCに接続してないでし！');
+    } else if (channels.get(guildId) != channelId) {
+        msg.channel.send('他の部屋で営業中でし！');
     }
 };
 
