@@ -45,17 +45,17 @@ async function join(interaction, params) {
         });
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
         if (member.user.id === cmd_message.author.id) {
-            interaction.followUp({
+            await interaction.followUp({
                 content: `募集主は参加表明できないでし！`,
                 ephemeral: true,
             });
         } else {
             const member_mention = `<@${member.user.id}>`;
             const host_mention = `<@${cmd_message.author.id}>`;
-            interaction.message.reply({
+            await interaction.message.reply({
                 content: `${host_mention}\n${member_mention}たんが参加表明したでし！`,
             });
-            interaction.followUp({
+            await interaction.followUp({
                 content: `${host_mention}からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
                 ephemeral: true,
             });
