@@ -68,12 +68,18 @@ client.on('guildMemberAdd', (member) => {
     join(member);
 });
 
-client.on('guildMemberRemove', (member) => {
-    const guild = member.guild;
-    const period = Math.round((Date.now() - member.joinedAt) / 86400000); // サーバーに居た期間を日数にして計算
-    guild.channels.cache
-        .find((channel) => channel.id === process.env.CHANNEL_ID_RETIRE_LOG)
-        .send(`${member.user.tag}さんが退部しました。入部期間：${period}日間`);
+client.on('guildMemberRemove', async (member) => {
+    try {
+        const guild = member.guild;
+        const tag = member.user.tag;
+        const period = Math.round((Date.now() - member.joinedAt) / 86400000); // サーバーに居た期間を日数にして計算
+        const retire_log =
+            guild.channels.cache.find((channel) => channel.id === process.env.CHANNEL_ID_RETIRE_LOG) ||
+            (await guild.channels.fetch(process.env.CHANNEL_ID_RETIRE_LOG));
+        retire_log.send(`${tag} さんが退部しました。入部期間：${period}日間`);
+    } catch (err) {
+        console.log(err);
+    }
 });
 
 client.on('voiceStateUpdate', (oldState, newState) => privateChat.onVoiceStateUpdate(oldState, newState));
