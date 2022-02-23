@@ -65,6 +65,9 @@ async function mode_api(msg) {
         let selectPitch = msg.author.id.substr(17, 1);
         let selectSpeed = msg.author.id.substr(16, 1);
         const replacedMessage = await messageReplace(msg);
+        if (replacedMessage.length == 0) {
+            return null;
+        }
         pitch = pitchList[selectPitch];
         speed = speedList[selectSpeed];
         return voiceText.fetchBuffer(replacedMessage, {
@@ -79,7 +82,8 @@ async function mode_api(msg) {
 }
 
 function bufferToStream(buffer) {
-    const stream = new Readable();
+    const hwm = 1024 * 1024;
+    const stream = new Readable({ highWaterMark: hwm });
     stream.push(buffer);
     stream.push(null);
     return stream;

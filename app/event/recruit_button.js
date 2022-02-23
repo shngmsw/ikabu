@@ -17,10 +17,9 @@ module.exports = {
  */
 async function handleError(err, { interaction }) {
     // UnKnown Interactionエラーはコンポーネント削除してるから出ちゃうのはしょうがないっぽい？のでスルー
-    if (err.code === 10062) {
+    if (err.code === 10062 || err.code === 40060) {
         return;
     }
-    // console.log(err);
 }
 
 /**
@@ -52,7 +51,7 @@ async function join(interaction, params) {
         } else {
             const member_mention = `<@${member.user.id}>`;
             const host_mention = `<@${cmd_message.author.id}>`;
-            await interaction.message.reply({
+            interaction.message.reply({
                 content: `${host_mention}\n${member_mention}たんが参加表明したでし！`,
             });
             await interaction.followUp({
