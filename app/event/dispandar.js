@@ -7,19 +7,24 @@ module.exports = {
 };
 
 async function dispand(message) {
-    messages = await extractMessages(message);
+    var messages = await extractMessages(message);
+    var url;
     for (var m in messages) {
         if (message.content) {
+            url = message.content.match(regexDiscrdMessageUrl);
             await message.channel.send({
-                embeds: [common.composeEmbed(messages[m], message.content)],
+                embeds: [common.composeEmbed(messages[m], url[0])],
             });
         }
         for (var embed in messages[m].embeds) {
             await message.channel.send({ embeds: [messages[m].embeds[embed]] });
         }
-        message.delete();
+        if (message.content === url[0]) {
+            message.delete();
+        }
     }
 }
+
 async function extractMessages(message) {
     let messages = new Array();
     let matches = message.content.match(regexDiscrdMessageUrl);

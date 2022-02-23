@@ -392,7 +392,7 @@ function weapon2txt(key) {
             return 'スパイガジェットソレーラ';
             break;
         default:
-            return ':question:';
+            return '❓';
             break;
     }
 }

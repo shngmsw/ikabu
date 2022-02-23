@@ -20,16 +20,16 @@ module.exports = function handleHelp(msg) {
                             value: '```!join```\n',
                         },
                         {
-                            name: 'ボイスチャンネルへ再接続',
-                            value: '```!reconnect```\n',
-                        },
-                        {
                             name: 'APIで利用可能な音声タイプを一覧表示します',
                             value: '```!type```\n',
                         },
                         {
                             name: '音声タイプを変更します',
                             value: '```!voice```\n',
+                        },
+                        {
+                            name: 'ボイスチャンネルからブキチを切断',
+                            value: '```!kill```\n',
                         },
                     ]),
             ],
