@@ -64,7 +64,7 @@ const play = async (msg) => {
             inputType: StreamType.Arbitrary,
         });
         player.play(resource);
-        await entersState(player, AudioPlayerStatus.Ready, 1000 * 900);
+        await entersState(player, AudioPlayerStatus.Idle, 1000 * 900);
     }
 };
 

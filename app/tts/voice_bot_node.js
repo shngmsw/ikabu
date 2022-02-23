@@ -82,7 +82,8 @@ async function mode_api(msg) {
 }
 
 function bufferToStream(buffer) {
-    const stream = new Readable();
+    const hwm = 1024 * 1024;
+    const stream = new Readable({ highWaterMark: hwm });
     stream.push(buffer);
     stream.push(null);
     return stream;
