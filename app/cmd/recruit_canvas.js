@@ -66,6 +66,7 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     var column = [''];
     var line = 0;
     var text = condition.replace('{br}', '\n', 'gm');
+    text = emoji_delete(text);
 
     for (var i = 0; i < text.length; i++) {
         var char = text.charAt(i);
@@ -164,3 +165,8 @@ function createRoundRect(ctx, x, y, width, height, radius) {
     ctx.arcTo(x, y, x + radius, y, radius);
     ctx.closePath();
 }
+
+const emoji_delete = (str) => {
+    const pat = /(<:\w*:\d*>)/g;
+    return str.replace(pat, '');
+};
