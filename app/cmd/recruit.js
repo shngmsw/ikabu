@@ -42,7 +42,7 @@ async function recruitLeagueMatch(msg, type) {
         return;
     }
 
-    var strCmd = msg.content.replace(/　/g, ' ');
+    var strCmd = msg.cleanContent.replace(/　/g, ' ');
     strCmd = strCmd.replace('  ', ' ');
     const args = strCmd.split(' ');
     args.shift();
@@ -72,7 +72,7 @@ async function regularMatch(msg) {
     if (isNotThisChannel(msg, channelName)) {
         return;
     }
-    var strCmd = msg.content.replace(/　/g, ' ');
+    var strCmd = msg.cleanContent.replace(/　/g, ' ');
     strCmd = strCmd.replace('  ', ' ');
     const args = strCmd.split(' ');
     args.shift();
@@ -118,7 +118,7 @@ async function salmonRun(msg) {
     if (isNotThisChannel(msg, channelName)) {
         return;
     }
-    var strCmd = msg.content.replace(/　/g, ' ');
+    var strCmd = msg.cleanContent.replace(/　/g, ' ');
     strCmd = strCmd.replace('  ', ' ');
     const args = strCmd.split(' ');
     args.shift();
