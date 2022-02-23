@@ -55,6 +55,7 @@ const play = async (msg) => {
     if (subscription && channels.get(guildId) === channelId) {
         // メッセージから音声ファイルを取得
         const buffer = await mode_api(msg);
+        if (buffer == null) return;
         const stream = await bufferToStream(buffer);
 
         // ボイスチャットセッションの音声プレイヤーに音声ファイルのURLを指定して再生させます。

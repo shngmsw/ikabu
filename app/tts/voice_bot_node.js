@@ -65,6 +65,9 @@ async function mode_api(msg) {
         let selectPitch = msg.author.id.substr(17, 1);
         let selectSpeed = msg.author.id.substr(16, 1);
         const replacedMessage = await messageReplace(msg);
+        if (replacedMessage.length == 0) {
+            return null;
+        }
         pitch = pitchList[selectPitch];
         speed = speedList[selectSpeed];
         return voiceText.fetchBuffer(replacedMessage, {
