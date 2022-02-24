@@ -57,10 +57,8 @@ async function join(interaction, params) {
             embed.setDescription(`${member}たんが参加表明したでし！`);
             embed.setAuthor({
                 name: '✋',
-                // name: member.user.username,
                 iconURL: member.user.displayAvatarURL(),
             });
-            // embed.setThumbnail(member.user.displayAvatarURL());
             interaction.message.reply({
                 content: `${host_mention}`,
                 embeds: [embed],
