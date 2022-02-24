@@ -19,6 +19,8 @@ async function handleError(err, { interaction }) {
     // UnKnown Interactionエラーはコンポーネント削除してるから出ちゃうのはしょうがないっぽい？のでスルー
     if (err.code === 10062 || err.code === 40060) {
         return;
+    } else {
+        console.log(err);
     }
 }
 
@@ -51,8 +53,17 @@ async function join(interaction, params) {
         } else {
             const member_mention = `<@${member.user.id}>`;
             const host_mention = `<@${cmd_message.author.id}>`;
+            const embed = new MessageEmbed();
+            embed.setDescription(`${member}たんが参加表明したでし！`);
+            embed.setAuthor({
+                name: '✋',
+                // name: member.user.username,
+                iconURL: member.user.displayAvatarURL(),
+            });
+            // embed.setThumbnail(member.user.displayAvatarURL());
             interaction.message.reply({
-                content: `${host_mention}\n${member_mention}たんが参加表明したでし！`,
+                content: `${host_mention}`,
+                embeds: [embed],
             });
             await interaction.followUp({
                 content: `${host_mention}からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
