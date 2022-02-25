@@ -125,7 +125,7 @@ async function messageReplace(message) {
         }
     };
 
-    const yomiage_message = await mention_replace(w_replace(over200_cut(emoji_delete(url_delete(`${message.content}`)))));
+    const yomiage_message = await over200_cut(mention_replace(w_replace(emoji_delete(url_delete(`${message.content}`)))));
     return yomiage_message;
 }
 
