@@ -54,7 +54,7 @@ async function join(interaction, params) {
             const member_mention = `<@${member.user.id}>`;
             const host_mention = `<@${cmd_message.author.id}>`;
             const embed = new MessageEmbed();
-            embed.setDescription(`${member}たんが参加表明したでし！`);
+            embed.setDescription(`${member_mention}たんが参加表明したでし！`);
             embed.setAuthor({
                 name: '✋',
                 iconURL: member.user.displayAvatarURL(),
