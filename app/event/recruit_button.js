@@ -51,12 +51,12 @@ async function join(interaction, params) {
                 ephemeral: true,
             });
         } else {
-            const member_mention = `<@${member.user.id}>`;
-            const host_mention = `<@${cmd_message.author.id}>`;
+            const member_mention = `<@!${member.user.id}>`;
+            const host_mention = `<@!${cmd_message.author.id}>`;
             const embed = new MessageEmbed();
             embed.setDescription(`${member_mention}たんが参加表明したでし！`);
             embed.setAuthor({
-                name: '✋',
+                name: `${member.user.username}`,
                 iconURL: member.user.displayAvatarURL(),
             });
             interaction.message.reply({
