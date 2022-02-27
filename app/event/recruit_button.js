@@ -55,15 +55,15 @@ async function join(interaction, params) {
             const member_mention = `<@!${member.user.id}>`;
             const host_mention = `<@!${cmd_message.author.id}>`;
             const embed = new MessageEmbed();
-            embed.setDescription(`私はイカ部心得を読んでからこのボタンを押しました。\nイカ部心得に違反するようなことは絶対にしません。`);
+            embed.setDescription(`募集主は${member.user.username}たんに遊ぶ部屋を伝えるでし！イカ部心得を守って楽しく遊んでほしいでし！`);
             embed.setAuthor({
                 name: `${member.user.username}たんが参加表明したでし！`,
                 iconURL: member.user.displayAvatarURL(),
             });
-            embed.addFields(
-                { name: '役職', value: member.roles.cache.map((role) => (role.name != '@everyone' ? role.name : '')).join(' / ') },
-                { name: 'イカ部歴', value: getExperience(member.joinedAt) },
-            );
+            embed.addFields({
+                name: `${member.user.username}の役職`,
+                value: member.roles.cache.map((role) => (role.name != '@everyone' ? role.name : '')).join(' / '),
+            });
             interaction.message.reply({
                 content: `${host_mention} ${member_mention}`,
                 embeds: [embed],
