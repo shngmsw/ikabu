@@ -15,6 +15,8 @@ module.exports = {
     composeEmbed: composeEmbed,
     dateAdd: dateAdd,
     dateDiff: dateDiff,
+    isEmpty: isEmpty,
+    isNotEmpty: isNotEmpty,
 };
 
 function composeEmbed(message, url) {
@@ -425,6 +427,37 @@ function getGachi(data, x) {
 
 function isInteger(x) {
     return Math.round(x) === x;
+}
+
+/**
+ * IsEmpty
+ * @param obj {any} - Target Object
+ */
+function isEmpty(obj) {
+    if (obj === undefined || obj === null) {
+        return true;
+    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'String') {
+        if (obj === '') {
+            return true;
+        }
+    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'Array') {
+        if (obj.length === 0) {
+            return true;
+        }
+    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'Object') {
+        if (!Object.keys(obj).length) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * IsNotEmpty
+ * @param obj {any} - Target Object
+ */
+function isNotEmpty(obj) {
+    return !isEmpty(obj);
 }
 
 function randomSelect(array, num) {
