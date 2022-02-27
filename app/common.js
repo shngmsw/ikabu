@@ -13,6 +13,10 @@ module.exports = {
     rgbToHex: rgbToHex,
     random: randomSelect,
     composeEmbed: composeEmbed,
+    dateAdd: dateAdd,
+    dateDiff: dateDiff,
+    isEmpty: isEmpty,
+    isNotEmpty: isNotEmpty,
 };
 
 function composeEmbed(message, url) {
@@ -425,6 +429,37 @@ function isInteger(x) {
     return Math.round(x) === x;
 }
 
+/**
+ * IsEmpty
+ * @param obj {any} - Target Object
+ */
+function isEmpty(obj) {
+    if (obj === undefined || obj === null) {
+        return true;
+    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'String') {
+        if (obj === '') {
+            return true;
+        }
+    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'Array') {
+        if (obj.length === 0) {
+            return true;
+        }
+    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'Object') {
+        if (!Object.keys(obj).length) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * IsNotEmpty
+ * @param obj {any} - Target Object
+ */
+function isNotEmpty(obj) {
+    return !isEmpty(obj);
+}
+
 function randomSelect(array, num) {
     var a = array;
     var t = [];
@@ -436,6 +471,77 @@ function randomSelect(array, num) {
         r[n] = t[i] || a[i];
         --l;
         t[i] = t[l] || a[l];
+    }
+    return r;
+}
+/*
+ *  日数または月数を加算
+ *
+ *  dt: 基準となる Date オブジェクト
+ *  dd: 日数または月数
+ *   u: 'D': dd は日数
+ *      'M': dd は月数
+ *
+ */
+function dateAdd(dt, dd, u) {
+    var y = dt.getFullYear();
+    var m = dt.getMonth();
+    var d = dt.getDate();
+    var r = new Date(y, m, d);
+    if (typeof u === 'undefined' || u == 'D') {
+        r.setDate(d + dd);
+    } else if (u == 'M') {
+        m += dd;
+        y += parseInt(m / 12);
+        m %= 12;
+        var e = new Date(y, m + 1, 0).getDate();
+        r.setFullYear(y, m, d > e ? e : d);
+    }
+    return r;
+}
+
+/*
+ *  経過年・月・日数の計算
+ *
+ *  dt1: 開始年月日の Date オブジェクト
+ *  dt2: 終了年月日の Date オブジェクト
+ *    u:  'Y': 経過年数を求める
+ *        'M': 経過月数を求める
+ *        'D': 経過日数を求める
+ *       'YM': 1年に満たない月数
+ *       'MD': 1ヶ月に満たない日数
+ *       'YD': 1年に満たない日数
+ *    f: true: 初日算入
+ *      false: 初日不算入
+ *
+ */
+function dateDiff(dt1, dt2, u, f) {
+    if (typeof dt2 == 'undefined') dt2 = new Date();
+    if (f) dt1 = dateAdd(dt1, -1, 'D');
+    var y1 = dt1.getFullYear();
+    var m1 = dt1.getMonth();
+    var y2 = dt2.getFullYear();
+    var m2 = dt2.getMonth();
+    var dt3,
+        r = 0;
+    if (typeof u === 'undefined' || u == 'D') {
+        r = parseInt((dt2 - dt1) / (24 * 3600 * 1000));
+    } else if (u == 'M') {
+        r = y2 * 12 + m2 - (y1 * 12 + m1);
+        dt3 = dateAdd(dt1, r, 'M');
+        if (dateDiff(dt3, dt2, 'D') < 0) --r;
+    } else if (u == 'Y') {
+        r = parseInt(dateDiff(dt1, dt2, 'M') / 12);
+    } else if (u == 'YM') {
+        r = dateDiff(dt1, dt2, 'M') % 12;
+    } else if (u == 'MD') {
+        r = dateDiff(dt1, dt2, 'M');
+        dt3 = dateAdd(dt1, r, 'M');
+        r = dateDiff(dt3, dt2, 'D');
+    } else if (u == 'YD') {
+        r = dateDiff(dt1, dt2, 'Y');
+        dt3 = dateAdd(dt1, r * 12, 'M');
+        r = dateDiff(dt3, dt2, 'D');
     }
     return r;
 }
