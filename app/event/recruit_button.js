@@ -1,6 +1,4 @@
 const { MessageEmbed, MessageActionRow, MessageButton, Client } = require('discord.js');
-const client = new Client({ intents: 0, partials: ['GUILD_MEMBER', 'USER'] });
-const { dateDiff } = require('../common');
 module.exports = {
     join: join,
     cancel: cancel,
@@ -160,19 +158,4 @@ function disableButtons() {
         new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
     ]);
     return buttons;
-}
-
-function getExperience(joinDate) {
-    let today = new Date();
-
-    let years = dateDiff(joinDate, today, 'Y', true);
-    let months = dateDiff(joinDate, today, 'YM', true);
-    let days = dateDiff(joinDate, today, 'MD', true);
-    // 0のときは出力しない
-    let output = '';
-    output = years != 0 ? years + '年' : '';
-    output = months != 0 ? output + months + 'ヶ月' : output + '';
-    output = days != 0 ? output + days + '日' : output + '';
-
-    return output;
 }
