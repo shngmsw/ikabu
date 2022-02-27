@@ -1,5 +1,6 @@
 const { MessageEmbed, MessageActionRow, MessageButton, Client } = require('discord.js');
 const client = new Client({ intents: 0, partials: ['GUILD_MEMBER', 'USER'] });
+const { dateDiff } = require('../common');
 module.exports = {
     join: join,
     cancel: cancel,
@@ -54,13 +55,17 @@ async function join(interaction, params) {
             const member_mention = `<@!${member.user.id}>`;
             const host_mention = `<@!${cmd_message.author.id}>`;
             const embed = new MessageEmbed();
-            embed.setDescription(`${member_mention}たんが参加表明したでし！`);
+            embed.setDescription(`私はイカ部心得を読んでからこのボタンを押しました。\nイカ部心得に違反するようなことは絶対にしません。`);
             embed.setAuthor({
-                name: `${member.user.username}`,
+                name: `${member.user.username}たんが参加表明したでし！`,
                 iconURL: member.user.displayAvatarURL(),
             });
+            embed.addFields(
+                { name: '役職', value: member.roles.cache.map((role) => (role.name != '@everyone' ? role.name : '')).join(' / ') },
+                { name: 'イカ部歴', value: getExperience(member.joinedAt) },
+            );
             interaction.message.reply({
-                content: `${host_mention}`,
+                content: `${host_mention} ${member_mention}`,
                 embeds: [embed],
             });
             await interaction.followUp({
@@ -155,4 +160,19 @@ function disableButtons() {
         new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
     ]);
     return buttons;
+}
+
+function getExperience(joinDate) {
+    let today = new Date();
+
+    let years = dateDiff(joinDate, today, 'Y', true);
+    let months = dateDiff(joinDate, today, 'YM', true);
+    let days = dateDiff(joinDate, today, 'MD', true);
+    // 0のときは出力しない
+    let output = '';
+    output = years != 0 ? years + '年' : '';
+    output = months != 0 ? output + months + 'ヶ月' : output + '';
+    output = days != 0 ? output + days + '日' : output + '';
+
+    return output;
 }
