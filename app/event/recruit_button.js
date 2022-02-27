@@ -1,5 +1,5 @@
 const { MessageEmbed, MessageActionRow, MessageButton, Client } = require('discord.js');
-const client = new Client({ intents: 0, partials: ['GUILD_MEMBER', 'USER'] });
+const { isNotEmpty } = require('../common');
 module.exports = {
     join: join,
     cancel: cancel,
@@ -53,14 +53,19 @@ async function join(interaction, params) {
         } else {
             const member_mention = `<@!${member.user.id}>`;
             const host_mention = `<@!${cmd_message.author.id}>`;
+            let member_roles = member.roles.cache.map((role) => (role.name != '@everyone' ? role.name : '')).join(' / ');
             const embed = new MessageEmbed();
-            embed.setDescription(`${member_mention}たんが参加表明したでし！`);
+            embed.setDescription(`募集主は${member.user.username}たんに遊ぶ部屋を伝えるでし！イカ部心得を守って楽しく遊んでほしいでし！`);
             embed.setAuthor({
-                name: `${member.user.username}`,
+                name: `${member.user.username}たんが参加表明したでし！`,
                 iconURL: member.user.displayAvatarURL(),
             });
+            embed.addFields({
+                name: `${member.user.username}の役職`,
+                value: isNotEmpty(member_roles) ? member_roles : 'なし',
+            });
             interaction.message.reply({
-                content: `${host_mention}`,
+                content: `${host_mention} ${member_mention}`,
                 embeds: [embed],
             });
             await interaction.followUp({
