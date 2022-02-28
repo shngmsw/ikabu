@@ -1,5 +1,5 @@
 const { MessageEmbed, MessageActionRow, MessageButton, Client } = require('discord.js');
-const { isNotEmpty } = require('../common');
+const { isNotEmpty, datetimeDiff } = require('../common');
 module.exports = {
     join: join,
     cancel: cancel,
@@ -129,15 +129,23 @@ async function close(interaction, params) {
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
+        const member_mention = `<@!${member.user.id}>`;
         const msg_id = params.get('mid');
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
         const host_mention = `<@${cmd_message.author.id}>`;
-        const embed = new MessageEmbed().setDescription(`${host_mention}たんの募集〆`);
         if (member.user.id === cmd_message.author.id) {
             await interaction.update({
                 content: `${host_mention}たんの募集は〆！`,
                 components: [disableButtons()],
             });
+            const embed = new MessageEmbed().setDescription(`${host_mention}たんの募集〆`);
+            interaction.message.reply({ embeds: [embed] });
+        } else if (datetimeDiff(new Date(), cmd_message.createdAt) > 30) {
+            await interaction.update({
+                content: `${host_mention}たんの募集は〆！`,
+                components: [disableButtons()],
+            });
+            const embed = new MessageEmbed().setDescription(`${host_mention}たんの募集〆 \n ${member_mention}たんが代理〆`);
             interaction.message.reply({ embeds: [embed] });
         } else {
             await interaction.deferReply({
