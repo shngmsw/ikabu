@@ -152,7 +152,7 @@ async function close(interaction, params) {
                 ephemeral: true,
             });
             await interaction.followUp({
-                content: `募集主以外は募集を〆られないでし。`,
+                content: `募集主以外は募集を〆られないでし。\n募集開始から30分経ったら代わりに〆れるようになるでし！`,
                 ephemeral: true,
             });
         }
