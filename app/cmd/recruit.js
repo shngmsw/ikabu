@@ -101,11 +101,18 @@ async function regularMatch(msg) {
 
             const stage = new MessageAttachment(await stageDoubleCanvas(stageImages), 'stages.png');
 
-            msg.channel.send({
+            const sentMessage = await msg.channel.send({
                 content: txt,
                 files: [recruit, stage],
                 components: [recruitActionRow(msg)],
             });
+            setTimeout(function () {
+                const host_mention = `<@${msg.author.id}>`;
+                sentMessage.edit({
+                    content: `${host_mention}たんの募集は〆！`,
+                    components: [disableButtons()],
+                });
+            }, 7200000);
         } catch (error) {
             msg.channel.send('なんかエラーでてるわ');
             console.error(error);
@@ -154,11 +161,18 @@ async function salmonRun(msg) {
 
             const stageImage = new MessageAttachment(await stageCanvas(stage), 'stages.png');
 
-            msg.channel.send({
+            const sentMessage = await msg.channel.send({
                 content: txt,
                 files: [recruit, stageImage],
                 components: [recruitActionRow(msg)],
             });
+            setTimeout(function () {
+                const host_mention = `<@${msg.author.id}>`;
+                sentMessage.edit({
+                    content: `${host_mention}たんの募集は〆！`,
+                    components: [disableButtons()],
+                });
+            }, 7200000);
         } catch (error) {
             msg.channel.send('なんかエラーでてるわ');
             console.error(error);
@@ -196,7 +210,7 @@ function deadByDayLight(msg) {
     sendOtherGames(msg, title, txt, color, image, logo);
 }
 
-function sendOtherGames(msg, title, txt, color, image, logo) {
+async function sendOtherGames(msg, title, txt, color, image, logo) {
     const channelName = '別ゲー募集';
     if (isNotThisChannel(msg, channelName)) {
         return;
@@ -224,11 +238,18 @@ function sendOtherGames(msg, title, txt, color, image, logo) {
             .setThumbnail(logo);
 
         try {
-            msg.channel.send({
+            const sentMessage = await msg.channel.send({
                 content: txt,
                 embeds: [embed],
                 components: [recruitActionRow(msg)],
             });
+            setTimeout(function () {
+                const host_mention = `<@${msg.author.id}>`;
+                sentMessage.edit({
+                    content: `${host_mention}たんの募集は〆！`,
+                    components: [disableButtons()],
+                });
+            }, 7200000);
         } catch (error) {
             console.log(error);
         }
@@ -289,11 +310,19 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     const stage = new MessageAttachment(await stageDoubleCanvas(stageImages), 'stages.png');
 
     try {
-        msg.channel.send({
+        const sentMessage = await msg.channel.send({
             content: txt,
             files: [recruit, stage],
             components: [recruitActionRow(msg)],
         });
+
+        setTimeout(function () {
+            const host_mention = `<@${msg.author.id}>`;
+            sentMessage.edit({
+                content: `${host_mention}たんの募集は〆！`,
+                components: [disableButtons()],
+            });
+        }, 7200000);
     } catch (error) {
         console.log(error);
     }
@@ -342,4 +371,12 @@ function recruitActionRow(msg) {
         new MessageButton().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle('DANGER'),
         new MessageButton().setCustomId(closeParams.toString()).setLabel('〆').setStyle('SECONDARY'),
     ]);
+}
+function disableButtons() {
+    let buttons = new MessageActionRow().addComponents([
+        new MessageButton().setCustomId('join').setLabel('参加').setStyle('PRIMARY').setDisabled(),
+        new MessageButton().setCustomId('cancel').setLabel('キャンセル').setStyle('DANGER').setDisabled(),
+        new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
+    ]);
+    return buttons;
 }
