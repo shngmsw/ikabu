@@ -23,8 +23,10 @@ function composeEmbed(message, url) {
     const embed = new Discord.MessageEmbed();
     embed.setDescription(message.content);
     embed.setTimestamp(message.createdAt);
-    embed.setTitle('引用元へジャンプ');
-    embed.setURL(url);
+    if (isNotEmpty(url)) {
+        embed.setTitle('引用元へジャンプ');
+        embed.setURL(url);
+    }
     embed.setAuthor({
         name: message.author.username,
         iconURL: message.author.displayAvatarURL(),
