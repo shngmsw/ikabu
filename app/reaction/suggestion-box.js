@@ -41,8 +41,7 @@ module.exports = {
             });
             const guild = msg.guild;
             const sendChannel = await guild.channels.cache.find((channel) => channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX_ARCHIVE);
-            let url = await m.url();
-            messages.map((m) => sendChannel.send({ embeds: [common.composeEmbed(m, url)] }));
+            messages.map((m) => sendChannel.send({ embeds: [common.composeEmbed(m, null)] }));
             txChHide(msg);
             return;
         }
@@ -83,7 +82,7 @@ async function txChCreate(msg, user) {
 async function txChHide(msg) {
     let members = msg.channel.members;
     if (members != null) {
-        members.map((member) => msg.channel.updateOverwrite(member.id, { VIEW_CHANNEL: false }));
+        members.map((member) => msg.channel.permissionOverwrites.edit(member.id, { VIEW_CHANNEL: false }));
         msg.channel.send('アーカイブ完了しました。');
     } else {
         console.log('チャンネルがないンゴ');
