@@ -1,7 +1,8 @@
 const Canvas = require('canvas');
 
 Canvas.registerFont('./fonts/Splatfont.ttf', { family: 'Splatfont' });
-Canvas.registerFont('./fonts/NotoSansJP-Black.otf', { family: 'NotoSans' });
+Canvas.registerFont('./fonts/GenShinGothic-P-Medium.ttf', { family: 'Genshin' });
+Canvas.registerFont('./fonts/GenShinGothic-P-Bold.ttf', { family: 'Genshin-Bold' });
 
 /**
  * canvasを用いた募集
@@ -32,14 +33,14 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     recruitCtx.lineWidth = 1.5;
     recruitCtx.strokeText(title[0], 120, 80);
 
-    recruitCtx.font = '36px NotoSans';
+    recruitCtx.font = '36px Genshin-Bold';
     recruitCtx.fillStyle = '#FFFFFF';
     recruitCtx.fillText(date, 40, 150);
 
     recruitCtx.font = '45px Splatfont';
     recruitCtx.fillStyle = '#FFFFFF';
     recruitCtx.fillText(subtitle, 40, 220);
-    recruitCtx.strokeStyle = '#000000';
+    recruitCtx.strokeStyle = '#2D3130';
     recruitCtx.lineWidth = 2.0;
     recruitCtx.strokeText(subtitle, 40, 220);
 
@@ -49,18 +50,18 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     recruitCtx.drawImage(rule, thumbnail[1], thumbnail[2]);
     recruitCtx.restore();
 
-    recruitCtx.font = '35px NotoSans';
+    recruitCtx.font = '35px Genshin';
     recruitCtx.fillStyle = '#FFFFFF';
     recruitCtx.fillText(stage, 80, 277);
 
     recruitCtx.font = '45px Splatfont';
     recruitCtx.fillStyle = '#FFFFFF';
     recruitCtx.fillText('参加条件', 40, 385);
-    recruitCtx.strokeStyle = '#000000';
+    recruitCtx.strokeStyle = '#2D3130';
     recruitCtx.lineWidth = 2.0;
     recruitCtx.strokeText('参加条件', 40, 385);
 
-    recruitCtx.font = '30px NotoSans';
+    recruitCtx.font = '30px Genshin';
     const width = 600;
     const size = 40;
     var column = [''];

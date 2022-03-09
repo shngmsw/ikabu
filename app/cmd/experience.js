@@ -22,7 +22,7 @@ module.exports = async function handleIkabuExperience(msg) {
     let days = dateDiff(joinDate, today, 'MD', true);
 
     Canvas.registerFont('./fonts/Splatfont.ttf', { family: 'Splatfont' });
-    Canvas.registerFont('./fonts/NotoSansJP-Black.otf', { family: 'NotoSans' });
+    Canvas.registerFont('./fonts/GenShinGothic-P-Bold.ttf', { family: 'Genshin-Bold' });
 
     const canvas = Canvas.createCanvas(700, 250);
     const context = canvas.getContext('2d');
@@ -109,10 +109,10 @@ module.exports = async function handleIkabuExperience(msg) {
 
 const userText = (canvas, text) => {
     const context = canvas.getContext('2d');
-    let fontSize = 45;
+    let fontSize = 50;
 
     do {
-        context.font = `${(fontSize -= 1)}px NotoSans`;
+        context.font = `${(fontSize -= 1)}px Genshin-Bold`;
     } while (context.measureText(text).width > 440);
 
     return context.font;
