@@ -64,7 +64,7 @@ async function join(interaction, params) {
                 name: `${member.user.username}の役職`,
                 value: isNotEmpty(member_roles) ? member_roles : 'なし',
             });
-            interaction.message.reply({
+            await interaction.message.reply({
                 content: `${host_mention} ${member_mention}`,
                 embeds: [embed],
             });
@@ -100,7 +100,7 @@ async function cancel(interaction, params) {
                 content: `${host_mention}たんの募集はキャンセルされたでし！`,
                 components: [disableButtons()],
             });
-            interaction.message.reply({ embeds: [embed] });
+            await interaction.message.reply({ embeds: [embed] });
         } else {
             await interaction.deferReply({
                 ephemeral: true,
@@ -138,7 +138,7 @@ async function close(interaction, params) {
                 content: `${host_mention}たんの募集は〆！`,
                 components: [disableButtons()],
             });
-            interaction.message.reply({ embeds: [embed] });
+            await interaction.message.reply({ embeds: [embed] });
         } else {
             await interaction.deferReply({
                 ephemeral: true,
