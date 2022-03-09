@@ -33,11 +33,12 @@ async function handleError(err, { interaction }) {
 async function join(interaction, params) {
     /** @type {Discord.Snowflake} */
     const msg_id = params.get('mid');
-    await interaction.deferReply({
-        ephemeral: true,
-    });
 
     try {
+        await interaction.deferReply({
+            ephemeral: true,
+        });
+
         const guild = await interaction.guild.fetch();
         // APIからのメンバーオブジェクト(discord.jsのGuildMemberでないもの)がそのまま渡ってくることがあるのでfetchすることで確実にGuildMemberとする。
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
@@ -64,6 +65,7 @@ async function join(interaction, params) {
                 name: `${member.user.username}の役職`,
                 value: isNotEmpty(member_roles) ? member_roles : 'なし',
             });
+
             await interaction.message.reply({
                 content: `${host_mention} ${member_mention}`,
                 embeds: [embed],
