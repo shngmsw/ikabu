@@ -1,4 +1,5 @@
 const Canvas = require('canvas');
+const path = require('path');
 const Discord = require('discord.js');
 const { dateDiff } = require('../common');
 const backgroundImgPaths = [
@@ -21,8 +22,8 @@ module.exports = async function handleIkabuExperience(msg) {
     let months = dateDiff(joinDate, today, 'YM', true);
     let days = dateDiff(joinDate, today, 'MD', true);
 
-    Canvas.registerFont('./fonts/Splatfont.ttf', { family: 'Splatfont' });
-    Canvas.registerFont('./fonts/GenShinGothic-P-Bold.ttf', { family: 'Genshin-Bold' });
+    Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
+    Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
 
     const canvas = Canvas.createCanvas(700, 250);
     const context = canvas.getContext('2d');
