@@ -1,4 +1,5 @@
 const Canvas = require('canvas');
+const path = require('path');
 const Discord = require('discord.js');
 const { dateDiff } = require('../common');
 const backgroundImgPaths = [
@@ -21,8 +22,9 @@ module.exports = async function handleIkabuExperience(msg) {
     let months = dateDiff(joinDate, today, 'YM', true);
     let days = dateDiff(joinDate, today, 'MD', true);
 
-    Canvas.registerFont('./fonts/Splatfont.ttf', { family: 'Splatfont' });
-    Canvas.registerFont('./fonts/NotoSansJP-Black.otf', { family: 'NotoSans' });
+    Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
+    Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
+    Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 
     const canvas = Canvas.createCanvas(700, 250);
     const context = canvas.getContext('2d');
@@ -83,7 +85,7 @@ module.exports = async function handleIkabuExperience(msg) {
     context.lineWidth = 1.5;
     context.strokeText(member.displayName, (400 - userWidth) / 2 + 250, 63);
 
-    context.font = '43px Splatfont';
+    context.font = '43px "Splatfont"';
     context.fillText('イカ部歴', 240, 130);
     context.strokeStyle = '#333333';
     context.lineWidth = 1.5;
@@ -109,10 +111,10 @@ module.exports = async function handleIkabuExperience(msg) {
 
 const userText = (canvas, text) => {
     const context = canvas.getContext('2d');
-    let fontSize = 45;
+    let fontSize = 50;
 
     do {
-        context.font = `${(fontSize -= 1)}px NotoSans`;
+        context.font = `${(fontSize -= 1)}px "Genshin-Bold", "SEGUI"`;
     } while (context.measureText(text).width > 440);
 
     return context.font;
@@ -127,7 +129,7 @@ const exText = (canvas, text) => {
 
     do {
         // Assign the font to the context and decrement it so it can be measured again
-        context.font = `${(fontSize -= 10)}px Splatfont`;
+        context.font = `${(fontSize -= 10)}px "Splatfont"`;
         // Compare pixel width of the text to the canvas minus the approximate avatar size
     } while (context.measureText(text).width > canvas.width - 306);
 
