@@ -4,6 +4,7 @@ const path = require('path');
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
 Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Medium.ttf'), { family: 'Genshin' });
 Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
+Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 
 /**
  * canvasを用いた募集
@@ -34,7 +35,7 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     recruitCtx.lineWidth = 1.5;
     recruitCtx.strokeText(title[0], 120, 80);
 
-    recruitCtx.font = '36px "Genshin-Bold"';
+    recruitCtx.font = '36px "Genshin-Bold", "SEGUI"';
     recruitCtx.fillStyle = '#FFFFFF';
     recruitCtx.fillText(date, 40, 150);
 
@@ -51,7 +52,7 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     recruitCtx.drawImage(rule, thumbnail[1], thumbnail[2]);
     recruitCtx.restore();
 
-    recruitCtx.font = '35px "Genshin"';
+    recruitCtx.font = '35px "Genshin", "SEGUI"';
     recruitCtx.fillStyle = '#FFFFFF';
     recruitCtx.fillText(stage, 80, 277);
 
@@ -62,7 +63,7 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     recruitCtx.lineWidth = 2.0;
     recruitCtx.strokeText('参加条件', 40, 385);
 
-    recruitCtx.font = '30px "Genshin"';
+    recruitCtx.font = '30px "Genshin", "SEGUI"';
     const width = 600;
     const size = 40;
     var column = [''];
@@ -91,7 +92,6 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     for (var j = 0; j < column.length; j++) {
         if (j < 3) {
             recruitCtx.fillText(column[j], 80, 430 + size * j);
-            console.log(column);
         }
     }
 
