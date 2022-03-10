@@ -24,6 +24,7 @@ module.exports = async function handleIkabuExperience(msg) {
 
     Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
     Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
+    Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 
     const canvas = Canvas.createCanvas(700, 250);
     const context = canvas.getContext('2d');
@@ -113,7 +114,7 @@ const userText = (canvas, text) => {
     let fontSize = 50;
 
     do {
-        context.font = `${(fontSize -= 1)}px "Genshin-Bold"`;
+        context.font = `${(fontSize -= 1)}px "Genshin-Bold", "SEGUI"`;
     } while (context.measureText(text).width > 440);
 
     return context.font;
