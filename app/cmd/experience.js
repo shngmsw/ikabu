@@ -84,7 +84,7 @@ module.exports = async function handleIkabuExperience(msg) {
     context.lineWidth = 1.5;
     context.strokeText(member.displayName, (400 - userWidth) / 2 + 250, 63);
 
-    context.font = '43px Splatfont';
+    context.font = '43px "Splatfont"';
     context.fillText('イカ部歴', 240, 130);
     context.strokeStyle = '#333333';
     context.lineWidth = 1.5;
@@ -113,7 +113,7 @@ const userText = (canvas, text) => {
     let fontSize = 50;
 
     do {
-        context.font = `${(fontSize -= 1)}px Genshin-Bold`;
+        context.font = `${(fontSize -= 1)}px "Genshin-Bold"`;
     } while (context.measureText(text).width > 440);
 
     return context.font;
@@ -128,7 +128,7 @@ const exText = (canvas, text) => {
 
     do {
         // Assign the font to the context and decrement it so it can be measured again
-        context.font = `${(fontSize -= 10)}px Splatfont`;
+        context.font = `${(fontSize -= 10)}px "Splatfont"`;
         // Compare pixel width of the text to the canvas minus the approximate avatar size
     } while (context.measureText(text).width > canvas.width - 306);
 

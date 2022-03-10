@@ -27,18 +27,18 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     var icon_img = await Canvas.loadImage(icon[0]);
     recruitCtx.drawImage(icon_img, icon[1], icon[2], icon[3], icon[4]);
 
-    recruitCtx.font = '50px Splatfont';
+    recruitCtx.font = '50px "Splatfont"';
     recruitCtx.fillStyle = title[1];
     recruitCtx.fillText(title[0], 120, 80);
     recruitCtx.strokeStyle = title[2];
     recruitCtx.lineWidth = 1.5;
     recruitCtx.strokeText(title[0], 120, 80);
 
-    recruitCtx.font = '36px Genshin-Bold';
+    recruitCtx.font = '36px "Genshin-Bold"';
     recruitCtx.fillStyle = '#FFFFFF';
     recruitCtx.fillText(date, 40, 150);
 
-    recruitCtx.font = '45px Splatfont';
+    recruitCtx.font = '45px "Splatfont"';
     recruitCtx.fillStyle = '#FFFFFF';
     recruitCtx.fillText(subtitle, 40, 220);
     recruitCtx.strokeStyle = '#2D3130';
@@ -51,18 +51,18 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     recruitCtx.drawImage(rule, thumbnail[1], thumbnail[2]);
     recruitCtx.restore();
 
-    recruitCtx.font = '35px Genshin';
+    recruitCtx.font = '35px "Genshin"';
     recruitCtx.fillStyle = '#FFFFFF';
     recruitCtx.fillText(stage, 80, 277);
 
-    recruitCtx.font = '45px Splatfont';
+    recruitCtx.font = '45px "Splatfont"';
     recruitCtx.fillStyle = '#FFFFFF';
     recruitCtx.fillText('参加条件', 40, 385);
     recruitCtx.strokeStyle = '#2D3130';
     recruitCtx.lineWidth = 2.0;
     recruitCtx.strokeText('参加条件', 40, 385);
 
-    recruitCtx.font = '30px Genshin';
+    recruitCtx.font = '30px "Genshin"';
     const width = 600;
     const size = 40;
     var column = [''];
