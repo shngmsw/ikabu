@@ -91,6 +91,7 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
     for (var j = 0; j < column.length; j++) {
         if (j < 3) {
             recruitCtx.fillText(column[j], 80, 430 + size * j);
+            console.log(column);
         }
     }
 
