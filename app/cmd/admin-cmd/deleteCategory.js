@@ -74,8 +74,12 @@ async function deleteCategory(msg, categoryIdList) {
                 categoryName = category.name;
                 await category.delete();
                 await guild.channels.fetch();
-                for (var channel of channels) {
-                    removed.push([categoryId, categoryName, channel[0], channel[1]]);
+                if (channels.length == 0) {
+                    removed.push([categoryId, categoryName, '', '']);
+                } else {
+                    for (var channel of channels) {
+                        removed.push([categoryId, categoryName, channel[0], channel[1]]);
+                    }
                 }
             }
             progressMsg.edit(parseInt(((+i + 1) / categoryIdList.length) * 100, 10) + '% 完了');
@@ -87,7 +91,7 @@ async function deleteCategory(msg, categoryIdList) {
 
     const csvString = stringify(removed);
     fs.writeFileSync('./csv/temp.csv', csvString);
-    const attachment = new MessageAttachment('./csv/temp.csv', 'removed_channel.csv');
+    const attachment = new MessageAttachment('./csv/temp.csv', 'removed_category.csv');
 
     msg.reply({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
