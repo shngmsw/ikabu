@@ -16,6 +16,7 @@ const handleTimer = require('./cmd/timer.js');
 const handleVoicePick = require('./cmd/vpick.js');
 const handleWiki = require('./cmd/wiki.js');
 const { handleCreateRole } = require('./cmd/admin-cmd/manageRole.js');
+const handleDeleteCategory = require('./cmd/admin-cmd/deleteCategory.js');
 
 module.exports = {
     call: call,
@@ -89,6 +90,10 @@ function call(msg) {
             break;
         case '!createrole':
             handleCreateRole(msg);
+            break;
+
+        case '!deletecategory':
+            handleDeleteCategory(msg);
             break;
     }
 }
