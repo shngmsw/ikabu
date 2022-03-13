@@ -32,6 +32,8 @@ module.exports = async function handleDeleteChannel(msg) {
 
     const progressMsg = await msg.channel.send('0% 完了');
 
+    channelIdList = Array.from(new Set(channelIdList));
+
     try {
         // i = index
         // removed[i][0] = deleted channel (id)

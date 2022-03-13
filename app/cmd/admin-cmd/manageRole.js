@@ -1,3 +1,6 @@
+const { MessageAttachment } = require('discord.js');
+const fs = require('fs');
+const { stringify } = require('csv-stringify/sync');
 const { createRole, searchRoleById, setColorToRole } = require('../../manager/roleManager.js');
 
 module.exports.handleCreateRole = async function (msg) {
@@ -54,6 +57,71 @@ module.exports.handleCreateRole = async function (msg) {
         console.error(error);
         msg.channel.send('なんかエラーでてるわ');
     }
+};
+
+module.exports.handleDeleteRole = async function (msg) {
+    if (!msg.member.permissions.has('MANAGE_ROLES')) {
+        return msg.reply('ロールを管理する権限がないでし！');
+    }
+
+    var strCmd = msg.content.replace(/　/g, ' ');
+    strCmd = strCmd.replace('\x20+', ' ');
+    const splits = strCmd.split(' ');
+    splits.shift();
+    var roleIdList = [];
+    for (var argument of splits) {
+        if (argument != '') {
+            roleIdList.push(argument);
+        }
+    }
+
+    if (roleIdList.length == 0) {
+        return msg.reply('削除したいロールのIDを入れるでし！');
+    }
+
+    msg.channel.send('指定されたIDのロールを削除中でし！\nちょっと待つでし！');
+
+    const guild = msg.guild;
+    var removed = [];
+
+    removed.push(['ロールID', 'ロール名']);
+
+    const progressMsg = await msg.channel.send('0% 完了');
+
+    roleIdList = Array.from(new Set(roleIdList));
+
+    try {
+        // i = index
+        // removed[i][0] = deleted role (id)
+        // removed[i][1] = deleted role (name)
+        for (var i in roleIdList) {
+            var roleName;
+            var role = searchRoleById(guild, roleIdList[i]);
+            // if role ID is not found, consider as an error.
+            if (role == null) {
+                roleName = 'NOT_FOUND!';
+            } else {
+                roleName = role.name;
+                await role.delete();
+                await guild.roles.fetch();
+            }
+            removed.push([roleIdList[i], roleName]);
+
+            await progressMsg.edit(parseInt(((+i + 1) / roleIdList.length) * 100, 10) + '% 完了');
+        }
+    } catch (error) {
+        console.error(error);
+        msg.reply('ロール削除中にエラーでし！');
+    }
+
+    const csvString = stringify(removed);
+    fs.writeFileSync('./temp/temp.csv', csvString);
+    const attachment = new MessageAttachment('./temp/temp.csv', 'removed_role.csv');
+
+    msg.reply({
+        content: '操作が完了したでし！\nしゃべると長くなるから下に削除したロールをまとめておいたでし！',
+        files: [attachment],
+    });
 };
 
 /**

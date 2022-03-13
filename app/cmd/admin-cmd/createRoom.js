@@ -179,10 +179,7 @@ module.exports = function handleCreateRoom(msg) {
                     }
                 }
 
-                console.log(resultData);
-
                 const csvString = stringify(resultData);
-                console.log(csvString);
                 fs.writeFileSync('./temp/temp.csv', csvString);
                 const attachment = new MessageAttachment('./temp/temp.csv', 'output.csv');
                 msg.reply({

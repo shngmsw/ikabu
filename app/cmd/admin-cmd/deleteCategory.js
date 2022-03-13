@@ -33,6 +33,7 @@ module.exports = function handleDeleteCategory(msg) {
                     for (var i in data) {
                         categoryIdList.push(data[i][0]);
                     }
+                    categoryIdList = Array.from(new Set(categoryIdList));
                 } catch (error) {
                     console.error(error);
                     msg.reply('CSVファイル読み込み中にエラーでし！');
@@ -42,7 +43,8 @@ module.exports = function handleDeleteCategory(msg) {
         );
     } else if (args.length != 0) {
         msg.channel.send('指定されたIDのカテゴリを削除中でし！\nちょっと待つでし！');
-        deleteCategory(msg, args);
+        var categoryIdList = Array.from(new Set(args));
+        deleteCategory(msg, categoryIdList);
     } else {
         msg.reply('CSVファイルを添付するか、削除したいカテゴリのIDを入れるでし！');
         return;
