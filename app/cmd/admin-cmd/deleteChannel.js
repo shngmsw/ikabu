@@ -1,7 +1,5 @@
 const { MessageAttachment } = require('discord.js');
-const request = require('request');
 const fs = require('fs');
-const csv = require('csv');
 const { stringify } = require('csv-stringify/sync');
 const { searchChannelById } = require('../../manager/channelManager.js');
 
@@ -57,7 +55,7 @@ module.exports = async function handleDeleteChannel(msg) {
             }
             removed.push([channelIdList[i], channelName]);
 
-            progressMsg.edit(parseInt(((+i + 1) / channelIdList.length) * 100, 10) + '% 完了');
+            await progressMsg.edit(parseInt(((+i + 1) / channelIdList.length) * 100, 10) + '% 完了');
         }
     } catch (error) {
         console.error(error);
@@ -65,8 +63,8 @@ module.exports = async function handleDeleteChannel(msg) {
     }
 
     const csvString = stringify(removed);
-    fs.writeFileSync('./csv/temp.csv', csvString);
-    const attachment = new MessageAttachment('./csv/temp.csv', 'removed_channel.csv');
+    fs.writeFileSync('./temp/temp.csv', csvString);
+    const attachment = new MessageAttachment('./temp/temp.csv', 'removed_channel.csv');
 
     msg.reply({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',

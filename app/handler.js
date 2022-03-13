@@ -18,6 +18,7 @@ const handleWiki = require('./cmd/wiki.js');
 const { handleCreateRole } = require('./cmd/admin-cmd/manageRole.js');
 const handleDeleteCategory = require('./cmd/admin-cmd/deleteCategory.js');
 const handleDeleteChannel = require('./cmd/admin-cmd/deleteChannel.js');
+const handleCreateRoom = require('./cmd/admin-cmd/createRoom.js');
 
 module.exports = {
     call: call,
@@ -88,6 +89,9 @@ function call(msg) {
             break;
         case 'stage':
             handleStageInfo(msg);
+            break;
+        case '!createroom':
+            handleCreateRoom(msg);
             break;
         case '!createrole':
             handleCreateRole(msg);

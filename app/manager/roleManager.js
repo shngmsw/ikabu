@@ -94,3 +94,25 @@ module.exports.setColorToRole = async function (guild, role, color) {
         return await role.hexColor;
     }
 };
+
+/**
+ * メンバーにロールを付与するコマンド，メンバーが見つからない場合エラーメッセージを返す
+ * @param {Guild} guild Guildオブジェクト
+ * @param {string} roleId ロールID
+ * @param {string} memberId メンバーID
+ * @returns メンバーID
+ */
+module.exports.setRoleToMember = function (guild, roleId, memberId) {
+    if (memberId == null || memberId == '') {
+        return null;
+    } else {
+        const member = guild.members.cache.get(memberId);
+
+        if (member != null) {
+            member.roles.add(guild.roles.cache.get(roleId));
+            return member.id;
+        } else {
+            return memberId + '(NOT_FOUND)';
+        }
+    }
+};

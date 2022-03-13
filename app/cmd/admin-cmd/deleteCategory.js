@@ -1,7 +1,7 @@
 const { MessageAttachment } = require('discord.js');
 const request = require('request');
 const fs = require('fs');
-const csv = require('csv');
+const { parse } = require('csv');
 const { stringify } = require('csv-stringify/sync');
 const { searchChannelById } = require('../../manager/channelManager.js');
 
@@ -27,7 +27,7 @@ module.exports = function handleDeleteCategory(msg) {
         const files = msg.attachments.map((attachment) => attachment.url);
 
         request(files[0]).pipe(
-            csv.parse(async function (err, data) {
+            parse(async function (err, data) {
                 try {
                     var categoryIdList = [];
                     for (var i in data) {
@@ -82,7 +82,7 @@ async function deleteCategory(msg, categoryIdList) {
                     }
                 }
             }
-            progressMsg.edit(parseInt(((+i + 1) / categoryIdList.length) * 100, 10) + '% 完了');
+            await progressMsg.edit(parseInt(((+i + 1) / categoryIdList.length) * 100, 10) + '% 完了');
         }
     } catch (error) {
         console.error(error);
@@ -90,8 +90,8 @@ async function deleteCategory(msg, categoryIdList) {
     }
 
     const csvString = stringify(removed);
-    fs.writeFileSync('./csv/temp.csv', csvString);
-    const attachment = new MessageAttachment('./csv/temp.csv', 'removed_category.csv');
+    fs.writeFileSync('./temp/temp.csv', csvString);
+    const attachment = new MessageAttachment('./temp/temp.csv', 'removed_category.csv');
 
     msg.reply({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
