@@ -15,6 +15,10 @@ const handleSub = require('./cmd/sub.js');
 const handleTimer = require('./cmd/timer.js');
 const handleVoicePick = require('./cmd/vpick.js');
 const handleWiki = require('./cmd/wiki.js');
+const { handleCreateRole, handleDeleteRole } = require('./cmd/admin-cmd/manageRole.js');
+const handleDeleteCategory = require('./cmd/admin-cmd/deleteCategory.js');
+const handleDeleteChannel = require('./cmd/admin-cmd/deleteChannel.js');
+const handleCreateRoom = require('./cmd/admin-cmd/createRoom.js');
 
 module.exports = {
     call: call,
@@ -85,6 +89,21 @@ function call(msg) {
             break;
         case 'stage':
             handleStageInfo(msg);
+            break;
+        case '!createroom':
+            handleCreateRoom(msg);
+            break;
+        case '!createrole':
+            handleCreateRole(msg);
+            break;
+        case '!deletecategory':
+            handleDeleteCategory(msg);
+            break;
+        case '!deletechannel':
+            handleDeleteChannel(msg);
+            break;
+        case '!deleterole':
+            handleDeleteRole(msg);
             break;
     }
 }
