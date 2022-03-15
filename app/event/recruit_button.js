@@ -7,6 +7,20 @@ module.exports = {
     close: close,
 };
 
+const kujis = {
+    0: '大吉',
+    1: '吉',
+    2: '中吉',
+    3: '小吉',
+    4: '末吉',
+    5: '凶',
+    6: '大凶',
+};
+function omikuji() {
+    var kuji = kujis[Math.floor(Math.random() * 7)];
+    return kuji;
+}
+
 /**
  *
  * @param {unknown} err
@@ -135,7 +149,9 @@ async function close(interaction, params) {
         const msg_id = params.get('mid');
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
         const host_mention = `<@${cmd_message.author.id}>`;
-        const embed = new MessageEmbed().setDescription(`${host_mention}たんの募集〆`);
+        const embed = new MessageEmbed().setDescription(
+            `${host_mention}たんの募集〆\nちなみに今の${cmd_message.author.username}たんの運勢は` + omikuji() + 'でし！',
+        );
         if (member.user.id === cmd_message.author.id) {
             await interaction.update({
                 content: `${host_mention}たんの募集は〆！`,
@@ -158,9 +174,9 @@ async function close(interaction, params) {
 
 function disableButtons() {
     let buttons = new MessageActionRow().addComponents([
-        new MessageButton().setCustomId('join').setLabel('参加').setStyle('PRIMARY').setDisabled(),
-        new MessageButton().setCustomId('cancel').setLabel('キャンセル').setStyle('DANGER').setDisabled(),
-        new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
+        new MessageButton().setCustomId('join').setLabel('行きたい！').setStyle('PRIMARY').setDisabled(),
+        new MessageButton().setCustomId('cancel').setLabel('やっぱやーめた').setStyle('DANGER').setDisabled(),
+        new MessageButton().setCustomId('close').setLabel('集まったので〆').setStyle('SECONDARY').setDisabled(),
     ]);
     return buttons;
 }
