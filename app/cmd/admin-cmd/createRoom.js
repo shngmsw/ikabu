@@ -6,6 +6,16 @@ const { stringify } = require('csv-stringify/sync');
 const { createChannel } = require('../../manager/channelManager.js');
 const { createRole, setColorToRole, searchRoleById, setRoleToMember } = require('../../manager/roleManager.js');
 
+const INDEX_CATEGORY_ID = 0;
+const INDEX_CATEGORY_NAME = 1;
+const INDEX_CHANNEL_ID = 2;
+const INDEX_CHANNEL_NAME = 3;
+const INDEX_CHANNEL_TYPE = 4;
+const INDEX_ROLE_ID = 5;
+const INDEX_ROLE_NAME = 6;
+const INDEX_COLOR_CODE = 7;
+const INDEX_MEMBER_ID_START = 8;
+
 module.exports = function handleCreateRoom(msg) {
     if (!msg.member.permissions.has('MANAGE_CHANNELS')) {
         return msg.reply('チャンネルを管理する権限がないでし！');
@@ -62,12 +72,12 @@ module.exports = function handleCreateRoom(msg) {
 
                 for (var i = 1; i < data.length; i++) {
                     try {
-                        var categoryName = data[i][1];
-                        var channelName = data[i][3];
-                        var channelType = data[i][4];
-                        var channelId;
-                        var roleName = data[i][6];
-                        var roleColor = data[i][7];
+                        var categoryName = data[i][INDEX_CATEGORY_NAME];
+                        var channelName = data[i][INDEX_CHANNEL_NAME];
+                        var channelType = data[i][INDEX_CHANNEL_TYPE];
+                        var channelId = null;
+                        var roleName = data[i][INDEX_ROLE_NAME];
+                        var roleColor = data[i][INDEX_COLOR_CODE];
 
                         if (data[i].length > maxColumn) {
                             maxColumn = data[i].length;
@@ -86,74 +96,28 @@ module.exports = function handleCreateRoom(msg) {
                                 if (channelType != 'ERROR!') {
                                     channelId = await createChannel(guild, categoryId, channelName, channelType);
                                 }
-                            } else {
-                                channelId = null;
                             }
                         } else {
-                            channelId = null;
                             channelType = checkChannelType(channelType);
                         }
 
                         var roleId = await createRole(guild, roleName);
 
                         if (roleId != null) {
-                            // set permission to channel
-                            if (channelId != null && channelId != 'ERROR!') {
-                                guild.channels.cache.get(channelId).permissionOverwrites.edit(roleId, {
-                                    VIEW_CHANNEL: true,
-                                });
-                                guild.channels.cache.get(channelId).permissionOverwrites.edit(guild.roles.everyone.id, {
-                                    VIEW_CHANNEL: false,
-                                });
-                            }
+                            setRoleToChanel(guild, roleId, channelId);
 
                             var role = searchRoleById(guild, roleId);
 
                             // the role will be displayed separately from other members
                             role.setHoist(true);
-                            var originRoleColor = role.hexColor;
 
-                            if (roleColor.match('^#([\\da-fA-F]{6})$')) {
-                                roleColor = await setColorToRole(guild, role, roleColor);
-                            } else if (originRoleColor != '#000000') {
-                                roleColor = originRoleColor;
-                            } else {
-                                var colorList = [
-                                    '#E60012',
-                                    '#EB6100',
-                                    '#F39800',
-                                    '#FCC800',
-                                    '#FFF100',
-                                    '#CFDB00',
-                                    '#8FC31F',
-                                    '#22AC38',
-                                    '#009944',
-                                    '#009B6B',
-                                    '#009E96',
-                                    '#00A0C1',
-                                    '#00A0E9',
-                                    '#0086D1',
-                                    '#0068B7',
-                                    '#00479D',
-                                    '#1D2088',
-                                    '#601986',
-                                    '#920783',
-                                    '#BE0081',
-                                    '#E4007F',
-                                    '#E5006A',
-                                    '#E5004F',
-                                    '#E60033',
-                                ];
-
-                                var colorIndex = i % 24;
-                                roleColor = await setColorToRole(guild, role, colorList[colorIndex]);
-                            }
+                            roleColor = await setRoleColor(guild, role, roleColor, i);
                         }
 
                         resultData.push([categoryId, categoryName, channelId, channelName, channelType, roleId, roleName, roleColor]);
 
                         if (roleId != null) {
-                            for (let j = 8; j < data[i].length; j++) {
+                            for (let j = INDEX_MEMBER_ID_START; j < data[i].length; j++) {
                                 var memberId = data[i][j].trim();
                                 memberId = setRoleToMember(guild, roleId, memberId);
                                 resultData[i].push(memberId);
@@ -167,7 +131,7 @@ module.exports = function handleCreateRoom(msg) {
                     }
                 }
 
-                for (var i = 8; i < maxColumn; i++) {
+                for (var i = INDEX_MEMBER_ID_START; i < maxColumn; i++) {
                     resultData[0].push('メンバー' + (i - 7));
                 }
 
@@ -187,9 +151,9 @@ module.exports = function handleCreateRoom(msg) {
                     files: [attachment],
                 });
 
-                const deleteCommands = createDeleteCommands(resultData);
+                const deleteCommandsText = setDeleteCommandsText(resultData);
                 msg.channel.send({
-                    files: [deleteCommands],
+                    files: [deleteCommandsText],
                 });
             }),
         );
@@ -210,7 +174,62 @@ function checkChannelType(channelType) {
     }
 }
 
-function createDeleteCommands(resultData) {
+function setRoleToChanel(guild, roleId, channelId, channelType) {
+    // set permission to channel
+    if (channelId != null && channelType != 'ERROR!') {
+        guild.channels.cache.get(channelId).permissionOverwrites.edit(roleId, {
+            VIEW_CHANNEL: true,
+        });
+        guild.channels.cache.get(channelId).permissionOverwrites.edit(guild.roles.everyone.id, {
+            VIEW_CHANNEL: false,
+        });
+    }
+}
+
+async function setRoleColor(guild, role, roleColor, index) {
+    var originRoleColor = role.hexColor;
+    var color;
+
+    if (roleColor.match('^#([\\da-fA-F]{6})$')) {
+        color = await setColorToRole(guild, role, roleColor);
+    } else if (originRoleColor != '#000000') {
+        color = originRoleColor;
+    } else {
+        var colorList = [
+            '#E60012',
+            '#EB6100',
+            '#F39800',
+            '#FCC800',
+            '#FFF100',
+            '#CFDB00',
+            '#8FC31F',
+            '#22AC38',
+            '#009944',
+            '#009B6B',
+            '#009E96',
+            '#00A0C1',
+            '#00A0E9',
+            '#0086D1',
+            '#0068B7',
+            '#00479D',
+            '#1D2088',
+            '#601986',
+            '#920783',
+            '#BE0081',
+            '#E4007F',
+            '#E5006A',
+            '#E5004F',
+            '#E60033',
+        ];
+
+        var colorIndex = index % 24;
+        color = await setColorToRole(guild, role, colorList[colorIndex]);
+    }
+
+    return color;
+}
+
+function setDeleteCommandsText(resultData) {
     var resultCategoryIdList = [];
     var resultChannelIdList = [];
     var resultRoleIdList = [];

@@ -185,8 +185,8 @@ function monsterHunterRize(msg) {
     let title = 'MONSTER HUNTER RISE';
     let txt = role_id.toString() + ' 【モンハンライズ募集】\n' + `<@${msg.author.id}>` + 'たんがモンハンライズ参加者募集中でし！\n';
     let color = '#3ce3f5';
-    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/MonsterHunterRise.jpeg';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/MonsterHunterRise_logo.png';
+    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/master/images/games/MonsterHunterRise.jpeg';
+    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/master/images/games/MonsterHunterRise_logo.png';
     sendOtherGames(msg, title, txt, color, image, logo);
 }
 
@@ -195,8 +195,8 @@ function apexLegends(msg) {
     let title = 'Apex Legends';
     let txt = role_id.toString() + ' 【Apex Legends募集】\n' + `<@${msg.author.id}>` + 'たんがApexLegendsの参加者募集中でし！\n';
     let color = '#F30100';
-    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/ApexLegends.jpg';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/ApexLegends_logo.png';
+    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/master/images/games/ApexLegends.jpg';
+    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/master/images/games/ApexLegends_logo.png';
     sendOtherGames(msg, title, txt, color, image, logo);
 }
 
@@ -205,8 +205,8 @@ function deadByDayLight(msg) {
     let title = 'Dead by Daylight';
     const txt = role_id.toString() + ' 【Dead by Daylight募集】\n' + `<@${msg.author.id}>` + 'たんがDbD参加者募集中でし！\n';
     let color = '#84331F';
-    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/DeadByDaylight.jpg';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/ikabu-4th-anniversary/images/games/deadbydaylight_logo.png';
+    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/master/images/games/DeadByDaylight.jpg';
+    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/master/images/games/deadbydaylight_logo.png';
     sendOtherGames(msg, title, txt, color, image, logo);
 }
 
