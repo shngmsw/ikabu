@@ -1,5 +1,6 @@
 const { MessageEmbed, MessageActionRow, MessageButton, Client } = require('discord.js');
 const { isNotEmpty } = require('../common');
+const { dateDiff } = require('../common');
 module.exports = {
     join: join,
     cancel: cancel,
@@ -56,15 +57,15 @@ async function join(interaction, params) {
             const host_mention = `<@!${cmd_message.author.id}>`;
             let member_roles = member.roles.cache.map((role) => (role.name != '@everyone' ? role.name : '')).join(' / ');
             const embed = new MessageEmbed();
-            embed.setDescription(`募集主は${member.user.username}たんに遊ぶ部屋を伝えるでし！イカ部心得を守って楽しく遊んでほしいでし！`);
+            embed.setDescription(`私はイカ部心得を読んでからこのボタンを押しました。\nイカ部心得に違反するようなことは絶対にしません。`);
             embed.setAuthor({
                 name: `${member.user.username}たんが参加表明したでし！`,
                 iconURL: member.user.displayAvatarURL(),
             });
-            embed.addFields({
-                name: `${member.user.username}の役職`,
-                value: isNotEmpty(member_roles) ? member_roles : 'なし',
-            });
+            embed.addFields(
+                { name: `${member.user.username}の役職`, value: isNotEmpty(member_roles) ? member_roles : 'なし' },
+                { name: 'イカ部歴', value: getExperience(member.joinedAt) },
+            );
 
             await interaction.message.reply({
                 content: `${host_mention} ${member_mention}`,
@@ -162,4 +163,19 @@ function disableButtons() {
         new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
     ]);
     return buttons;
+}
+
+function getExperience(joinDate) {
+    let today = new Date();
+
+    let years = dateDiff(joinDate, today, 'Y', true);
+    let months = dateDiff(joinDate, today, 'YM', true);
+    let days = dateDiff(joinDate, today, 'MD', true);
+    // 0のときは出力しない
+    let output = '';
+    output = years != 0 ? years + '年' : '';
+    output = months != 0 ? output + months + 'ヶ月' : output + '';
+    output = days != 0 ? output + days + '日' : output + '';
+
+    return output;
 }
