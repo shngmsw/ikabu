@@ -20,7 +20,7 @@ module.exports = async function guildMemberAddEvent(member) {
     roby.send(
         `<@!${member.user.id}> よろしくお願いします！\n` +
             `最初の10分間は閲覧しかできません、その間に ${rules} と ${channelDiscription} をよく読んでくださいね\n` +
-            `||クソガキは即BANするから言動には気をつけろよ！||でし！\n` +
+            `イカ部心得を読まずに違反するような悪い子は即BANするから言動には気をつけろよ！でし！\n` +
             `10分経ったら、書き込めるようになります。 ${introduction} で自己紹介も兼ねて自分のフレコを貼ってください\n\n` +
             `${guild.name}のみんなが~~監視~~歓迎していますよ〜`,
     )
