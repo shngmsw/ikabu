@@ -3,7 +3,7 @@ const { MessageEmbed } = require('discord.js');
 
 module.exports = async function handleWiki(msg, word) {
     try {
-        let wikipedia = wiki({ apiUrl: 'http://ja.wikipedia.org/w/api.php' });
+        let wikipedia = wiki({ apiUrl: 'http://ko.wikipedia.org/w/api.php' });
         let data = await wikipedia.search(word);
         let page = await wikipedia.page(data.results[0]);
         let summary = await page.summary();
@@ -14,7 +14,7 @@ module.exports = async function handleWiki(msg, word) {
             .setURL(decodeURI(url))
             .setColor(0xf02d7d)
             .addFields({
-                name: '概要',
+                name: 'summary',
                 value: summary.substring(0, 300),
             })
             .setImage(decodeURI(imageURL));
