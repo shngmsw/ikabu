@@ -4,6 +4,8 @@ module.exports = function handlePick(msg) {
     strCmd = msg.content.replace(/\r?\n/g, ' ');
     const args = strCmd.split(' ');
     args.shift();
+    args.push('ガチマ');
+    args.push('ガチマ');
     // Math.random() * ( 最大値 - 最小値 ) + 最小値;
     var picked = args[Math.floor(Math.random() * args.length)];
     var kazu = Number(args[0]);
