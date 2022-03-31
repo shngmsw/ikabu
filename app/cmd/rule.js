@@ -1,9 +1,9 @@
 const common = require('../common.js');
 const rules = {
-    0: 'ガチエリア',
-    1: 'ガチヤグラ',
-    2: 'ガチホコ',
-    3: 'ガチアサリ',
+    0: 'えりあをとるやつ',
+    1: 'エレクトリカル・パレード',
+    2: 'しゃちほこ',
+    3: 'みそしるのみたい',
 };
 
 module.exports = function handleRule(msg) {
