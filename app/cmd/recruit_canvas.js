@@ -58,10 +58,10 @@ module.exports.recruitCanvas = async function (title, icon, date, subtitle, thum
 
     recruitCtx.font = '45px "Splatfont"';
     recruitCtx.fillStyle = '#FFFFFF';
-    recruitCtx.fillText('参加条件', 40, 385);
+    recruitCtx.fillText('この人知りませんか？', 40, 385);
     recruitCtx.strokeStyle = '#2D3130';
     recruitCtx.lineWidth = 2.0;
-    recruitCtx.strokeText('参加条件', 40, 385);
+    recruitCtx.strokeText('この人知りませんか？', 40, 385);
 
     recruitCtx.font = '30px "Genshin", "SEGUI"';
     const width = 600;
