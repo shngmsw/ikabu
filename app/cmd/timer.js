@@ -2,9 +2,9 @@ const common = require('../common.js');
 
 module.exports = function handleTimer(msg, args) {
     var kazu = Number(args);
-    var count = kazu + 1;
-    if (count <= 11 && count > 0 && common.isInteger(kazu)) {
-        msg.reply('タイマーを' + count + '分後にセットしたでし！\n1分おまけしといたでし！');
+    var count = kazu;
+    if (count <= 10 && count > 0 && common.isInteger(kazu)) {
+        msg.reply('タイマーを' + count + '分後にセットしたでし！');
         var countdown = function () {
             count--;
             if (count != 0) {

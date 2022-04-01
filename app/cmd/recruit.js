@@ -137,7 +137,7 @@ async function salmonRun(msg) {
             const data = await response.json();
             const stage = 'https://splatoon2.ink/assets/splatnet' + data.details[0].stage.image;
             let condition = 'なし';
-            let txt = '@everyone 【アットホームな職場です】\n' + `<@${msg.author.id}>` + 'が運搬スタッフを募集中！\n';
+            let txt = '@everyone 【バイト募集】\n' + `<@${msg.author.id}>` + 'たんがバイト中でし！\n';
             if (args.length > 0) condition = args.join(' ') + '\n';
             txt += 'よければ合流しませんか？';
             const date = common.unixTime2mdwhm(data.details[0].start_time) + ' – ' + common.unixTime2mdwhm(data.details[0].end_time);
@@ -152,11 +152,11 @@ async function salmonRun(msg) {
                 '・' +
                 common.weapon2txt(data.details[0].weapons[3].id);
 
-            const title = ['サーモ・ン・ラン', '#FF5600', '#FFFFFF'];
+            const title = ['サーモンラン', '#FF5600', '#FFFFFF'];
             const icon = ['https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png', 22, 35, 80, 52.8];
-            const thumbnail = ['https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png', 560, 424, 0.8, 0.8];
+            const thumbnail = ['https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png', 296, 424, 0.8, 0.8];
 
-            const recruitBuffer = await recruitCanvas(title, icon, date, '勤務地: ' + coop_stage, thumbnail, weapons, condition);
+            const recruitBuffer = await recruitCanvas(title, icon, date, coop_stage, thumbnail, weapons, condition);
             const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
 
             const stageImage = new MessageAttachment(await stageCanvas(stage), 'stages.png');
@@ -270,7 +270,6 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
             var thumbnailYP = 240;
             var thumbScaleX = 0.7;
             var thumbScaleY = 0.7;
-            l_rule = 'エリアとるやつ';
             break;
         case 'ガチヤグラ':
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
@@ -278,7 +277,6 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
             var thumbnailYP = 85;
             var thumbScaleX = 1.0;
             var thumbScaleY = 1.0;
-            l_rule = 'エレクトリカル・パレード';
             break;
         case 'ガチホコバトル':
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
@@ -286,7 +284,6 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
             var thumbnailYP = 230;
             var thumbScaleX = 0.75;
             var thumbScaleY = 0.65;
-            l_rule = 'お城まで鉾を返しに行こう';
             break;
         case 'ガチアサリ':
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
@@ -294,7 +291,6 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
             var thumbnailYP = 120;
             var thumbScaleX = 1.0;
             var thumbScaleY = 1.0;
-            l_rule = '味噌汁';
             break;
         default:
             thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png';
@@ -304,8 +300,8 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
             var thumbScaleY = 1.0;
             break;
     }
-    const title = ['リーグマッチョ', '#FFFFFF', '#333333'];
-    const icon = ['./images/muscle.png', 15, 15, 90, 90];
+    const title = ['リーグマッチ', '#F02D7E', '#FFFFFF'];
+    const icon = ['https://cdn.glitch.me/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png', 15, 15, 90, 90];
     const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
     const recruitBuffer = await recruitCanvas(title, icon, l_date, l_rule, thumbnail, l_stage, condition);
@@ -371,16 +367,16 @@ function recruitActionRow(msg) {
     closeParams.append('mid', msg.id);
 
     return new MessageActionRow().addComponents([
-        new MessageButton().setCustomId(joinParams.toString()).setLabel('行きたい！').setStyle('PRIMARY'),
-        new MessageButton().setCustomId(cancelParams.toString()).setLabel('やっぱやーめた').setStyle('DANGER'),
-        new MessageButton().setCustomId(closeParams.toString()).setLabel('集まったので〆').setStyle('SECONDARY'),
+        new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
+        new MessageButton().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle('DANGER'),
+        new MessageButton().setCustomId(closeParams.toString()).setLabel('〆').setStyle('SECONDARY'),
     ]);
 }
 function disableButtons() {
     let buttons = new MessageActionRow().addComponents([
-        new MessageButton().setCustomId('join').setLabel('行きたい！').setStyle('PRIMARY').setDisabled(),
-        new MessageButton().setCustomId('cancel').setLabel('やっぱやーめた').setStyle('DANGER').setDisabled(),
-        new MessageButton().setCustomId('close').setLabel('集まったので〆').setStyle('SECONDARY').setDisabled(),
+        new MessageButton().setCustomId('join').setLabel('参加').setStyle('PRIMARY').setDisabled(),
+        new MessageButton().setCustomId('cancel').setLabel('キャンセル').setStyle('DANGER').setDisabled(),
+        new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
     ]);
     return buttons;
 }
