@@ -1,25 +1,10 @@
 const { MessageEmbed, MessageActionRow, MessageButton, Client } = require('discord.js');
 const { isNotEmpty } = require('../common');
-const { dateDiff } = require('../common');
 module.exports = {
     join: join,
     cancel: cancel,
     close: close,
 };
-
-const kujis = {
-    0: '大吉',
-    1: '吉',
-    2: '中吉',
-    3: '小吉',
-    4: '末吉',
-    5: '凶',
-    6: '大凶',
-};
-function omikuji() {
-    var kuji = kujis[Math.floor(Math.random() * 7)];
-    return kuji;
-}
 
 /**
  *
@@ -71,15 +56,15 @@ async function join(interaction, params) {
             const host_mention = `<@!${cmd_message.author.id}>`;
             let member_roles = member.roles.cache.map((role) => (role.name != '@everyone' ? role.name : '')).join(' / ');
             const embed = new MessageEmbed();
-            embed.setDescription(`私はイカ部心得を読んでからこのボタンを押しました。\nイカ部心得に違反するようなことは絶対にしません。`);
+            embed.setDescription(`募集主は${member.user.username}たんに遊ぶ部屋を伝えるでし！イカ部心得を守って楽しく遊んでほしいでし！`);
             embed.setAuthor({
                 name: `${member.user.username}たんが参加表明したでし！`,
                 iconURL: member.user.displayAvatarURL(),
             });
-            embed.addFields(
-                { name: `${member.user.username}の役職`, value: isNotEmpty(member_roles) ? member_roles : 'なし' },
-                { name: 'イカ部歴', value: getExperience(member.joinedAt) },
-            );
+            embed.addFields({
+                name: `${member.user.username}の役職`,
+                value: isNotEmpty(member_roles) ? member_roles : 'なし',
+            });
 
             await interaction.message.reply({
                 content: `${host_mention} ${member_mention}`,
@@ -149,9 +134,7 @@ async function close(interaction, params) {
         const msg_id = params.get('mid');
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
         const host_mention = `<@${cmd_message.author.id}>`;
-        const embed = new MessageEmbed().setDescription(
-            `${host_mention}たんの募集〆\nちなみに今の${cmd_message.author.username}たんの運勢は` + omikuji() + 'でし！',
-        );
+        const embed = new MessageEmbed().setDescription(`${host_mention}たんの募集〆`);
         if (member.user.id === cmd_message.author.id) {
             await interaction.update({
                 content: `${host_mention}たんの募集は〆！`,
@@ -174,24 +157,9 @@ async function close(interaction, params) {
 
 function disableButtons() {
     let buttons = new MessageActionRow().addComponents([
-        new MessageButton().setCustomId('join').setLabel('行きたい！').setStyle('PRIMARY').setDisabled(),
-        new MessageButton().setCustomId('cancel').setLabel('やっぱやーめた').setStyle('DANGER').setDisabled(),
-        new MessageButton().setCustomId('close').setLabel('集まったので〆').setStyle('SECONDARY').setDisabled(),
+        new MessageButton().setCustomId('join').setLabel('参加').setStyle('PRIMARY').setDisabled(),
+        new MessageButton().setCustomId('cancel').setLabel('キャンセル').setStyle('DANGER').setDisabled(),
+        new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
     ]);
     return buttons;
-}
-
-function getExperience(joinDate) {
-    let today = new Date();
-
-    let years = dateDiff(joinDate, today, 'Y', true);
-    let months = dateDiff(joinDate, today, 'YM', true);
-    let days = dateDiff(joinDate, today, 'MD', true);
-    // 0のときは出力しない
-    let output = '';
-    output = years != 0 ? years + '年' : '';
-    output = months != 0 ? output + months + 'ヶ月' : output + '';
-    output = days != 0 ? output + days + '日' : output + '';
-
-    return output;
 }

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 const { MessageEmbed } = require('discord.js');
 
 module.exports = function handleHelp(msg) {
@@ -8,137 +7,130 @@ module.exports = function handleHelp(msg) {
     args.shift();
     if (args[0] == 'voice') {
         msg.channel.send({
-          embeds: [
-            new MessageEmbed()
-              .setAuthor({
-                name: "Πώς να χρησιμοποιήσετε το Bukiti(読み上げbot)",
-                iconURL:
-                  "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg",
-              })
-              .setColor(0x1bc2a5)
-              .addFields([
-                {
-                  name: "Συνδεθείτε με τον Bukiti στο φωνητικό κανάλι.",
-                  value: "```!join```\n",
-                },
-                {
-                  name: "Απαριθμεί τους τύπους φωνής που είναι διαθέσιμοι στο API",
-                  value: "```!type```\n",
-                },
-                {
-                  name: "Αλλαγή τύπου φωνής.",
-                  value: "```!voice```\n",
-                },
-                {
-                  name: "Αποσύνδεση των bookies από το φωνητικό κανάλι.",
-                  value: "```!kill```\n",
-                },
-              ]),
-          ],
+            embeds: [
+                new MessageEmbed()
+                    .setAuthor({
+                        name: 'ブキチの使い方(読み上げbot)',
+                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
+                    })
+                    .setColor(0x1bc2a5)
+                    .addFields([
+                        {
+                            name: 'ボイスチャンネルにブキチを参加',
+                            value: '```!join```\n',
+                        },
+                        {
+                            name: 'APIで利用可能な音声タイプを一覧表示します',
+                            value: '```!type```\n',
+                        },
+                        {
+                            name: '音声タイプを変更します',
+                            value: '```!voice```\n',
+                        },
+                        {
+                            name: 'ボイスチャンネルからブキチを切断',
+                            value: '```!kill```\n',
+                        },
+                    ]),
+            ],
         });
     } else if (args[0] == '2') {
         msg.channel.send({
-          embeds: [
-            new MessageEmbed()
-              .setAuthor({
-                name: "Πώς να χρησιμοποιήσετε το Bukiti(2/2)",
-                iconURL:
-                  "https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg",
-              })
-              .setColor(0x1bc2a5)
-              .addFields([
-                {
-                  name: "Εμφάνιση πληροφοριών σκηνής.[now / next / nawabari / run]",
-                  value: "```show ○○○```\n",
-                },
-                {
-                  name: "τυχαία εντολή",
-                  value:
-                    "Τυχαία επιλογή στοιχημάτων.```buki Αν είναι περισσότερα από ένα, συμπληρώστε τον αριθμό```\n" +
-                    "Αναφέρετε τη μέθοδο τυχαίας επιλογής για κάθε τύπο buki: ```buki help```\n" +
-                    "Choose a weapon randomly:```weapon```\n" +
-                    "Choose a weapon randomly help:```weapon help```\n" +
-                    "Τυχαία επιλεγμένοι κανόνες Gatil：```rule```\n" +
-                    "Τυχαία επιλογή φρικτών κανόνων και σταδίων.：```rule stage```\n" +
-                    "Τυχαία επιλεγμένα υποόπλα.：```sub```\n" +
-                    "Τυχαία επιλεγμένο ειδικό όπλο.：```special```",
-                },
-                {
-                  name: "Τυχαία επιλογή από μια σειρά επιλογών",
-                  value:
-                    "```pick Σε περίπτωση πολλαπλών επιλογών, συμπληρώστε τους αριθμούς Μισό διάστημα μεταξύ των επιλογών ή διάλειμμα γραμμής```",
-                },
-                {
-                  name: "Τυχαία εξαγωγή ανθρώπων για έναν αριθμό από τον συνδεδεμένο λέβητα.",
-                  value:
-                    "```vpick Εάν εκλεγούν περισσότεροι από ένας, συμπληρώστε τους αριθμούς```",
-                },
-                {
-                  name: "Απόσπασμα Prave θεατών.",
-                  value:
-                    "```kansen Συμπληρώστε τους αριθμούς για τον αριθμό των αντιστοιχιών.```",
-                },
-                {
-                  name: "Πραγματοποιήστε μια έρευνα (όσες θέλετε, διαχωρισμένες με κενά).",
-                  value: "```poll Επιλογή 1 Επιλογή 2```",
-                },
-                {
-                  name: "Δείτε τους δικούς σας κωδικούς φίλων.",
-                  value:
-                    "```fc @εγώ ο ίδιος```\nΑν αναφέρεται στα τελευταία 100 κανάλια κωδικός φίλου αυτό έχει προτεραιότητα.",
-                },
-                {
-                  name: "Καταχωρήστε τον δικό σας κωδικό φίλου.",
-                  value:
-                    "```fcadd 0000-0000-0000```\nΕάν εγγραφείτε ξανά, θα αντικατασταθεί. Δεν μπορείτε να καταχωρίσετε το όνομα κάποιου άλλου.",
-                },
-                {
-                  name: "Δείτε το ιστορικό της λέσχης καλαμαριών σας.",
-                  value: "```@ブキチ イカ部歴```\n",
-                },
-                {
-                  name: "Ελέγξτε τη wikipedia.",
-                  value: "```wiki 〇〇```",
-                },
-              ]),
-          ],
+            embeds: [
+                new MessageEmbed()
+                    .setAuthor({
+                        name: 'ブキチの使い方(2/2)',
+                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
+                    })
+                    .setColor(0x1bc2a5)
+                    .addFields([
+                        {
+                            name: 'ステージ情報を表示[now / next / nawabari / run]',
+                            value: '```show ○○○```\n',
+                        },
+                        {
+                            name: 'ランダム系コマンド',
+                            value:
+                                'ブキをランダムで選出：```buki 複数の場合は数字を記入```\n' +
+                                'ブキ種別ごとのランダム選出方法を表示：```buki help```\n' +
+                                'Choose a weapon randomly:```weapon```\n' +
+                                'Choose a weapon randomly help:```weapon help```\n' +
+                                'ガチルールをランダムで選出：```rule```\n' +
+                                'ガチルールとステージをランダムで選出：```rule stage```\n' +
+                                'サブウェポンをランダムで選出：```sub```\n' +
+                                'スペシャルウェポンをランダムで選出：```special```',
+                        },
+                        {
+                            name: '選択肢の中からランダム選出',
+                            value: '```pick 複数選出の場合は数字を記入 選択肢を半スペ空け or 改行して記入```',
+                        },
+                        {
+                            name: '接続してるボイチャから数字分のヒトをランダム抽出',
+                            value: '```vpick 複数選出の場合は数字を記入```',
+                        },
+                        {
+                            name: 'プラベの観戦者を抽出',
+                            value: '```kansen 試合回数分の数字を記入```',
+                        },
+                        {
+                            name: 'アンケートを実施(スペースで区切れば何個でも)',
+                            value: '```poll 選択肢1 選択肢2```',
+                        },
+                        {
+                            name: '自分のフレンドコードを表示',
+                            value: '```fc @自分```\n「フレンドコード」チャンネルの直近100件に書いてあればそちらを優先します。',
+                        },
+                        {
+                            name: '自分のフレンドコードを登録',
+                            value: '```fcadd 0000-0000-0000```\nもう一度登録すると上書きされます。他人のは登録できません。',
+                        },
+                        {
+                            name: '自分のイカ部歴を表示',
+                            value: '```@ブキチ イカ部歴```\n',
+                        },
+                        {
+                            name: 'wikipediaで調べる',
+                            value: '```wiki 〇〇```',
+                        },
+                    ]),
+            ],
         });
     } else {
         msg.channel.send({
             embeds: [
                 new MessageEmbed()
                     .setAuthor({
-                        name: 'Πώς να χρησιμοποιήσετε το Bukiti(1/2)',
+                        name: 'ブキチの使い方(1/2)',
                         iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
                     })
                     .setColor(0x1bc2a5)
                     .addFields([
                         {
-                            name: 'Εμφάνιση μιας λίστας εντολών bot.',
+                            name: 'botのコマンド一覧を表示',
                             value: '```help または help 2 または help voice```',
                         },
                         {
-                            name: 'Εμφάνιση τρεχουσών πληροφοριών και προσλήψεων Rigma',
-                            value: '```now Όροι συμμετοχής, αν υπάρχουν.```\n',
+                            name: '現在のリグマ情報を表示して募集',
+                            value: '```now 参加条件があれば記載```\n',
                         },
                         {
-                            name: 'Εμφάνιση των επόμενων πληροφοριών rigma και πρόσληψη.',
-                            value: '```next Όροι συμμετοχής, αν υπάρχουν.```\n',
+                            name: '次回のリグマ情報を表示して募集',
+                            value: '```next 参加条件があれば記載```\n',
                         },
                         {
-                            name: 'Εμφάνιση τρεχουσών πληροφοριών και προσλήψεων του NAWABARI',
-                            value: '```nawabari Όροι συμμετοχής, αν υπάρχουν.```\n',
+                            name: '現在のナワバリ情報を表示して募集',
+                            value: '```nawabari 参加条件があれば記載```\n',
                         },
                         {
-                            name: 'Εμφάνιση πληροφοριών και προσλήψεων για το Salmon Run.',
-                            value: '```run Όροι συμμετοχής, αν υπάρχουν.```\n',
+                            name: 'サーモンラン情報を表示して募集',
+                            value: '```run 参加条件があれば記載```\n',
                         },
                         {
-                            name: 'Ξεχωριστή εντολή πρόσληψης παιχνιδιού',
+                            name: '別ゲー募集コマンド',
                             value:
-                                'Dead by Daylight：```!dbd Όροι συμμετοχής, αν υπάρχουν.```\n' +
-                                'モンスターハンターライズ：```!mhr Όροι συμμετοχής, αν υπάρχουν.```\n' +
-                                'ApexLegends：```!apex Όροι συμμετοχής, αν υπάρχουν.```\n',
+                                'Dead by Daylight：```!dbd 参加条件があれば記載```\n' +
+                                'モンスターハンターライズ：```!mhr 参加条件があれば記載```\n' +
+                                'ApexLegends：```!apex 参加条件があれば記載```\n',
                         },
                     ]),
             ],
