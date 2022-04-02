@@ -16,7 +16,7 @@ const INDEX_ROLE_NAME = 6;
 const INDEX_COLOR_CODE = 7;
 const INDEX_MEMBER_ID_START = 8;
 
-module.exports = function handleCreateRoom(msg) {
+module.exports = async function handleCreateRoom(msg) {
     if (!msg.member.permissions.has('MANAGE_CHANNELS')) {
         return msg.reply('チャンネルを管理する権限がないでし！');
     }
@@ -119,7 +119,7 @@ module.exports = function handleCreateRoom(msg) {
                         if (roleId != null) {
                             for (let j = INDEX_MEMBER_ID_START; j < data[i].length; j++) {
                                 var memberId = data[i][j].trim();
-                                memberId = setRoleToMember(guild, roleId, memberId);
+                                memberId = await setRoleToMember(guild, roleId, memberId);
                                 resultData[i].push(memberId);
                             }
                         }
