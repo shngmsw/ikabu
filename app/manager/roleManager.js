@@ -102,11 +102,16 @@ module.exports.setColorToRole = async function (guild, role, color) {
  * @param {string} memberId メンバーID
  * @returns メンバーID
  */
-module.exports.setRoleToMember = function (guild, roleId, memberId) {
+module.exports.setRoleToMember = async function (guild, roleId, memberId) {
     if (memberId == null || memberId == '') {
         return null;
     } else {
-        const member = guild.members.cache.get(memberId);
+        let member;
+        if (memberId.length == 18) {
+            member = await guild.members.cache.get(memberId);
+        } else {
+            member = await guild.members.cache.find((member) => member.user.tag === memberId);
+        }
 
         if (member != null) {
             member.roles.add(guild.roles.cache.get(roleId));
