@@ -4,3 +4,4 @@ launch.json
 local/*
 package-lock.json
 .history/
+ikabu.code-workspace
