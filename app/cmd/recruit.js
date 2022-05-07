@@ -38,8 +38,14 @@ module.exports = function handleRecruit(msg) {
 
 async function recruitLeagueMatch(msg, type) {
     const channelName = 'リグマ募集';
+    let mention = '@everyone';
     if (isNotThisChannel(msg, channelName)) {
         return;
+    }
+
+    if (isRookieChannel(msg)) {
+        const role_id = await msg.guild.roles.cache.find((role) => role.name === '🔰新入部員');
+        mention = `${role_id}`;
     }
 
     var strCmd = msg.cleanContent.replace(/　/g, ' ');
@@ -54,7 +60,7 @@ async function recruitLeagueMatch(msg, type) {
             const data = await response.json();
             const l_args = common.getLeague(data, type).split(',');
             let condition = 'なし';
-            let txt = '@everyone 【リグマ募集】\n' + `<@${msg.author.id}>` + 'たんがリグメン募集中でし！\n';
+            let txt = mention + ' 【リグマ募集】\n' + `<@${msg.author.id}>` + 'たんがリグメン募集中でし！\n';
             if (args.length > 0) condition = args.join(' ');
             const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_a.image;
             const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_b.image;
@@ -348,6 +354,15 @@ function isNotThisChannel(msg, channelName) {
     const msgSendedChannelName = msg.channel.name;
     if (!msgSendedChannelName.match(channelName)) {
         msg.reply('このコマンドはこのチャンネルでは使えないでし！');
+        return true;
+    }
+    return false;
+}
+
+function isRookieChannel(msg) {
+    const msgSendedChannelName = msg.channel.name;
+    const rookieChannelName = '🔰リグマ募集';
+    if (msgSendedChannelName === rookieChannelName) {
         return true;
     }
     return false;
