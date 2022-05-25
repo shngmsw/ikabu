@@ -358,7 +358,7 @@ function getCloseEmbed() {
 
 function getCommandHelpEmbed(command) {
     const embed = new MessageEmbed();
-    embed.setDescription('募集コマンドは `' + `${command}` + '`\n詳しくは <#560485660696510484> を確認するでし！');
+    embed.setDescription('募集コマンドは ' + `${command}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
     return embed;
 }
 
