@@ -119,7 +119,6 @@ async function regularMatch(msg) {
                     content: `${host_mention}たんの募集は〆！`,
                     components: [disableButtons()],
                 });
-                sendCloseMessage(msg, 'nawabari');
             }, 7200000);
         } catch (error) {
             msg.channel.send('なんかエラーでてるわ');
@@ -181,7 +180,6 @@ async function salmonRun(msg) {
                     content: `${host_mention}たんの募集は〆！`,
                     components: [disableButtons()],
                 });
-                sendCloseMessage(msg, 'run');
             }, 7200000);
         } catch (error) {
             msg.channel.send('なんかエラーでてるわ');
@@ -260,7 +258,6 @@ async function sendOtherGames(msg, title, txt, color, image, logo) {
                     content: `${host_mention}たんの募集は〆！`,
                     components: [disableButtons()],
                 });
-                sendCloseMessage(msg, 'run');
             }, 7200000);
         } catch (error) {
             console.log(error);
@@ -335,7 +332,6 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
                 content: `${host_mention}たんの募集は〆！`,
                 components: [disableButtons()],
             });
-            sendCloseMessage(msg, 'run');
         }, 7200000);
     } catch (error) {
         console.log(error);
