@@ -114,8 +114,9 @@ async function regularMatch(msg) {
             // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
             sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
             setTimeout(function () {
+                const host_mention = `<@${msg.author.id}>`;
                 sentMessage.edit({
-                    content: `↑の募集は〆！`,
+                    content: `${host_mention}たんの募集は〆！`,
                     components: [disableButtons()],
                 });
                 sendCloseMessage(msg, 'nawabari');
@@ -175,8 +176,9 @@ async function salmonRun(msg) {
             // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
             sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
             setTimeout(function () {
+                const host_mention = `<@${msg.author.id}>`;
                 sentMessage.edit({
-                    content: `↑の募集は〆！`,
+                    content: `${host_mention}たんの募集は〆！`,
                     components: [disableButtons()],
                 });
                 sendCloseMessage(msg, 'run');
@@ -253,8 +255,9 @@ async function sendOtherGames(msg, title, txt, color, image, logo) {
             // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
             sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
             setTimeout(function () {
+                const host_mention = `<@${msg.author.id}>`;
                 sentMessage.edit({
-                    content: `↑の募集は〆！`,
+                    content: `${host_mention}たんの募集は〆！`,
                     components: [disableButtons()],
                 });
                 sendCloseMessage(msg, 'run');
@@ -326,9 +329,10 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
-        setTimeout(function () {
+        setTimeout(function async() {
+            const host_mention = `<@${msg.author.id}>`;
             sentMessage.edit({
-                content: `↑の募集は〆！`,
+                content: `${host_mention}たんの募集は〆！`,
                 components: [disableButtons()],
             });
             sendCloseMessage(msg, 'run');
