@@ -109,11 +109,44 @@ async function messageReplace(message) {
         return str.replace(pat, '');
     };
 
-    const mention_replace = (str) => {
-        const pat = /<@!(\d*)>/g;
-        const [matchAllElement] = str.matchAll(pat);
+    const role_mention_replace = (str) => {
+        const [matchAllElement] = str.matchAll(/<@&(\d*)>/g);
         if (matchAllElement === undefined) return str;
-        return str.replace(pat, message.mentions.users.first().username);
+        for (var i = 0; i < [matchAllElement].length; i++) {
+            let roleName = message.mentions.roles.get([matchAllElement][i][1]).name;
+            str = str.replace([matchAllElement][i][0], '@' + roleName);
+        }
+        return role_mention_replace(str);
+    };
+
+    const nickname_mention_replace = (str) => {
+        const [matchAllElement] = str.matchAll(/<@!(\d*)>/g);
+        if (matchAllElement === undefined) return str;
+        for (var i = 0; i < [matchAllElement].length; i++) {
+            let username = message.mentions.users.get([matchAllElement][i][1]).username;
+            str = str.replace([matchAllElement][i][0], '@' + username);
+        }
+        return nickname_mention_replace(str);
+    };
+
+    const mention_replace = (str) => {
+        const [matchAllElement] = str.matchAll(/<@(\d*)>/g);
+        if (matchAllElement === undefined) return str;
+        for (var i = 0; i < [matchAllElement].length; i++) {
+            let username = message.mentions.users.get([matchAllElement][i][1]).username;
+            str = str.replace([matchAllElement][i][0], '@' + username);
+        }
+        return mention_replace(str);
+    };
+
+    const channel_replace = (str) => {
+        const [matchAllElement] = str.matchAll(/<#(\d*)>/g);
+        if (matchAllElement === undefined) return str;
+        for (var i = 0; i < [matchAllElement].length; i++) {
+            let chName = message.guild.channels.cache.get([matchAllElement][i][1]).name;
+            str = str.replace([matchAllElement][i][0], chName);
+        }
+        return channel_replace(str);
     };
 
     const over200_cut = (str) => {
@@ -125,7 +158,15 @@ async function messageReplace(message) {
         }
     };
 
-    const yomiage_message = await over200_cut(mention_replace(w_replace(emoji_delete(url_delete(`${message.content}`)))));
+    let url_deleted = url_delete(`${message.content}`);
+    let emoji_deleted = emoji_delete(url_deleted);
+    let w_replaced = w_replace(emoji_deleted);
+    let mention_replaced = mention_replace(w_replaced);
+    let nickname_replaced = nickname_mention_replace(mention_replaced);
+    let role_mention_replaced = role_mention_replace(nickname_replaced);
+    let channel_replaced = channel_replace(role_mention_replaced);
+
+    const yomiage_message = await over200_cut(channel_replaced);
     return yomiage_message;
 }
 

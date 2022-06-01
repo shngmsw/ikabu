@@ -54,6 +54,9 @@
     "node",
     "express"
   ],
+  "compilerOptions": {
+      "lib": ["es2020.string"]
+  },
   "devDependencies": {
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
