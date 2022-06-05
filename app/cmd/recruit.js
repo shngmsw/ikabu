@@ -53,7 +53,7 @@ async function recruitLeagueMatch(msg, type) {
     const args = strCmd.split(' ');
     args.shift();
     if (strCmd.match('〆')) {
-        sendCloseMessage(msg);
+        sendCloseMessage(msg, '`now` か `next`');
     } else {
         try {
             const response = await fetch(schedule_url);
@@ -83,7 +83,7 @@ async function regularMatch(msg) {
     const args = strCmd.split(' ');
     args.shift();
     if (strCmd.match('〆')) {
-        sendCloseMessage(msg);
+        sendCloseMessage(msg, 'nawabari');
     } else {
         try {
             const response = await fetch(schedule_url);
@@ -110,8 +110,9 @@ async function regularMatch(msg) {
             const sentMessage = await msg.channel.send({
                 content: txt,
                 files: [recruit, stage],
-                components: [recruitActionRow(msg)],
             });
+            // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
+            sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
             setTimeout(function () {
                 const host_mention = `<@${msg.author.id}>`;
                 sentMessage.edit({
@@ -136,7 +137,7 @@ async function salmonRun(msg) {
     const args = strCmd.split(' ');
     args.shift();
     if (strCmd.match('〆')) {
-        sendCloseMessage(msg);
+        sendCloseMessage(msg, 'run');
     } else {
         try {
             const response = await fetch(coop_schedule_url);
@@ -170,8 +171,9 @@ async function salmonRun(msg) {
             const sentMessage = await msg.channel.send({
                 content: txt,
                 files: [recruit, stageImage],
-                components: [recruitActionRow(msg)],
             });
+            // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
+            sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
             setTimeout(function () {
                 const host_mention = `<@${msg.author.id}>`;
                 sentMessage.edit({
@@ -226,7 +228,7 @@ async function sendOtherGames(msg, title, txt, color, image, logo) {
     const args = strCmd.split(' ');
     args.shift();
     if (args[0] == '〆') {
-        sendCloseMessage(msg);
+        sendCloseMessage(msg, '`!apex` か `!dbd` か `!mhr`');
     } else {
         let condition = 'なし';
         if (args.length > 0) condition = args.join(' ') + '\n';
@@ -247,8 +249,9 @@ async function sendOtherGames(msg, title, txt, color, image, logo) {
             const sentMessage = await msg.channel.send({
                 content: txt,
                 embeds: [embed],
-                components: [recruitActionRow(msg)],
             });
+            // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
+            sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
             setTimeout(function () {
                 const host_mention = `<@${msg.author.id}>`;
                 sentMessage.edit({
@@ -319,10 +322,11 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
         const sentMessage = await msg.channel.send({
             content: txt,
             files: [recruit, stage],
-            components: [recruitActionRow(msg)],
         });
 
-        setTimeout(function () {
+        // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
+        sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
+        setTimeout(function async() {
             const host_mention = `<@${msg.author.id}>`;
             sentMessage.edit({
                 content: `${host_mention}たんの募集は〆！`,
@@ -334,20 +338,28 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
     }
 }
 
-function sendCloseMessage(msg) {
+function sendCloseMessage(msg, command) {
     try {
-        const embed = getCloseEmbed(msg);
+        const embed = getCloseEmbed();
         msg.channel.send({ embeds: [embed] });
+        const cmdHelpEmbed = getCommandHelpEmbed(command);
+        msg.channel.send({ embeds: [cmdHelpEmbed] });
         msg.delete();
     } catch (error) {
         console.log(error);
     }
 }
 
-function getCloseEmbed(msg) {
-    const stageEmbed = new MessageEmbed();
-    stageEmbed.setDescription(`<@${msg.author.id}>たんの募集 〆`);
-    return stageEmbed;
+function getCloseEmbed() {
+    const embed = new MessageEmbed();
+    embed.setDescription(`↑の募集 〆`);
+    return embed;
+}
+
+function getCommandHelpEmbed(command) {
+    const embed = new MessageEmbed();
+    embed.setDescription('募集コマンドは ' + `${command}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
+    return embed;
 }
 
 function isNotThisChannel(msg, channelName) {
@@ -372,14 +384,17 @@ function recruitActionRow(msg) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
     joinParams.append('mid', msg.id);
+    joinParams.append('cid', msg.channel.id);
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', 'cr');
     cancelParams.append('mid', msg.id);
+    cancelParams.append('cid', msg.channel.id);
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'close');
     closeParams.append('mid', msg.id);
+    closeParams.append('cid', msg.channel.id);
 
     return new MessageActionRow().addComponents([
         new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),

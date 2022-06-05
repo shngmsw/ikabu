@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+
 const common = require('../common.js');
 const weaponsUrl = 'https://stat.ink/api/v2/weapon';
 const { MessageEmbed } = require('discord.js');
