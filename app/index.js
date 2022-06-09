@@ -80,8 +80,6 @@ client.on('guildMemberRemove', async (member) => {
     }
 });
 
-client.on('voiceStateUpdate', (oldState, newState) => privateChat.onVoiceStateUpdate(oldState, newState));
-
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     // ready後にready以前に実行されたinteractionのinteractionCreateがemitされるが、
