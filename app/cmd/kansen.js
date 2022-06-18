@@ -1,11 +1,11 @@
 const { MessageEmbed } = require('discord.js');
-const Combinatorics = require('js-combinatorics');
+const { Combination } = require('js-combinatorics');
 const common = require('../common.js');
 
 module.exports = async function handleKansen(msg, args) {
     var how_many_times = Number(args);
     var resultList = new Array();
-    var cmb = Combinatorics.combination(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], 2);
+    var cmb = new Combination(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], 2);
     var tmp_watching_list = cmb.toArray();
     var result = '';
     if (!common.isInteger(how_many_times) || how_many_times <= 0) {
@@ -54,20 +54,5 @@ module.exports = async function handleKansen(msg, args) {
     }
 
     var emb = new MessageEmbed().setColor(0xf02d7d).addFields([{ name: '観戦の人', value: resultList.join('\n') }]);
-
-    var pin_msg = await msg.channel.send({ embeds: [emb] });
-    pin_msg.pin();
-    var count = how_many_times * 8;
-    if (count > 0) {
-        var countdown = function () {
-            count--;
-        };
-        var id = setInterval(function () {
-            countdown();
-            if (count <= 0) {
-                clearInterval(id);
-                pin_msg.unpin();
-            }
-        }, 60000);
-    }
+    await msg.channel.send({ embeds: [emb] });
 };
