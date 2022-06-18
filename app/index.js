@@ -16,7 +16,6 @@ const Handler = require('./handler.js');
 const Dispandar = require('./event/dispandar.js');
 const VOICE_API = require('./tts/voice_bot_node.js');
 const DISCORD_VOICE = require('./tts/discordjs_voice.js');
-const privateChat = require('./voice/secretchat.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
