@@ -3,8 +3,11 @@ const { commandNames } = require('./constant.js');
 
 require('dotenv').config();
 const voiceLock = new SlashCommandBuilder().setName(commandNames.voice_channel).setDescription('ボイスチャンネルの人数制限を設定します。');
+const closeRecruit = new SlashCommandBuilder()
+    .setName(commandNames.close)
+    .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
 
-const commands = [voiceLock];
+const commands = [voiceLock, closeRecruit];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');
