@@ -17,6 +17,7 @@ const Dispandar = require('./event/dispandar.js');
 const VOICE_API = require('./tts/voice_bot_node.js');
 const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
+const { getCloseEmbed, getCommandHelpEmbed } = require('./cmd/recruit.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
 const suggestionBox = require('./reaction/suggestion-box.js');
@@ -24,6 +25,7 @@ const join = require('./event/join.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
 const handleIkabuExperience = require('./cmd/experience.js');
+const { commandNames } = require('../constant');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
@@ -125,10 +127,39 @@ const buttons = {
  * @param {Discord.Interaction} interaction
  */
 async function onInteraction(interaction) {
-    if (!interaction.isButton()) {
-        return;
+    try {
+        if (interaction.isButton()) {
+            const params = new URLSearchParams(interaction.customId);
+            await buttons[params.get('d')](interaction, params);
+            return;
+        }
+        if (interaction.isCommand()) {
+            const { commandName } = interaction;
+
+            if (commandName === commandNames.voice_channel) {
+                //pingコマンド
+                await interaction.reply('Pong!');
+            } else if (commandName === commandNames.close) {
+                //serverコマンド
+                const embed = getCloseEmbed();
+                if (!interaction.replied) {
+                    await interaction.reply({
+                        embeds: [embed, getCommandHelpEmbed(interaction.channel.name)],
+                    });
+                }
+            } else if (commandName === 'user') {
+                //userコマンド
+                await interaction.reply('User info.');
+            }
+            return;
+        }
+    } catch (error) {
+        const error_detail = {
+            content: `Command failed: ${error}`,
+            interaction_replied: interaction.replied,
+            interaction_deferred: interaction.deferred,
+        };
+        console.log(error_detail);
     }
-    const params = new URLSearchParams(interaction.customId);
-    await buttons[params.get('d')](interaction, params);
 }
 client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
