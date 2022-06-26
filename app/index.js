@@ -24,6 +24,7 @@ const join = require('./event/join.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
 const handleIkabuExperience = require('./cmd/experience.js');
+const { commandNames } = require('../constant');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
@@ -125,10 +126,25 @@ const buttons = {
  * @param {Discord.Interaction} interaction
  */
 async function onInteraction(interaction) {
-    if (!interaction.isButton()) {
+    if (interaction.isButton()) {
+        const params = new URLSearchParams(interaction.customId);
+        await buttons[params.get('d')](interaction, params);
         return;
     }
-    const params = new URLSearchParams(interaction.customId);
-    await buttons[params.get('d')](interaction, params);
+    if (interaction.isCommand()) {
+        const { commandName } = interaction;
+
+        if (commandName === commandNames.voice_channel) {
+            //pingコマンド
+            await interaction.reply('Pong!');
+        } else if (commandName === 'server') {
+            //serverコマンド
+            await interaction.reply('Server info');
+        } else if (commandName === 'user') {
+            //userコマンド
+            await interaction.reply('User info.');
+        }
+        return;
+    }
 }
 client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));

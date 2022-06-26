@@ -1,7 +1,9 @@
 const { SlashCommandBuilder } = require(`@discordjs/builders`);
+const { commandNames } = require('./constant.js');
+
 require('dotenv').config();
 const voiceLock = new SlashCommandBuilder()
-    .setName('voice_channel')
+    .setName(commandNames.voice_channel)
     .setDescription('ボイスチャンネルの人数制限を設定します。')
     .addStringOption((option) =>
         option
