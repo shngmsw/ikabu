@@ -6,7 +6,12 @@ const schedule_url = 'https://splatoon2.ink/data/schedules.json';
 const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
 const { URLSearchParams } = require('url');
 
-module.exports = function handleRecruit(msg) {
+module.exports = {
+    handleRecruit: handleRecruit,
+    getCloseEmbed: getCloseEmbed,
+};
+
+function handleRecruit(msg) {
     if (msg.content.startsWith('next') && msg.channel.name != 'botコマンド') {
         recruitLeagueMatch(msg, 1);
     }
@@ -34,7 +39,7 @@ module.exports = function handleRecruit(msg) {
     if (msg.content.startsWith('!dbd')) {
         deadByDayLight(msg);
     }
-};
+}
 
 async function recruitLeagueMatch(msg, type) {
     const channelName = 'リグマ募集';

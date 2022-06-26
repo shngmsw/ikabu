@@ -12,8 +12,11 @@ const voiceLock = new SlashCommandBuilder()
             .setRequired(true)
             .addChoices({ name: 'view', value: 'view' }, { name: 'lock', value: 'lock' }, { name: 'unlock', value: 'unlock' }),
     );
+const closeRecruit = new SlashCommandBuilder()
+    .setName(commandNames.close)
+    .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
 
-const commands = [voiceLock];
+const commands = [voiceLock, closeRecruit];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');
