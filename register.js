@@ -2,16 +2,7 @@ const { SlashCommandBuilder } = require(`@discordjs/builders`);
 const { commandNames } = require('./constant.js');
 
 require('dotenv').config();
-const voiceLock = new SlashCommandBuilder()
-    .setName(commandNames.voice_channel)
-    .setDescription('ボイスチャンネルの人数制限を設定します。')
-    .addStringOption((option) =>
-        option
-            .setName('status')
-            .setDescription('ボイスチャンネルに人数制限をかけます。')
-            .setRequired(true)
-            .addChoices({ name: 'view', value: 'view' }, { name: 'lock', value: 'lock' }, { name: 'unlock', value: 'unlock' }),
-    );
+const voiceLock = new SlashCommandBuilder().setName(commandNames.voice_channel).setDescription('ボイスチャンネルの人数制限を設定します。');
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
