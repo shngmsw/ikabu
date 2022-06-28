@@ -26,6 +26,7 @@ const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
 const handleIkabuExperience = require('./cmd/experience.js');
 const { commandNames } = require('../constant');
+const { voiceLocker, voiceLockerUpdate } = require('./cmd/voice_locker.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
@@ -86,7 +87,7 @@ client.on('ready', () => {
     // ready後にready以前に実行されたinteractionのinteractionCreateがemitされるが、
     // そのときにはinteractionがtimeoutしておりfollowupで失敗することがよくある。
     // そのようなことを避けるためready内でハンドラを登録する。
-    client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
+    // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
@@ -129,16 +130,20 @@ const buttons = {
 async function onInteraction(interaction) {
     try {
         if (interaction.isButton()) {
-            const params = new URLSearchParams(interaction.customId);
-            await buttons[params.get('d')](interaction, params);
-            return;
+            const customIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
+            if (customIds.includes(interaction.customId)) {
+                voiceLockerUpdate(interaction);
+            } else {
+                const params = new URLSearchParams(interaction.customId);
+                await buttons[params.get('d')](interaction, params);
+                return;
+            }
         }
         if (interaction.isCommand()) {
             const { commandName } = interaction;
 
-            if (commandName === commandNames.voice_channel) {
-                //pingコマンド
-                await interaction.reply('Pong!');
+            if (commandName === commandNames.voice_channel && !(interaction.replied || interaction.deferred)) {
+                await voiceLocker(interaction);
             } else if (commandName === commandNames.close) {
                 //serverコマンド
                 const embed = getCloseEmbed();
@@ -163,3 +168,24 @@ async function onInteraction(interaction) {
     }
 }
 client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
+
+client.on('voiceStateUpdate', (oldState, newState) => onVoiceStateUpdate(oldState, newState));
+const pattern = /^[a-m]/;
+// NOTE:VC切断時に0人になったら人数制限を0にする
+async function onVoiceStateUpdate(oldState, newState) {
+    // StateUpdateが同じチャンネルの場合は対象外
+    if (oldState.channelId === newState.channelId) {
+        return;
+    }
+
+    if (oldState.channelId != null) {
+        const oldChannel = oldState.guild.channels.cache.get(oldState.channelId);
+        // a～mから始まらない場合は対象外にする
+        if (!oldChannel.name.match(pattern)) {
+            return;
+        }
+        if (oldChannel.members.size == 0) {
+            oldChannel.setUserLimit(0);
+        }
+    }
+}
