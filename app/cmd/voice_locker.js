@@ -14,7 +14,27 @@ module.exports.voiceLocker = async function (interaction) {
         return;
     }
 
-    const channelState = await getVoiceChannelState(interaction);
+    let channelState;
+
+    // optionの判定
+    if (interaction.options.getInteger('limit') != null) {
+        let limitNum = interaction.options.getInteger('limit');
+        if (limitNum < 0 || limitNum > 99) {
+            await interaction.reply({ content: '制限人数は0～99の間で指定するでし！', ephemeral: true });
+            return;
+        }
+
+        channelState = {
+            id: channel.id,
+            limit: limitNum,
+            isLock: limitNum == 0 ? false : true,
+        };
+
+        // 制限人数を反映
+        channel.setUserLimit(limitNum);
+    } else {
+        channelState = await getVoiceChannelState(interaction);
+    }
 
     const embed = createEmbed(channelState);
     const button = createButton(channelState);

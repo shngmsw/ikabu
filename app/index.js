@@ -26,6 +26,7 @@ const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
 const handleIkabuExperience = require('./cmd/experience.js');
 const { commandNames } = require('../constant');
+const registerSlashCommands = require('../register.js');
 const { voiceLocker, voiceLockerUpdate } = require('./cmd/voice_locker.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
@@ -82,12 +83,13 @@ client.on('guildMemberRemove', async (member) => {
     }
 });
 
-client.on('ready', () => {
+client.on('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
     // ready後にready以前に実行されたinteractionのinteractionCreateがemitされるが、
     // そのときにはinteractionがtimeoutしておりfollowupで失敗することがよくある。
     // そのようなことを避けるためready内でハンドラを登録する。
     // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
+    await registerSlashCommands();
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
