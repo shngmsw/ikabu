@@ -32,7 +32,7 @@ function handleRecruit(msg) {
      * 別ゲー
      */
     if (msg.content.startsWith('!mhr')) {
-        monsterHunterRize(msg);
+        monsterHunterRise(msg);
     }
     if (msg.content.startsWith('!apex')) {
         apexLegends(msg);
@@ -194,13 +194,13 @@ async function salmonRun(msg) {
     }
 }
 
-function monsterHunterRize(msg) {
+function monsterHunterRise(msg) {
     const role_id = msg.guild.roles.cache.find((role) => role.name === 'ハンター');
     let title = 'MONSTER HUNTER RISE';
     let txt = role_id.toString() + ' 【モンハンライズ募集】\n' + `<@${msg.author.id}>` + 'たんがモンハンライズ参加者募集中でし！\n';
-    let color = '#3ce3f5';
-    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/master/images/games/MonsterHunterRise.jpeg';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/master/images/games/MonsterHunterRise_logo.png';
+    let color = '#b71008';
+    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/games/MonsterHunterRiseSunBreak.jpg';
+    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/games/MonsterHunterRiseSunBreak_logo.png';
     sendOtherGames(msg, title, txt, color, image, logo);
 }
 
