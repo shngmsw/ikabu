@@ -199,8 +199,8 @@ function monsterHunterRise(msg) {
     let title = 'MONSTER HUNTER RISE';
     let txt = role_id.toString() + ' 【モンハンライズ募集】\n' + `<@${msg.author.id}>` + 'たんがモンハンライズ参加者募集中でし！\n';
     let color = '#b71008';
-    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/master/images/games/MonsterHunterRiseSunBreak.jpg';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/master/images/games/MonsterHunterRiseSunBreak_logo.png';
+    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/games/MonsterHunterRiseSunBreak.jpg';
+    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/games/MonsterHunterRiseSunBreak_logo.png';
     sendOtherGames(msg, title, txt, color, image, logo);
 }
 
