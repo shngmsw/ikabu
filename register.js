@@ -19,28 +19,40 @@ const otherGame = new SlashCommandBuilder()
         subcommand
             .setName('apex')
             .setDescription('ApexLegendsの募集')
-            .addIntegerOption((option) => option.setName('あと何人募集').setDescription('募集する人数').setRequired(true))
+            .addIntegerOption((option) =>
+                option.setName('min').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
+            )
+            .addIntegerOption((option) => option.setName('max').setDescription('最高何人までなら一緒にあそべる？'))
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
         subcommand
             .setName('mhr')
             .setDescription('モンスターハンターライズ:サンブレイクの募集')
-            .addIntegerOption((option) => option.setName('あと何人募集').setDescription('募集する人数').setRequired(true))
+            .addIntegerOption((option) =>
+                option.setName('min').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
+            )
+            .addIntegerOption((option) => option.setName('max').setDescription('最高何人までなら一緒にあそべる？'))
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
         subcommand
             .setName('dbd')
             .setDescription('Dead by Daylightの募集')
-            .addIntegerOption((option) => option.setName('あと何人募集').setDescription('募集する人数').setRequired(true))
+            .addIntegerOption((option) =>
+                option.setName('min').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
+            )
+            .addIntegerOption((option) => option.setName('max').setDescription('最高何人までなら一緒にあそべる？'))
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
         subcommand
             .setName('valo')
             .setDescription('Valorantの募集')
-            .addIntegerOption((option) => option.setName('あと何人募集').setDescription('募集する人数').setRequired(true))
+            .addIntegerOption((option) =>
+                option.setName('min').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
+            )
+            .addIntegerOption((option) => option.setName('max').setDescription('最高何人までなら一緒にあそべる？'))
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
@@ -50,7 +62,10 @@ const otherGame = new SlashCommandBuilder()
             .addStringOption((option) =>
                 option.setName('ゲームタイトル').setDescription('ゲームタイトルを入力してください。').setRequired(true),
             )
-            .addIntegerOption((option) => option.setName('あと何人募集').setDescription('募集する人数').setRequired(true))
+            .addIntegerOption((option) =>
+                option.setName('min').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
+            )
+            .addIntegerOption((option) => option.setName('max').setDescription('最高何人までなら一緒にあそべる？'))
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 

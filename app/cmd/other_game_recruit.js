@@ -75,7 +75,10 @@ function others(interaction) {
 
 async function sendOtherGames(interaction, title, txt, color, image, logo) {
     let options = interaction.options;
-    let recruitNum = options.getInteger('あと何人募集');
+    let recruitMinNum = options.getInteger('min');
+    let recruitMaxNum = options.getInteger('max');
+    let recruitNumText = recruitMinNum.toString() + `～`;
+    if (recruitMaxNum != null) recruitNumText = recruitNumText + recruitMaxNum.toString();
     let condition = options.getString('内容または参加条件');
 
     const embed = new MessageEmbed()
@@ -87,7 +90,7 @@ async function sendOtherGames(interaction, title, txt, color, image, logo) {
         .addFields([
             {
                 name: '募集人数',
-                value: recruitNum.toString(),
+                value: '＠' + recruitNumText,
             },
             {
                 name: '参加条件',
