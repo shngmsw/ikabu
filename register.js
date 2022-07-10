@@ -12,7 +12,49 @@ const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
 
-const commands = [voiceLock, closeRecruit];
+const otherGame = new SlashCommandBuilder()
+    .setName(commandNames.other_game)
+    .setDescription('スプラ以外のゲーム募集コマンド')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('apex')
+            .setDescription('ApexLegendsの募集')
+            .addIntegerOption((option) => option.setName('あと何人募集').setDescription('募集する人数').setRequired(true))
+            .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('mhr')
+            .setDescription('モンスターハンターライズ:サンブレイクの募集')
+            .addIntegerOption((option) => option.setName('あと何人募集').setDescription('募集する人数').setRequired(true))
+            .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('dbd')
+            .setDescription('Dead by Daylightの募集')
+            .addIntegerOption((option) => option.setName('あと何人募集').setDescription('募集する人数').setRequired(true))
+            .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('valo')
+            .setDescription('Valorantの募集')
+            .addIntegerOption((option) => option.setName('あと何人募集').setDescription('募集する人数').setRequired(true))
+            .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('other')
+            .setDescription('その他別ゲーの募集')
+            .addStringOption((option) =>
+                option.setName('ゲームタイトル').setDescription('ゲームタイトルを入力してください。').setRequired(true),
+            )
+            .addIntegerOption((option) => option.setName('あと何人募集').setDescription('募集する人数').setRequired(true))
+            .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+    );
+
+const commands = [voiceLock, closeRecruit, otherGame];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');

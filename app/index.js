@@ -18,6 +18,7 @@ const VOICE_API = require('./tts/voice_bot_node.js');
 const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
 const { getCloseEmbed, getCommandHelpEmbed } = require('./cmd/recruit.js');
+const { otherGameRecruit } = require('./cmd/other_game_recruit.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
 const suggestionBox = require('./reaction/suggestion-box.js');
@@ -154,9 +155,8 @@ async function onInteraction(interaction) {
                         embeds: [embed, getCommandHelpEmbed(interaction.channel.name)],
                     });
                 }
-            } else if (commandName === 'user') {
-                //userコマンド
-                await interaction.reply('User info.');
+            } else if (commandName === commandNames.other_game) {
+                await otherGameRecruit(interaction);
             }
             return;
         }

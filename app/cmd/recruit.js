@@ -361,7 +361,7 @@ const recruit_command = {
     リグマ募集: '`now` か `next`',
     'ナワバリ・フェス募集': `nawabari`,
     サーモン募集: `run`,
-    別ゲー募集: '`!apex` か `!dbd` か `!mhr`',
+    別ゲー募集: '`/apex` or `/dbd` or `/mhr` or `/valo` or `/other`',
 };
 
 function getCommandHelpEmbed(channelName) {
