@@ -59,7 +59,7 @@ function valorant(interaction) {
     const txt = role_id.toString() + ' 【VALORANT募集】\n' + `<@${interaction.member.id}>` + 'たんがVALORANT参加者募集中でし！\n';
     let color = '#FF4654';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant.jpg';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant_logo.jpg';
+    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant_logo.png';
     sendOtherGames(interaction, title, txt, color, image, logo);
 }
 
