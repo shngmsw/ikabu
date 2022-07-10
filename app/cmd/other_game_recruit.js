@@ -77,7 +77,14 @@ async function sendOtherGames(interaction, title, txt, color, image, logo) {
     let options = interaction.options;
     let recruitMinNum = options.getInteger('募集人数');
     let recruitMaxNum = options.getInteger('最大人数');
-    if (recruitMaxNum != null && recruitMinNum > recruitMaxNum) {
+    if (recruitMinNum <= 0 || recruitMaxNum <= 0) {
+        await interaction.reply({
+            content: 'デバッグしようとする頭の良い子は嫌いでし！',
+            ephemeral: true,
+        });
+        return;
+    }
+    if (recruitMaxNum != null && recruitMinNum >= recruitMaxNum) {
         await interaction.reply({
             content: '最大人数に募集人数より少ない数は設定できないでし！',
             ephemeral: true,
