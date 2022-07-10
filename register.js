@@ -20,9 +20,9 @@ const otherGame = new SlashCommandBuilder()
             .setName('apex')
             .setDescription('ApexLegendsの募集')
             .addIntegerOption((option) =>
-                option.setName('min').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
+                option.setName('募集人数').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
             )
-            .addIntegerOption((option) => option.setName('max').setDescription('最高何人までなら一緒にあそべる？'))
+            .addIntegerOption((option) => option.setName('最大人数').setDescription('最高何人までなら一緒にあそべる？'))
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
@@ -30,9 +30,9 @@ const otherGame = new SlashCommandBuilder()
             .setName('mhr')
             .setDescription('モンスターハンターライズ:サンブレイクの募集')
             .addIntegerOption((option) =>
-                option.setName('min').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
+                option.setName('募集人数').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
             )
-            .addIntegerOption((option) => option.setName('max').setDescription('最高何人までなら一緒にあそべる？'))
+            .addIntegerOption((option) => option.setName('最大人数').setDescription('最高何人までなら一緒にあそべる？'))
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
@@ -40,9 +40,9 @@ const otherGame = new SlashCommandBuilder()
             .setName('dbd')
             .setDescription('Dead by Daylightの募集')
             .addIntegerOption((option) =>
-                option.setName('min').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
+                option.setName('募集人数').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
             )
-            .addIntegerOption((option) => option.setName('max').setDescription('最高何人までなら一緒にあそべる？'))
+            .addIntegerOption((option) => option.setName('最大人数').setDescription('最高何人までなら一緒にあそべる？'))
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
@@ -50,9 +50,9 @@ const otherGame = new SlashCommandBuilder()
             .setName('valo')
             .setDescription('Valorantの募集')
             .addIntegerOption((option) =>
-                option.setName('min').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
+                option.setName('募集人数').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
             )
-            .addIntegerOption((option) => option.setName('max').setDescription('最高何人までなら一緒にあそべる？'))
+            .addIntegerOption((option) => option.setName('最大人数').setDescription('最高何人までなら一緒にあそべる？'))
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
@@ -63,9 +63,9 @@ const otherGame = new SlashCommandBuilder()
                 option.setName('ゲームタイトル').setDescription('ゲームタイトルを入力してください。').setRequired(true),
             )
             .addIntegerOption((option) =>
-                option.setName('min').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
+                option.setName('募集人数').setDescription('あと何人募集する？（最低でもほしい人数）').setRequired(true),
             )
-            .addIntegerOption((option) => option.setName('max').setDescription('最高何人までなら一緒にあそべる？'))
+            .addIntegerOption((option) => option.setName('最大人数').setDescription('最高何人までなら一緒にあそべる？'))
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 

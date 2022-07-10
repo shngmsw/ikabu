@@ -75,8 +75,15 @@ function others(interaction) {
 
 async function sendOtherGames(interaction, title, txt, color, image, logo) {
     let options = interaction.options;
-    let recruitMinNum = options.getInteger('min');
-    let recruitMaxNum = options.getInteger('max');
+    let recruitMinNum = options.getInteger('募集人数');
+    let recruitMaxNum = options.getInteger('最大人数');
+    if (recruitMaxNum != null && recruitMinNum > recruitMaxNum) {
+        await interaction.reply({
+            content: '最大人数に募集人数より少ない数は設定できないでし！',
+            ephemeral: true,
+        });
+        return;
+    }
     let recruitNumText = recruitMinNum.toString() + `～`;
     if (recruitMaxNum != null) recruitNumText = recruitNumText + recruitMaxNum.toString();
     let condition = options.getString('内容または参加条件');
