@@ -8,6 +8,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "register": "node register.js",
     "lint": "run-p -l -c --aggregate-output lint:*",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier --check .",
