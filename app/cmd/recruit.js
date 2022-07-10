@@ -234,7 +234,7 @@ async function sendOtherGames(msg, title, txt, color, image, logo) {
     const args = strCmd.split(' ');
     args.shift();
     if (args[0] == '〆') {
-        sendCloseMessage(msg, '`!apex` か `!dbd` か `!mhr`');
+        sendCloseMessage(msg, '`/apex` or `/dbd` or `/mhr` or `/valo` or `/other`');
     } else {
         let condition = 'なし';
         if (args.length > 0) condition = args.join(' ') + '\n';
@@ -361,7 +361,7 @@ const recruit_command = {
     リグマ募集: '`now` か `next`',
     'ナワバリ・フェス募集': `nawabari`,
     サーモン募集: `run`,
-    別ゲー募集: '`!apex` か `!dbd` か `!mhr`',
+    別ゲー募集: '`/apex` or `/dbd` or `/mhr` or `/valo` or `/other`',
 };
 
 function getCommandHelpEmbed(channelName) {
