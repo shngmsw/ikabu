@@ -54,7 +54,7 @@ function deadByDayLight(interaction) {
 }
 
 function valorant(interaction) {
-    const role_id = interaction.member.guild.roles.cache.find((role) => role.name === 'valorant');
+    const role_id = interaction.member.guild.roles.cache.find((role) => role.name === 'エージェント');
     let title = 'VALORANT';
     const txt = role_id.toString() + ' 【VALORANT募集】\n' + `<@${interaction.member.id}>` + 'たんがVALORANT参加者募集中でし！\n';
     let color = '#FF4654';
