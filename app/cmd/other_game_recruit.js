@@ -98,8 +98,8 @@ async function sendOtherGames(interaction, title, txt, color, image, logo) {
         });
         return;
     }
-    let recruitNumText = recruitMinNum.toString() + `～`;
-    if (recruitMaxNum != null) recruitNumText = recruitNumText + recruitMaxNum.toString();
+    let recruitNumText = recruitMinNum.toString();
+    if (recruitMaxNum != null) recruitNumText = recruitNumText + `～` + recruitMaxNum.toString();
     let condition = options.getString('内容または参加条件');
 
     const embed = new MessageEmbed()
