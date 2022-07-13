@@ -12,6 +12,15 @@ const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
 
+const privateMatch = new SlashCommandBuilder()
+    .setName(commandNames.private)
+    .setDescription('プラベ募集コマンド')
+    .addStringOption((option) => option.setName('開始時刻').setDescription('何時から始める？例：21:00').setRequired(true))
+    .addStringOption((option) => option.setName('所要時間').setDescription('何時間ぐらいやる？例：2時間').setRequired(true))
+    .addIntegerOption((option) => option.setName('募集人数').setDescription('あと最低何人いたらプラベができる？').setRequired(true))
+    .addIntegerOption((option) => option.setName('最大人数').setDescription('何人まで募集する？（上限）'))
+    .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'));
+
 const otherGame = new SlashCommandBuilder()
     .setName(commandNames.other_game)
     .setDescription('スプラ以外のゲーム募集コマンド')
@@ -69,7 +78,7 @@ const otherGame = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 
-const commands = [voiceLock, closeRecruit, otherGame];
+const commands = [voiceLock, closeRecruit, otherGame, privateMatch];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');

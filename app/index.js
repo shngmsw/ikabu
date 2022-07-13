@@ -19,6 +19,7 @@ const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
 const { getCloseEmbed, getCommandHelpEmbed } = require('./cmd/recruit.js');
 const { otherGameRecruit } = require('./cmd/other_game_recruit.js');
+const { privateRecruit } = require('./cmd/private_recruit.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
 const suggestionBox = require('./reaction/suggestion-box.js');
@@ -157,6 +158,8 @@ async function onInteraction(interaction) {
                 }
             } else if (commandName === commandNames.other_game) {
                 await otherGameRecruit(interaction);
+            } else if (commandName === commandNames.private) {
+                await privateRecruit(interaction);
             }
             return;
         }
