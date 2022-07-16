@@ -102,11 +102,15 @@ async function sendOtherGames(interaction, title, txt, color, image, logo) {
     if (recruitMaxNum != null) recruitNumText = recruitNumText + `～` + recruitMaxNum.toString();
     let condition = options.getString('内容または参加条件');
 
+    let authorName = interaction.member.nickname == null ? interaction.member.user.username : interaction.member.nickname;
+    let authorAvatarUrl = interaction.member.user.avatarURL();
+
     const embed = new MessageEmbed()
         .setAuthor({
-            name: title,
-            iconURL: logo,
+            name: authorName,
+            iconURL: authorAvatarUrl,
         })
+        .setTitle(title + '募集')
         .setColor(color)
         .addFields([
             {
@@ -119,6 +123,7 @@ async function sendOtherGames(interaction, title, txt, color, image, logo) {
             },
         ])
         .setImage(image)
+        .setTimestamp()
         .setThumbnail(logo);
 
     try {

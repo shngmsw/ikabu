@@ -39,12 +39,15 @@ async function privateRecruit(interaction) {
     if (recruitMaxNum != null) recruitNumText = recruitNumText + `～` + recruitMaxNum.toString();
     let condition = options.getString('内容または参加条件');
     let logo = 'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
+    let authorName = interaction.member.nickname == null ? interaction.member.user.username : interaction.member.nickname;
+    let authorAvatarUrl = interaction.member.user.avatarURL();
 
     const embed = new MessageEmbed()
         .setAuthor({
-            name: 'プライベートマッチ募集',
-            iconURL: logo,
+            name: authorName,
+            iconURL: authorAvatarUrl,
         })
+        .setTitle('プライベートマッチ募集')
         .addFields([
             {
                 name: '開始時刻',
@@ -63,6 +66,8 @@ async function privateRecruit(interaction) {
                 value: condition == null ? 'なし' : condition,
             },
         ])
+        .setColor('#5900b7')
+        .setTimestamp()
         .setThumbnail(logo);
 
     try {
