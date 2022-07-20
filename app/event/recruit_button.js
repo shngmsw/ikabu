@@ -170,6 +170,8 @@ async function getHelpEmbed(guild, chid) {
         command = '`run`';
     } else if (sendChannel.name.match('別ゲー募集')) {
         command = '`/apex` or `/dbd` or `/mhr` or `/valo` or `/other`';
+    } else if (sendChannel.name.match('プラベ募集')) {
+        command = '`/プラベ募集`';
     }
     const embed = new MessageEmbed();
     embed.setDescription('募集コマンドは ' + `${command}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
