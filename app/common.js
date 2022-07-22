@@ -397,8 +397,11 @@ function weapon2txt(key) {
         case '6021':
             return 'スパイガジェットソレーラ';
             break;
-        default:
+        case '-2':
             return '❓';
+            break;
+        default:
+            return '？';
             break;
     }
 }
