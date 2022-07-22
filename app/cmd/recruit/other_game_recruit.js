@@ -5,6 +5,8 @@ module.exports = {
     otherGameRecruit: otherGameRecruit,
 };
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function otherGameRecruit(interaction) {
     // subCommands取得
     if (!interaction.isCommand()) return;
@@ -127,13 +129,26 @@ async function sendOtherGames(interaction, title, txt, color, image, logo) {
         .setThumbnail(logo);
 
     try {
-        await interaction.reply({ content: '募集完了でし！参加者が来るまで気長に待つでし！', ephemeral: true });
+        await interaction.reply({
+            content: '募集完了でし！参加者が来るまで気長に待つでし！\n15秒間は募集を取り消せるでし！',
+            ephemeral: true,
+        });
         const sentMessage = await interaction.channel.send({
             content: txt,
             embeds: [embed],
         });
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        sentMessage.edit({ components: [recruitActionRow(sentMessage, interaction.member)] });
+        sentMessage.edit({ components: [recruitDeleteButton(sentMessage, interaction.member)] });
+
+        // 15秒後に削除ボタンを消す
+        await sleep(15000);
+        let cmd_message = await interaction.channel.messages.cache.get(sentMessage.id);
+        if (cmd_message != undefined) {
+            sentMessage.edit({ components: [recruitActionRow(sentMessage, interaction.member)] });
+        } else {
+            return;
+        }
+
         setTimeout(function () {
             const host_mention = `<@${interaction.member.id}>`;
             sentMessage.edit({
