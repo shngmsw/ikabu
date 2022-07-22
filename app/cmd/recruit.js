@@ -118,7 +118,7 @@ async function regularMatch(msg) {
                 files: [recruit, stage],
             });
             // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-            sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
+            sentMessage.edit({ components: [recruitActionRow(sentMessage, msg.author)] });
             setTimeout(function () {
                 const host_mention = `<@${msg.author.id}>`;
                 sentMessage.edit({
@@ -179,7 +179,7 @@ async function salmonRun(msg) {
                 files: [recruit, stageImage],
             });
             // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-            sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
+            sentMessage.edit({ components: [recruitActionRow(sentMessage, msg.author)] });
             setTimeout(function () {
                 const host_mention = `<@${msg.author.id}>`;
                 sentMessage.edit({
@@ -257,7 +257,7 @@ async function sendOtherGames(msg, title, txt, color, image, logo) {
                 embeds: [embed],
             });
             // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-            sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
+            sentMessage.edit({ components: [recruitActionRow(sentMessage, msg.author)] });
             setTimeout(function () {
                 const host_mention = `<@${msg.author.id}>`;
                 sentMessage.edit({
@@ -331,7 +331,7 @@ async function sendLeagueMatch(msg, txt, condition, l_args, stageImages) {
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
+        sentMessage.edit({ components: [recruitActionRow(sentMessage, msg.author)] });
         setTimeout(function async() {
             const host_mention = `<@${msg.author.id}>`;
             sentMessage.edit({
@@ -409,21 +409,24 @@ function isRookieChannel(msg) {
     return false;
 }
 
-function recruitActionRow(msg) {
+function recruitActionRow(msg, host_user) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
     joinParams.append('mid', msg.id);
     joinParams.append('cid', msg.channel.id);
+    joinParams.append('hid', host_user.id);
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', 'cr');
     cancelParams.append('mid', msg.id);
     cancelParams.append('cid', msg.channel.id);
+    cancelParams.append('hid', host_user.id);
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'close');
     closeParams.append('mid', msg.id);
     closeParams.append('cid', msg.channel.id);
+    closeParams.append('hid', host_user.id);
 
     return new MessageActionRow().addComponents([
         new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),

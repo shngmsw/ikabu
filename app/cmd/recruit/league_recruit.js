@@ -168,7 +168,7 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        sentMessage.edit({ components: [recruitActionRow(sentMessage), recruitDeleteButton(sentMessage)] });
+        sentMessage.edit({ components: [recruitActionRow(sentMessage, host_user), recruitDeleteButton(sentMessage, host_user)] });
         if (count == 2) {
             await interaction.editReply({
                 content:
@@ -186,7 +186,7 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
         await sleep(20000);
         let cmd_message = await channel.messages.cache.get(sentMessage.id);
         if (cmd_message != undefined) {
-            sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
+            sentMessage.edit({ components: [recruitActionRow(sentMessage, host_user)] });
         } else {
             return;
         }
@@ -450,32 +450,36 @@ async function ruleCanvas(l_rule, l_date, l_time, l_stage1, l_stage2, stageImage
     return rule;
 }
 
-function recruitDeleteButton(msg) {
+function recruitDeleteButton(msg, host_user) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
     deleteParams.append('mid', msg.id);
     deleteParams.append('cid', msg.channel.id);
+    deleteParams.append('hid', host_user.id);
 
     let button = new MessageActionRow();
     button.addComponents(new MessageButton().setCustomId(deleteParams.toString()).setLabel('削除').setStyle('DANGER'));
     return button;
 }
 
-function recruitActionRow(msg) {
+function recruitActionRow(msg, host_user) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
     joinParams.append('mid', msg.id);
     joinParams.append('cid', msg.channel.id);
+    joinParams.append('hid', host_user.id);
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', 'cr');
     cancelParams.append('mid', msg.id);
     cancelParams.append('cid', msg.channel.id);
+    cancelParams.append('hid', host_user.id);
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'close');
     closeParams.append('mid', msg.id);
     closeParams.append('cid', msg.channel.id);
+    closeParams.append('hid', host_user.id);
 
     return new MessageActionRow().addComponents([
         new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
