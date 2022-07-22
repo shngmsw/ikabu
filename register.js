@@ -15,23 +15,44 @@ const closeRecruit = new SlashCommandBuilder()
 const leagueMatch = new SlashCommandBuilder()
     .setName(commandNames.league)
     .setDescription('リグマ募集コマンド')
-    .addStringOption((option) =>
-        option
-            .setName('スケジュール')
-            .setDescription('募集をかけるスケジュールを選択してください。')
-            .setChoices({ name: 'now', value: 'now' }, { name: 'next', value: 'next' })
-            .setRequired(true),
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('now')
+            .setDescription('現在のリーグマッチの募集をたてます。')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            ),
     )
-    .addIntegerOption((option) =>
-        option
-            .setName('募集人数')
-            .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-            .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
-            .setRequired(true),
-    )
-    .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-    .addUserOption((option) => option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false))
-    .addUserOption((option) => option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false));
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('next')
+            .setDescription('現在のリーグマッチの募集をたてます。')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            ),
+    );
 
 const privateMatch = new SlashCommandBuilder()
     .setName(commandNames.private)
