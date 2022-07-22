@@ -173,18 +173,18 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
         if (count == 2) {
             await interaction.editReply({
                 content:
-                    '2リグで募集がかかったでし！\n4リグで募集をたてるには参加者に指定するか、募集人数を変更して募集し直すでし！\n10秒間は募集を取り消せるでし！',
+                    '2リグで募集がかかったでし！\n4リグで募集をたてるには参加者に指定するか、募集人数を変更して募集し直すでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
             });
         } else {
             await interaction.editReply({
-                content: '募集完了でし！参加者が来るまで待つでし！\n10秒間は募集を取り消せるでし！',
+                content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
             });
         }
 
-        // 10秒後に削除ボタンを消す
-        await sleep(10000);
+        // 15秒後に削除ボタンを消す
+        await sleep(15000);
         let cmd_message = await channel.messages.cache.get(sentMessage.id);
         if (cmd_message != undefined) {
             sentMessage.edit({ components: [recruitActionRow(sentMessage, host_user)] });
@@ -199,7 +199,7 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
                 content: `${host_mention}たんの募集は〆！`,
                 components: [disableButtons()],
             });
-        }, 7200000 - 20000);
+        }, 7200000 - 15000);
     } catch (error) {
         console.log(error);
     }

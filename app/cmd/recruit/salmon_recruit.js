@@ -29,7 +29,6 @@ async function salmonRecruit(interaction) {
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // プレイ人数のカウンター
-    let type;
 
     if (recruit_num < 1 || recruit_num > 3) {
         await interaction.reply({
@@ -59,7 +58,6 @@ async function salmonRecruit(interaction) {
     try {
         const response = await fetch(coop_schedule_url);
         const data = await response.json();
-        let condition = 'なし';
         let txt = '@everyone 【バイト募集】\n' + `<@${host_user.id}>` + 'たんがバイト中でし！\n';
 
         if (user1 != null && user2 != null) {
@@ -105,12 +103,12 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
         sentMessage.edit({ components: [recruitDeleteButton(sentMessage, host_user)] });
 
         await interaction.editReply({
-            content: '募集完了でし！参加者が来るまで待つでし！\n10秒間は募集を取り消せるでし！',
+            content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
             ephemeral: true,
         });
 
-        // 10秒後に削除ボタンを消す
-        await sleep(10000);
+        // 15秒後に削除ボタンを消す
+        await sleep(15000);
         let cmd_message = await channel.messages.cache.get(sentMessage.id);
         if (cmd_message != undefined) {
             sentMessage.edit({ components: [recruitActionRow(sentMessage, host_user)] });
@@ -125,7 +123,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
                 content: `${host_mention}たんの募集は〆！`,
                 components: [disableButtons()],
             });
-        }, 7200000 - 20000);
+        }, 7200000 - 15000);
     } catch (error) {
         console.log(error);
     }
