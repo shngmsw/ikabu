@@ -29,9 +29,10 @@ async function leagueRecruit(interaction) {
     let user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // リグマプレイ人数のカウンター
     let type;
-    if (options.getString('スケジュール') === 'now') {
+
+    if (options.getSubcommand() === 'now') {
         type = 0;
-    } else if (options.getString('スケジュール') === 'next') {
+    } else if (options.getSubcommand() === 'next') {
         type = 1;
     }
 
