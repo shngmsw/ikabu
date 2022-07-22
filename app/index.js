@@ -126,6 +126,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 const buttons = {
     jr: recruitButton.join,
     cr: recruitButton.cancel,
+    del: recruitButton.del,
     close: recruitButton.close,
 };
 /**

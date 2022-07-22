@@ -15,6 +15,8 @@ module.exports = {
     leagueRecruit: leagueRecruit,
 };
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function leagueRecruit(interaction) {
     if (!interaction.isCommand()) return;
 
@@ -166,15 +168,37 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
-        await interaction.editReply({ content: '募集完了でし！参加者が来るまで待つでし！', ephemeral: true });
+        sentMessage.edit({ components: [recruitActionRow(sentMessage), recruitDeleteButton(sentMessage)] });
+        if (count == 2) {
+            await interaction.editReply({
+                content:
+                    '2リグで募集がかかったでし！\n4リグで募集をたてるには参加者に指定するか、募集人数を変更して募集し直すでし！\n20秒間は募集を取り消せるでし！',
+                ephemeral: true,
+            });
+        } else {
+            await interaction.editReply({
+                content: '募集完了でし！参加者が来るまで待つでし！\n20秒間は募集を取り消せるでし！',
+                ephemeral: true,
+            });
+        }
+
+        // 20秒後に削除ボタンを消す
+        await sleep(20000);
+        let cmd_message = await channel.messages.cache.get(sentMessage.id);
+        if (cmd_message != undefined) {
+            sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
+        } else {
+            return;
+        }
+
+        // 2時間後にボタンを無効化する
         setTimeout(function async() {
             const host_mention = `<@${host_user.id}>`;
             sentMessage.edit({
                 content: `${host_mention}たんの募集は〆！`,
                 components: [disableButtons()],
             });
-        }, 7200000);
+        }, 7200000 - 20000);
     } catch (error) {
         console.log(error);
     }
@@ -424,6 +448,17 @@ async function ruleCanvas(l_rule, l_date, l_time, l_stage1, l_stage2, stageImage
 
     const rule = ruleCanvas.toBuffer();
     return rule;
+}
+
+function recruitDeleteButton(msg) {
+    const deleteParams = new URLSearchParams();
+    deleteParams.append('d', 'del');
+    deleteParams.append('mid', msg.id);
+    deleteParams.append('cid', msg.channel.id);
+
+    let button = new MessageActionRow();
+    button.addComponents(new MessageButton().setCustomId(deleteParams.toString()).setLabel('削除').setStyle('DANGER'));
+    return button;
 }
 
 function recruitActionRow(msg) {

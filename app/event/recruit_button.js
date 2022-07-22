@@ -3,6 +3,7 @@ const { isNotEmpty } = require('../common');
 module.exports = {
     join: join,
     cancel: cancel,
+    del: del,
     close: close,
 };
 
@@ -112,6 +113,26 @@ async function cancel(interaction, params) {
                 content: `キャンセルするときぐらい、自分の言葉で伝えましょう！\n${host_mention}たんにメンションつきで伝えるでし！`,
                 ephemeral: true,
             });
+        }
+    } catch (err) {
+        handleError(err, { interaction });
+    }
+}
+
+async function del(interaction, params) {
+    /** @type {Discord.Snowflake} */
+    try {
+        const guild = await interaction.guild.fetch();
+        const member = await guild.members.fetch(interaction.member.user.id, {
+            force: true, // intentsによってはGuildMemberUpdateが配信されないため
+        });
+        const msg_id = params.get('mid');
+        const cmd_message = await interaction.channel.messages.fetch(msg_id);
+        const host_mention = await cmd_message.mentions.users.first();
+        if (member.user.id == host_mention.id) {
+            await cmd_message.delete();
+        } else {
+            interaction.reply({ content: '他人の募集は消せる訳無いでし！！！', ephemeral: true });
         }
     } catch (err) {
         handleError(err, { interaction });
