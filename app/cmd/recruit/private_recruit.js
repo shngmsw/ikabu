@@ -79,7 +79,7 @@ async function privateRecruit(interaction) {
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
         setTimeout(function () {
-            const host_mention = `@${interaction.member.id}>`;
+            const host_mention = `<@${interaction.member.id}>`;
             sentMessage.edit({
                 content: `${host_mention}たんの募集は〆！`,
                 components: [disableButtons()],
