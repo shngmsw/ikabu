@@ -2,10 +2,10 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const { unixTime2mdwhm, coop_stage2txt, weapon2txt } = require('../../common.js');
-const { MessageAttachment, MessageActionRow, MessageButton } = require('discord.js');
+const { createRoundRect, drawArcImage } = require('./canvas_components.js');
+const { recruitDeleteButton, recruitActionRow, disableButtons } = require('./button_components.js');
+const { MessageAttachment } = require('discord.js');
 const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
-
-const { URLSearchParams } = require('url');
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
 Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Medium.ttf'), { family: 'Genshin' });
@@ -399,94 +399,4 @@ async function ruleCanvas(date, stage, weapon1, weapon2, weapon3, weapon4, stage
 
     const rule = ruleCanvas.toBuffer();
     return rule;
-}
-
-function recruitDeleteButton(msg, host_user) {
-    const joinParams = new URLSearchParams();
-    joinParams.append('d', 'jr');
-    joinParams.append('mid', msg.id);
-    joinParams.append('cid', msg.channel.id);
-    joinParams.append('hid', host_user.id);
-
-    const deleteParams = new URLSearchParams();
-    deleteParams.append('d', 'del');
-    deleteParams.append('mid', msg.id);
-    deleteParams.append('cid', msg.channel.id);
-    deleteParams.append('hid', host_user.id);
-
-    let button = new MessageActionRow();
-    button.addComponents([
-        new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
-        new MessageButton().setCustomId(deleteParams.toString()).setLabel('削除').setStyle('DANGER'),
-    ]);
-    return button;
-}
-
-function recruitActionRow(msg, host_user) {
-    const joinParams = new URLSearchParams();
-    joinParams.append('d', 'jr');
-    joinParams.append('mid', msg.id);
-    joinParams.append('cid', msg.channel.id);
-    joinParams.append('hid', host_user.id);
-
-    const cancelParams = new URLSearchParams();
-    cancelParams.append('d', 'cr');
-    cancelParams.append('mid', msg.id);
-    cancelParams.append('cid', msg.channel.id);
-    cancelParams.append('hid', host_user.id);
-
-    const closeParams = new URLSearchParams();
-    closeParams.append('d', 'close');
-    closeParams.append('mid', msg.id);
-    closeParams.append('cid', msg.channel.id);
-    closeParams.append('hid', host_user.id);
-
-    return new MessageActionRow().addComponents([
-        new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
-        new MessageButton().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle('DANGER'),
-        new MessageButton().setCustomId(closeParams.toString()).setLabel('〆').setStyle('SECONDARY'),
-    ]);
-}
-function disableButtons() {
-    let buttons = new MessageActionRow().addComponents([
-        new MessageButton().setCustomId('join').setLabel('参加').setStyle('PRIMARY').setDisabled(),
-        new MessageButton().setCustomId('cancel').setLabel('キャンセル').setStyle('DANGER').setDisabled(),
-        new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
-    ]);
-    return buttons;
-}
-
-/*
- 角が丸い四角形を作成
- x,yは座標
- width,heightは幅と高さ
- radiusは角丸の半径
-*/
-function createRoundRect(ctx, x, y, width, height, radius) {
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.arcTo(x + width, y, x + width, y + radius, radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
-    ctx.lineTo(x + radius, y + height);
-    ctx.arcTo(x, y + height, x, y + height - radius, radius);
-    ctx.lineTo(x, y + radius);
-    ctx.arcTo(x, y, x + radius, y, radius);
-    ctx.closePath();
-}
-
-/**
- * 座標の位置に円形にクリップされた画像を表示
- * @param {*} ctx Canvas Context
- * @param {*} img 描写する画像
- * @param {*} xPosition x座標
- * @param {*} yPosition y座標
- * @param {*} radius 半径
- */
-function drawArcImage(ctx, img, xPosition, yPosition, radius) {
-    ctx.beginPath();
-    ctx.arc(xPosition + radius, yPosition + radius, radius, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.clip();
-    ctx.drawImage(img, 0, 0, img.width, img.height, xPosition, yPosition, radius * 2, radius * 2);
 }
