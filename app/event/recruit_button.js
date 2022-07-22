@@ -98,7 +98,7 @@ async function cancel(interaction, params) {
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
         const host_mention = await cmd_message.mentions.users.first();
         const embed = new MessageEmbed().setDescription(`${host_mention}たんの募集〆`);
-        if (member.user.id === cmd_message.author.id) {
+        if (member.user.id == host_mention.id) {
             await interaction.update({
                 content: `${host_mention}たんの募集はキャンセルされたでし！`,
                 components: [disableButtons()],
