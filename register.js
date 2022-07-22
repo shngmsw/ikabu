@@ -12,6 +12,27 @@ const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
 
+const leagueMatch = new SlashCommandBuilder()
+    .setName(commandNames.league)
+    .setDescription('リグマ募集コマンド')
+    .addStringOption((option) =>
+        option
+            .setName('スケジュール')
+            .setDescription('募集をかけるスケジュールを選択してください。')
+            .setChoices({ name: 'now', value: 'now' }, { name: 'next', value: 'next' })
+            .setRequired(true),
+    )
+    .addIntegerOption((option) =>
+        option
+            .setName('募集人数')
+            .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+            .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+            .setRequired(true),
+    )
+    .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+    .addUserOption((option) => option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false))
+    .addUserOption((option) => option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false));
+
 const privateMatch = new SlashCommandBuilder()
     .setName(commandNames.private)
     .setDescription('プラベ募集コマンド')
@@ -78,7 +99,7 @@ const otherGame = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 
-const commands = [voiceLock, closeRecruit, otherGame, privateMatch];
+const commands = [voiceLock, closeRecruit, otherGame, privateMatch, leagueMatch];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');

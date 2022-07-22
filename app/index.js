@@ -18,8 +18,9 @@ const VOICE_API = require('./tts/voice_bot_node.js');
 const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
 const { getCloseEmbed, getCommandHelpEmbed } = require('./cmd/recruit.js');
-const { otherGameRecruit } = require('./cmd/other_game_recruit.js');
-const { privateRecruit } = require('./cmd/private_recruit.js');
+const { otherGameRecruit } = require('./cmd/recruit/other_game_recruit.js');
+const { leagueRecruit } = require('./cmd/recruit/league_recruit.js');
+const { privateRecruit } = require('./cmd/recruit/private_recruit.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
 const suggestionBox = require('./reaction/suggestion-box.js');
@@ -125,6 +126,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 const buttons = {
     jr: recruitButton.join,
     cr: recruitButton.cancel,
+    del: recruitButton.del,
     close: recruitButton.close,
 };
 /**
@@ -160,6 +162,8 @@ async function onInteraction(interaction) {
                 await otherGameRecruit(interaction);
             } else if (commandName === commandNames.private) {
                 await privateRecruit(interaction);
+            } else if (commandName === commandNames.league) {
+                await leagueRecruit(interaction);
             }
             return;
         }

@@ -77,9 +77,9 @@ async function privateRecruit(interaction) {
             embeds: [embed],
         });
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        sentMessage.edit({ components: [recruitActionRow(sentMessage)] });
+        sentMessage.edit({ components: [recruitActionRow(sentMessage, interaction.member)] });
         setTimeout(function () {
-            const host_mention = `@${interaction.member.id}>`;
+            const host_mention = `<@${interaction.member.id}>`;
             sentMessage.edit({
                 content: `${host_mention}たんの募集は〆！`,
                 components: [disableButtons()],
@@ -90,21 +90,24 @@ async function privateRecruit(interaction) {
     }
 }
 
-function recruitActionRow(msg) {
+function recruitActionRow(msg, host_user) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
     joinParams.append('mid', msg.id);
     joinParams.append('cid', msg.channel.id);
+    joinParams.append('hid', host_user.id);
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', 'cr');
     cancelParams.append('mid', msg.id);
     cancelParams.append('cid', msg.channel.id);
+    cancelParams.append('hid', host_user.id);
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'close');
     closeParams.append('mid', msg.id);
     closeParams.append('cid', msg.channel.id);
+    closeParams.append('hid', host_user.id);
 
     return new MessageActionRow().addComponents([
         new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
