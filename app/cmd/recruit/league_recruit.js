@@ -1,7 +1,7 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
-const { stage2txt, rule2txt } = require('../../common.js');
+const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require('../../common.js');
 const { createRoundRect, drawArcImage } = require('./canvas_components.js');
 const { recruitDeleteButton, recruitActionRow, disableButtons } = require('./button_components.js');
 const { MessageAttachment } = require('discord.js');
@@ -456,29 +456,18 @@ async function ruleCanvas(l_rule, l_date, l_time, l_stage1, l_stage2, stageImage
  * commonにあるgetLeagueを、情報を2行に分けるためにカスタムしたもの
  */
 function getLeague(data, x) {
-    var WeekChars = ['(日)', '(月)', '(火)', '(水)', '(木)', '(金)', '(土)'];
-
     let stage1;
     let stage2;
-    let date_str;
-    let time_str;
+    let date;
+    let time;
     let rule;
     let rstr;
-    let start_time = new Date(data.league[x].start_time * 1000);
-    let end_time = new Date(data.league[x].end_time * 1000);
-    date_str =
-        start_time.getFullYear() + '/' + (start_time.getMonth() + 1) + '/' + start_time.getDate() + ' ' + WeekChars[start_time.getDay()];
-    time_str =
-        start_time.getHours() +
-        ':' +
-        ('0' + start_time.getMinutes()).slice(-2) +
-        ' - ' +
-        end_time.getHours() +
-        ':' +
-        ('0' + end_time.getMinutes()).slice(-2);
+
+    date = unixTime2ymdw(data.league[x].start_time);
+    time = unixTime2hm(data.league[x].start_time) + ' – ' + unixTime2hm(data.league[x].end_time);
     rule = rule2txt(data.league[x].rule.key);
     stage1 = stage2txt(data.league[x].stage_a.id);
     stage2 = stage2txt(data.league[x].stage_b.id);
-    rstr = date_str + ',' + time_str + ',' + rule + ',' + stage1 + ',' + stage2;
+    rstr = date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
     return rstr;
 }
