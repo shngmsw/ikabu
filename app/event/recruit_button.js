@@ -179,11 +179,11 @@ async function getHelpEmbed(guild, chid) {
     const sendChannel = await guild.channels.cache.find((channel) => channel.id === chid);
     let command = '';
     if (sendChannel.name.match('リグマ募集')) {
-        command = '`now` か `next`';
+        command = '`/now` or `/next`';
     } else if (sendChannel.name.match('ナワバリ・フェス募集')) {
         command = '`nawabari`';
     } else if (sendChannel.name.match('サーモン募集')) {
-        command = '`run`';
+        command = '`/run`';
     } else if (sendChannel.name.match('別ゲー募集')) {
         command = '`/apex` or `/dbd` or `/mhr` or `/valo` or `/other`';
     } else if (sendChannel.name.match('プラベ募集')) {
