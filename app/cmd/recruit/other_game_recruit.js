@@ -1,9 +1,11 @@
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
-const { URLSearchParams } = require('url');
+const { MessageEmbed } = require('discord.js');
+const { recruitDeleteButton, recruitActionRow, disableButtons } = require('./button_components.js');
 
 module.exports = {
     otherGameRecruit: otherGameRecruit,
 };
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function otherGameRecruit(interaction) {
     // subCommands取得
@@ -127,13 +129,26 @@ async function sendOtherGames(interaction, title, txt, color, image, logo) {
         .setThumbnail(logo);
 
     try {
-        await interaction.reply({ content: '募集完了でし！参加者が来るまで気長に待つでし！', ephemeral: true });
+        await interaction.reply({
+            content: '募集完了でし！参加者が来るまで気長に待つでし！\n15秒間は募集を取り消せるでし！',
+            ephemeral: true,
+        });
         const sentMessage = await interaction.channel.send({
             content: txt,
             embeds: [embed],
         });
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        sentMessage.edit({ components: [recruitActionRow(sentMessage, interaction.member)] });
+        sentMessage.edit({ components: [recruitDeleteButton(sentMessage, interaction.member)] });
+
+        // 15秒後に削除ボタンを消す
+        await sleep(15000);
+        let cmd_message = await interaction.channel.messages.cache.get(sentMessage.id);
+        if (cmd_message != undefined) {
+            sentMessage.edit({ components: [recruitActionRow(sentMessage, interaction.member)] });
+        } else {
+            return;
+        }
+
         setTimeout(function () {
             const host_mention = `<@${interaction.member.id}>`;
             sentMessage.edit({
@@ -144,38 +159,4 @@ async function sendOtherGames(interaction, title, txt, color, image, logo) {
     } catch (error) {
         console.log(error);
     }
-}
-
-function recruitActionRow(msg, host_user) {
-    const joinParams = new URLSearchParams();
-    joinParams.append('d', 'jr');
-    joinParams.append('mid', msg.id);
-    joinParams.append('cid', msg.channel.id);
-    joinParams.append('hid', host_user.id);
-
-    const cancelParams = new URLSearchParams();
-    cancelParams.append('d', 'cr');
-    cancelParams.append('mid', msg.id);
-    cancelParams.append('cid', msg.channel.id);
-    cancelParams.append('hid', host_user.id);
-
-    const closeParams = new URLSearchParams();
-    closeParams.append('d', 'close');
-    closeParams.append('mid', msg.id);
-    closeParams.append('cid', msg.channel.id);
-    closeParams.append('hid', host_user.id);
-
-    return new MessageActionRow().addComponents([
-        new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
-        new MessageButton().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle('DANGER'),
-        new MessageButton().setCustomId(closeParams.toString()).setLabel('〆').setStyle('SECONDARY'),
-    ]);
-}
-function disableButtons() {
-    let buttons = new MessageActionRow().addComponents([
-        new MessageButton().setCustomId('join').setLabel('参加').setStyle('PRIMARY').setDisabled(),
-        new MessageButton().setCustomId('cancel').setLabel('キャンセル').setStyle('DANGER').setDisabled(),
-        new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
-    ]);
-    return buttons;
 }

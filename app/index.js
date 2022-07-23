@@ -20,6 +20,7 @@ const handleStageInfo = require('./cmd/stageinfo.js');
 const { getCloseEmbed, getCommandHelpEmbed } = require('./cmd/recruit.js');
 const { otherGameRecruit } = require('./cmd/recruit/other_game_recruit.js');
 const { leagueRecruit } = require('./cmd/recruit/league_recruit.js');
+const { salmonRecruit } = require('./cmd/recruit/salmon_recruit.js');
 const { privateRecruit } = require('./cmd/recruit/private_recruit.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
@@ -164,6 +165,8 @@ async function onInteraction(interaction) {
                 await privateRecruit(interaction);
             } else if (commandName === commandNames.league) {
                 await leagueRecruit(interaction);
+            } else if (commandName === commandNames.salmon) {
+                await salmonRecruit(interaction);
             }
             return;
         }

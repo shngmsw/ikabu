@@ -54,6 +54,29 @@ const leagueMatch = new SlashCommandBuilder()
             ),
     );
 
+const salmonRun = new SlashCommandBuilder()
+    .setName(commandNames.salmon)
+    .setDescription('サーモンラン募集コマンド')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('run')
+            .setDescription('サーモンランの募集をたてます。')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            ),
+    );
+
 const privateMatch = new SlashCommandBuilder()
     .setName(commandNames.private)
     .setDescription('プラベ募集コマンド')
@@ -120,7 +143,7 @@ const otherGame = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 
-const commands = [voiceLock, closeRecruit, otherGame, privateMatch, leagueMatch];
+const commands = [voiceLock, closeRecruit, otherGame, privateMatch, leagueMatch, salmonRun];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');
