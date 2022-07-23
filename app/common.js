@@ -6,6 +6,7 @@ module.exports = {
     getLeague: getLeague,
     unixTime2hm: unixTime2hm,
     unixTime2mdwhm: unixTime2mdwhm,
+    unixTime2ymdw: unixTime2ymdw,
     rule2txt: rule2txt,
     stage2txt: stage2txt,
     coop_stage2txt: coop_stage2txt,
@@ -72,6 +73,16 @@ function unixTime2mdwhm(intTime) {
     const dow = d.getUTCDay();
     const week = ['日', '月', '火', '水', '木', '金', '土'][dow];
     return month + '/' + day + '(' + week + ') ' + hour + ':' + min;
+}
+
+function unixTime2ymdw(intTime) {
+    const d = new Date(intTime * 1000 + 9 * 60 * 60 * 1000);
+    const year = d.getUTCFullYear();
+    const month = d.getUTCMonth() + 1;
+    const day = d.getUTCDate();
+    const dow = d.getUTCDay();
+    const week = ['日', '月', '火', '水', '木', '金', '土'][dow];
+    return year + '/' + month + '/' + day + ' (' + week + ')';
 }
 
 function rule2txt(key) {
