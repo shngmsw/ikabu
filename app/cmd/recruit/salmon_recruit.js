@@ -309,6 +309,9 @@ async function ruleCanvas(date, stage, weapon1, weapon2, weapon3, weapon4, stage
         weapon1 = '？';
         rule_ctx.font = '41px "Splatfont"';
         rule_ctx.fillStyle = '#FFDB26';
+    } else if (weapon1 === '？') {
+        rule_ctx.font = '41px "Splatfont"';
+        rule_ctx.fillStyle = '#00BE63';
     } else {
         rule_ctx.font = '33px "Splatfont"';
         rule_ctx.fillStyle = '#FFFFFF';
@@ -325,6 +328,9 @@ async function ruleCanvas(date, stage, weapon1, weapon2, weapon3, weapon4, stage
         weapon2 = '？';
         rule_ctx.font = '41px "Splatfont"';
         rule_ctx.fillStyle = '#FFDB26';
+    } else if (weapon2 === '？') {
+        rule_ctx.font = '41px "Splatfont"';
+        rule_ctx.fillStyle = '#00BE63';
     } else {
         rule_ctx.font = '33px "Splatfont"';
         rule_ctx.fillStyle = '#FFFFFF';
@@ -341,6 +347,9 @@ async function ruleCanvas(date, stage, weapon1, weapon2, weapon3, weapon4, stage
         weapon3 = '？';
         rule_ctx.font = '41px "Splatfont"';
         rule_ctx.fillStyle = '#FFDB26';
+    } else if (weapon3 === '？') {
+        rule_ctx.font = '41px "Splatfont"';
+        rule_ctx.fillStyle = '#00BE63';
     } else {
         rule_ctx.font = '33px "Splatfont"';
         rule_ctx.fillStyle = '#FFFFFF';
@@ -357,6 +366,9 @@ async function ruleCanvas(date, stage, weapon1, weapon2, weapon3, weapon4, stage
         weapon4 = '？';
         rule_ctx.font = '41px "Splatfont"';
         rule_ctx.fillStyle = '#FFDB26';
+    } else if (weapon4 === '？') {
+        rule_ctx.font = '41px "Splatfont"';
+        rule_ctx.fillStyle = '#00BE63';
     } else {
         rule_ctx.font = '33px "Splatfont"';
         rule_ctx.fillStyle = '#FFFFFF';
