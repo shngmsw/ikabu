@@ -3,8 +3,15 @@ const path = require('path');
 const fetch = require('node-fetch');
 const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require('../../common.js');
 const { createRoundRect, drawArcImage } = require('./canvas_components.js');
-const { recruitDeleteButton, recruitActionRow, disableButtons } = require('./button_components.js');
-const { MessageAttachment } = require('discord.js');
+const {
+    recruitDeleteButton,
+    recruitActionRow,
+    disableButtons,
+    recruitDeleteButtonWithChannel,
+    recruitActionRowWithChannel,
+    unlockChannelButton,
+} = require('./button_components.js');
+const { MessageAttachment, Permissions } = require('discord.js');
 const schedule_url = 'https://splatoon2.ink/data/schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
@@ -23,6 +30,7 @@ async function leagueRecruit(interaction) {
 
     const options = interaction.options;
     const channel = interaction.channel;
+    const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
     let host_user = interaction.member.user;
@@ -62,6 +70,16 @@ async function leagueRecruit(interaction) {
 
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply({ ephemeral: true });
+
+    if (voice_channel != null) {
+        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_user.id)) {
+            await interaction.editReply({
+                content: 'そのチャンネルは使用中でし！',
+                ephemeral: true,
+            });
+            return;
+        }
+    }
 
     // 新入部員用リグマ募集ようにメンションを変更
     let mention = '@everyone';
@@ -156,9 +174,17 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
             break;
     }
 
+    const reserve_channel = interaction.options.getChannel('使用チャンネル');
+
+    if (reserve_channel == null) {
+        channel_name = '🔉 VC指定なし';
+    } else {
+        channel_name = '🔉 ' + reserve_channel.name;
+    }
+
     const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
-    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, condition);
+    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, condition, channel_name);
     const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
 
     const rule = new MessageAttachment(await ruleCanvas(l_rule, l_date, l_time, l_stage1, l_stage2, stageImages, thumbnail), 'stages.png');
@@ -170,16 +196,30 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        sentMessage.edit({ components: [recruitDeleteButton(sentMessage, host_user)] });
+        if (reserve_channel == null) {
+            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, host_user)] });
+        } else {
+            sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, host_user, reserve_channel.id)] });
+            reserve_channel.permissionOverwrites.set(
+                [
+                    { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
+                    { id: host_user.id, allow: [Permissions.FLAGS.CONNECT] },
+                ],
+                'Reserve Voice Channel',
+            );
+        }
+
         if (count == 2) {
             await interaction.editReply({
                 content:
                     '2リグで募集がかかったでし！\n4リグで募集をたてるには参加者に指定するか、募集人数を変更して募集し直すでし！\n15秒間は募集を取り消せるでし！',
+                components: reserve_channel != null ? [unlockChannelButton(reserve_channel.id)] : [],
                 ephemeral: true,
             });
         } else {
             await interaction.editReply({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
+                components: reserve_channel != null ? [unlockChannelButton(reserve_channel.id)] : [],
                 ephemeral: true,
             });
         }
@@ -188,7 +228,11 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
         await sleep(15000);
         let cmd_message = await channel.messages.cache.get(sentMessage.id);
         if (cmd_message != undefined) {
-            sentMessage.edit({ components: [recruitActionRow(sentMessage, host_user)] });
+            if (reserve_channel == null) {
+                sentMessage.edit({ components: [recruitActionRow(sentMessage, host_user)] });
+            } else {
+                sentMessage.edit({ components: [recruitActionRowWithChannel(sentMessage, host_user, reserve_channel.id)] });
+            }
         } else {
             return;
         }
@@ -209,7 +253,7 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
 /*
  * 募集用のキャンバス(1枚目)を作成する
  */
-async function recruitCanvas(recruit_num, count, host_user, user1, user2, condition) {
+async function recruitCanvas(recruit_num, count, host_user, user1, user2, condition, channel_name) {
     blank_avatar_url = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
@@ -229,8 +273,8 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     recruit_ctx.font = '50px Splatfont';
     recruit_ctx.fillStyle = '#F02D7E';
     recruit_ctx.fillText('リーグマッチ', 115, 80);
-    recruit_ctx.strokeStyle = '#FFFFFF';
-    recruit_ctx.lineWidth = 2;
+    recruit_ctx.strokeStyle = '#bd2363';
+    recruit_ctx.lineWidth = 1;
     recruit_ctx.strokeText('リーグマッチ', 115, 80);
 
     // 募集主の画像
@@ -310,6 +354,7 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     recruit_ctx.font = '30px "Genshin", "SEGUI"';
     const width = 600;
     const size = 40;
+    const column_num = 4;
     let column = [''];
     let line = 0;
     condition = condition.replace('{br}', '\n', 'gm');
@@ -329,15 +374,22 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
         }
     }
 
-    if (column.length > 5) {
-        column[4] += '…';
+    if (column.length > column_num) {
+        column[column_num - 1] += '…';
     }
 
     for (var j = 0; j < column.length; j++) {
-        if (j < 5) {
-            recruit_ctx.fillText(column[j], 65, 350 + size * j);
+        if (j < column_num) {
+            recruit_ctx.fillText(column[j], 65, 345 + size * j);
         }
     }
+
+    recruit_ctx.font = '37px Splatfont';
+    recruit_ctx.fillStyle = '#FFFFFF';
+    recruit_ctx.fillText(channel_name, 30, 520);
+    recruit_ctx.strokeStyle = '#2D3130';
+    recruit_ctx.lineWidth = 1.0;
+    recruit_ctx.strokeText(channel_name, 30, 520);
 
     const recruit = recruitCanvas.toBuffer();
     return recruit;

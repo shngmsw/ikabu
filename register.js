@@ -32,12 +32,15 @@ const leagueMatch = new SlashCommandBuilder()
             )
             .addUserOption((option) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addChannelOption((option) =>
+                option.setName('使用チャンネル').setDescription('使用するボイスチャンネルを指定できます。').setRequired(false),
             ),
     )
     .addSubcommand((subcommand) =>
         subcommand
             .setName('next')
-            .setDescription('現在のリーグマッチの募集をたてます。')
+            .setDescription('次のリーグマッチの募集をたてます。')
             .addIntegerOption((option) =>
                 option
                     .setName('募集人数')
@@ -74,6 +77,9 @@ const salmonRun = new SlashCommandBuilder()
             )
             .addUserOption((option) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addChannelOption((option) =>
+                option.setName('使用チャンネル').setDescription('使用するボイスチャンネルを指定できます。').setRequired(false),
             ),
     );
 
@@ -83,7 +89,10 @@ const privateMatch = new SlashCommandBuilder()
     .addStringOption((option) => option.setName('開始時刻').setDescription('何時から始める？例：21:00').setRequired(true))
     .addStringOption((option) => option.setName('所要時間').setDescription('何時間ぐらいやる？例：2時間').setRequired(true))
     .addStringOption((option) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
-    .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'));
+    .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'))
+    .addChannelOption((option) =>
+        option.setName('使用チャンネル').setDescription('使用するVCのチャンネルを指定できます。').setRequired(false),
+    );
 
 const otherGame = new SlashCommandBuilder()
     .setName(commandNames.other_game)

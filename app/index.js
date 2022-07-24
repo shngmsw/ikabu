@@ -129,6 +129,7 @@ const buttons = {
     cr: recruitButton.cancel,
     del: recruitButton.del,
     close: recruitButton.close,
+    unl: recruitButton.unlock,
 };
 /**
  *
@@ -198,6 +199,11 @@ async function onVoiceStateUpdate(oldState, newState) {
         }
         if (oldChannel.members.size == 0) {
             oldChannel.setUserLimit(0);
+        } else {
+            // TODO:
+            if (oldChannel.members.has('ホストユーザーのID')) {
+                // 制限解除の呪文
+            }
         }
     }
 }

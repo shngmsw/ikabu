@@ -16,6 +16,7 @@ module.exports = {
     composeEmbed: composeEmbed,
     dateAdd: dateAdd,
     dateDiff: dateDiff,
+    datetimeDiff: datetimeDiff,
     isEmpty: isEmpty,
     isNotEmpty: isNotEmpty,
 };
@@ -560,4 +561,12 @@ function dateDiff(dt1, dt2, u, f) {
         r = dateDiff(dt3, dt2, 'D');
     }
     return r;
+}
+/*
+ *  経過時間（分）の計算
+ */
+function datetimeDiff(dt1, dt2) {
+    diff = dt2.getTime() - dt1.getTime();
+    const diffMinutes = Math.abs(diff) / (60 * 1000);
+    return diffMinutes;
 }
