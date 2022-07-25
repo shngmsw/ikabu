@@ -71,10 +71,18 @@ async function leagueRecruit(interaction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply({ ephemeral: true });
 
+    var usable_channel = ['alfa', 'bravo', 'charlie', 'delta', 'echo', 'fox', 'golf', 'hotel', 'india', 'juliett', 'kilo', 'lima', 'mike'];
+
     if (voice_channel != null) {
         if (voice_channel.members.size != 0 && !voice_channel.members.has(host_user.id)) {
             await interaction.editReply({
                 content: 'そのチャンネルは使用中でし！',
+                ephemeral: true,
+            });
+            return;
+        } else if (!usable_channel.includes(voice_channel.name)) {
+            await interaction.editReply({
+                content: 'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
                 ephemeral: true,
             });
             return;
@@ -233,18 +241,19 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
             } else {
                 sentMessage.edit({ components: [recruitActionRowWithChannel(sentMessage, host_user, reserve_channel.id)] });
             }
-        } else {
-            return;
         }
 
         // 2時間後にボタンを無効化する
-        setTimeout(function async() {
-            const host_mention = `<@${host_user.id}>`;
-            sentMessage.edit({
-                content: `${host_mention}たんの募集は〆！`,
-                components: [disableButtons()],
-            });
-        }, 7200000 - 15000);
+        await sleep(7200000 - 15000);
+        const host_mention = `<@${host_user.id}>`;
+        sentMessage.edit({
+            content: `${host_mention}たんの募集は〆！`,
+            components: [disableButtons()],
+        });
+        if (reserve_channel != null) {
+            reserve_channel.permissionOverwrites.delete(interaction.guild.roles.everyone, 'UnLock Voice Channel');
+            reserve_channel.permissionOverwrites.delete(host_user, 'UnLock Voice Channel');
+        }
     } catch (error) {
         console.log(error);
     }

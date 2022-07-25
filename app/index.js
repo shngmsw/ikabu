@@ -199,11 +199,13 @@ async function onVoiceStateUpdate(oldState, newState) {
         }
         if (oldChannel.members.size == 0) {
             oldChannel.setUserLimit(0);
-        } else {
-            // TODO:
-            if (oldChannel.members.has('ホストユーザーのID')) {
-                // 制限解除の呪文
-            }
+        }
+    }
+    if (newState.channelId != null) {
+        const newChannel = newState.guild.channels.cache.get(newState.channelId);
+        if (newChannel.members.size != 0) {
+            newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
+            newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
         }
     }
 }

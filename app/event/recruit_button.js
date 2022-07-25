@@ -57,14 +57,9 @@ async function join(interaction, params) {
             const member_mention = `<@!${member.user.id}>`;
             let member_roles = member.roles.cache.map((role) => (role.name != '@everyone' ? role.name : '')).join(' / ');
             const embed = new MessageEmbed();
-            embed.setDescription(`募集主は${member.user.username}たんに遊ぶ部屋を伝えるでし！イカ部心得を守って楽しく遊んでほしいでし！`);
             embed.setAuthor({
                 name: `${member.user.username}たんが参加表明したでし！`,
                 iconURL: member.user.displayAvatarURL(),
-            });
-            embed.addFields({
-                name: `${member.user.username}の役職`,
-                value: isNotEmpty(member_roles) ? member_roles : 'なし',
             });
 
             await interaction.message.reply({
@@ -189,7 +184,8 @@ async function close(interaction, params) {
             await cmd_message.channel.send({ embeds: [helpEmbed] });
             if (channelId != undefined) {
                 let channel = await guild.channels.cache.get(channelId);
-                channel.setUserLimit(0);
+                channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
         } else if (datetimeDiff(new Date(), cmd_message.createdAt) > 120) {
             await interaction.update({
