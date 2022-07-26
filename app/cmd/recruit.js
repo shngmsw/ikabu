@@ -346,7 +346,7 @@ function getCloseEmbed() {
 const recruit_command = {
     リグマ募集: '`/now` or `/next`',
     'ナワバリ・フェス募集': '`/now` or `/next`',
-    サーモン募集: `run`,
+    サーモン募集: `/run`,
     別ゲー募集: '`/apex` or `/dbd` or `/mhr` or `/valo` or `/other`',
 };
 
