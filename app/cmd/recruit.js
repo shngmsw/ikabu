@@ -180,13 +180,6 @@ async function salmonRun(msg) {
             });
             // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
             sentMessage.edit({ components: [recruitActionRow(sentMessage, msg.author)] });
-            setTimeout(function () {
-                const host_mention = `<@${msg.author.id}>`;
-                sentMessage.edit({
-                    content: `${host_mention}たんの募集は〆！`,
-                    components: [disableButtons()],
-                });
-            }, 7200000);
         } catch (error) {
             msg.channel.send('なんかエラーでてるわ');
             console.error(error);
@@ -258,13 +251,6 @@ async function sendOtherGames(msg, title, txt, color, image, logo) {
             });
             // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
             sentMessage.edit({ components: [recruitActionRow(sentMessage, msg.author)] });
-            setTimeout(function () {
-                const host_mention = `<@${msg.author.id}>`;
-                sentMessage.edit({
-                    content: `${host_mention}たんの募集は〆！`,
-                    components: [disableButtons()],
-                });
-            }, 7200000);
         } catch (error) {
             console.log(error);
         }

@@ -148,14 +148,6 @@ async function sendOtherGames(interaction, title, txt, color, image, logo) {
         } else {
             return;
         }
-
-        setTimeout(function () {
-            const host_mention = `<@${interaction.member.id}>`;
-            sentMessage.edit({
-                content: `${host_mention}たんの募集は〆！`,
-                components: [disableButtons()],
-            });
-        }, 7200000);
     } catch (error) {
         console.log(error);
     }
