@@ -13,6 +13,77 @@ const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
 
+const regularMatch = new SlashCommandBuilder()
+    .setName(commandNames.regular)
+    .setDescription('ナワバリ募集コマンド')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('now')
+            .setDescription('現在のナワバリバトルの募集をたてます。')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                        { name: '@4', value: 4 },
+                        { name: '@5', value: 5 },
+                        { name: '@6', value: 6 },
+                        { name: '@7', value: 7 },
+                    )
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addChannelOption((option) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者3').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            ),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('next')
+            .setDescription('次のナワバリバトルの募集をたてます。')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                        { name: '@4', value: 4 },
+                        { name: '@5', value: 5 },
+                        { name: '@6', value: 6 },
+                        { name: '@7', value: 7 },
+                    )
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者3').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            ),
+    );
+
 const leagueMatch = new SlashCommandBuilder()
     .setName(commandNames.league)
     .setDescription('リグマ募集コマンド')
@@ -154,7 +225,7 @@ const otherGame = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 
-const commands = [voiceLock, closeRecruit, otherGame, privateMatch, leagueMatch, salmonRun];
+const commands = [voiceLock, closeRecruit, otherGame, privateMatch, regularMatch, leagueMatch, salmonRun];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');

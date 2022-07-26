@@ -55,7 +55,6 @@ async function join(interaction, params) {
             });
         } else {
             const member_mention = `<@!${member.user.id}>`;
-            let member_roles = member.roles.cache.map((role) => (role.name != '@everyone' ? role.name : '')).join(' / ');
             const embed = new MessageEmbed();
             embed.setAuthor({
                 name: `${member.user.username}たんが参加表明したでし！`,
@@ -239,7 +238,7 @@ async function getHelpEmbed(guild, chid) {
     if (sendChannel.name.match('リグマ募集')) {
         command = '`/now` or `/next`';
     } else if (sendChannel.name.match('ナワバリ・フェス募集')) {
-        command = '`nawabari`';
+        command = '`/now` or `/next`';
     } else if (sendChannel.name.match('サーモン募集')) {
         command = '`/run`';
     } else if (sendChannel.name.match('別ゲー募集')) {
