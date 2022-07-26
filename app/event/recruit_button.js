@@ -46,7 +46,9 @@ async function join(interaction, params) {
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
-        const host_id = params.get('hid');
+        const header_msg_id = params.get('hmid');
+        const header_message = await interaction.channel.messages.fetch(header_msg_id);
+        const host_id = header_message.interaction.user.id;
         const channelId = params.get('vid');
         if (member.user.id === host_id) {
             await interaction.followUp({
@@ -97,7 +99,9 @@ async function cancel(interaction, params) {
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
-        const host_id = params.get('hid');
+        const header_msg_id = params.get('hmid');
+        const header_message = await interaction.channel.messages.fetch(header_msg_id);
+        const host_id = header_message.interaction.user.id;
         const channelId = params.get('vid');
         const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
         if (member.user.id == host_id) {
@@ -135,7 +139,9 @@ async function del(interaction, params) {
         });
         const msg_id = params.get('mid');
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
-        const host_id = params.get('hid');
+        const header_msg_id = params.get('hmid');
+        const header_message = await interaction.channel.messages.fetch(header_msg_id);
+        const host_id = header_message.interaction.user.id;
         const channelId = params.get('vid');
         if (member.user.id == host_id) {
             if (channelId != undefined) {
@@ -144,6 +150,7 @@ async function del(interaction, params) {
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
             await cmd_message.delete();
+            await header_message.delete();
         } else {
             interaction.reply({ content: '他人の募集は消せる訳無いでし！！！', ephemeral: true });
         }
@@ -167,11 +174,10 @@ async function close(interaction, params) {
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
-        const msg_id = params.get('mid');
-        const cmd_message = await interaction.channel.messages.fetch(msg_id);
-        const msg_ch_id = cmd_message.channel.id;
-        const helpEmbed = await getHelpEmbed(guild, msg_ch_id);
-        const host_id = params.get('hid');
+        const header_msg_id = params.get('hmid');
+        const header_message = await interaction.channel.messages.fetch(header_msg_id);
+        const helpEmbed = await getHelpEmbed(guild, header_message.channel.id);
+        const host_id = header_message.interaction.user.id;
         const channelId = params.get('vid');
         const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
         if (member.user.id === host_id) {
@@ -180,20 +186,20 @@ async function close(interaction, params) {
                 components: [disableButtons()],
             });
             await interaction.message.reply({ embeds: [embed] });
-            await cmd_message.channel.send({ embeds: [helpEmbed] });
+            await interaction.channel.send({ embeds: [helpEmbed] });
             if (channelId != undefined) {
                 let channel = await guild.channels.cache.get(channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
-        } else if (datetimeDiff(new Date(), cmd_message.createdAt) > 120) {
+        } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
             await interaction.update({
                 content: `<@${host_id}>たんの募集は〆！`,
                 components: [disableButtons()],
             });
             const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.message.reply({ embeds: [embed] });
-            await cmd_message.channel.send({ embeds: [helpEmbed] });
+            await header_message.channel.send({ embeds: [helpEmbed] });
             if (channelId != undefined) {
                 let channel = await guild.channels.cache.get(channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');

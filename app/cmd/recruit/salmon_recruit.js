@@ -127,17 +127,16 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
 
     try {
-        const sentMessage = await interaction.followUp({
+        const header = await interaction.editReply({ files: [recruit, rule], ephemeral: false });
+        const sentMessage = await interaction.channel.send({
             content: txt,
-            files: [recruit, rule],
-            ephemeral: false,
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         if (reserve_channel == null) {
-            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, host_user)] });
+            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
         } else {
-            sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, host_user, reserve_channel.id)] });
+            sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
@@ -158,9 +157,9 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
         let cmd_message = await channel.messages.cache.get(sentMessage.id);
         if (cmd_message != undefined) {
             if (reserve_channel == null) {
-                sentMessage.edit({ components: [recruitActionRow(sentMessage, host_user)] });
+                sentMessage.edit({ components: [recruitActionRow(header)] });
             } else {
-                sentMessage.edit({ components: [recruitActionRowWithChannel(sentMessage, host_user, reserve_channel.id)] });
+                sentMessage.edit({ components: [recruitActionRowWithChannel(reserve_channel.id, header)] });
             }
         }
     } catch (error) {

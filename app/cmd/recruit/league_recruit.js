@@ -100,8 +100,7 @@ async function leagueRecruit(interaction) {
         const response = await fetch(schedule_url);
         const data = await response.json();
         const l_args = getLeague(data, type).split(',');
-        let txt = mention + ' 【リグマ募集】\n' + `<@${host_user.id}>` + 'たんがリグメン募集中でし！\n';
-
+        let txt = `<@${host_user.id}>` + 'たんがリグメン募集中でし！\n';
         if (user1 != null && user2 != null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         } else if (user1 != null) {
@@ -117,6 +116,7 @@ async function leagueRecruit(interaction) {
         await sendLeagueMatch(
             interaction,
             channel,
+            mention,
             txt,
             recruit_num,
             condition,
@@ -133,7 +133,20 @@ async function leagueRecruit(interaction) {
     }
 }
 
-async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition, count, host_user, user1, user2, l_args, stageImages) {
+async function sendLeagueMatch(
+    interaction,
+    channel,
+    mention,
+    txt,
+    recruit_num,
+    condition,
+    count,
+    host_user,
+    user1,
+    user2,
+    l_args,
+    stageImages,
+) {
     let l_date = l_args[0]; // 日付
     let l_time = l_args[1]; // 時間
     let l_rule = l_args[2]; // ガチルール
@@ -198,17 +211,16 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
     const rule = new MessageAttachment(await ruleCanvas(l_rule, l_date, l_time, l_stage1, l_stage2, stageImages, thumbnail), 'rules.png');
 
     try {
-        const sentMessage = await interaction.followUp({
-            content: txt,
-            files: [recruit, rule],
-            ephemeral: false,
+        const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
+        const sentMessage = await interaction.channel.send({
+            content: mention + ' ボタンを押して参加表明するでし！',
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         if (reserve_channel == null) {
-            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, host_user)] });
+            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
         } else {
-            sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, host_user, reserve_channel.id)] });
+            sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
@@ -238,9 +250,9 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
         let cmd_message = await channel.messages.cache.get(sentMessage.id);
         if (cmd_message != undefined) {
             if (reserve_channel == null) {
-                sentMessage.edit({ components: [recruitActionRow(sentMessage, host_user)] });
+                sentMessage.edit({ components: [recruitActionRow(header)] });
             } else {
-                sentMessage.edit({ components: [recruitActionRowWithChannel(sentMessage, host_user, reserve_channel.id)] });
+                sentMessage.edit({ components: [recruitActionRowWithChannel(reserve_channel.id, header)] });
             }
         }
 

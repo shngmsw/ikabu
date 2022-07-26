@@ -19,6 +19,8 @@ module.exports = {
     datetimeDiff: datetimeDiff,
     isEmpty: isEmpty,
     isNotEmpty: isNotEmpty,
+    getCloseEmbed: getCloseEmbed,
+    getCommandHelpEmbed: getCommandHelpEmbed,
 };
 
 function composeEmbed(message, url) {
@@ -569,4 +571,51 @@ function datetimeDiff(dt1, dt2) {
     diff = dt2.getTime() - dt1.getTime();
     const diffMinutes = Math.abs(diff) / (60 * 1000);
     return diffMinutes;
+}
+
+function sendCloseMessage(msg, command) {
+    try {
+        msg.delete();
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+function getCloseEmbed() {
+    const embed = new MessageEmbed();
+    embed.setDescription(`↑の募集 〆`);
+    return embed;
+}
+const recruit_command = {
+    リグマ募集: '`/now` or `/next`',
+    'ナワバリ・フェス募集': '`/now` or `/next`',
+    サーモン募集: `/run`,
+    別ゲー募集: '`/apex` or `/dbd` or `/mhr` or `/valo` or `/other`',
+};
+
+function getCommandHelpEmbed(channelName) {
+    let commandMessage;
+    switch (channelName) {
+        case 'リグマ募集':
+        case 'リグマ募集2':
+        case '🔰リグマ募集':
+            commandMessage = recruit_command.リグマ募集;
+            break;
+        case 'ナワバリ・フェス募集':
+            commandMessage = recruit_command['ナワバリ・フェス募集'];
+            break;
+        case 'サーモン募集':
+            commandMessage = recruit_command.サーモン募集;
+            break;
+        case '別ゲー募集':
+            commandMessage = recruit_command.別ゲー募集;
+            break;
+
+        default:
+            break;
+    }
+
+    const embed = new MessageEmbed();
+    embed.setDescription('募集コマンドは ' + `${commandMessage}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
+    return embed;
 }
