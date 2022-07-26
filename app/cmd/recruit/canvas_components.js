@@ -3,15 +3,28 @@ const Canvas = require('canvas');
 module.exports = {
     createRoundRect: createRoundRect,
     drawArcImage: drawArcImage,
+    fillTextWithStroke: fillTextWithStroke,
 };
 
-/*
- 角が丸い四角形を作成
- x,yは座標
- width,heightは幅と高さ
- radiusは角丸の半径
-*/
-
+/**
+ *
+ * @param {Canvas.CanvasRenderingContext2D} ctx Canvas Context
+ * @param {String} text テキスト
+ * @param {String} font_style フォントスタイル
+ * @param {String} fill_color 塗りつぶしの色
+ * @param {String} stroke_color フチの色
+ * @param {float} strokeWidth フチの太さ
+ * @param {float} x x座標
+ * @param {float} y y座標
+ */
+function fillTextWithStroke(ctx, text, font_style, fill_color, stroke_color, strokeWidth, x, y) {
+    ctx.font = font_style;
+    ctx.fillStyle = fill_color;
+    ctx.fillText(text, x, y);
+    ctx.strokeStyle = stroke_color;
+    ctx.lineWidth = strokeWidth;
+    ctx.strokeText(text, x, y);
+}
 /**
  * 角が丸い四角形を作成
  * @param {Canvas.CanvasRenderingContext2D} ctx Canvas Context

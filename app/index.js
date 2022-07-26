@@ -19,6 +19,7 @@ const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
 const { getCloseEmbed, getCommandHelpEmbed } = require('./cmd/recruit.js');
 const { otherGameRecruit } = require('./cmd/recruit/other_game_recruit.js');
+const { regularRecruit } = require('./cmd/recruit/regular_recruit.js');
 const { leagueRecruit } = require('./cmd/recruit/league_recruit.js');
 const { salmonRecruit } = require('./cmd/recruit/salmon_recruit.js');
 const { privateRecruit } = require('./cmd/recruit/private_recruit.js');
@@ -129,6 +130,7 @@ const buttons = {
     cr: recruitButton.cancel,
     del: recruitButton.del,
     close: recruitButton.close,
+    unl: recruitButton.unlock,
 };
 /**
  *
@@ -163,6 +165,8 @@ async function onInteraction(interaction) {
                 await otherGameRecruit(interaction);
             } else if (commandName === commandNames.private) {
                 await privateRecruit(interaction);
+            } else if (commandName === commandNames.regular) {
+                await regularRecruit(interaction);
             } else if (commandName === commandNames.league) {
                 await leagueRecruit(interaction);
             } else if (commandName === commandNames.salmon) {
@@ -198,6 +202,13 @@ async function onVoiceStateUpdate(oldState, newState) {
         }
         if (oldChannel.members.size == 0) {
             oldChannel.setUserLimit(0);
+        }
+    }
+    if (newState.channelId != null) {
+        const newChannel = newState.guild.channels.cache.get(newState.channelId);
+        if (newChannel.members.size != 0) {
+            newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
+            newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
         }
     }
 }

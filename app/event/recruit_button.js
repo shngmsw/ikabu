@@ -1,10 +1,11 @@
 const { MessageEmbed, MessageActionRow, MessageButton, Client } = require('discord.js');
-const { isNotEmpty } = require('../common');
+const { isNotEmpty, datetimeDiff } = require('../common');
 module.exports = {
     join: join,
     cancel: cancel,
     del: del,
     close: close,
+    unlock: unlock,
 };
 
 /**
@@ -46,6 +47,7 @@ async function join(interaction, params) {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
         const host_id = params.get('hid');
+        const channelId = params.get('vid');
         if (member.user.id === host_id) {
             await interaction.followUp({
                 content: `募集主は参加表明できないでし！`,
@@ -53,26 +55,28 @@ async function join(interaction, params) {
             });
         } else {
             const member_mention = `<@!${member.user.id}>`;
-            let member_roles = member.roles.cache.map((role) => (role.name != '@everyone' ? role.name : '')).join(' / ');
             const embed = new MessageEmbed();
-            embed.setDescription(`募集主は${member.user.username}たんに遊ぶ部屋を伝えるでし！イカ部心得を守って楽しく遊んでほしいでし！`);
             embed.setAuthor({
                 name: `${member.user.username}たんが参加表明したでし！`,
                 iconURL: member.user.displayAvatarURL(),
-            });
-            embed.addFields({
-                name: `${member.user.username}の役職`,
-                value: isNotEmpty(member_roles) ? member_roles : 'なし',
             });
 
             await interaction.message.reply({
                 content: `<@${host_id}> ${member_mention}`,
                 embeds: [embed],
             });
-            await interaction.followUp({
-                content: `<@${host_id}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
-                ephemeral: true,
-            });
+            if (channelId == undefined) {
+                await interaction.followUp({
+                    content: `<@${host_id}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
+                    ephemeral: true,
+                });
+            } else {
+                await interaction.followUp({
+                    content: `<@${host_id}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
+                    components: [channelLinkButtons(interaction.guildId, channelId)],
+                    ephemeral: true,
+                });
+            }
         }
     } catch (err) {
         handleError(err, { interaction });
@@ -89,10 +93,12 @@ async function cancel(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
         const guild = await interaction.guild.fetch();
+        await guild.channels.fetch();
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
         const host_id = params.get('hid');
+        const channelId = params.get('vid');
         const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
         if (member.user.id == host_id) {
             await interaction.update({
@@ -100,6 +106,11 @@ async function cancel(interaction, params) {
                 components: [disableButtons()],
             });
             await interaction.message.reply({ embeds: [embed] });
+            if (channelId != undefined) {
+                let channel = await guild.channels.cache.get(channelId);
+                channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
+            }
         } else {
             await interaction.deferReply({
                 ephemeral: true,
@@ -118,13 +129,20 @@ async function del(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
         const guild = await interaction.guild.fetch();
+        await guild.channels.fetch();
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
         const msg_id = params.get('mid');
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
         const host_id = params.get('hid');
+        const channelId = params.get('vid');
         if (member.user.id == host_id) {
+            if (channelId != undefined) {
+                let channel = await guild.channels.cache.get(channelId);
+                channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
+            }
             await cmd_message.delete();
         } else {
             interaction.reply({ content: '他人の募集は消せる訳無いでし！！！', ephemeral: true });
@@ -145,14 +163,16 @@ async function close(interaction, params) {
 
     try {
         const guild = await interaction.guild.fetch();
+        await guild.channels.fetch();
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
         const msg_id = params.get('mid');
-        const msg_ch_id = params.get('cid');
-        const helpEmbed = await getHelpEmbed(guild, msg_ch_id);
         const cmd_message = await interaction.channel.messages.fetch(msg_id);
+        const msg_ch_id = cmd_message.channel.id;
+        const helpEmbed = await getHelpEmbed(guild, msg_ch_id);
         const host_id = params.get('hid');
+        const channelId = params.get('vid');
         const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
         if (member.user.id === host_id) {
             await interaction.update({
@@ -161,6 +181,24 @@ async function close(interaction, params) {
             });
             await interaction.message.reply({ embeds: [embed] });
             await cmd_message.channel.send({ embeds: [helpEmbed] });
+            if (channelId != undefined) {
+                let channel = await guild.channels.cache.get(channelId);
+                channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
+            }
+        } else if (datetimeDiff(new Date(), cmd_message.createdAt) > 120) {
+            await interaction.update({
+                content: `<@${host_id}>たんの募集は〆！`,
+                components: [disableButtons()],
+            });
+            const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
+            await interaction.message.reply({ embeds: [embed] });
+            await cmd_message.channel.send({ embeds: [helpEmbed] });
+            if (channelId != undefined) {
+                let channel = await guild.channels.cache.get(channelId);
+                channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
+            }
         } else {
             await interaction.deferReply({
                 ephemeral: true,
@@ -175,13 +213,32 @@ async function close(interaction, params) {
     }
 }
 
+async function unlock(interaction, params) {
+    /** @type {Discord.Snowflake} */
+
+    try {
+        const channelId = params.get('vid');
+        const guild = await interaction.guild;
+        const channel = await guild.channels.cache.get(channelId);
+
+        channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+        channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
+
+        await interaction.update({
+            components: [disableUnlockButton()],
+        });
+    } catch (err) {
+        handleError(err, { interaction });
+    }
+}
+
 async function getHelpEmbed(guild, chid) {
     const sendChannel = await guild.channels.cache.find((channel) => channel.id === chid);
     let command = '';
     if (sendChannel.name.match('リグマ募集')) {
         command = '`/now` or `/next`';
     } else if (sendChannel.name.match('ナワバリ・フェス募集')) {
-        command = '`nawabari`';
+        command = '`/now` or `/next`';
     } else if (sendChannel.name.match('サーモン募集')) {
         command = '`/run`';
     } else if (sendChannel.name.match('別ゲー募集')) {
@@ -199,6 +256,21 @@ function disableButtons() {
         new MessageButton().setCustomId('join').setLabel('参加').setStyle('PRIMARY').setDisabled(),
         new MessageButton().setCustomId('cancel').setLabel('キャンセル').setStyle('DANGER').setDisabled(),
         new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
+    ]);
+    return buttons;
+}
+
+function disableUnlockButton() {
+    let buttons = new MessageActionRow().addComponents([
+        new MessageButton().setCustomId('unlocked').setLabel('ロック解除済み').setStyle('SECONDARY').setDisabled(),
+    ]);
+    return buttons;
+}
+
+function channelLinkButtons(guildId, channelId) {
+    const channel_link = `https://discord.com/channels/${guildId}/${channelId}`;
+    let buttons = new MessageActionRow().addComponents([
+        new MessageButton().setLabel('チャンネルに移動').setStyle('LINK').setURL(channel_link),
     ]);
     return buttons;
 }
