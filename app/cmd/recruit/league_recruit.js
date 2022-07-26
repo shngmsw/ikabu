@@ -69,7 +69,7 @@ async function leagueRecruit(interaction) {
     }
 
     // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
 
     var usable_channel = ['alfa', 'bravo', 'charlie', 'delta', 'echo', 'fox', 'golf', 'hotel', 'india', 'juliett', 'kilo', 'lima', 'mike'];
 
@@ -198,9 +198,10 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
     const rule = new MessageAttachment(await ruleCanvas(l_rule, l_date, l_time, l_stage1, l_stage2, stageImages, thumbnail), 'stages.png');
 
     try {
-        const sentMessage = await channel.send({
+        const sentMessage = await interaction.followUp({
             content: txt,
             files: [recruit, rule],
+            ephemeral: false,
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
@@ -218,14 +219,14 @@ async function sendLeagueMatch(interaction, channel, txt, recruit_num, condition
         }
 
         if (count == 2) {
-            await interaction.editReply({
+            await interaction.followUp({
                 content:
                     '2リグで募集がかかったでし！\n4リグで募集をたてるには参加者に指定するか、募集人数を変更して募集し直すでし！\n15秒間は募集を取り消せるでし！',
                 components: reserve_channel != null ? [unlockChannelButton(reserve_channel.id)] : [],
                 ephemeral: true,
             });
         } else {
-            await interaction.editReply({
+            await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 components: reserve_channel != null ? [unlockChannelButton(reserve_channel.id)] : [],
                 ephemeral: true,

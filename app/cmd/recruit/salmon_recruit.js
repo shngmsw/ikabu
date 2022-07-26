@@ -6,7 +6,6 @@ const { createRoundRect, drawArcImage } = require('./canvas_components.js');
 const {
     recruitDeleteButton,
     recruitActionRow,
-    disableButtons,
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
@@ -61,7 +60,7 @@ async function salmonRecruit(interaction) {
     }
 
     // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
 
     var usable_channel = ['alfa', 'bravo', 'charlie', 'delta', 'echo', 'fox', 'golf', 'hotel', 'india', 'juliett', 'kilo', 'lima', 'mike'];
 
@@ -128,9 +127,10 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
 
     try {
-        const sentMessage = await channel.send({
+        const sentMessage = await interaction.followUp({
             content: txt,
             files: [recruit, rule],
+            ephemeral: false,
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
@@ -147,7 +147,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             );
         }
 
-        await interaction.editReply({
+        await interaction.followUp({
             content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
             components: reserve_channel != null ? [unlockChannelButton(reserve_channel.id)] : [],
             ephemeral: true,
@@ -162,18 +162,6 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             } else {
                 sentMessage.edit({ components: [recruitActionRowWithChannel(sentMessage, host_user, reserve_channel.id)] });
             }
-        }
-
-        // 2時間後にボタンを無効化する
-        await sleep(7200000 - 15000);
-        const host_mention = `<@${host_user.id}>`;
-        sentMessage.edit({
-            content: `${host_mention}たんの募集は〆！`,
-            components: [disableButtons()],
-        });
-        if (reserve_channel != null) {
-            reserve_channel.permissionOverwrites.delete(interaction.guild.roles.everyone, 'UnLock Voice Channel');
-            reserve_channel.permissionOverwrites.delete(host_user, 'UnLock Voice Channel');
         }
     } catch (error) {
         console.log(error);
