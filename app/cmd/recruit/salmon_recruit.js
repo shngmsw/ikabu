@@ -115,15 +115,6 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
         } else {
             return;
         }
-
-        // 2時間後にボタンを無効化する
-        setTimeout(function async() {
-            const host_mention = `<@${host_user.id}>`;
-            sentMessage.edit({
-                content: `${host_mention}たんの募集は〆！`,
-                components: [disableButtons()],
-            });
-        }, 7200000 - 15000);
     } catch (error) {
         console.log(error);
     }
