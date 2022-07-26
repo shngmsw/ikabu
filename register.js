@@ -185,6 +185,13 @@ const otherGame = new SlashCommandBuilder()
                     .setChoices({ name: '@1', value: '@1' }, { name: '@2', value: '@2' })
                     .setRequired(true),
             )
+            .addChannelOption((option) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            )
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
@@ -198,7 +205,14 @@ const otherGame = new SlashCommandBuilder()
                     .setChoices({ name: '@1', value: '@1' }, { name: '@2', value: '@2' }, { name: '@3', value: '@3' })
                     .setRequired(true),
             )
-            .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+            .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'))
+            .addChannelOption((option) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            ),
     )
     .addSubcommand((subcommand) =>
         subcommand
