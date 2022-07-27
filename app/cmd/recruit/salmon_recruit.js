@@ -2,9 +2,15 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const { unixTime2mdwhm, coop_stage2txt, weapon2txt } = require('../../common.js');
-const { createRoundRect, drawArcImage } = require('./canvas_components.js');
-const { recruitDeleteButton, recruitActionRow, disableButtons } = require('./button_components.js');
-const { MessageAttachment } = require('discord.js');
+const { createRoundRect, drawArcImage, fillTextWithStroke } = require('./canvas_components.js');
+const {
+    recruitDeleteButton,
+    recruitActionRow,
+    recruitDeleteButtonWithChannel,
+    recruitActionRowWithChannel,
+    unlockChannelButton,
+} = require('./button_components.js');
+const { MessageAttachment, Permissions } = require('discord.js');
 const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
@@ -23,6 +29,7 @@ async function salmonRecruit(interaction) {
 
     const options = interaction.options;
     const channel = interaction.channel;
+    const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
     let host_user = interaction.member.user;
@@ -52,13 +59,31 @@ async function salmonRecruit(interaction) {
         return;
     }
 
+    var usable_channel = ['alfa', 'bravo', 'charlie', 'delta', 'echo', 'fox', 'golf', 'hotel', 'india', 'juliett', 'kilo', 'lima', 'mike'];
+
+    if (voice_channel != null) {
+        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_user.id)) {
+            await interaction.reply({
+                content: 'そのチャンネルは使用中でし！',
+                ephemeral: true,
+            });
+            return;
+        } else if (!usable_channel.includes(voice_channel.name)) {
+            await interaction.reply({
+                content: 'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉limaの間のチャンネルで指定するでし！',
+                ephemeral: true,
+            });
+            return;
+        }
+    }
+
     // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
 
     try {
         const response = await fetch(coop_schedule_url);
         const data = await response.json();
-        let txt = '@everyone 【バイト募集】\n' + `<@${host_user.id}>` + 'たんがバイト中でし！\n';
+        let txt = `<@${host_user.id}>` + 'たんがバイト中でし！\n';
 
         if (user1 != null && user2 != null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
@@ -88,22 +113,42 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     let weapon4 = weapon2txt(detail.weapons[3].id);
     let stageImage = 'https://splatoon2.ink/assets/splatnet' + detail.stage.image;
 
-    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, condition);
+    const reserve_channel = interaction.options.getChannel('使用チャンネル');
+
+    if (reserve_channel == null) {
+        channel_name = '🔉 VC指定なし';
+    } else {
+        channel_name = '🔉 ' + reserve_channel.name;
+    }
+
+    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, condition, channel_name);
     const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
 
     const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
 
     try {
-        const sentMessage = await channel.send({
-            content: txt,
-            files: [recruit, rule],
+        const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
+        const sentMessage = await interaction.channel.send({
+            content: '@everyone ボタンを押して参加表明するでし！',
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        sentMessage.edit({ components: [recruitDeleteButton(sentMessage, host_user)] });
+        if (reserve_channel == null) {
+            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
+        } else {
+            sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
+            reserve_channel.permissionOverwrites.set(
+                [
+                    { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
+                    { id: host_user.id, allow: [Permissions.FLAGS.CONNECT] },
+                ],
+                'Reserve Voice Channel',
+            );
+        }
 
-        await interaction.editReply({
+        await interaction.followUp({
             content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
+            components: reserve_channel != null ? [unlockChannelButton(reserve_channel.id)] : [],
             ephemeral: true,
         });
 
@@ -111,9 +156,11 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
         await sleep(15000);
         let cmd_message = await channel.messages.cache.get(sentMessage.id);
         if (cmd_message != undefined) {
-            sentMessage.edit({ components: [recruitActionRow(sentMessage, host_user)] });
-        } else {
-            return;
+            if (reserve_channel == null) {
+                sentMessage.edit({ components: [recruitActionRow(header)] });
+            } else {
+                sentMessage.edit({ components: [recruitActionRowWithChannel(reserve_channel.id, header)] });
+            }
         }
     } catch (error) {
         console.log(error);
@@ -123,7 +170,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
 /*
  * 募集用のキャンバス(1枚目)を作成する
  */
-async function recruitCanvas(recruit_num, count, host_user, user1, user2, condition) {
+async function recruitCanvas(recruit_num, count, host_user, user1, user2, condition, channel_name) {
     blank_avatar_url = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
@@ -140,12 +187,7 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     let league_icon = await Canvas.loadImage('https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png');
     recruit_ctx.drawImage(league_icon, 22, 35, 80, 52.8);
 
-    recruit_ctx.font = '50px Splatfont';
-    recruit_ctx.fillStyle = '#FF5600';
-    recruit_ctx.fillText('サーモンラン', 115, 80);
-    recruit_ctx.strokeStyle = '#FFFFFF';
-    recruit_ctx.lineWidth = 2.5;
-    recruit_ctx.strokeText('サーモンラン', 115, 80);
+    fillTextWithStroke(recruit_ctx, 'サーモンラン', '50px Splatfont', '#FF5600', '#FF9A00', 2, 115, 80);
 
     // 募集主の画像
     let host_img = await Canvas.loadImage(host_user.displayAvatarURL({ format: 'png' }));
@@ -202,30 +244,16 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     let host_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
     recruit_ctx.drawImage(host_icon, 0, 0, host_icon.width, host_icon.height, 90, 172, 75, 75);
 
-    recruit_ctx.font = '39px "Splatfont"';
-    recruit_ctx.fillStyle = '#FFFFFF';
-    recruit_ctx.fillText('募集人数', 525, 155);
-    recruit_ctx.strokeStyle = '#2D3130';
-    recruit_ctx.lineWidth = 1.0;
-    recruit_ctx.strokeText('募集人数', 525, 155);
+    fillTextWithStroke(recruit_ctx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
 
-    recruit_ctx.font = '42px "Splatfont"';
-    recruit_ctx.fillStyle = '#FFFFFF';
-    recruit_ctx.fillText('@' + recruit_num, 580, 218);
-    recruit_ctx.strokeStyle = '#2D3130';
-    recruit_ctx.lineWidth = 1.0;
-    recruit_ctx.strokeText('@' + recruit_num, 580, 218);
+    fillTextWithStroke(recruit_ctx, '@' + recruit_num, '42px "Splatfont"', '#FFFFFF', '#2D3130', 1, 580, 218);
 
-    recruit_ctx.font = '43px "Splatfont"';
-    recruit_ctx.fillStyle = '#FFFFFF';
-    recruit_ctx.fillText('参加条件', 35, 290);
-    recruit_ctx.strokeStyle = '#2D3130';
-    recruit_ctx.lineWidth = 1.0;
-    recruit_ctx.strokeText('参加条件', 35, 290);
+    fillTextWithStroke(recruit_ctx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 290);
 
     recruit_ctx.font = '30px "Genshin", "SEGUI"';
     const width = 600;
     const size = 40;
+    const column_num = 4;
     let column = [''];
     let line = 0;
     condition = condition.replace('{br}', '\n', 'gm');
@@ -245,15 +273,17 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
         }
     }
 
-    if (column.length > 5) {
-        column[4] += '…';
+    if (column.length > column_num) {
+        column[column_num - 1] += '…';
     }
 
     for (var j = 0; j < column.length; j++) {
-        if (j < 5) {
-            recruit_ctx.fillText(column[j], 65, 350 + size * j);
+        if (j < column_num) {
+            recruit_ctx.fillText(column[j], 65, 345 + size * j);
         }
     }
+
+    fillTextWithStroke(recruit_ctx, channel_name, '37px "Splatfont"', '#FFFFFF', '#2D3130', 1, 30, 520);
 
     const recruit = recruitCanvas.toBuffer();
     return recruit;
@@ -273,27 +303,12 @@ async function ruleCanvas(date, stage, weapon1, weapon2, weapon3, weapon4, stage
     rule_ctx.lineWidth = 4;
     rule_ctx.stroke();
 
-    rule_ctx.font = '32px "Splatfont"';
-    rule_ctx.fillStyle = '#FFFFFF';
-    rule_ctx.fillText('日時', 35, 80);
-    rule_ctx.strokeStyle = '#2D3130';
-    rule_ctx.lineWidth = 1.0;
-    rule_ctx.strokeText('日時', 35, 80);
+    fillTextWithStroke(rule_ctx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
     date_width = rule_ctx.measureText(date).width;
-    rule_ctx.font = '37px "Splatfont"';
-    rule_ctx.fillStyle = '#FFFFFF';
-    rule_ctx.fillText(date, (650 - date_width) / 2, 145); // 中央寄せ
-    rule_ctx.strokeStyle = '#2D3130';
-    rule_ctx.lineWidth = 1.0;
-    rule_ctx.strokeText(date, (650 - date_width) / 2, 145);
+    fillTextWithStroke(rule_ctx, date, '37px Splatfont', '#FFFFFF', '#2D3130', 1, (650 - date_width) / 2, 145);
 
-    rule_ctx.font = '32px "Splatfont"';
-    rule_ctx.fillStyle = '#FFFFFF';
-    rule_ctx.fillText('武器', 35, 245);
-    rule_ctx.strokeStyle = '#2D3130';
-    rule_ctx.lineWidth = 1.0;
-    rule_ctx.strokeText('武器', 35, 245);
+    fillTextWithStroke(rule_ctx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 245);
 
     rule_ctx.save();
     if (weapon1 === '❓') {
@@ -371,20 +386,10 @@ async function ruleCanvas(date, stage, weapon1, weapon2, weapon3, weapon4, stage
     rule_ctx.strokeText(weapon4, (350 - weapons4_width) / 2, 505);
     rule_ctx.restore();
 
-    rule_ctx.font = '33px "Splatfont"';
-    rule_ctx.fillStyle = '#FFFFFF';
-    rule_ctx.fillText('ステージ', 350, 245);
-    rule_ctx.strokeStyle = '#2D3130';
-    rule_ctx.lineWidth = 1.0;
-    rule_ctx.strokeText('ステージ', 350, 245);
+    fillTextWithStroke(rule_ctx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 350, 245);
 
     stage_width = rule_ctx.measureText(stage).width;
-    rule_ctx.font = '38px "Splatfont"';
-    rule_ctx.fillStyle = '#FFFFFF';
-    rule_ctx.fillText(stage, 150 + (700 - stage_width) / 2, 300);
-    rule_ctx.strokeStyle = '#2D3130';
-    rule_ctx.lineWidth = 1.0;
-    rule_ctx.strokeText(stage, 150 + (700 - stage_width) / 2, 300);
+    fillTextWithStroke(rule_ctx, stage, '38px Splatfont', '#FFFFFF', '#2D3130', 1, 150 + (700 - stage_width) / 2, 300);
 
     let stage_img = await Canvas.loadImage(stageImage);
     rule_ctx.save();

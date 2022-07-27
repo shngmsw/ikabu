@@ -7,7 +7,6 @@ const handleKansen = require('./cmd/kansen.js');
 const handlePick = require('./cmd/pick.js');
 const handleOmikuji = require('./cmd/omikuji.js');
 const handlePoll = require('./cmd/poll.js');
-const { handleRecruit } = require('./cmd/recruit.js');
 const handleRule = require('./cmd/rule.js');
 const handleShow = require('./cmd/show.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
@@ -63,16 +62,6 @@ function call(msg) {
         case 'buki':
         case 'weapon':
             handleBuki(command, msg);
-            break;
-        case 'now':
-        case 'nou':
-        case 'next':
-        case 'run':
-        case 'nawabari':
-        case '!mhr':
-        case '!apex':
-        case '!dbd':
-            handleRecruit(msg);
             break;
         case 'show':
             handleShow(msg, args[0]);
