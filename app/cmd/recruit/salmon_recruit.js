@@ -83,7 +83,7 @@ async function salmonRecruit(interaction) {
     try {
         const response = await fetch(coop_schedule_url);
         const data = await response.json();
-        let txt = '@everyone 【バイト募集】\n' + `<@${host_user.id}>` + 'たんがバイト中でし！\n';
+        let txt = `<@${host_user.id}>` + 'たんがバイト中でし！\n';
 
         if (user1 != null && user2 != null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
@@ -127,9 +127,9 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
 
     try {
-        const header = await interaction.editReply({ files: [recruit, rule], ephemeral: false });
+        const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
         const sentMessage = await interaction.channel.send({
-            content: txt,
+            content: '@everyone ボタンを押して参加表明するでし！',
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
