@@ -9,6 +9,23 @@ const voiceLock = new SlashCommandBuilder()
     .addIntegerOption((option) =>
         option.setName('limit').setDescription('制限人数を指定する場合は1～99で指定してください。').setRequired(false),
     );
+const friendCode = new SlashCommandBuilder()
+    .setName(commandNames.friend_code)
+    .setDescription('フレンドコードの登録・表示')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('add')
+            .setDescription('フレンドコードを登録します。')
+            .addStringOption((option) => option.setName('フレンドコード').setDescription('例：SW-0000-0000-0000').setRequired(true)),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('show')
+            .setDescription('登録したフレンドコードを表示します。未登録の場合は自己紹介から引用します。')
+            .addUserOption((option) =>
+                option.setName('user').setDescription('フレンドコードを表示したい人を指定してください。').setRequired(true),
+            ),
+    );
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
@@ -239,7 +256,7 @@ const otherGame = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 
-const commands = [voiceLock, closeRecruit, otherGame, privateMatch, regularMatch, leagueMatch, salmonRun];
+const commands = [voiceLock, friendCode, closeRecruit, otherGame, privateMatch, regularMatch, leagueMatch, salmonRun];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');

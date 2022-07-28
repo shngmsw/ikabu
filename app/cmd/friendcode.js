@@ -1,58 +1,65 @@
 const insert = require('../../db/fc_insert.js');
 const getFC = require('../../db/fc_select.js');
 const Discord = require('discord.js');
-
-module.exports = function handleFriendCode(msg) {
-    if (msg.content.startsWith('fcadd')) {
-        if (msg.channel.name === '自己紹介') {
-            msg.delete();
-            sendDM(msg);
-        } else {
-            insertFriendCode(msg);
-        }
-    } else if (msg.content.startsWith('fc')) {
-        selectFriendCode(msg);
-    }
+module.exports = {
+    handleFriendCode: handleFriendCode,
 };
 
-async function selectFriendCode(msg) {
-    var strCmd = msg.content.replace(/　/g, ' ');
-    const args = strCmd.split(' ');
-    args.shift();
-    // let id = args[0].replace('<@', '').replace('>','');
+async function handleFriendCode(interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply({ ephemeral: true });
 
-    // check if mention is included
-    if (msg.mentions.members.size != 1) {
-        msg.reply('フレンドコードを検索したい人のメンションを1つつけるでし');
-        return;
+    const options = interaction.options;
+    const subCommand = options.getSubcommand();
+    if (subCommand === 'add') {
+        insertFriendCode(interaction);
+    } else if (subCommand === 'show') {
+        selectFriendCode(interaction);
     }
+}
 
-    let id = msg.mentions.users.first().id;
-    let ch = await msg.guild.channels.cache.find((channel) => channel.name === '自己紹介');
+async function selectFriendCode(interaction) {
+    let targetUser = interaction.options.getUser('user');
+    let id = targetUser.id;
+    let ch = await interaction.guild.channels.cache.find((channel) => channel.name === '自己紹介');
     let messages = await ch.messages.fetch({ limit: 100 }).catch(console.error);
-    let list = await messages.filter((m) => m.author.id === id);
+    let list = await messages.filter((m) => targetUser.id === m.author.id && !m.author.bot);
     let result = list.map(function (value) {
         return value.content;
     });
 
     if (result.length == 0) {
-        let fc = await getFC(id, msg, args[0]);
-        // console.log("getFC:" + fc[0].code);
+        let fc = await getFC(id);
+        interaction.followUp({
+            content: '登録済みのフレンドコードがあったでし！',
+            ephemeral: true,
+        });
         if (fc[0] != null) {
-            msg.channel.send({
-                embeds: [composeEmbed(msg.mentions.users.first(), fc[0].code, true)],
+            interaction.followUp({
+                embeds: [composeEmbed(targetUser, fc[0].code, true)],
+                ephemeral: false,
             });
             return;
         }
     }
     if (result.length > 0) {
+        interaction.followUp({
+            content: '自己紹介チャンネルから引用してきたでし！',
+        });
+        let embeds = [];
         for (var r of result) {
-            msg.channel.send({
-                embeds: [composeEmbed(msg.mentions.users.first(), r, false)],
-            });
+            embeds.push(composeEmbed(targetUser, r, false));
         }
+        interaction.followUp({
+            embeds: embeds,
+        });
     } else {
-        msg.reply('自己紹介チャンネルに投稿がないか、投稿した日時が古すぎて検索できないでし');
+        interaction.editReply({
+            content:
+                '自己紹介チャンネルに投稿がないか、投稿した日時が古すぎて検索できないでし\n `/friend_code add`でコードを登録してみるでし！',
+            ephemeral: true,
+        });
     }
 }
 
@@ -68,29 +75,14 @@ function composeEmbed(users, fc, isDatabase) {
     return embed;
 }
 
-async function insertFriendCode(msg) {
-    var strCmd = msg.content.replace(/　/g, ' ');
-    const args = strCmd.split(' ');
-    args.shift();
-    // let id = args[0].replace('<@', '').replace('>','');
-    let id = msg.author.id;
-    let code = args[0];
-    // console.log("handle_fc:" + id + "/" + code);
-    insert(id, code);
-    msg.reply('覚えたでし！');
-}
+async function insertFriendCode(interaction) {
+    let id = interaction.member.user.id;
+    const options = interaction.options;
+    const code = options.getString('フレンドコード');
 
-async function sendDM(msg) {
-    const introduction = msg.guild.channels.cache.find((channel) => channel.id === process.env.CHANNEL_ID_INTRODUCTION);
-    const botCmd = msg.guild.channels.cache.find((channel) => channel.id === process.env.CHANNEL_ID_BOT_CMD);
-    msg.author.createDM().then((DMChannel) => {
-        // We have now a channel ready.
-        // Send the message.
-        DMChannel.send(
-            `このメッセージは${introduction}チャンネルで\`fcadd\`コマンドを使った方に送信しています。 \n` +
-                ` \`fcadd\`コマンドは${introduction} 以外のチャンネル(無難なのは ${botCmd} )で使用してください。 \n` +
-                ` \`fc @自分\` と打つことで${introduction} の直近100件までに投稿された内容を表示することができます。\n` +
-                `そのため、自己紹介以外の投稿があると検索対象の書き込みが減ってしまいます。ご協力お願いします。`,
-        );
+    insert(id, code);
+    interaction.editReply({
+        content: `${code}で覚えたでし！変更したい場合はもう一度登録すると上書きされるでし！`,
+        ephemeral: true,
     });
 }
