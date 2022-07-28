@@ -1,6 +1,6 @@
 const handleBan = require('./cmd/admin-cmd/ban.js');
 const handleBuki = require('./cmd/buki.js');
-const handleFriendCode = require('./cmd/friendcode.js');
+
 const handleSpecial = require('./cmd/special.js');
 const handleHelp = require('./cmd/help.js');
 const handleKansen = require('./cmd/kansen.js');
@@ -71,10 +71,6 @@ function call(msg) {
             break;
         case '!ban':
             handleBan(msg);
-            break;
-        case 'fc':
-        case 'fcadd':
-            handleFriendCode(msg);
             break;
         case 'stage':
             handleStageInfo(msg);

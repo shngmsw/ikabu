@@ -33,6 +33,7 @@ const handleIkabuExperience = require('./cmd/experience.js');
 const { commandNames } = require('../constant');
 const registerSlashCommands = require('../register.js');
 const { voiceLocker, voiceLockerUpdate } = require('./cmd/voice_locker.js');
+const { handleFriendCode } = require('./cmd/friendcode.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
@@ -171,6 +172,8 @@ async function onInteraction(interaction) {
                 await leagueRecruit(interaction);
             } else if (commandName === commandNames.salmon) {
                 await salmonRecruit(interaction);
+            } else if (commandName === commandNames.friend_code) {
+                await handleFriendCode(interaction);
             }
             return;
         }
