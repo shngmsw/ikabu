@@ -50,11 +50,7 @@ module.exports = function handleHelp(msg) {
                         },
                         {
                             name: 'ランダム系コマンド',
-                            value:
-                                'ブキをランダムで選出：```buki 複数の場合は数字を記入```\n' +
-                                'ブキ種別ごとのランダム選出方法を表示：```buki help```\n' +
-                                'Choose a weapon randomly:```weapon```\n' +
-                                'Choose a weapon randomly help:```weapon help```',
+                            value: 'ブキをランダムで選出：```buki 複数の場合は数字を記入```\n',
                         },
                         {
                             name: '選択肢の中からランダム選出',
@@ -67,10 +63,6 @@ module.exports = function handleHelp(msg) {
                         {
                             name: 'プラベの観戦者を抽出',
                             value: '```kansen 試合回数分の数字を記入```',
-                        },
-                        {
-                            name: 'アンケートを実施(スペースで区切れば何個でも)',
-                            value: '```poll 選択肢1 選択肢2```',
                         },
                         {
                             name: '自分のフレンドコードを表示',

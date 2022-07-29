@@ -40,11 +40,7 @@ function call(interaction) {
         case commandNames.voice_pick:
             handleVoicePick(interaction);
             break;
-        case 'poll':
-            handlePoll(interaction);
-            break;
-        case 'buki':
-        case 'weapon':
+        case commandNames.buki:
             handleBuki(interaction);
             break;
         case 'show':

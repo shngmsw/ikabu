@@ -8,6 +8,7 @@ module.exports = {
         timer: 'timer',
         pick: 'pick',
         voice_pick: 'vpick',
+        buki: 'buki',
         other_game: '別ゲー募集',
         regular: 'ナワバリ募集',
         league: 'リグマ募集',

@@ -58,6 +58,29 @@ const vpick = new SlashCommandBuilder()
     .addIntegerOption((option) =>
         option.setName('ピックする人数').setDescription('2人以上ピックしたい場合は指定してください。').setRequired(false),
     );
+
+const buki = new SlashCommandBuilder()
+    .setName(commandNames.buki)
+    .setDescription('ブキをランダムに抽出します。')
+    .addIntegerOption((option) => option.setName('ブキの数').setDescription('指定するとn個のブキをランダムに選びます。').setRequired(false))
+    .addStringOption((option) =>
+        option
+            .setName('ブキ種')
+            .setDescription('ブキ種を指定したい場合は指定できます。')
+            .setChoices(
+                { name: 'シューター', value: 'shooter' },
+                { name: 'ブラスター', value: 'blaster' },
+                { name: 'シェルター', value: 'brella' },
+                { name: 'フデ', value: 'brush' },
+                { name: 'チャージャー', value: 'charger' },
+                { name: 'マニューバー', value: 'maneuver' },
+                { name: 'リールガン', value: 'reelgun' },
+                { name: 'ローラー', value: 'roller' },
+                { name: 'スロッシャー', value: 'slosher' },
+                { name: 'スピナー', value: 'splatling' },
+            )
+            .setRequired(false),
+    );
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
@@ -296,6 +319,7 @@ const commands = [
     minutesTimer,
     pick,
     vpick,
+    buki,
     closeRecruit,
     otherGame,
     privateMatch,
