@@ -1,16 +1,13 @@
 const handleBan = require('./cmd/admin-cmd/ban.js');
 const handleBuki = require('./cmd/buki.js');
 
-const handleSpecial = require('./cmd/special.js');
 const handleHelp = require('./cmd/help.js');
 const handleKansen = require('./cmd/kansen.js');
 const handlePick = require('./cmd/pick.js');
 const handleOmikuji = require('./cmd/omikuji.js');
 const handlePoll = require('./cmd/poll.js');
-const handleRule = require('./cmd/rule.js');
 const handleShow = require('./cmd/show.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
-const handleSub = require('./cmd/sub.js');
 const handleTimer = require('./cmd/timer.js');
 const handleVoicePick = require('./cmd/vpick.js');
 const handleWiki = require('./cmd/wiki.js');
@@ -18,62 +15,52 @@ const { handleCreateRole, handleDeleteRole } = require('./cmd/admin-cmd/manageRo
 const handleDeleteCategory = require('./cmd/admin-cmd/deleteCategory.js');
 const handleDeleteChannel = require('./cmd/admin-cmd/deleteChannel.js');
 const handleCreateRoom = require('./cmd/admin-cmd/createRoom.js');
+const { commandNames } = require('../constant.js');
 
 module.exports = {
     call: call,
 };
 
-function call(msg) {
-    var strCmd = msg.content.replace(/　/g, ' ');
-    const args = strCmd.split(' ');
-    const command = args.shift().toLowerCase();
+function call(interaction) {
+    const { commandName } = interaction;
 
-    switch (command) {
-        case 'wiki':
-            handleWiki(msg, args[0]);
+    switch (commandName) {
+        case commandNames.wiki:
+            handleWiki(interaction);
             break;
         case 'kansen':
-            handleKansen(msg, args[0]);
+            handleKansen(interaction);
             break;
         case 'timer':
-            handleTimer(msg, args[0]);
+            handleTimer(interaction);
             break;
         case 'pick':
-            handlePick(msg);
+            handlePick(interaction);
             break;
         case 'omikuji':
-            handleOmikuji(msg);
+            handleOmikuji(interaction);
             break;
         case 'vpick':
-            handleVoicePick(msg);
+            handleVoicePick(interaction);
             break;
         case 'poll':
-            handlePoll(msg);
-            break;
-        case 'rule':
-            handleRule(msg);
-            break;
-        case 'sub':
-            handleSub(msg);
-            break;
-        case 'special':
-            handleSpecial(msg);
+            handlePoll(interaction);
             break;
         case 'buki':
         case 'weapon':
-            handleBuki(command, msg);
+            handleBuki(interaction);
             break;
         case 'show':
-            handleShow(msg, args[0]);
+            handleShow(interaction);
             break;
         case 'help':
-            handleHelp(msg);
+            handleHelp(interaction);
             break;
         case '!ban':
-            handleBan(msg);
+            handleBan(interaction);
             break;
         case 'stage':
-            handleStageInfo(msg);
+            handleStageInfo(interaction);
             break;
         case '!createroom':
             handleCreateRoom(msg);

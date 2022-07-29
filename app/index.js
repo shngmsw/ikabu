@@ -174,6 +174,8 @@ async function onInteraction(interaction) {
                 await salmonRecruit(interaction);
             } else if (commandName === commandNames.friend_code) {
                 await handleFriendCode(interaction);
+            } else {
+                Handler.call(interaction);
             }
             return;
         }
