@@ -44,6 +44,20 @@ const minutesTimer = new SlashCommandBuilder()
     .setDescription('分タイマー')
     .addIntegerOption((option) => option.setName('分').setDescription('〇〇分後まで1分ごとにカウントダウンします。').setRequired(true));
 
+const pick = new SlashCommandBuilder()
+    .setName(commandNames.pick)
+    .setDescription('選択肢の中からランダムに抽出します。')
+    .addStringOption((option) => option.setName('選択肢').setDescription('半角スペースで区切って入力してください。').setRequired(true))
+    .addIntegerOption((option) =>
+        option.setName('ピックする数').setDescription('2つ以上ピックしたい場合は指定してください。').setRequired(false),
+    );
+
+const vpick = new SlashCommandBuilder()
+    .setName(commandNames.voice_pick)
+    .setDescription('VCに接続しているメンバーからランダムに抽出します。')
+    .addIntegerOption((option) =>
+        option.setName('ピックする人数').setDescription('2人以上ピックしたい場合は指定してください。').setRequired(false),
+    );
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
@@ -280,6 +294,8 @@ const commands = [
     wiki,
     kansen,
     minutesTimer,
+    pick,
+    vpick,
     closeRecruit,
     otherGame,
     privateMatch,

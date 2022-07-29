@@ -34,13 +34,10 @@ function call(interaction) {
         case commandNames.timer:
             handleTimer(interaction);
             break;
-        case 'pick':
+        case commandNames.pick:
             handlePick(interaction);
             break;
-        case 'omikuji':
-            handleOmikuji(interaction);
-            break;
-        case 'vpick':
+        case commandNames.voice_pick:
             handleVoicePick(interaction);
             break;
         case 'poll':

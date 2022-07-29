@@ -6,6 +6,8 @@ module.exports = {
         wiki: 'wiki',
         kansen: 'kansen',
         timer: 'timer',
+        pick: 'pick',
+        voice_pick: 'vpick',
         other_game: '別ゲー募集',
         regular: 'ナワバリ募集',
         league: 'リグマ募集',
