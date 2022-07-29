@@ -28,10 +28,10 @@ function call(interaction) {
         case commandNames.wiki:
             handleWiki(interaction);
             break;
-        case 'kansen':
+        case commandNames.kansen:
             handleKansen(interaction);
             break;
-        case 'timer':
+        case commandNames.timer:
             handleTimer(interaction);
             break;
         case 'pick':

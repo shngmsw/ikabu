@@ -39,6 +39,11 @@ const kansen = new SlashCommandBuilder()
         option.setName('回数').setDescription('何回分の組み合わせを抽出するかを指定します。5回がおすすめ').setRequired(true),
     );
 
+const minutesTimer = new SlashCommandBuilder()
+    .setName(commandNames.timer)
+    .setDescription('分タイマー')
+    .addIntegerOption((option) => option.setName('分').setDescription('〇〇分後まで1分ごとにカウントダウンします。').setRequired(true));
+
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
@@ -269,7 +274,19 @@ const otherGame = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 
-const commands = [voiceLock, friendCode, wiki, kansen, closeRecruit, otherGame, privateMatch, regularMatch, leagueMatch, salmonRun];
+const commands = [
+    voiceLock,
+    friendCode,
+    wiki,
+    kansen,
+    minutesTimer,
+    closeRecruit,
+    otherGame,
+    privateMatch,
+    regularMatch,
+    leagueMatch,
+    salmonRun,
+];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');
