@@ -1,8 +1,14 @@
 const wiki = require('wikijs').default;
 const { MessageEmbed } = require('discord.js');
 
-module.exports = async function handleWiki(msg, word) {
+module.exports = async function handleWiki(interaction) {
     try {
+        if (!interaction.isCommand()) return;
+        // 'インタラクションに失敗'が出ないようにするため
+        await interaction.deferReply();
+
+        const { options } = interaction;
+        const word = options.getString('キーワード');
         let wikipedia = wiki({ apiUrl: 'http://ja.wikipedia.org/w/api.php' });
         let data = await wikipedia.search(word);
         let page = await wikipedia.page(data.results[0]);
@@ -19,7 +25,7 @@ module.exports = async function handleWiki(msg, word) {
             })
             .setImage(decodeURI(imageURL));
 
-        msg.channel.send({ embeds: [embed] });
+        interaction.editReply({ embeds: [embed] });
     } catch (err) {
         console.log(err.name + ': ' + err.message);
     }

@@ -3,6 +3,7 @@ module.exports = {
         voice_channel: 'voice_channel',
         close: 'close',
         friend_code: 'friend_code',
+        wiki: 'wiki',
         other_game: '別ゲー募集',
         regular: 'ナワバリ募集',
         league: 'リグマ募集',
