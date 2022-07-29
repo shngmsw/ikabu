@@ -43,7 +43,7 @@ function call(interaction) {
         case commandNames.buki:
             handleBuki(interaction);
             break;
-        case 'show':
+        case commandNames.show:
             handleShow(interaction);
             break;
         case 'help':

@@ -81,6 +81,15 @@ const buki = new SlashCommandBuilder()
             )
             .setRequired(false),
     );
+
+const show = new SlashCommandBuilder()
+    .setName(commandNames.show)
+    .setDescription('ステージ情報を表示')
+    .addSubcommand((subcommand) => subcommand.setName('now').setDescription('現在のリグマ、ガチマのステージ情報を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('next').setDescription('次のリグマ、ガチマのステージ情報を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('nawabari').setDescription('現在のナワバリステージ情報を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('run').setDescription('現在のシフトを表示'));
+
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
@@ -320,6 +329,7 @@ const commands = [
     pick,
     vpick,
     buki,
+    show,
     closeRecruit,
     otherGame,
     privateMatch,
