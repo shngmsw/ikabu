@@ -4,6 +4,7 @@ module.exports = {
         close: 'close',
         friend_code: 'friend_code',
         wiki: 'wiki',
+        kansen: 'kansen',
         other_game: '別ゲー募集',
         regular: 'ナワバリ募集',
         league: 'リグマ募集',

@@ -1,18 +1,19 @@
 const { MessageEmbed } = require('discord.js');
 const { Combination } = require('js-combinatorics');
-const common = require('../common.js');
 
-module.exports = async function handleKansen(msg, args) {
-    var how_many_times = Number(args);
+module.exports = async function handleKansen(interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+
+    const { options } = interaction;
+    const how_many_times = options.getInteger('回数');
+
     var resultList = new Array();
     var cmb = new Combination(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], 2);
     var tmp_watching_list = cmb.toArray();
-    var result = '';
-    if (!common.isInteger(how_many_times) || how_many_times <= 0) {
-        msg.reply('1以上の整数じゃないとダメでし！');
-        return;
-    } else if (how_many_times > 20) {
-        msg.reply('20回未満じゃないとダメでし！');
+    if (how_many_times > 20) {
+        interaction.followUp({ content: '20回未満じゃないとダメでし！', ephemeral: true });
         return;
     }
 
@@ -54,5 +55,5 @@ module.exports = async function handleKansen(msg, args) {
     }
 
     var emb = new MessageEmbed().setColor(0xf02d7d).addFields([{ name: '観戦の人', value: resultList.join('\n') }]);
-    await msg.channel.send({ embeds: [emb] });
+    await interaction.editReply({ embeds: [emb] });
 };

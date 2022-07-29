@@ -26,10 +26,18 @@ const friendCode = new SlashCommandBuilder()
                 option.setName('user').setDescription('フレンドコードを表示したい人を指定してください。').setRequired(true),
             ),
     );
+
 const wiki = new SlashCommandBuilder()
     .setName(commandNames.wiki)
     .setDescription('wikipediaで調べる')
     .addStringOption((option) => option.setName('キーワード').setDescription('調べたいキーワードを入力').setRequired(true));
+
+const kansen = new SlashCommandBuilder()
+    .setName(commandNames.kansen)
+    .setDescription('プラベの観戦する人をランダムな組み合わせで抽出します。')
+    .addIntegerOption((option) =>
+        option.setName('回数').setDescription('何回分の組み合わせを抽出するかを指定します。5回がおすすめ').setRequired(true),
+    );
 
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
@@ -261,7 +269,7 @@ const otherGame = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 
-const commands = [voiceLock, friendCode, wiki, closeRecruit, otherGame, privateMatch, regularMatch, leagueMatch, salmonRun];
+const commands = [voiceLock, friendCode, wiki, kansen, closeRecruit, otherGame, privateMatch, regularMatch, leagueMatch, salmonRun];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');
