@@ -15,6 +15,10 @@ module.exports = async function handleWiki(interaction) {
         let summary = await page.summary();
         let imageURL = await page.mainImage();
         let url = page.url();
+        if (summary === '') {
+            interaction.followUp({ content: '見つからなかったでし！', ephemeral: false });
+            return;
+        }
         const embed = new MessageEmbed()
             .setTitle(page.raw.title)
             .setURL(decodeURI(url))
