@@ -44,14 +44,11 @@ async function selectFriendCode(interaction) {
         }
     }
     if (result.length > 0) {
-        interaction.followUp({
-            content: '自己紹介チャンネルから引用してきたでし！',
-        });
         let embeds = [];
         for (var r of result) {
             embeds.push(composeEmbed(targetUser, r, false));
         }
-        interaction.followUp({
+        interaction.editReply({
             embeds: embeds,
         });
     } else {
