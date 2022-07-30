@@ -1,12 +1,13 @@
 const { MessageEmbed } = require('discord.js');
 
-module.exports = function handleHelp(msg) {
-    var strCmd = msg.content.replace(/　/g, ' ');
-    strCmd = strCmd.replace('  ', ' ');
-    const args = strCmd.split(' ');
-    args.shift();
-    if (args[0] == 'voice') {
-        msg.channel.send({
+module.exports = async function handleHelp(interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+    const { options } = interaction;
+    const subCommand = options.getSubcommand();
+    if (subCommand === 'voice') {
+        interaction.editReply({
             embeds: [
                 new MessageEmbed()
                     .setAuthor({
@@ -17,25 +18,25 @@ module.exports = function handleHelp(msg) {
                     .addFields([
                         {
                             name: 'ボイスチャンネルにブキチを参加',
-                            value: '```!join```\n',
+                            value: '```/join```\n',
                         },
                         {
                             name: 'APIで利用可能な音声タイプを一覧表示します',
-                            value: '```!type```\n',
+                            value: '```/type```\n',
                         },
                         {
                             name: '音声タイプを変更します',
-                            value: '```!voice```\n',
+                            value: '```/voice```\n',
                         },
                         {
                             name: 'ボイスチャンネルからブキチを切断',
-                            value: '```!kill```\n',
+                            value: '```/kill```\n',
                         },
                     ]),
             ],
         });
-    } else if (args[0] == '2') {
-        msg.channel.send({
+    } else if (subCommand === 'other') {
+        interaction.editReply({
             embeds: [
                 new MessageEmbed()
                     .setAuthor({
@@ -46,45 +47,45 @@ module.exports = function handleHelp(msg) {
                     .addFields([
                         {
                             name: 'ステージ情報を表示[now / next / nawabari / run]',
-                            value: '```show ○○○```\n',
+                            value: '```/show ○○○```\n',
                         },
                         {
                             name: 'ランダム系コマンド',
-                            value: 'ブキをランダムで選出：```buki 複数の場合は数字を記入```\n',
+                            value: 'ブキをランダムで選出：```/buki 複数の場合は数字を記入```\n',
                         },
                         {
                             name: '選択肢の中からランダム選出',
-                            value: '```pick 複数選出の場合は数字を記入 選択肢を半スペ空け or 改行して記入```',
+                            value: '```/pick 複数選出の場合は数字を記入 選択肢を半スペ空け or 改行して記入```',
                         },
                         {
                             name: '接続してるボイチャから数字分のヒトをランダム抽出',
-                            value: '```vpick 複数選出の場合は数字を記入```',
+                            value: '```/vpick 複数選出の場合は数字を記入```',
                         },
                         {
                             name: 'プラベの観戦者を抽出',
-                            value: '```kansen 試合回数分の数字を記入```',
+                            value: '```/kansen 試合回数分の数字を記入```',
                         },
                         {
                             name: '自分のフレンドコードを表示',
-                            value: '```fc @自分```\n「フレンドコード」チャンネルの直近100件に書いてあればそちらを優先します。',
+                            value: '```/friend_code show @自分```\n「自己紹介」チャンネルの直近100件に書いてあればそちらを優先します。',
                         },
                         {
                             name: '自分のフレンドコードを登録',
-                            value: '```fcadd 0000-0000-0000```\nもう一度登録すると上書きされます。他人のは登録できません。',
+                            value: '```/friend_code add 0000-0000-0000```\nもう一度登録すると上書きされます。他人のは登録できません。',
                         },
                         {
                             name: '自分のイカ部歴を表示',
-                            value: '```@ブキチ イカ部歴```\n',
+                            value: '```/イカ部歴```\n',
                         },
                         {
                             name: 'wikipediaで調べる',
-                            value: '```wiki 〇〇```',
+                            value: '```/wiki 〇〇```',
                         },
                     ]),
             ],
         });
-    } else {
-        msg.channel.send({
+    } else if (subCommand === 'recruit') {
+        interaction.editReply({
             embeds: [
                 new MessageEmbed()
                     .setAuthor({
@@ -95,7 +96,7 @@ module.exports = function handleHelp(msg) {
                     .addFields([
                         {
                             name: 'botのコマンド一覧を表示',
-                            value: '```help または help 2 または help voice```',
+                            value: '```/help recruit または /help other または /help voice```',
                         },
                         {
                             name: 'プラベ募集コマンド',
@@ -124,7 +125,7 @@ module.exports = function handleHelp(msg) {
                         {
                             name: '別ゲー募集コマンド',
                             value:
-                                'Dead by Daylight：```/dbd 募集人数 参加条件があれば記載```\n' +
+                                'Dead by Daylight：```/別ゲー募集 dbd 募集人数 参加条件があれば記載```\n' +
                                 'VALORANT：```/別ゲー募集 valo 募集人数 参加条件があれば記載```\n' +
                                 'モンスターハンターライズ：```/別ゲー募集 mhr 募集人数 参加条件があれば記載```\n' +
                                 'ApexLegends：```/別ゲー募集 apex 募集人数 参加条件があれば記載```\n' +

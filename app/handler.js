@@ -46,7 +46,7 @@ function call(interaction) {
         case commandNames.show:
             handleShow(interaction);
             break;
-        case 'help':
+        case commandNames.help:
             handleHelp(interaction);
             break;
         case '!ban':

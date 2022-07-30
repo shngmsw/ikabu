@@ -90,6 +90,13 @@ const show = new SlashCommandBuilder()
     .addSubcommand((subcommand) => subcommand.setName('nawabari').setDescription('現在のナワバリステージ情報を表示'))
     .addSubcommand((subcommand) => subcommand.setName('run').setDescription('現在のシフトを表示'));
 
+const help = new SlashCommandBuilder()
+    .setName(commandNames.help)
+    .setDescription('ヘルプを表示します。')
+    .addSubcommand((subcommand) => subcommand.setName('recruit').setDescription('募集コマンドの使い方を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('voice').setDescription('読み上げ機能のヘルプを表示'))
+    .addSubcommand((subcommand) => subcommand.setName('other').setDescription('募集コマンド以外の使い方を表示'));
+
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
@@ -330,6 +337,7 @@ const commands = [
     vpick,
     buki,
     show,
+    help,
     closeRecruit,
     otherGame,
     privateMatch,
