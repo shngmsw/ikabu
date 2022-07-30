@@ -29,6 +29,7 @@ module.exports = async function handleBan(interaction) {
 
         const banChannel = interaction.guild.channels.cache.find((channel) => channel.name === 'banコマンド');
         banChannel.send(`${member.user.tag}さんを以下の理由によりBANしました。\n` + reasonText);
+        interaction.editReply('BANしたでし！');
     } else {
         return interaction.editReply('BANする権限がないでし！');
     }
