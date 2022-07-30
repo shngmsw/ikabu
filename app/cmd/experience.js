@@ -12,9 +12,12 @@ const backgroundImgPaths = [
     './images/1month.jpg',
 ];
 const colorCodes = ['#db4240', '#9849c9', '#2eddff', '#5d8e9c', '#f0c46e', '#86828f', '#ad745c'];
-module.exports = async function handleIkabuExperience(msg) {
-    let author = msg.author;
-    const member = msg.guild.members.cache.get(author.id);
+module.exports = async function handleIkabuExperience(interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+    let author = interaction.member;
+    const member = interaction.guild.members.cache.get(author.id);
     const joinDate = member.joinedAt;
     let today = new Date();
 
@@ -106,7 +109,7 @@ module.exports = async function handleIkabuExperience(msg) {
 
     const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'ikabu_experience.png');
 
-    msg.reply({ files: [attachment] });
+    interaction.editReply({ files: [attachment] });
 };
 
 const userText = (canvas, text) => {

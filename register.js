@@ -154,6 +154,7 @@ const chManager = new SlashCommandBuilder()
             ),
     );
 
+const experience = new SlashCommandBuilder().setName(commandNames.experience).setDescription('イカ部歴を表示します。');
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');

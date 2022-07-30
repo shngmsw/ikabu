@@ -68,9 +68,6 @@ client.on('messageCreate', async (msg) => {
     suggestionBox.init(msg);
     chatCountUp(msg);
     removeRookie(msg);
-    if (msg.mentions.has(client.user) && msg.content.includes('イカ部歴')) {
-        handleIkabuExperience(msg);
-    }
 });
 
 client.on('guildMemberAdd', (member) => {
@@ -174,6 +171,8 @@ async function onInteraction(interaction) {
                 await salmonRecruit(interaction);
             } else if (commandName === commandNames.friend_code) {
                 await handleFriendCode(interaction);
+            } else if (commandName === commandNames.experience) {
+                handleIkabuExperience(interaction);
             } else {
                 Handler.call(interaction);
             }
