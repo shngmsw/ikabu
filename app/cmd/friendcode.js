@@ -8,7 +8,7 @@ module.exports = {
 async function handleFriendCode(interaction) {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ ephemeral: false });
 
     const options = interaction.options;
     const subCommand = options.getSubcommand();
@@ -36,7 +36,7 @@ async function selectFriendCode(interaction) {
             ephemeral: true,
         });
         if (fc[0] != null) {
-            interaction.followUp({
+            interaction.editReply({
                 embeds: [composeEmbed(targetUser, fc[0].code, true)],
                 ephemeral: false,
             });
