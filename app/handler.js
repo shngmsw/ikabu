@@ -49,7 +49,7 @@ function call(interaction) {
         case commandNames.help:
             handleHelp(interaction);
             break;
-        case '!ban':
+        case commandNames.ban:
             handleBan(interaction);
             break;
         case 'stage':

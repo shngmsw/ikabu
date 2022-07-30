@@ -97,6 +97,12 @@ const help = new SlashCommandBuilder()
     .addSubcommand((subcommand) => subcommand.setName('voice').setDescription('読み上げ機能のヘルプを表示'))
     .addSubcommand((subcommand) => subcommand.setName('other').setDescription('募集コマンド以外の使い方を表示'));
 
+const ban = new SlashCommandBuilder()
+    .setName(commandNames.ban)
+    .setDescription('banします。')
+    .addUserOption((option) => option.setName('ban対象').setDescription('banする人を指定してください。').setRequired(true))
+    .addStringOption((option) => option.setName('ban理由').setDescription('ban対象の人にブキチがDMします。').setRequired(true));
+
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
@@ -338,6 +344,7 @@ const commands = [
     buki,
     show,
     help,
+    ban,
     closeRecruit,
     otherGame,
     privateMatch,
