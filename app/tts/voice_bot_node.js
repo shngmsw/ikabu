@@ -22,6 +22,7 @@ const voiceLists1 = {
     bear: '凶暴なクマ',
     show: 'ショウ（男性）',
 };
+
 const modeList1 = {
     1: 'HOYA VoiceText API',
 };
@@ -68,6 +69,7 @@ async function mode_api(msg) {
         if (replacedMessage.length == 0) {
             return null;
         }
+        console.log({ replacedMessage });
         pitch = pitchList[selectPitch];
         speed = speedList[selectSpeed];
         return voiceText.fetchBuffer(replacedMessage, {
@@ -170,66 +172,17 @@ async function messageReplace(message) {
     return yomiage_message;
 }
 
-async function setting(message) {
-    if (!message.guild) return;
+async function setting(interaction) {
+    if (!interaction.isCommand()) return;
+    if (!interaction.guild) return;
+    const { options } = interaction;
+    const subCommand = options.getSubcommand();
 
-    if (message.content.indexOf(`${prefix}mode`) === 0) {
-        const split = message.content.split(' ');
-        if (1 < split.length) {
-            if (modeList1[split[1]] != null) {
-                mode = Number(split[1]);
-                const modeMessage = `読み上げAPIを${split[1]} : ${modeList1[split[1]]}に設定したでし`;
-                message.reply(modeMessage);
-                yomiage({
-                    message: modeMessage,
-                    cons: context,
-                });
-            } else {
-                mode = Number(split[1]);
-                message.reply(`指定されたAPIが不正でし指定可能なAPIは${prefix}modeで見ることが可能でし`);
-            }
-        } else {
-            let modeNames = `\n以下のAPIに切り替え可能でし 指定時の例：${prefix}mode 1\n`;
-            for (const indexes in modeList1) {
-                modeNames = `${modeNames + indexes} -> ${modeList1[indexes]}\n`;
-            }
-            message.reply(modeNames);
-        }
-    }
+    if (subCommand != null && subCommand === 'type') {
+        const type = options.getString('音声の種類');
+        voicePattern1 = type;
+        const voiceMessage = `読み上げ音声を${voiceLists1[type]}に設定したでし`;
 
-    if (message.content === `${prefix}type`) {
-        let typeMessage = '\n音声タイプ -> その説明\n';
-        if (mode === 1) {
-            for (const voiceLists1Key in voiceLists1) {
-                typeMessage = `${typeMessage + voiceLists1Key}->${voiceLists1[voiceLists1Key]}\n`;
-            }
-        } else {
-            typeMessage = `${typeMessage}APIが不正でし`;
-        }
-        message.reply(typeMessage);
-    }
-
-    if (message.content.indexOf(`${prefix}voice`) === 0) {
-        const split = message.content.split(' ');
-        if (mode === 1) {
-            if (1 < split.length) {
-                if (voiceLists1[split[1]] != null) {
-                    voicePattern1 = split[1];
-                    const voiceMessage = `読み上げ音声を${split[1]} : ${voiceLists1[split[1]]}に設定したでし`;
-                    message.reply(voiceMessage);
-                } else {
-                    message.reply(`指定された読み上げ音声タイプが不正でし指定可能な音声タイプは${prefix}typeで見ることが可能でし`);
-                }
-            } else {
-                message.reply(
-                    `読み上げ音声タイプを指定する必要があるでし例：${prefix}voice hikari 指定可能な音声タイプは${prefix}typeで見ることが可能でし`,
-                );
-            }
-        }
-    }
-
-    if (message.content === `${prefix}reload`) {
-        config = conf.reloadConfigs();
-        if (readConfig()) message.channel.send('コンフィグを再読み込みしたでし');
+        interaction.followUp(voiceMessage);
     }
 }
