@@ -23,6 +23,7 @@ module.exports = {
 
 function call(interaction) {
     const { commandName } = interaction;
+    const { options } = interaction;
 
     switch (commandName) {
         case commandNames.wiki:
@@ -52,23 +53,24 @@ function call(interaction) {
         case commandNames.ban:
             handleBan(interaction);
             break;
-        case 'stage':
-            handleStageInfo(interaction);
-            break;
-        case '!createroom':
-            handleCreateRoom(msg);
-            break;
-        case '!createrole':
-            handleCreateRole(msg);
-            break;
-        case '!deletecategory':
-            handleDeleteCategory(msg);
-            break;
-        case '!deletechannel':
-            handleDeleteChannel(msg);
-            break;
-        case '!deleterole':
-            handleDeleteRole(msg);
-            break;
+        case commandNames.ch_manager:
+            const subCommand = options.getSubcommand();
+            switch (subCommand) {
+                case 'チャンネル作成':
+                    handleCreateRoom(interaction);
+                    break;
+                case 'ロール作成':
+                    handleCreateRole(interaction);
+                    break;
+                case 'カテゴリー削除':
+                    handleDeleteCategory(interaction);
+                    break;
+                case 'チャンネル削除':
+                    handleDeleteChannel(interaction);
+                    break;
+                case 'ロール削除':
+                    handleDeleteRole(interaction);
+                    break;
+            }
     }
 }

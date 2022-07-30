@@ -31,10 +31,6 @@ async function selectFriendCode(interaction) {
 
     if (result.length == 0) {
         let fc = await getFC(id);
-        interaction.followUp({
-            content: '登録済みのフレンドコードがあったでし！',
-            ephemeral: true,
-        });
         if (fc[0] != null) {
             interaction.editReply({
                 embeds: [composeEmbed(targetUser, fc[0].code, true)],
