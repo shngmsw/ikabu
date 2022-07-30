@@ -26,6 +26,161 @@ const friendCode = new SlashCommandBuilder()
                 option.setName('user').setDescription('フレンドコードを表示したい人を指定してください。').setRequired(true),
             ),
     );
+
+const wiki = new SlashCommandBuilder()
+    .setName(commandNames.wiki)
+    .setDescription('wikipediaで調べる')
+    .addStringOption((option) => option.setName('キーワード').setDescription('調べたいキーワードを入力').setRequired(true));
+
+const kansen = new SlashCommandBuilder()
+    .setName(commandNames.kansen)
+    .setDescription('プラベの観戦する人をランダムな組み合わせで抽出します。')
+    .addIntegerOption((option) =>
+        option.setName('回数').setDescription('何回分の組み合わせを抽出するかを指定します。5回がおすすめ').setRequired(true),
+    );
+
+const minutesTimer = new SlashCommandBuilder()
+    .setName(commandNames.timer)
+    .setDescription('分タイマー')
+    .addIntegerOption((option) => option.setName('分').setDescription('〇〇分後まで1分ごとにカウントダウンします。').setRequired(true));
+
+const pick = new SlashCommandBuilder()
+    .setName(commandNames.pick)
+    .setDescription('選択肢の中からランダムに抽出します。')
+    .addStringOption((option) => option.setName('選択肢').setDescription('半角スペースで区切って入力してください。').setRequired(true))
+    .addIntegerOption((option) =>
+        option.setName('ピックする数').setDescription('2つ以上ピックしたい場合は指定してください。').setRequired(false),
+    );
+
+const vpick = new SlashCommandBuilder()
+    .setName(commandNames.voice_pick)
+    .setDescription('VCに接続しているメンバーからランダムに抽出します。')
+    .addIntegerOption((option) =>
+        option.setName('ピックする人数').setDescription('2人以上ピックしたい場合は指定してください。').setRequired(false),
+    );
+
+const buki = new SlashCommandBuilder()
+    .setName(commandNames.buki)
+    .setDescription('ブキをランダムに抽出します。')
+    .addIntegerOption((option) => option.setName('ブキの数').setDescription('指定するとn個のブキをランダムに選びます。').setRequired(false))
+    .addStringOption((option) =>
+        option
+            .setName('ブキ種')
+            .setDescription('ブキ種を指定したい場合は指定できます。')
+            .setChoices(
+                { name: 'シューター', value: 'shooter' },
+                { name: 'ブラスター', value: 'blaster' },
+                { name: 'シェルター', value: 'brella' },
+                { name: 'フデ', value: 'brush' },
+                { name: 'チャージャー', value: 'charger' },
+                { name: 'マニューバー', value: 'maneuver' },
+                { name: 'リールガン', value: 'reelgun' },
+                { name: 'ローラー', value: 'roller' },
+                { name: 'スロッシャー', value: 'slosher' },
+                { name: 'スピナー', value: 'splatling' },
+            )
+            .setRequired(false),
+    );
+
+const show = new SlashCommandBuilder()
+    .setName(commandNames.show)
+    .setDescription('ステージ情報を表示')
+    .addSubcommand((subcommand) => subcommand.setName('now').setDescription('現在のリグマ、ガチマのステージ情報を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('next').setDescription('次のリグマ、ガチマのステージ情報を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('nawabari').setDescription('現在のナワバリステージ情報を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('run').setDescription('現在のシフトを表示'));
+
+const help = new SlashCommandBuilder()
+    .setName(commandNames.help)
+    .setDescription('ヘルプを表示します。')
+    .addSubcommand((subcommand) => subcommand.setName('recruit').setDescription('募集コマンドの使い方を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('voice').setDescription('読み上げ機能のヘルプを表示'))
+    .addSubcommand((subcommand) => subcommand.setName('other').setDescription('募集コマンド以外の使い方を表示'));
+
+const ban = new SlashCommandBuilder()
+    .setName(commandNames.ban)
+    .setDescription('banします。')
+    .addUserOption((option) => option.setName('ban対象').setDescription('banする人を指定してください。').setRequired(true))
+    .addStringOption((option) => option.setName('ban理由').setDescription('ban対象の人にブキチがDMします。').setRequired(true));
+
+const chManager = new SlashCommandBuilder()
+    .setName(commandNames.ch_manager)
+    .setDescription('チャンネルを作ったり削除したり')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('チャンネル作成')
+            .setDescription('チャンネル一括作成')
+            .addAttachmentOption((option) =>
+                option
+                    .setName('csv')
+                    .setDescription('CSV（ヘッダー有り）:catID,catName,chID,chName,chType,roleID,roleName,roleColor,member1,member2,member')
+                    .setRequired(true),
+            ),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('ロール作成')
+            .setDescription('ロール作成')
+            .addStringOption((option) => option.setName('ロール名').setDescription('ロール名を指定してください。').setRequired(true))
+            .addStringOption((option) =>
+                option.setName('ロールカラー').setDescription('カラーコードをhexで入力してください。').setRequired(false),
+            ),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('ロール削除')
+            .setDescription('ロール削除')
+            .addMentionableOption((option) => option.setName('ロール名1').setDescription('ロール名を指定してください。').setRequired(true))
+            .addMentionableOption((option) => option.setName('ロール名2').setDescription('ロール名を指定してください。').setRequired(false))
+            .addMentionableOption((option) =>
+                option.setName('ロール名3').setDescription('ロール名を指定してください。').setRequired(false),
+            ),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('カテゴリー削除')
+            .setDescription('カテゴリー削除')
+            .addAttachmentOption((option) => option.setName('csv').setDescription('csv').setRequired(false))
+            .addStringOption((option) =>
+                option.setName('カテゴリーid').setDescription('カテゴリーIDを半角スペース区切りで指定').setRequired(false),
+            ),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('チャンネル削除')
+            .setDescription('チャンネル削除')
+            .addStringOption((option) =>
+                option.setName('チャンネルid').setDescription('チャンネルIDをを半角スペース区切りで指定').setRequired(true),
+            ),
+    );
+
+const experience = new SlashCommandBuilder().setName(commandNames.experience).setDescription('イカ部歴を表示します。');
+
+const voice = new SlashCommandBuilder()
+    .setName(commandNames.voice)
+    .setDescription('テキストチャットの読み上げコマンド')
+    .addSubcommand((subcommand) => subcommand.setName('join').setDescription('読み上げを開始'))
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('type')
+            .setDescription('読み上げボイスの種類を変更します。')
+            .addStringOption((option) =>
+                option
+                    .setName('音声の種類')
+                    .setDescription('声の種類を選択してください。')
+                    .setChoices(
+                        { name: 'ひかり（女性）', value: 'hikari' },
+                        { name: 'はるか（女性）', value: 'haruka' },
+                        { name: 'たける（男性）', value: 'takeru' },
+                        { name: 'サンタ', value: 'santa' },
+                        { name: '凶暴なクマ', value: 'bear' },
+                        { name: 'ショウ（男性）', value: 'show' },
+                    )
+                    .setRequired(true),
+            ),
+    )
+    .addSubcommand((subcommand) => subcommand.setName('kill').setDescription('読み上げを終了'));
+
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
@@ -256,7 +411,28 @@ const otherGame = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 
-const commands = [voiceLock, friendCode, closeRecruit, otherGame, privateMatch, regularMatch, leagueMatch, salmonRun];
+const commands = [
+    voiceLock,
+    friendCode,
+    wiki,
+    kansen,
+    minutesTimer,
+    pick,
+    vpick,
+    buki,
+    show,
+    help,
+    ban,
+    chManager,
+    experience,
+    voice,
+    closeRecruit,
+    otherGame,
+    privateMatch,
+    regularMatch,
+    leagueMatch,
+    salmonRun,
+];
 
 //登録用関数
 const { REST } = require('@discordjs/rest');

@@ -3,15 +3,19 @@ const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
 const { searchChannelById } = require('../../manager/channelManager.js');
 
-module.exports = async function handleDeleteChannel(msg) {
-    if (!msg.member.permissions.has('MANAGE_CHANNELS')) {
-        return msg.reply('チャンネルを管理する権限がないでし！');
-    }
+module.exports = async function handleDeleteChannel(interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
 
-    var strCmd = msg.content.replace(/　/g, ' ');
-    strCmd = strCmd.replace('\x20+', ' ');
+    if (!interaction.member.permissions.has('MANAGE_CHANNELS')) {
+        return interaction.followUp('チャンネルを管理する権限がないでし！');
+    }
+    const { options } = interaction;
+    const categoryIds = options.getString('チャンネルid');
+
+    let strCmd = categoryIds.replace('\x20+', ' ');
     const splits = strCmd.split(' ');
-    splits.shift();
     var channelIdList = [];
     for (var argument of splits) {
         if (argument != '') {
@@ -20,17 +24,17 @@ module.exports = async function handleDeleteChannel(msg) {
     }
 
     if (channelIdList.length == 0) {
-        return msg.reply('削除したいチャンネルのIDを入れるでし！');
+        return interaction.followUp('削除したいチャンネルのIDを入れるでし！');
     }
 
-    msg.channel.send('指定されたIDのチャンネルを削除中でし！\nちょっと待つでし！');
+    interaction.editReply('指定されたIDのチャンネルを削除中でし！\nちょっと待つでし！');
 
-    const guild = msg.guild;
+    const guild = interaction.guild;
     var removed = [];
 
     removed.push(['チャンネルID', 'チャンネル名']);
 
-    const progressMsg = await msg.channel.send('0% 完了');
+    await interaction.editReply('0% 完了');
 
     channelIdList = Array.from(new Set(channelIdList));
 
@@ -57,18 +61,18 @@ module.exports = async function handleDeleteChannel(msg) {
             }
             removed.push([channelIdList[i], channelName]);
 
-            await progressMsg.edit(parseInt(((+i + 1) / channelIdList.length) * 100, 10) + '% 完了');
+            await interaction.editReply(parseInt(((+i + 1) / channelIdList.length) * 100, 10) + '% 完了');
         }
     } catch (error) {
         console.error(error);
-        msg.reply('チャンネル削除中にエラーでし！');
+        interaction.followUp('チャンネル削除中にエラーでし！');
     }
 
     const csvString = stringify(removed);
     fs.writeFileSync('./temp/temp.csv', csvString);
     const attachment = new MessageAttachment('./temp/temp.csv', 'removed_channel.csv');
 
-    msg.reply({
+    interaction.followUp({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
         files: [attachment],
     });

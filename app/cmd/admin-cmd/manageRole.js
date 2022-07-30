@@ -3,90 +3,77 @@ const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
 const { createRole, searchRoleById, setColorToRole } = require('../../manager/roleManager.js');
 
-module.exports.handleCreateRole = async function (msg) {
-    if (!msg.member.permissions.has('MANAGE_ROLES')) {
-        return msg.reply('ロールを管理する権限がないでし！');
+module.exports.handleCreateRole = async function (interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+    const { options } = interaction;
+
+    if (!interaction.member.permissions.has('MANAGE_ROLES')) {
+        return interaction.editReply('ロールを管理する権限がないでし！');
     }
 
     try {
-        var strCmd = msg.content.replace(/　/g, ' ');
-        strCmd = strCmd.replace('\x20+', ' ');
-        const splits = strCmd.split(' ');
-        splits.shift();
-        var args = [];
-        for (var argument of splits) {
-            if (argument != '') {
-                args.push(argument);
-            }
-        }
+        let roleName = options.getString('ロール名');
+        let colorInput = options.getString('ロールカラー');
 
-        var roleName;
-        var colorInput;
-
-        if (args.length == 0) {
-            return msg.reply('作成するロール名を入力するでし！\n`[usage]: !createrole ロール名 [カラーコード(option)]`');
-        } else if (args.length == 1) {
-            roleName = args[0];
+        if (!colorInput.match('^#([\\da-fA-F]{6})$')) {
+            interaction.followUp(
+                '`' + colorInput + '`はカラーコードじゃないでし！\n`[ex]: #5d4efd, #111`\n色はこっちで決めさせてもらうでし！',
+            );
             colorInput = null;
-        } else {
-            roleName = args[0];
-            if (args[1].match('^#([\\da-fA-F]{6})$')) {
-                colorInput = args[1];
-            } else {
-                colorInput = null;
-                msg.channel.send(
-                    '`' + args[1] + '`はカラーコードじゃないでし！\n`[ex]: #5d4efd, #111`\n色はこっちで決めさせてもらうでし！',
-                );
-            }
         }
 
-        if (searchRoleIdByName(msg.guild, roleName) != null) {
-            return msg.reply('その名前のロールはもうあるでし！\n別のロール名を使うでし！');
+        if (searchRoleIdByName(interaction.guild, roleName) != null) {
+            return interaction.followUp('その名前のロールはもうあるでし！\n別のロール名を使うでし！');
         }
 
-        var roleId = await createRole(msg.guild, roleName);
+        var roleId = await createRole(interaction.guild, roleName);
 
-        await msg.guild.roles.fetch();
+        await interaction.guild.roles.fetch();
 
-        var role = searchRoleById(msg.guild, roleId);
-        var colorCode = await setColorToRole(msg.guild, role, colorInput);
+        var role = searchRoleById(interaction.guild, roleId);
+        var colorCode = await setColorToRole(interaction.guild, role, colorInput);
         role.setHoist(true);
 
-        msg.reply('ロール名`' + role.name + '`を作ったでし！\nロールIDは`' + roleId + '`、カラーコードは`' + colorCode + '`でし！');
+        interaction.followUp(
+            'ロール名`' + role.name + '`を作ったでし！\nロールIDは`' + roleId + '`、カラーコードは`' + colorCode + '`でし！',
+        );
     } catch (error) {
         console.error(error);
-        msg.channel.send('なんかエラーでてるわ');
+        interaction.followUp('なんかエラーでてるわ');
     }
 };
 
-module.exports.handleDeleteRole = async function (msg) {
-    if (!msg.member.permissions.has('MANAGE_ROLES')) {
-        return msg.reply('ロールを管理する権限がないでし！');
+module.exports.handleDeleteRole = async function (interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+    const { options } = interaction;
+    if (!interaction.member.permissions.has('MANAGE_ROLES')) {
+        return interaction.editReply('ロールを管理する権限がないでし！');
     }
 
-    var strCmd = msg.content.replace(/　/g, ' ');
-    strCmd = strCmd.replace('\x20+', ' ');
-    const splits = strCmd.split(' ');
-    splits.shift();
     var roleIdList = [];
-    for (var argument of splits) {
-        if (argument != '') {
-            roleIdList.push(argument);
-        }
+    const roleId1 = options.getMentionable('ロール名1');
+    const roleId2 = options.getMentionable('ロール名2');
+    const roleId3 = options.getMentionable('ロール名3');
+    roleIdList.push(roleId1.id);
+    if (roleId2 != null) {
+        roleIdList.push(roleId2.id);
+    }
+    if (roleId3 != null) {
+        roleIdList.push(roleId3.id);
     }
 
-    if (roleIdList.length == 0) {
-        return msg.reply('削除したいロールのIDを入れるでし！');
-    }
+    interaction.editReply('指定されたIDのロールを削除中でし！\nちょっと待つでし！');
 
-    msg.channel.send('指定されたIDのロールを削除中でし！\nちょっと待つでし！');
-
-    const guild = msg.guild;
+    const guild = interaction.guild;
     var removed = [];
 
     removed.push(['ロールID', 'ロール名']);
 
-    const progressMsg = await msg.channel.send('0% 完了');
+    await interaction.editReply('0% 完了');
 
     roleIdList = Array.from(new Set(roleIdList));
 
@@ -107,18 +94,18 @@ module.exports.handleDeleteRole = async function (msg) {
             }
             removed.push([roleIdList[i], roleName]);
 
-            await progressMsg.edit(parseInt(((+i + 1) / roleIdList.length) * 100, 10) + '% 完了');
+            await interaction.editReply(parseInt(((+i + 1) / roleIdList.length) * 100, 10) + '% 完了');
         }
     } catch (error) {
         console.error(error);
-        msg.reply('ロール削除中にエラーでし！');
+        interaction.editReply('ロール削除中にエラーでし！');
     }
 
     const csvString = stringify(removed);
     fs.writeFileSync('./temp/temp.csv', csvString);
     const attachment = new MessageAttachment('./temp/temp.csv', 'removed_role.csv');
 
-    msg.reply({
+    interaction.followUp({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したロールをまとめておいたでし！',
         files: [attachment],
     });

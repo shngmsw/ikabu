@@ -8,7 +8,7 @@ module.exports = {
 async function handleFriendCode(interaction) {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ ephemeral: false });
 
     const options = interaction.options;
     const subCommand = options.getSubcommand();
@@ -31,12 +31,8 @@ async function selectFriendCode(interaction) {
 
     if (result.length == 0) {
         let fc = await getFC(id);
-        interaction.followUp({
-            content: '登録済みのフレンドコードがあったでし！',
-            ephemeral: true,
-        });
         if (fc[0] != null) {
-            interaction.followUp({
+            interaction.editReply({
                 embeds: [composeEmbed(targetUser, fc[0].code, true)],
                 ephemeral: false,
             });
@@ -44,14 +40,11 @@ async function selectFriendCode(interaction) {
         }
     }
     if (result.length > 0) {
-        interaction.followUp({
-            content: '自己紹介チャンネルから引用してきたでし！',
-        });
         let embeds = [];
         for (var r of result) {
             embeds.push(composeEmbed(targetUser, r, false));
         }
-        interaction.followUp({
+        interaction.editReply({
             embeds: embeds,
         });
     } else {

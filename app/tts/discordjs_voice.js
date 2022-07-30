@@ -19,16 +19,20 @@ const channels = new Map();
 
 module.exports = {
     handleVoiceCommand: handleVoiceCommand,
+    play: play,
 };
 
-const join = async (msg) => {
-    const { guildId, member, channelId } = msg;
+const join = async (interaction) => {
+    const guildId = interaction.guild.id;
+    const channelId = interaction.channel.id;
+    const member = interaction.member;
+
     let subscription = subscriptions.get(guildId);
     if (!subscription) {
         // yoshi-taroがボイスチャンネルに入っていなければ参加
         if (!member.voice.channelId) {
             // メンバーがVCにいるかチェック
-            msg.channel.send('ボイチャに参加してからコマンドを使うでし！');
+            interaction.followUp('ボイチャに参加してからコマンドを使うでし！');
             return;
         }
         const connection = joinVoiceChannel({
@@ -41,15 +45,47 @@ const join = async (msg) => {
         connection.on('error', console.warn);
         subscriptions.set(guildId, subscription);
         channels.set(guildId, channelId);
-        msg.channel.send('ボイスチャンネルに接続したでし！`help voice`で使い方を説明するでし！');
+        interaction.followUp('ボイスチャンネルに接続したでし！`help voice`で使い方を説明するでし！');
     } else if (channels.get(guildId) === channelId) {
-        msg.channel.send('既に接続済みでし！');
+        interaction.followUp('既に接続済みでし！');
     } else {
-        msg.channel.send('他の部屋で営業中でし！');
+        interaction.followUp('他の部屋で営業中でし！');
     }
 };
 
-const play = async (msg) => {
+const kill = async (interaction) => {
+    const guildId = interaction.guild.id;
+    const channelId = interaction.channel.id;
+    let subscription = subscriptions.get(guildId);
+    if (subscription && channels.get(guildId) === channelId) {
+        subscription.connection.destroy();
+        subscriptions.delete(guildId);
+        channels.delete(guildId);
+        interaction.followUp(':dash:');
+    } else if (channels.get(guildId) != channelId) {
+        interaction.followUp('他の部屋で営業中でし！');
+    }
+};
+
+async function handleVoiceCommand(interaction) {
+    if (!interaction.isCommand()) return;
+    const { options } = interaction;
+    const subCommand = options.getSubcommand();
+    try {
+        switch (subCommand) {
+            case 'join':
+                join(interaction);
+                break;
+            case 'kill':
+                kill(interaction);
+                break;
+        }
+    } catch (err) {
+        kill(interaction);
+    }
+}
+
+async function play(msg) {
     const { guildId, channelId } = msg;
     let subscription = subscriptions.get(guildId);
     if (subscription && channels.get(guildId) === channelId) {
@@ -63,42 +99,8 @@ const play = async (msg) => {
         const resource = await createAudioResource(stream, {
             inputType: StreamType.Arbitrary,
         });
+
         player.play(resource);
         await entersState(player, AudioPlayerStatus.Idle, 1000 * 900);
-    }
-};
-
-const kill = async (msg) => {
-    const { guildId, channelId } = msg;
-    let subscription = subscriptions.get(guildId);
-    if (subscription && channels.get(guildId) === channelId) {
-        subscription.connection.destroy();
-        subscriptions.delete(guildId);
-        channels.delete(guildId);
-        msg.channel.send(':dash:');
-    } else if (channels.get(guildId) != channelId) {
-        msg.channel.send('他の部屋で営業中でし！');
-    }
-};
-
-function handleVoiceCommand(msg) {
-    const { content } = msg;
-    let strCmd = content.replace(/ /g, ' ');
-    const args = strCmd.split(' ');
-    const command = args.shift().toLowerCase();
-    try {
-        switch (command) {
-            case '!join':
-                join(msg);
-                break;
-            case '!kill':
-                kill(msg);
-                break;
-            default:
-                play(msg);
-                break;
-        }
-    } catch (err) {
-        kill(msg);
     }
 }

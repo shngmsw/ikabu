@@ -58,19 +58,14 @@ client.on('messageCreate', async (msg) => {
                 '\n文部科学省は国語審議会で、球技を指す場合は「ボウリング」表記を用い、掘削を意味する「ボーリング」と区別することを推奨しているでし。```',
         );
     }
-
     deleteToken(msg);
     Handler.call(msg);
     Dispandar.dispand(msg);
-    VOICE_API.setting(msg);
-    DISCORD_VOICE.handleVoiceCommand(msg);
+    DISCORD_VOICE.play(msg);
     suggestionBox.archive(msg);
     suggestionBox.init(msg);
     chatCountUp(msg);
     removeRookie(msg);
-    if (msg.mentions.has(client.user) && msg.content.includes('イカ部歴')) {
-        handleIkabuExperience(msg);
-    }
 });
 
 client.on('guildMemberAdd', (member) => {
@@ -174,6 +169,15 @@ async function onInteraction(interaction) {
                 await salmonRecruit(interaction);
             } else if (commandName === commandNames.friend_code) {
                 await handleFriendCode(interaction);
+            } else if (commandName === commandNames.experience) {
+                handleIkabuExperience(interaction);
+            } else if (commandName === commandNames.voice) {
+                // 'インタラクションに失敗'が出ないようにするため
+                await interaction.deferReply();
+                DISCORD_VOICE.handleVoiceCommand(interaction);
+                VOICE_API.setting(interaction);
+            } else {
+                Handler.call(interaction);
             }
             return;
         }

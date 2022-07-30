@@ -16,25 +16,28 @@ const INDEX_ROLE_NAME = 6;
 const INDEX_COLOR_CODE = 7;
 const INDEX_MEMBER_ID_START = 8;
 
-module.exports = async function handleCreateRoom(msg) {
-    if (!msg.member.permissions.has('MANAGE_CHANNELS')) {
-        return msg.reply('チャンネルを管理する権限がないでし！');
+module.exports = async function handleCreateRoom(interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+    const { options } = interaction;
+    const attachment = options.getAttachment('csv');
+    if (!interaction.member.permissions.has('MANAGE_CHANNELS')) {
+        return interaction.editReply('チャンネルを管理する権限がないでし！');
     }
 
-    if (!msg.member.permissions.has('MANAGE_ROLES')) {
-        return msg.reply('ロールを管理する権限がないでし！');
+    if (!interaction.member.permissions.has('MANAGE_ROLES')) {
+        return interaction.editReply('ロールを管理する権限がないでし！');
     }
 
-    if (!msg.attachments.size) {
-        return msg.reply('CSVファイルを添付するでし！');
+    if (!attachment.size) {
+        return interaction.editReply('CSVファイルを添付するでし！');
     }
 
-    msg.channel.send('作成中でし！\nこの作業には時間がかかるでし！');
-
-    const files = msg.attachments.map((attachment) => attachment.url);
+    interaction.editReply('作成中でし！\nこの作業には時間がかかるでし！');
 
     try {
-        request(files[0]).pipe(
+        request(attachment.url).pipe(
             parse(async function (err, data) {
                 // i = CSV行数
                 // data[i][0] カテゴリID (カテゴリには権限がつかない)
@@ -48,12 +51,12 @@ module.exports = async function handleCreateRoom(msg) {
                 // data[i][8...n] メンバーID
 
                 if (data == undefined) {
-                    return msg.reply('CSVファイルがおかしいでし！\n要素数が全ての行で同じになっているか確認するでし！');
+                    return interaction.followUp('CSVファイルがおかしいでし！\n要素数が全ての行で同じになっているか確認するでし！');
                 }
 
                 var resultData = [];
 
-                var guild = msg.guild;
+                var guild = interaction.guild;
 
                 resultData.push([
                     'カテゴリID',
@@ -66,7 +69,7 @@ module.exports = async function handleCreateRoom(msg) {
                     'ロールカラー',
                 ]);
 
-                const progressMsg = await msg.channel.send('0% 完了');
+                await interaction.editReply('0% 完了');
 
                 var maxColumn = 0;
 
@@ -124,10 +127,10 @@ module.exports = async function handleCreateRoom(msg) {
                             }
                         }
 
-                        await progressMsg.edit(parseInt((i / (data.length - 1)) * 100, 10) + '% 完了');
+                        await interaction.editReply(parseInt((i / (data.length - 1)) * 100, 10) + '% 完了');
                     } catch (error) {
                         console.error(error);
-                        msg.channel.send('データの' + i + '行目でエラーでし！');
+                        interaction.followUp('データの' + i + '行目でエラーでし！');
                     }
                 }
 
@@ -146,19 +149,19 @@ module.exports = async function handleCreateRoom(msg) {
                 const csvString = stringify(resultData);
                 fs.writeFileSync('./temp/temp.csv', csvString);
                 const attachment = new MessageAttachment('./temp/temp.csv', 'output.csv');
-                msg.reply({
+                interaction.editReply({
                     content: '終わったでし！下に結果を出すでし！',
                     files: [attachment],
                 });
 
                 const deleteCommandsText = setDeleteCommandsText(resultData);
-                msg.channel.send({
+                interaction.followUp({
                     files: [deleteCommandsText],
                 });
             }),
         );
     } catch (error) {
-        msg.reply('CSVファイル読み込み中にエラーでし！');
+        interaction.editReply('CSVファイル読み込み中にエラーでし！');
     }
 };
 
@@ -254,19 +257,14 @@ function setDeleteCommandsText(resultData) {
         '以下のコマンドを用いて今回作成したカテゴリ・チャンネル・ロールを全て削除することができます。\n' +
         '個別に削除する場合は出力されたCSVから削除したい項目を選んでコマンドで削除してください。\n\n' +
         'カテゴリ削除コマンド(※カテゴリ内のチャンネルも同時に削除されます。)\n' +
-        '!deletecategory';
+        '/ch_management カテゴリー削除';
     for (var categoryId of resultCategoryIdList) {
         resultStr = resultStr + ' ' + categoryId;
     }
 
-    resultStr += '\n\nチャンネル削除コマンド\n!deletechannel';
+    resultStr += '\n\nチャンネル削除コマンド\n/ch_management チャンネル削除';
     for (var channelId of resultChannelIdList) {
         resultStr = resultStr + ' ' + channelId;
-    }
-
-    resultStr += '\n\nロール削除コマンド\n!deleterole';
-    for (var roleId of resultRoleIdList) {
-        resultStr = resultStr + ' ' + roleId;
     }
 
     fs.writeFileSync('./temp/temp.txt', resultStr);
