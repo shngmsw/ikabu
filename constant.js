@@ -13,6 +13,7 @@ module.exports = {
         help: 'help',
         ban: 'ban',
         ch_manager: 'ch_management',
+        voice: 'voice',
         experience: 'イカ部歴',
         other_game: '別ゲー募集',
         regular: 'ナワバリ募集',

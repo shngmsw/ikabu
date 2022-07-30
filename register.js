@@ -155,6 +155,32 @@ const chManager = new SlashCommandBuilder()
     );
 
 const experience = new SlashCommandBuilder().setName(commandNames.experience).setDescription('イカ部歴を表示します。');
+
+const voice = new SlashCommandBuilder()
+    .setName(commandNames.voice)
+    .setDescription('テキストチャットの読み上げコマンド')
+    .addSubcommand((subcommand) => subcommand.setName('join').setDescription('読み上げを開始'))
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('type')
+            .setDescription('読み上げボイスの種類を変更します。')
+            .addStringOption((option) =>
+                option
+                    .setName('音声の種類')
+                    .setDescription('声の種類を選択してください。')
+                    .setChoices(
+                        { name: 'ひかり（女性）', value: 'hikari' },
+                        { name: 'はるか（女性）', value: 'haruka' },
+                        { name: 'たける（男性）', value: 'takeru' },
+                        { name: 'サンタ', value: 'santa' },
+                        { name: '凶暴なクマ', value: 'bear' },
+                        { name: 'ショウ（男性）', value: 'show' },
+                    )
+                    .setRequired(true),
+            ),
+    )
+    .addSubcommand((subcommand) => subcommand.setName('kill').setDescription('読み上げを終了'));
+
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
     .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
@@ -398,6 +424,8 @@ const commands = [
     help,
     ban,
     chManager,
+    experience,
+    voice,
     closeRecruit,
     otherGame,
     privateMatch,

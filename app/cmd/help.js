@@ -18,19 +18,15 @@ module.exports = async function handleHelp(interaction) {
                     .addFields([
                         {
                             name: 'ボイスチャンネルにブキチを参加',
-                            value: '```/join```\n',
-                        },
-                        {
-                            name: 'APIで利用可能な音声タイプを一覧表示します',
-                            value: '```/type```\n',
+                            value: '```/voice join```\n',
                         },
                         {
                             name: '音声タイプを変更します',
-                            value: '```/voice```\n',
+                            value: '```/voice type```\n',
                         },
                         {
                             name: 'ボイスチャンネルからブキチを切断',
-                            value: '```/kill```\n',
+                            value: '```/voice kill```\n',
                         },
                     ]),
             ],
