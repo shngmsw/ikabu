@@ -1,5 +1,5 @@
 // Discord bot implements
-const { Client, Intents, VoiceChannel } = require('discord.js');
+const { Client, Intents, VoiceChannel, MessageAttachment } = require('discord.js');
 const { URLSearchParams } = require('url');
 const client = new Client({
     intents: [
@@ -58,6 +58,12 @@ client.on('messageCreate', async (msg) => {
                 '\n文部科学省は国語審議会で、球技を指す場合は「ボウリング」表記を用い、掘削を意味する「ボーリング」と区別することを推奨しているでし。```',
         );
     }
+
+    if (msg.content.match('お前を消す方法')) {
+        const Kairu = new MessageAttachment('./images/Kairu.png');
+        msg.reply({ files: [Kairu] });
+    }
+
     deleteToken(msg);
     Handler.call(msg);
     Dispandar.dispand(msg);
