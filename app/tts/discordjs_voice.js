@@ -45,7 +45,7 @@ const join = async (interaction) => {
         connection.on('error', console.warn);
         subscriptions.set(guildId, subscription);
         channels.set(guildId, channelId);
-        interaction.followUp('ボイスチャンネルに接続したでし！`help voice`で使い方を説明するでし！');
+        interaction.followUp('ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！');
     } else if (channels.get(guildId) === channelId) {
         interaction.followUp('既に接続済みでし！');
     } else {
