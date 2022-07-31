@@ -51,7 +51,7 @@ module.exports = async function handleHelp(interaction) {
                         },
                         {
                             name: '選択肢の中からランダム選出',
-                            value: '```/pick 複数選出の場合は数字を記入 選択肢を半スペ空け or 改行して記入```',
+                            value: '```/pick 複数選出の場合は数字を記入 選択肢を半スペ空けで記入```',
                         },
                         {
                             name: '接続してるボイチャから数字分のヒトをランダム抽出',
