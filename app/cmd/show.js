@@ -4,7 +4,7 @@ const { MessageEmbed } = require('discord.js');
 const schedule_url = 'https://splatoon2.ink/data/schedules.json';
 const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
 
-function sendStageInfo(msg, data, scheduleNum) {
+function sendStageInfo(interaction, data, scheduleNum) {
     const l_args = common.getLeague(data, scheduleNum).split(',');
     const g_args = common.getGachi(data, scheduleNum).split(',');
     const l_date = l_args[0];
@@ -43,20 +43,25 @@ function sendStageInfo(msg, data, scheduleNum) {
         })
         .setThumbnail('https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fgachi.png');
 
-    msg.channel.send({
+    interaction.editReply({
         embeds: [leagueEmbed, gachiEmbed],
     });
 }
 
-module.exports = async function handleShow(msg, args) {
+module.exports = async function handleShow(interaction) {
     try {
+        if (!interaction.isCommand()) return;
+        // 'インタラクションに失敗'が出ないようにするため
+        await interaction.deferReply();
+        const { options } = interaction;
+        const subCommand = options.getSubcommand();
         const response = await fetch(schedule_url);
         const data = await response.json();
-        if (args == `now`) {
-            sendStageInfo(msg, data, 0);
-        } else if (args == 'next') {
-            sendStageInfo(msg, data, 1);
-        } else if (args == 'nawabari') {
+        if (subCommand === `now`) {
+            sendStageInfo(interaction, data, 0);
+        } else if (subCommand === 'next') {
+            sendStageInfo(interaction, data, 1);
+        } else if (subCommand === 'nawabari') {
             const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_a.image;
             const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.regular[0].stage_b.image;
             const date = common.unixTime2mdwhm(data.regular[0].start_time) + ' – ' + common.unixTime2mdwhm(data.regular[0].end_time);
@@ -74,10 +79,10 @@ module.exports = async function handleShow(msg, args) {
                 })
                 .setThumbnail('https://splatoon2.ink/assets/img/battle-regular.01b5ef.png');
 
-            msg.channel.send({
+            interaction.editReply({
                 embeds: [nawabariEmbed],
             });
-        } else if (msg.content === 'show run') {
+        } else if (subCommand === 'run') {
             try {
                 const response = await fetch(coop_schedule_url);
                 const data = await response.json();
@@ -112,16 +117,16 @@ module.exports = async function handleShow(msg, args) {
                     )
                     .setImage(stage);
 
-                msg.channel.send({
+                interaction.editReply({
                     embeds: [salmonEmbed],
                 });
             } catch (error) {
-                msg.channel.send('なんかエラーでてるわ');
+                interaction.followUp('なんかエラーでてるわ');
                 console.error(error);
             }
         }
     } catch (error) {
-        msg.channel.send('なんかエラーでてるわ');
+        interaction.followUp('なんかエラーでてるわ');
         console.error(error);
     }
 };

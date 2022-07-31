@@ -1,16 +1,13 @@
 const handleBan = require('./cmd/admin-cmd/ban.js');
 const handleBuki = require('./cmd/buki.js');
-const handleFriendCode = require('./cmd/friendcode.js');
-const handleSpecial = require('./cmd/special.js');
+
 const handleHelp = require('./cmd/help.js');
 const handleKansen = require('./cmd/kansen.js');
 const handlePick = require('./cmd/pick.js');
 const handleOmikuji = require('./cmd/omikuji.js');
 const handlePoll = require('./cmd/poll.js');
-const handleRule = require('./cmd/rule.js');
 const handleShow = require('./cmd/show.js');
 const handleStageInfo = require('./cmd/stageinfo.js');
-const handleSub = require('./cmd/sub.js');
 const handleTimer = require('./cmd/timer.js');
 const handleVoicePick = require('./cmd/vpick.js');
 const handleWiki = require('./cmd/wiki.js');
@@ -18,81 +15,62 @@ const { handleCreateRole, handleDeleteRole } = require('./cmd/admin-cmd/manageRo
 const handleDeleteCategory = require('./cmd/admin-cmd/deleteCategory.js');
 const handleDeleteChannel = require('./cmd/admin-cmd/deleteChannel.js');
 const handleCreateRoom = require('./cmd/admin-cmd/createRoom.js');
+const { commandNames } = require('../constant.js');
 
 module.exports = {
     call: call,
 };
 
-function call(msg) {
-    var strCmd = msg.content.replace(/　/g, ' ');
-    const args = strCmd.split(' ');
-    const command = args.shift().toLowerCase();
+function call(interaction) {
+    const { commandName } = interaction;
+    const { options } = interaction;
 
-    switch (command) {
-        case 'wiki':
-            handleWiki(msg, args[0]);
+    switch (commandName) {
+        case commandNames.wiki:
+            handleWiki(interaction);
             break;
-        case 'kansen':
-            handleKansen(msg, args[0]);
+        case commandNames.kansen:
+            handleKansen(interaction);
             break;
-        case 'timer':
-            handleTimer(msg, args[0]);
+        case commandNames.timer:
+            handleTimer(interaction);
             break;
-        case 'pick':
-            handlePick(msg);
+        case commandNames.pick:
+            handlePick(interaction);
             break;
-        case 'omikuji':
-            handleOmikuji(msg);
+        case commandNames.voice_pick:
+            handleVoicePick(interaction);
             break;
-        case 'vpick':
-            handleVoicePick(msg);
+        case commandNames.buki:
+            handleBuki(interaction);
             break;
-        case 'poll':
-            handlePoll(msg);
+        case commandNames.show:
+            handleShow(interaction);
             break;
-        case 'rule':
-            handleRule(msg);
+        case commandNames.help:
+            handleHelp(interaction);
             break;
-        case 'sub':
-            handleSub(msg);
+        case commandNames.ban:
+            handleBan(interaction);
             break;
-        case 'special':
-            handleSpecial(msg);
-            break;
-        case 'buki':
-        case 'weapon':
-            handleBuki(command, msg);
-            break;
-        case 'show':
-            handleShow(msg, args[0]);
-            break;
-        case 'help':
-            handleHelp(msg);
-            break;
-        case '!ban':
-            handleBan(msg);
-            break;
-        case 'fc':
-        case 'fcadd':
-            handleFriendCode(msg);
-            break;
-        case 'stage':
-            handleStageInfo(msg);
-            break;
-        case '!createroom':
-            handleCreateRoom(msg);
-            break;
-        case '!createrole':
-            handleCreateRole(msg);
-            break;
-        case '!deletecategory':
-            handleDeleteCategory(msg);
-            break;
-        case '!deletechannel':
-            handleDeleteChannel(msg);
-            break;
-        case '!deleterole':
-            handleDeleteRole(msg);
-            break;
+        case commandNames.ch_manager:
+            const subCommand = options.getSubcommand();
+            switch (subCommand) {
+                case 'チャンネル作成':
+                    handleCreateRoom(interaction);
+                    break;
+                case 'ロール作成':
+                    handleCreateRole(interaction);
+                    break;
+                case 'カテゴリー削除':
+                    handleDeleteCategory(interaction);
+                    break;
+                case 'チャンネル削除':
+                    handleDeleteChannel(interaction);
+                    break;
+                case 'ロール削除':
+                    handleDeleteRole(interaction);
+                    break;
+            }
     }
 }

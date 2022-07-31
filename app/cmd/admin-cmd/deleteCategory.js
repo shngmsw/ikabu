@@ -5,28 +5,33 @@ const { parse } = require('csv');
 const { stringify } = require('csv-stringify/sync');
 const { searchChannelById } = require('../../manager/channelManager.js');
 
-module.exports = function handleDeleteCategory(msg) {
-    if (!msg.member.permissions.has('MANAGE_CHANNELS')) {
-        return msg.reply('チャンネルを管理する権限がないでし！');
+module.exports = async function handleDeleteCategory(interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+
+    if (!interaction.member.permissions.has('MANAGE_CHANNELS')) {
+        return interaction.followUp('チャンネルを管理する権限がないでし！');
     }
 
-    var strCmd = msg.content.replace(/　/g, ' ');
-    strCmd = strCmd.replace('\x20+', ' ');
-    const splits = strCmd.split(' ');
-    splits.shift();
+    const { options } = interaction;
+    const attachment = options.getAttachment('csv');
+    const categoryIds = options.getString('カテゴリーid');
     var args = [];
-    for (var argument of splits) {
-        if (argument != '') {
-            args.push(argument);
+    if (categoryIds != null) {
+        let strCmd = categoryIds.replace('\x20+', ' ');
+        const splits = strCmd.split(' ');
+        for (var argument of splits) {
+            if (argument != '') {
+                args.push(argument);
+            }
         }
     }
 
-    if (msg.attachments.size) {
-        msg.channel.send('CSVを読み込んで削除中でし！\nちょっと待つでし！');
+    if (attachment != null && attachment.size) {
+        interaction.editReply('CSVを読み込んで削除中でし！\nちょっと待つでし！');
 
-        const files = msg.attachments.map((attachment) => attachment.url);
-
-        request(files[0]).pipe(
+        request(attachment.url).pipe(
             parse(async function (err, data) {
                 try {
                     var categoryIdList = [];
@@ -36,28 +41,28 @@ module.exports = function handleDeleteCategory(msg) {
                     categoryIdList = Array.from(new Set(categoryIdList));
                 } catch (error) {
                     console.error(error);
-                    msg.reply('CSVファイル読み込み中にエラーでし！');
+                    interaction.followUp('CSVファイル読み込み中にエラーでし！');
                 }
-                deleteCategory(msg, categoryIdList);
+                deleteCategory(interaction, categoryIdList);
             }),
         );
     } else if (args.length != 0) {
-        msg.channel.send('指定されたIDのカテゴリを削除中でし！\nちょっと待つでし！');
+        interaction.editReply('指定されたIDのカテゴリを削除中でし！\nちょっと待つでし！');
         var categoryIdList = Array.from(new Set(args));
-        deleteCategory(msg, categoryIdList);
+        deleteCategory(interaction, categoryIdList);
     } else {
-        msg.reply('CSVファイルを添付するか、削除したいカテゴリのIDを入れるでし！');
+        interaction.followUp('CSVファイルを添付するか、削除したいカテゴリのIDを入れるでし！');
         return;
     }
 };
 
-async function deleteCategory(msg, categoryIdList) {
-    const guild = msg.guild;
+async function deleteCategory(interaction, categoryIdList) {
+    const guild = interaction.guild;
     var removed = [];
 
     removed.push(['カテゴリID', 'カテゴリ名', 'チャンネルID', 'チャンネル名']);
 
-    const progressMsg = await msg.channel.send('0% 完了');
+    await interaction.followUp('0% 完了');
 
     try {
         // i = index
@@ -84,18 +89,18 @@ async function deleteCategory(msg, categoryIdList) {
                     }
                 }
             }
-            await progressMsg.edit(parseInt(((+i + 1) / categoryIdList.length) * 100, 10) + '% 完了');
+            await interaction.editReply(parseInt(((+i + 1) / categoryIdList.length) * 100, 10) + '% 完了');
         }
     } catch (error) {
         console.error(error);
-        msg.reply('カテゴリ削除中にエラーでし！');
+        interaction.followUp('カテゴリ削除中にエラーでし！');
     }
 
     const csvString = stringify(removed);
     fs.writeFileSync('./temp/temp.csv', csvString);
     const attachment = new MessageAttachment('./temp/temp.csv', 'removed_category.csv');
 
-    msg.reply({
+    interaction.followUp({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
         files: [attachment],
     });

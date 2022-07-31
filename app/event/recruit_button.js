@@ -242,13 +242,13 @@ async function getHelpEmbed(guild, chid) {
     const sendChannel = await guild.channels.cache.find((channel) => channel.id === chid);
     let command = '';
     if (sendChannel.name.match('リグマ募集')) {
-        command = '`/now` or `/next`';
+        command = '`/リグマ募集 now` or `/リグマ募集 next`';
     } else if (sendChannel.name.match('ナワバリ・フェス募集')) {
-        command = '`/now` or `/next`';
+        command = '`/ナワバリ募集 now` or `/ナワバリ募集 next`';
     } else if (sendChannel.name.match('サーモン募集')) {
-        command = '`/run`';
+        command = '`/サーモンラン募集 run`';
     } else if (sendChannel.name.match('別ゲー募集')) {
-        command = '`/apex` or `/dbd` or `/mhr` or `/valo` or `/other`';
+        command = '`/別ゲー募集 apex` or `/別ゲー募集 dbd` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`';
     } else if (sendChannel.name.match('プラベ募集')) {
         command = '`/プラベ募集`';
     }

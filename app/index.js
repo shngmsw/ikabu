@@ -1,5 +1,5 @@
 // Discord bot implements
-const { Client, Intents, VoiceChannel } = require('discord.js');
+const { Client, Intents, VoiceChannel, MessageAttachment } = require('discord.js');
 const { URLSearchParams } = require('url');
 const client = new Client({
     intents: [
@@ -33,6 +33,7 @@ const handleIkabuExperience = require('./cmd/experience.js');
 const { commandNames } = require('../constant');
 const registerSlashCommands = require('../register.js');
 const { voiceLocker, voiceLockerUpdate } = require('./cmd/voice_locker.js');
+const { handleFriendCode } = require('./cmd/friendcode.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
@@ -58,18 +59,19 @@ client.on('messageCreate', async (msg) => {
         );
     }
 
+    if (msg.content.match('お前を消す方法')) {
+        const Kairu = new MessageAttachment('./images/Kairu.png');
+        msg.reply({ files: [Kairu] });
+    }
+
     deleteToken(msg);
     Handler.call(msg);
     Dispandar.dispand(msg);
-    VOICE_API.setting(msg);
-    DISCORD_VOICE.handleVoiceCommand(msg);
+    DISCORD_VOICE.play(msg);
     suggestionBox.archive(msg);
     suggestionBox.init(msg);
     chatCountUp(msg);
     removeRookie(msg);
-    if (msg.mentions.has(client.user) && msg.content.includes('イカ部歴')) {
-        handleIkabuExperience(msg);
-    }
 });
 
 client.on('guildMemberAdd', (member) => {
@@ -171,6 +173,17 @@ async function onInteraction(interaction) {
                 await leagueRecruit(interaction);
             } else if (commandName === commandNames.salmon) {
                 await salmonRecruit(interaction);
+            } else if (commandName === commandNames.friend_code) {
+                await handleFriendCode(interaction);
+            } else if (commandName === commandNames.experience) {
+                handleIkabuExperience(interaction);
+            } else if (commandName === commandNames.voice) {
+                // 'インタラクションに失敗'が出ないようにするため
+                await interaction.deferReply();
+                DISCORD_VOICE.handleVoiceCommand(interaction);
+                VOICE_API.setting(interaction);
+            } else {
+                Handler.call(interaction);
             }
             return;
         }
