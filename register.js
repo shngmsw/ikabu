@@ -337,11 +337,11 @@ const salmonRun = new SlashCommandBuilder()
 
 const fesA = new SlashCommandBuilder()
     .setName(commandNames.fesA)
-    .setDescription('フェス(フウカ派) 募集コマンド')
+    .setDescription('フェス(フウカ陣営) 募集コマンド')
     .addSubcommand((subcommand) =>
         subcommand
             .setName('fes')
-            .setDescription('フェスマッチの募集をたてます。(フウカ派)')
+            .setDescription('フェスマッチの募集をたてます。(フウカ陣営)')
             .addIntegerOption((option) =>
                 option
                     .setName('募集人数')
@@ -367,11 +367,11 @@ const fesA = new SlashCommandBuilder()
 
 const fesB = new SlashCommandBuilder()
     .setName(commandNames.fesB)
-    .setDescription('フェス(マンタロー派) 募集コマンド')
+    .setDescription('フェス(マンタロー陣営) 募集コマンド')
     .addSubcommand((subcommand) =>
         subcommand
             .setName('fes')
-            .setDescription('フェスマッチの募集をたてます。(マンタロー派)')
+            .setDescription('フェスマッチの募集をたてます。(マンタロー陣営)')
             .addIntegerOption((option) =>
                 option
                     .setName('募集人数')
@@ -397,11 +397,11 @@ const fesB = new SlashCommandBuilder()
 
 const fesC = new SlashCommandBuilder()
     .setName(commandNames.fesC)
-    .setDescription('フェス(ウツホ派) 募集コマンド')
+    .setDescription('フェス(ウツホ陣営) 募集コマンド')
     .addSubcommand((subcommand) =>
         subcommand
             .setName('fes')
-            .setDescription('フェスマッチの募集をたてます。(ウツホ派)')
+            .setDescription('フェスマッチの募集をたてます。(ウツホ陣営)')
             .addIntegerOption((option) =>
                 option
                     .setName('募集人数')
