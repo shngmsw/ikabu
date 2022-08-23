@@ -115,6 +115,10 @@ module.exports = async function handleHelp(interaction) {
                             value: '```/ナワバリ募集 next 募集人数 参加条件があれば記載```\n',
                         },
                         {
+                            name: 'フェス募集コマンド',
+                            value: '```/〇〇陣営 fes 募集人数 参加条件があれば記載```\n',
+                        },
+                        {
                             name: 'サーモンラン情報を表示して募集',
                             value: '```/サーモンラン募集 run 募集人数 参加条件があれば記載```\n',
                         },

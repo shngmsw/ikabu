@@ -507,6 +507,7 @@ function getCloseEmbed() {
 const recruit_command = {
     リグマ募集: '`/リグマ募集 now` or `/リグマ募集 next`',
     'ナワバリ・フェス募集': '`/ナワバリ募集 now` or `/ナワバリ募集 next`',
+    フェス募集: '`/〇〇陣営 fes` or `/fes`',
     サーモン募集: `/サーモンラン募集 run`,
     別ゲー募集: '`/別ゲー募集 apex` or `/別ゲー募集 dbd` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`',
 };
@@ -521,6 +522,9 @@ function getCommandHelpEmbed(channelName) {
             break;
         case 'ナワバリ・フェス募集':
             commandMessage = recruit_command['ナワバリ・フェス募集'];
+            break;
+        case 'フェス募集':
+            commandMessage = recruit_command.フェス募集;
             break;
         case 'サーモン募集':
             commandMessage = recruit_command.サーモン募集;

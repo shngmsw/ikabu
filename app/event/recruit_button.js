@@ -243,7 +243,7 @@ async function getHelpEmbed(guild, chid) {
     let command = '';
     if (sendChannel.name.match('リグマ募集')) {
         command = '`/リグマ募集 now` or `/リグマ募集 next`';
-    } else if (sendChannel.name.match('ナワバリ・フェス募集')) {
+    } else if (sendChannel.name.match('ナワバリ')) {
         command = '`/ナワバリ募集 now` or `/ナワバリ募集 next`';
     } else if (sendChannel.name.match('サーモン募集')) {
         command = '`/サーモンラン募集 run`';
@@ -251,6 +251,8 @@ async function getHelpEmbed(guild, chid) {
         command = '`/別ゲー募集 apex` or `/別ゲー募集 dbd` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`';
     } else if (sendChannel.name.match('プラベ募集')) {
         command = '`/プラベ募集`';
+    } else if (sendChannel.name.match('フェス')) {
+        command = '`/〇〇陣営 fes` or `/fes`';
     }
     const embed = new MessageEmbed();
     embed.setDescription('募集コマンドは ' + `${command}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
