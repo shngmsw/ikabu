@@ -20,6 +20,7 @@ const handleStageInfo = require('./cmd/stageinfo.js');
 const { getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
 const { otherGameRecruit } = require('./cmd/recruit/other_game_recruit.js');
 const { regularRecruit } = require('./cmd/recruit/regular_recruit.js');
+const { fesRecruit } = require('./cmd/recruit/fes_recruit');
 const { leagueRecruit } = require('./cmd/recruit/league_recruit.js');
 const { salmonRecruit } = require('./cmd/recruit/salmon_recruit.js');
 const { privateRecruit } = require('./cmd/recruit/private_recruit.js');
@@ -171,6 +172,12 @@ async function onInteraction(interaction) {
                 await regularRecruit(interaction);
             } else if (commandName === commandNames.league) {
                 await leagueRecruit(interaction);
+            } else if (commandName === commandNames.fesA) {
+                await fesRecruit(interaction);
+            } else if (commandName === commandNames.fesB) {
+                await fesRecruit(interaction);
+            } else if (commandName === commandNames.fesC) {
+                await fesRecruit(interaction);
             } else if (commandName === commandNames.salmon) {
                 await salmonRecruit(interaction);
             } else if (commandName === commandNames.friend_code) {

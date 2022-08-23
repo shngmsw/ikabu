@@ -335,6 +335,96 @@ const salmonRun = new SlashCommandBuilder()
             ),
     );
 
+const fesA = new SlashCommandBuilder()
+    .setName(commandNames.fesA)
+    .setDescription('フェス(フウカ陣営) 募集コマンド')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('fes')
+            .setDescription('フェスマッチの募集をたてます。(フウカ陣営)')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addChannelOption((option) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            ),
+    );
+
+const fesB = new SlashCommandBuilder()
+    .setName(commandNames.fesB)
+    .setDescription('フェス(マンタロー陣営) 募集コマンド')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('fes')
+            .setDescription('フェスマッチの募集をたてます。(マンタロー陣営)')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addChannelOption((option) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            ),
+    );
+
+const fesC = new SlashCommandBuilder()
+    .setName(commandNames.fesC)
+    .setDescription('フェス(ウツホ陣営) 募集コマンド')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('fes')
+            .setDescription('フェスマッチの募集をたてます。(ウツホ陣営)')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addChannelOption((option) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            ),
+    );
+
 const privateMatch = new SlashCommandBuilder()
     .setName(commandNames.private)
     .setDescription('プラベ募集コマンド')
@@ -432,6 +522,9 @@ const commands = [
     regularMatch,
     leagueMatch,
     salmonRun,
+    fesA,
+    fesB,
+    fesC,
 ];
 
 //登録用関数

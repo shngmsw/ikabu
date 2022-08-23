@@ -24,7 +24,7 @@ module.exports.createRole = async function (guild, roleName) {
  * @param {string} roleName ロール名
  * @returns ロールID
  */
-function searchRoleIdByName(guild, roleName) {
+module.exports.searchRoleIdByName = function (guild, roleName) {
     var role = guild.roles.cache.find((role) => role.name === roleName);
 
     if (role != null) {
@@ -32,7 +32,7 @@ function searchRoleIdByName(guild, roleName) {
     } else {
         return null;
     }
-}
+};
 
 /**
  * ロールIDからロールを検索する．ない場合はnullを返す．
