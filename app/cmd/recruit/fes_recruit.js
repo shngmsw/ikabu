@@ -247,9 +247,7 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, team, 
     recruit_ctx.lineWidth = 4;
     recruit_ctx.stroke();
 
-    let fes_icon = await Canvas.loadImage(
-        'https://raw.githubusercontent.com/shngmsw/ikabu/fes_recruit-command/images/recruit/fes_icon.png',
-    );
+    let fes_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png');
     recruit_ctx.drawImage(fes_icon, 9, 17, 105, 90);
 
     fillTextWithStroke(recruit_ctx, 'フェスマッチ', '51px Splatfont', '#000000', teamColors[teamNames.indexOf(team)], 3, 115, 80);
@@ -310,7 +308,7 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, team, 
         recruit_ctx.restore();
     }
 
-    let host_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png');
+    let host_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
     recruit_ctx.drawImage(host_icon, 0, 0, host_icon.width, host_icon.height, 90, 172, 75, 75);
 
     fillTextWithStroke(recruit_ctx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
