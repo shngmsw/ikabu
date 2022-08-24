@@ -1,21 +1,19 @@
-const handleBan = require('./cmd/admin-cmd/ban.js');
-const handleBuki = require('./cmd/buki.js');
+const root = require('app-root-path');
 
-const handleHelp = require('./cmd/help.js');
-const handleKansen = require('./cmd/kansen.js');
-const handlePick = require('./cmd/pick.js');
-const handleOmikuji = require('./cmd/omikuji.js');
-const handlePoll = require('./cmd/poll.js');
-const handleShow = require('./cmd/show.js');
-const handleStageInfo = require('./cmd/stageinfo.js');
-const handleTimer = require('./cmd/timer.js');
-const handleVoicePick = require('./cmd/vpick.js');
-const handleWiki = require('./cmd/wiki.js');
+const handleBan = require('./cmd/admin-cmd/ban.js');
+const handleBuki = require('./cmd/splat2/buki.js');
+const handleHelp = require('./cmd/other/help.js');
+const handleKansen = require('./cmd/other/kansen.js');
+const handlePick = require('./cmd/other/pick.js');
+const handleShow = require('./cmd/splat2/show.js');
+const handleTimer = require('./cmd/other/timer.js');
+const handleVoicePick = require('./cmd/other/vpick.js');
+const handleWiki = require('./cmd/other/wiki.js');
 const { handleCreateRole, handleDeleteRole } = require('./cmd/admin-cmd/manageRole.js');
 const handleDeleteCategory = require('./cmd/admin-cmd/deleteCategory.js');
 const handleDeleteChannel = require('./cmd/admin-cmd/deleteChannel.js');
 const handleCreateRoom = require('./cmd/admin-cmd/createRoom.js');
-const { commandNames } = require('../constant.js');
+const { commandNames } = require(root + '/constant.js');
 
 module.exports = {
     call: call,

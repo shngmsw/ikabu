@@ -3,7 +3,8 @@ const request = require('request');
 const fs = require('fs');
 const { parse } = require('csv');
 const { stringify } = require('csv-stringify/sync');
-const { searchChannelById } = require('../../manager/channelManager.js');
+const app = require('app-root-path').resolve('app');
+const { searchChannelById } = require(app + '/manager/channelManager.js');
 
 module.exports = async function handleDeleteCategory(interaction) {
     if (!interaction.isCommand()) return;

@@ -12,29 +12,31 @@ const client = new Client({
         Intents.FLAGS.GUILD_MEMBERS,
     ],
 });
+const app = require('app-root-path').resolve('app');
+const root = require('app-root-path');
 const Handler = require('./handler.js');
 const Dispandar = require('./event/dispandar.js');
 const VOICE_API = require('./tts/voice_bot_node.js');
 const DISCORD_VOICE = require('./tts/discordjs_voice.js');
-const handleStageInfo = require('./cmd/stageinfo.js');
+const handleStageInfo = require(app + '/cmd/splat2/stageinfo.js');
 const { getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
-const { otherGameRecruit } = require('./cmd/recruit/other_game_recruit.js');
-const { regularRecruit } = require('./cmd/recruit/regular_recruit.js');
-const { fesRecruit } = require('./cmd/recruit/fes_recruit');
-const { leagueRecruit } = require('./cmd/recruit/league_recruit.js');
-const { salmonRecruit } = require('./cmd/recruit/salmon_recruit.js');
-const { privateRecruit } = require('./cmd/recruit/private_recruit.js');
+const { otherGameRecruit } = require(app + '/cmd/other/recruit/other_game_recruit.js');
+const { regularRecruit } = require(app + '/cmd/splat2/recruit/regular_recruit.js');
+const { fesRecruit } = require(app + '/cmd/splat2/recruit/fes_recruit');
+const { leagueRecruit } = require(app + '/cmd/splat2/recruit/league_recruit.js');
+const { salmonRecruit } = require(app + '/cmd/splat2/recruit/salmon_recruit.js');
+const { privateRecruit } = require(app + '/cmd/splat2/recruit/private_recruit.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
 const suggestionBox = require('./reaction/suggestion-box.js');
 const join = require('./event/join.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
-const handleIkabuExperience = require('./cmd/experience.js');
-const { commandNames } = require('../constant');
-const registerSlashCommands = require('../register.js');
-const { voiceLocker, voiceLockerUpdate } = require('./cmd/voice_locker.js');
-const { handleFriendCode } = require('./cmd/friendcode.js');
+const handleIkabuExperience = require(app + '/cmd/other/experience.js');
+const { commandNames } = require(root + '/constant');
+const registerSlashCommands = require(root + '/register.js');
+const { voiceLocker, voiceLockerUpdate } = require(app + '/cmd/other/voice_locker.js');
+const { handleFriendCode } = require(app + '/cmd/other/friendcode.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {

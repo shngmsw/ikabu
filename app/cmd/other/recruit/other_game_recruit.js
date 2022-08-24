@@ -1,11 +1,12 @@
 const { MessageEmbed, Permissions } = require('discord.js');
+const app = require('app-root-path').resolve('app');
 const {
     recruitDeleteButton,
     recruitActionRow,
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require('../../splat2/recruit/button_components.js');
+} = require(app + '/cmd/splat2/recruit/button_components.js');
 
 module.exports = {
     otherGameRecruit: otherGameRecruit,

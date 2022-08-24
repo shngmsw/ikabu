@@ -1,7 +1,8 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
-const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require('../../common.js');
+const app = require('app-root-path').resolve('app');
+const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require(app + '/common.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('./canvas_components.js');
 const {
     recruitDeleteButton,
@@ -12,6 +13,8 @@ const {
     unlockChannelButton,
 } = require('./button_components.js');
 const { MessageAttachment, Permissions } = require('discord.js');
+const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
+
 const schedule_url = 'https://splatoon2.ink/data/schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });

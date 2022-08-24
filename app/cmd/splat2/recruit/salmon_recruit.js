@@ -1,7 +1,8 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
-const { unixTime2mdwhm, coop_stage2txt, weapon2txt } = require('../../../common.js');
+const app = require('app-root-path').resolve('app');
+const { unixTime2mdwhm, coop_stage2txt, weapon2txt } = require(app + '/common.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('./canvas_components.js');
 const {
     recruitDeleteButton,

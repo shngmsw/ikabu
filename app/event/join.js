@@ -1,6 +1,7 @@
-const getMember = require('../../db/members_select.js');
-const getFC = require('../../db/fc_select.js');
-const common = require('../common.js');
+const root = require('app-root-path');
+const getMember = require(root + '/db/members_select.js');
+const getFC = require(root + '/db/fc_select.js');
+const common = require(root + '/app/common.js');
 
 module.exports = async function guildMemberAddEvent(member) {
     const guild = member.guild;
