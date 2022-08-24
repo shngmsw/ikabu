@@ -1,7 +1,7 @@
 const Canvas = require('canvas');
 const path = require('path');
 const Discord = require('discord.js');
-const { dateDiff } = require('../common');
+const { dateDiff } = require('../../common');
 const backgroundImgPaths = [
     './images/over4years.jpg',
     './images/4years.jpg',

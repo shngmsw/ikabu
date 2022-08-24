@@ -1,4 +1,4 @@
-const common = require('../common.js');
+const common = require('../../common.js');
 
 module.exports = async function handleTimer(interaction) {
     if (!interaction.isCommand()) return;

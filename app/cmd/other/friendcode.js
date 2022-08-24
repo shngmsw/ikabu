@@ -1,5 +1,5 @@
-const insert = require('../../db/fc_insert.js');
-const getFC = require('../../db/fc_select.js');
+const insert = require('../../../db/fc_insert.js');
+const getFC = require('../../../db/fc_select.js');
 const Discord = require('discord.js');
 module.exports = {
     handleFriendCode: handleFriendCode,
