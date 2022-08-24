@@ -179,9 +179,11 @@ async function sendRegularMatch(
     const rule = new MessageAttachment(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
 
     try {
+        const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention = `<@&${mention_id}>`;
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
         const sentMessage = await interaction.channel.send({
-            content: '@everyone ボタンを押して参加表明するでし！',
+            content: mention + ' ボタンを押して参加表明するでし！',
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る

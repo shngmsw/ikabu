@@ -128,9 +128,11 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
 
     try {
+        const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention = `<@&${mention_id}>`;
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
         const sentMessage = await interaction.channel.send({
-            content: '@everyone ボタンを押して参加表明するでし！',
+            content: mention + ' ボタンを押して参加表明するでし！',
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る

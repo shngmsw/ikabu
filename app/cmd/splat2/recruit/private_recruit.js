@@ -57,8 +57,11 @@ async function privateRecruit(interaction) {
             embeds: [embed],
             ephemeral: false,
         });
+
+        const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention = `<@&${mention_id}>`;
         const sentMessage = await interaction.channel.send({
-            content: `@everyone ボタンを押して参加表明するでし！`,
+            content: mention + ` ボタンを押して参加表明するでし！`,
         });
         await interaction.followUp({
             content: '募集完了でし！参加者が来るまで気長に待つでし！\n15秒間は募集を取り消せるでし！',

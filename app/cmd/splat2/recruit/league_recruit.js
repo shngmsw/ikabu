@@ -92,13 +92,8 @@ async function leagueRecruit(interaction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    // 新入部員用リグマ募集ようにメンションを変更
-    let mention = '@everyone';
-    if (channel.name === '🔰リグマ募集') {
-        const role_id = await interaction.guild.roles.cache.find((role) => role.name === '🔰新入部員');
-        mention = `${role_id}`;
-    }
-
+    const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+    const mention = `<@&${mention_id}>`;
     try {
         const response = await fetch(schedule_url);
         const data = await response.json();
