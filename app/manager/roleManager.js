@@ -1,3 +1,11 @@
+module.exports = {
+    createRole: createRole,
+    searchRoleIdByName: searchRoleIdByName,
+    searchRoleById: searchRoleById,
+    setColorToRole: setColorToRole,
+    setRoleToMember: setRoleToMember,
+};
+
 /**
  * ロールを作成し，作成したロールのIDを返す．
  * 既に同じロール名のロールが有る場合，そのロールIDを返す
@@ -5,7 +13,7 @@
  * @param {string} roleName ロール名
  * @returns ロールID
  */
-module.exports.createRole = async function (guild, roleName) {
+async function createRole(guild, roleName) {
     if (roleName == '') {
         return null;
     }
@@ -16,7 +24,7 @@ module.exports.createRole = async function (guild, roleName) {
         var role = await guild.roles.create({ name: roleName });
         return role.id;
     }
-};
+}
 
 /**
  * ロール名からロールIDを検索する．ない場合はnullを返す．
@@ -24,7 +32,7 @@ module.exports.createRole = async function (guild, roleName) {
  * @param {string} roleName ロール名
  * @returns ロールID
  */
-module.exports.searchRoleIdByName = function (guild, roleName) {
+function searchRoleIdByName(guild, roleName) {
     var role = guild.roles.cache.find((role) => role.name === roleName);
 
     if (role != null) {
@@ -32,7 +40,7 @@ module.exports.searchRoleIdByName = function (guild, roleName) {
     } else {
         return null;
     }
-};
+}
 
 /**
  * ロールIDからロールを検索する．ない場合はnullを返す．
@@ -40,7 +48,7 @@ module.exports.searchRoleIdByName = function (guild, roleName) {
  * @param {string} roleId ロールID
  * @returns ロールオブジェクト
  */
-module.exports.searchRoleById = function (guild, roleId) {
+function searchRoleById(guild, roleId) {
     var role = guild.roles.cache.find((role) => role.id === roleId);
 
     if (role != null) {
@@ -48,7 +56,7 @@ module.exports.searchRoleById = function (guild, roleId) {
     } else {
         return null;
     }
-};
+}
 
 /**
  * 渡されたロールに色を設定する．色がnullのときはランダムな色を設定する
@@ -56,7 +64,7 @@ module.exports.searchRoleById = function (guild, roleId) {
  * @param {string} color カラーコード
  * @returns セットしたカラーコード
  */
-module.exports.setColorToRole = async function (guild, role, color) {
+async function setColorToRole(guild, role, color) {
     if (color != null) {
         await role.setColor(color);
         await guild.roles.fetch();
@@ -93,7 +101,7 @@ module.exports.setColorToRole = async function (guild, role, color) {
         await guild.roles.fetch();
         return await role.hexColor;
     }
-};
+}
 
 /**
  * メンバーにロールを付与するコマンド，メンバーが見つからない場合エラーメッセージを返す
@@ -102,14 +110,22 @@ module.exports.setColorToRole = async function (guild, role, color) {
  * @param {string} memberId メンバーID
  * @returns メンバーID
  */
-module.exports.setRoleToMember = async function (guild, roleId, memberId) {
+async function setRoleToMember(guild, roleId, memberId) {
     if (memberId == null || memberId == '') {
         return null;
     } else {
         let member;
-        if (memberId.length == 18) {
-            member = await guild.members.cache.get(memberId);
+
+        // 数値判定
+        if (!isNaN(memberId)) {
+            // 桁数判定
+            if (memberId.length == 18 || memberId.length == 19) {
+                member = await guild.members.cache.get(memberId);
+            } else {
+                member = null;
+            }
         } else {
+            // ユーザータグからメンバー取得
             member = await guild.members.cache.find((member) => member.user.tag === memberId);
         }
 
@@ -120,4 +136,4 @@ module.exports.setRoleToMember = async function (guild, roleId, memberId) {
             return memberId + '(NOT_FOUND)';
         }
     }
-};
+}
