@@ -1,5 +1,5 @@
 // Discord bot implements
-const { Client, Intents, VoiceChannel, MessageAttachment } = require('discord.js');
+const { Client, Intents, MessageAttachment } = require('discord.js');
 const { URLSearchParams } = require('url');
 const client = new Client({
     intents: [
