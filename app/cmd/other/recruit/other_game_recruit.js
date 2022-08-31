@@ -1,11 +1,12 @@
 const { MessageEmbed, Permissions } = require('discord.js');
+const app = require('app-root-path').resolve('app');
 const {
     recruitDeleteButton,
     recruitActionRow,
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require('./button_components.js');
+} = require(app + '/common/button_components.js');
 
 module.exports = {
     otherGameRecruit: otherGameRecruit,
