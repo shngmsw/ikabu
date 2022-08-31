@@ -9,7 +9,7 @@ const handleShow = require('./cmd/splat2/show.js');
 const handleTimer = require('./cmd/other/timer.js');
 const handleVoicePick = require('./cmd/other/vpick.js');
 const handleWiki = require('./cmd/other/wiki.js');
-const { handleCreateRole, handleDeleteRole } = require('./cmd/admin-cmd/manageRole.js');
+const { handleCreateRole, handleDeleteRole, handleAssignRole, handleUnassignRole } = require('./cmd/admin-cmd/manageRole.js');
 const handleDeleteCategory = require('./cmd/admin-cmd/deleteCategory.js');
 const handleDeleteChannel = require('./cmd/admin-cmd/deleteChannel.js');
 const handleCreateRoom = require('./cmd/admin-cmd/createRoom.js');
@@ -59,6 +59,12 @@ function call(interaction) {
                     break;
                 case 'ロール作成':
                     handleCreateRole(interaction);
+                    break;
+                case 'ロール割当':
+                    handleAssignRole(interaction);
+                    break;
+                case 'ロール解除':
+                    handleUnassignRole(interaction);
                     break;
                 case 'カテゴリー削除':
                     handleDeleteCategory(interaction);
