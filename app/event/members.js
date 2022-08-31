@@ -1,5 +1,6 @@
-const insertMembers = require('../../db/members_insert.js');
-const getMember = require('../../db/members_select.js');
+const root = require('app-root-path');
+const insertMembers = require(root + '/db/members_insert.js');
+const getMember = require(root + '/db/members_select.js');
 
 module.exports = async function chatCountUp(msg) {
     let id = msg.author.id;

@@ -1,4 +1,3 @@
-const common = require('../common.js');
 const kujis = {
     0: '大吉',
     1: '吉',

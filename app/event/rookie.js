@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
-const getMember = require('../../db/members_select.js');
+const root = require('app-root-path');
+const getMember = require(root + '/db/members_select.js');
 module.exports = async function removeRookie(msg) {
     const dt = new Date();
     const lastMonth = dt.setMonth(dt.getMonth() - 1);

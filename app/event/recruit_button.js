@@ -1,5 +1,6 @@
 const { MessageEmbed, MessageActionRow, MessageButton, Client } = require('discord.js');
-const { isNotEmpty, datetimeDiff } = require('../common');
+const app = require('app-root-path').resolve('app');
+const { isNotEmpty, datetimeDiff } = require(app + '/common');
 module.exports = {
     join: join,
     cancel: cancel,

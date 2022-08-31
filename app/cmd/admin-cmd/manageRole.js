@@ -1,7 +1,8 @@
 const { MessageAttachment } = require('discord.js');
 const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
-const { createRole, searchRoleById, setColorToRole } = require('../../manager/roleManager.js');
+const app = require('app-root-path').resolve('app');
+const { createRole, searchRoleById, setColorToRole } = require(app + '/manager/roleManager.js');
 
 module.exports.handleCreateRole = async function (interaction) {
     if (!interaction.isCommand()) return;

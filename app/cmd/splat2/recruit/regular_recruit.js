@@ -1,8 +1,10 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
-const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require('../../common.js');
-const { createRoundRect, drawArcImage, fillTextWithStroke } = require('./canvas_components.js');
+const app = require('app-root-path').resolve('app');
+const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require(app + '/common.js');
+const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
+const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
 const {
     recruitDeleteButton,
     recruitActionRow,
@@ -10,7 +12,7 @@ const {
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require('./button_components.js');
+} = require(app + '/common/button_components.js');
 const { MessageAttachment, Permissions } = require('discord.js');
 const schedule_url = 'https://splatoon2.ink/data/schedules.json';
 
@@ -178,9 +180,11 @@ async function sendRegularMatch(
     const rule = new MessageAttachment(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
 
     try {
+        const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention = `<@&${mention_id}>`;
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
         const sentMessage = await interaction.channel.send({
-            content: '@everyone ボタンを押して参加表明するでし！',
+            content: mention + ' ボタンを押して参加表明するでし！',
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
