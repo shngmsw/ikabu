@@ -6,7 +6,7 @@ const {
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require(app + '/cmd/splat2/recruit/button_components.js');
+} = require(app + '/common/button_components.js');
 
 module.exports = {
     otherGameRecruit: otherGameRecruit,

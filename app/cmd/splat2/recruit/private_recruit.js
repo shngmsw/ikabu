@@ -1,5 +1,7 @@
 const { MessageEmbed } = require('discord.js');
-const { recruitDeleteButton, recruitActionRow } = require('./button_components.js');
+const app = require('app-root-path').resolve('app');
+const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
+const { recruitDeleteButton, recruitActionRow } = require(app + '/common/button_components.js');
 
 module.exports = {
     privateRecruit: privateRecruit,

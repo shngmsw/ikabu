@@ -3,7 +3,7 @@ const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
 const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require(app + '/common.js');
-const { createRoundRect, drawArcImage, fillTextWithStroke } = require('./canvas_components.js');
+const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
 const {
     recruitDeleteButton,
     recruitActionRow,
@@ -11,7 +11,7 @@ const {
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require('./button_components.js');
+} = require(app + '/common/button_components.js');
 const { MessageAttachment, Permissions } = require('discord.js');
 const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
 

@@ -1,6 +1,6 @@
 const app = require('app-root-path').resolve('app');
 const common = require(app + '/common.js');
-const regexDiscrdMessageUrl =
+const regexDiscordMessageUrl =
     'https://(ptb.|canary.)?discord(app)?.com/channels/' + '(?<guild>[0-9]{18,19})/(?<channel>[0-9]{18,19})/(?<message>[0-9]{18,19})';
 
 module.exports = {
@@ -12,7 +12,7 @@ async function dispand(message) {
     var url;
     for (var m in messages) {
         if (message.content) {
-            url = message.content.match(regexDiscrdMessageUrl);
+            url = message.content.match(regexDiscordMessageUrl);
             await message.channel.send({
                 embeds: [common.composeEmbed(messages[m], url[0])],
             });
@@ -28,7 +28,7 @@ async function dispand(message) {
 
 async function extractMessages(message) {
     let messages = new Array();
-    let matches = message.content.match(regexDiscrdMessageUrl);
+    let matches = message.content.match(regexDiscordMessageUrl);
     if (!matches) {
         return;
     }

@@ -3,20 +3,27 @@ const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
 const { unixTime2mdwhm, coop_stage2txt, weapon2txt } = require(app + '/common.js');
-const { createRoundRect, drawArcImage, fillTextWithStroke } = require('./canvas_components.js');
+const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
+const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
 const {
     recruitDeleteButton,
     recruitActionRow,
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require('./button_components.js');
+} = require(app + '/common/button_components.js');
 const { MessageAttachment, Permissions } = require('discord.js');
 const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
 
-Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
-Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Medium.ttf'), { family: 'Genshin' });
-Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
+Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
+    family: 'Splatfont',
+});
+Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Medium.ttf'), {
+    family: 'Genshin',
+});
+Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), {
+    family: 'Genshin-Bold',
+});
 Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 
 module.exports = {
@@ -130,19 +137,30 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     try {
         const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
         const mention = `<@&${mention_id}>`;
-        const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
+        const header = await interaction.editReply({
+            content: txt,
+            files: [recruit, rule],
+            ephemeral: false,
+        });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         if (reserve_channel == null) {
-            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
+            sentMessage.edit({
+                components: [recruitDeleteButton(sentMessage, header)],
+            });
         } else {
-            sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
+            sentMessage.edit({
+                components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)],
+            });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
+                    {
+                        id: interaction.guild.roles.everyone.id,
+                        deny: [Permissions.FLAGS.CONNECT],
+                    },
                     { id: host_user.id, allow: [Permissions.FLAGS.CONNECT] },
                 ],
                 'Reserve Voice Channel',
@@ -162,7 +180,9 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             if (reserve_channel == null) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
             } else {
-                sentMessage.edit({ components: [recruitActionRowWithChannel(reserve_channel.id, header)] });
+                sentMessage.edit({
+                    components: [recruitActionRowWithChannel(reserve_channel.id, header)],
+                });
             }
         }
     } catch (error) {
