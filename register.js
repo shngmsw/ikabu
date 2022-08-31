@@ -128,6 +128,24 @@ const chManager = new SlashCommandBuilder()
     )
     .addSubcommand((subcommand) =>
         subcommand
+            .setName('ロール割当')
+            .setDescription('ロール割当')
+            .addMentionableOption((option) =>
+                option.setName('ターゲットロール').setDescription('どのロールにつけますか？').setRequired(true),
+            )
+            .addMentionableOption((option) => option.setName('割当ロール').setDescription('どのロールをつけますか？').setRequired(true)),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('ロール解除')
+            .setDescription('ロール解除')
+            .addMentionableOption((option) =>
+                option.setName('ターゲットロール').setDescription('どのロールから外しますか？').setRequired(true),
+            )
+            .addMentionableOption((option) => option.setName('解除ロール').setDescription('どのロールを外しますか？').setRequired(true)),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
             .setName('ロール削除')
             .setDescription('ロール削除')
             .addMentionableOption((option) => option.setName('ロール名1').setDescription('ロール名を指定してください。').setRequired(true))

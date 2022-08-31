@@ -2,9 +2,16 @@ const { MessageAttachment } = require('discord.js');
 const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
 const app = require('app-root-path').resolve('app');
-const { createRole, searchRoleById, setColorToRole } = require(app + '/manager/roleManager.js');
+const { createRole, searchRoleById, setColorToRole, searchRoleIdByName } = require(app + '/manager/roleManager.js');
 
-module.exports.handleCreateRole = async function (interaction) {
+module.exports = {
+    handleCreateRole: handleCreateRole,
+    handleDeleteRole: handleDeleteRole,
+    handleAssignRole: handleAssignRole,
+    handleUnassignRole: handleUnassignRole,
+};
+
+async function handleCreateRole(interaction) {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
@@ -44,9 +51,9 @@ module.exports.handleCreateRole = async function (interaction) {
         console.error(error);
         interaction.followUp('なんかエラーでてるわ');
     }
-};
+}
 
-module.exports.handleDeleteRole = async function (interaction) {
+async function handleDeleteRole(interaction) {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
@@ -110,20 +117,60 @@ module.exports.handleDeleteRole = async function (interaction) {
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したロールをまとめておいたでし！',
         files: [attachment],
     });
-};
+}
 
-/**
- * ロール名からロールIDを検索する．ない場合はnullを返す．
- * @param {Guild} guild Guildオブジェクト
- * @param {string} roleName ロール名
- * @returns ロールID
- */
-function searchRoleIdByName(guild, roleName) {
-    var role = guild.roles.cache.find((role) => role.name === roleName);
+async function handleAssignRole(interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+    const { options } = interaction;
 
-    if (role != null) {
-        return role.id;
-    } else {
-        return null;
+    if (!interaction.member.permissions.has('MANAGE_ROLES')) {
+        return interaction.editReply('ロールを管理する権限がないでし！');
+    }
+
+    try {
+        const targetRole = options.getMentionable('ターゲットロール');
+        const assignRole = options.getMentionable('割当ロール');
+        let assignRoleId = assignRole.id;
+
+        let targets = targetRole.members;
+
+        for (var target of targets) {
+            await target[1].roles.add(assignRoleId);
+        }
+
+        interaction.editReply('`' + targetRole.name + '`のメンバーに`' + assignRole.name + '`のロールつけたでし！');
+    } catch (error) {
+        console.error(error);
+        interaction.editReply('なんかエラーでてるわ');
+    }
+}
+
+async function handleUnassignRole(interaction) {
+    if (!interaction.isCommand()) return;
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+    const { options } = interaction;
+
+    if (!interaction.member.permissions.has('MANAGE_ROLES')) {
+        return interaction.editReply('ロールを管理する権限がないでし！');
+    }
+
+    try {
+        const targetRole = options.getMentionable('ターゲットロール');
+        const unAssignRole = options.getMentionable('解除ロール');
+        let unAssignRoleId = unAssignRole.id;
+
+        var targets = targetRole.members;
+
+        for (var target of targets) {
+            await target[1].roles.remove(unAssignRoleId);
+        }
+
+        interaction.editReply('`' + targetRole.name + '`のメンバーから`' + unAssignRole.name + '`のロールを削除したでし！');
+    } catch (error) {
+        console.error(error);
+        interaction.editReply('なんかエラーでてるわ');
     }
 }
