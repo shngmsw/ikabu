@@ -1,4 +1,4 @@
-const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 
 module.exports = {
     isInteger: isInteger,
@@ -24,7 +24,7 @@ module.exports = {
 };
 
 function composeEmbed(message, url) {
-    const embed = new Discord.MessageEmbed();
+    const embed = new MessageEmbed();
     embed.setDescription(message.content);
     embed.setTimestamp(message.createdAt);
     if (isNotEmpty(url)) {
@@ -504,6 +504,7 @@ function getCloseEmbed() {
     embed.setDescription(`↑の募集 〆`);
     return embed;
 }
+
 const recruit_command = {
     リグマ募集: '`/リグマ募集 now` or `/リグマ募集 next`',
     'ナワバリ・フェス募集': '`/ナワバリ募集 now` or `/ナワバリ募集 next`',
