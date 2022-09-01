@@ -6,6 +6,9 @@ module.exports = {
     cancel: cancel,
     del: del,
     close: close,
+    joinNotify: joinNotify,
+    cancelNotify: cancelNotify,
+    closeNotify: closeNotify,
     unlock: unlock,
 };
 
@@ -220,6 +223,120 @@ async function close(interaction, params) {
     }
 }
 
+async function joinNotify(interaction, params) {
+    /** @type {Discord.Snowflake} */
+
+    try {
+        await interaction.deferReply({
+            ephemeral: true,
+        });
+
+        const guild = await interaction.guild.fetch();
+        // APIからのメンバーオブジェクト(discord.jsのGuildMemberでないもの)がそのまま渡ってくることがあるのでfetchすることで確実にGuildMemberとする。
+        // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
+        const member = await guild.members.fetch(interaction.member.user.id, {
+            force: true, // intentsによってはGuildMemberUpdateが配信されないため
+        });
+        const host_id = params.get('hid');
+        if (member.user.id === host_id) {
+            await interaction.followUp({
+                content: `募集主は参加表明できないでし！`,
+                ephemeral: true,
+            });
+        } else {
+            const member_mention = `<@!${member.user.id}>`;
+            const embed = new MessageEmbed();
+            embed.setAuthor({
+                name: `${member.user.username}たんが参加表明したでし！`,
+                iconURL: member.user.displayAvatarURL(),
+            });
+
+            await interaction.message.reply({
+                content: `<@${host_id}> ${member_mention}`,
+                embeds: [embed],
+            });
+
+            await interaction.followUp({
+                content: `<@${host_id}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
+                ephemeral: true,
+            });
+        }
+    } catch (err) {
+        handleError(err, { interaction });
+    }
+}
+
+async function cancelNotify(interaction, params) {
+    /** @type {Discord.Snowflake} */
+    try {
+        const guild = await interaction.guild.fetch();
+        await guild.channels.fetch();
+        const member = await guild.members.fetch(interaction.member.user.id, {
+            force: true, // intentsによってはGuildMemberUpdateが配信されないため
+        });
+        const host_id = params.get('hid');
+        const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
+        if (member.user.id == host_id) {
+            await interaction.update({
+                content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
+                components: [disableButtons()],
+            });
+            await interaction.message.reply({ embeds: [embed] });
+        } else {
+            await interaction.deferReply({
+                ephemeral: true,
+            });
+            await interaction.followUp({
+                content: `キャンセルするときぐらい、自分の言葉で伝えましょう！\n<@${host_id}>たんにメンションつきで伝えるでし！`,
+                ephemeral: true,
+            });
+        }
+    } catch (err) {
+        handleError(err, { interaction });
+    }
+}
+
+async function closeNotify(interaction, params) {
+    /** @type {Discord.Snowflake} */
+
+    try {
+        const guild = await interaction.guild.fetch();
+        await guild.channels.fetch();
+        const member = await guild.members.fetch(interaction.member.user.id, {
+            force: true, // intentsによってはGuildMemberUpdateが配信されないため
+        });
+        const host_id = params.get('hid');
+        const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
+        const helpEmbed = await getHelpEmbed(guild, interaction.channel.id);
+        if (member.user.id === host_id) {
+            await interaction.update({
+                content: `<@${host_id}>たんの募集は〆！`,
+                components: [disableButtons()],
+            });
+            await interaction.message.reply({ embeds: [embed] });
+            await interaction.channel.send({ embeds: [helpEmbed] });
+        } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
+            await interaction.update({
+                content: `<@${host_id}>たんの募集は〆！`,
+                components: [disableButtons()],
+            });
+            const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
+            await interaction.message.reply({ embeds: [embed] });
+            await header_message.channel.send({ embeds: [helpEmbed] });
+        } else {
+            await interaction.deferReply({
+                ephemeral: true,
+            });
+            await interaction.followUp({
+                content: `募集主以外は募集を〆られないでし。`,
+                ephemeral: true,
+            });
+        }
+    } catch (err) {
+        handleError(err, { interaction });
+    }
+}
+
 async function unlock(interaction, params) {
     /** @type {Discord.Snowflake} */
 
@@ -251,7 +368,7 @@ async function getHelpEmbed(guild, chid) {
     } else if (sendChannel.name.match('別ゲー募集')) {
         command = '`/別ゲー募集 apex` or `/別ゲー募集 dbd` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`';
     } else if (sendChannel.name.match('プラベ募集')) {
-        command = '`/プラベ募集`';
+        command = '`/プラベ募集 recruit` or `/プラベ募集 button`';
     } else if (sendChannel.name.match('フェス')) {
         command = '`/〇〇陣営 fes` or `/fes`';
     }
