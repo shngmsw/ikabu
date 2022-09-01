@@ -169,10 +169,7 @@ async function onInteraction(interaction) {
                     });
                 }
             } else if (commandName === commandNames.regular) {
-                if (
-                    interaction.channel.parentId ==
-                    searchChannelIdByName(interaction.guild, '🎮スプラ2募集--------------', 'GUILD_CATEGORY')
-                ) {
+                if (interaction.channel.parentId == process.env.CATEGORY_SPLAT2_ID) {
                     await regular2Recruit(interaction);
                 } else {
                     await regularRecruit(interaction);
