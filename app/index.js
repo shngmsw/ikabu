@@ -21,7 +21,8 @@ const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const handleStageInfo = require(app + '/cmd/splat2/stageinfo.js');
 const { getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
 const { otherGameRecruit } = require(app + '/cmd/other/recruit/other_game_recruit.js');
-const { regularRecruit } = require(app + '/cmd/splat2/recruit/regular_recruit.js');
+const { regular2Recruit } = require(app + '/cmd/splat2/recruit/regular_recruit.js');
+const { regularRecruit } = require(app + '/cmd/splat3/recruit/regular_recruit.js');
 const { fesRecruit } = require(app + '/cmd/splat3/recruit/fes_recruit');
 const { leagueRecruit } = require(app + '/cmd/splat2/recruit/league_recruit.js');
 const { salmonRecruit } = require(app + '/cmd/splat2/recruit/salmon_recruit.js');
@@ -32,6 +33,7 @@ const suggestionBox = require('./reaction/suggestion-box.js');
 const join = require('./event/join.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
+const { searchChannelIdByName } = require('./manager/channelManager.js');
 const handleIkabuExperience = require(app + '/cmd/other/experience.js');
 const { commandNames } = require(root + '/constant');
 const registerSlashCommands = require(root + '/register.js');
@@ -166,12 +168,19 @@ async function onInteraction(interaction) {
                         embeds: [embed, getCommandHelpEmbed(interaction.channel.name)],
                     });
                 }
+            } else if (commandName === commandNames.regular) {
+                if (
+                    interaction.channel.parentId ==
+                    searchChannelIdByName(interaction.guild, '🎮スプラ2募集--------------', 'GUILD_CATEGORY')
+                ) {
+                    await regular2Recruit(interaction);
+                } else {
+                    await regularRecruit(interaction);
+                }
             } else if (commandName === commandNames.other_game) {
                 await otherGameRecruit(interaction);
             } else if (commandName === commandNames.private) {
                 await privateRecruit(interaction);
-            } else if (commandName === commandNames.regular) {
-                await regularRecruit(interaction);
             } else if (commandName === commandNames.league) {
                 await leagueRecruit(interaction);
             } else if (commandName === commandNames.fesA) {
