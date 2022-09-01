@@ -25,6 +25,7 @@ const { regular2Recruit } = require(app + '/cmd/splat2/recruit/regular_recruit.j
 const { regularRecruit } = require(app + '/cmd/splat3/recruit/regular_recruit.js');
 const { fesRecruit } = require(app + '/cmd/splat3/recruit/fes_recruit');
 const { leagueRecruit } = require(app + '/cmd/splat2/recruit/league_recruit.js');
+const { anarchyRecruit } = require(app + '/cmd/splat3/recruit/anarchy_recruit.js');
 const { salmon2Recruit } = require(app + '/cmd/splat2/recruit/salmon_recruit.js');
 const { salmonRecruit } = require(app + '/cmd/splat3/recruit/salmon_recruit.js');
 const { private2Recruit } = require(app + '/cmd/splat2/recruit/private_recruit.js');
@@ -180,6 +181,8 @@ async function onInteraction(interaction) {
                 }
             } else if (commandName === commandNames.other_game) {
                 await otherGameRecruit(interaction);
+            } else if (commandName === commandNames.anarchy) {
+                await anarchyRecruit(interaction);
             } else if (commandName === commandNames.private) {
                 if (interaction.channel.parentId == process.env.CATEGORY_SPLAT2_ID) {
                     await private2Recruit(interaction);

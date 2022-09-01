@@ -18,6 +18,7 @@ module.exports = {
         other_game: '別ゲー募集',
         regular: 'ナワバリ募集',
         league: 'リグマ募集',
+        anarchy: 'バンカラ募集',
         salmon: 'サーモンラン募集',
         fesA: 'フウカ陣営',
         fesB: 'マンタロー陣営',

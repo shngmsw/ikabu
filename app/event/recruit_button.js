@@ -363,6 +363,8 @@ async function getHelpEmbed(guild, chid) {
         command = '`/リグマ募集 now` or `/リグマ募集 next`';
     } else if (sendChannel.name.match('ナワバリ')) {
         command = '`/ナワバリ募集 now` or `/ナワバリ募集 next`';
+    } else if (sendChannel.name.match('バンカラ募集')) {
+        command = '`/バンカラ募集 now` or `/バンカラ募集 next`';
     } else if (sendChannel.name.match('サーモン募集')) {
         command = '`/サーモンラン募集 run`';
     } else if (sendChannel.name.match('別ゲー募集')) {
