@@ -208,8 +208,8 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     recruit_ctx.lineWidth = 4;
     recruit_ctx.stroke();
 
-    let salmon_icon = await Canvas.loadImage('https://cdn.wikimg.net/en/splatoonwiki/images/7/76/S3_art_3D_Little_buddy.png');
-    recruit_ctx.drawImage(salmon_icon, 20, 15, 85, 105);
+    let salmon_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
+    recruit_ctx.drawImage(salmon_icon, 22, 32, 82, 60);
 
     fillTextWithStroke(recruit_ctx, 'SALMON', '51px Splatfont', '#000000', '#FF9900', 3, 115, 80);
     fillTextWithStroke(recruit_ctx, 'RUN', '51px Splatfont', '#000000', '#00FF00DA', 3, 350, 80);
