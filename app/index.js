@@ -25,7 +25,8 @@ const { regular2Recruit } = require(app + '/cmd/splat2/recruit/regular_recruit.j
 const { regularRecruit } = require(app + '/cmd/splat3/recruit/regular_recruit.js');
 const { fesRecruit } = require(app + '/cmd/splat3/recruit/fes_recruit');
 const { leagueRecruit } = require(app + '/cmd/splat2/recruit/league_recruit.js');
-const { salmonRecruit } = require(app + '/cmd/splat2/recruit/salmon_recruit.js');
+const { salmon2Recruit } = require(app + '/cmd/splat2/recruit/salmon_recruit.js');
+const { salmonRecruit } = require(app + '/cmd/splat3/recruit/salmon_recruit.js');
 const { private2Recruit } = require(app + '/cmd/splat2/recruit/private_recruit.js');
 const { privateRecruit } = require(app + '/cmd/splat3/recruit/private_recruit.js');
 const removeRookie = require('./event/rookie.js');
@@ -34,7 +35,6 @@ const suggestionBox = require('./reaction/suggestion-box.js');
 const join = require('./event/join.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
-const { searchChannelIdByName } = require('./manager/channelManager.js');
 const handleIkabuExperience = require(app + '/cmd/other/experience.js');
 const { commandNames } = require(root + '/constant');
 const registerSlashCommands = require(root + '/register.js');
@@ -195,7 +195,11 @@ async function onInteraction(interaction) {
             } else if (commandName === commandNames.fesC) {
                 await fesRecruit(interaction);
             } else if (commandName === commandNames.salmon) {
-                await salmonRecruit(interaction);
+                if (interaction.channel.parentId == process.env.CATEGORY_SPLAT2_ID) {
+                    await salmon2Recruit(interaction);
+                } else {
+                    await salmonRecruit(interaction);
+                }
             } else if (commandName === commandNames.friend_code) {
                 await handleFriendCode(interaction);
             } else if (commandName === commandNames.experience) {
