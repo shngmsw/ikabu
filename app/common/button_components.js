@@ -8,6 +8,7 @@ module.exports = {
     recruitActionRowWithChannel: recruitActionRowWithChannel,
     disableButtons: disableButtons,
     unlockChannelButton: unlockChannelButton,
+    notifyActionRow: notifyActionRow,
 };
 
 function recruitDeleteButtonWithChannel(msg, channel_id, header) {
@@ -83,6 +84,26 @@ function recruitActionRow(header) {
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'close');
     closeParams.append('hmid', header.id);
+
+    return new MessageActionRow().addComponents([
+        new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
+        new MessageButton().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle('DANGER'),
+        new MessageButton().setCustomId(closeParams.toString()).setLabel('〆').setStyle('SECONDARY'),
+    ]);
+}
+
+function notifyActionRow(interaction) {
+    const joinParams = new URLSearchParams();
+    joinParams.append('d', 'njr');
+    joinParams.append('hid', interaction.member.id);
+
+    const cancelParams = new URLSearchParams();
+    cancelParams.append('d', 'ncr');
+    cancelParams.append('hid', interaction.member.id);
+
+    const closeParams = new URLSearchParams();
+    closeParams.append('d', 'nclose');
+    closeParams.append('hid', interaction.member.id);
 
     return new MessageActionRow().addComponents([
         new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
