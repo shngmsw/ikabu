@@ -185,7 +185,7 @@ async function onInteraction(interaction) {
                     await private2Recruit(interaction);
                 } else {
                     await privateRecruit(interaction);
-                
+                }
             } else if (commandName === commandNames.league) {
                 await leagueRecruit(interaction);
             } else if (commandName === commandNames.fesA) {
