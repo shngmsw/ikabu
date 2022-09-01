@@ -22,12 +22,12 @@ Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), { family: 
 Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 
 module.exports = {
-    regular2Recruit: regular2Recruit,
+    regularRecruit: regularRecruit,
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function regular2Recruit(interaction) {
+async function regularRecruit(interaction) {
     if (!interaction.isCommand()) return;
 
     const options = interaction.options;
@@ -125,7 +125,8 @@ async function regular2Recruit(interaction) {
         if (condition == null) condition = 'なし';
         const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.regular[type].stage_a.image;
         const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.regular[type].stage_b.image;
-        const stageImages = [stage_a, stage_b];
+        // const stageImages = [stage_a, stage_b];
+        const stageImages = 'dummy';
         await sendRegularMatch(
             interaction,
             channel,
@@ -174,15 +175,16 @@ async function sendRegularMatch(
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
-    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, user3, condition, channel_name);
+    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, user3, condition, channel_name, r_time);
     const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new MessageAttachment(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
+    // const rule = new MessageAttachment(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
 
     try {
-        const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention_id = searchRoleIdByName(interaction.guild, 'ナワバリ');
         const mention = `<@&${mention_id}>`;
-        const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
+        // const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
+        const header = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
@@ -237,7 +239,7 @@ async function sendRegularMatch(
 /*
  * 募集用のキャンバス(1枚目)を作成する
  */
-async function recruitCanvas(recruit_num, count, host_user, user1, user2, user3, condition, channel_name) {
+async function recruitCanvas(recruit_num, count, host_user, user1, user2, user3, condition, channel_name, r_time) {
     blank_avatar_url = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
@@ -251,10 +253,10 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, user3,
     recruit_ctx.lineWidth = 4;
     recruit_ctx.stroke();
 
-    let regular_icon = await Canvas.loadImage('https://splatoon2.ink/assets/img/battle-regular.01b5ef.png');
-    recruit_ctx.drawImage(regular_icon, 25, 25, 70, 70);
+    let regular_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png');
+    recruit_ctx.drawImage(regular_icon, 25, 25, 75, 75);
 
-    fillTextWithStroke(recruit_ctx, 'レギュラーマッチ', '50px Splatfont', '#CFF622', '#45520B', 1, 115, 80);
+    fillTextWithStroke(recruit_ctx, 'レギュラーマッチ', '51px Splatfont', '#000000', '#B3FF00', 3, 115, 80);
 
     let member_urls = [];
 
@@ -300,6 +302,11 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, user3,
     recruit_ctx.save();
     recruit_ctx.textAlign = 'right';
     fillTextWithStroke(recruit_ctx, channel_name, '33px "Splatfont"', '#FFFFFF', '#2D3130', 1, 680, 60);
+    recruit_ctx.restore();
+
+    recruit_ctx.save();
+    recruit_ctx.textAlign = 'center';
+    fillTextWithStroke(recruit_ctx, r_time, '36px "Splatfont"', '#FFFFFF', '#2D3130', 1, 570, 120);
     recruit_ctx.restore();
 
     fillTextWithStroke(recruit_ctx, '募集人数', '41px "Splatfont"', '#FFFFFF', '#2D3130', 1, 490, 185);
@@ -422,6 +429,7 @@ function getRegular(data, x) {
 
     date = unixTime2ymdw(data.regular[x].start_time);
     time = unixTime2hm(data.regular[x].start_time) + ' – ' + unixTime2hm(data.regular[x].end_time);
+    // time = unixTime2hm(data.regular[x].start_time) + '～';
     rule = rule2txt(data.regular[x].rule.key);
     stage1 = stage2txt(data.regular[x].stage_a.id);
     stage2 = stage2txt(data.regular[x].stage_b.id);
