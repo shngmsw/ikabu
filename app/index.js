@@ -25,7 +25,8 @@ const { regularRecruit } = require(app + '/cmd/splat2/recruit/regular_recruit.js
 const { fesRecruit } = require(app + '/cmd/splat3/recruit/fes_recruit');
 const { leagueRecruit } = require(app + '/cmd/splat2/recruit/league_recruit.js');
 const { salmonRecruit } = require(app + '/cmd/splat2/recruit/salmon_recruit.js');
-const { privateRecruit } = require(app + '/cmd/splat2/recruit/private_recruit.js');
+const { private2Recruit } = require(app + '/cmd/splat2/recruit/private_recruit.js');
+const { privateRecruit } = require(app + '/cmd/splat3/recruit/private_recruit.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
 const suggestionBox = require('./reaction/suggestion-box.js');
@@ -136,6 +137,9 @@ const buttons = {
     del: recruitButton.del,
     close: recruitButton.close,
     unl: recruitButton.unlock,
+    njr: recruitButton.joinNotify,
+    ncr: recruitButton.cancelNotify,
+    nclose: recruitButton.closeNotify,
 };
 /**
  *
@@ -169,7 +173,11 @@ async function onInteraction(interaction) {
             } else if (commandName === commandNames.other_game) {
                 await otherGameRecruit(interaction);
             } else if (commandName === commandNames.private) {
-                await privateRecruit(interaction);
+                if (interaction.channel.parentId == process.env.CATEGORY_SPLAT2_ID) {
+                    await private2Recruit(interaction);
+                } else {
+                    await privateRecruit(interaction);
+                }
             } else if (commandName === commandNames.regular) {
                 await regularRecruit(interaction);
             } else if (commandName === commandNames.league) {
