@@ -521,10 +521,18 @@ const fesC = new SlashCommandBuilder()
 const privateMatch = new SlashCommandBuilder()
     .setName(commandNames.private)
     .setDescription('プラベ募集コマンド')
-    .addStringOption((option) => option.setName('開始時刻').setDescription('何時から始める？例：21:00').setRequired(true))
-    .addStringOption((option) => option.setName('所要時間').setDescription('何時間ぐらいやる？例：2時間').setRequired(true))
-    .addStringOption((option) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
-    .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'));
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('recruit')
+            .setDescription('開始時刻や人数などを細かく設定できます。通常はこちらを使ってください。')
+            .addStringOption((option) => option.setName('開始時刻').setDescription('何時から始める？例：21:00').setRequired(true))
+            .addStringOption((option) => option.setName('所要時間').setDescription('何時間ぐらいやる？例：2時間').setRequired(true))
+            .addStringOption((option) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
+            .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand.setName('button').setDescription('募集条件を通常のチャットで打ち込んだ後に通知と募集用のボタンを出せます。'),
+    );
 
 const otherGame = new SlashCommandBuilder()
     .setName(commandNames.other_game)

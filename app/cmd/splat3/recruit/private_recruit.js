@@ -4,12 +4,12 @@ const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
 const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require(app + '/common/button_components.js');
 
 module.exports = {
-    private2Recruit: private2Recruit,
+    privateRecruit: privateRecruit,
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function private2Recruit(interaction) {
+async function privateRecruit(interaction) {
     if (!interaction.isCommand()) return;
 
     const options = interaction.options;
@@ -69,8 +69,7 @@ async function sendPrivateRecruit(interaction, options) {
             ephemeral: false,
         });
 
-        const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
-        const mention = `<@&${mention_id}>`;
+        const mention = `@everyone`;
         const sentMessage = await interaction.channel.send({
             content: mention + ` ボタンを押して参加表明するでし！`,
         });
@@ -95,8 +94,7 @@ async function sendPrivateRecruit(interaction, options) {
 }
 
 async function sendNotification(interaction) {
-    const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
-    const mention = `<@&${mention_id}>`;
+    const mention = `@everyone`;
     const sentMessage = await interaction.channel.send({
         content: mention + ` ボタンを押して参加表明するでし！`,
     });

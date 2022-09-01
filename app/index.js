@@ -26,8 +26,10 @@ const { regularRecruit } = require(app + '/cmd/splat3/recruit/regular_recruit.js
 const { fesRecruit } = require(app + '/cmd/splat3/recruit/fes_recruit');
 const { leagueRecruit } = require(app + '/cmd/splat2/recruit/league_recruit.js');
 const { anarchyRecruit } = require(app + '/cmd/splat3/recruit/anarchy_recruit.js');
-const { salmonRecruit } = require(app + '/cmd/splat2/recruit/salmon_recruit.js');
-const { privateRecruit } = require(app + '/cmd/splat2/recruit/private_recruit.js');
+const { salmon2Recruit } = require(app + '/cmd/splat2/recruit/salmon_recruit.js');
+const { salmonRecruit } = require(app + '/cmd/splat3/recruit/salmon_recruit.js');
+const { private2Recruit } = require(app + '/cmd/splat2/recruit/private_recruit.js');
+const { privateRecruit } = require(app + '/cmd/splat3/recruit/private_recruit.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
 const suggestionBox = require('./reaction/suggestion-box.js');
@@ -138,6 +140,9 @@ const buttons = {
     del: recruitButton.del,
     close: recruitButton.close,
     unl: recruitButton.unlock,
+    njr: recruitButton.joinNotify,
+    ncr: recruitButton.cancelNotify,
+    nclose: recruitButton.closeNotify,
 };
 /**
  *
@@ -176,10 +181,14 @@ async function onInteraction(interaction) {
                 }
             } else if (commandName === commandNames.other_game) {
                 await otherGameRecruit(interaction);
-            } else if (commandName === commandNames.private) {
-                await privateRecruit(interaction);
             } else if (commandName === commandNames.anarchy) {
                 await anarchyRecruit(interaction);
+            } else if (commandName === commandNames.private) {
+                if (interaction.channel.parentId == process.env.CATEGORY_SPLAT2_ID) {
+                    await private2Recruit(interaction);
+                } else {
+                    await privateRecruit(interaction);
+                }
             } else if (commandName === commandNames.league) {
                 await leagueRecruit(interaction);
             } else if (commandName === commandNames.fesA) {
@@ -189,7 +198,11 @@ async function onInteraction(interaction) {
             } else if (commandName === commandNames.fesC) {
                 await fesRecruit(interaction);
             } else if (commandName === commandNames.salmon) {
-                await salmonRecruit(interaction);
+                if (interaction.channel.parentId == process.env.CATEGORY_SPLAT2_ID) {
+                    await salmon2Recruit(interaction);
+                } else {
+                    await salmonRecruit(interaction);
+                }
             } else if (commandName === commandNames.friend_code) {
                 await handleFriendCode(interaction);
             } else if (commandName === commandNames.experience) {
