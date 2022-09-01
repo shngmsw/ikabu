@@ -25,6 +25,7 @@ const { regular2Recruit } = require(app + '/cmd/splat2/recruit/regular_recruit.j
 const { regularRecruit } = require(app + '/cmd/splat3/recruit/regular_recruit.js');
 const { fesRecruit } = require(app + '/cmd/splat3/recruit/fes_recruit');
 const { leagueRecruit } = require(app + '/cmd/splat2/recruit/league_recruit.js');
+const { anarchyRecruit } = require(app + '/cmd/splat3/recruit/anarchy_recruit.js');
 const { salmonRecruit } = require(app + '/cmd/splat2/recruit/salmon_recruit.js');
 const { privateRecruit } = require(app + '/cmd/splat2/recruit/private_recruit.js');
 const removeRookie = require('./event/rookie.js');
@@ -33,7 +34,6 @@ const suggestionBox = require('./reaction/suggestion-box.js');
 const join = require('./event/join.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
-const { searchChannelIdByName } = require('./manager/channelManager.js');
 const handleIkabuExperience = require(app + '/cmd/other/experience.js');
 const { commandNames } = require(root + '/constant');
 const registerSlashCommands = require(root + '/register.js');
@@ -178,6 +178,8 @@ async function onInteraction(interaction) {
                 await otherGameRecruit(interaction);
             } else if (commandName === commandNames.private) {
                 await privateRecruit(interaction);
+            } else if (commandName === commandNames.anarchy) {
+                await anarchyRecruit(interaction);
             } else if (commandName === commandNames.league) {
                 await leagueRecruit(interaction);
             } else if (commandName === commandNames.fesA) {

@@ -246,12 +246,14 @@ async function getHelpEmbed(guild, chid) {
         command = '`/リグマ募集 now` or `/リグマ募集 next`';
     } else if (sendChannel.name.match('ナワバリ')) {
         command = '`/ナワバリ募集 now` or `/ナワバリ募集 next`';
+    } else if (sendChannel.name.match('バンカラ募集')) {
+        command = '`/バンカラ募集 now` or `/バンカラ募集 next`';
     } else if (sendChannel.name.match('サーモン募集')) {
         command = '`/サーモンラン募集 run`';
     } else if (sendChannel.name.match('別ゲー募集')) {
         command = '`/別ゲー募集 apex` or `/別ゲー募集 dbd` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`';
     } else if (sendChannel.name.match('プラベ募集')) {
-        command = '`/プラベ募集`';
+        command = '`/プラベ募集 recruit` or `/プラベ募集 button`';
     } else if (sendChannel.name.match('フェス')) {
         command = '`/〇〇陣営 fes` or `/fes`';
     }
