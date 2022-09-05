@@ -17,3 +17,9 @@ CREATE TABLE IF NOT EXISTS random_matching_message (
     message_id varchar(20) primary key
     ,author_id varchar(20)
 );
+
+CREATE TABLE IF NOT EXISTS recruit (
+    message_id varchar(20)
+    ,author_id varchar(20)
+    ,member_id varchar(20)
+);
