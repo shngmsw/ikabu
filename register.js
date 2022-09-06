@@ -323,6 +323,81 @@ const leagueMatch = new SlashCommandBuilder()
             ),
     );
 
+const anarchyMatch = new SlashCommandBuilder()
+    .setName(commandNames.anarchy)
+    .setDescription('バンカラマッチ募集コマンド')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('now')
+            .setDescription('現在のバンカラマッチの募集をたてます。')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) =>
+                option
+                    .setName('募集ウデマエ')
+                    .setDescription('募集するウデマエを選択してください')
+                    .setChoices(
+                        { name: 'C', value: 'C' },
+                        { name: 'B', value: 'B' },
+                        { name: 'A', value: 'A' },
+                        { name: 'S', value: 'S' },
+                        { name: 'S+', value: 'S+' },
+                    )
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addChannelOption((option) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            ),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('next')
+            .setDescription('次のバンカラマッチの募集をたてます。')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) =>
+                option
+                    .setName('募集ウデマエ')
+                    .setDescription('募集するウデマエを選択してください')
+                    .setChoices(
+                        { name: 'C', value: 'C' },
+                        { name: 'B', value: 'B' },
+                        { name: 'A', value: 'A' },
+                        { name: 'S', value: 'S' },
+                        { name: 'S+', value: 'S+' },
+                    )
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            ),
+    );
+
 const salmonRun = new SlashCommandBuilder()
     .setName(commandNames.salmon)
     .setDescription('サーモンラン募集コマンド')
@@ -446,10 +521,20 @@ const fesC = new SlashCommandBuilder()
 const privateMatch = new SlashCommandBuilder()
     .setName(commandNames.private)
     .setDescription('プラベ募集コマンド')
-    .addStringOption((option) => option.setName('開始時刻').setDescription('何時から始める？例：21:00').setRequired(true))
-    .addStringOption((option) => option.setName('所要時間').setDescription('何時間ぐらいやる？例：2時間').setRequired(true))
-    .addStringOption((option) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
-    .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'));
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('recruit')
+            .setDescription('開始時刻や人数などを細かく設定できます。通常はこちらを使ってください。')
+            .addStringOption((option) => option.setName('開始時刻').setDescription('何時から始める？例：21:00').setRequired(true))
+            .addStringOption((option) => option.setName('所要時間').setDescription('何時間ぐらいやる？例：2時間').setRequired(true))
+            .addStringOption((option) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
+            .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('button')
+            .setDescription('募集条件を通常のチャットで打ち込んだ後に通知と募集用のボタンを出せます。※@everyoneメンションを使用します。'),
+    );
 
 const otherGame = new SlashCommandBuilder()
     .setName(commandNames.other_game)
@@ -539,6 +624,7 @@ const commands = [
     privateMatch,
     regularMatch,
     leagueMatch,
+    anarchyMatch,
     salmonRun,
     fesA,
     fesB,

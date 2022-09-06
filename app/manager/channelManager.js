@@ -1,3 +1,9 @@
+module.exports = {
+    createChannel: createChannel,
+    searchChannelIdByName: searchChannelIdByName,
+    searchChannelById: searchChannelById,
+};
+
 /**
  * チャンネルを作成し，作成したチャンネルのIDを返す．
  * 既に同じカテゴリに同じチャンネル名のチャンネルが有る場合，そのチャンネルIDを返す
@@ -7,7 +13,7 @@
  * @param {string} channelType 'GUILD_TEXT' or 'GUILD_VOICE' or 'GUILD_CATEGORY'
  * @returns チャンネルID
  */
-module.exports.createChannel = async function (guild, categoryId, channelName, channelType) {
+async function createChannel(guild, categoryId, channelName, channelType) {
     if (channelName == '') {
         return null;
     }
@@ -24,7 +30,7 @@ module.exports.createChannel = async function (guild, categoryId, channelName, c
         await guild.channels.fetch();
         return channel.id;
     }
-};
+}
 
 /**
  * チャンネル名からチャンネルIDを検索する．ない場合はnullを返す．
@@ -56,7 +62,7 @@ function searchChannelIdByName(guild, channelName, channelType, categoryId) {
  * @param {string} categoryId カテゴリID or null
  * @returns チャンネルオブジェクト
  */
-module.exports.searchChannelById = function (guild, channelId, categoryId) {
+function searchChannelById(guild, channelId, categoryId) {
     var channel;
     if (categoryId != null) {
         channel = guild.channels.cache.fing((c) => c.id == channelId && c.parent == categoryId);
@@ -69,4 +75,4 @@ module.exports.searchChannelById = function (guild, channelId, categoryId) {
     } else {
         return null;
     }
-};
+}

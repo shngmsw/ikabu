@@ -96,7 +96,7 @@ module.exports = async function handleHelp(interaction) {
                         },
                         {
                             name: 'プラベ募集コマンド',
-                            value: '```/プラベ募集 開始時刻 所要時間 募集人数 内容または参加条件があれば記載```\n',
+                            value: '```/プラベ募集 recruit 開始時刻 所要時間 募集人数 内容または参加条件があれば記載```\n',
                         },
                         {
                             name: '現在のリグマ情報を表示して募集',
