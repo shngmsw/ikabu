@@ -365,6 +365,9 @@ async function joinNotify(interaction, params) {
 async function cancelNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
+        await interaction.deferReply({
+            ephemeral: true,
+        });
         const guild = await interaction.guild.fetch();
         await guild.channels.fetch();
         const member = await guild.members.fetch(interaction.member.user.id, {
@@ -381,14 +384,24 @@ async function cancelNotify(interaction, params) {
             });
             await interaction.message.reply({ embeds: [embed] });
         } else {
-            // recruitテーブルから自分のデータのみ削除
-            await deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
+            // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
+            const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
+            if (member_data.length > 0) {
+                // recruitテーブルから自分のデータのみ削除
+                await deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
 
-            // ホストに通知
-            await editMemberListMessage(interaction);
-            await interaction.message.reply({
-                content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
-            });
+                // ホストに通知
+                await editMemberListMessage(interaction);
+                await interaction.message.reply({
+                    content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
+                });
+                return;
+            } else {
+                await interaction.followUp({
+                    content: `他人の募集は勝手にキャンセルできないでし！！`,
+                    ephemeral: true,
+                });
+            }
         }
     } catch (err) {
         handleError(err, { interaction });
