@@ -531,7 +531,9 @@ const privateMatch = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
-        subcommand.setName('button').setDescription('募集条件を通常のチャットで打ち込んだ後に通知と募集用のボタンを出せます。'),
+        subcommand
+            .setName('button')
+            .setDescription('募集条件を通常のチャットで打ち込んだ後に通知と募集用のボタンを出せます。※@everyoneメンションを使用します。'),
     );
 
 const otherGame = new SlashCommandBuilder()
