@@ -4,7 +4,6 @@ const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
 const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require(app + '/common.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
-const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
 const {
     recruitDeleteButton,
     recruitActionRow,
@@ -14,6 +13,8 @@ const {
     unlockChannelButton,
 } = require(app + '/common/button_components.js');
 const { MessageAttachment, Permissions } = require('discord.js');
+const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
+
 const schedule_url = 'https://splatoon2.ink/data/schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
@@ -22,24 +23,24 @@ Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), { family: 
 Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 
 module.exports = {
-    regular2Recruit: regular2Recruit,
+    anarchyRecruit: anarchyRecruit,
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function regular2Recruit(interaction) {
+async function anarchyRecruit(interaction) {
     if (!interaction.isCommand()) return;
 
     const options = interaction.options;
     const channel = interaction.channel;
     const voice_channel = interaction.options.getChannel('使用チャンネル');
+    let rank = options.getString('募集ウデマエ');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
     let host_user = interaction.member.user;
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
-    let user3 = options.getUser('参加者3');
-    let member_counter = recruit_num; // プレイ人数のカウンター
+    let member_counter = recruit_num; // リグマプレイ人数のカウンター
     let type;
 
     if (options.getSubcommand() === 'now') {
@@ -48,9 +49,9 @@ async function regular2Recruit(interaction) {
         type = 1;
     }
 
-    if (recruit_num < 1 || recruit_num > 7) {
+    if (recruit_num < 1 || recruit_num > 3) {
         await interaction.reply({
-            content: '募集人数は1～7までで指定するでし！',
+            content: '募集人数は1～3までで指定するでし！',
             ephemeral: true,
         });
         return;
@@ -61,9 +62,8 @@ async function regular2Recruit(interaction) {
     // プレイヤー指定があればカウンターを増やす
     if (user1 != null) member_counter++;
     if (user2 != null) member_counter++;
-    if (user3 != null) member_counter++;
 
-    if (member_counter > 8) {
+    if (member_counter > 4) {
         await interaction.reply({
             content: '募集人数がおかしいでし！',
             ephemeral: true,
@@ -92,52 +92,46 @@ async function regular2Recruit(interaction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
+    const mention_id = searchRoleIdByName(interaction.guild, rank);
+    if (mention_id == null) {
+        interaction.editReply({
+            content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+            ephemeral: false,
+        });
+        return;
+    }
+    const mention = `<@&${mention_id}>`;
     try {
         const response = await fetch(schedule_url);
         const data = await response.json();
-        const args = getRegular(data, type).split(',');
-        let txt = `<@${host_user.id}>` + 'たんがナワバリ募集中でし！\n';
-        let members = [];
-
-        if (user1 != null) {
-            members.push(`<@${user1.id}>` + 'たん');
+        const a_args = getAnarchy(data, type).split(',');
+        let txt = `<@${host_user.id}>` + 'たんがリグメン募集中でし！\n';
+        if (user1 != null && user2 != null) {
+            txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
+        } else if (user1 != null) {
+            txt = txt + `<@${user1.id}>` + 'たんの参加が既に決定しているでし！';
+        } else if (user2 != null) {
+            txt = txt + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         }
-        if (user2 != null) {
-            members.push(`<@${user2.id}>` + 'たん');
-        }
-        if (user3 != null) {
-            members.push(`<@${user3.id}>` + 'たん');
-        }
-
-        if (members.length != 0) {
-            for (let i in members) {
-                if (i == 0) {
-                    txt = txt + members[i];
-                } else {
-                    txt = txt + 'と' + members[i];
-                }
-            }
-            txt += 'の参加が既に決定しているでし！\n';
-        }
-
-        txt += 'よければ合流しませんか？';
 
         if (condition == null) condition = 'なし';
-        const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.regular[type].stage_a.image;
-        const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.regular[type].stage_b.image;
-        const stageImages = [stage_a, stage_b];
-        await sendRegularMatch(
+        const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_a.image;
+        const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_b.image;
+        // const stageImages = [stage_a, stage_b];
+        stageImages = 'dummy';
+        await sendAnarchyMatch(
             interaction,
             channel,
+            mention,
             txt,
             recruit_num,
             condition,
             member_counter,
+            rank,
             host_user,
             user1,
             user2,
-            user3,
-            args,
+            a_args,
             stageImages,
         );
     } catch (error) {
@@ -146,25 +140,68 @@ async function regular2Recruit(interaction) {
     }
 }
 
-async function sendRegularMatch(
+async function sendAnarchyMatch(
     interaction,
     channel,
+    mention,
     txt,
     recruit_num,
     condition,
     count,
+    rank,
     host_user,
     user1,
     user2,
-    user3,
-    args,
+    a_args,
     stageImages,
 ) {
-    let r_date = args[0]; // 日付
-    let r_time = args[1]; // 時間
-    let r_rule = 'ナワバリバトル';
-    let r_stage1 = args[3]; // ステージ1
-    let r_stage2 = args[4]; // ステージ2
+    let a_date = a_args[0]; // 日付
+    let a_time = a_args[1]; // 時間
+    let a_rule = a_args[2]; // ガチルール
+    let a_stage1 = a_args[3]; // ステージ1
+    let a_stage2 = a_args[4]; // ステージ2
+    let thumbnaia_url; // ガチルールのアイコン
+    let thumbnailXP; // アイコンx座標
+    let thumbnailYP; // アイコンy座標
+    let thumbScaleX; // アイコン幅
+    let thumbScaleY; // アイコン高さ
+    switch (a_rule) {
+        case 'ガチエリア':
+            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
+            thumbnailXP = 600;
+            thumbnailYP = 20;
+            thumbScaleX = 90;
+            thumbScaleY = 100;
+            break;
+        case 'ガチヤグラ':
+            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
+            thumbnailXP = 595;
+            thumbnailYP = 20;
+            thumbScaleX = 90;
+            thumbScaleY = 100;
+            break;
+        case 'ガチホコバトル':
+            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
+            thumbnailXP = 585;
+            thumbnailYP = 23;
+            thumbScaleX = 110;
+            thumbScaleY = 90;
+            break;
+        case 'ガチアサリ':
+            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
+            thumbnailXP = 570;
+            thumbnailYP = 20;
+            thumbScaleX = 120;
+            thumbScaleY = 100;
+            break;
+        default:
+            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png';
+            thumbnailXP = 595;
+            thumbnailYP = 20;
+            thumbScaleX = 100;
+            thumbScaleY = 100;
+            break;
+    }
 
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
@@ -174,15 +211,16 @@ async function sendRegularMatch(
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
-    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, user3, condition, channel_name);
+    const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
+
+    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, condition, rank, channel_name, a_time);
     const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new MessageAttachment(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
+    // const rule = new MessageAttachment(await ruleCanvas(a_rule, a_date, a_time, a_stage1, a_stage2, stageImages, thumbnail), 'rules.png');
 
     try {
-        const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
-        const mention = `<@&${mention_id}>`;
-        const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
+        // const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
+        const header = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
@@ -237,7 +275,7 @@ async function sendRegularMatch(
 /*
  * 募集用のキャンバス(1枚目)を作成する
  */
-async function recruitCanvas(recruit_num, count, host_user, user1, user2, user3, condition, channel_name) {
+async function recruitCanvas(recruit_num, count, host_user, user1, user2, condition, rank, channel_name, a_time) {
     blank_avatar_url = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
@@ -251,67 +289,80 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, user3,
     recruit_ctx.lineWidth = 4;
     recruit_ctx.stroke();
 
-    let regular_icon = await Canvas.loadImage('https://splatoon2.ink/assets/img/battle-regular.01b5ef.png');
-    recruit_ctx.drawImage(regular_icon, 25, 25, 70, 70);
+    let league_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png');
+    recruit_ctx.drawImage(league_icon, 18, 15, 86, 86);
 
-    fillTextWithStroke(recruit_ctx, 'レギュラーマッチ', '50px Splatfont', '#CFF622', '#45520B', 1, 115, 80);
-
-    let member_urls = [];
-
-    if (user1 != null) {
-        member_urls.push(user1.displayAvatarURL({ format: 'png' }));
-    }
-    if (user2 != null) {
-        member_urls.push(user2.displayAvatarURL({ format: 'png' }));
-    }
-    if (user3 != null) {
-        member_urls.push(user3.displayAvatarURL({ format: 'png' }));
-    }
+    fillTextWithStroke(recruit_ctx, 'バンカラマッチ', '51px Splatfont', '#000000', '#F14400', 3, 115, 80);
 
     // 募集主の画像
     let host_img = await Canvas.loadImage(host_user.displayAvatarURL({ format: 'png' }));
     recruit_ctx.save();
-    drawArcImage(recruit_ctx, host_img, 40, 120, 40);
+    drawArcImage(recruit_ctx, host_img, 40, 120, 50);
     recruit_ctx.strokeStyle = '#1e1f23';
     recruit_ctx.lineWidth = 9;
     recruit_ctx.stroke();
     recruit_ctx.restore();
 
-    for (let i = 0; i < 7; i++) {
-        if (count >= i + 2) {
-            let user_url = member_urls[i] != null ? member_urls[i] : blank_avatar_url;
-            let user_img = await Canvas.loadImage(user_url);
-            recruit_ctx.save();
-            if (i < 3) {
-                drawArcImage(recruit_ctx, user_img, (i + 1) * 100 + 40, 120, 40);
-            } else {
-                drawArcImage(recruit_ctx, user_img, (i - 3) * 100 + 40, 220, 40);
-            }
-            recruit_ctx.strokeStyle = '#1e1f23';
-            recruit_ctx.lineWidth = 9;
-            recruit_ctx.stroke();
-            recruit_ctx.restore();
-        }
+    let user1_url = blank_avatar_url;
+    let user2_url = blank_avatar_url;
+    let user3_url = blank_avatar_url;
+
+    // 参加者指定があれば、画像を拾ってくる
+    if (user1 != null && user2 != null) {
+        user1_url = user1.displayAvatarURL({ format: 'png' });
+        user2_url = user2.displayAvatarURL({ format: 'png' });
+    } else if (user1 != null && user2 == null) {
+        user1_url = user1.displayAvatarURL({ format: 'png' });
+    } else if (user1 == null && user2 != null) {
+        user1_url = user2.displayAvatarURL({ format: 'png' });
+    }
+
+    let user1_img = await Canvas.loadImage(user1_url);
+    recruit_ctx.save();
+    drawArcImage(recruit_ctx, user1_img, 158, 120, 50);
+    recruit_ctx.strokeStyle = '#1e1f23';
+    recruit_ctx.lineWidth = 9;
+    recruit_ctx.stroke();
+    recruit_ctx.restore();
+
+    if (count >= 3) {
+        let user2_img = await Canvas.loadImage(user2_url);
+        recruit_ctx.save();
+        drawArcImage(recruit_ctx, user2_img, 276, 120, 50);
+        recruit_ctx.strokeStyle = '#1e1f23';
+        recruit_ctx.lineWidth = 9;
+        recruit_ctx.stroke();
+        recruit_ctx.restore();
+    }
+
+    if (count == 4) {
+        let user3_img = await Canvas.loadImage(user3_url);
+        recruit_ctx.save();
+        drawArcImage(recruit_ctx, user3_img, 394, 120, 50);
+        recruit_ctx.strokeStyle = '#1e1f23';
+        recruit_ctx.lineWidth = 9;
+        recruit_ctx.stroke();
+        recruit_ctx.restore();
     }
 
     let host_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
-    recruit_ctx.drawImage(host_icon, 0, 0, host_icon.width, host_icon.height, 75, 155, 75, 75);
+    recruit_ctx.drawImage(host_icon, 0, 0, host_icon.width, host_icon.height, 90, 172, 75, 75);
 
     recruit_ctx.save();
     recruit_ctx.textAlign = 'right';
-    fillTextWithStroke(recruit_ctx, channel_name, '33px "Splatfont"', '#FFFFFF', '#2D3130', 1, 680, 60);
+    fillTextWithStroke(recruit_ctx, a_time, '35px "Splatfont"', '#FFFFFF', '#2D3130', 1, 690, 70);
     recruit_ctx.restore();
 
-    fillTextWithStroke(recruit_ctx, '募集人数', '41px "Splatfont"', '#FFFFFF', '#2D3130', 1, 490, 185);
+    fillTextWithStroke(recruit_ctx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
 
-    fillTextWithStroke(recruit_ctx, '@' + recruit_num, '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 535, 248);
+    fillTextWithStroke(recruit_ctx, '@' + recruit_num, '42px "Splatfont"', '#FFFFFF', '#2D3130', 1, 580, 218);
 
-    fillTextWithStroke(recruit_ctx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 360);
+    fillTextWithStroke(recruit_ctx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 290);
 
-    recruit_ctx.font = '31px "Genshin", "SEGUI"';
-    const width = 603;
+    recruit_ctx.font = '30px "Genshin", "SEGUI"';
+    const width = 600;
     const size = 40;
-    const column_num = 3;
+    const column_num = 4;
     let column = [''];
     let line = 0;
     condition = condition.replace('{br}', '\n', 'gm');
@@ -337,9 +388,16 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, user3,
 
     for (var j = 0; j < column.length; j++) {
         if (j < column_num) {
-            recruit_ctx.fillText(column[j], 65, 415 + size * j);
+            recruit_ctx.fillText(column[j], 65, 345 + size * j);
         }
     }
+
+    fillTextWithStroke(recruit_ctx, channel_name, '37px "Splatfont"', '#FFFFFF', '#2D3130', 1, 30, 520);
+
+    recruit_ctx.save();
+    recruit_ctx.textAlign = 'right';
+    fillTextWithStroke(recruit_ctx, '募集ウデマエ: ' + rank, '38px "Splatfont"', '#FFFFFF', '#2D3130', 1, 690, 520);
+    recruit_ctx.restore();
 
     const recruit = recruitCanvas.toBuffer();
     return recruit;
@@ -348,7 +406,7 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, user3,
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-async function ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages) {
+async function ruleCanvas(a_rule, a_date, a_time, a_stage1, a_stage2, stageImages, thumbnail) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
     const rule_ctx = ruleCanvas.getContext('2d');
 
@@ -361,24 +419,24 @@ async function ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImage
 
     fillTextWithStroke(rule_ctx, 'ルール', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
-    rule_width = rule_ctx.measureText(r_rule).width;
-    fillTextWithStroke(rule_ctx, r_rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - rule_width) / 2, 145); // 中央寄せ
+    rule_width = rule_ctx.measureText(a_rule).width;
+    fillTextWithStroke(rule_ctx, a_rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - rule_width) / 2, 145); // 中央寄せ
 
     fillTextWithStroke(rule_ctx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
 
-    date_width = rule_ctx.measureText(r_date).width;
-    fillTextWithStroke(rule_ctx, r_date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - date_width) / 2, 270); // 中央寄せ
+    date_width = rule_ctx.measureText(a_date).width;
+    fillTextWithStroke(rule_ctx, a_date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - date_width) / 2, 270); // 中央寄せ
 
-    time_width = rule_ctx.measureText(r_time).width;
-    fillTextWithStroke(rule_ctx, r_time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - time_width) / 2, 320); // 中央寄せ
+    time_width = rule_ctx.measureText(a_time).width;
+    fillTextWithStroke(rule_ctx, a_time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - time_width) / 2, 320); // 中央寄せ
 
     fillTextWithStroke(rule_ctx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
 
-    stage1_width = rule_ctx.measureText(r_stage1).width;
-    fillTextWithStroke(rule_ctx, r_stage1, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage1_width) / 2 + 10, 440); // 中央寄せ
+    stage1_width = rule_ctx.measureText(a_stage1).width;
+    fillTextWithStroke(rule_ctx, a_stage1, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage1_width) / 2 + 10, 440); // 中央寄せ
 
-    stage2_width = rule_ctx.measureText(r_stage2).width;
-    fillTextWithStroke(rule_ctx, r_stage2, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage2_width) / 2 + 10, 490); // 中央寄せ
+    stage2_width = rule_ctx.measureText(a_stage2).width;
+    fillTextWithStroke(rule_ctx, a_stage2, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage2_width) / 2 + 10, 490); // 中央寄せ
 
     let stage1_img = await Canvas.loadImage(stageImages[0]);
     rule_ctx.save();
@@ -402,6 +460,11 @@ async function ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImage
     rule_ctx.stroke();
     rule_ctx.restore();
 
+    rule_ctx.save();
+    const rule_img = await Canvas.loadImage(thumbnail[0]);
+    rule_ctx.drawImage(rule_img, 0, 0, rule_img.width, rule_img.height, thumbnail[1], thumbnail[2], thumbnail[3], thumbnail[4]);
+    rule_ctx.restore();
+
     createRoundRect(rule_ctx, 1, 1, 718, 548, 30);
     rule_ctx.clip();
 
@@ -409,10 +472,7 @@ async function ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImage
     return rule;
 }
 
-/**
- * commonにあるgetRegularを、情報を2行に分けるためにカスタムしたもの
- */
-function getRegular(data, x) {
+function getAnarchy(data, x) {
     let stage1;
     let stage2;
     let date;
@@ -420,11 +480,11 @@ function getRegular(data, x) {
     let rule;
     let rstr;
 
-    date = unixTime2ymdw(data.regular[x].start_time);
-    time = unixTime2hm(data.regular[x].start_time) + ' – ' + unixTime2hm(data.regular[x].end_time);
-    rule = rule2txt(data.regular[x].rule.key);
-    stage1 = stage2txt(data.regular[x].stage_a.id);
-    stage2 = stage2txt(data.regular[x].stage_b.id);
+    date = unixTime2ymdw(data.league[x].start_time);
+    time = unixTime2hm(data.league[x].start_time) + ' – ' + unixTime2hm(data.league[x].end_time);
+    rule = rule2txt(data.league[x].rule.key);
+    stage1 = stage2txt(data.league[x].stage_a.id);
+    stage2 = stage2txt(data.league[x].stage_b.id);
     rstr = date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
     return rstr;
 }

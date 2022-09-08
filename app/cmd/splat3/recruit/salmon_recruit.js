@@ -27,12 +27,12 @@ Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), {
 Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 
 module.exports = {
-    salmon2Recruit: salmon2Recruit,
+    salmonRecruit: salmonRecruit,
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function salmon2Recruit(interaction) {
+async function salmonRecruit(interaction) {
     if (!interaction.isCommand()) return;
 
     const options = interaction.options;
@@ -135,13 +135,14 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
 
     try {
-        const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention_id = searchRoleIdByName(interaction.guild, 'サーモン');
         const mention = `<@&${mention_id}>`;
-        const header = await interaction.editReply({
-            content: txt,
-            files: [recruit, rule],
-            ephemeral: false,
-        });
+        // const header = await interaction.editReply({
+        //     content: txt,
+        //     files: [recruit, rule],
+        //     ephemeral: false,
+        // });
+        const header = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
@@ -207,10 +208,11 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     recruit_ctx.lineWidth = 4;
     recruit_ctx.stroke();
 
-    let league_icon = await Canvas.loadImage('https://splatoon2.ink/assets/img/salmon-run-mini.aee5e8.png');
-    recruit_ctx.drawImage(league_icon, 22, 35, 80, 52.8);
+    let salmon_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
+    recruit_ctx.drawImage(salmon_icon, 22, 32, 82, 60);
 
-    fillTextWithStroke(recruit_ctx, 'サーモンラン', '50px Splatfont', '#FF5600', '#FF9A00', 2, 115, 80);
+    fillTextWithStroke(recruit_ctx, 'SALMON', '51px Splatfont', '#000000', '#FF9900', 3, 115, 80);
+    fillTextWithStroke(recruit_ctx, 'RUN', '51px Splatfont', '#000000', '#00FF00DA', 3, 350, 80);
 
     // 募集主の画像
     let host_img = await Canvas.loadImage(host_user.displayAvatarURL({ format: 'png' }));
