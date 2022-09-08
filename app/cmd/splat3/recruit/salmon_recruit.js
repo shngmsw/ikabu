@@ -136,7 +136,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
 
     try {
         const mention_id = searchRoleIdByName(interaction.guild, 'サーモン');
-        const mention = `<@&${mention_id}>`;
+        const mention = `@everyone`;
         // const header = await interaction.editReply({
         //     content: txt,
         //     files: [recruit, rule],
