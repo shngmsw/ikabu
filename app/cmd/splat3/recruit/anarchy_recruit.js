@@ -103,6 +103,8 @@ async function anarchyRecruit(interaction) {
             return;
         }
         mention = `<@&${mention_id}>`;
+    } else {
+        rank = '指定なし';
     }
     try {
         const response = await fetch(schedule_url);
