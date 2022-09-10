@@ -91,16 +91,19 @@ async function anarchyRecruit(interaction) {
 
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
-
-    const mention_id = searchRoleIdByName(interaction.guild, rank);
-    if (mention_id == null) {
-        interaction.editReply({
-            content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
-            ephemeral: false,
-        });
-        return;
+    let mention = '@everyone';
+    // 募集条件がランクの場合はウデマエロールにメンション
+    if (rank !== undefined && rank !== null) {
+        const mention_id = searchRoleIdByName(interaction.guild, rank);
+        if (mention_id == null) {
+            interaction.editReply({
+                content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                ephemeral: false,
+            });
+            return;
+        }
+        mention = `<@&${mention_id}>`;
     }
-    const mention = `<@&${mention_id}>`;
     try {
         const response = await fetch(schedule_url);
         const data = await response.json();
