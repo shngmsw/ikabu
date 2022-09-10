@@ -347,8 +347,7 @@ const anarchyMatch = new SlashCommandBuilder()
                         { name: 'A', value: 'A' },
                         { name: 'S', value: 'S' },
                         { name: 'S+', value: 'S+' },
-                    )
-                    .setRequired(true),
+                    ),
             )
             .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
             .addUserOption((option) =>
@@ -386,8 +385,7 @@ const anarchyMatch = new SlashCommandBuilder()
                         { name: 'A', value: 'A' },
                         { name: 'S', value: 'S' },
                         { name: 'S+', value: 'S+' },
-                    )
-                    .setRequired(true),
+                    ),
             )
             .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
             .addUserOption((option) =>
