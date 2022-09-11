@@ -2,7 +2,7 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
-const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require(app + '/common.js');
+const { stage3txt, rule3txt, sp3unixTime2hm, sp3unixTime2ymdw } = require(app + '/common.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
 const {
     recruitDeleteButton,
@@ -15,7 +15,7 @@ const {
 const { MessageAttachment, Permissions } = require('discord.js');
 const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
 
-const schedule_url = 'https://splatoon2.ink/data/schedules.json';
+const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
 Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Medium.ttf'), { family: 'Genshin' });
@@ -120,10 +120,10 @@ async function anarchyRecruit(interaction) {
         }
 
         if (condition == null) condition = 'なし';
-        const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_a.image;
-        const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.league[type].stage_b.image;
-        // const stageImages = [stage_a, stage_b];
-        stageImages = 'dummy';
+        const stageImageSource = data.data.bankaraSchedules.nodes[type].bankaraMatchSettings[1].vsStages;
+        const stage_a = stageImageSource[0].image.url;
+        const stage_b = stageImageSource[1].image.url;
+        const stageImages = [stage_a, stage_b];
         await sendAnarchyMatch(
             interaction,
             channel,
@@ -221,11 +221,10 @@ async function sendAnarchyMatch(
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, condition, rank, channel_name, a_time);
     const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
 
-    // const rule = new MessageAttachment(await ruleCanvas(a_rule, a_date, a_time, a_stage1, a_stage2, stageImages, thumbnail), 'rules.png');
+    const rule = new MessageAttachment(await ruleCanvas(a_rule, a_date, a_time, a_stage1, a_stage2, stageImages, thumbnail), 'rules.png');
 
     try {
-        // const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
-        const header = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
+        const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
@@ -294,8 +293,8 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     recruit_ctx.lineWidth = 4;
     recruit_ctx.stroke();
 
-    let league_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png');
-    recruit_ctx.drawImage(league_icon, 18, 15, 86, 86);
+    let anarchy_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png');
+    recruit_ctx.drawImage(anarchy_icon, 18, 15, 86, 86);
 
     fillTextWithStroke(recruit_ctx, 'バンカラマッチ', '51px Splatfont', '#000000', '#F14400', 3, 115, 80);
 
@@ -352,11 +351,6 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
 
     let host_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
     recruit_ctx.drawImage(host_icon, 0, 0, host_icon.width, host_icon.height, 90, 172, 75, 75);
-
-    recruit_ctx.save();
-    recruit_ctx.textAlign = 'right';
-    fillTextWithStroke(recruit_ctx, a_time, '35px "Splatfont"', '#FFFFFF', '#2D3130', 1, 690, 70);
-    recruit_ctx.restore();
 
     fillTextWithStroke(recruit_ctx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
 
@@ -477,7 +471,12 @@ async function ruleCanvas(a_rule, a_date, a_time, a_stage1, a_stage2, stageImage
     return rule;
 }
 
+/**
+ * データ取得用
+ */
 function getAnarchy(data, x) {
+    const anarchy_list = data.data.bankaraSchedules.nodes;
+    const a_settings = anarchy_list[x].bankaraMatchSettings; // 0: Challenge 1: Open
     let stage1;
     let stage2;
     let date;
@@ -485,11 +484,11 @@ function getAnarchy(data, x) {
     let rule;
     let rstr;
 
-    date = unixTime2ymdw(data.league[x].start_time);
-    time = unixTime2hm(data.league[x].start_time) + ' – ' + unixTime2hm(data.league[x].end_time);
-    rule = rule2txt(data.league[x].rule.key);
-    stage1 = stage2txt(data.league[x].stage_a.id);
-    stage2 = stage2txt(data.league[x].stage_b.id);
+    date = sp3unixTime2ymdw(anarchy_list[x].startTime);
+    time = sp3unixTime2hm(anarchy_list[x].startTime) + ' – ' + sp3unixTime2hm(anarchy_list[x].endTime);
+    rule = rule3txt(a_settings[1].vsRule.name);
+    stage1 = stage3txt(a_settings[1].vsStages[0].vsStageId);
+    stage2 = stage3txt(a_settings[1].vsStages[1].vsStageId);
     rstr = date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
     return rstr;
 }
