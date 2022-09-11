@@ -148,9 +148,6 @@ async function join(interaction, params) {
 async function cancel(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.deferReply({
-            ephemeral: true,
-        });
         const guild = await interaction.guild.fetch();
         await guild.channels.fetch();
         const member = await guild.members.fetch(interaction.member.user.id, {
@@ -177,6 +174,10 @@ async function cancel(interaction, params) {
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
         } else {
+            await interaction.deferReply({
+                ephemeral: true,
+            });
+
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
