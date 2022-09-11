@@ -5,11 +5,17 @@ module.exports = {
     getGachi: getGachi,
     getLeague: getLeague,
     unixTime2hm: unixTime2hm,
+    sp3unixTime2hm: sp3unixTime2hm,
     unixTime2mdwhm: unixTime2mdwhm,
+    sp3unixTime2mdwhm: sp3unixTime2mdwhm,
+    sp3unixTime2ymdw: sp3unixTime2ymdw,
     unixTime2ymdw: unixTime2ymdw,
     rule2txt: rule2txt,
+    rule3txt: rule3txt,
     stage2txt: stage2txt,
+    stage3txt: stage3txt,
     coop_stage2txt: coop_stage2txt,
+    coop_stage3txt: coop_stage3txt,
     weapon2txt: weapon2txt,
     rgbToHex: rgbToHex,
     random: randomSelect,
@@ -67,8 +73,28 @@ function unixTime2hm(intTime) {
     return hour + ':' + min;
 }
 
+function sp3unixTime2hm(datetime) {
+    const date = new Date(datetime);
+    const d = new Date(date.getTime() + 9 * 60 * 60 * 1000); // UTC = UTC + 9
+    const hour = d.getUTCHours();
+    const min = ('0' + d.getUTCMinutes()).slice(-2);
+    return hour + ':' + min;
+}
+
 function unixTime2mdwhm(intTime) {
     const d = new Date(intTime * 1000 + 9 * 60 * 60 * 1000);
+    const month = d.getUTCMonth() + 1;
+    const day = d.getUTCDate();
+    const hour = d.getUTCHours();
+    const min = ('0' + d.getUTCMinutes()).slice(-2);
+    const dow = d.getUTCDay();
+    const week = ['日', '月', '火', '水', '木', '金', '土'][dow];
+    return month + '/' + day + '(' + week + ') ' + hour + ':' + min;
+}
+
+function sp3unixTime2mdwhm(datetime) {
+    const date = new Date(datetime);
+    const d = new Date(date.getTime() + 9 * 60 * 60 * 1000); // UTC = UTC + 9
     const month = d.getUTCMonth() + 1;
     const day = d.getUTCDate();
     const hour = d.getUTCHours();
@@ -88,6 +114,17 @@ function unixTime2ymdw(intTime) {
     return year + '/' + month + '/' + day + ' (' + week + ')';
 }
 
+function sp3unixTime2ymdw(datetime) {
+    const date = new Date(datetime);
+    const d = new Date(date.getTime() + 9 * 60 * 60 * 1000); // UTC = UTC + 9
+    const year = d.getUTCFullYear();
+    const month = d.getUTCMonth() + 1;
+    const day = d.getUTCDate();
+    const dow = d.getUTCDay();
+    const week = ['日', '月', '火', '水', '木', '金', '土'][dow];
+    return year + '/' + month + '/' + day + ' (' + week + ')';
+}
+
 function rule2txt(key) {
     switch (key) {
         case 'tower_control':
@@ -97,6 +134,21 @@ function rule2txt(key) {
         case 'rainmaker':
             return 'ガチホコバトル';
         case 'clam_blitz':
+            return 'ガチアサリ';
+    }
+}
+
+function rule3txt(name) {
+    switch (name) {
+        case 'Turf War':
+            return 'ナワバリバトル';
+        case 'Tower Control':
+            return 'ガチヤグラ';
+        case 'Splat Zones':
+            return 'ガチエリア';
+        case 'Rainmaker':
+            return 'ガチホコバトル';
+        case 'Clam Blitz':
             return 'ガチアサリ';
     }
 }
@@ -154,6 +206,57 @@ function stage2txt(key) {
     }
 }
 
+function stage3txt(key) {
+    switch (key) {
+        case 1:
+            return 'ユノハナ大渓谷';
+        case 2:
+            return 'ゴンズイ地区';
+        case 3:
+            return 'ヤガラ市場';
+        case 4:
+            return 'マテガイ放水路';
+        case 5:
+            return '';
+        case 6:
+            return 'ナメロウ金属';
+        case 7:
+            return '';
+        case 8:
+            return '';
+        case 9:
+            return '';
+        case 10:
+            return 'マサバ海峡大橋';
+        case 11:
+            return 'キンメダイ美術館';
+        case 12:
+            return 'マヒマヒリゾート＆スパ';
+        case 13:
+            return '海女美術大学';
+        case 14:
+            return 'チョウザメ造船';
+        case 15:
+            return 'ザトウマーケット';
+        case 16:
+            return 'スメーシーワールド';
+        case 17:
+            return '';
+        case 18:
+            return '';
+        case 19:
+            return '';
+        case 20:
+            return '';
+        case 21:
+            return '';
+        case 22:
+            return '';
+        case 9999:
+            return '';
+    }
+}
+
 function coop_stage2txt(key) {
     switch (key) {
         case '/images/coop_stage/e9f7c7b35e6d46778cd3cbc0d89bd7e1bc3be493.png':
@@ -166,6 +269,29 @@ function coop_stage2txt(key) {
             return '海上集落シャケト場';
         case '/images/coop_stage/50064ec6e97aac91e70df5fc2cfecf61ad8615fd.png':
             return '朽ちた箱舟 ポラリス';
+    }
+}
+
+function coop_stage3txt(key) {
+    switch (key) {
+        case 0:
+            return '';
+        case 1:
+            return 'シェケナダム';
+        case 2:
+            return 'アラマキ砦';
+        case 3:
+            return '';
+        case 4:
+            return '';
+        case 5:
+            return '';
+        case 6:
+            return '';
+        case 7:
+            return 'ムニ・エール海洋発電所';
+        case 8:
+            return '';
     }
 }
 

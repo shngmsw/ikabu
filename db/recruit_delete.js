@@ -4,11 +4,11 @@ module.exports = {
     deleteRecruitByMemberId,
 };
 
-async function delete_recruit(message_id, member_id) {
+async function delete_recruit(message_id) {
     const db = await getPostgresClient();
     try {
-        const sql = 'DELETE from recruit where message_id = $1 and member_id = $2';
-        const params = [message_id, member_id];
+        const sql = 'DELETE from recruit where message_id = $1';
+        const params = [message_id];
         await db.begin();
         await db.execute(sql, params);
         await db.commit();

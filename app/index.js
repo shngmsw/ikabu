@@ -18,7 +18,7 @@ const Handler = require('./handler.js');
 const Dispandar = require('./event/dispandar.js');
 const VOICE_API = require('./tts/voice_bot_node.js');
 const DISCORD_VOICE = require('./tts/discordjs_voice.js');
-const handleStageInfo = require(app + '/cmd/splat2/stageinfo.js');
+const handleStageInfo = require(app + '/cmd/splat3/stageinfo.js');
 const { getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
 const { otherGameRecruit } = require(app + '/cmd/other/recruit/other_game_recruit.js');
 const { regular2Recruit } = require(app + '/cmd/splat2/recruit/regular_recruit.js');
@@ -65,7 +65,6 @@ client.on('messageCreate', async (msg) => {
                 '\n文部科学省は国語審議会で、球技を指す場合は「ボウリング」表記を用い、掘削を意味する「ボーリング」と区別することを推奨しているでし。```',
         );
     }
-
     if (msg.content.match('お前を消す方法')) {
         const Kairu = new MessageAttachment('./images/Kairu.png');
         msg.reply({ files: [Kairu] });
