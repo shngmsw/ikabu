@@ -2,9 +2,8 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
-const { unixTime2mdwhm, coop_stage2txt, weapon2txt } = require(app + '/common.js');
+const { sp3unixTime2mdwhm, coop_stage3txt } = require(app + '/common.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
-const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
 const {
     recruitDeleteButton,
     recruitActionRow,
@@ -13,7 +12,7 @@ const {
     unlockChannelButton,
 } = require(app + '/common/button_components.js');
 const { MessageAttachment, Permissions } = require('discord.js');
-const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
+const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -105,7 +104,18 @@ async function salmonRecruit(interaction) {
 
         if (condition == null) condition = 'なし';
 
-        await sendSalmonRun(interaction, channel, txt, recruit_num, condition, member_counter, host_user, user1, user2, data.details[0]);
+        await sendSalmonRun(
+            interaction,
+            channel,
+            txt,
+            recruit_num,
+            condition,
+            member_counter,
+            host_user,
+            user1,
+            user2,
+            data.data.coopGroupingSchedule.regularSchedules.nodes[0],
+        );
     } catch (error) {
         channel.send('なんかエラーでてるわ');
         console.error(error);
@@ -113,13 +123,14 @@ async function salmonRecruit(interaction) {
 }
 
 async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, count, host_user, user1, user2, detail) {
-    let date = unixTime2mdwhm(detail.start_time) + ' – ' + unixTime2mdwhm(detail.end_time);
-    let coop_stage = coop_stage2txt(detail.stage.image);
-    let weapon1 = weapon2txt(detail.weapons[0].id);
-    let weapon2 = weapon2txt(detail.weapons[1].id);
-    let weapon3 = weapon2txt(detail.weapons[2].id);
-    let weapon4 = weapon2txt(detail.weapons[3].id);
-    let stageImage = 'https://splatoon2.ink/assets/splatnet' + detail.stage.image;
+    const coopSetting = detail.setting;
+    let date = sp3unixTime2mdwhm(detail.startTime) + ' – ' + sp3unixTime2mdwhm(detail.endTime);
+    let coop_stage = coop_stage3txt(coopSetting.coopStage.coopStageId);
+    let weapon1 = coopSetting.weapons[0].image.url;
+    let weapon2 = coopSetting.weapons[1].image.url;
+    let weapon3 = coopSetting.weapons[2].image.url;
+    let weapon4 = coopSetting.weapons[3].image.url;
+    let stageImage = coopSetting.coopStage.thumbnailImage.url;
 
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
@@ -135,14 +146,12 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
 
     try {
-        const mention_id = searchRoleIdByName(interaction.guild, 'サーモン');
         const mention = `@everyone`;
-        // const header = await interaction.editReply({
-        //     content: txt,
-        //     files: [recruit, rule],
-        //     ephemeral: false,
-        // });
-        const header = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
+        const header = await interaction.editReply({
+            content: txt,
+            files: [recruit, rule],
+            ephemeral: false,
+        });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
@@ -334,81 +343,17 @@ async function ruleCanvas(date, stage, weapon1, weapon2, weapon3, weapon4, stage
 
     fillTextWithStroke(rule_ctx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 245);
 
-    rule_ctx.save();
-    if (weapon1 === '❓') {
-        weapon1 = '？';
-        rule_ctx.font = '41px "Splatfont"';
-        rule_ctx.fillStyle = '#FFDB26';
-    } else if (weapon1 === '？') {
-        rule_ctx.font = '41px "Splatfont"';
-        rule_ctx.fillStyle = '#00BE63';
-    } else {
-        rule_ctx.font = '33px "Splatfont"';
-        rule_ctx.fillStyle = '#FFFFFF';
-    }
-    weapons1_width = rule_ctx.measureText(weapon1).width;
-    rule_ctx.fillText(weapon1, (350 - weapons1_width) / 2, 310);
-    rule_ctx.strokeStyle = '#2D3130';
-    rule_ctx.lineWidth = 1.0;
-    rule_ctx.strokeText(weapon1, (350 - weapons1_width) / 2, 310);
-    rule_ctx.restore();
+    let weapon1_img = await Canvas.loadImage(weapon1);
+    rule_ctx.drawImage(weapon1_img, 50, 280, 110, 110);
 
-    rule_ctx.save();
-    if (weapon2 === '❓') {
-        weapon2 = '？';
-        rule_ctx.font = '41px "Splatfont"';
-        rule_ctx.fillStyle = '#FFDB26';
-    } else if (weapon2 === '？') {
-        rule_ctx.font = '41px "Splatfont"';
-        rule_ctx.fillStyle = '#00BE63';
-    } else {
-        rule_ctx.font = '33px "Splatfont"';
-        rule_ctx.fillStyle = '#FFFFFF';
-    }
-    weapons2_width = rule_ctx.measureText(weapon2).width;
-    rule_ctx.fillText(weapon2, (350 - weapons2_width) / 2, 375);
-    rule_ctx.strokeStyle = '#2D3130';
-    rule_ctx.lineWidth = 1.0;
-    rule_ctx.strokeText(weapon2, (350 - weapons2_width) / 2, 375);
-    rule_ctx.restore();
+    let weapon2_img = await Canvas.loadImage(weapon2);
+    rule_ctx.drawImage(weapon2_img, 190, 280, 110, 110);
 
-    rule_ctx.save();
-    if (weapon3 === '❓') {
-        weapon3 = '？';
-        rule_ctx.font = '41px "Splatfont"';
-        rule_ctx.fillStyle = '#FFDB26';
-    } else if (weapon3 === '？') {
-        rule_ctx.font = '41px "Splatfont"';
-        rule_ctx.fillStyle = '#00BE63';
-    } else {
-        rule_ctx.font = '33px "Splatfont"';
-        rule_ctx.fillStyle = '#FFFFFF';
-    }
-    weapons3_width = rule_ctx.measureText(weapon3).width;
-    rule_ctx.fillText(weapon3, (350 - weapons3_width) / 2, 440);
-    rule_ctx.strokeStyle = '#2D3130';
-    rule_ctx.lineWidth = 1.0;
-    rule_ctx.strokeText(weapon3, (350 - weapons3_width) / 2, 440);
-    rule_ctx.restore();
+    let weapon3_img = await Canvas.loadImage(weapon3);
+    rule_ctx.drawImage(weapon3_img, 50, 410, 110, 110);
 
-    rule_ctx.save();
-    if (weapon4 === '❓') {
-        weapon4 = '？';
-        rule_ctx.font = '41px "Splatfont"';
-        rule_ctx.fillStyle = '#FFDB26';
-    } else if (weapon4 === '？') {
-        rule_ctx.font = '41px "Splatfont"';
-        rule_ctx.fillStyle = '#00BE63';
-    } else {
-        rule_ctx.font = '33px "Splatfont"';
-        rule_ctx.fillStyle = '#FFFFFF';
-    }
-    weapons4_width = rule_ctx.measureText(weapon4).width;
-    rule_ctx.fillText(weapon4, (350 - weapons4_width) / 2, 505);
-    rule_ctx.strokeStyle = '#2D3130';
-    rule_ctx.lineWidth = 1.0;
-    rule_ctx.strokeText(weapon4, (350 - weapons4_width) / 2, 505);
-    rule_ctx.restore();
+    let weapon4_img = await Canvas.loadImage(weapon4);
+    rule_ctx.drawImage(weapon4_img, 190, 410, 110, 110);
 
     fillTextWithStroke(rule_ctx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 350, 245);
 
