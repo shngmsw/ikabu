@@ -293,8 +293,8 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     recruit_ctx.lineWidth = 4;
     recruit_ctx.stroke();
 
-    let league_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png');
-    recruit_ctx.drawImage(league_icon, 18, 15, 86, 86);
+    let anarchy_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png');
+    recruit_ctx.drawImage(anarchy_icon, 18, 15, 86, 86);
 
     fillTextWithStroke(recruit_ctx, 'バンカラマッチ', '51px Splatfont', '#000000', '#F14400', 3, 115, 80);
 
