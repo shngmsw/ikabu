@@ -40,7 +40,7 @@ async function anarchyRecruit(interaction) {
     let host_user = interaction.member.user;
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
-    let member_counter = recruit_num; // リグマプレイ人数のカウンター
+    let member_counter = recruit_num; // プレイ人数のカウンター
     let type;
 
     if (options.getSubcommand() === 'now') {
@@ -110,7 +110,7 @@ async function anarchyRecruit(interaction) {
         const response = await fetch(schedule_url);
         const data = await response.json();
         const a_args = getAnarchy(data, type).split(',');
-        let txt = `<@${host_user.id}>` + 'たんがリグメン募集中でし！\n';
+        let txt = `<@${host_user.id}>` + 'たんがバンカラ募集中でし！\n';
         if (user1 != null && user2 != null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         } else if (user1 != null) {
@@ -165,7 +165,7 @@ async function sendAnarchyMatch(
     let a_rule = a_args[2]; // ガチルール
     let a_stage1 = a_args[3]; // ステージ1
     let a_stage2 = a_args[4]; // ステージ2
-    let thumbnaia_url; // ガチルールのアイコン
+    let thumbnail_url; // ガチルールのアイコン
     let thumbnailXP; // アイコンx座標
     let thumbnailYP; // アイコンy座標
     let thumbScaleX; // アイコン幅
