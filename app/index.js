@@ -32,7 +32,6 @@ const { private2Recruit } = require(app + '/cmd/splat2/recruit/private_recruit.j
 const { privateRecruit } = require(app + '/cmd/splat3/recruit/private_recruit.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
-const suggestionBox = require('./reaction/suggestion-box.js');
 const join = require('./event/join.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
@@ -74,8 +73,6 @@ client.on('messageCreate', async (msg) => {
     Handler.call(msg);
     Dispandar.dispand(msg);
     DISCORD_VOICE.play(msg);
-    suggestionBox.archive(msg);
-    suggestionBox.init(msg);
     chatCountUp(msg);
     removeRookie(msg);
 });
@@ -114,15 +111,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
         } catch (error) {
             console.error('Something went wrong when fetching the message:', error);
             return;
-        }
-    }
-    if (reaction.message.channel.id === process.env.CHANNEL_ID_SUGGESTION_BOX) {
-        if (reaction.emoji.name == '📭' && user.bot == false) {
-            suggestionBox.create(reaction.message, user);
-            reaction.remove();
-            reaction.message.react('📭');
-        } else if (reaction.emoji.name != '📭' && user.bot == false) {
-            reaction.remove();
         }
     }
 });
