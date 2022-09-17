@@ -2,7 +2,7 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
-const { stage3txt, rule3txt, sp3unixTime2hm, sp3unixTime2ymdw } = require(app + '/common.js');
+const { getRegular } = require(app + '/common.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
 const {
     recruitDeleteButton,
@@ -94,7 +94,7 @@ async function regularRecruit(interaction) {
     try {
         const response = await fetch(schedule_url);
         const data = await response.json();
-        const args = common.getRegular(data, type).split(',');
+        const args = getRegular(data, type).split(',');
         let txt = `<@${host_user.id}>` + 'たんがナワバリ募集中でし！\n';
         let members = [];
 
