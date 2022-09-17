@@ -85,7 +85,7 @@ function sendStageInfo(interaction, data, scheduleNum) {
         .setThumbnail(x_thumbnail);
 
     interaction.editReply({
-        embeds: [challengeEmbed, openEmbed],
+        embeds: [openEmbed, challengeEmbed],
     });
     // TODO: リーグマッチとXマッチはゲーム内で実装後に表示
     // interaction.editReply({
