@@ -2,8 +2,11 @@ const { MessageEmbed } = require('discord.js');
 
 module.exports = {
     isInteger: isInteger,
-    getGachi: getGachi,
+    getOpen: getOpen,
+    getChallenge: getChallenge,
+    getXMatch: getXMatch,
     getLeague: getLeague,
+    getRegular: getRegular,
     unixTime2hm: unixTime2hm,
     sp3unixTime2hm: sp3unixTime2hm,
     unixTime2mdwhm: unixTime2mdwhm,
@@ -468,24 +471,67 @@ function getLeague(data, x) {
     let stage;
     let date;
     let rule;
-    let rstr;
-    date = unixTime2mdwhm(data.league[x].start_time) + ' – ' + unixTime2hm(data.league[x].end_time);
-    rule = rule2txt(data.league[x].rule.key);
-    stage = stage2txt(data.league[x].stage_a.id) + '\n' + stage2txt(data.league[x].stage_b.id) + '\n';
-    rstr = date + ',' + rule + ',' + stage;
-    return rstr;
+    date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
+    rule = rule3txt(data[x].leagueMatchSetting.vsRule.name);
+    stage =
+        stage3txt(data[x].leagueMatchSetting.vsStages[0].vsStageId) + '／' + stage3txt(data[x].leagueMatchSetting.vsStages[1].vsStageId);
+    return date + ',' + rule + ',' + stage;
 }
 
-function getGachi(data, x) {
+function getOpen(data, x) {
     let stage;
     let date;
     let rule;
-    let rstr;
-    date = unixTime2mdwhm(data.gachi[x].start_time) + ' – ' + unixTime2hm(data.gachi[x].end_time);
-    rule = rule2txt(data.gachi[x].rule.key);
-    stage = stage2txt(data.gachi[x].stage_a.id) + '\n' + stage2txt(data.gachi[x].stage_b.id) + '\n';
-    rstr = date + ',' + rule + ',' + stage;
-    return rstr;
+    date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
+    rule = rule3txt(data[x].bankaraMatchSettings[1].vsRule.name);
+    stage =
+        stage3txt(data[x].bankaraMatchSettings[1].vsStages[0].vsStageId) +
+        '／' +
+        stage3txt(data[x].bankaraMatchSettings[1].vsStages[1].vsStageId);
+    return date + ',' + rule + ',' + stage;
+}
+
+function getChallenge(data, x) {
+    let stage;
+    let date;
+    let rule;
+    date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
+    rule = rule3txt(data[x].bankaraMatchSettings[0].vsRule.name);
+    stage =
+        stage3txt(data[x].bankaraMatchSettings[0].vsStages[0].vsStageId) +
+        '／' +
+        stage3txt(data[x].bankaraMatchSettings[0].vsStages[1].vsStageId);
+    return date + ',' + rule + ',' + stage;
+}
+
+function getXMatch(data, x) {
+    let stage;
+    let date;
+    let rule;
+    date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
+    rule = rule3txt(data[x].xMatchSetting.vsRule.name);
+    stage = stage3txt(data[x].xMatchSetting.vsStages[0].vsStageId) + '／' + stage3txt(data[x].xMatchSetting.vsStages[1].vsStageId);
+    return date + ',' + rule + ',' + stage;
+}
+
+/**
+ * データ取得用
+ */
+function getRegular(data, x) {
+    const regular_list = data.data.regularSchedules.nodes;
+    const r_setting = regular_list[x].regularMatchSetting;
+    let stage1;
+    let stage2;
+    let date;
+    let time;
+    let rule;
+
+    date = sp3unixTime2ymdw(regular_list[x].startTime);
+    time = sp3unixTime2hm(regular_list[x].startTime) + ' – ' + sp3unixTime2hm(regular_list[x].endTime);
+    rule = rule3txt(r_setting.vsRule.name);
+    stage1 = stage3txt(r_setting.vsStages[0].vsStageId);
+    stage2 = stage3txt(r_setting.vsStages[1].vsStageId);
+    return date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
 }
 
 function isInteger(x) {
