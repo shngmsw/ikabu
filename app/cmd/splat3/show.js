@@ -16,15 +16,19 @@ function sendStageInfo(interaction, data, scheduleNum) {
     const l_date = l_args[0];
     const l_rule = l_args[1];
     const l_stage = l_args[2];
+    const l_thumbnail = rule2image(l_rule);
     const c_date = c_args[0];
     const c_rule = c_args[1];
     const c_stage = c_args[2];
+    const c_thumbnail = rule2image(c_rule);
     const o_date = o_args[0];
     const o_rule = o_args[1];
     const o_stage = o_args[2];
+    const o_thumbnail = rule2image(o_rule);
     const x_date = x_args[0];
     const x_rule = x_args[1];
     const x_stage = x_args[2];
+    const x_thumbnail = rule2image(x_rule);
     var title;
     if (scheduleNum == 0) {
         title = '現在';
@@ -41,7 +45,7 @@ function sendStageInfo(interaction, data, scheduleNum) {
             name: l_date + '　' + l_rule,
             value: l_stage,
         })
-        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png');
+        .setThumbnail(l_thumbnail);
 
     const challengeEmbed = new MessageEmbed()
         .setAuthor({
@@ -53,7 +57,7 @@ function sendStageInfo(interaction, data, scheduleNum) {
             name: c_date + '　' + c_rule,
             value: c_stage,
         })
-        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png');
+        .setThumbnail(c_thumbnail);
 
     const openEmbed = new MessageEmbed()
         .setAuthor({
@@ -65,7 +69,7 @@ function sendStageInfo(interaction, data, scheduleNum) {
             name: o_date + '　' + o_rule,
             value: o_stage,
         })
-        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png');
+        .setThumbnail(o_thumbnail);
 
     const xMatchEmbed = new MessageEmbed()
         .setAuthor({
@@ -78,14 +82,14 @@ function sendStageInfo(interaction, data, scheduleNum) {
             name: x_date + '　' + x_rule,
             value: x_stage,
         })
-        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png');
+        .setThumbnail(x_thumbnail);
 
     interaction.editReply({
         embeds: [challengeEmbed, openEmbed],
     });
     // TODO: リーグマッチとXマッチはゲーム内で実装後に表示
     // interaction.editReply({
-    //     embeds: [leagueEmbed, challengeEmbed, openEmbed, xMatchEmbed],
+    //     embeds: [leagueEmbed, openEmbed, challengeEmbed, xMatchEmbed],
     // });
 }
 
@@ -172,29 +176,46 @@ module.exports = async function handleShow(interaction) {
  * ルール情報のキャンバス(2枚目)を作成する
  */
 async function salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4) {
-    const weaponCanvas = Canvas.createCanvas(720, 150);
+    const canvas_width = 650;
+    const canvas_height = 220;
+    const weaponCanvas = Canvas.createCanvas(canvas_width, canvas_height);
     const weapon_ctx = weaponCanvas.getContext('2d');
 
-    createRoundRect(weapon_ctx, 1, 1, 718, 148, 0);
+    createRoundRect(weapon_ctx, 1, 1, canvas_width - 2, canvas_height - 2, 0);
     weapon_ctx.fillStyle = '#2F3136';
     weapon_ctx.fill();
 
     fillTextWithStroke(weapon_ctx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 45);
 
     let weapon1_img = await Canvas.loadImage(weapon1);
-    weapon_ctx.drawImage(weapon1_img, 140, 20, 110, 110);
+    let weapon1_dx = 80;
+    let weapon_dy = 70;
+    weapon_ctx.drawImage(weapon1_img, weapon1_dx, weapon_dy, 110, 110);
 
     let weapon2_img = await Canvas.loadImage(weapon2);
-    weapon_ctx.drawImage(weapon2_img, 280, 20, 110, 110);
+    weapon_ctx.drawImage(weapon2_img, weapon1_dx + 140, weapon_dy, 110, 110);
 
     let weapon3_img = await Canvas.loadImage(weapon3);
-    weapon_ctx.drawImage(weapon3_img, 420, 20, 110, 110);
+    weapon_ctx.drawImage(weapon3_img, weapon1_dx + 280, weapon_dy, 110, 110);
 
     let weapon4_img = await Canvas.loadImage(weapon4);
-    weapon_ctx.drawImage(weapon4_img, 560, 20, 110, 110);
+    weapon_ctx.drawImage(weapon4_img, weapon1_dx + 420, weapon_dy, 110, 110);
 
-    createRoundRect(weapon_ctx, 1, 1, 718, 548, 30);
+    createRoundRect(weapon_ctx, 1, 1, canvas_width - 2, canvas_height - 2, 30);
     weapon_ctx.clip();
 
     return weaponCanvas.toBuffer();
+}
+
+function rule2image(rule) {
+    switch (rule) {
+        case 'ガチエリア':
+            return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
+        case 'ガチヤグラ':
+            return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
+        case 'ガチホコバトル':
+            return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
+        case 'ガチアサリ':
+            return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
+    }
 }
