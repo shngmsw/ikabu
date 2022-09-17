@@ -10,8 +10,8 @@ const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
 function sendStageInfo(interaction, data, scheduleNum) {
     const l_args = common.getLeague(data.data.leagueSchedules.nodes, scheduleNum).split(',');
-    const c_args = common.getOpen(data.data.bankaraSchedules.nodes, scheduleNum).split(',');
-    const o_args = common.getChallenge(data.data.bankaraSchedules.nodes, scheduleNum).split(',');
+    const c_args = common.getChallenge(data.data.bankaraSchedules.nodes, scheduleNum).split(',');
+    const o_args = common.getOpen(data.data.bankaraSchedules.nodes, scheduleNum).split(',');
     const x_args = common.getXMatch(data.data.xSchedules.nodes, scheduleNum).split(',');
     const l_date = l_args[0];
     const l_rule = l_args[1];
