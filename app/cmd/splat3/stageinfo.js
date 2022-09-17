@@ -22,7 +22,6 @@ async function sf(msg) {
             iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
         });
         embedStr_league.setColor('#ED2D7C');
-        msg.channel.send({ embeds: [embedStr_league] });
 
         const embedStr_challenge = getACEmbed(data.data.bankaraSchedules.nodes);
         embedStr_challenge.setAuthor({
@@ -30,7 +29,6 @@ async function sf(msg) {
             iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
         });
         embedStr_challenge.setColor('#F54910');
-        msg.channel.send({ embeds: [embedStr_challenge] });
 
         const embedStr_open = getAOEmbed(data.data.bankaraSchedules.nodes);
         embedStr_open.setAuthor({
@@ -38,7 +36,6 @@ async function sf(msg) {
             iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
         });
         embedStr_open.setColor('#F54910');
-        msg.channel.send({ embeds: [embedStr_open] });
 
         const embedStr_x = getXMatchEmbed(data.data.xSchedules.nodes);
         embedStr_x.setAuthor({
@@ -46,7 +43,9 @@ async function sf(msg) {
             iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
         });
         embedStr_x.setColor('#0edb9b');
-        msg.channel.send({ embeds: [embedStr_x] });
+        msg.channel.send({
+            embeds: [embedStr_league, embedStr_open, embedStr_challenge, embedStr_x],
+        });
     } catch (error) {
         msg.channel.send('なんかエラーでてるわ');
         console.error(error);

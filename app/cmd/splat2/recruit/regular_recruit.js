@@ -187,10 +187,14 @@ async function sendRegularMatch(
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
+        let isLock = false;
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        if (reserve_channel == null) {
-            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
-        } else {
+        if (reserve_channel != null && interaction.member.voice.channelId != reserve_channel.id) {
+            // vc指定なし
+            isLock = true;
+        }
+
+        if (isLock) {
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
@@ -199,19 +203,25 @@ async function sendRegularMatch(
                 ],
                 'Reserve Voice Channel',
             );
-        }
 
-        await interaction.followUp({
-            content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
-            components: reserve_channel != null ? [unlockChannelButton(reserve_channel.id)] : [],
-            ephemeral: true,
-        });
+            await interaction.followUp({
+                content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
+                components: [unlockChannelButton(reserve_channel.id)],
+                ephemeral: true,
+            });
+        } else {
+            await interaction.followUp({
+                content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
+                ephemeral: true,
+            });
+            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
+        }
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
         let cmd_message = await channel.messages.cache.get(sentMessage.id);
         if (cmd_message != undefined) {
-            if (reserve_channel == null) {
+            if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
             } else {
                 sentMessage.edit({ components: [recruitActionRowWithChannel(reserve_channel.id, header)] });

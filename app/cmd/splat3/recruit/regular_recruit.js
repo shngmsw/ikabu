@@ -94,7 +94,7 @@ async function regularRecruit(interaction) {
     try {
         const response = await fetch(schedule_url);
         const data = await response.json();
-        const args = getRegular(data, type).split(',');
+        const args = common.getRegular(data, type).split(',');
         let txt = `<@${host_user.id}>` + 'たんがナワバリ募集中でし！\n';
         let members = [];
 
@@ -186,10 +186,14 @@ async function sendRegularMatch(
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
+        let isLock = false;
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        if (reserve_channel == null) {
-            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
-        } else {
+        if (reserve_channel != null && interaction.member.voice.channelId != reserve_channel.id) {
+            // vc指定なし
+            isLock = true;
+        }
+
+        if (isLock) {
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
@@ -198,19 +202,25 @@ async function sendRegularMatch(
                 ],
                 'Reserve Voice Channel',
             );
-        }
 
-        await interaction.followUp({
-            content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
-            components: reserve_channel != null ? [unlockChannelButton(reserve_channel.id)] : [],
-            ephemeral: true,
-        });
+            await interaction.followUp({
+                content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
+                components: [unlockChannelButton(reserve_channel.id)],
+                ephemeral: true,
+            });
+        } else {
+            await interaction.followUp({
+                content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
+                ephemeral: true,
+            });
+            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
+        }
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
         let cmd_message = await channel.messages.cache.get(sentMessage.id);
         if (cmd_message != undefined) {
-            if (reserve_channel == null) {
+            if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
             } else {
                 sentMessage.edit({ components: [recruitActionRowWithChannel(reserve_channel.id, header)] });
@@ -406,26 +416,4 @@ async function ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImage
 
     const rule = ruleCanvas.toBuffer();
     return rule;
-}
-
-/**
- * データ取得用
- */
-function getRegular(data, x) {
-    const regular_list = data.data.regularSchedules.nodes;
-    const r_setting = regular_list[x].regularMatchSetting;
-    let stage1;
-    let stage2;
-    let date;
-    let time;
-    let rule;
-    let rstr;
-
-    date = sp3unixTime2ymdw(regular_list[x].startTime);
-    time = sp3unixTime2hm(regular_list[x].startTime) + ' – ' + sp3unixTime2hm(regular_list[x].endTime);
-    rule = rule3txt(r_setting.vsRule.name);
-    stage1 = stage3txt(r_setting.vsStages[0].vsStageId);
-    stage2 = stage3txt(r_setting.vsStages[1].vsStageId);
-    rstr = date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
-    return rstr;
 }
