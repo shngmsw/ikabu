@@ -94,7 +94,7 @@ async function regularRecruit(interaction) {
     try {
         const response = await fetch(schedule_url);
         const data = await response.json();
-        const args = getRegular(data, type).split(',');
+        const args = common.getRegular(data, type).split(',');
         let txt = `<@${host_user.id}>` + 'たんがナワバリ募集中でし！\n';
         let members = [];
 
@@ -406,26 +406,4 @@ async function ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImage
 
     const rule = ruleCanvas.toBuffer();
     return rule;
-}
-
-/**
- * データ取得用
- */
-function getRegular(data, x) {
-    const regular_list = data.data.regularSchedules.nodes;
-    const r_setting = regular_list[x].regularMatchSetting;
-    let stage1;
-    let stage2;
-    let date;
-    let time;
-    let rule;
-    let rstr;
-
-    date = sp3unixTime2ymdw(regular_list[x].startTime);
-    time = sp3unixTime2hm(regular_list[x].startTime) + ' – ' + sp3unixTime2hm(regular_list[x].endTime);
-    rule = rule3txt(r_setting.vsRule.name);
-    stage1 = stage3txt(r_setting.vsStages[0].vsStageId);
-    stage2 = stage3txt(r_setting.vsStages[1].vsStageId);
-    rstr = date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
-    return rstr;
 }
