@@ -91,7 +91,7 @@ async function join(interaction, params) {
             insert_recruit(interaction.message.id, host_id, member.user.id);
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
-            let notify_to_host_message;
+            let notify_to_host_message = null;
             let host_guild_member = await guild.members.fetch(host_id, { force: true });
             if (host_guild_member.voice.channelId) {
                 let host_joined_vc = await guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
@@ -124,7 +124,7 @@ async function join(interaction, params) {
             await editMemberListMessage(interaction);
 
             // 15秒後にホストへの通知を削除
-            if (!notify_to_host_message) {
+            if (notify_to_host_message != null) {
                 await sleep(15000);
                 notify_to_host_message.delete();
             }
@@ -338,10 +338,24 @@ async function joinNotify(interaction, params) {
             // recruitテーブルにデータ追加
             insert_recruit(interaction.message.id, interaction.member.user.id, member.user.id);
 
-            const notify_to_host_message = await interaction.message.reply({
-                content: `<@${host_id}>`,
-                embeds: [embed],
+            // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
+            let notify_to_host_message = null;
+            let host_guild_member = await guild.members.fetch(host_id, {
+                force: true,
             });
+            if (host_guild_member.voice.channelId) {
+                let host_joined_vc = await guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
+                await host_joined_vc.send({
+                    content: `<@${host_id}>`,
+                    embeds: [embed],
+                    components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
+                });
+            } else {
+                notify_to_host_message = await interaction.message.reply({
+                    content: `<@${host_id}>`,
+                    embeds: [embed],
+                });
+            }
 
             await interaction.followUp({
                 content: `<@${host_id}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
@@ -350,8 +364,10 @@ async function joinNotify(interaction, params) {
 
             await editMemberListMessage(interaction);
             // 15秒後にホストへの通知を削除
-            await sleep(15000);
-            notify_to_host_message.delete();
+            if (notify_to_host_message != null) {
+                await sleep(15000);
+                notify_to_host_message.delete();
+            }
         }
     } catch (err) {
         handleError(err, { interaction });
