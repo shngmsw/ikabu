@@ -483,11 +483,11 @@ function getOpen(data, x) {
     let date;
     let rule;
     date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
-    rule = rule3txt(data[x].bankaraMatchSettings[1].vsRule.name);
+    rule = rule3txt(data[x].bankaraMatchSettings[0].vsRule.name);
     stage =
-        stage3txt(data[x].bankaraMatchSettings[1].vsStages[0].vsStageId) +
+        stage3txt(data[x].bankaraMatchSettings[0].vsStages[0].vsStageId) +
         '／' +
-        stage3txt(data[x].bankaraMatchSettings[1].vsStages[1].vsStageId);
+        stage3txt(data[x].bankaraMatchSettings[0].vsStages[1].vsStageId);
     return date + ',' + rule + ',' + stage;
 }
 
@@ -496,11 +496,11 @@ function getChallenge(data, x) {
     let date;
     let rule;
     date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
-    rule = rule3txt(data[x].bankaraMatchSettings[0].vsRule.name);
+    rule = rule3txt(data[x].bankaraMatchSettings[1].vsRule.name);
     stage =
-        stage3txt(data[x].bankaraMatchSettings[0].vsStages[0].vsStageId) +
+        stage3txt(data[x].bankaraMatchSettings[1].vsStages[0].vsStageId) +
         '／' +
-        stage3txt(data[x].bankaraMatchSettings[0].vsStages[1].vsStageId);
+        stage3txt(data[x].bankaraMatchSettings[1].vsStages[1].vsStageId);
     return date + ',' + rule + ',' + stage;
 }
 
