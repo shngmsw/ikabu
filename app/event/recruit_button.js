@@ -58,7 +58,8 @@ async function join(interaction, params) {
         });
         const header_msg_id = params.get('hmid');
         const header_message = await interaction.channel.messages.fetch(header_msg_id);
-        const host_id = header_message.interaction.user.id;
+        const host = header_message.interaction.user;
+        const host_id = host.id;
         const channelId = params.get('vid');
         if (member.user.id === host_id) {
             await interaction.followUp({
@@ -66,27 +67,6 @@ async function join(interaction, params) {
                 ephemeral: true,
             });
         } else {
-            // TODO: スレッドはあとで実装するかも
-            // const host = await guild.members.cache.get(host_id);
-            // const host_name = host.user.username;
-            // let thread = await interaction.channel.threads.cache.find((x) => x.name === `${host_name + 'の募集'}`);
-            // なかったらスレッド作成する
-            //   if (thread === undefined) {
-            //     // スレッド作成する
-            //     thread = await interaction.channel.threads.create({
-            //       name: `${host_name + "の募集"}`,
-            //     });
-            //     // botをjoin
-            //     thread.join();
-
-            //     // hostとメンバーをjoin
-            //     await thread.members.add(host_id);
-            //   }
-
-            // hostとメンバーをjoin
-            // await thread.members.add(member.user.id);
-            // スレッド内に募集主向けのメッセージを送信する
-
             // 参加済みかチェック
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
@@ -109,10 +89,23 @@ async function join(interaction, params) {
 
             // recruitテーブルにデータ追加
             insert_recruit(interaction.message.id, host_id, member.user.id);
-            const notify_to_host_message = await interaction.message.reply({
-                content: `<@${host_id}>`,
-                embeds: [embed],
-            });
+
+            // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
+            let notify_to_host_message;
+            let host_guild_member = await guild.members.fetch(host_id, { force: true });
+            if (host_guild_member.voice.channelId) {
+                let host_joined_vc = await guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
+                await host_joined_vc.send({
+                    content: `<@${host_id}>`,
+                    embeds: [embed],
+                    components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
+                });
+            } else {
+                notify_to_host_message = await interaction.message.reply({
+                    content: `<@${host_id}>`,
+                    embeds: [embed],
+                });
+            }
 
             if (channelId == undefined) {
                 await interaction.followUp({
@@ -131,8 +124,10 @@ async function join(interaction, params) {
             await editMemberListMessage(interaction);
 
             // 15秒後にホストへの通知を削除
-            await sleep(15000);
-            notify_to_host_message.delete();
+            if (!notify_to_host_message) {
+                await sleep(15000);
+                notify_to_host_message.delete();
+            }
         }
     } catch (err) {
         handleError(err, { interaction });
@@ -520,6 +515,17 @@ function channelLinkButtons(guildId, channelId) {
     const channel_link = `https://discord.com/channels/${guildId}/${channelId}`;
     let buttons = new MessageActionRow().addComponents([
         new MessageButton().setLabel('チャンネルに移動').setStyle('LINK').setURL(channel_link),
+    ]);
+    return buttons;
+}
+function messageLinkButtons(guildId, channelId, messageId, label) {
+    const link = `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
+
+    let buttons = new MessageActionRow().addComponents([
+        new MessageButton()
+            .setLabel(label != null ? label : 'メッセージを表示')
+            .setStyle('LINK')
+            .setURL(link),
     ]);
     return buttons;
 }
