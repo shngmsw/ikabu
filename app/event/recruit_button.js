@@ -96,9 +96,12 @@ async function join(interaction, params) {
             if (host_guild_member.voice.channelId) {
                 let host_joined_vc = await guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
                 await host_joined_vc.send({
-                    content: `<@${host_id}>`,
                     embeds: [embed],
                     components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
+                });
+                notify_to_host_message = await interaction.message.reply({
+                    content: `<@${host_id}>`,
+                    embeds: [embed],
                 });
             } else {
                 notify_to_host_message = await interaction.message.reply({
@@ -123,9 +126,9 @@ async function join(interaction, params) {
 
             await editMemberListMessage(interaction);
 
-            // 15秒後にホストへの通知を削除
+            // 5分後にホストへの通知を削除
             if (notify_to_host_message != null) {
-                await sleep(15000);
+                await sleep(300000);
                 notify_to_host_message.delete();
             }
         }
@@ -363,9 +366,9 @@ async function joinNotify(interaction, params) {
             });
 
             await editMemberListMessage(interaction);
-            // 15秒後にホストへの通知を削除
+            // 5分後にホストへの通知を削除
             if (notify_to_host_message != null) {
-                await sleep(15000);
+                await sleep(300000);
                 notify_to_host_message.delete();
             }
         }

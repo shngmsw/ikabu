@@ -22,4 +22,5 @@ CREATE TABLE IF NOT EXISTS recruit (
     message_id varchar(20)
     ,author_id varchar(20)
     ,member_id varchar(20)
+    ,created_at timestamp
 );
