@@ -10,7 +10,7 @@ async function getRecruitAllByMessageId(message_id) {
     const db = await getPostgresClient();
     let result;
     try {
-        const sql = 'SELECT * FROM recruit where message_id = $1';
+        const sql = 'SELECT * FROM recruit where message_id = $1 order by created';
         const params = [message_id];
 
         result = await db.execute(sql, params);
