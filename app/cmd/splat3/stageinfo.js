@@ -108,11 +108,11 @@ function getLeagueEmbed(league_list) {
             common.sp3unixTime2mdwhm(league_list[attributename].startTime) +
             ' – ' +
             common.sp3unixTime2hm(league_list[attributename].endTime);
-        rule = common.rule3txt(league_list[attributename].leagueMatchSetting.vsRule.name);
+        rule = common.sp3rule2txt(league_list[attributename].leagueMatchSetting.vsRule.name);
         stage =
-            common.stage3txt(league_list[attributename].leagueMatchSetting.vsStages[0].vsStageId) +
+            common.sp3stage2txt(league_list[attributename].leagueMatchSetting.vsStages[0].vsStageId) +
             '／' +
-            common.stage3txt(league_list[attributename].leagueMatchSetting.vsStages[1].vsStageId);
+            common.sp3stage2txt(league_list[attributename].leagueMatchSetting.vsStages[1].vsStageId);
         let name = date + ' 【' + rule + '】';
         stageEmbed.addField(name, stage);
         x = x + 1;
@@ -133,11 +133,11 @@ function getAOEmbed(anarchy_list) {
             common.sp3unixTime2mdwhm(anarchy_list[attributename].startTime) +
             ' – ' +
             common.sp3unixTime2hm(anarchy_list[attributename].endTime);
-        rule = common.rule3txt(anarchy_list[attributename].bankaraMatchSettings[1].vsRule.name);
+        rule = common.sp3rule2txt(anarchy_list[attributename].bankaraMatchSettings[1].vsRule.name);
         stage =
-            common.stage3txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[0].vsStageId) +
+            common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[0].vsStageId) +
             '／' +
-            common.stage3txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[1].vsStageId);
+            common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[1].vsStageId);
         let name = date + ' 【' + rule + '】';
         stageEmbed.addField(name, stage);
         x = x + 1;
@@ -158,11 +158,11 @@ function getACEmbed(anarchy_list) {
             common.sp3unixTime2mdwhm(anarchy_list[attributename].startTime) +
             ' – ' +
             common.sp3unixTime2hm(anarchy_list[attributename].endTime);
-        rule = common.rule3txt(anarchy_list[attributename].bankaraMatchSettings[0].vsRule.name);
+        rule = common.sp3rule2txt(anarchy_list[attributename].bankaraMatchSettings[0].vsRule.name);
         stage =
-            common.stage3txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[0].vsStageId) +
+            common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[0].vsStageId) +
             '／' +
-            common.stage3txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[1].vsStageId);
+            common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[1].vsStageId);
         let name = date + ' 【' + rule + '】';
         stageEmbed.addField(name, stage);
         x = x + 1;
@@ -180,11 +180,11 @@ function getXMatchEmbed(x_list) {
         let date;
         let rule;
         date = common.sp3unixTime2mdwhm(x_list[attributename].startTime) + ' – ' + common.sp3unixTime2hm(x_list[attributename].endTime);
-        rule = common.rule3txt(x_list[attributename].xMatchSetting.vsRule.name);
+        rule = common.sp3rule2txt(x_list[attributename].xMatchSetting.vsRule.name);
         stage =
-            common.stage3txt(x_list[attributename].xMatchSetting.vsStages[0].vsStageId) +
+            common.sp3stage2txt(x_list[attributename].xMatchSetting.vsStages[0].vsStageId) +
             '／' +
-            common.stage3txt(x_list[attributename].xMatchSetting.vsStages[1].vsStageId);
+            common.sp3stage2txt(x_list[attributename].xMatchSetting.vsStages[1].vsStageId);
         let name = date + ' 【' + rule + '】';
         stageEmbed.addField(name, stage);
         x = x + 1;

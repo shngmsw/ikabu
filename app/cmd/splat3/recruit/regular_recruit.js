@@ -2,7 +2,8 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
-const { getRegular } = require(app + '/common.js');
+const { checkFes, getRegular } = require(app + '/common.js');
+const { searchChannelIdByName } = require(app + '/manager/channelManager.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
 const {
     recruitDeleteButton,
@@ -94,6 +95,14 @@ async function regularRecruit(interaction) {
     try {
         const response = await fetch(schedule_url);
         const data = await response.json();
+        if (checkFes(data, type)) {
+            const fes_channel_id = searchChannelIdByName(interaction.guild, 'フェス募集', 'GUILD_TEXT', null);
+            await interaction.editReply({
+                content: `募集を建てようとした期間はフェス中でし！<#${fes_channel_id}>のチャンネルを使うでし！`,
+                ephemeral: true,
+            });
+            return;
+        }
         const args = getRegular(data, type).split(',');
         let txt = `<@${host_user.id}>` + 'たんがナワバリ募集中でし！\n';
         let members = [];
@@ -174,7 +183,7 @@ async function sendRegularMatch(
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
-    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, user3, condition, channel_name, r_time);
+    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, user3, condition, channel_name);
     const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
 
     const rule = new MessageAttachment(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
@@ -189,7 +198,6 @@ async function sendRegularMatch(
         let isLock = false;
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         if (reserve_channel != null && interaction.member.voice.channelId != reserve_channel.id) {
-            // vc指定なし
             isLock = true;
         }
 
@@ -234,7 +242,7 @@ async function sendRegularMatch(
             content: `${host_mention}たんの募集は〆！`,
             components: [disableButtons()],
         });
-        if (reserve_channel != null) {
+        if (isLock) {
             reserve_channel.permissionOverwrites.delete(interaction.guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_user, 'UnLock Voice Channel');
         }
@@ -246,7 +254,7 @@ async function sendRegularMatch(
 /*
  * 募集用のキャンバス(1枚目)を作成する
  */
-async function recruitCanvas(recruit_num, count, host_user, user1, user2, user3, condition, channel_name, r_time) {
+async function recruitCanvas(recruit_num, count, host_user, user1, user2, user3, condition, channel_name) {
     blank_avatar_url = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
