@@ -1,7 +1,7 @@
 const root = require('app-root-path');
 
 const handleBan = require('./cmd/admin-cmd/ban.js');
-const handleBuki = require('./cmd/splat2/buki.js');
+const handleBuki = require('./cmd/splat3/buki.js');
 const handleHelp = require('./cmd/other/help.js');
 const handleKansen = require('./cmd/other/kansen.js');
 const handlePick = require('./cmd/other/pick.js');
