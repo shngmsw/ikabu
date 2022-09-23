@@ -103,7 +103,7 @@ async function regularRecruit(interaction) {
             });
             return;
         }
-        const args = getRegular(data, type).split(',');
+        const regularResult = getRegular(data, type);
         let txt = `<@${host_member.user.id}>` + 'たんがナワバリ募集中でし！\n';
         let members = [];
 
@@ -146,7 +146,7 @@ async function regularRecruit(interaction) {
             user1,
             user2,
             user3,
-            args,
+            regularResult,
             stageImages,
         );
     } catch (error) {
@@ -166,14 +166,14 @@ async function sendRegularMatch(
     user1,
     user2,
     user3,
-    args,
+    regularResult,
     stageImages,
 ) {
-    let r_date = args[0]; // 日付
-    let r_time = args[1]; // 時間
+    let r_date = regularResult.date; // 日付
+    let r_time = regularResult.time; // 時間
     let r_rule = 'ナワバリバトル';
-    let r_stage1 = args[3]; // ステージ1
-    let r_stage2 = args[4]; // ステージ2
+    let r_stage1 = regularResult.stage1; // ステージ1
+    let r_stage2 = regularResult.stage2; // ステージ2
 
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
