@@ -2,7 +2,8 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
-const { sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw } = require(app + '/common.js');
+const { checkFes, sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw } = require(app + '/common.js');
+const { searchChannelIdByName } = require(app + '/manager/channelManager.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
 const {
     recruitDeleteButton,
@@ -109,6 +110,15 @@ async function anarchyRecruit(interaction) {
     try {
         const response = await fetch(schedule_url);
         const data = await response.json();
+        if (checkFes(data, type)) {
+            const fes_channel_id = searchChannelIdByName(interaction.guild, 'フェス募集', 'GUILD_TEXT', null);
+            await interaction.editReply({
+                content: `募集を建てようとした期間はフェス中でし！\nフェス募集をするには<#${fes_channel_id}>のチャンネルを使うでし！`,
+                ephemeral: true,
+            });
+            return;
+        }
+
         const a_args = getAnarchy(data, type).split(',');
         let txt = `<@${host_member.user.id}>` + 'たんがバンカラ募集中でし！\n';
         if (user1 != null && user2 != null) {
