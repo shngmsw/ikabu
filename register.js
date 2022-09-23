@@ -85,8 +85,8 @@ const buki = new SlashCommandBuilder()
 const show = new SlashCommandBuilder()
     .setName(commandNames.show)
     .setDescription('ステージ情報を表示')
-    .addSubcommand((subcommand) => subcommand.setName('now').setDescription('現在のリグマ、ガチマのステージ情報を表示'))
-    .addSubcommand((subcommand) => subcommand.setName('next').setDescription('次のリグマ、ガチマのステージ情報を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('now').setDescription('現在のバンカラマッチのステージ情報を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('next').setDescription('次のバンカラマッチのステージ情報を表示'))
     .addSubcommand((subcommand) => subcommand.setName('nawabari').setDescription('現在のナワバリステージ情報を表示'))
     .addSubcommand((subcommand) => subcommand.setName('run').setDescription('現在のシフトを表示'));
 
