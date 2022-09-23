@@ -43,7 +43,8 @@ const { handleFriendCode, deleteFriendCode } = require(app + '/cmd/other/friendc
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
-    const member = await msg.guild.members.fetch(msg.author.id, {
+    const guild = await msg.guild.fetch();
+    const member = await guild.members.fetch(msg.author.id, {
         force: true, // intentsによってはGuildMemberUpdateが配信されないため
     });
     if (msg.author.bot || member.permissions.has('MANAGE_CHANNELS')) {
