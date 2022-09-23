@@ -43,7 +43,7 @@ const { handleFriendCode, deleteFriendCode } = require(app + '/cmd/other/friendc
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
-    const member = await msg.guild.members.cache.get(msg.author.id);
+    const member = msg.guild.members.cache.get(msg.author.id);
     if (msg.author.bot || member.permissions.has('MANAGE_CHANNELS')) {
         if (msg.content.startsWith('/poll')) {
             if (msg.author.username === 'ブキチ') {
