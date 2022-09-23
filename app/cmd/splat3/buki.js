@@ -34,8 +34,8 @@ async function buki(interaction) {
         let bukiNames = bukis.map(function (value) {
             const embed = new MessageEmbed()
                 .setAuthor({
-                    name: interaction.member.user.username + 'のブキ',
-                    iconURL: interaction.member.user.displayAvatarURL(),
+                    name: interaction.member.displayName + 'のブキ',
+                    iconURL: interaction.member.displayAvatarURL(),
                 })
                 .setColor(0xf02d7d)
                 .setTitle(value.name.ja_JP)
