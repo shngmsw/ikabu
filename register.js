@@ -472,13 +472,6 @@ const fesA = new SlashCommandBuilder()
             )
             .addUserOption((option) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
-            )
-            .addChannelOption((option) =>
-                option
-                    .setName('使用チャンネル')
-                    .setDescription('使用するボイスチャンネルを指定できます。')
-                    .addChannelTypes(ChannelType.GuildVoice)
-                    .setRequired(false),
             ),
     );
 
@@ -528,13 +521,6 @@ const fesB = new SlashCommandBuilder()
             )
             .addUserOption((option) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
-            )
-            .addChannelOption((option) =>
-                option
-                    .setName('使用チャンネル')
-                    .setDescription('使用するボイスチャンネルを指定できます。')
-                    .addChannelTypes(ChannelType.GuildVoice)
-                    .setRequired(false),
             ),
     );
 
@@ -584,13 +570,6 @@ const fesC = new SlashCommandBuilder()
             )
             .addUserOption((option) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
-            )
-            .addChannelOption((option) =>
-                option
-                    .setName('使用チャンネル')
-                    .setDescription('使用するボイスチャンネルを指定できます。')
-                    .addChannelTypes(ChannelType.GuildVoice)
-                    .setRequired(false),
             ),
     );
 
