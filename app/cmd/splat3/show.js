@@ -3,94 +3,115 @@ const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
 const common = require(app + '/common.js');
 const { createRoundRect, fillTextWithStroke } = require(app + '/common/canvas_components.js');
-const { sp3unixTime2mdwhm, coop_stage3txt } = require(app + '/common.js');
+const { sp3unixTime2mdwhm, sp3coop_stage2txt } = require(app + '/common.js');
 const { MessageEmbed, MessageAttachment } = require('discord.js');
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
 function sendStageInfo(interaction, data, scheduleNum) {
-    const l_args = common.getLeague(data.data.leagueSchedules.nodes, scheduleNum).split(',');
-    const c_args = common.getChallenge(data.data.bankaraSchedules.nodes, scheduleNum).split(',');
-    const o_args = common.getOpen(data.data.bankaraSchedules.nodes, scheduleNum).split(',');
-    const x_args = common.getXMatch(data.data.xSchedules.nodes, scheduleNum).split(',');
-    const l_date = l_args[0];
-    const l_rule = l_args[1];
-    const l_stage = l_args[2];
-    const l_thumbnail = rule2image(l_rule);
-    const c_date = c_args[0];
-    const c_rule = c_args[1];
-    const c_stage = c_args[2];
-    const c_thumbnail = rule2image(c_rule);
-    const o_date = o_args[0];
-    const o_rule = o_args[1];
-    const o_stage = o_args[2];
-    const o_thumbnail = rule2image(o_rule);
-    const x_date = x_args[0];
-    const x_rule = x_args[1];
-    const x_stage = x_args[2];
-    const x_thumbnail = rule2image(x_rule);
     var title;
     if (scheduleNum == 0) {
         title = '現在';
     } else {
         title = '次';
     }
-    const leagueEmbed = new MessageEmbed()
-        .setAuthor({
-            name: title + 'のリーグマッチ',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
-        })
-        .setColor('#ED2D7C')
-        .addFields({
-            name: l_date + '　' + l_rule,
-            value: l_stage,
-        })
-        .setThumbnail(l_thumbnail);
+    // フェス期間中はフェスマッチ情報を返す
+    if (common.checkFes(data, scheduleNum)) {
+        const result = common.getRegular(data, scheduleNum);
 
-    const challengeEmbed = new MessageEmbed()
-        .setAuthor({
-            name: title + 'のバンカラマッチ (チャレンジ)',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
-        })
-        .setColor('#F54910')
-        .addFields({
-            name: c_date + '　' + c_rule,
-            value: c_stage,
-        })
-        .setThumbnail(c_thumbnail);
+        const nawabariEmbed = new MessageEmbed()
+            .setAuthor({
+                name: title + 'の' + result.matchName,
+                iconURL: result.iconURL,
+            })
+            .setColor(result.color)
+            .addFields({
+                name: result.date + ' ' + result.time,
+                value: result.stage1 + '／' + result.stage2,
+            })
+            .setThumbnail(result.iconURL);
 
-    const openEmbed = new MessageEmbed()
-        .setAuthor({
-            name: title + 'のバンカラマッチ (オープン)',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
-        })
-        .setColor('#F54910')
-        .addFields({
-            name: o_date + '　' + o_rule,
-            value: o_stage,
-        })
-        .setThumbnail(o_thumbnail);
+        interaction.editReply({
+            embeds: [nawabariEmbed],
+        });
+    } else {
+        const l_args = common.getLeague(data.data.leagueSchedules.nodes, scheduleNum).split(',');
+        const c_args = common.getChallenge(data.data.bankaraSchedules.nodes, scheduleNum).split(',');
+        const o_args = common.getOpen(data.data.bankaraSchedules.nodes, scheduleNum).split(',');
+        const x_args = common.getXMatch(data.data.xSchedules.nodes, scheduleNum).split(',');
+        const l_date = l_args[0];
+        const l_rule = l_args[1];
+        const l_stage = l_args[2];
+        const l_thumbnail = rule2image(l_rule);
+        const c_date = c_args[0];
+        const c_rule = c_args[1];
+        const c_stage = c_args[2];
+        const c_thumbnail = rule2image(c_rule);
+        const o_date = o_args[0];
+        const o_rule = o_args[1];
+        const o_stage = o_args[2];
+        const o_thumbnail = rule2image(o_rule);
+        const x_date = x_args[0];
+        const x_rule = x_args[1];
+        const x_stage = x_args[2];
+        const x_thumbnail = rule2image(x_rule);
+        const leagueEmbed = new MessageEmbed()
+            .setAuthor({
+                name: title + 'のリーグマッチ',
+                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
+            })
+            .setColor('#ED2D7C')
+            .addFields({
+                name: l_date + '　' + l_rule,
+                value: l_stage,
+            })
+            .setThumbnail(l_thumbnail);
 
-    const xMatchEmbed = new MessageEmbed()
-        .setAuthor({
-            name: title + 'のXマッチ',
+        const challengeEmbed = new MessageEmbed()
+            .setAuthor({
+                name: title + 'のバンカラマッチ (チャレンジ)',
+                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+            })
+            .setColor('#F54910')
+            .addFields({
+                name: c_date + '　' + c_rule,
+                value: c_stage,
+            })
+            .setThumbnail(c_thumbnail);
 
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
-        })
-        .setColor('#0edb9b')
-        .addFields({
-            name: x_date + '　' + x_rule,
-            value: x_stage,
-        })
-        .setThumbnail(x_thumbnail);
+        const openEmbed = new MessageEmbed()
+            .setAuthor({
+                name: title + 'のバンカラマッチ (オープン)',
+                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+            })
+            .setColor('#F54910')
+            .addFields({
+                name: o_date + '　' + o_rule,
+                value: o_stage,
+            })
+            .setThumbnail(o_thumbnail);
 
-    interaction.editReply({
-        embeds: [openEmbed, challengeEmbed],
-    });
-    // TODO: リーグマッチとXマッチはゲーム内で実装後に表示
-    // interaction.editReply({
-    //     embeds: [leagueEmbed, openEmbed, challengeEmbed, xMatchEmbed],
-    // });
+        const xMatchEmbed = new MessageEmbed()
+            .setAuthor({
+                name: title + 'のXマッチ',
+
+                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
+            })
+            .setColor('#0edb9b')
+            .addFields({
+                name: x_date + '　' + x_rule,
+                value: x_stage,
+            })
+            .setThumbnail(x_thumbnail);
+
+        interaction.editReply({
+            embeds: [openEmbed, challengeEmbed],
+        });
+        // TODO: リーグマッチとXマッチはゲーム内で実装後に表示
+        // interaction.editReply({
+        //     embeds: [leagueEmbed, openEmbed, challengeEmbed, xMatchEmbed],
+        // });
+    }
 }
 
 module.exports = async function handleShow(interaction) {
@@ -109,19 +130,19 @@ module.exports = async function handleShow(interaction) {
         } else if (subCommand === 'nawabari') {
             const response = await fetch(schedule_url);
             const data = await response.json();
-            const args = common.getRegular(data, 0).split(',');
+            const result = common.getRegular(data, 0);
 
             const nawabariEmbed = new MessageEmbed()
                 .setAuthor({
-                    name: 'レギュラーマッチ',
-                    iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png',
+                    name: result.matchName,
+                    iconURL: result.iconURL,
                 })
-                .setColor('#B3FF00')
+                .setColor(result.color)
                 .addFields({
-                    name: args[0] + ' ' + args[1],
-                    value: args[3] + '／' + args[4],
+                    name: result.date + ' ' + result.time,
+                    value: result.stage1 + '／' + result.stage2,
                 })
-                .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png');
+                .setThumbnail(result.iconURL);
 
             interaction.editReply({
                 embeds: [nawabariEmbed],
@@ -133,7 +154,7 @@ module.exports = async function handleShow(interaction) {
                 const salmon_data = data.data.coopGroupingSchedule.regularSchedules.nodes[0];
                 const coopSetting = salmon_data.setting;
                 let date = sp3unixTime2mdwhm(salmon_data.startTime) + ' – ' + sp3unixTime2mdwhm(salmon_data.endTime);
-                let coop_stage = coop_stage3txt(coopSetting.coopStage.coopStageId);
+                let coop_stage = sp3coop_stage2txt(coopSetting.coopStage.coopStageId);
                 let weapon1 = coopSetting.weapons[0].image.url;
                 let weapon2 = coopSetting.weapons[1].image.url;
                 let weapon3 = coopSetting.weapons[2].image.url;

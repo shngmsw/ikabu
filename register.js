@@ -19,12 +19,7 @@ const friendCode = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('フレンドコード').setDescription('例：SW-0000-0000-0000').setRequired(true)),
     )
     .addSubcommand((subcommand) =>
-        subcommand
-            .setName('show')
-            .setDescription('登録したフレンドコードを表示します。未登録の場合は自己紹介から引用します。')
-            .addUserOption((option) =>
-                option.setName('user').setDescription('フレンドコードを表示したい人を指定してください。').setRequired(true),
-            ),
+        subcommand.setName('show').setDescription('登録したフレンドコードを表示します。未登録の場合は自己紹介から引用します。'),
     );
 
 const wiki = new SlashCommandBuilder()
@@ -78,6 +73,8 @@ const buki = new SlashCommandBuilder()
                 { name: 'ローラー', value: 'roller' },
                 { name: 'スロッシャー', value: 'slosher' },
                 { name: 'スピナー', value: 'splatling' },
+                { name: 'ワイパー', value: 'wiper' },
+                { name: 'ストリンガー', value: 'stringer' },
             )
             .setRequired(false),
     );
@@ -85,8 +82,8 @@ const buki = new SlashCommandBuilder()
 const show = new SlashCommandBuilder()
     .setName(commandNames.show)
     .setDescription('ステージ情報を表示')
-    .addSubcommand((subcommand) => subcommand.setName('now').setDescription('現在のリグマ、ガチマのステージ情報を表示'))
-    .addSubcommand((subcommand) => subcommand.setName('next').setDescription('次のリグマ、ガチマのステージ情報を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('now').setDescription('現在のバンカラマッチのステージ情報を表示'))
+    .addSubcommand((subcommand) => subcommand.setName('next').setDescription('次のバンカラマッチのステージ情報を表示'))
     .addSubcommand((subcommand) => subcommand.setName('nawabari').setDescription('現在のナワバリステージ情報を表示'))
     .addSubcommand((subcommand) => subcommand.setName('run').setDescription('現在のシフトを表示'));
 
@@ -431,8 +428,8 @@ const fesA = new SlashCommandBuilder()
     .setDescription('フェス(フウカ陣営) 募集コマンド')
     .addSubcommand((subcommand) =>
         subcommand
-            .setName('fes')
-            .setDescription('フェスマッチの募集をたてます。(フウカ陣営)')
+            .setName('now')
+            .setDescription('現在のフェスマッチの募集をたてます。(フウカ陣営)')
             .addIntegerOption((option) =>
                 option
                     .setName('募集人数')
@@ -453,6 +450,25 @@ const fesA = new SlashCommandBuilder()
                     .setDescription('使用するボイスチャンネルを指定できます。')
                     .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
+            ),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('next')
+            .setDescription('次のフェスマッチの募集をたてます。(フウカ陣営)')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
     );
 
@@ -461,8 +477,8 @@ const fesB = new SlashCommandBuilder()
     .setDescription('フェス(マンタロー陣営) 募集コマンド')
     .addSubcommand((subcommand) =>
         subcommand
-            .setName('fes')
-            .setDescription('フェスマッチの募集をたてます。(マンタロー陣営)')
+            .setName('now')
+            .setDescription('現在のフェスマッチの募集をたてます。(マンタロー陣営)')
             .addIntegerOption((option) =>
                 option
                     .setName('募集人数')
@@ -484,6 +500,25 @@ const fesB = new SlashCommandBuilder()
                     .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
             ),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('next')
+            .setDescription('次のフェスマッチの募集をたてます。(マンタロー陣営)')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            ),
     );
 
 const fesC = new SlashCommandBuilder()
@@ -491,8 +526,8 @@ const fesC = new SlashCommandBuilder()
     .setDescription('フェス(ウツホ陣営) 募集コマンド')
     .addSubcommand((subcommand) =>
         subcommand
-            .setName('fes')
-            .setDescription('フェスマッチの募集をたてます。(ウツホ陣営)')
+            .setName('now')
+            .setDescription('現在のフェスマッチの募集をたてます。(ウツホ陣営)')
             .addIntegerOption((option) =>
                 option
                     .setName('募集人数')
@@ -513,6 +548,25 @@ const fesC = new SlashCommandBuilder()
                     .setDescription('使用するボイスチャンネルを指定できます。')
                     .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
+            ),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('next')
+            .setDescription('次のフェスマッチの募集をたてます。(ウツホ陣営)')
+            .addIntegerOption((option) =>
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setRequired(true),
+            )
+            .addStringOption((option) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
+            .addUserOption((option) =>
+                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+            )
+            .addUserOption((option) =>
+                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
     );
 

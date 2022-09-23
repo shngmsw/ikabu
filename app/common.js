@@ -7,6 +7,7 @@ module.exports = {
     getXMatch: getXMatch,
     getLeague: getLeague,
     getRegular: getRegular,
+    checkFes: checkFes,
     unixTime2hm: unixTime2hm,
     sp3unixTime2hm: sp3unixTime2hm,
     unixTime2mdwhm: unixTime2mdwhm,
@@ -14,11 +15,11 @@ module.exports = {
     sp3unixTime2ymdw: sp3unixTime2ymdw,
     unixTime2ymdw: unixTime2ymdw,
     rule2txt: rule2txt,
-    rule3txt: rule3txt,
+    sp3rule2txt: sp3rule2txt,
     stage2txt: stage2txt,
-    stage3txt: stage3txt,
+    sp3stage2txt: sp3stage2txt,
     coop_stage2txt: coop_stage2txt,
-    coop_stage3txt: coop_stage3txt,
+    sp3coop_stage2txt: sp3coop_stage2txt,
     weapon2txt: weapon2txt,
     rgbToHex: rgbToHex,
     random: randomSelect,
@@ -141,7 +142,7 @@ function rule2txt(key) {
     }
 }
 
-function rule3txt(name) {
+function sp3rule2txt(name) {
     switch (name) {
         case 'Turf War':
             return 'ナワバリバトル';
@@ -209,7 +210,7 @@ function stage2txt(key) {
     }
 }
 
-function stage3txt(key) {
+function sp3stage2txt(key) {
     switch (key) {
         case 1:
             return 'ユノハナ大渓谷';
@@ -219,16 +220,16 @@ function stage3txt(key) {
             return 'ヤガラ市場';
         case 4:
             return 'マテガイ放水路';
-        case 5:
-            return '';
+        // case 5:
+        //     return '';
         case 6:
             return 'ナメロウ金属';
-        case 7:
-            return '';
-        case 8:
-            return '';
-        case 9:
-            return '';
+        // case 7:
+        //     return '';
+        // case 8:
+        //     return '';
+        // case 9:
+        //     return '';
         case 10:
             return 'マサバ海峡大橋';
         case 11:
@@ -243,20 +244,22 @@ function stage3txt(key) {
             return 'ザトウマーケット';
         case 16:
             return 'スメーシーワールド';
-        case 17:
-            return '';
-        case 18:
-            return '';
-        case 19:
-            return '';
-        case 20:
-            return '';
-        case 21:
-            return '';
-        case 22:
-            return '';
-        case 9999:
-            return '';
+        // case 17:
+        //     return '';
+        // case 18:
+        //     return '';
+        // case 19:
+        //     return '';
+        // case 20:
+        //     return '';
+        // case 21:
+        //     return '';
+        // case 22:
+        //     return '';
+        // case 9999:
+        //     return '';
+        default:
+            return 'そーりー・あんでふぁいんど';
     }
 }
 
@@ -275,26 +278,28 @@ function coop_stage2txt(key) {
     }
 }
 
-function coop_stage3txt(key) {
+function sp3coop_stage2txt(key) {
     switch (key) {
-        case 0:
-            return '';
+        // case 0:
+        //     return '';
         case 1:
             return 'シェケナダム';
         case 2:
             return 'アラマキ砦';
-        case 3:
-            return '';
-        case 4:
-            return '';
-        case 5:
-            return '';
-        case 6:
-            return '';
+        // case 3:
+        //     return '';
+        // case 4:
+        //     return '';
+        // case 5:
+        //     return '';
+        // case 6:
+        //     return '';
         case 7:
             return 'ムニ・エール海洋発電所';
-        case 8:
-            return '';
+        // case 8:
+        //     return '';
+        default:
+            return 'そーりー・あんでふぁいんど';
     }
 }
 
@@ -472,9 +477,16 @@ function getLeague(data, x) {
     let date;
     let rule;
     date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
-    rule = rule3txt(data[x].leagueMatchSetting.vsRule.name);
-    stage =
-        stage3txt(data[x].leagueMatchSetting.vsStages[0].vsStageId) + '／' + stage3txt(data[x].leagueMatchSetting.vsStages[1].vsStageId);
+    if (data[x].leagueMatchSettingleagueMatchSetting == null) {
+        rule = 'フェス期間中';
+        stage = 'フェス期間中はお休みでし';
+    } else {
+        rule = sp3rule2txt(data[x].leagueMatchSetting.vsRule.name);
+        stage =
+            sp3stage2txt(data[x].leagueMatchSetting.vsStages[0].vsStageId) +
+            '／' +
+            sp3stage2txt(data[x].leagueMatchSetting.vsStages[1].vsStageId);
+    }
     return date + ',' + rule + ',' + stage;
 }
 
@@ -483,11 +495,16 @@ function getOpen(data, x) {
     let date;
     let rule;
     date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
-    rule = rule3txt(data[x].bankaraMatchSettings[1].vsRule.name);
-    stage =
-        stage3txt(data[x].bankaraMatchSettings[1].vsStages[0].vsStageId) +
-        '／' +
-        stage3txt(data[x].bankaraMatchSettings[1].vsStages[1].vsStageId);
+    if (data[x].bankaraMatchSettings == null) {
+        rule = 'フェス期間中';
+        stage = 'フェス期間中はお休みでし';
+    } else {
+        rule = sp3rule2txt(data[x].bankaraMatchSettings[1].vsRule.name);
+        stage =
+            sp3stage2txt(data[x].bankaraMatchSettings[1].vsStages[0].vsStageId) +
+            '／' +
+            sp3stage2txt(data[x].bankaraMatchSettings[1].vsStages[1].vsStageId);
+    }
     return date + ',' + rule + ',' + stage;
 }
 
@@ -496,11 +513,16 @@ function getChallenge(data, x) {
     let date;
     let rule;
     date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
-    rule = rule3txt(data[x].bankaraMatchSettings[0].vsRule.name);
-    stage =
-        stage3txt(data[x].bankaraMatchSettings[0].vsStages[0].vsStageId) +
-        '／' +
-        stage3txt(data[x].bankaraMatchSettings[0].vsStages[1].vsStageId);
+    if (data[x].bankaraMatchSettings == null) {
+        rule = 'フェス期間中';
+        stage = 'フェス期間中はお休みでし';
+    } else {
+        rule = sp3rule2txt(data[x].bankaraMatchSettings[0].vsRule.name);
+        stage =
+            sp3stage2txt(data[x].bankaraMatchSettings[0].vsStages[0].vsStageId) +
+            '／' +
+            sp3stage2txt(data[x].bankaraMatchSettings[0].vsStages[1].vsStageId);
+    }
     return date + ',' + rule + ',' + stage;
 }
 
@@ -509,29 +531,78 @@ function getXMatch(data, x) {
     let date;
     let rule;
     date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
-    rule = rule3txt(data[x].xMatchSetting.vsRule.name);
-    stage = stage3txt(data[x].xMatchSetting.vsStages[0].vsStageId) + '／' + stage3txt(data[x].xMatchSetting.vsStages[1].vsStageId);
+    if (data[x].xMatchSetting == null) {
+        rule = 'フェス期間中';
+        stage = 'フェス期間中はお休みでし';
+    } else {
+        rule = sp3rule2txt(data[x].xMatchSetting.vsRule.name);
+        stage =
+            sp3stage2txt(data[x].xMatchSetting.vsStages[0].vsStageId) + '／' + sp3stage2txt(data[x].xMatchSetting.vsStages[1].vsStageId);
+    }
     return date + ',' + rule + ',' + stage;
 }
 
 /**
- * データ取得用
+ * レギュラーマッチステージ情報取得
+ * フェス期間中はフェス情報を取得する
  */
 function getRegular(data, x) {
-    const regular_list = data.data.regularSchedules.nodes;
-    const r_setting = regular_list[x].regularMatchSetting;
     let stage1;
     let stage2;
     let date;
     let time;
     let rule;
+    let matchName;
+    let iconURL;
+    let color;
+    if (checkFes(data, x)) {
+        const fest_list = data.data.festSchedules.nodes;
+        const f_setting = fest_list[x].festMatchSetting;
 
-    date = sp3unixTime2ymdw(regular_list[x].startTime);
-    time = sp3unixTime2hm(regular_list[x].startTime) + ' – ' + sp3unixTime2hm(regular_list[x].endTime);
-    rule = rule3txt(r_setting.vsRule.name);
-    stage1 = stage3txt(r_setting.vsStages[0].vsStageId);
-    stage2 = stage3txt(r_setting.vsStages[1].vsStageId);
-    return date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
+        date = sp3unixTime2ymdw(fest_list[x].startTime);
+        time = sp3unixTime2hm(fest_list[x].startTime) + ' – ' + sp3unixTime2hm(fest_list[x].endTime);
+        rule = sp3rule2txt(f_setting.vsRule.name);
+        stage1 = sp3stage2txt(f_setting.vsStages[0].vsStageId);
+        stage2 = sp3stage2txt(f_setting.vsStages[1].vsStageId);
+        matchName = 'フェスマッチ';
+        iconURL = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png';
+        color = '#ead147';
+    } else {
+        const regular_list = data.data.regularSchedules.nodes;
+        const r_setting = regular_list[x].regularMatchSetting;
+
+        date = sp3unixTime2ymdw(regular_list[x].startTime);
+        time = sp3unixTime2hm(regular_list[x].startTime) + ' – ' + sp3unixTime2hm(regular_list[x].endTime);
+        rule = sp3rule2txt(r_setting.vsRule.name);
+        stage1 = sp3stage2txt(r_setting.vsStages[0].vsStageId);
+        stage2 = sp3stage2txt(r_setting.vsStages[1].vsStageId);
+        matchName = 'レギュラーマッチ';
+        iconURL = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png';
+        color = '#B3FF00';
+    }
+    return {
+        date: date,
+        time: time,
+        rule: rule,
+        stage1: stage1,
+        stage2: stage2,
+        matchName: matchName,
+        iconURL: iconURL,
+        color: color,
+    };
+}
+
+/**
+ * フェス期間中かチェックする
+ */
+function checkFes(data, type) {
+    const fest_list = data.data.festSchedules.nodes;
+    const f_setting = fest_list[type].festMatchSetting;
+    if (f_setting == null) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 function isInteger(x) {
@@ -681,7 +752,7 @@ const recruit_command = {
     リグマ募集: '`/リグマ募集 now` or `/リグマ募集 next`',
     ナワバリ募集: '`/ナワバリ募集 now` or `/ナワバリ募集 next`',
     バンカラ募集: '`/バンカラ募集 now` or `/バンカラ募集 next`',
-    フェス募集: '`/〇〇陣営 fes` or `/fes`',
+    フェス募集: '`/〇〇陣営 now` or `/〇〇陣営 next`',
     サーモン募集: `/サーモンラン募集 run`,
     別ゲー募集: '`/別ゲー募集 apex` or `/別ゲー募集 dbd` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`',
 };

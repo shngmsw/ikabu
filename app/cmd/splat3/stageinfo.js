@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
 const common = require(app + '/common.js');
 const Discord = require('discord.js');
+const { checkFes } = require('../../common');
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
 module.exports = function handleStageInfo(msg) {
@@ -98,7 +99,6 @@ async function stageinfo(msg) {
 }
 
 function getLeagueEmbed(league_list) {
-    let x = 0;
     const stageEmbed = new Discord.MessageEmbed().setTitle('ステージ情報');
     for (var attributename in league_list) {
         let stage;
@@ -108,14 +108,18 @@ function getLeagueEmbed(league_list) {
             common.sp3unixTime2mdwhm(league_list[attributename].startTime) +
             ' – ' +
             common.sp3unixTime2hm(league_list[attributename].endTime);
-        rule = common.rule3txt(league_list[attributename].leagueMatchSetting.vsRule.name);
-        stage =
-            common.stage3txt(league_list[attributename].leagueMatchSetting.vsStages[0].vsStageId) +
-            '／' +
-            common.stage3txt(league_list[attributename].leagueMatchSetting.vsStages[1].vsStageId);
+        if (league_list[attributename].leagueMatchSetting == null) {
+            rule = 'フェス期間中';
+            stage = 'フェス期間中はお休みでし';
+        } else {
+            rule = common.sp3rule2txt(league_list[attributename].leagueMatchSetting.vsRule.name);
+            stage =
+                common.sp3stage2txt(league_list[attributename].leagueMatchSetting.vsStages[0].vsStageId) +
+                '／' +
+                common.sp3stage2txt(league_list[attributename].leagueMatchSetting.vsStages[1].vsStageId);
+        }
         let name = date + ' 【' + rule + '】';
         stageEmbed.addField(name, stage);
-        x = x + 1;
     }
     stageEmbed.setTimestamp();
     stageEmbed.setFooter({ text: 'StageInfo by splatoon3.ink' });
@@ -123,7 +127,6 @@ function getLeagueEmbed(league_list) {
 }
 
 function getAOEmbed(anarchy_list) {
-    let x = 0;
     const stageEmbed = new Discord.MessageEmbed().setTitle('ステージ情報');
     for (var attributename in anarchy_list) {
         let stage;
@@ -133,14 +136,18 @@ function getAOEmbed(anarchy_list) {
             common.sp3unixTime2mdwhm(anarchy_list[attributename].startTime) +
             ' – ' +
             common.sp3unixTime2hm(anarchy_list[attributename].endTime);
-        rule = common.rule3txt(anarchy_list[attributename].bankaraMatchSettings[1].vsRule.name);
-        stage =
-            common.stage3txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[0].vsStageId) +
-            '／' +
-            common.stage3txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[1].vsStageId);
+        if (anarchy_list[attributename].bankaraMatchSettings == null) {
+            rule = 'フェス期間中';
+            stage = 'フェス期間中はお休みでし';
+        } else {
+            rule = common.sp3rule2txt(anarchy_list[attributename].bankaraMatchSettings[1].vsRule.name);
+            stage =
+                common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[0].vsStageId) +
+                '／' +
+                common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[1].vsStageId);
+        }
         let name = date + ' 【' + rule + '】';
         stageEmbed.addField(name, stage);
-        x = x + 1;
     }
     stageEmbed.setTimestamp();
     stageEmbed.setFooter({ text: 'StageInfo by splatoon3.ink' });
@@ -148,7 +155,6 @@ function getAOEmbed(anarchy_list) {
 }
 
 function getACEmbed(anarchy_list) {
-    let x = 0;
     const stageEmbed = new Discord.MessageEmbed().setTitle('ステージ情報');
     for (var attributename in anarchy_list) {
         let stage;
@@ -158,14 +164,18 @@ function getACEmbed(anarchy_list) {
             common.sp3unixTime2mdwhm(anarchy_list[attributename].startTime) +
             ' – ' +
             common.sp3unixTime2hm(anarchy_list[attributename].endTime);
-        rule = common.rule3txt(anarchy_list[attributename].bankaraMatchSettings[0].vsRule.name);
-        stage =
-            common.stage3txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[0].vsStageId) +
-            '／' +
-            common.stage3txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[1].vsStageId);
+        if (anarchy_list[attributename].bankaraMatchSettings == null) {
+            rule = 'フェス期間中';
+            stage = 'フェス期間中はお休みでし';
+        } else {
+            rule = common.sp3rule2txt(anarchy_list[attributename].bankaraMatchSettings[0].vsRule.name);
+            stage =
+                common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[0].vsStageId) +
+                '／' +
+                common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[1].vsStageId);
+        }
         let name = date + ' 【' + rule + '】';
         stageEmbed.addField(name, stage);
-        x = x + 1;
     }
     stageEmbed.setTimestamp();
     stageEmbed.setFooter({ text: 'StageInfo by splatoon3.ink' });
@@ -173,21 +183,24 @@ function getACEmbed(anarchy_list) {
 }
 
 function getXMatchEmbed(x_list) {
-    let x = 0;
     const stageEmbed = new Discord.MessageEmbed().setTitle('ステージ情報');
     for (var attributename in x_list) {
         let stage;
         let date;
         let rule;
         date = common.sp3unixTime2mdwhm(x_list[attributename].startTime) + ' – ' + common.sp3unixTime2hm(x_list[attributename].endTime);
-        rule = common.rule3txt(x_list[attributename].xMatchSetting.vsRule.name);
-        stage =
-            common.stage3txt(x_list[attributename].xMatchSetting.vsStages[0].vsStageId) +
-            '／' +
-            common.stage3txt(x_list[attributename].xMatchSetting.vsStages[1].vsStageId);
+        if (x_list[attributename].xMatchSetting == null) {
+            rule = 'フェス期間中';
+            stage = 'フェス期間中はお休みでし';
+        } else {
+            rule = common.sp3rule2txt(x_list[attributename].xMatchSetting.vsRule.name);
+            stage =
+                common.sp3stage2txt(x_list[attributename].xMatchSetting.vsStages[0].vsStageId) +
+                '／' +
+                common.sp3stage2txt(x_list[attributename].xMatchSetting.vsStages[1].vsStageId);
+        }
         let name = date + ' 【' + rule + '】';
         stageEmbed.addField(name, stage);
-        x = x + 1;
     }
     stageEmbed.setTimestamp();
     stageEmbed.setFooter({ text: 'StageInfo by splatoon3.ink' });
