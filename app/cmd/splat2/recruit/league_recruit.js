@@ -36,7 +36,7 @@ async function leagueRecruit(interaction) {
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    let host_user = interaction.member.user;
+    let host_member = interaction.member;
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // リグマプレイ人数のカウンター
@@ -74,7 +74,7 @@ async function leagueRecruit(interaction) {
     var usable_channel = ['alfa', 'bravo', 'charlie', 'delta', 'echo', 'fox', 'golf', 'hotel', 'india', 'juliett', 'kilo', 'lima', 'mike'];
 
     if (voice_channel != null) {
-        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_user.id)) {
+        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_member.user.id)) {
             await interaction.reply({
                 content: 'そのチャンネルは使用中でし！',
                 ephemeral: true,
@@ -98,7 +98,7 @@ async function leagueRecruit(interaction) {
         const response = await fetch(schedule_url);
         const data = await response.json();
         const l_args = getLeague(data, type).split(',');
-        let txt = `<@${host_user.id}>` + 'たんがリグメン募集中でし！\n';
+        let txt = `<@${host_member.user.id}>` + 'たんがリグメン募集中でし！\n';
         if (user1 != null && user2 != null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         } else if (user1 != null) {
@@ -119,7 +119,7 @@ async function leagueRecruit(interaction) {
             recruit_num,
             condition,
             member_counter,
-            host_user,
+            host_member,
             user1,
             user2,
             l_args,
@@ -139,7 +139,7 @@ async function sendLeagueMatch(
     recruit_num,
     condition,
     count,
-    host_user,
+    host_member,
     user1,
     user2,
     l_args,
@@ -203,7 +203,15 @@ async function sendLeagueMatch(
 
     const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
-    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, condition, channel_name);
+    // サーバーメンバーとして取得し直し
+    if (user1 != null) {
+        user1 = await interaction.guild.members.cache.get(user1.id);
+    }
+    if (user2 != null) {
+        user2 = await interaction.guild.members.cache.get(user2.id);
+    }
+
+    const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
     const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
 
     const rule = new MessageAttachment(await ruleCanvas(l_rule, l_date, l_time, l_stage1, l_stage2, stageImages, thumbnail), 'rules.png');
@@ -226,7 +234,7 @@ async function sendLeagueMatch(
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
-                    { id: host_user.id, allow: [Permissions.FLAGS.CONNECT] },
+                    { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
                 ],
                 'Reserve Voice Channel',
             );
@@ -262,14 +270,14 @@ async function sendLeagueMatch(
 
         // 2時間後にボタンを無効化する
         await sleep(7200000 - 15000);
-        const host_mention = `<@${host_user.id}>`;
+        const host_mention = `<@${host_member.user.id}>`;
         sentMessage.edit({
             content: `${host_mention}たんの募集は〆！`,
             components: [disableButtons()],
         });
         if (reserve_channel != null) {
             reserve_channel.permissionOverwrites.delete(interaction.guild.roles.everyone, 'UnLock Voice Channel');
-            reserve_channel.permissionOverwrites.delete(host_user, 'UnLock Voice Channel');
+            reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }
     } catch (error) {
         console.log(error);
@@ -279,7 +287,7 @@ async function sendLeagueMatch(
 /*
  * 募集用のキャンバス(1枚目)を作成する
  */
-async function recruitCanvas(recruit_num, count, host_user, user1, user2, condition, channel_name) {
+async function recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name) {
     blank_avatar_url = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
@@ -299,7 +307,7 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     fillTextWithStroke(recruit_ctx, 'リーグマッチ', '50px Splatfont', '#F02D7E', '#bd2363', 1, 115, 80);
 
     // 募集主の画像
-    let host_img = await Canvas.loadImage(host_user.displayAvatarURL({ format: 'png' }));
+    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));
     recruit_ctx.save();
     drawArcImage(recruit_ctx, host_img, 40, 120, 50);
     recruit_ctx.strokeStyle = '#1e1f23';
