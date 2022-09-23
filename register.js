@@ -78,6 +78,8 @@ const buki = new SlashCommandBuilder()
                 { name: 'ローラー', value: 'roller' },
                 { name: 'スロッシャー', value: 'slosher' },
                 { name: 'スピナー', value: 'splatling' },
+                { name: 'ワイパー', value: 'wiper' },
+                { name: 'ストリンガー', value: 'stringer' },
             )
             .setRequired(false),
     );

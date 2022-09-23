@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
 const common = require(app + '/common.js');
-const weaponsUrl = 'https://stat.ink/api/v2/weapon';
+const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 const { MessageEmbed } = require('discord.js');
 
 module.exports = async function handleBuki(interaction) {
