@@ -2,7 +2,7 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
-const { sp3unixTime2mdwhm, coop_stage3txt } = require(app + '/common.js');
+const { sp3unixTime2mdwhm, sp3coop_stage2txt } = require(app + '/common.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
 const {
     recruitDeleteButton,
@@ -125,7 +125,7 @@ async function salmonRecruit(interaction) {
 async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, count, host_user, user1, user2, detail) {
     const coopSetting = detail.setting;
     let date = sp3unixTime2mdwhm(detail.startTime) + ' – ' + sp3unixTime2mdwhm(detail.endTime);
-    let coop_stage = coop_stage3txt(coopSetting.coopStage.coopStageId);
+    let coop_stage = sp3coop_stage2txt(coopSetting.coopStage.coopStageId);
     let weapon1 = coopSetting.weapons[0].image.url;
     let weapon2 = coopSetting.weapons[1].image.url;
     let weapon3 = coopSetting.weapons[2].image.url;
@@ -159,7 +159,6 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
         let isLock = false;
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         if (reserve_channel != null && interaction.member.voice.channelId != reserve_channel.id) {
-            // vc指定なし
             isLock = true;
         }
 
@@ -197,6 +196,12 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
                     components: [recruitActionRowWithChannel(reserve_channel.id, header)],
                 });
             }
+        }
+        // 2時間後にVCロックを解除する
+        await sleep(7200000 - 15000);
+        if (isLock) {
+            reserve_channel.permissionOverwrites.delete(interaction.guild.roles.everyone, 'UnLock Voice Channel');
+            reserve_channel.permissionOverwrites.delete(host_user, 'UnLock Voice Channel');
         }
     } catch (error) {
         console.log(error);

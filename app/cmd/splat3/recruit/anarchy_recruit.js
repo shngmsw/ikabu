@@ -2,7 +2,7 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
-const { stage3txt, rule3txt, sp3unixTime2hm, sp3unixTime2ymdw } = require(app + '/common.js');
+const { sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw } = require(app + '/common.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
 const {
     recruitDeleteButton,
@@ -277,7 +277,7 @@ async function sendAnarchyMatch(
             content: `${host_mention}たんの募集は〆！`,
             components: [disableButtons()],
         });
-        if (reserve_channel != null) {
+        if (isLock) {
             reserve_channel.permissionOverwrites.delete(interaction.guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_user, 'UnLock Voice Channel');
         }
@@ -496,9 +496,9 @@ function getAnarchy(data, x) {
 
     date = sp3unixTime2ymdw(anarchy_list[x].startTime);
     time = sp3unixTime2hm(anarchy_list[x].startTime) + ' – ' + sp3unixTime2hm(anarchy_list[x].endTime);
-    rule = rule3txt(a_settings[1].vsRule.name);
-    stage1 = stage3txt(a_settings[1].vsStages[0].vsStageId);
-    stage2 = stage3txt(a_settings[1].vsStages[1].vsStageId);
+    rule = sp3rule2txt(a_settings[1].vsRule.name);
+    stage1 = sp3stage2txt(a_settings[1].vsStages[0].vsStageId);
+    stage2 = sp3stage2txt(a_settings[1].vsStages[1].vsStageId);
     rstr = date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
     return rstr;
 }
