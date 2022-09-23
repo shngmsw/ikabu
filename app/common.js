@@ -477,11 +477,16 @@ function getLeague(data, x) {
     let date;
     let rule;
     date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
-    rule = sp3rule2txt(data[x].leagueMatchSetting.vsRule.name);
-    stage =
-        sp3stage2txt(data[x].leagueMatchSetting.vsStages[0].vsStageId) +
-        '／' +
-        sp3stage2txt(data[x].leagueMatchSetting.vsStages[1].vsStageId);
+    if (data[x].leagueMatchSettingleagueMatchSetting == null) {
+        rule = 'フェス期間中';
+        stage = 'フェス期間中はお休みでし';
+    } else {
+        rule = sp3rule2txt(data[x].leagueMatchSetting.vsRule.name);
+        stage =
+            sp3stage2txt(data[x].leagueMatchSetting.vsStages[0].vsStageId) +
+            '／' +
+            sp3stage2txt(data[x].leagueMatchSetting.vsStages[1].vsStageId);
+    }
     return date + ',' + rule + ',' + stage;
 }
 
@@ -490,11 +495,16 @@ function getOpen(data, x) {
     let date;
     let rule;
     date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
-    rule = sp3rule2txt(data[x].bankaraMatchSettings[1].vsRule.name);
-    stage =
-        sp3stage2txt(data[x].bankaraMatchSettings[1].vsStages[0].vsStageId) +
-        '／' +
-        sp3stage2txt(data[x].bankaraMatchSettings[1].vsStages[1].vsStageId);
+    if (data[x].bankaraMatchSettings == null) {
+        rule = 'フェス期間中';
+        stage = 'フェス期間中はお休みでし';
+    } else {
+        rule = sp3rule2txt(data[x].bankaraMatchSettings[1].vsRule.name);
+        stage =
+            sp3stage2txt(data[x].bankaraMatchSettings[1].vsStages[0].vsStageId) +
+            '／' +
+            sp3stage2txt(data[x].bankaraMatchSettings[1].vsStages[1].vsStageId);
+    }
     return date + ',' + rule + ',' + stage;
 }
 
@@ -503,11 +513,16 @@ function getChallenge(data, x) {
     let date;
     let rule;
     date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
-    rule = sp3rule2txt(data[x].bankaraMatchSettings[0].vsRule.name);
-    stage =
-        sp3stage2txt(data[x].bankaraMatchSettings[0].vsStages[0].vsStageId) +
-        '／' +
-        sp3stage2txt(data[x].bankaraMatchSettings[0].vsStages[1].vsStageId);
+    if (data[x].bankaraMatchSettings == null) {
+        rule = 'フェス期間中';
+        stage = 'フェス期間中はお休みでし';
+    } else {
+        rule = sp3rule2txt(data[x].bankaraMatchSettings[0].vsRule.name);
+        stage =
+            sp3stage2txt(data[x].bankaraMatchSettings[0].vsStages[0].vsStageId) +
+            '／' +
+            sp3stage2txt(data[x].bankaraMatchSettings[0].vsStages[1].vsStageId);
+    }
     return date + ',' + rule + ',' + stage;
 }
 
@@ -516,29 +531,65 @@ function getXMatch(data, x) {
     let date;
     let rule;
     date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
-    rule = sp3rule2txt(data[x].xMatchSetting.vsRule.name);
-    stage = sp3stage2txt(data[x].xMatchSetting.vsStages[0].vsStageId) + '／' + sp3stage2txt(data[x].xMatchSetting.vsStages[1].vsStageId);
+    if (data[x].xMatchSetting == null) {
+        rule = 'フェス期間中';
+        stage = 'フェス期間中はお休みでし';
+    } else {
+        rule = sp3rule2txt(data[x].xMatchSetting.vsRule.name);
+        stage =
+            sp3stage2txt(data[x].xMatchSetting.vsStages[0].vsStageId) + '／' + sp3stage2txt(data[x].xMatchSetting.vsStages[1].vsStageId);
+    }
     return date + ',' + rule + ',' + stage;
 }
 
 /**
- * データ取得用
+ * レギュラーマッチステージ情報取得
+ * フェス期間中はフェス情報を取得する
  */
 function getRegular(data, x) {
-    const regular_list = data.data.regularSchedules.nodes;
-    const r_setting = regular_list[x].regularMatchSetting;
     let stage1;
     let stage2;
     let date;
     let time;
     let rule;
+    let matchName;
+    let iconURL;
+    let color;
+    if (checkFes(data, x)) {
+        const fest_list = data.data.festSchedules.nodes;
+        const f_setting = fest_list[x].festMatchSetting;
 
-    date = sp3unixTime2ymdw(regular_list[x].startTime);
-    time = sp3unixTime2hm(regular_list[x].startTime) + ' – ' + sp3unixTime2hm(regular_list[x].endTime);
-    rule = sp3rule2txt(r_setting.vsRule.name);
-    stage1 = sp3stage2txt(r_setting.vsStages[0].vsStageId);
-    stage2 = sp3stage2txt(r_setting.vsStages[1].vsStageId);
-    return date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
+        date = sp3unixTime2ymdw(fest_list[x].startTime);
+        time = sp3unixTime2hm(fest_list[x].startTime) + ' – ' + sp3unixTime2hm(fest_list[x].endTime);
+        rule = sp3rule2txt(f_setting.vsRule.name);
+        stage1 = sp3stage2txt(f_setting.vsStages[0].vsStageId);
+        stage2 = sp3stage2txt(f_setting.vsStages[1].vsStageId);
+        matchName = 'フェスマッチ';
+        iconURL = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png';
+        color = '#ead147';
+    } else {
+        const regular_list = data.data.regularSchedules.nodes;
+        const r_setting = regular_list[x].regularMatchSetting;
+
+        date = sp3unixTime2ymdw(regular_list[x].startTime);
+        time = sp3unixTime2hm(regular_list[x].startTime) + ' – ' + sp3unixTime2hm(regular_list[x].endTime);
+        rule = sp3rule2txt(r_setting.vsRule.name);
+        stage1 = sp3stage2txt(r_setting.vsStages[0].vsStageId);
+        stage2 = sp3stage2txt(r_setting.vsStages[1].vsStageId);
+        matchName = 'レギュラーマッチ';
+        iconURL = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png';
+        color = '#B3FF00';
+    }
+    return {
+        date: date,
+        time: time,
+        rule: rule,
+        stage1: stage1,
+        stage2: stage2,
+        matchName: matchName,
+        iconURL: iconURL,
+        color: color,
+    };
 }
 
 /**
