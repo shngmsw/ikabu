@@ -19,12 +19,7 @@ const friendCode = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('フレンドコード').setDescription('例：SW-0000-0000-0000').setRequired(true)),
     )
     .addSubcommand((subcommand) =>
-        subcommand
-            .setName('show')
-            .setDescription('登録したフレンドコードを表示します。未登録の場合は自己紹介から引用します。')
-            .addUserOption((option) =>
-                option.setName('user').setDescription('フレンドコードを表示したい人を指定してください。').setRequired(true),
-            ),
+        subcommand.setName('show').setDescription('登録したフレンドコードを表示します。未登録の場合は自己紹介から引用します。'),
     );
 
 const wiki = new SlashCommandBuilder()

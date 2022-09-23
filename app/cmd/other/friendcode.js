@@ -21,8 +21,8 @@ async function handleFriendCode(interaction) {
 }
 
 async function selectFriendCode(interaction) {
-    let targetUser = interaction.options.getUser('user');
-    let id = targetUser.id;
+    let targetUser = interaction.member;
+    let id = interaction.member.user.id;
     let ch = await interaction.guild.channels.cache.find((channel) => channel.name === '自己紹介');
     let messages = await ch.messages.fetch({ limit: 100 }).catch(console.error);
     let list = await messages.filter((m) => targetUser.id === m.author.id && !m.author.bot);
@@ -60,7 +60,7 @@ async function selectFriendCode(interaction) {
 function composeEmbed(users, fc, isDatabase) {
     const embed = new Discord.MessageEmbed();
     embed.setDescription(fc);
-    embed.setAuthor({ name: users.username, iconURL: users.displayAvatarURL() });
+    embed.setAuthor({ name: users.displayName, iconURL: users.displayAvatarURL() });
     if (!isDatabase) {
         embed.setFooter({
             text: '自己紹介チャンネルより引用',
