@@ -43,7 +43,10 @@ const { handleFriendCode } = require(app + '/cmd/other/friendcode.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
-    if (msg.author.bot) {
+    const member = await msg.guild.members.fetch(msg.author.id, {
+        force: true, // intentsによってはGuildMemberUpdateが配信されないため
+    });
+    if (msg.author.bot || member.permissions.has('MANAGE_CHANNELS')) {
         if (msg.content.startsWith('/poll')) {
             if (msg.author.username === 'ブキチ') {
                 console.log(msg.author.username);
