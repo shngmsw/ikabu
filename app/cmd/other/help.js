@@ -63,11 +63,11 @@ module.exports = async function handleHelp(interaction) {
                         },
                         {
                             name: '自分のフレンドコードを表示',
-                            value: '```/friend_code show @自分```\n「自己紹介」チャンネルの直近100件に書いてあればそちらを優先します。',
+                            value: '```/friend_code show``\n「自己紹介」チャンネルの直近100件に書いてあればそちらを優先します。',
                         },
                         {
                             name: '自分のフレンドコードを登録',
-                            value: '```/friend_code add 0000-0000-0000```\nもう一度登録すると上書きされます。他人のは登録できません。',
+                            value: '```/friend_code add SW-0000-0000-0000```\nもう一度登録すると上書きされます。他人のは登録できません。',
                         },
                         {
                             name: '自分のイカ部歴を表示',

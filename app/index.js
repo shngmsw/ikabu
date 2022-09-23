@@ -39,7 +39,7 @@ const handleIkabuExperience = require(app + '/cmd/other/experience.js');
 const { commandNames } = require(root + '/constant');
 const registerSlashCommands = require(root + '/register.js');
 const { voiceLocker, voiceLockerUpdate } = require(app + '/cmd/other/voice_locker.js');
-const { handleFriendCode } = require(app + '/cmd/other/friendcode.js');
+const { handleFriendCode, deleteFriendCode } = require(app + '/cmd/other/friendcode.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
@@ -144,6 +144,8 @@ async function onInteraction(interaction) {
             const customIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
             if (customIds.includes(interaction.customId)) {
                 voiceLockerUpdate(interaction);
+            } else if (interaction.customId == 'fchide') {
+                deleteFriendCode(interaction);
             } else {
                 const params = new URLSearchParams(interaction.customId);
                 await buttons[params.get('d')](interaction, params);

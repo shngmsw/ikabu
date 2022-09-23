@@ -4,6 +4,7 @@ const getFC = require(root + '/db/fc_select.js');
 const Discord = require('discord.js');
 module.exports = {
     handleFriendCode: handleFriendCode,
+    deleteFriendCode: deleteFriendCode,
 };
 
 async function handleFriendCode(interaction) {
@@ -21,8 +22,8 @@ async function handleFriendCode(interaction) {
 }
 
 async function selectFriendCode(interaction) {
-    let targetUser = interaction.options.getUser('user');
-    let id = targetUser.id;
+    let targetUser = interaction.member;
+    let id = interaction.member.user.id;
     let ch = await interaction.guild.channels.cache.find((channel) => channel.name === '自己紹介');
     let messages = await ch.messages.fetch({ limit: 100 }).catch(console.error);
     let list = await messages.filter((m) => targetUser.id === m.author.id && !m.author.bot);
@@ -30,11 +31,14 @@ async function selectFriendCode(interaction) {
         return value.content;
     });
 
+    const deleteButton = new Discord.MessageActionRow();
+    deleteButton.addComponents([new Discord.MessageButton().setCustomId('fchide').setLabel('削除').setStyle('DANGER')]);
     if (result.length == 0) {
         let fc = await getFC(id);
         if (fc[0] != null) {
             interaction.editReply({
                 embeds: [composeEmbed(targetUser, fc[0].code, true)],
+                components: [deleteButton],
                 ephemeral: false,
             });
             return;
@@ -47,6 +51,7 @@ async function selectFriendCode(interaction) {
         }
         interaction.editReply({
             embeds: embeds,
+            components: [deleteButton],
         });
     } else {
         interaction.editReply({
@@ -60,7 +65,7 @@ async function selectFriendCode(interaction) {
 function composeEmbed(users, fc, isDatabase) {
     const embed = new Discord.MessageEmbed();
     embed.setDescription(fc);
-    embed.setAuthor({ name: users.username, iconURL: users.displayAvatarURL() });
+    embed.setAuthor({ name: users.displayName, iconURL: users.displayAvatarURL() });
     if (!isDatabase) {
         embed.setFooter({
             text: '自己紹介チャンネルより引用',
@@ -79,4 +84,8 @@ async function insertFriendCode(interaction) {
         content: `${code}で覚えたでし！変更したい場合はもう一度登録すると上書きされるでし！`,
         ephemeral: true,
     });
+}
+
+async function deleteFriendCode(interaction) {
+    await interaction.message.delete();
 }
