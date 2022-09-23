@@ -83,8 +83,8 @@ async function join(interaction, params) {
 
             const embed = new MessageEmbed();
             embed.setAuthor({
-                name: `${member.user.username}たんが参加表明したでし！`,
-                iconURL: member.user.displayAvatarURL(),
+                name: `${member.displayName}たんが参加表明したでし！`,
+                iconURL: member.displayAvatarURL(),
             });
 
             // recruitテーブルにデータ追加
@@ -335,8 +335,8 @@ async function joinNotify(interaction, params) {
 
             const embed = new MessageEmbed();
             embed.setAuthor({
-                name: `${member.user.username}たんが参加表明したでし！`,
-                iconURL: member.user.displayAvatarURL(),
+                name: `${member.displayName}たんが参加表明したでし！`,
+                iconURL: member.displayAvatarURL(),
             });
             // recruitテーブルにデータ追加
             insert_recruit(interaction.message.id, interaction.member.user.id, member.user.id);
@@ -507,7 +507,7 @@ async function getHelpEmbed(guild, chid) {
     } else if (sendChannel.name.match('プラベ募集')) {
         command = '`/プラベ募集 recruit` or `/プラベ募集 button`';
     } else if (sendChannel.name.match('フェス')) {
-        command = '`/〇〇陣営 fes` or `/fes`';
+        command = '`/〇〇陣営 now` or `/〇〇陣営 next`';
     }
     const embed = new MessageEmbed();
     embed.setDescription('募集コマンドは ' + `${command}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);

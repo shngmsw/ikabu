@@ -2,7 +2,8 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
-const { sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw } = require(app + '/common.js');
+const { checkFes, sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw } = require(app + '/common.js');
+const { searchChannelIdByName } = require(app + '/manager/channelManager.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
 const {
     recruitDeleteButton,
@@ -37,7 +38,7 @@ async function anarchyRecruit(interaction) {
     let rank = options.getString('募集ウデマエ');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    let host_user = interaction.member.user;
+    let host_member = interaction.member;
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // プレイ人数のカウンター
@@ -74,7 +75,7 @@ async function anarchyRecruit(interaction) {
     var usable_channel = ['alfa', 'bravo', 'charlie', 'delta', 'echo', 'fox', 'golf', 'hotel', 'india', 'juliett', 'kilo', 'lima', 'mike'];
 
     if (voice_channel != null) {
-        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_user.id)) {
+        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_member.user.id)) {
             await interaction.reply({
                 content: 'そのチャンネルは使用中でし！',
                 ephemeral: true,
@@ -109,8 +110,17 @@ async function anarchyRecruit(interaction) {
     try {
         const response = await fetch(schedule_url);
         const data = await response.json();
+        if (checkFes(data, type)) {
+            const fes_channel_id = searchChannelIdByName(interaction.guild, 'フェス募集', 'GUILD_TEXT', null);
+            await interaction.editReply({
+                content: `募集を建てようとした期間はフェス中でし！\nフェス募集をするには<#${fes_channel_id}>のチャンネルを使うでし！`,
+                ephemeral: true,
+            });
+            return;
+        }
+
         const a_args = getAnarchy(data, type).split(',');
-        let txt = `<@${host_user.id}>` + 'たんがバンカラ募集中でし！\n';
+        let txt = `<@${host_member.user.id}>` + 'たんがバンカラ募集中でし！\n';
         if (user1 != null && user2 != null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         } else if (user1 != null) {
@@ -133,7 +143,7 @@ async function anarchyRecruit(interaction) {
             condition,
             member_counter,
             rank,
-            host_user,
+            host_member,
             user1,
             user2,
             a_args,
@@ -154,7 +164,7 @@ async function sendAnarchyMatch(
     condition,
     count,
     rank,
-    host_user,
+    host_member,
     user1,
     user2,
     a_args,
@@ -218,7 +228,15 @@ async function sendAnarchyMatch(
 
     const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
-    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, condition, rank, channel_name, a_time);
+    // サーバーメンバーとして取得し直し
+    if (user1 != null) {
+        user1 = await interaction.guild.members.cache.get(user1.id);
+    }
+    if (user2 != null) {
+        user2 = await interaction.guild.members.cache.get(user2.id);
+    }
+
+    const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, rank, channel_name);
     const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
 
     const rule = new MessageAttachment(await ruleCanvas(a_rule, a_date, a_time, a_stage1, a_stage2, stageImages, thumbnail), 'rules.png');
@@ -241,7 +259,7 @@ async function sendAnarchyMatch(
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
-                    { id: host_user.id, allow: [Permissions.FLAGS.CONNECT] },
+                    { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
                 ],
                 'Reserve Voice Channel',
             );
@@ -272,14 +290,14 @@ async function sendAnarchyMatch(
 
         // 2時間後にボタンを無効化する
         await sleep(7200000 - 15000);
-        const host_mention = `<@${host_user.id}>`;
+        const host_mention = `<@${host_member.user.id}>`;
         sentMessage.edit({
             content: `${host_mention}たんの募集は〆！`,
             components: [disableButtons()],
         });
         if (isLock) {
             reserve_channel.permissionOverwrites.delete(interaction.guild.roles.everyone, 'UnLock Voice Channel');
-            reserve_channel.permissionOverwrites.delete(host_user, 'UnLock Voice Channel');
+            reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }
     } catch (error) {
         console.log(error);
@@ -289,7 +307,7 @@ async function sendAnarchyMatch(
 /*
  * 募集用のキャンバス(1枚目)を作成する
  */
-async function recruitCanvas(recruit_num, count, host_user, user1, user2, condition, rank, channel_name, a_time) {
+async function recruitCanvas(recruit_num, count, host_member, user1, user2, condition, rank, channel_name) {
     blank_avatar_url = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
@@ -309,7 +327,7 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     fillTextWithStroke(recruit_ctx, 'バンカラマッチ', '51px Splatfont', '#000000', '#F14400', 3, 115, 80);
 
     // 募集主の画像
-    let host_img = await Canvas.loadImage(host_user.displayAvatarURL({ format: 'png' }));
+    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));
     recruit_ctx.save();
     drawArcImage(recruit_ctx, host_img, 40, 120, 50);
     recruit_ctx.strokeStyle = '#1e1f23';

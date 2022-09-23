@@ -176,6 +176,14 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
+    // サーバーメンバーとして取得し直し
+    if (user1 != null) {
+        user1 = await interaction.guild.members.cache.get(user1.id);
+    }
+    if (user2 != null) {
+        user2 = await interaction.guild.members.cache.get(user2.id);
+    }
+
     const recruitBuffer = await recruitCanvas(
         recruit_num,
         count,

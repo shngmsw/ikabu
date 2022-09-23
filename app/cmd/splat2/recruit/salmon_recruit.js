@@ -40,7 +40,7 @@ async function salmon2Recruit(interaction) {
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    let host_user = interaction.member.user;
+    let host_member = interaction.member;
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // プレイ人数のカウンター
@@ -70,7 +70,7 @@ async function salmon2Recruit(interaction) {
     var usable_channel = ['alfa', 'bravo', 'charlie', 'delta', 'echo', 'fox', 'golf', 'hotel', 'india', 'juliett', 'kilo', 'lima', 'mike'];
 
     if (voice_channel != null) {
-        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_user.id)) {
+        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_member.user.id)) {
             await interaction.reply({
                 content: 'そのチャンネルは使用中でし！',
                 ephemeral: true,
@@ -78,7 +78,7 @@ async function salmon2Recruit(interaction) {
             return;
         } else if (!usable_channel.includes(voice_channel.name)) {
             await interaction.reply({
-                content: 'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉limaの間のチャンネルで指定するでし！',
+                content: 'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
                 ephemeral: true,
             });
             return;
@@ -91,7 +91,7 @@ async function salmon2Recruit(interaction) {
     try {
         const response = await fetch(coop_schedule_url);
         const data = await response.json();
-        let txt = `<@${host_user.id}>` + 'たんがバイト中でし！\n';
+        let txt = `<@${host_member.user.id}>` + 'たんがバイト中でし！\n';
 
         if (user1 != null && user2 != null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
@@ -105,14 +105,14 @@ async function salmon2Recruit(interaction) {
 
         if (condition == null) condition = 'なし';
 
-        await sendSalmonRun(interaction, channel, txt, recruit_num, condition, member_counter, host_user, user1, user2, data.details[0]);
+        await sendSalmonRun(interaction, channel, txt, recruit_num, condition, member_counter, host_member, user1, user2, data.details[0]);
     } catch (error) {
         channel.send('なんかエラーでてるわ');
         console.error(error);
     }
 }
 
-async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, count, host_user, user1, user2, detail) {
+async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, count, host_member, user1, user2, detail) {
     let date = unixTime2mdwhm(detail.start_time) + ' – ' + unixTime2mdwhm(detail.end_time);
     let coop_stage = coop_stage2txt(detail.stage.image);
     let weapon1 = weapon2txt(detail.weapons[0].id);
@@ -129,7 +129,15 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
-    const recruitBuffer = await recruitCanvas(recruit_num, count, host_user, user1, user2, condition, channel_name);
+    // サーバーメンバーとして取得し直し
+    if (user1 != null) {
+        user1 = await interaction.guild.members.cache.get(user1.id);
+    }
+    if (user2 != null) {
+        user2 = await interaction.guild.members.cache.get(user2.id);
+    }
+
+    const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
     const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
 
     const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
@@ -158,7 +166,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
-                    { id: host_user.id, allow: [Permissions.FLAGS.CONNECT] },
+                    { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
                 ],
                 'Reserve Voice Channel',
             );
@@ -196,7 +204,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
 /*
  * 募集用のキャンバス(1枚目)を作成する
  */
-async function recruitCanvas(recruit_num, count, host_user, user1, user2, condition, channel_name) {
+async function recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name) {
     blank_avatar_url = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
@@ -216,7 +224,7 @@ async function recruitCanvas(recruit_num, count, host_user, user1, user2, condit
     fillTextWithStroke(recruit_ctx, 'サーモンラン', '50px Splatfont', '#FF5600', '#FF9A00', 2, 115, 80);
 
     // 募集主の画像
-    let host_img = await Canvas.loadImage(host_user.displayAvatarURL({ format: 'png' }));
+    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));
     recruit_ctx.save();
     drawArcImage(recruit_ctx, host_img, 40, 120, 50);
     recruit_ctx.strokeStyle = '#1e1f23';
