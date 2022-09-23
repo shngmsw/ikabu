@@ -104,7 +104,7 @@ async function regularRecruit(interaction) {
             return;
         }
         const regularResult = getRegular(data, type);
-        let txt = `<@${host_user.id}>` + 'たんがナワバリ募集中でし！\n';
+        let txt = `<@${host_member.user.id}>` + 'たんがナワバリ募集中でし！\n';
         let members = [];
 
         if (user1 != null) {
