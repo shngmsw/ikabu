@@ -32,8 +32,9 @@ async function createRole(guild, roleName) {
  * @param {string} roleName ロール名
  * @returns ロールID
  */
-function searchRoleIdByName(guild, roleName) {
-    var role = guild.roles.cache.find((role) => role.name === roleName);
+async function searchRoleIdByName(guild, roleName) {
+    const roles = await guild.roles.fetch();
+    var role = roles.find((role) => role.name === roleName);
 
     if (role != null) {
         return role.id;
@@ -48,8 +49,9 @@ function searchRoleIdByName(guild, roleName) {
  * @param {string} roleId ロールID
  * @returns ロールオブジェクト
  */
-function searchRoleById(guild, roleId) {
-    var role = guild.roles.cache.find((role) => role.id === roleId);
+async function searchRoleById(guild, roleId) {
+    const roles = await guild.roles.fetch();
+    var role = roles.find((role) => role.id === roleId);
 
     if (role != null) {
         return role;
@@ -120,17 +122,18 @@ async function setRoleToMember(guild, roleId, memberId) {
         if (!isNaN(memberId)) {
             // 桁数判定
             if (memberId.length == 18 || memberId.length == 19) {
-                member = await guild.members.cache.get(memberId);
+                member = await guild.members.fetch(memberId);
             } else {
                 member = null;
             }
         } else {
+            const members = await guild.members.fetch();
             // ユーザータグからメンバー取得
-            member = await guild.members.cache.find((member) => member.user.tag === memberId);
+            member = members.find((member) => member.user.tag === memberId);
         }
 
         if (member != null) {
-            member.roles.add(guild.roles.cache.get(roleId));
+            member.roles.add(guild.roles.fetch(roleId));
             return member.id;
         } else {
             return memberId + '(NOT_FOUND)';

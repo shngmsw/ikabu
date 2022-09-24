@@ -93,7 +93,7 @@ async function leagueRecruit(interaction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+    const mention_id = await searchRoleIdByName(interaction.guild, 'スプラ2');
     const mention = `<@&${mention_id}>`;
     try {
         const response = await fetch(schedule_url);
@@ -206,10 +206,10 @@ async function sendLeagueMatch(
 
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.cache.get(user1.id);
+        user1 = await interaction.guild.members.fetch(user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.cache.get(user2.id);
+        user2 = await interaction.guild.members.fetch(user2.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
@@ -260,7 +260,7 @@ async function sendLeagueMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.cache.get(sentMessage.id);
+        let cmd_message = await channel.messages.fetch(sentMessage.id);
         if (cmd_message != undefined) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });

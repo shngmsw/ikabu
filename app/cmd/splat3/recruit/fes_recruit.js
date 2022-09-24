@@ -158,8 +158,8 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
     let f_stage1 = args[3]; // ステージ1
     let f_stage2 = args[4]; // ステージ2
 
-    const mention_id = searchRoleIdByName(interaction.guild, team);
-    const team_role = searchRoleById(interaction.guild, mention_id);
+    const mention_id = await searchRoleIdByName(interaction.guild, team);
+    const team_role = await searchRoleById(interaction.guild, mention_id);
 
     if (mention_id == null) {
         interaction.editReply({
@@ -239,7 +239,7 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.cache.get(sentMessage.id);
+        let cmd_message = await channel.messages.fetch(sentMessage.id);
         if (cmd_message != undefined) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });

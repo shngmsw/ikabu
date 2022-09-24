@@ -84,7 +84,7 @@ async function sendPrivateRecruit(interaction, options) {
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await interaction.channel.messages.cache.get(sentMessage.id);
+        let cmd_message = await interaction.channel.messages.fetch(sentMessage.id);
         if (cmd_message != undefined) {
             sentMessage.edit({ components: [recruitActionRow(header)] });
         } else {

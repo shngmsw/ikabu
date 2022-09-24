@@ -73,12 +73,13 @@ async function deleteCategory(interaction, categoryIdList) {
             var categoryId = categoryIdList[i];
             var categoryName;
             // if category ID is not found or the ID type is not a category, consider as an error.
-            if (searchChannelById(guild, categoryId) == null) {
+            if ((await searchChannelById(guild, categoryId)) == null) {
                 categoryName = 'NOT_FOUND!';
                 removed.push([categoryId, 'NOT_FOUND!', '', '']);
             } else {
                 var channels = await deleteChannelsByCategoryId(guild, categoryId);
-                var category = guild.channels.cache.find((c) => c.id == categoryId && c.type == 'GUILD_CATEGORY');
+                const channelCollection = await guild.channels.fetch();
+                var category = channelCollection.find((c) => c.id == categoryId && c.type == 'GUILD_CATEGORY');
                 categoryName = category.name;
                 await category.delete();
                 await guild.channels.fetch();
@@ -109,8 +110,9 @@ async function deleteCategory(interaction, categoryIdList) {
 
 async function deleteChannelsByCategoryId(guild, categoryId) {
     var channels = [];
-    while (guild.channels.cache.find((c) => c.type != 'GUILD_CATEGORY' && c.parent == categoryId) != null) {
-        var channel = guild.channels.cache.find((c) => c.type != 'GUILD_CATEGORY' && c.parent == categoryId);
+    const channelCollection = await guild.channels.fetch();
+    while (channelCollection.find((c) => c.type != 'GUILD_CATEGORY' && c.parent == categoryId) != null) {
+        var channel = channelCollection.find((c) => c.type != 'GUILD_CATEGORY' && c.parent == categoryId);
         if (channel.type == 'GUILD_TEXT') {
             channels.push([channel.id, '#' + channel.name]);
         } else if (channel.type == 'GUILD_VOICE') {

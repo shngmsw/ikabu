@@ -97,7 +97,7 @@ async function regularRecruit(interaction) {
         const response = await fetch(schedule_url);
         const data = await response.json();
         if (checkFes(data, type)) {
-            const fes_channel_id = searchChannelIdByName(interaction.guild, 'フェス募集', 'GUILD_TEXT', null);
+            const fes_channel_id = await searchChannelIdByName(interaction.guild, 'フェス募集', 'GUILD_TEXT', null);
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！<#${fes_channel_id}>のチャンネルを使うでし！`,
                 ephemeral: true,
@@ -186,13 +186,13 @@ async function sendRegularMatch(
 
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.cache.get(user1.id);
+        user1 = await interaction.guild.members.fetch(user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.cache.get(user2.id);
+        user2 = await interaction.guild.members.fetch(user2.id);
     }
     if (user3 != null) {
-        user3 = await interaction.guild.members.cache.get(user3.id);
+        user3 = await interaction.guild.members.fetch(user3.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, user3, condition, channel_name);
@@ -238,7 +238,7 @@ async function sendRegularMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.cache.get(sentMessage.id);
+        let cmd_message = await channel.messages.fetch(sentMessage.id);
         if (cmd_message != undefined) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });

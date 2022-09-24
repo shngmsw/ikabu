@@ -43,8 +43,7 @@ const { handleFriendCode, deleteFriendCode } = require(app + '/cmd/other/friendc
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
-    const member = msg.guild.members.cache.get(msg.author.id);
-    if (msg.author.bot || member.permissions.has('MANAGE_CHANNELS')) {
+    if (msg.author.bot) {
         if (msg.content.startsWith('/poll')) {
             if (msg.author.username === 'ブキチ') {
                 console.log(msg.author.username);
@@ -56,6 +55,17 @@ client.on('messageCreate', async (msg) => {
             handleStageInfo(msg);
         }
         return;
+    } else {
+        // ステージ情報デバッグ用
+        if (msg.content === 'stageinfo') {
+            const guild = await msg.guild.fetch();
+            const member = await guild.members.fetch(msg.author.id, {
+                force: true, // intentsによってはGuildMemberUpdateが配信されないため
+            });
+            if (member.permissions.has('MANAGE_CHANNELS')) {
+                handleStageInfo(msg);
+            }
+        }
     }
     if (msg.content.match('ボーリング')) {
         msg.reply(
@@ -70,7 +80,7 @@ client.on('messageCreate', async (msg) => {
         msg.reply({ files: [Kairu] });
     }
 
-    deleteToken(msg);
+    await deleteToken(msg);
     Handler.call(msg);
     Dispandar.dispand(msg);
     DISCORD_VOICE.play(msg);
@@ -84,13 +94,13 @@ client.on('guildMemberAdd', (member) => {
 
 client.on('guildMemberRemove', async (member) => {
     try {
-        const guild = member.guild;
         const tag = member.user.tag;
         const period = Math.round((Date.now() - member.joinedAt) / 86400000); // サーバーに居た期間を日数にして計算
-        const retire_log = await guild.channels.cache.find((channel) => channel.id === process.env.CHANNEL_ID_RETIRE_LOG);
+        const retire_log = await member.guild.channels.fetch(process.env.CHANNEL_ID_RETIRE_LOG);
         retire_log.send(`${tag} さんが退部しました。入部日: ${member.joinedAt} 入部期間：${period}日間`);
     } catch (err) {
-        console.log(err);
+        console.log('guildMemberRemove');
+        console.log({ err });
     }
 });
 
@@ -228,7 +238,7 @@ async function onVoiceStateUpdate(oldState, newState) {
     }
 
     if (oldState.channelId != null) {
-        const oldChannel = oldState.guild.channels.cache.get(oldState.channelId);
+        const oldChannel = await oldState.guild.channels.fetch(oldState.channelId);
         // a～mから始まらない場合は対象外にする
         if (!oldChannel.name.match(pattern)) {
             return;
@@ -238,7 +248,7 @@ async function onVoiceStateUpdate(oldState, newState) {
         }
     }
     if (newState.channelId != null) {
-        const newChannel = newState.guild.channels.cache.get(newState.channelId);
+        const newChannel = await newState.guild.channels.fetch(newState.channelId);
         if (newChannel.members.size != 0) {
             newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
             newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
