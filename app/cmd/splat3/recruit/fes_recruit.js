@@ -35,7 +35,8 @@ async function fesRecruit(interaction) {
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    const host_member = await interaction.guild.members.fetch(interaction.member.user.id);
+    const guild = await interaction.guild.fetch();
+    const host_member = await guild.members.fetch(interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let team = interaction.commandName;
@@ -289,8 +290,6 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, team
     recruit_ctx.textAlign = 'right';
     fillTextWithStroke(recruit_ctx, team, '48px Splatfont', color, '#222222', 1.7, 690, 80);
     recruit_ctx.restore();
-
-    console.log(host_member.displayAvatarURL({ format: 'png' }));
 
     // 募集主の画像
     let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));

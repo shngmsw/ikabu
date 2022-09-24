@@ -31,7 +31,8 @@ async function sendPrivateRecruit(interaction, options) {
 
     let condition = options.getString('内容または参加条件');
     let logo = 'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
-    const host_member = await interaction.guild.members.fetch(interaction.member.user.id);
+    const guild = await interaction.guild.fetch();
+    const host_member = await guild.members.fetch(interaction.member.user.id);
     let authorName = host_member.displayName;
     let authorAvatarUrl = host_member.avatarURL();
 

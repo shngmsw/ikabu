@@ -38,7 +38,8 @@ async function anarchyRecruit(interaction) {
     let rank = options.getString('募集ウデマエ');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    const host_member = await interaction.guild.members.fetch(interaction.member.user.id);
+    const guild = await interaction.guild.fetch();
+    const host_member = await guild.members.fetch(interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // プレイ人数のカウンター

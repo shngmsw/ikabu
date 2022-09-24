@@ -23,7 +23,8 @@ async function buki(interaction) {
     try {
         const response = await fetch(weaponsUrl);
         const weapons = await response.json();
-        const host_member = await interaction.guild.members.fetch(interaction.member.user.id);
+        const guild = await interaction.guild.fetch();
+        const member = await guild.members.fetch(interaction.member.user.id);
         let bukis = weapons.filter(function (value) {
             if (bukiType != null) {
                 // 特定のbukiTypeが指定されているとき
@@ -35,8 +36,8 @@ async function buki(interaction) {
         let bukiNames = bukis.map(function (value) {
             const embed = new MessageEmbed()
                 .setAuthor({
-                    name: host_member.displayName + 'のブキ',
-                    iconURL: host_member.displayAvatarURL(),
+                    name: member.displayName + 'のブキ',
+                    iconURL: member.displayAvatarURL(),
                 })
                 .setColor(0xf02d7d)
                 .setTitle(value.name.ja_JP)
