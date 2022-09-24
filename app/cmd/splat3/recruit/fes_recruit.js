@@ -35,7 +35,7 @@ async function fesRecruit(interaction) {
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    const host_member = interaction.guild.members.cache.get(interaction.member.user.id);
+    const host_member = await interaction.guild.members.fetch(interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let team = interaction.commandName;
@@ -178,10 +178,10 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
 
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.cache.get(user1.id);
+        user1 = await interaction.guild.members.fetch(user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.cache.get(user2.id);
+        user2 = await interaction.guild.members.fetch(user2.id);
     }
 
     const recruitBuffer = await recruitCanvas(

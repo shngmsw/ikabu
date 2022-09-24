@@ -35,7 +35,7 @@ async function regular2Recruit(interaction) {
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    let host_member = interaction.member;
+    const host_member = await interaction.guild.members.fetch(interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let user3 = options.getUser('参加者3');
