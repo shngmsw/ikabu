@@ -141,11 +141,11 @@ async function messageReplace(message) {
         return mention_replace(str);
     };
 
-    const channel_replace = (str) => {
+    const channel_replace = async (str) => {
         const [matchAllElement] = str.matchAll(/<#(\d*)>/g);
         if (matchAllElement === undefined) return str;
         for (var i = 0; i < [matchAllElement].length; i++) {
-            let chName = message.guild.channels.cache.get([matchAllElement][i][1]).name;
+            let chName = await message.guild.channels.fetch([matchAllElement][i][1]).name;
             str = str.replace([matchAllElement][i][0], chName);
         }
         return channel_replace(str);

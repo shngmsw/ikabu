@@ -39,7 +39,8 @@ async function salmonRecruit(interaction) {
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    let host_member = interaction.member;
+    const guild = await interaction.guild.fetch();
+    const host_member = await guild.members.fetch(interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // プレイ人数のカウンター
@@ -141,10 +142,10 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     }
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.cache.get(user1.id);
+        user1 = await interaction.guild.members.fetch(user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.cache.get(user2.id);
+        user2 = await interaction.guild.members.fetch(user2.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
@@ -194,7 +195,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.cache.get(sentMessage.id);
+        let cmd_message = await channel.messages.fetch(sentMessage.id);
         if (cmd_message != undefined) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });

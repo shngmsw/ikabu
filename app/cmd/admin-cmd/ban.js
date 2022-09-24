@@ -9,12 +9,8 @@ module.exports = async function handleBan(interaction) {
 
     if (interaction.member.permissions.has('BAN_MEMBERS')) {
         let memberId = banTarget.id;
-        let member;
-        if (memberId.length == 18) {
-            member = await interaction.guild.members.cache.get(memberId);
-        } else {
-            member = await interaction.guild.members.cache.find((member) => member.user.tag === memberId);
-        }
+
+        const member = await interaction.guild.members.fetch(memberId);
 
         let reasonText =
             'イカ部の管理人です。以下の理由によりイカ部から退部とさせていただきました。```' +
@@ -26,8 +22,8 @@ module.exports = async function handleBan(interaction) {
         await DMChannel.send({ content: reasonText }).catch(console.error);
 
         await member.ban({ reason: reasonText }).catch(console.error);
-
-        const banChannel = interaction.guild.channels.cache.find((channel) => channel.name === 'banコマンド');
+        const channels = await interaction.guild.channels.fetch();
+        const banChannel = channels.find((channel) => channel.name === 'banコマンド');
         banChannel.send(`${member.user.tag}さんを以下の理由によりBANしました。\n` + reasonText);
         interaction.editReply('BANしたでし！');
     } else {

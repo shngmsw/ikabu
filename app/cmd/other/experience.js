@@ -18,7 +18,8 @@ module.exports = async function handleIkabuExperience(interaction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     let author = interaction.member;
-    const member = interaction.guild.members.cache.get(author.id);
+    const guild = await interaction.guild.fetch();
+    const member = await guild.members.fetch(author.id);
     const joinDate = member.joinedAt;
     let today = new Date();
 

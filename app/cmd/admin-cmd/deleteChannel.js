@@ -45,7 +45,7 @@ module.exports = async function handleDeleteChannel(interaction) {
         // removed[i][1] = deleted channel (name)
         for (var i in channelIdList) {
             var channelName;
-            var channel = searchChannelById(guild, channelIdList[i], null);
+            var channel = await searchChannelById(guild, channelIdList[i], null);
             // if channel ID is not found, consider as an error.
             if (channel == null) {
                 channelName = 'NOT_FOUND!';

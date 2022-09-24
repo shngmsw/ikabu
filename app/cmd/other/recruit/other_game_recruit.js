@@ -40,22 +40,23 @@ async function otherGameRecruit(interaction) {
 
     // 募集がfollowUpでないとリグマと同じfunctionでeditできないため
     await interaction.deferReply();
+    const roles = await interaction.guild.roles.fetch();
 
     if (options.getSubcommand() === 'apex') {
-        apexLegends(interaction);
+        apexLegends(interaction, roles);
     } else if (options.getSubcommand() === 'mhr') {
-        monsterHunterRise(interaction);
+        monsterHunterRise(interaction, roles);
     } else if (options.getSubcommand() === 'dbd') {
-        deadByDayLight(interaction);
+        deadByDayLight(interaction, roles);
     } else if (options.getSubcommand() === 'valo') {
-        valorant(interaction);
+        valorant(interaction, roles);
     } else if (options.getSubcommand() === 'other') {
-        others(interaction);
+        others(interaction, roles);
     }
 }
 
-function monsterHunterRise(interaction) {
-    const role_id = interaction.member.guild.roles.cache.find((role) => role.name === 'ハンター');
+function monsterHunterRise(interaction, roles) {
+    const role_id = roles.find((role) => role.name === 'ハンター');
     let title = 'MONSTER HUNTER RISE';
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
@@ -66,8 +67,8 @@ function monsterHunterRise(interaction) {
     sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function apexLegends(interaction) {
-    const role_id = interaction.member.guild.roles.cache.find((role) => role.name === 'レジェンド');
+function apexLegends(interaction, roles) {
+    const role_id = roles.find((role) => role.name === 'レジェンド');
     let title = 'Apex Legends';
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
@@ -78,8 +79,8 @@ function apexLegends(interaction) {
     sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function deadByDayLight(interaction) {
-    const role_id = interaction.member.guild.roles.cache.find((role) => role.name === 'DbD');
+function deadByDayLight(interaction, roles) {
+    const role_id = roles.find((role) => role.name === 'DbD');
     let title = 'Dead by Daylight';
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
@@ -90,8 +91,8 @@ function deadByDayLight(interaction) {
     sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function valorant(interaction) {
-    const role_id = interaction.member.guild.roles.cache.find((role) => role.name === 'エージェント');
+function valorant(interaction, roles) {
+    const role_id = roles.find((role) => role.name === 'エージェント');
     let title = 'VALORANT';
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
@@ -102,8 +103,8 @@ function valorant(interaction) {
     sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function others(interaction) {
-    const role_id = interaction.member.guild.roles.cache.find((role) => role.name === '別ゲー');
+function others(interaction, roles) {
+    const role_id = roles.find((role) => role.name === '別ゲー');
     let title = interaction.options.getString('ゲームタイトル');
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
@@ -174,7 +175,7 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await interaction.channel.messages.cache.get(sentMessage.id);
+        let cmd_message = await interaction.channel.messages.fetch(sentMessage.id);
         if (cmd_message != undefined) {
             if (reserve_channel == null) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
