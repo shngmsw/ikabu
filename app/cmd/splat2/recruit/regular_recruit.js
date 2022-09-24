@@ -35,7 +35,8 @@ async function regular2Recruit(interaction) {
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    let host_member = interaction.member;
+    const guild = await interaction.guild.fetch();
+    const host_member = await guild.members.fetch(interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let user3 = options.getUser('参加者3');
@@ -176,13 +177,13 @@ async function sendRegularMatch(
 
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.cache.get(user1.id);
+        user1 = await interaction.guild.members.fetch(user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.cache.get(user2.id);
+        user2 = await interaction.guild.members.fetch(user2.id);
     }
     if (user3 != null) {
-        user3 = await interaction.guild.members.cache.get(user3.id);
+        user3 = await interaction.guild.members.fetch(user3.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, user3, condition, channel_name);
@@ -191,7 +192,7 @@ async function sendRegularMatch(
     const rule = new MessageAttachment(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
 
     try {
-        const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention_id = await searchRoleIdByName(interaction.guild, 'スプラ2');
         const mention = `<@&${mention_id}>`;
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
         const sentMessage = await interaction.channel.send({
@@ -230,7 +231,7 @@ async function sendRegularMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.cache.get(sentMessage.id);
+        let cmd_message = await channel.messages.fetch(sentMessage.id);
         if (cmd_message != undefined) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });

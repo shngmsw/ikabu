@@ -40,7 +40,7 @@ async function handleCreateRole(interaction) {
 
         await interaction.guild.roles.fetch();
 
-        var role = searchRoleById(interaction.guild, roleId);
+        var role = await searchRoleById(interaction.guild, roleId);
         var colorCode = await setColorToRole(interaction.guild, role, colorInput);
         role.setHoist(true);
 
@@ -91,7 +91,7 @@ async function handleDeleteRole(interaction) {
         // removed[i][1] = deleted role (name)
         for (var i in roleIdList) {
             var roleName;
-            var role = searchRoleById(guild, roleIdList[i]);
+            var role = await searchRoleById(guild, roleIdList[i]);
             // if role ID is not found, consider as an error.
             if (role == null) {
                 roleName = 'NOT_FOUND!';

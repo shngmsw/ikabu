@@ -108,9 +108,9 @@ module.exports = async function handleCreateRoom(interaction) {
                         var roleId = await createRole(guild, roleName);
 
                         if (roleId != null) {
-                            setRoleToChanel(guild, roleId, channelId);
+                            await setRoleToChanel(guild, roleId, channelId);
 
-                            var role = searchRoleById(guild, roleId);
+                            var role = await searchRoleById(guild, roleId);
 
                             // the role will be displayed separately from other members
                             role.setHoist(true);
@@ -178,13 +178,13 @@ function checkChannelType(channelType) {
     }
 }
 
-function setRoleToChanel(guild, roleId, channelId, channelType) {
+async function setRoleToChanel(guild, roleId, channelId, channelType) {
     // set permission to channel
     if (channelId != null && channelType != 'ERROR!') {
-        guild.channels.cache.get(channelId).permissionOverwrites.edit(roleId, {
+        await guild.channels.fetch(channelId).permissionOverwrites.edit(roleId, {
             VIEW_CHANNEL: true,
         });
-        guild.channels.cache.get(channelId).permissionOverwrites.edit(guild.roles.everyone.id, {
+        await guild.channels.fetch(channelId).permissionOverwrites.edit(guild.roles.everyone.id, {
             VIEW_CHANNEL: false,
         });
     }

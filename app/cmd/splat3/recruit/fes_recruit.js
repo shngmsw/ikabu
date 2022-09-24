@@ -35,7 +35,8 @@ async function fesRecruit(interaction) {
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    let host_member = interaction.member;
+    const guild = await interaction.guild.fetch();
+    const host_member = await guild.members.fetch(interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let team = interaction.commandName;
@@ -157,8 +158,8 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
     let f_stage1 = args[3]; // ステージ1
     let f_stage2 = args[4]; // ステージ2
 
-    const mention_id = searchRoleIdByName(interaction.guild, team);
-    const team_role = searchRoleById(interaction.guild, mention_id);
+    const mention_id = await searchRoleIdByName(interaction.guild, team);
+    const team_role = await searchRoleById(interaction.guild, mention_id);
 
     if (mention_id == null) {
         interaction.editReply({
@@ -178,10 +179,10 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
 
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.cache.get(user1.id);
+        user1 = await interaction.guild.members.fetch(user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.cache.get(user2.id);
+        user2 = await interaction.guild.members.fetch(user2.id);
     }
 
     const recruitBuffer = await recruitCanvas(
@@ -238,7 +239,7 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.cache.get(sentMessage.id);
+        let cmd_message = await channel.messages.fetch(sentMessage.id);
         if (cmd_message != undefined) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });

@@ -31,8 +31,10 @@ async function sendPrivateRecruit(interaction, options) {
 
     let condition = options.getString('内容または参加条件');
     let logo = 'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
-    let authorName = interaction.member.displayName;
-    let authorAvatarUrl = interaction.member.avatarURL();
+    const guild = await interaction.guild.fetch();
+    const host_member = await guild.members.fetch(interaction.member.user.id);
+    let authorName = host_member.displayName;
+    let authorAvatarUrl = host_member.avatarURL();
 
     const embed = new MessageEmbed()
         .setAuthor({
@@ -69,7 +71,7 @@ async function sendPrivateRecruit(interaction, options) {
             ephemeral: false,
         });
 
-        const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention_id = await searchRoleIdByName(interaction.guild, 'スプラ2');
         const mention = `<@&${mention_id}>`;
         const sentMessage = await interaction.channel.send({
             content: mention + ` ボタンを押して参加表明するでし！`,
@@ -83,7 +85,7 @@ async function sendPrivateRecruit(interaction, options) {
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await interaction.channel.messages.cache.get(sentMessage.id);
+        let cmd_message = await interaction.channel.messages.fetch(sentMessage.id);
         if (cmd_message != undefined) {
             sentMessage.edit({ components: [recruitActionRow(header)] });
         } else {
@@ -95,7 +97,7 @@ async function sendPrivateRecruit(interaction, options) {
 }
 
 async function sendNotification(interaction) {
-    const mention_id = searchRoleIdByName(interaction.guild, 'スプラ2');
+    const mention_id = await searchRoleIdByName(interaction.guild, 'スプラ2');
     const mention = `<@&${mention_id}>`;
     const sentMessage = await interaction.channel.send({
         content: mention + ` ボタンを押して参加表明するでし！`,

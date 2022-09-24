@@ -24,7 +24,8 @@ async function handleFriendCode(interaction) {
 async function selectFriendCode(interaction) {
     let targetUser = interaction.member;
     let id = interaction.member.user.id;
-    let ch = await interaction.guild.channels.cache.find((channel) => channel.name === '自己紹介');
+    const channelCollection = await interaction.guild.channels.fetch();
+    let ch = channelCollection.find((channel) => channel.name === '自己紹介');
     let messages = await ch.messages.fetch({ limit: 100 }).catch(console.error);
     let list = await messages.filter((m) => targetUser.id === m.author.id && !m.author.bot);
     let result = list.map(function (value) {

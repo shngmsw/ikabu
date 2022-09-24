@@ -4,17 +4,19 @@ const getMember = require(root + '/db/members_select.js');
 module.exports = async function removeRookie(msg) {
     const dt = new Date();
     const lastMonth = dt.setMonth(dt.getMonth() - 1);
-    const beginnerRole = await msg.guild.roles.cache.find((role) => role.name === '🔰新入部員');
+    const member = await msg.guild.members.fetch(msg.author.id);
+    const roles = await msg.guild.roles.fetch();
+    const beginnerRole = roles.find((role) => role.name === '🔰新入部員');
     const messageCount = await getMessageCount(msg.member.id);
     if (msg.member.joinedTimestamp < lastMonth || messageCount > 99) {
-        const hasBeginnerRole = await msg.member.roles.cache.find((role) => role.id === beginnerRole.id);
+        const hasBeginnerRole = member.roles.cache.find((role) => role.id === beginnerRole.id);
         if (hasBeginnerRole) {
             msg.member.roles.remove([beginnerRole.id]);
             const embed = new Discord.MessageEmbed();
             embed.setDescription('新入部員期間が終わったでし！\nこれからもイカ部心得を守ってイカ部生活をエンジョイするでし！');
             embed.setAuthor({
-                name: msg.author.username,
-                iconURL: msg.author.displayAvatarURL(),
+                name: member.displayName,
+                iconURL: member.displayAvatarURL(),
             });
             msg.channel.send({ embeds: [embed] }).catch();
         }

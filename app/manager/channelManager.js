@@ -23,8 +23,8 @@ async function createChannel(guild, categoryId, channelName, channelType) {
         parentId = null;
     }
     var channel;
-    if (searchChannelIdByName(guild, channelName, channelType, parentId) != null) {
-        return searchChannelIdByName(guild, channelName, channelType, parentId);
+    if ((await searchChannelIdByName(guild, channelName, channelType, parentId)) != null) {
+        return await searchChannelIdByName(guild, channelName, channelType, parentId);
     } else {
         channel = await guild.channels.create(channelName, { type: channelType, parent: parentId });
         await guild.channels.fetch();
@@ -40,12 +40,13 @@ async function createChannel(guild, categoryId, channelName, channelType) {
  * @param {string} categoryId カテゴリID or null
  * @returns チャンネルID
  */
-function searchChannelIdByName(guild, channelName, channelType, categoryId) {
+async function searchChannelIdByName(guild, channelName, channelType, categoryId) {
     var channel;
+    const channels = await guild.channels.fetch();
     if (categoryId != null) {
-        channel = guild.channels.cache.find((c) => c.name == channelName && c.type == channelType && c.parent == categoryId);
+        channel = channels.find((c) => c.name == channelName && c.type == channelType && c.parent == categoryId);
     } else {
-        channel = guild.channels.cache.find((c) => c.name == channelName && c.type == channelType);
+        channel = channels.find((c) => c.name == channelName && c.type == channelType);
     }
 
     if (channel != null) {
@@ -62,12 +63,13 @@ function searchChannelIdByName(guild, channelName, channelType, categoryId) {
  * @param {string} categoryId カテゴリID or null
  * @returns チャンネルオブジェクト
  */
-function searchChannelById(guild, channelId, categoryId) {
+async function searchChannelById(guild, channelId, categoryId) {
     var channel;
+    const channels = await guild.channels.fetch();
     if (categoryId != null) {
-        channel = guild.channels.cache.fing((c) => c.id == channelId && c.parent == categoryId);
+        channel = channels.find((c) => c.id == channelId && c.parent == categoryId);
     } else {
-        channel = guild.channels.cache.find((c) => c.id == channelId);
+        channel = channels.find((c) => c.id == channelId);
     }
 
     if (channel != null) {
