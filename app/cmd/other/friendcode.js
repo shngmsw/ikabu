@@ -34,16 +34,14 @@ async function selectFriendCode(interaction) {
 
     const deleteButton = new Discord.MessageActionRow();
     deleteButton.addComponents([new Discord.MessageButton().setCustomId('fchide').setLabel('削除').setStyle('DANGER')]);
-    if (result.length == 0) {
-        let fc = await getFC(id);
-        if (fc[0] != null) {
-            interaction.editReply({
-                embeds: [composeEmbed(targetUser, fc[0].code, true)],
-                components: [deleteButton],
-                ephemeral: false,
-            });
-            return;
-        }
+    let fc = await getFC(id);
+    if (fc[0] != null) {
+        interaction.editReply({
+            embeds: [composeEmbed(targetUser, fc[0].code, true)],
+            components: [deleteButton],
+            ephemeral: false,
+        });
+        return;
     }
     if (result.length > 0) {
         let embeds = [];
