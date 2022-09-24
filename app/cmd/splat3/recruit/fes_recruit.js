@@ -290,6 +290,8 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, team
     fillTextWithStroke(recruit_ctx, team, '48px Splatfont', color, '#222222', 1.7, 690, 80);
     recruit_ctx.restore();
 
+    console.log(host_member.displayAvatarURL({ format: 'png' }));
+
     // 募集主の画像
     let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));
     recruit_ctx.save();
