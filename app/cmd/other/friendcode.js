@@ -24,7 +24,8 @@ async function handleFriendCode(interaction) {
 async function selectFriendCode(interaction) {
     let targetUser = interaction.member;
     let id = interaction.member.user.id;
-    let ch = await interaction.guild.channels.cache.find((channel) => channel.name === '自己紹介');
+    const channelCollection = await interaction.guild.channels.fetch();
+    let ch = channelCollection.find((channel) => channel.name === '自己紹介');
     let messages = await ch.messages.fetch({ limit: 100 }).catch(console.error);
     let list = await messages.filter((m) => targetUser.id === m.author.id && !m.author.bot);
     let result = list.map(function (value) {
@@ -33,16 +34,14 @@ async function selectFriendCode(interaction) {
 
     const deleteButton = new Discord.MessageActionRow();
     deleteButton.addComponents([new Discord.MessageButton().setCustomId('fchide').setLabel('削除').setStyle('DANGER')]);
-    if (result.length == 0) {
-        let fc = await getFC(id);
-        if (fc[0] != null) {
-            interaction.editReply({
-                embeds: [composeEmbed(targetUser, fc[0].code, true)],
-                components: [deleteButton],
-                ephemeral: false,
-            });
-            return;
-        }
+    let fc = await getFC(id);
+    if (fc[0] != null) {
+        interaction.editReply({
+            embeds: [composeEmbed(targetUser, fc[0].code, true)],
+            components: [deleteButton],
+            ephemeral: false,
+        });
+        return;
     }
     if (result.length > 0) {
         let embeds = [];

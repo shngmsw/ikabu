@@ -38,7 +38,8 @@ async function anarchyRecruit(interaction) {
     let rank = options.getString('募集ウデマエ');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    let host_member = interaction.member;
+    const guild = await interaction.guild.fetch();
+    const host_member = await guild.members.fetch(interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // プレイ人数のカウンター
@@ -95,7 +96,7 @@ async function anarchyRecruit(interaction) {
     let mention = '@everyone';
     // 募集条件がランクの場合はウデマエロールにメンション
     if (rank !== undefined && rank !== null) {
-        const mention_id = searchRoleIdByName(interaction.guild, rank);
+        const mention_id = await searchRoleIdByName(interaction.guild, rank);
         if (mention_id == null) {
             interaction.editReply({
                 content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
@@ -111,7 +112,7 @@ async function anarchyRecruit(interaction) {
         const response = await fetch(schedule_url);
         const data = await response.json();
         if (checkFes(data, type)) {
-            const fes_channel_id = searchChannelIdByName(interaction.guild, 'フェス募集', 'GUILD_TEXT', null);
+            const fes_channel_id = await searchChannelIdByName(interaction.guild, 'フェス募集', 'GUILD_TEXT', null);
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！\nフェス募集をするには<#${fes_channel_id}>のチャンネルを使うでし！`,
                 ephemeral: true,
@@ -230,10 +231,10 @@ async function sendAnarchyMatch(
 
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.cache.get(user1.id);
+        user1 = await interaction.guild.members.fetch(user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.cache.get(user2.id);
+        user2 = await interaction.guild.members.fetch(user2.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, rank, channel_name);
@@ -279,7 +280,7 @@ async function sendAnarchyMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.cache.get(sentMessage.id);
+        let cmd_message = await channel.messages.fetch(sentMessage.id);
         if (cmd_message != undefined) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });

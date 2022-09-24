@@ -5,11 +5,13 @@ const common = require(root + '/app/common.js');
 
 module.exports = async function guildMemberAddEvent(member) {
     const guild = member.guild;
-    let robby = await guild.channels.cache.find((channel) => channel.id === process.env.CHANNEL_ID_ROBBY);
-    let beginnerRole = await guild.roles.cache.find((role) => role.name === '🔰新入部員');
-    const rules = await guild.channels.cache.find((channel) => channel.id === process.env.CHANNEL_ID_RULE);
-    const channelDescription = await guild.channels.cache.find((channel) => channel.id === process.env.CHANNEL_ID_DESCRIPTION);
-    const introduction = await guild.channels.cache.find((channel) => channel.id === process.env.CHANNEL_ID_INTRODUCTION);
+    const channels = await guild.channels.fetch();
+    const roles = await guild.roles.fetch();
+    let robby = channels.find((channel) => channel.id === process.env.CHANNEL_ID_ROBBY);
+    let beginnerRole = roles.find((role) => role.name === '🔰新入部員');
+    const rules = channels.find((channel) => channel.id === process.env.CHANNEL_ID_RULE);
+    const channelDescription = channels.find((channel) => channel.id === process.env.CHANNEL_ID_DESCRIPTION);
+    const introduction = channels.find((channel) => channel.id === process.env.CHANNEL_ID_INTRODUCTION);
 
     if (
         common.isNotEmpty(robby) &&

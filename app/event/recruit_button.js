@@ -56,6 +56,7 @@ async function join(interaction, params) {
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
+        const channels = await guild.channels.fetch();
         const header_msg_id = params.get('hmid');
         const header_message = await interaction.channel.messages.fetch(header_msg_id);
         const host = header_message.interaction.user;
@@ -94,7 +95,7 @@ async function join(interaction, params) {
             let notify_to_host_message = null;
             let host_guild_member = await guild.members.fetch(host_id, { force: true });
             if (host_guild_member.voice.channelId) {
-                let host_joined_vc = await guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
+                let host_joined_vc = channels.find((channel) => channel.id === host_guild_member.voice.channelId);
                 await host_joined_vc.send({
                     embeds: [embed],
                     components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
@@ -147,7 +148,6 @@ async function cancel(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
         const guild = await interaction.guild.fetch();
-        await guild.channels.fetch();
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
@@ -167,7 +167,7 @@ async function cancel(interaction, params) {
 
             await interaction.message.reply({ embeds: [embed] });
             if (channelId != undefined) {
-                let channel = await guild.channels.cache.get(channelId);
+                let channel = await guild.channels.fetch(channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
@@ -204,7 +204,6 @@ async function del(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
         const guild = await interaction.guild.fetch();
-        await guild.channels.fetch();
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
@@ -216,7 +215,7 @@ async function del(interaction, params) {
         const channelId = params.get('vid');
         if (member.user.id == host_id) {
             if (channelId != undefined) {
-                let channel = await guild.channels.cache.get(channelId);
+                let channel = await guild.channels.fetch(channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
@@ -243,7 +242,6 @@ async function close(interaction, params) {
 
     try {
         const guild = await interaction.guild.fetch();
-        await guild.channels.fetch();
         const member = await guild.members.fetch(interaction.member.user.id, {
             force: true, // intentsによってはGuildMemberUpdateが配信されないため
         });
@@ -267,7 +265,7 @@ async function close(interaction, params) {
             delete_recruit(interaction.message.id);
 
             if (channelId != undefined) {
-                let channel = await guild.channels.cache.get(channelId);
+                let channel = await guild.channels.fetch(channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
@@ -284,7 +282,7 @@ async function close(interaction, params) {
             // recruitテーブルから削除
             deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
             if (channelId != undefined) {
-                let channel = await guild.channels.cache.get(channelId);
+                let channel = await guild.channels.fetch(channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
@@ -311,6 +309,7 @@ async function joinNotify(interaction, params) {
         });
 
         const guild = await interaction.guild.fetch();
+        const channels = await interaction.channels.fetch();
         // APIからのメンバーオブジェクト(discord.jsのGuildMemberでないもの)がそのまま渡ってくることがあるのでfetchすることで確実にGuildMemberとする。
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await guild.members.fetch(interaction.member.user.id, {
@@ -347,7 +346,7 @@ async function joinNotify(interaction, params) {
                 force: true,
             });
             if (host_guild_member.voice.channelId) {
-                let host_joined_vc = await guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
+                let host_joined_vc = channels.find((channel) => channel.id === host_guild_member.voice.channelId);
                 await host_joined_vc.send({
                     content: `<@${host_id}>`,
                     embeds: [embed],
@@ -478,7 +477,7 @@ async function unlock(interaction, params) {
     try {
         const channelId = params.get('vid');
         const guild = await interaction.guild;
-        const channel = await guild.channels.cache.get(channelId);
+        const channel = await guild.channels.fetch(channelId);
 
         channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
         channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
@@ -492,7 +491,8 @@ async function unlock(interaction, params) {
 }
 
 async function getHelpEmbed(guild, chid) {
-    const sendChannel = await guild.channels.cache.find((channel) => channel.id === chid);
+    const channels = await guild.channels.fetch();
+    const sendChannel = channels.find((channel) => channel.id === chid);
     let command = '';
     if (sendChannel.name.match('リグマ募集')) {
         command = '`/リグマ募集 now` or `/リグマ募集 next`';

@@ -42,6 +42,7 @@ async function extractMessages(message) {
 }
 
 async function fetchMessageFromId(guild, chId, msgId) {
-    let channel = guild.channels.cache.find((channel) => channel.id === chId);
+    const channels = await guild.channels.fetch();
+    let channel = channels.find((channel) => channel.id === chId);
     return channel.messages.fetch(msgId);
 }
