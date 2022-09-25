@@ -36,7 +36,8 @@ module.exports = async function guildMemberAddEvent(member) {
     var setRookieRole = async function (beginnerRole, messageCount, friendCode) {
         if (beginnerRole) {
             if (messageCount == 0 && friendCode.length == 0) {
-                const fetch_member = await guild.members.fetch(member.id);
+                const members = await guild.members.fetch();
+                const fetch_member = members.find((fetch_member) => fetch_member.id === member.id);
                 if (fetch_member) {
                     fetch_member.roles.set([beginnerRole.id]).catch(console.error);
                 }
