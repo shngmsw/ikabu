@@ -33,15 +33,19 @@ module.exports = async function guildMemberAddEvent(member) {
 
     const messageCount = await getMessageCount(member.id);
     const friendCode = await getFriendCode(member.id);
-    var setRookieRole = function (beginnerRole, messageCount, friendCode) {
+    var setRookieRole = async function (beginnerRole, messageCount, friendCode) {
         if (beginnerRole) {
             if (messageCount == 0 && friendCode.length == 0) {
-                member.roles.set([beginnerRole.id]).catch(console.error);
+                const members = await guild.members.fetch();
+                const fetch_member = members.find((fetch_member) => fetch_member.id === member.id);
+                if (fetch_member) {
+                    fetch_member.roles.set([beginnerRole.id]).catch(console.error);
+                }
             }
         }
     };
-    setTimeout(function () {
-        setRookieRole(beginnerRole, messageCount, friendCode);
+    setTimeout(async function () {
+        await setRookieRole(beginnerRole, messageCount, friendCode);
     }, 600 * 1000);
 };
 
