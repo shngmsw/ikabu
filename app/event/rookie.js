@@ -1,10 +1,12 @@
 const Discord = require('discord.js');
 const root = require('app-root-path');
 const getMember = require(root + '/db/members_select.js');
+const app = require('app-root-path').resolve('app');
+const { searchMemberById } = require(app + '/manager/memberManager.js');
 module.exports = async function removeRookie(msg) {
     const dt = new Date();
     const lastMonth = dt.setMonth(dt.getMonth() - 1);
-    const member = await msg.guild.members.fetch(msg.author.id);
+    const member = await searchMemberById(msg.guild, msg.author.id);
     const roles = await msg.guild.roles.fetch();
     const beginnerRole = roles.find((role) => role.name === '🔰新入部員');
     const messageCount = await getMessageCount(msg.member.id);

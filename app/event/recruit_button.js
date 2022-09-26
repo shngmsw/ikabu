@@ -5,6 +5,9 @@ const { isNotEmpty, datetimeDiff } = require(app + '/common');
 const { insert_recruit } = require(db + '/recruit_insert.js');
 const { delete_recruit, deleteRecruitByMemberId } = require(db + '/recruit_delete.js');
 const { getRecruitMessageByMemberId, getRecruitAllByMessageId } = require(db + '/recruit_select.js');
+const { searchMemberById } = require(app + '/manager/memberManager.js');
+const { searchMessageById } = require(app + '/manager/messageManager.js');
+const { searchChannelById } = require(app + '/manager/channelManager.js');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 module.exports = {
@@ -51,14 +54,11 @@ async function join(interaction, params) {
         });
 
         const guild = await interaction.guild.fetch();
-        // APIからのメンバーオブジェクト(discord.jsのGuildMemberでないもの)がそのまま渡ってくることがあるのでfetchすることで確実にGuildMemberとする。
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
-        const member = await guild.members.fetch(interaction.member.user.id, {
-            force: true, // intentsによってはGuildMemberUpdateが配信されないため
-        });
+        const member = await searchMemberById(guild, interaction.member.user.id);
         const channels = await guild.channels.fetch();
         const header_msg_id = params.get('hmid');
-        const header_message = await interaction.channel.messages.fetch(header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
         const channelId = params.get('vid');
@@ -89,11 +89,11 @@ async function join(interaction, params) {
             });
 
             // recruitテーブルにデータ追加
-            insert_recruit(interaction.message.id, host_id, member.user.id);
+            await insert_recruit(interaction.message.id, host_id, member.user.id);
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
-            let host_guild_member = await guild.members.fetch(host_id, { force: true });
+            let host_guild_member = await searchMemberById(guild, host_id);
             if (host_guild_member.voice.channelId) {
                 let host_joined_vc = channels.find((channel) => channel.id === host_guild_member.voice.channelId);
                 await host_joined_vc.send({
@@ -148,34 +148,35 @@ async function cancel(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
         const guild = await interaction.guild.fetch();
-        const member = await guild.members.fetch(interaction.member.user.id, {
-            force: true, // intentsによってはGuildMemberUpdateが配信されないため
-        });
+        const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
-        const header_message = await interaction.channel.messages.fetch(header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
         const host_id = header_message.interaction.user.id;
         const channelId = params.get('vid');
         const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
+        const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
+
         if (member.user.id == host_id) {
-            await interaction.update({
-                content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
-                components: [disableButtons()],
+            await interaction.deferReply({
+                ephemeral: false,
             });
 
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
 
-            await interaction.message.reply({ embeds: [embed] });
             if (channelId != undefined) {
-                let channel = await guild.channels.fetch(channelId);
+                let channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
-        } else {
-            await interaction.deferReply({
-                ephemeral: true,
-            });
 
+            await header_msg.edit({
+                content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
+                components: [disableButtons()],
+            });
+            await interaction.editReply({ embeds: [embed] });
+        } else {
+            await interaction.deferReply({ ephemeral: true });
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
@@ -187,11 +188,13 @@ async function cancel(interaction, params) {
                 await interaction.message.reply({
                     content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
+                await interaction.followUp({
+                    content: `キャンセルを受け付けたでし！`,
+                });
                 return;
             } else {
-                await interaction.followUp({
+                await interaction.editReply({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
-                    ephemeral: true,
                 });
             }
         }
@@ -202,29 +205,37 @@ async function cancel(interaction, params) {
 
 async function del(interaction, params) {
     /** @type {Discord.Snowflake} */
+
+    // Discord APIの処理待ち時に削除ボタン連打されるのを防ぐため
+    await interaction.deferReply({
+        ephemeral: true,
+    });
+
     try {
         const guild = await interaction.guild.fetch();
-        const member = await guild.members.fetch(interaction.member.user.id, {
-            force: true, // intentsによってはGuildMemberUpdateが配信されないため
-        });
+        const member = await searchMemberById(guild, interaction.member.user.id);
         const msg_id = params.get('mid');
-        const cmd_message = await interaction.channel.messages.fetch(msg_id);
+        const cmd_message = await searchMessageById(guild, interaction.channel, msg_id);
         const header_msg_id = params.get('hmid');
-        const header_message = await interaction.channel.messages.fetch(header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
         const host_id = header_message.interaction.user.id;
         const channelId = params.get('vid');
         if (member.user.id == host_id) {
             if (channelId != undefined) {
-                let channel = await guild.channels.fetch(channelId);
+                let channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
             await cmd_message.delete();
             await header_message.delete();
             // recruitテーブルから削除
-            delete_recruit(interaction.message.id);
+            await delete_recruit(interaction.message.id);
+            await interaction.editReply({
+                content: '募集を削除したでし！\n次回は内容をしっかり確認してから送信するでし！',
+                ephemeral: true,
+            });
         } else {
-            interaction.reply({ content: '他人の募集は消せる訳無いでし！！！', ephemeral: true });
+            await interaction.editReply({ content: '他人の募集は消せる訳無いでし！！！', ephemeral: true });
         }
     } catch (err) {
         handleError(err, { interaction });
@@ -242,55 +253,59 @@ async function close(interaction, params) {
 
     try {
         const guild = await interaction.guild.fetch();
-        const member = await guild.members.fetch(interaction.member.user.id, {
-            force: true, // intentsによってはGuildMemberUpdateが配信されないため
-        });
+        const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
-        const header_message = await interaction.channel.messages.fetch(header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
         const helpEmbed = await getHelpEmbed(guild, header_message.channel.id);
         const host_id = header_message.interaction.user.id;
         const channelId = params.get('vid');
         const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
+        const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
+
         if (member.user.id === host_id) {
+            await interaction.deferReply({
+                ephemeral: false,
+            });
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
-            await interaction.update({
+
+            // recruitテーブルから削除
+            await delete_recruit(interaction.message.id);
+
+            if (channelId != undefined) {
+                let channel = await searchChannelById(guild, channelId);
+                channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
+            }
+            await header_msg.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
             await interaction.message.reply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
-
+        } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
+            await interaction.deferReply({
+                ephemeral: false,
+            });
+            const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
+            const member_list = getMemberMentions(recruit_data);
             // recruitテーブルから削除
-            delete_recruit(interaction.message.id);
+            deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
 
             if (channelId != undefined) {
-                let channel = await guild.channels.fetch(channelId);
+                let channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
-        } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
-            const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
-            const member_list = getMemberMentions(recruit_data);
-            await interaction.update({
+            await header_msg.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
             const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
-            await interaction.message.reply({ embeds: [embed] });
-            await header_message.channel.send({ embeds: [helpEmbed] });
-            // recruitテーブルから削除
-            deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
-            if (channelId != undefined) {
-                let channel = await guild.channels.fetch(channelId);
-                channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
-            }
+            await interaction.editReply({ embeds: [embed] });
+            await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
-            await interaction.deferReply({
-                ephemeral: true,
-            });
-            await interaction.followUp({
+            await interaction.reply({
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
@@ -309,12 +324,9 @@ async function joinNotify(interaction, params) {
         });
 
         const guild = await interaction.guild.fetch();
-        const channels = await interaction.channels.fetch();
-        // APIからのメンバーオブジェクト(discord.jsのGuildMemberでないもの)がそのまま渡ってくることがあるのでfetchすることで確実にGuildMemberとする。
+        const channels = await interaction.guild.channels.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
-        const member = await guild.members.fetch(interaction.member.user.id, {
-            force: true, // intentsによってはGuildMemberUpdateが配信されないため
-        });
+        const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         if (member.user.id === host_id) {
             await interaction.followUp({
@@ -338,13 +350,11 @@ async function joinNotify(interaction, params) {
                 iconURL: member.displayAvatarURL(),
             });
             // recruitテーブルにデータ追加
-            insert_recruit(interaction.message.id, interaction.member.user.id, member.user.id);
+            await insert_recruit(interaction.message.id, interaction.member.user.id, member.user.id);
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
-            let host_guild_member = await guild.members.fetch(host_id, {
-                force: true,
-            });
+            let host_guild_member = await searchMemberById(guild, host_id);
             if (host_guild_member.voice.channelId) {
                 let host_joined_vc = channels.find((channel) => channel.id === host_guild_member.voice.channelId);
                 await host_joined_vc.send({
@@ -379,25 +389,26 @@ async function joinNotify(interaction, params) {
 async function cancelNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.deferReply({
-            ephemeral: true,
-        });
         const guild = await interaction.guild.fetch();
         await guild.channels.fetch();
-        const member = await guild.members.fetch(interaction.member.user.id, {
-            force: true, // intentsによってはGuildMemberUpdateが配信されないため
-        });
+        const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
+        const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
+
         if (member.user.id == host_id) {
+            await interaction.deferReply({
+                ephemeral: false,
+            });
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
-            await interaction.update({
+            await header_msg.edit({
                 content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
                 components: [disableButtons()],
             });
-            await interaction.message.reply({ embeds: [embed] });
+            await interaction.editReply({ embeds: [embed] });
         } else {
+            await interaction.deferReply({ ephemeral: true });
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
@@ -409,11 +420,13 @@ async function cancelNotify(interaction, params) {
                 await interaction.message.reply({
                     content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
+                await interaction.followUp({
+                    content: `キャンセルを受け付けたでし！`,
+                });
                 return;
             } else {
-                await interaction.followUp({
+                await interaction.reply({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
-                    ephemeral: true,
                 });
             }
         }
@@ -424,44 +437,46 @@ async function cancelNotify(interaction, params) {
 
 async function closeNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
-
     try {
         const guild = await interaction.guild.fetch();
         await guild.channels.fetch();
-        const member = await guild.members.fetch(interaction.member.user.id, {
-            force: true, // intentsによってはGuildMemberUpdateが配信されないため
-        });
+        const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
         const helpEmbed = await getHelpEmbed(guild, interaction.channel.id);
+        const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
+
         if (member.user.id === host_id) {
+            await interaction.deferReply({
+                ephemeral: false,
+            });
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
-            await interaction.update({
+            await header_msg.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
-            await interaction.message.reply({ embeds: [embed] });
-            await interaction.channel.send({ embeds: [helpEmbed] });
             // recruitテーブルから削除
-            delete_recruit(interaction.message.id);
+            await delete_recruit(interaction.message.id);
+            await interaction.editReply({ embeds: [embed] });
+            await interaction.channel.send({ embeds: [helpEmbed] });
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
+            await interaction.deferReply({
+                ephemeral: false,
+            });
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
-            await interaction.update({
+            await header_msg.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
-            const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
-            await interaction.message.reply({ embeds: [embed] });
-            await header_message.channel.send({ embeds: [helpEmbed] });
             // recruitテーブルから削除
             deleteRecruitByMemberId(interaction.message.id);
+            const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
+            await interaction.editReply({ embeds: [embed] });
+            await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
-            await interaction.deferReply({
-                ephemeral: true,
-            });
-            await interaction.followUp({
+            await interaction.reply({
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
@@ -477,7 +492,7 @@ async function unlock(interaction, params) {
     try {
         const channelId = params.get('vid');
         const guild = await interaction.guild;
-        const channel = await guild.channels.fetch(channelId);
+        const channel = await searchChannelById(guild, channelId);
 
         channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
         channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
@@ -561,7 +576,7 @@ function getMemberMentions(members) {
 async function editMemberListMessage(interaction) {
     const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
     const member_list = getMemberMentions(recruit_data);
-    const interaction_message = await interaction.channel.messages.fetch(interaction.message.id);
+    const interaction_message = await searchMessageById(interaction.guild, interaction.channel, interaction.message.id);
     const message_first_row = interaction_message.content.split('\n')[0];
     interaction_message.edit({
         content: message_first_row + '\n' + member_list,

@@ -1,17 +1,19 @@
 const root = require('app-root-path');
+const app = require('app-root-path').resolve('app');
+const { searchChannelById } = require(app + '/manager/channelManager.js');
+const { searchMemberById } = require(app + '/manager/memberManager.js');
 const getMember = require(root + '/db/members_select.js');
 const getFC = require(root + '/db/fc_select.js');
 const common = require(root + '/app/common.js');
 
 module.exports = async function guildMemberAddEvent(member) {
-    const guild = member.guild;
-    const channels = await guild.channels.fetch();
+    const guild = await member.guild.fetch();
     const roles = await guild.roles.fetch();
-    let robby = channels.find((channel) => channel.id === process.env.CHANNEL_ID_ROBBY);
+    let robby = await searchChannelById(guild, process.env.CHANNEL_ID_ROBBY);
     let beginnerRole = roles.find((role) => role.name === '🔰新入部員');
-    const rules = channels.find((channel) => channel.id === process.env.CHANNEL_ID_RULE);
-    const channelDescription = channels.find((channel) => channel.id === process.env.CHANNEL_ID_DESCRIPTION);
-    const introduction = channels.find((channel) => channel.id === process.env.CHANNEL_ID_INTRODUCTION);
+    const rules = await searchChannelById(guild, process.env.CHANNEL_ID_RULE);
+    const channelDescription = await searchChannelById(guild, process.env.CHANNEL_ID_DESCRIPTION);
+    const introduction = await searchChannelById(guild, process.env.CHANNEL_ID_INTRODUCTION);
 
     if (
         common.isNotEmpty(robby) &&
@@ -36,8 +38,7 @@ module.exports = async function guildMemberAddEvent(member) {
     var setRookieRole = async function (beginnerRole, messageCount, friendCode) {
         if (beginnerRole) {
             if (messageCount == 0 && friendCode.length == 0) {
-                const members = await guild.members.fetch();
-                const fetch_member = members.find((fetch_member) => fetch_member.id === member.id);
+                const fetch_member = await searchMemberById(guild, member.id);
                 if (fetch_member) {
                     fetch_member.roles.set([beginnerRole.id]).catch(console.error);
                 }

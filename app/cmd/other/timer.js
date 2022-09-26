@@ -10,22 +10,22 @@ module.exports = async function handleTimer(interaction) {
     var kazu = options.getInteger('分');
     var count = kazu;
     if (count <= 10 && count > 0 && common.isInteger(kazu)) {
-        interaction.editReply('タイマーを' + count + '分後にセットしたでし！');
-        var countdown = function () {
+        await interaction.editReply('タイマーを' + count + '分後にセットしたでし！');
+        var countdown = async function () {
             count--;
             if (count != 0) {
-                interaction.editReply(`残り${count}分でし`);
+                await interaction.editReply(`残り${count}分でし`);
             } else {
-                interaction.followUp(`<@${interaction.member.user.id}> 時間でし！`);
+                await interaction.followUp(`<@${interaction.member.user.id}> 時間でし！`);
             }
         };
-        var id = setInterval(function () {
-            countdown();
+        var id = setInterval(async function () {
+            await countdown();
             if (count <= 0) {
                 clearInterval(id);
             }
         }, 60000);
     } else {
-        interaction.editReply('10分以内しか入力できないでし！');
+        await interaction.editReply('10分以内しか入力できないでし！');
     }
 };

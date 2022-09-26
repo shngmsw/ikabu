@@ -10,7 +10,7 @@ module.exports = async function handleDeleteChannel(interaction) {
     await interaction.deferReply();
 
     if (!interaction.member.permissions.has('MANAGE_CHANNELS')) {
-        return interaction.followUp('チャンネルを管理する権限がないでし！');
+        return await interaction.followUp('チャンネルを管理する権限がないでし！');
     }
     const { options } = interaction;
     const categoryIds = options.getString('チャンネルid');
@@ -25,10 +25,10 @@ module.exports = async function handleDeleteChannel(interaction) {
     }
 
     if (channelIdList.length == 0) {
-        return interaction.followUp('削除したいチャンネルのIDを入れるでし！');
+        return await interaction.followUp('削除したいチャンネルのIDを入れるでし！');
     }
 
-    interaction.editReply('指定されたIDのチャンネルを削除中でし！\nちょっと待つでし！');
+    await interaction.editReply('指定されたIDのチャンネルを削除中でし！\nちょっと待つでし！');
 
     const guild = interaction.guild;
     var removed = [];
@@ -45,7 +45,7 @@ module.exports = async function handleDeleteChannel(interaction) {
         // removed[i][1] = deleted channel (name)
         for (var i in channelIdList) {
             var channelName;
-            var channel = await searchChannelById(guild, channelIdList[i], null);
+            var channel = await searchChannelById(guild, channelIdList[i]);
             // if channel ID is not found, consider as an error.
             if (channel == null) {
                 channelName = 'NOT_FOUND!';
@@ -66,14 +66,14 @@ module.exports = async function handleDeleteChannel(interaction) {
         }
     } catch (error) {
         console.error(error);
-        interaction.followUp('チャンネル削除中にエラーでし！');
+        await interaction.followUp('チャンネル削除中にエラーでし！');
     }
 
     const csvString = stringify(removed);
     fs.writeFileSync('./temp/temp.csv', csvString);
     const attachment = new MessageAttachment('./temp/temp.csv', 'removed_channel.csv');
 
-    interaction.followUp({
+    await interaction.followUp({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
         files: [attachment],
     });

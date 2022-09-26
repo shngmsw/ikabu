@@ -18,7 +18,7 @@ async function handleCreateRole(interaction) {
     const { options } = interaction;
 
     if (!interaction.member.permissions.has('MANAGE_ROLES')) {
-        return interaction.editReply('ロールを管理する権限がないでし！');
+        return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
     try {
@@ -26,14 +26,14 @@ async function handleCreateRole(interaction) {
         let colorInput = options.getString('ロールカラー');
 
         if (!colorInput.match('^#([\\da-fA-F]{6})$')) {
-            interaction.followUp(
+            await interaction.followUp(
                 '`' + colorInput + '`はカラーコードじゃないでし！\n`[ex]: #5d4efd, #111`\n色はこっちで決めさせてもらうでし！',
             );
             colorInput = null;
         }
 
         if (searchRoleIdByName(interaction.guild, roleName) != null) {
-            return interaction.followUp('その名前のロールはもうあるでし！\n別のロール名を使うでし！');
+            return await interaction.followUp('その名前のロールはもうあるでし！\n別のロール名を使うでし！');
         }
 
         var roleId = await createRole(interaction.guild, roleName);
@@ -44,12 +44,12 @@ async function handleCreateRole(interaction) {
         var colorCode = await setColorToRole(interaction.guild, role, colorInput);
         role.setHoist(true);
 
-        interaction.followUp(
+        await interaction.followUp(
             'ロール名`' + role.name + '`を作ったでし！\nロールIDは`' + roleId + '`、カラーコードは`' + colorCode + '`でし！',
         );
     } catch (error) {
         console.error(error);
-        interaction.followUp('なんかエラーでてるわ');
+        await interaction.followUp('なんかエラーでてるわ');
     }
 }
 
@@ -59,7 +59,7 @@ async function handleDeleteRole(interaction) {
     await interaction.deferReply();
     const { options } = interaction;
     if (!interaction.member.permissions.has('MANAGE_ROLES')) {
-        return interaction.editReply('ロールを管理する権限がないでし！');
+        return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
     var roleIdList = [];
@@ -74,7 +74,7 @@ async function handleDeleteRole(interaction) {
         roleIdList.push(roleId3.id);
     }
 
-    interaction.editReply('指定されたIDのロールを削除中でし！\nちょっと待つでし！');
+    await interaction.editReply('指定されたIDのロールを削除中でし！\nちょっと待つでし！');
 
     const guild = interaction.guild;
     var removed = [];
@@ -106,14 +106,14 @@ async function handleDeleteRole(interaction) {
         }
     } catch (error) {
         console.error(error);
-        interaction.editReply('ロール削除中にエラーでし！');
+        await interaction.editReply('ロール削除中にエラーでし！');
     }
 
     const csvString = stringify(removed);
     fs.writeFileSync('./temp/temp.csv', csvString);
     const attachment = new MessageAttachment('./temp/temp.csv', 'removed_role.csv');
 
-    interaction.followUp({
+    await interaction.followUp({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したロールをまとめておいたでし！',
         files: [attachment],
     });
@@ -126,7 +126,7 @@ async function handleAssignRole(interaction) {
     const { options } = interaction;
 
     if (!interaction.member.permissions.has('MANAGE_ROLES')) {
-        return interaction.editReply('ロールを管理する権限がないでし！');
+        return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
     try {
@@ -140,10 +140,10 @@ async function handleAssignRole(interaction) {
             await target[1].roles.add(assignRoleId);
         }
 
-        interaction.editReply('`' + targetRole.name + '`のメンバーに`' + assignRole.name + '`のロールつけたでし！');
+        await interaction.editReply('`' + targetRole.name + '`のメンバーに`' + assignRole.name + '`のロールつけたでし！');
     } catch (error) {
         console.error(error);
-        interaction.editReply('なんかエラーでてるわ');
+        await interaction.editReply('なんかエラーでてるわ');
     }
 }
 
@@ -154,7 +154,7 @@ async function handleUnassignRole(interaction) {
     const { options } = interaction;
 
     if (!interaction.member.permissions.has('MANAGE_ROLES')) {
-        return interaction.editReply('ロールを管理する権限がないでし！');
+        return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
     try {
@@ -168,9 +168,9 @@ async function handleUnassignRole(interaction) {
             await target[1].roles.remove(unAssignRoleId);
         }
 
-        interaction.editReply('`' + targetRole.name + '`のメンバーから`' + unAssignRole.name + '`のロールを削除したでし！');
+        await interaction.editReply('`' + targetRole.name + '`のメンバーから`' + unAssignRole.name + '`のロールを削除したでし！');
     } catch (error) {
         console.error(error);
-        interaction.editReply('なんかエラーでてるわ');
+        await interaction.editReply('なんかエラーでてるわ');
     }
 }

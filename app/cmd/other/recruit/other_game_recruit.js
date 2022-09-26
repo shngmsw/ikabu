@@ -1,5 +1,7 @@
 const { MessageEmbed, Permissions } = require('discord.js');
 const app = require('app-root-path').resolve('app');
+const { searchMessageById } = require(app + '/manager/messageManager.js');
+const { searchMemberById } = require(app + '/manager/memberManager.js');
 const {
     recruitDeleteButton,
     recruitActionRow,
@@ -120,14 +122,13 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
 
     let condition = options.getString('内容または参加条件');
 
-    let authorName = interaction.member.nickname == null ? interaction.member.user.username : interaction.member.nickname;
-    let authorAvatarUrl = interaction.member.user.avatarURL();
+    let author = await searchMemberById(interaction.guild, interaction.member.user.id);
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
     let embed = new MessageEmbed()
         .setAuthor({
-            name: authorName,
-            iconURL: authorAvatarUrl,
+            name: author.displayName,
+            iconURL: author.displayAvatarURL(),
         })
         .setTitle(title + '募集')
         .setColor(color)
@@ -175,8 +176,8 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await interaction.channel.messages.fetch(sentMessage.id);
-        if (cmd_message != undefined) {
+        let cmd_message = await searchMessageById(interaction.guild, interaction.channel.id, sentMessage.id);
+        if (cmd_message) {
             if (reserve_channel == null) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
             } else {

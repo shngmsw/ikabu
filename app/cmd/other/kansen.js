@@ -13,14 +13,14 @@ module.exports = async function handleKansen(interaction) {
     var cmb = new Combination(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], 2);
     var tmp_watching_list = cmb.toArray();
     if (how_many_times > 20) {
-        interaction.followUp({
+        await interaction.followUp({
             content: '20回以下じゃないとダメでし！',
             ephemeral: true,
         });
         return;
     }
     if (how_many_times <= 0) {
-        interaction.followUp({
+        await interaction.followUp({
             content: '1以上じゃないとダメでし！',
             ephemeral: true,
         });

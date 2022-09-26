@@ -1,4 +1,6 @@
 const { MessageEmbed } = require('discord.js');
+const app = require('app-root-path').resolve('app');
+const { searchMemberById } = require(app + '/manager/memberManager.js');
 
 module.exports = {
     isInteger: isInteger,
@@ -33,17 +35,18 @@ module.exports = {
     getCommandHelpEmbed: getCommandHelpEmbed,
 };
 
-function composeEmbed(message, url) {
+async function composeEmbed(message, url) {
     const embed = new MessageEmbed();
     embed.setDescription(message.content);
     embed.setTimestamp(message.createdAt);
+    const member = await searchMemberById(message.guild, message.author.id);
     if (isNotEmpty(url)) {
         embed.setTitle('引用元へジャンプ');
         embed.setURL(url);
     }
     embed.setAuthor({
-        name: message.author.username,
-        iconURL: message.author.displayAvatarURL(),
+        name: member.displayName,
+        iconURL: member.displayAvatarURL(),
     });
     embed.setFooter({
         text: message.channel.name,

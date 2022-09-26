@@ -111,7 +111,7 @@ module.exports = async function handleIkabuExperience(interaction) {
 
     const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'ikabu_experience.png');
 
-    interaction.editReply({ files: [attachment] });
+    await interaction.editReply({ files: [attachment] });
 };
 
 const userText = (canvas, text) => {

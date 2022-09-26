@@ -24,18 +24,18 @@ module.exports = async function handleCreateRoom(interaction) {
     const { options } = interaction;
     const attachment = options.getAttachment('csv');
     if (!interaction.member.permissions.has('MANAGE_CHANNELS')) {
-        return interaction.editReply('チャンネルを管理する権限がないでし！');
+        return await interaction.editReply('チャンネルを管理する権限がないでし！');
     }
 
     if (!interaction.member.permissions.has('MANAGE_ROLES')) {
-        return interaction.editReply('ロールを管理する権限がないでし！');
+        return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
     if (!attachment.size) {
-        return interaction.editReply('CSVファイルを添付するでし！');
+        return await interaction.editReply('CSVファイルを添付するでし！');
     }
 
-    interaction.editReply('作成中でし！\nこの作業には時間がかかるでし！');
+    await interaction.editReply('作成中でし！\nこの作業には時間がかかるでし！');
 
     try {
         request(attachment.url).pipe(
@@ -52,7 +52,7 @@ module.exports = async function handleCreateRoom(interaction) {
                 // data[i][8...n] メンバーID
 
                 if (data == undefined) {
-                    return interaction.followUp('CSVファイルがおかしいでし！\n要素数が全ての行で同じになっているか確認するでし！');
+                    return await interaction.followUp('CSVファイルがおかしいでし！\n要素数が全ての行で同じになっているか確認するでし！');
                 }
 
                 var resultData = [];
@@ -131,7 +131,7 @@ module.exports = async function handleCreateRoom(interaction) {
                         await interaction.editReply(parseInt((i / (data.length - 1)) * 100, 10) + '% 完了');
                     } catch (error) {
                         console.error(error);
-                        interaction.followUp('データの' + i + '行目でエラーでし！');
+                        await interaction.followUp('データの' + i + '行目でエラーでし！');
                     }
                 }
 
@@ -150,19 +150,19 @@ module.exports = async function handleCreateRoom(interaction) {
                 const csvString = stringify(resultData);
                 fs.writeFileSync('./temp/temp.csv', csvString);
                 const attachment = new MessageAttachment('./temp/temp.csv', 'output.csv');
-                interaction.editReply({
+                await interaction.editReply({
                     content: '終わったでし！下に結果を出すでし！',
                     files: [attachment],
                 });
 
                 const deleteCommandsText = setDeleteCommandsText(resultData);
-                interaction.followUp({
+                await interaction.followUp({
                     files: [deleteCommandsText],
                 });
             }),
         );
     } catch (error) {
-        interaction.editReply('CSVファイル読み込み中にエラーでし！');
+        await interaction.editReply('CSVファイル読み込み中にエラーでし！');
     }
 };
 
