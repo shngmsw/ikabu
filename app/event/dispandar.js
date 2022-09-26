@@ -11,6 +11,10 @@ module.exports = {
 async function dispand(message) {
     var messages = await extractMessages(message);
     var url;
+    if (messages.length == 0) {
+        message.reply('メッセージが見つからなかったでし！');
+        return;
+    }
     for (var m in messages) {
         if (message.content) {
             url = message.content.match(regexDiscordMessageUrl);
@@ -38,6 +42,9 @@ async function extractMessages(message) {
         return;
     }
     fetchedMessage = await searchMessageById(guild, matches.groups.channel, matches.groups.message);
-    messages.push(fetchedMessage);
+    if (fetchedMessage) {
+        messages.push(fetchedMessage);
+    }
+
     return messages;
 }

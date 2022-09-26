@@ -113,6 +113,7 @@ client.on('ready', async () => {
     // そのようなことを避けるためready内でハンドラを登録する。
     // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
     await registerSlashCommands();
+    client.user.setActivity('通常営業', { type: 'PLAYING' });
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
