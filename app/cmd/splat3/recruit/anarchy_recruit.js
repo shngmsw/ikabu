@@ -99,7 +99,7 @@ async function anarchyRecruit(interaction) {
     if (rank !== undefined && rank !== null) {
         const mention_id = await searchRoleIdByName(interaction.guild, rank);
         if (mention_id == null) {
-            interaction.editReply({
+            await interaction.editReply({
                 content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
                 ephemeral: false,
             });

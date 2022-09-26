@@ -14,5 +14,5 @@ module.exports = async function handleVoicePick(interaction) {
     } else {
         user = interaction.member.voice.channel.members.random(1);
     }
-    interaction.editReply({ content: `${user}` });
+    await interaction.editReply({ content: `${user}` });
 };

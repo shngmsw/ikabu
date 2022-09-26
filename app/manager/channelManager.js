@@ -63,14 +63,10 @@ async function searchChannelIdByName(guild, channelName, channelType, categoryId
  * @param {string} categoryId カテゴリID or null
  * @returns チャンネルオブジェクト
  */
-async function searchChannelById(guild, channelId, categoryId) {
+async function searchChannelById(guild, channelId) {
     var channel;
     const channels = await guild.channels.fetch();
-    if (categoryId != null) {
-        channel = channels.find((c) => c.id == channelId && c.parent == categoryId);
-    } else {
-        channel = channels.find((c) => c.id == channelId);
-    }
+    channel = channels.find((c) => c.id == channelId);
 
     return channel;
 }

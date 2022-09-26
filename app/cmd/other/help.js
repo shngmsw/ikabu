@@ -7,7 +7,7 @@ module.exports = async function handleHelp(interaction) {
     const { options } = interaction;
     const subCommand = options.getSubcommand();
     if (subCommand === 'voice') {
-        interaction.editReply({
+        await interaction.editReply({
             embeds: [
                 new MessageEmbed()
                     .setAuthor({
@@ -32,7 +32,7 @@ module.exports = async function handleHelp(interaction) {
             ],
         });
     } else if (subCommand === 'other') {
-        interaction.editReply({
+        await interaction.editReply({
             embeds: [
                 new MessageEmbed()
                     .setAuthor({
@@ -81,7 +81,7 @@ module.exports = async function handleHelp(interaction) {
             ],
         });
     } else if (subCommand === 'recruit') {
-        interaction.editReply({
+        await interaction.editReply({
             embeds: [
                 new MessageEmbed()
                     .setAuthor({

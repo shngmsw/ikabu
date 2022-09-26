@@ -39,7 +39,7 @@ async function selectFriendCode(interaction) {
     deleteButton.addComponents([new Discord.MessageButton().setCustomId('fchide').setLabel('削除').setStyle('DANGER')]);
     let fc = await getFC(id);
     if (fc[0] != null) {
-        interaction.editReply({
+        await interaction.editReply({
             embeds: [composeEmbed(targetUser, fc[0].code, true)],
             components: [deleteButton],
             ephemeral: false,
@@ -51,12 +51,12 @@ async function selectFriendCode(interaction) {
         for (var r of result) {
             embeds.push(composeEmbed(targetUser, r, false));
         }
-        interaction.editReply({
+        await interaction.editReply({
             embeds: embeds,
             components: [deleteButton],
         });
     } else {
-        interaction.editReply({
+        await interaction.editReply({
             content:
                 '自己紹介チャンネルに投稿がないか、投稿した日時が古すぎて検索できないでし\n `/friend_code add`でコードを登録してみるでし！',
             ephemeral: true,
@@ -82,7 +82,7 @@ async function insertFriendCode(interaction) {
     const code = options.getString('フレンドコード');
 
     insert(id, code);
-    interaction.editReply({
+    await interaction.editReply({
         content: `\`${code}\`で覚えたでし！変更したい場合はもう一度登録すると上書きされるでし！`,
         ephemeral: true,
     });

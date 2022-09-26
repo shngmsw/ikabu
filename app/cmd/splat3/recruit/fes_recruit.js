@@ -163,7 +163,7 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
     const team_role = await searchRoleById(interaction.guild, mention_id);
 
     if (mention_id == null) {
-        interaction.editReply({
+        await interaction.editReply({
             content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
             ephemeral: false,
         });

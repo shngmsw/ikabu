@@ -13,7 +13,7 @@ module.exports = {
  * @returns メッセージオブジェクト
  */
 async function searchMessageById(guild, channelId, messageId) {
-    const channel = await searchChannelById(guild, channelId, null);
+    const channel = await searchChannelById(guild, channelId);
     let message;
     if (channel) {
         const messages = await channel.messages.fetch();

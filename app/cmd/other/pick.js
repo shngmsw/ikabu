@@ -21,5 +21,5 @@ module.exports = async function handlePick(interaction) {
     } else {
         var picked = args[Math.floor(Math.random() * args.length)];
     }
-    interaction.editReply({ content: picked + 'でし！' });
+    await interaction.editReply({ content: picked + 'でし！' });
 };

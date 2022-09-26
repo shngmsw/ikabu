@@ -11,22 +11,21 @@ module.exports = {
 async function dispand(message) {
     var messages = await extractMessages(message);
     var url;
-    if (messages.length == 0) {
-        message.reply('メッセージが見つからなかったでし！');
-        return;
-    }
-    for (var m in messages) {
-        if (message.content) {
-            url = message.content.match(regexDiscordMessageUrl);
-            await message.channel.send({
-                embeds: [await common.composeEmbed(messages[m], url[0])],
-            });
-        }
-        for (var embed in messages[m].embeds) {
-            await message.channel.send({ embeds: [messages[m].embeds[embed]] });
-        }
-        if (message.content === url[0]) {
-            message.delete();
+
+    if (common.isNotEmpty(messages)) {
+        for (var m in messages) {
+            if (message.content) {
+                url = message.content.match(regexDiscordMessageUrl);
+                await message.channel.send({
+                    embeds: [await common.composeEmbed(messages[m], url[0])],
+                });
+            }
+            for (var embed in messages[m].embeds) {
+                await message.channel.send({ embeds: [messages[m].embeds[embed]] });
+            }
+            if (message.content === url[0]) {
+                message.delete();
+            }
         }
     }
 }
@@ -41,9 +40,12 @@ async function extractMessages(message) {
     if (guild.id != matches.groups.guild) {
         return;
     }
-    fetchedMessage = await searchMessageById(guild, matches.groups.channel, matches.groups.message);
-    if (fetchedMessage) {
+    const fetchedMessage = await searchMessageById(guild, matches.groups.channel, matches.groups.message);
+    if (common.isNotEmpty(fetchedMessage)) {
         messages.push(fetchedMessage);
+    } else {
+        message.reply('メッセージが見つからなかったでし！');
+        return;
     }
 
     return messages;
