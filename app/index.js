@@ -96,8 +96,10 @@ client.on('guildMemberRemove', async (member) => {
     try {
         const tag = member.user.tag;
         const period = Math.round((Date.now() - member.joinedAt) / 86400000); // サーバーに居た期間を日数にして計算
-        const retire_log = await member.guild.channels.fetch(process.env.CHANNEL_ID_RETIRE_LOG);
-        retire_log.send(`${tag} さんが退部しました。入部日: ${member.joinedAt} 入部期間：${period}日間`);
+        const retire_log = member.guild.channels.cache.get(process.env.CHANNEL_ID_RETIRE_LOG);
+        if (retire_log != null) {
+            retire_log.send(`${tag} さんが退部しました。入部日: ${member.joinedAt} 入部期間：${period}日間`);
+        }
     } catch (err) {
         console.log('guildMemberRemove');
         console.log({ err });
@@ -111,6 +113,7 @@ client.on('ready', async () => {
     // そのようなことを避けるためready内でハンドラを登録する。
     // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
     await registerSlashCommands();
+    client.user.setActivity('通常営業', { type: 'PLAYING' });
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {

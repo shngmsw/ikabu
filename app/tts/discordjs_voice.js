@@ -32,7 +32,7 @@ const join = async (interaction) => {
         // yoshi-taroがボイスチャンネルに入っていなければ参加
         if (!member.voice.channelId) {
             // メンバーがVCにいるかチェック
-            interaction.followUp('ボイチャに参加してからコマンドを使うでし！');
+            await interaction.followUp('ボイチャに参加してからコマンドを使うでし！');
             return;
         }
         const connection = joinVoiceChannel({
@@ -45,11 +45,11 @@ const join = async (interaction) => {
         connection.on('error', console.warn);
         subscriptions.set(guildId, subscription);
         channels.set(guildId, channelId);
-        interaction.followUp('ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！');
+        await interaction.followUp('ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！');
     } else if (channels.get(guildId) === channelId) {
-        interaction.followUp('既に接続済みでし！');
+        await interaction.followUp('既に接続済みでし！');
     } else {
-        interaction.followUp('他の部屋で営業中でし！');
+        await interaction.followUp('他の部屋で営業中でし！');
     }
 };
 
@@ -61,9 +61,9 @@ const kill = async (interaction) => {
         subscription.connection.destroy();
         subscriptions.delete(guildId);
         channels.delete(guildId);
-        interaction.followUp(':dash:');
+        await interaction.followUp(':dash:');
     } else if (channels.get(guildId) != channelId) {
-        interaction.followUp('他の部屋で営業中でし！');
+        await interaction.followUp('他の部屋で営業中でし！');
     }
 };
 

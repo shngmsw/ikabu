@@ -8,7 +8,7 @@ const { MessageEmbed, MessageAttachment } = require('discord.js');
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
-function sendStageInfo(interaction, data, scheduleNum) {
+async function sendStageInfo(interaction, data, scheduleNum) {
     var title;
     if (scheduleNum == 0) {
         title = '現在';
@@ -31,7 +31,7 @@ function sendStageInfo(interaction, data, scheduleNum) {
             })
             .setThumbnail(result.iconURL);
 
-        interaction.editReply({
+        await interaction.editReply({
             embeds: [nawabariEmbed],
         });
     } else {
@@ -104,11 +104,11 @@ function sendStageInfo(interaction, data, scheduleNum) {
             })
             .setThumbnail(x_thumbnail);
 
-        interaction.editReply({
+        await interaction.editReply({
             embeds: [openEmbed, challengeEmbed],
         });
         // TODO: リーグマッチとXマッチはゲーム内で実装後に表示
-        // interaction.editReply({
+        // await interaction.editReply({
         //     embeds: [leagueEmbed, openEmbed, challengeEmbed, xMatchEmbed],
         // });
     }
@@ -124,9 +124,9 @@ module.exports = async function handleShow(interaction) {
         const response = await fetch(schedule_url);
         const data = await response.json();
         if (subCommand === `now`) {
-            sendStageInfo(interaction, data, 0);
+            await sendStageInfo(interaction, data, 0);
         } else if (subCommand === 'next') {
-            sendStageInfo(interaction, data, 1);
+            await sendStageInfo(interaction, data, 1);
         } else if (subCommand === 'nawabari') {
             const response = await fetch(schedule_url);
             const data = await response.json();
@@ -144,7 +144,7 @@ module.exports = async function handleShow(interaction) {
                 })
                 .setThumbnail(result.iconURL);
 
-            interaction.editReply({
+            await interaction.editReply({
                 embeds: [nawabariEmbed],
             });
         } else if (subCommand === 'run') {
@@ -176,19 +176,19 @@ module.exports = async function handleShow(interaction) {
                     .setImage(stageImage)
                     .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
 
-                interaction.editReply({
+                await interaction.editReply({
                     embeds: [salmonEmbed],
                 });
-                interaction.channel.send({
+                await interaction.channel.send({
                     files: [weaponsImage],
                 });
             } catch (error) {
-                interaction.followUp('なんかエラーでてるわ');
+                await interaction.followUp('なんかエラーでてるわ');
                 console.error(error);
             }
         }
     } catch (error) {
-        interaction.followUp('なんかエラーでてるわ');
+        await interaction.followUp('なんかエラーでてるわ');
         console.error(error);
     }
 };

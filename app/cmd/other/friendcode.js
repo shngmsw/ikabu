@@ -2,6 +2,9 @@ const root = require('app-root-path');
 const insert = require(root + '/db/fc_insert.js');
 const getFC = require(root + '/db/fc_select.js');
 const Discord = require('discord.js');
+const app = require('app-root-path').resolve('app');
+const { searchMemberById } = require(app + '/manager/memberManager.js');
+
 module.exports = {
     handleFriendCode: handleFriendCode,
     deleteFriendCode: deleteFriendCode,
@@ -22,7 +25,7 @@ async function handleFriendCode(interaction) {
 }
 
 async function selectFriendCode(interaction) {
-    let targetUser = interaction.member;
+    let targetUser = await searchMemberById(interaction.guild, interaction.member.user.id);
     let id = interaction.member.user.id;
     const channelCollection = await interaction.guild.channels.fetch();
     let ch = channelCollection.find((channel) => channel.name === '自己紹介');
@@ -36,7 +39,7 @@ async function selectFriendCode(interaction) {
     deleteButton.addComponents([new Discord.MessageButton().setCustomId('fchide').setLabel('削除').setStyle('DANGER')]);
     let fc = await getFC(id);
     if (fc[0] != null) {
-        interaction.editReply({
+        await interaction.editReply({
             embeds: [composeEmbed(targetUser, fc[0].code, true)],
             components: [deleteButton],
             ephemeral: false,
@@ -48,12 +51,12 @@ async function selectFriendCode(interaction) {
         for (var r of result) {
             embeds.push(composeEmbed(targetUser, r, false));
         }
-        interaction.editReply({
+        await interaction.editReply({
             embeds: embeds,
             components: [deleteButton],
         });
     } else {
-        interaction.editReply({
+        await interaction.editReply({
             content:
                 '自己紹介チャンネルに投稿がないか、投稿した日時が古すぎて検索できないでし\n `/friend_code add`でコードを登録してみるでし！',
             ephemeral: true,
@@ -79,8 +82,8 @@ async function insertFriendCode(interaction) {
     const code = options.getString('フレンドコード');
 
     insert(id, code);
-    interaction.editReply({
-        content: `${code}で覚えたでし！変更したい場合はもう一度登録すると上書きされるでし！`,
+    await interaction.editReply({
+        content: `\`${code}\`で覚えたでし！変更したい場合はもう一度登録すると上書きされるでし！`,
         ephemeral: true,
     });
 }

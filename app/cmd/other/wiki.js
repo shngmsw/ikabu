@@ -16,7 +16,7 @@ module.exports = async function handleWiki(interaction) {
         let imageURL = await page.mainImage();
         let url = page.url();
         if (summary === '') {
-            interaction.followUp({ content: '見つからなかったでし！', ephemeral: false });
+            await interaction.followUp({ content: '見つからなかったでし！', ephemeral: false });
             return;
         }
         const embed = new MessageEmbed()
@@ -29,7 +29,7 @@ module.exports = async function handleWiki(interaction) {
             })
             .setImage(decodeURI(imageURL));
 
-        interaction.editReply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
     } catch (err) {
         console.log(err.name + ': ' + err.message);
     }

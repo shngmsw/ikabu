@@ -2,6 +2,8 @@ const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
+const { searchMessageById } = require(app + '/manager/messageManager.js');
+const { searchMemberById } = require(app + '/manager/memberManager.js');
 const { checkFes, getRegular } = require(app + '/common.js');
 const { searchChannelIdByName } = require(app + '/manager/channelManager.js');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
@@ -35,8 +37,7 @@ async function regularRecruit(interaction) {
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild.fetch();
-    const host_member = await guild.members.fetch(interaction.member.user.id);
+    const host_member = await searchMemberById(interaction.guild, interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let user3 = options.getUser('参加者3');
@@ -186,13 +187,13 @@ async function sendRegularMatch(
 
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.fetch(user1.id);
+        user1 = await searchMemberById(interaction.guild, user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.fetch(user2.id);
+        user2 = await searchMemberById(interaction.guild, user2.id);
     }
     if (user3 != null) {
-        user3 = await interaction.guild.members.fetch(user3.id);
+        user3 = await searchMemberById(interaction.guild, user3.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, user3, condition, channel_name);
@@ -238,8 +239,8 @@ async function sendRegularMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.fetch(sentMessage.id);
-        if (cmd_message != undefined) {
+        let cmd_message = await searchMessageById(interaction.guild, interaction.channel.id, sentMessage.id);
+        if (cmd_message) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
             } else {

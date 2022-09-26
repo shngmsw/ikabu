@@ -1,4 +1,5 @@
 const app = require('app-root-path').resolve('app');
+const { searchMessageById } = require(app + '/manager/messageManager.js');
 const common = require(app + '/common.js');
 const regexDiscordMessageUrl =
     'https://(ptb.|canary.)?discord(app)?.com/channels/' + '(?<guild>[0-9]{18,19})/(?<channel>[0-9]{18,19})/(?<message>[0-9]{18,19})';
@@ -10,18 +11,21 @@ module.exports = {
 async function dispand(message) {
     var messages = await extractMessages(message);
     var url;
-    for (var m in messages) {
-        if (message.content) {
-            url = message.content.match(regexDiscordMessageUrl);
-            await message.channel.send({
-                embeds: [common.composeEmbed(messages[m], url[0])],
-            });
-        }
-        for (var embed in messages[m].embeds) {
-            await message.channel.send({ embeds: [messages[m].embeds[embed]] });
-        }
-        if (message.content === url[0]) {
-            message.delete();
+
+    if (common.isNotEmpty(messages)) {
+        for (var m in messages) {
+            if (message.content) {
+                url = message.content.match(regexDiscordMessageUrl);
+                await message.channel.send({
+                    embeds: [await common.composeEmbed(messages[m], url[0])],
+                });
+            }
+            for (var embed in messages[m].embeds) {
+                await message.channel.send({ embeds: [messages[m].embeds[embed]] });
+            }
+            if (message.content === url[0]) {
+                message.delete();
+            }
         }
     }
 }
@@ -36,13 +40,13 @@ async function extractMessages(message) {
     if (guild.id != matches.groups.guild) {
         return;
     }
-    fetchedMessage = await fetchMessageFromId(guild, matches.groups.channel, matches.groups.message);
-    messages.push(fetchedMessage);
-    return messages;
-}
+    const fetchedMessage = await searchMessageById(guild, matches.groups.channel, matches.groups.message);
+    if (common.isNotEmpty(fetchedMessage)) {
+        messages.push(fetchedMessage);
+    } else {
+        message.reply('メッセージが見つからなかったでし！');
+        return;
+    }
 
-async function fetchMessageFromId(guild, chId, msgId) {
-    const channels = await guild.channels.fetch();
-    let channel = channels.find((channel) => channel.id === chId);
-    return channel.messages.fetch(msgId);
+    return messages;
 }

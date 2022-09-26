@@ -12,7 +12,7 @@ module.exports = async function handleDeleteCategory(interaction) {
     await interaction.deferReply();
 
     if (!interaction.member.permissions.has('MANAGE_CHANNELS')) {
-        return interaction.followUp('チャンネルを管理する権限がないでし！');
+        return await interaction.followUp('チャンネルを管理する権限がないでし！');
     }
 
     const { options } = interaction;
@@ -30,7 +30,7 @@ module.exports = async function handleDeleteCategory(interaction) {
     }
 
     if (attachment != null && attachment.size) {
-        interaction.editReply('CSVを読み込んで削除中でし！\nちょっと待つでし！');
+        await interaction.editReply('CSVを読み込んで削除中でし！\nちょっと待つでし！');
 
         request(attachment.url).pipe(
             parse(async function (err, data) {
@@ -42,17 +42,17 @@ module.exports = async function handleDeleteCategory(interaction) {
                     categoryIdList = Array.from(new Set(categoryIdList));
                 } catch (error) {
                     console.error(error);
-                    interaction.followUp('CSVファイル読み込み中にエラーでし！');
+                    await interaction.followUp('CSVファイル読み込み中にエラーでし！');
                 }
                 deleteCategory(interaction, categoryIdList);
             }),
         );
     } else if (args.length != 0) {
-        interaction.editReply('指定されたIDのカテゴリを削除中でし！\nちょっと待つでし！');
+        await interaction.editReply('指定されたIDのカテゴリを削除中でし！\nちょっと待つでし！');
         var categoryIdList = Array.from(new Set(args));
         deleteCategory(interaction, categoryIdList);
     } else {
-        interaction.followUp('CSVファイルを添付するか、削除したいカテゴリのIDを入れるでし！');
+        await interaction.followUp('CSVファイルを添付するか、削除したいカテゴリのIDを入れるでし！');
         return;
     }
 };
@@ -95,14 +95,14 @@ async function deleteCategory(interaction, categoryIdList) {
         }
     } catch (error) {
         console.error(error);
-        interaction.followUp('カテゴリ削除中にエラーでし！');
+        await interaction.followUp('カテゴリ削除中にエラーでし！');
     }
 
     const csvString = stringify(removed);
     fs.writeFileSync('./temp/temp.csv', csvString);
     const attachment = new MessageAttachment('./temp/temp.csv', 'removed_category.csv');
 
-    interaction.followUp({
+    await interaction.followUp({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
         files: [attachment],
     });

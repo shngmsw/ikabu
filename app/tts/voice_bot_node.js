@@ -183,6 +183,6 @@ async function setting(interaction) {
         voicePattern1 = type;
         const voiceMessage = `読み上げ音声を${voiceLists1[type]}に設定したでし`;
 
-        interaction.followUp(voiceMessage);
+        await interaction.followUp(voiceMessage);
     }
 }
