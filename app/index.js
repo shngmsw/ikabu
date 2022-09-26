@@ -94,7 +94,6 @@ client.on('guildMemberAdd', (member) => {
 
 client.on('guildMemberRemove', async (member) => {
     try {
-        console.log({ member });
         const tag = member.user.tag;
         const period = Math.round((Date.now() - member.joinedAt) / 86400000); // サーバーに居た期間を日数にして計算
         const retire_log = member.guild.channels.cache.get(process.env.CHANNEL_ID_RETIRE_LOG);
