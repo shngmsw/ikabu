@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const app = require('app-root-path').resolve('app');
+const { searchMemberById } = require(app + '/manager/memberManager.js');
 const common = require(app + '/common.js');
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 const { MessageEmbed } = require('discord.js');
@@ -24,7 +25,7 @@ async function buki(interaction) {
         const response = await fetch(weaponsUrl);
         const weapons = await response.json();
         const guild = await interaction.guild.fetch();
-        const member = await guild.members.fetch(interaction.member.user.id);
+        const member = await searchMemberById(guild, interaction.member.user.id);
         let bukis = weapons.filter(function (value) {
             if (bukiType != null) {
                 // 特定のbukiTypeが指定されているとき

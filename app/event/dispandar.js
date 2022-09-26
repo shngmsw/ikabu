@@ -1,4 +1,5 @@
 const app = require('app-root-path').resolve('app');
+const { searchMessageById } = require(app + '/manager/messageManager.js');
 const common = require(app + '/common.js');
 const regexDiscordMessageUrl =
     'https://(ptb.|canary.)?discord(app)?.com/channels/' + '(?<guild>[0-9]{18,19})/(?<channel>[0-9]{18,19})/(?<message>[0-9]{18,19})';
@@ -14,7 +15,7 @@ async function dispand(message) {
         if (message.content) {
             url = message.content.match(regexDiscordMessageUrl);
             await message.channel.send({
-                embeds: [common.composeEmbed(messages[m], url[0])],
+                embeds: [await common.composeEmbed(messages[m], url[0])],
             });
         }
         for (var embed in messages[m].embeds) {
@@ -36,13 +37,7 @@ async function extractMessages(message) {
     if (guild.id != matches.groups.guild) {
         return;
     }
-    fetchedMessage = await fetchMessageFromId(guild, matches.groups.channel, matches.groups.message);
+    fetchedMessage = await searchMessageById(guild, matches.groups.channel, matches.groups.message);
     messages.push(fetchedMessage);
     return messages;
-}
-
-async function fetchMessageFromId(guild, chId, msgId) {
-    const channels = await guild.channels.fetch();
-    let channel = channels.find((channel) => channel.id === chId);
-    return channel.messages.fetch(msgId);
 }

@@ -72,9 +72,5 @@ async function searchChannelById(guild, channelId, categoryId) {
         channel = channels.find((c) => c.id == channelId);
     }
 
-    if (channel != null) {
-        return channel;
-    } else {
-        return null;
-    }
+    return channel;
 }

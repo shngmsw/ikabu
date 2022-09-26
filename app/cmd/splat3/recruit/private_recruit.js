@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js');
 const app = require('app-root-path').resolve('app');
-const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
+const { searchMessageById } = require(app + '/manager/messageManager.js');
+const { searchMemberById } = require(app + '/manager/memberManager.js');
 const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require(app + '/common/button_components.js');
 
 module.exports = {
@@ -32,7 +33,7 @@ async function sendPrivateRecruit(interaction, options) {
     let condition = options.getString('内容または参加条件');
     let logo = 'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
     const guild = await interaction.guild.fetch();
-    const host_member = await guild.members.fetch(interaction.member.user.id);
+    const host_member = await searchMemberById(guild, interaction.member.user.id);
     let authorName = host_member.displayName;
     let authorAvatarUrl = host_member.avatarURL();
 
@@ -84,8 +85,8 @@ async function sendPrivateRecruit(interaction, options) {
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await interaction.channel.messages.fetch(sentMessage.id);
-        if (cmd_message != undefined) {
+        let cmd_message = await searchMessageById(guild, interaction.channel.id, sentMessage.id);
+        if (cmd_message) {
             sentMessage.edit({ components: [recruitActionRow(header)] });
         } else {
             return;
