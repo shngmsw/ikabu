@@ -281,7 +281,7 @@ async function close(interaction, params) {
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
-            await interaction.message.reply({ embeds: [embed] });
+            await interaction.editReply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
             await interaction.deferReply({
