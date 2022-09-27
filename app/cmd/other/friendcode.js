@@ -25,9 +25,10 @@ async function handleFriendCode(interaction) {
 }
 
 async function selectFriendCode(interaction) {
-    let targetUser = await searchMemberById(interaction.guild, interaction.member.user.id);
+    const guild = await interaction.guild.fetch();
+    let targetUser = await searchMemberById(guild, interaction.member.user.id);
     let id = interaction.member.user.id;
-    const channelCollection = await interaction.guild.channels.fetch();
+    const channelCollection = await guild.channels.fetch();
     let ch = channelCollection.find((channel) => channel.name === '自己紹介');
     let messages = await ch.messages.fetch({ limit: 100 }).catch(console.error);
     let list = await messages.filter((m) => targetUser.id === m.author.id && !m.author.bot);

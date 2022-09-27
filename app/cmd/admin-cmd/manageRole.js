@@ -21,6 +21,8 @@ async function handleCreateRole(interaction) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
+    const guild = await interaction.guild.fetch();
+
     try {
         let roleName = options.getString('ロール名');
         let colorInput = options.getString('ロールカラー');
@@ -32,16 +34,16 @@ async function handleCreateRole(interaction) {
             colorInput = null;
         }
 
-        if (searchRoleIdByName(interaction.guild, roleName) != null) {
+        if (searchRoleIdByName(guild, roleName) != null) {
             return await interaction.followUp('その名前のロールはもうあるでし！\n別のロール名を使うでし！');
         }
 
-        var roleId = await createRole(interaction.guild, roleName);
+        var roleId = await createRole(guild, roleName);
 
-        await interaction.guild.roles.fetch();
+        await guild.roles.fetch();
 
-        var role = await searchRoleById(interaction.guild, roleId);
-        var colorCode = await setColorToRole(interaction.guild, role, colorInput);
+        var role = await searchRoleById(guild, roleId);
+        var colorCode = await setColorToRole(guild, role, colorInput);
         role.setHoist(true);
 
         await interaction.followUp(
@@ -76,7 +78,7 @@ async function handleDeleteRole(interaction) {
 
     await interaction.editReply('指定されたIDのロールを削除中でし！\nちょっと待つでし！');
 
-    const guild = interaction.guild;
+    const guild = await interaction.guild.fetch();
     var removed = [];
 
     removed.push(['ロールID', 'ロール名']);

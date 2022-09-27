@@ -71,7 +71,7 @@ async function sendPrivateRecruit(interaction, options) {
             ephemeral: false,
         });
 
-        const mention_id = await searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention_id = await searchRoleIdByName(guild, 'スプラ2');
         const mention = `<@&${mention_id}>`;
         const sentMessage = await interaction.channel.send({
             content: mention + ` ボタンを押して参加表明するでし！`,
@@ -97,7 +97,8 @@ async function sendPrivateRecruit(interaction, options) {
 }
 
 async function sendNotification(interaction) {
-    const mention_id = await searchRoleIdByName(interaction.guild, 'スプラ2');
+    const guild = await interaction.guild.fetch();
+    const mention_id = await searchRoleIdByName(guild, 'スプラ2');
     const mention = `<@&${mention_id}>`;
     const sentMessage = await interaction.channel.send({
         content: mention + ` ボタンを押して参加表明するでし！`,

@@ -58,12 +58,12 @@ module.exports = async function handleDeleteCategory(interaction) {
 };
 
 async function deleteCategory(interaction, categoryIdList) {
-    const guild = interaction.guild;
+    const guild = await interaction.guild.fetch();
     var removed = [];
 
     removed.push(['カテゴリID', 'カテゴリ名', 'チャンネルID', 'チャンネル名']);
 
-    await interaction.followUp('0% 完了');
+    await interaction.editReply('0% 完了');
 
     try {
         // i = index
@@ -109,8 +109,8 @@ async function deleteCategory(interaction, categoryIdList) {
 }
 
 async function deleteChannelsByCategoryId(guild, categoryId) {
-    var channels = [];
-    const channelCollection = await guild.channels.fetch();
+    let channels = [];
+    let channelCollection = await guild.channels.fetch();
     while (channelCollection.find((c) => c.type != 'GUILD_CATEGORY' && c.parent == categoryId) != null) {
         var channel = channelCollection.find((c) => c.type != 'GUILD_CATEGORY' && c.parent == categoryId);
         if (channel.type == 'GUILD_TEXT') {
@@ -119,7 +119,7 @@ async function deleteChannelsByCategoryId(guild, categoryId) {
             channels.push([channel.id, '🔊' + channel.name]);
         }
         await channel.delete();
-        await guild.channels.fetch();
+        channelCollection = await guild.channels.fetch();
     }
     return channels;
 }

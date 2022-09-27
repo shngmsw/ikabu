@@ -30,7 +30,7 @@ module.exports = async function handleDeleteChannel(interaction) {
 
     await interaction.editReply('指定されたIDのチャンネルを削除中でし！\nちょっと待つでし！');
 
-    const guild = interaction.guild;
+    const guild = await interaction.guild.fetch();
     var removed = [];
 
     removed.push(['チャンネルID', 'チャンネル名']);

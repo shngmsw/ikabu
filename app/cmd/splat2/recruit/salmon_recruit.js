@@ -130,12 +130,13 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
+    const guild = await interaction.guild.fetch();
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.fetch(user1.id);
+        user1 = await guild.members.fetch(user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.fetch(user2.id);
+        user2 = await guild.members.fetch(user2.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
@@ -144,7 +145,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
 
     try {
-        const mention_id = await searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention_id = await searchRoleIdByName(guild, 'スプラ2');
         const mention = `<@&${mention_id}>`;
         const header = await interaction.editReply({
             content: txt,
@@ -166,7 +167,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
                     { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
                 ],
                 'Reserve Voice Channel',
