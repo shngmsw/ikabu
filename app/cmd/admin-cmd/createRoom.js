@@ -57,7 +57,7 @@ module.exports = async function handleCreateRoom(interaction) {
 
                 var resultData = [];
 
-                var guild = interaction.guild;
+                const guild = await interaction.guild.fetch();
 
                 resultData.push([
                     'カテゴリID',

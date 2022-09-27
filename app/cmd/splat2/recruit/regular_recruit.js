@@ -175,15 +175,16 @@ async function sendRegularMatch(
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
+    const guild = await interaction.guild.fetch();
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.fetch(user1.id);
+        user1 = await guild.members.fetch(user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.fetch(user2.id);
+        user2 = await guild.members.fetch(user2.id);
     }
     if (user3 != null) {
-        user3 = await interaction.guild.members.fetch(user3.id);
+        user3 = await guild.members.fetch(user3.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, user3, condition, channel_name);
@@ -192,7 +193,7 @@ async function sendRegularMatch(
     const rule = new MessageAttachment(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
 
     try {
-        const mention_id = await searchRoleIdByName(interaction.guild, 'スプラ2');
+        const mention_id = await searchRoleIdByName(guild, 'スプラ2');
         const mention = `<@&${mention_id}>`;
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
         const sentMessage = await interaction.channel.send({
@@ -248,7 +249,7 @@ async function sendRegularMatch(
             components: [disableButtons()],
         });
         if (reserve_channel != null) {
-            reserve_channel.permissionOverwrites.delete(interaction.guild.roles.everyone, 'UnLock Voice Channel');
+            reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }
     } catch (error) {

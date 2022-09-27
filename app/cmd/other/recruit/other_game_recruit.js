@@ -42,7 +42,8 @@ async function otherGameRecruit(interaction) {
 
     // 募集がfollowUpでないとリグマと同じfunctionでeditできないため
     await interaction.deferReply();
-    const roles = await interaction.guild.roles.fetch();
+    const guild = await interaction.guild.fetch();
+    const roles = await guild.roles.fetch();
 
     if (options.getSubcommand() === 'apex') {
         apexLegends(interaction, roles);
@@ -122,7 +123,9 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
 
     let condition = options.getString('内容または参加条件');
 
-    let author = await searchMemberById(interaction.guild, interaction.member.user.id);
+    const guild = await interaction.guild.fetch();
+
+    let author = await searchMemberById(guild, interaction.member.user.id);
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
     let embed = new MessageEmbed()
@@ -167,7 +170,7 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
                     { id: interaction.member.user.id, allow: [Permissions.FLAGS.CONNECT] },
                 ],
                 'Reserve Voice Channel',
@@ -176,7 +179,7 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await searchMessageById(interaction.guild, interaction.channel.id, sentMessage.id);
+        let cmd_message = await searchMessageById(guild, interaction.channel.id, sentMessage.id);
         if (cmd_message) {
             if (reserve_channel == null) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
