@@ -93,7 +93,7 @@ async function leagueRecruit(interaction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    const mention_id = await searchRoleIdByName(interaction.guild, 'スプラ2');
+    const mention_id = await searchRoleIdByName(guild, 'スプラ2');
     const mention = `<@&${mention_id}>`;
     try {
         const response = await fetch(schedule_url);
@@ -204,12 +204,13 @@ async function sendLeagueMatch(
 
     const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
+    const guild = await interaction.guild.fetch();
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await interaction.guild.members.fetch(user1.id);
+        user1 = await guild.members.fetch(user1.id);
     }
     if (user2 != null) {
-        user2 = await interaction.guild.members.fetch(user2.id);
+        user2 = await guild.members.fetch(user2.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
@@ -234,7 +235,7 @@ async function sendLeagueMatch(
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
                     { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
                 ],
                 'Reserve Voice Channel',
@@ -277,7 +278,7 @@ async function sendLeagueMatch(
             components: [disableButtons()],
         });
         if (reserve_channel != null) {
-            reserve_channel.permissionOverwrites.delete(interaction.guild.roles.everyone, 'UnLock Voice Channel');
+            reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }
     } catch (error) {

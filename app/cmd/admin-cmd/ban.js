@@ -10,7 +10,8 @@ module.exports = async function handleBan(interaction) {
     if (interaction.member.permissions.has('BAN_MEMBERS')) {
         let memberId = banTarget.id;
 
-        const member = await interaction.guild.members.fetch(memberId);
+        const guild = await interaction.guild.fetch();
+        const member = await guild.members.fetch(memberId);
 
         let reasonText =
             'イカ部の管理人です。以下の理由によりイカ部から退部とさせていただきました。```' +
@@ -22,7 +23,7 @@ module.exports = async function handleBan(interaction) {
         await DMChannel.send({ content: reasonText }).catch(console.error);
 
         await member.ban({ reason: reasonText }).catch(console.error);
-        const channels = await interaction.guild.channels.fetch();
+        const channels = await guild.channels.fetch();
         const banChannel = channels.find((channel) => channel.name === 'banコマンド');
         banChannel.send(`${member.user.tag}さんを以下の理由によりBANしました。\n` + reasonText);
         await interaction.editReply('BANしたでし！');

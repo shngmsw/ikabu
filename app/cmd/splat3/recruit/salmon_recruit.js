@@ -41,7 +41,8 @@ async function salmonRecruit(interaction) {
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
-    const host_member = await searchMemberById(interaction.guild, interaction.member.user.id);
+    const guild = await interaction.guild.fetch();
+    const host_member = await searchMemberById(guild, interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // プレイ人数のカウンター
@@ -142,12 +143,13 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
+    const guild = await interaction.guild.fetch();
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await searchMemberById(interaction.guild, user1.id);
+        user1 = await searchMemberById(guild, user1.id);
     }
     if (user2 != null) {
-        user2 = await searchMemberById(interaction.guild, user2.id);
+        user2 = await searchMemberById(guild, user2.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
@@ -176,7 +178,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
                     { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
                 ],
                 'Reserve Voice Channel',
@@ -197,7 +199,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await searchMessageById(interaction.guild, interaction.channel.id, sentMessage.id);
+        let cmd_message = await searchMessageById(guild, interaction.channel.id, sentMessage.id);
         if (cmd_message) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
@@ -210,7 +212,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
         // 2時間後にVCロックを解除する
         await sleep(7200000 - 15000);
         if (isLock) {
-            reserve_channel.permissionOverwrites.delete(interaction.guild.roles.everyone, 'UnLock Voice Channel');
+            reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }
     } catch (error) {

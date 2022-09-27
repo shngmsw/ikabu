@@ -491,7 +491,7 @@ async function unlock(interaction, params) {
 
     try {
         const channelId = params.get('vid');
-        const guild = await interaction.guild;
+        const guild = await interaction.guild.fetch();
         const channel = await searchChannelById(guild, channelId);
 
         channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
@@ -574,9 +574,10 @@ function getMemberMentions(members) {
 }
 
 async function editMemberListMessage(interaction) {
+    const guild = await interaction.guild.fetch();
     const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
     const member_list = getMemberMentions(recruit_data);
-    const interaction_message = await searchMessageById(interaction.guild, interaction.channel, interaction.message.id);
+    const interaction_message = await searchMessageById(guild, interaction.channel, interaction.message.id);
     const message_first_row = interaction_message.content.split('\n')[0];
     interaction_message.edit({
         content: message_first_row + '\n' + member_list,
