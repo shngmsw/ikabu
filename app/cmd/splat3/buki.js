@@ -1,7 +1,6 @@
 const fetch = require('node-fetch');
-const app = require('app-root-path').resolve('app');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
-const common = require(app + '/common.js');
+const { searchMemberById } = require('../../manager/memberManager');
+const common = require('../../common');
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 const { MessageEmbed } = require('discord.js');
 

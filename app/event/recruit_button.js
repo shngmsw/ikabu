@@ -1,13 +1,11 @@
 const { MessageEmbed, MessageActionRow, MessageButton, Client } = require('discord.js');
-const app = require('app-root-path').resolve('app');
-const db = require('app-root-path').resolve('db');
-const { isNotEmpty, datetimeDiff } = require(app + '/common');
-const { insert_recruit } = require(db + '/recruit_insert.js');
-const { delete_recruit, deleteRecruitByMemberId } = require(db + '/recruit_delete.js');
-const { getRecruitMessageByMemberId, getRecruitAllByMessageId } = require(db + '/recruit_select.js');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
-const { searchMessageById } = require(app + '/manager/messageManager.js');
-const { searchChannelById } = require(app + '/manager/channelManager.js');
+const { isNotEmpty, datetimeDiff } = require('../common');
+const { insert_recruit } = require('../../db/recruit_insert');
+const { delete_recruit, deleteRecruitByMemberId } = require('../../db/recruit_delete.js');
+const { getRecruitMessageByMemberId, getRecruitAllByMessageId } = require('../../db/recruit_select.js');
+const { searchMemberById } = require('../manager/memberManager.js');
+const { searchMessageById } = require('../manager/messageManager.js');
+const { searchChannelById } = require('../manager/channelManager.js');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 module.exports = {

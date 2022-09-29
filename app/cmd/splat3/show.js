@@ -1,9 +1,8 @@
 const Canvas = require('canvas');
 const fetch = require('node-fetch');
-const app = require('app-root-path').resolve('app');
-const common = require(app + '/common.js');
-const { createRoundRect, fillTextWithStroke } = require(app + '/common/canvas_components.js');
-const { sp3unixTime2mdwhm, sp3coop_stage2txt } = require(app + '/common.js');
+const common = require('../../common');
+const { createRoundRect, fillTextWithStroke } = require('../../common/canvas_components');
+const { sp3unixTime2mdwhm, sp3coop_stage2txt } = require('../../common');
 const { MessageEmbed, MessageAttachment } = require('discord.js');
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';

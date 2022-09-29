@@ -1,5 +1,4 @@
-const app = require('app-root-path').resolve('app');
-const { searchChannelById } = require(app + '/manager/channelManager.js');
+const { searchChannelById } = require('../manager/channelManager');
 
 module.exports = {
     searchMessageById: searchMessageById,

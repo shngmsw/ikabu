@@ -1,14 +1,13 @@
 const { MessageEmbed, Permissions } = require('discord.js');
-const app = require('app-root-path').resolve('app');
-const { searchMessageById } = require(app + '/manager/messageManager.js');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
+const { searchMessageById } = require('../../../manager/messageManager');
+const { searchMemberById } = require('../../../manager/memberManager');
 const {
     recruitDeleteButton,
     recruitActionRow,
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require(app + '/common/button_components.js');
+} = require('../../../common/button_components.js');
 
 module.exports = {
     otherGameRecruit: otherGameRecruit,

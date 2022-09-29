@@ -23,7 +23,6 @@
     "@discordjs/opus": "^0.7.0",
     "@discordjs/rest": "^0.4.1",
     "@discordjs/voice": "^0.9.0",
-    "app-root-path": "^3.1.0",
     "canvas": "^2.9.1",
     "config": "^3.3.7",
     "config-reloadable": "^1.0.9",
