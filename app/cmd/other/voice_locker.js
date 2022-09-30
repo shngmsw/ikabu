@@ -1,4 +1,4 @@
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { setTimeout } = require('timers/promises');
 
 /*
@@ -142,29 +142,39 @@ async function getVoiceChannelState(interaction) {
  * @returns 作成したボタンを返す
  */
 function createButton(channelState) {
-    const button = new MessageActionRow();
+    const button = new ActionRowBuilder();
     const limit = channelState.limit;
     if (channelState.isLock) {
         // 制限人数が1のとき，'－'ボタンを無効化
         if (limit == 1) {
-            button.addComponents([new MessageButton().setCustomId('voiceLock_dec').setLabel('－').setStyle('PRIMARY').setDisabled(true)]);
+            button.addComponents([
+                new ButtonBuilder().setCustomId('voiceLock_dec').setLabel('－').setStyle(ButtonStyle.Primary).setDisabled(true),
+            ]);
         } else {
-            button.addComponents([new MessageButton().setCustomId('voiceLock_dec').setLabel('－').setStyle('PRIMARY').setDisabled(false)]);
+            button.addComponents([
+                new ButtonBuilder().setCustomId('voiceLock_dec').setLabel('－').setStyle(ButtonStyle.Primary).setDisabled(false),
+            ]);
         }
 
-        button.addComponents([new MessageButton().setCustomId('voiceLockOrUnlock').setLabel('UNLOCK').setStyle('SUCCESS').setEmoji('🔓')]);
+        button.addComponents([
+            new ButtonBuilder().setCustomId('voiceLockOrUnlock').setLabel('UNLOCK').setStyle(ButtonStyle.Success).setEmoji('🔓'),
+        ]);
 
         // 制限人数が99のとき，'＋'ボタンを無効化
         if (limit == 99) {
-            button.addComponents([new MessageButton().setCustomId('voiceLock_inc').setLabel('＋').setStyle('PRIMARY').setDisabled(true)]);
+            button.addComponents([
+                new ButtonBuilder().setCustomId('voiceLock_inc').setLabel('＋').setStyle(ButtonStyle.Primary).setDisabled(true),
+            ]);
         } else {
-            button.addComponents([new MessageButton().setCustomId('voiceLock_inc').setLabel('＋').setStyle('PRIMARY').setDisabled(false)]);
+            button.addComponents([
+                new ButtonBuilder().setCustomId('voiceLock_inc').setLabel('＋').setStyle(ButtonStyle.Primary).setDisabled(false),
+            ]);
         }
     } else {
         button.addComponents([
-            new MessageButton().setCustomId('voiceLock_dec').setLabel('－').setStyle('PRIMARY').setDisabled(true),
-            new MessageButton().setCustomId('voiceLockOrUnlock').setLabel('LOCK').setStyle('DANGER').setEmoji('🔒'),
-            new MessageButton().setCustomId('voiceLock_inc').setLabel('＋').setStyle('PRIMARY').setDisabled(true),
+            new ButtonBuilder().setCustomId('voiceLock_dec').setLabel('－').setStyle(ButtonStyle.Primary).setDisabled(true),
+            new ButtonBuilder().setCustomId('voiceLockOrUnlock').setLabel('LOCK').setStyle(ButtonStyle.Danger).setEmoji('🔒'),
+            new ButtonBuilder().setCustomId('voiceLock_inc').setLabel('＋').setStyle(ButtonStyle.Primary).setDisabled(true),
         ]);
     }
     return button;
@@ -183,14 +193,26 @@ function createEmbed(channelState) {
     } else {
         limit = channelState.limit;
     }
-    const embed = new MessageEmbed().setTitle('ボイスチャンネル情報').addField('対象のチャンネル', '<#' + channelState.id + '>');
+    const embed = new EmbedBuilder()
+        .setTitle('ボイスチャンネル情報')
+        .addFields([{ name: '対象のチャンネル', value: '<#' + channelState.id + '>' }]);
     if (channelState.isLock) {
-        embed.addField('状態', '制限中');
-        embed.setColor('#d83c3e');
+        embed.addFields([
+            {
+                name: '状態',
+                value: '制限中',
+            },
+        ]),
+            embed.setColor('#d83c3e');
     } else {
-        embed.addField('状態', '制限なし');
-        embed.setColor('#2d7d46');
+        embed.addFields([
+            {
+                name: '状態',
+                value: '制限なし',
+            },
+        ]),
+            embed.setColor('#2d7d46');
     }
-    embed.addField('人数制限', String(limit));
+    embed.addFields([{ name: '人数制限', value: String(limit) }]);
     return embed;
 }

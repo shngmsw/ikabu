@@ -1,6 +1,6 @@
 const insert = require('../../../db/fc_insert.js');
 const getFC = require('../../../db/fc_select.js');
-const Discord = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { searchMemberById } = require('../../manager/memberManager');
 
 module.exports = {
@@ -34,8 +34,8 @@ async function selectFriendCode(interaction) {
         return value.content;
     });
 
-    const deleteButton = new Discord.MessageActionRow();
-    deleteButton.addComponents([new Discord.MessageButton().setCustomId('fchide').setLabel('削除').setStyle('DANGER')]);
+    const deleteButton = new ActionRowBuilder();
+    deleteButton.addComponents([new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger)]);
     let fc = await getFC(id);
     if (fc[0] != null) {
         await interaction.editReply({
@@ -64,7 +64,7 @@ async function selectFriendCode(interaction) {
 }
 
 function composeEmbed(users, fc, isDatabase) {
-    const embed = new Discord.MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setDescription(fc);
     embed.setAuthor({ name: users.displayName, iconURL: users.displayAvatarURL() });
     if (!isDatabase) {

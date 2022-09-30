@@ -1,3 +1,6 @@
+const { ChannelType } = require('discord.js');
+const common = require('../common');
+
 module.exports = {
     createChannel: createChannel,
     searchChannelIdByName: searchChannelIdByName,
@@ -10,7 +13,7 @@ module.exports = {
  * @param {Guild} guild Guildオブジェクト
  * @param {string} categoryId カテゴリID or null
  * @param {string} channelName チャンネル名
- * @param {string} channelType 'GUILD_TEXT' or 'GUILD_VOICE' or 'GUILD_CATEGORY'
+ * @param {ChannelType} channelType チャンネルタイプ(discord.jsのenumを使用)
  * @returns チャンネルID
  */
 async function createChannel(guild, categoryId, channelName, channelType) {
@@ -26,7 +29,7 @@ async function createChannel(guild, categoryId, channelName, channelType) {
     if ((await searchChannelIdByName(guild, channelName, channelType, parentId)) != null) {
         return await searchChannelIdByName(guild, channelName, channelType, parentId);
     } else {
-        channel = await guild.channels.create(channelName, { type: channelType, parent: parentId });
+        channel = await guild.channels.create({ name: channelName, type: channelType, parent: parentId });
         await guild.channels.fetch();
         return channel.id;
     }
@@ -36,7 +39,7 @@ async function createChannel(guild, categoryId, channelName, channelType) {
  * チャンネル名からチャンネルIDを検索する．ない場合はnullを返す．
  * @param {string} guild Guildオブジェクト
  * @param {string} channelName チャンネル名
- * @param {string} channelType 'GUILD_TEXT' or 'GUILD_VOICE' or 'GUILD_CATEGORY'
+ * @param {ChannelType} channelType チャンネルタイプ(discord.jsのenumを使用)
  * @param {string} categoryId カテゴリID or null
  * @returns チャンネルID
  */
@@ -67,6 +70,13 @@ async function searchChannelById(guild, channelId) {
     var channel;
     const channels = await guild.channels.fetch();
     channel = channels.find((c) => c.id == channelId);
+    if (common.isEmpty(channel)) {
+        channels.forEach((c) => {
+            if (c.type != ChannelType.GuildCategory && c.type != ChannelType.GuildVoice && c.threads.cache.size > 0) {
+                channel = c.threads.cache.find((t) => t.id == channelId);
+            }
+        });
+    }
 
     return channel;
 }

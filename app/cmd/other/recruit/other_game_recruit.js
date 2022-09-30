@@ -1,4 +1,4 @@
-const { MessageEmbed, Permissions } = require('discord.js');
+const { EmbedBuilder, Permissions } = require('discord.js');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const {
@@ -127,7 +127,7 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
     let author = await searchMemberById(guild, interaction.member.user.id);
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
-    let embed = new MessageEmbed()
+    let embed = new EmbedBuilder()
         .setAuthor({
             name: author.displayName,
             iconURL: author.displayAvatarURL(),

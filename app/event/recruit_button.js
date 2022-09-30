@@ -1,4 +1,4 @@
-const { MessageEmbed, MessageActionRow, MessageButton, Client } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { isNotEmpty, datetimeDiff } = require('../common');
 const { insert_recruit } = require('../../db/recruit_insert');
 const { delete_recruit, deleteRecruitByMemberId } = require('../../db/recruit_delete.js');
@@ -80,7 +80,7 @@ async function join(interaction, params) {
                 return;
             }
 
-            const embed = new MessageEmbed();
+            const embed = new EmbedBuilder();
             embed.setAuthor({
                 name: `${member.displayName}たんが参加表明したでし！`,
                 iconURL: member.displayAvatarURL(),
@@ -151,7 +151,7 @@ async function cancel(interaction, params) {
         const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
         const host_id = header_message.interaction.user.id;
         const channelId = params.get('vid');
-        const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
+        const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
 
         if (member.user.id == host_id) {
@@ -257,7 +257,7 @@ async function close(interaction, params) {
         const helpEmbed = await getHelpEmbed(guild, header_message.channel.id);
         const host_id = header_message.interaction.user.id;
         const channelId = params.get('vid');
-        const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
+        const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
 
         if (member.user.id === host_id) {
@@ -299,7 +299,7 @@ async function close(interaction, params) {
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
-            const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
+            const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.editReply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
@@ -342,7 +342,7 @@ async function joinNotify(interaction, params) {
                 return;
             }
 
-            const embed = new MessageEmbed();
+            const embed = new EmbedBuilder();
             embed.setAuthor({
                 name: `${member.displayName}たんが参加表明したでし！`,
                 iconURL: member.displayAvatarURL(),
@@ -391,7 +391,7 @@ async function cancelNotify(interaction, params) {
         await guild.channels.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
-        const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
+        const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
 
         if (member.user.id == host_id) {
@@ -440,7 +440,7 @@ async function closeNotify(interaction, params) {
         await guild.channels.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
-        const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆`);
+        const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const helpEmbed = await getHelpEmbed(guild, interaction.channel.id);
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
 
@@ -470,7 +470,7 @@ async function closeNotify(interaction, params) {
             });
             // recruitテーブルから削除
             deleteRecruitByMemberId(interaction.message.id);
-            const embed = new MessageEmbed().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
+            const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.editReply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
@@ -522,41 +522,41 @@ async function getHelpEmbed(guild, chid) {
     } else if (sendChannel.name.match('フェス')) {
         command = '`/〇〇陣営 now` or `/〇〇陣営 next`';
     }
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setDescription('募集コマンドは ' + `${command}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
     return embed;
 }
 
 function disableButtons() {
-    let buttons = new MessageActionRow().addComponents([
-        new MessageButton().setCustomId('join').setLabel('参加').setStyle('PRIMARY').setDisabled(),
-        new MessageButton().setCustomId('cancel').setLabel('キャンセル').setStyle('DANGER').setDisabled(),
-        new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
+    let buttons = new ActionRowBuilder().addComponents([
+        new ButtonBuilder().setCustomId('join').setLabel('参加').setStyle(ButtonStyle.Primary).setDisabled(),
+        new ButtonBuilder().setCustomId('cancel').setLabel('キャンセル').setStyle(ButtonStyle.Danger).setDisabled(),
+        new ButtonBuilder().setCustomId('close').setLabel('〆').setStyle(ButtonStyle.Secondary).setDisabled(),
     ]);
     return buttons;
 }
 
 function disableUnlockButton() {
-    let buttons = new MessageActionRow().addComponents([
-        new MessageButton().setCustomId('unlocked').setLabel('ロック解除済み').setStyle('SECONDARY').setDisabled(),
+    let buttons = new ActionRowBuilder().addComponents([
+        new ButtonBuilder().setCustomId('unlocked').setLabel('ロック解除済み').setStyle(ButtonStyle.Secondary).setDisabled(),
     ]);
     return buttons;
 }
 
 function channelLinkButtons(guildId, channelId) {
     const channel_link = `https://discord.com/channels/${guildId}/${channelId}`;
-    let buttons = new MessageActionRow().addComponents([
-        new MessageButton().setLabel('チャンネルに移動').setStyle('LINK').setURL(channel_link),
+    let buttons = new ActionRowBuilder().addComponents([
+        new ButtonBuilder().setLabel('チャンネルに移動').setStyle(ButtonStyle.Link).setURL(channel_link),
     ]);
     return buttons;
 }
 function messageLinkButtons(guildId, channelId, messageId, label) {
     const link = `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
 
-    let buttons = new MessageActionRow().addComponents([
-        new MessageButton()
+    let buttons = new ActionRowBuilder().addComponents([
+        new ButtonBuilder()
             .setLabel(label != null ? label : 'メッセージを表示')
-            .setStyle('LINK')
+            .setStyle(ButtonStyle.Link)
             .setURL(link),
     ]);
     return buttons;

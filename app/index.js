@@ -1,15 +1,16 @@
 // Discord bot implements
-const { Client, Intents, MessageAttachment } = require('discord.js');
+const { Client, GatewayIntentBits, PermissionsBitField } = require('discord.js');
 const { URLSearchParams } = require('url');
 const client = new Client({
     intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.GUILD_BANS,
-        Intents.FLAGS.GUILD_PRESENCES,
-        Intents.FLAGS.GUILD_VOICE_STATES,
-        Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-        Intents.FLAGS.GUILD_MEMBERS,
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildBans,
+        GatewayIntentBits.GuildPresences,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.MessageContent,
     ],
 });
 
@@ -61,7 +62,7 @@ client.on('messageCreate', async (msg) => {
             const member = await guild.members.fetch(msg.author.id, {
                 force: true, // intentsによってはGuildMemberUpdateが配信されないため
             });
-            if (member.permissions.has('MANAGE_CHANNELS')) {
+            if (member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
                 handleStageInfo(msg);
             }
         }
@@ -75,7 +76,7 @@ client.on('messageCreate', async (msg) => {
         );
     }
     if (msg.content.match('お前を消す方法')) {
-        const Kairu = new MessageAttachment('./images/Kairu.png');
+        const Kairu = new AttachmentBuilder('./images/Kairu.png');
         msg.reply({ files: [Kairu] });
     }
 

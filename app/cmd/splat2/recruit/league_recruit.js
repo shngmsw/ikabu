@@ -11,7 +11,7 @@ const {
     recruitActionRowWithChannel,
     unlockChannelButton,
 } = require('../../../common/button_components.js');
-const { MessageAttachment, Permissions } = require('discord.js');
+const { AttachmentBuilder, Permissions } = require('discord.js');
 const { searchRoleIdByName } = require('../../../manager/roleManager');
 
 const schedule_url = 'https://splatoon2.ink/data/schedules.json';
@@ -213,9 +213,9 @@ async function sendLeagueMatch(
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
-    const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
+    const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new MessageAttachment(await ruleCanvas(l_rule, l_date, l_time, l_stage1, l_stage2, stageImages, thumbnail), 'rules.png');
+    const rule = new AttachmentBuilder(await ruleCanvas(l_rule, l_date, l_time, l_stage1, l_stage2, stageImages, thumbnail), 'rules.png');
 
     try {
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
@@ -260,7 +260,7 @@ async function sendLeagueMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.fetch(sentMessage.id);
+        let cmd_message = await channel.messages.fetch({ message: sentMessage.id });
         if (cmd_message != undefined) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
@@ -308,7 +308,7 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
     fillTextWithStroke(recruit_ctx, 'リーグマッチ', '50px Splatfont', '#F02D7E', '#bd2363', 1, 115, 80);
 
     // 募集主の画像
-    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));
+    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ extension: 'png' }));
     recruit_ctx.save();
     drawArcImage(recruit_ctx, host_img, 40, 120, 50);
     recruit_ctx.strokeStyle = '#1e1f23';
@@ -322,12 +322,12 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
 
     // 参加者指定があれば、画像を拾ってくる
     if (user1 != null && user2 != null) {
-        user1_url = user1.displayAvatarURL({ format: 'png' });
-        user2_url = user2.displayAvatarURL({ format: 'png' });
+        user1_url = user1.displayAvatarURL({ extension: 'png' });
+        user2_url = user2.displayAvatarURL({ extension: 'png' });
     } else if (user1 != null && user2 == null) {
-        user1_url = user1.displayAvatarURL({ format: 'png' });
+        user1_url = user1.displayAvatarURL({ extension: 'png' });
     } else if (user1 == null && user2 != null) {
-        user1_url = user2.displayAvatarURL({ format: 'png' });
+        user1_url = user2.displayAvatarURL({ extension: 'png' });
     }
 
     let user1_img = await Canvas.loadImage(user1_url);

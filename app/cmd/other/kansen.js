@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const { Combination } = require('js-combinatorics');
 
 module.exports = async function handleKansen(interaction) {
@@ -64,6 +64,6 @@ module.exports = async function handleKansen(interaction) {
         }
     }
 
-    var emb = new MessageEmbed().setColor(0xf02d7d).addFields([{ name: '観戦の人', value: resultList.join('\n') }]);
+    var emb = new EmbedBuilder().setColor(0xf02d7d).addFields([{ name: '観戦の人', value: resultList.join('\n') }]);
     await interaction.editReply({ embeds: [emb] });
 };

@@ -13,7 +13,7 @@ const {
     recruitActionRowWithChannel,
     unlockChannelButton,
 } = require('../../../common/button_components');
-const { MessageAttachment, Permissions } = require('discord.js');
+const { AttachmentBuilder } = require('discord.js');
 const { searchRoleIdByName, searchRoleById } = require('../../../manager/roleManager');
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
@@ -198,9 +198,9 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
         condition,
         channel_name,
     );
-    const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
+    const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new MessageAttachment(await ruleCanvas(f_rule, f_date, f_time, f_stage1, f_stage2, stageImages), 'rules.png');
+    const rule = new AttachmentBuilder(await ruleCanvas(f_rule, f_date, f_time, f_stage1, f_stage2, stageImages), 'rules.png');
 
     try {
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
@@ -294,7 +294,7 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, team
     recruit_ctx.restore();
 
     // 募集主の画像
-    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));
+    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ extension: 'png' }));
     recruit_ctx.save();
     drawArcImage(recruit_ctx, host_img, 40, 120, 50);
     recruit_ctx.strokeStyle = '#1e1f23';
@@ -308,12 +308,12 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, team
 
     // 参加者指定があれば、画像を拾ってくる
     if (user1 != null && user2 != null) {
-        user1_url = user1.displayAvatarURL({ format: 'png' });
-        user2_url = user2.displayAvatarURL({ format: 'png' });
+        user1_url = user1.displayAvatarURL({ extension: 'png' });
+        user2_url = user2.displayAvatarURL({ extension: 'png' });
     } else if (user1 != null && user2 == null) {
-        user1_url = user1.displayAvatarURL({ format: 'png' });
+        user1_url = user1.displayAvatarURL({ extension: 'png' });
     } else if (user1 == null && user2 != null) {
-        user1_url = user2.displayAvatarURL({ format: 'png' });
+        user1_url = user2.displayAvatarURL({ extension: 'png' });
     }
 
     let user1_img = await Canvas.loadImage(user1_url);

@@ -98,7 +98,7 @@ async function stageinfo(msg) {
 }
 
 function getLeagueEmbed(league_list) {
-    const stageEmbed = new Discord.MessageEmbed().setTitle('ステージ情報');
+    const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
     for (var attributename in league_list) {
         let stage;
         let date;
@@ -118,7 +118,7 @@ function getLeagueEmbed(league_list) {
                 common.sp3stage2txt(league_list[attributename].leagueMatchSetting.vsStages[1].vsStageId);
         }
         let name = date + ' 【' + rule + '】';
-        stageEmbed.addField(name, stage);
+        stageEmbed.addFields([{ name: name, value: stage }]);
     }
     stageEmbed.setTimestamp();
     stageEmbed.setFooter({ text: 'StageInfo by splatoon3.ink' });
@@ -126,7 +126,7 @@ function getLeagueEmbed(league_list) {
 }
 
 function getAOEmbed(anarchy_list) {
-    const stageEmbed = new Discord.MessageEmbed().setTitle('ステージ情報');
+    const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
     for (var attributename in anarchy_list) {
         let stage;
         let date;
@@ -146,7 +146,7 @@ function getAOEmbed(anarchy_list) {
                 common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[1].vsStageId);
         }
         let name = date + ' 【' + rule + '】';
-        stageEmbed.addField(name, stage);
+        stageEmbed.addFields([{ name: name, value: stage }]);
     }
     stageEmbed.setTimestamp();
     stageEmbed.setFooter({ text: 'StageInfo by splatoon3.ink' });
@@ -154,7 +154,7 @@ function getAOEmbed(anarchy_list) {
 }
 
 function getACEmbed(anarchy_list) {
-    const stageEmbed = new Discord.MessageEmbed().setTitle('ステージ情報');
+    const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
     for (var attributename in anarchy_list) {
         let stage;
         let date;
@@ -174,7 +174,7 @@ function getACEmbed(anarchy_list) {
                 common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[1].vsStageId);
         }
         let name = date + ' 【' + rule + '】';
-        stageEmbed.addField(name, stage);
+        stageEmbed.addFields([{ name: name, value: stage }]);
     }
     stageEmbed.setTimestamp();
     stageEmbed.setFooter({ text: 'StageInfo by splatoon3.ink' });
@@ -182,7 +182,7 @@ function getACEmbed(anarchy_list) {
 }
 
 function getXMatchEmbed(x_list) {
-    const stageEmbed = new Discord.MessageEmbed().setTitle('ステージ情報');
+    const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
     for (var attributename in x_list) {
         let stage;
         let date;
@@ -199,7 +199,7 @@ function getXMatchEmbed(x_list) {
                 common.sp3stage2txt(x_list[attributename].xMatchSetting.vsStages[1].vsStageId);
         }
         let name = date + ' 【' + rule + '】';
-        stageEmbed.addField(name, stage);
+        stageEmbed.addFields([{ name: name, value: stage }]);
     }
     stageEmbed.setTimestamp();
     stageEmbed.setFooter({ text: 'StageInfo by splatoon3.ink' });
