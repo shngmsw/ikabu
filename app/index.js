@@ -12,34 +12,33 @@ const client = new Client({
         Intents.FLAGS.GUILD_MEMBERS,
     ],
 });
-const app = require('app-root-path').resolve('app');
-const root = require('app-root-path');
+
 const Handler = require('./handler.js');
 const Dispandar = require('./event/dispandar.js');
 const VOICE_API = require('./tts/voice_bot_node.js');
 const DISCORD_VOICE = require('./tts/discordjs_voice.js');
-const handleStageInfo = require(app + '/cmd/splat3/stageinfo.js');
+const handleStageInfo = require('./cmd/splat3/stageinfo.js');
 const { getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
-const { otherGameRecruit } = require(app + '/cmd/other/recruit/other_game_recruit.js');
-const { regular2Recruit } = require(app + '/cmd/splat2/recruit/regular_recruit.js');
-const { regularRecruit } = require(app + '/cmd/splat3/recruit/regular_recruit.js');
-const { fesRecruit } = require(app + '/cmd/splat3/recruit/fes_recruit');
-const { leagueRecruit } = require(app + '/cmd/splat2/recruit/league_recruit.js');
-const { anarchyRecruit } = require(app + '/cmd/splat3/recruit/anarchy_recruit.js');
-const { salmon2Recruit } = require(app + '/cmd/splat2/recruit/salmon_recruit.js');
-const { salmonRecruit } = require(app + '/cmd/splat3/recruit/salmon_recruit.js');
-const { private2Recruit } = require(app + '/cmd/splat2/recruit/private_recruit.js');
-const { privateRecruit } = require(app + '/cmd/splat3/recruit/private_recruit.js');
+const { otherGameRecruit } = require('./cmd/other/recruit/other_game_recruit.js');
+const { regular2Recruit } = require('./cmd/splat2/recruit/regular_recruit.js');
+const { regularRecruit } = require('./cmd/splat3/recruit/regular_recruit.js');
+const { fesRecruit } = require('./cmd/splat3/recruit/fes_recruit');
+const { leagueRecruit } = require('./cmd/splat2/recruit/league_recruit.js');
+const { anarchyRecruit } = require('./cmd/splat3/recruit/anarchy_recruit.js');
+const { salmon2Recruit } = require('./cmd/splat2/recruit/salmon_recruit.js');
+const { salmonRecruit } = require('./cmd/splat3/recruit/salmon_recruit.js');
+const { private2Recruit } = require('./cmd/splat2/recruit/private_recruit.js');
+const { privateRecruit } = require('./cmd/splat3/recruit/private_recruit.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
 const join = require('./event/join.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
-const handleIkabuExperience = require(app + '/cmd/other/experience.js');
-const { commandNames } = require(root + '/constant');
-const registerSlashCommands = require(root + '/register.js');
-const { voiceLocker, voiceLockerUpdate } = require(app + '/cmd/other/voice_locker.js');
-const { handleFriendCode, deleteFriendCode } = require(app + '/cmd/other/friendcode.js');
+const handleIkabuExperience = require('./cmd/other/experience.js');
+const { commandNames } = require('../constant');
+const registerSlashCommands = require('../register.js');
+const { voiceLocker, voiceLockerUpdate } = require('./cmd/other/voice_locker.js');
+const { handleFriendCode, deleteFriendCode } = require('./cmd/other/friendcode.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {

@@ -1,9 +1,7 @@
-const root = require('app-root-path');
-const insert = require(root + '/db/fc_insert.js');
-const getFC = require(root + '/db/fc_select.js');
+const insert = require('../../../db/fc_insert.js');
+const getFC = require('../../../db/fc_select.js');
 const Discord = require('discord.js');
-const app = require('app-root-path').resolve('app');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
+const { searchMemberById } = require('../../manager/memberManager');
 
 module.exports = {
     handleFriendCode: handleFriendCode,

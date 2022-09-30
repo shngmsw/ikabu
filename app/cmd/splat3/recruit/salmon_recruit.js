@@ -1,18 +1,17 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
-const app = require('app-root-path').resolve('app');
-const { searchMessageById } = require(app + '/manager/messageManager.js');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
-const { sp3unixTime2mdwhm, sp3coop_stage2txt } = require(app + '/common.js');
-const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
+const { searchMessageById } = require('../../../manager/messageManager');
+const { searchMemberById } = require('../../../manager/memberManager');
+const { sp3unixTime2mdwhm, sp3coop_stage2txt } = require('../../../common');
+const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const {
     recruitDeleteButton,
     recruitActionRow,
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require(app + '/common/button_components.js');
+} = require('../../../common/button_components');
 const { MessageAttachment, Permissions } = require('discord.js');
 const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';
 

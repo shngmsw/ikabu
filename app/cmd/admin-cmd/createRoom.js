@@ -3,9 +3,8 @@ const request = require('request');
 const fs = require('fs');
 const { parse } = require('csv');
 const { stringify } = require('csv-stringify/sync');
-const app = require('app-root-path').resolve('app');
-const { createChannel } = require(app + '/manager/channelManager.js');
-const { createRole, setColorToRole, searchRoleById, setRoleToMember } = require(app + '/manager/roleManager.js');
+const { createChannel } = require('../../manager/channelManager');
+const { createRole, setColorToRole, searchRoleById, setRoleToMember } = require('../../manager/roleManager');
 
 const INDEX_CATEGORY_ID = 0;
 const INDEX_CATEGORY_NAME = 1;

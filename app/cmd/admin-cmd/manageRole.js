@@ -1,8 +1,7 @@
 const { MessageAttachment } = require('discord.js');
 const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
-const app = require('app-root-path').resolve('app');
-const { createRole, searchRoleById, setColorToRole, searchRoleIdByName } = require(app + '/manager/roleManager.js');
+const { createRole, searchRoleById, setColorToRole, searchRoleIdByName } = require('../../manager/roleManager');
 
 module.exports = {
     handleCreateRole: handleCreateRole,

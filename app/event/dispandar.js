@@ -1,6 +1,5 @@
-const app = require('app-root-path').resolve('app');
-const { searchMessageById } = require(app + '/manager/messageManager.js');
-const common = require(app + '/common.js');
+const { searchMessageById } = require('../manager/messageManager');
+const common = require('../common');
 const regexDiscordMessageUrl =
     'https://(ptb.|canary.)?discord(app)?.com/channels/' + '(?<guild>[0-9]{18,19})/(?<channel>[0-9]{18,19})/(?<message>[0-9]{18,19})';
 

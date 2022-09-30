@@ -1,8 +1,7 @@
 const { MessageAttachment } = require('discord.js');
 const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
-const app = require('app-root-path').resolve('app');
-const { searchChannelById } = require(app + '/manager/channelManager.js');
+const { searchChannelById } = require('../../manager/channelManager');
 
 module.exports = async function handleDeleteChannel(interaction) {
     if (!interaction.isCommand()) return;

@@ -1,6 +1,5 @@
 const fetch = require('node-fetch');
-const app = require('app-root-path').resolve('app');
-const common = require(app + '/common.js');
+const common = require('../../common');
 const Discord = require('discord.js');
 const { checkFes } = require('../../common');
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';

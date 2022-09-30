@@ -1,6 +1,5 @@
 const { MessageEmbed } = require('discord.js');
-const app = require('app-root-path').resolve('app');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
+const { searchMemberById } = require('./manager/memberManager.js');
 
 module.exports = {
     isInteger: isInteger,
