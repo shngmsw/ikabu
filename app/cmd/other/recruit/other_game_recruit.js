@@ -1,4 +1,4 @@
-const { EmbedBuilder, Permissions } = require('discord.js');
+const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const {
@@ -169,8 +169,8 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
-                    { id: interaction.member.user.id, allow: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
+                    { id: interaction.member.user.id, allow: [PermissionsBitField.Flags.Connect] },
                 ],
                 'Reserve Voice Channel',
             );

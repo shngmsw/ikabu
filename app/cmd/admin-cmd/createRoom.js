@@ -95,7 +95,7 @@ module.exports = async function handleCreateRoom(interaction) {
                         if (channelName != '') {
                             channelType = checkChannelType(channelType);
 
-                            if (channelType != '') {
+                            if (channelType !== '') {
                                 if (channelType != 'ERROR!') {
                                     channelId = await createChannel(guild, categoryId, channelName, channelType);
                                 }
@@ -180,11 +180,12 @@ function checkChannelType(channelType) {
 async function setRoleToChanel(guild, roleId, channelId, channelType) {
     // set permission to channel
     if (channelId != null && channelType != 'ERROR!') {
-        await guild.channels.fetch(channelId).permissionOverwrites.edit(roleId, {
-            VIEW_CHANNEL: true,
+        const channel = await guild.channels.fetch(channelId);
+        channel.permissionOverwrites.edit(roleId, {
+            ViewChannel: true,
         });
-        await guild.channels.fetch(channelId).permissionOverwrites.edit(guild.roles.everyone.id, {
-            VIEW_CHANNEL: false,
+        await channel.permissionOverwrites.edit(guild.roles.everyone.id, {
+            ViewChannel: false,
         });
     }
 }

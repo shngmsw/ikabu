@@ -30,7 +30,6 @@ async function createChannel(guild, categoryId, channelName, channelType) {
         return await searchChannelIdByName(guild, channelName, channelType, parentId);
     } else {
         channel = await guild.channels.create({ name: channelName, type: channelType, parent: parentId });
-        await guild.channels.fetch();
         return channel.id;
     }
 }

@@ -18,7 +18,7 @@ async function createRole(guild, roleName) {
         return null;
     }
 
-    if (searchRoleIdByName(guild, roleName) != null) {
+    if ((await searchRoleIdByName(guild, roleName)) != null) {
         return searchRoleIdByName(guild, roleName);
     } else {
         var role = await guild.roles.create({ name: roleName });
@@ -122,7 +122,12 @@ async function setRoleToMember(guild, roleId, memberId) {
         if (!isNaN(memberId)) {
             // 桁数判定
             if (memberId.length == 18 || memberId.length == 19) {
-                member = await guild.members.fetch(memberId);
+                try {
+                    member = await guild.members.fetch(memberId);
+                } catch (error) {
+                    console.log('roleManager: member missing');
+                    member = null;
+                }
             } else {
                 member = null;
             }
@@ -133,7 +138,7 @@ async function setRoleToMember(guild, roleId, memberId) {
         }
 
         if (member != null) {
-            member.roles.add(guild.roles.fetch(roleId));
+            member.roles.add(await guild.roles.fetch(roleId));
             return member.id;
         } else {
             return memberId + '(NOT_FOUND)';

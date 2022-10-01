@@ -14,7 +14,7 @@ const {
     recruitActionRowWithChannel,
     unlockChannelButton,
 } = require('../../../common/button_components');
-const { AttachmentBuilder, ChannelType } = require('discord.js');
+const { AttachmentBuilder, ChannelType, PermissionsBitField } = require('discord.js');
 const { searchRoleIdByName } = require('../../../manager/roleManager');
 
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
@@ -261,8 +261,8 @@ async function sendAnarchyMatch(
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
-                    { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
+                    { id: host_member.user.id, allow: [PermissionsBitField.Flags.Connect] },
                 ],
                 'Reserve Voice Channel',
             );
