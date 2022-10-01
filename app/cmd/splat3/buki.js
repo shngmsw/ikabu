@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 const { searchMemberById } = require('../../manager/memberManager');
 const common = require('../../common');
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = async function handleBuki(interaction) {
     if (!interaction.isCommand()) return;
@@ -34,7 +34,7 @@ async function buki(interaction) {
             }
         });
         let bukiNames = bukis.map(function (value) {
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setAuthor({
                     name: member.displayName + 'のブキ',
                     iconURL: member.displayAvatarURL(),

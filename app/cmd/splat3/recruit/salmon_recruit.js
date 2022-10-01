@@ -12,7 +12,7 @@ const {
     recruitActionRowWithChannel,
     unlockChannelButton,
 } = require('../../../common/button_components');
-const { MessageAttachment, Permissions } = require('discord.js');
+const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
@@ -152,9 +152,9 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
-    const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
+    const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
+    const rule = new AttachmentBuilder(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
 
     try {
         const mention = `@everyone`;
@@ -177,8 +177,8 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
-                    { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
+                    { id: host_member.user.id, allow: [PermissionsBitField.Flags.Connect] },
                 ],
                 'Reserve Voice Channel',
             );
@@ -243,7 +243,7 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
     fillTextWithStroke(recruit_ctx, 'RUN', '51px Splatfont', '#000000', '#00FF00DA', 3, 350, 80);
 
     // 募集主の画像
-    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));
+    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ extension: 'png' }));
     recruit_ctx.save();
     drawArcImage(recruit_ctx, host_img, 40, 120, 50);
     recruit_ctx.strokeStyle = '#1e1f23';
@@ -257,12 +257,12 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
 
     // 参加者指定があれば、画像を拾ってくる
     if (user1 != null && user2 != null) {
-        user1_url = user1.displayAvatarURL({ format: 'png' });
-        user2_url = user2.displayAvatarURL({ format: 'png' });
+        user1_url = user1.displayAvatarURL({ extension: 'png' });
+        user2_url = user2.displayAvatarURL({ extension: 'png' });
     } else if (user1 != null && user2 == null) {
-        user1_url = user1.displayAvatarURL({ format: 'png' });
+        user1_url = user1.displayAvatarURL({ extension: 'png' });
     } else if (user1 == null && user2 != null) {
-        user1_url = user2.displayAvatarURL({ format: 'png' });
+        user1_url = user2.displayAvatarURL({ extension: 'png' });
     }
 
     let user1_img = await Canvas.loadImage(user1_url);

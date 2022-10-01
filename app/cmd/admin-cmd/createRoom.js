@@ -1,4 +1,4 @@
-const { MessageAttachment } = require('discord.js');
+const { AttachmentBuilder, PermissionsBitField, ChannelType } = require('discord.js');
 const request = require('request');
 const fs = require('fs');
 const { parse } = require('csv');
@@ -22,11 +22,11 @@ module.exports = async function handleCreateRoom(interaction) {
     await interaction.deferReply();
     const { options } = interaction;
     const attachment = options.getAttachment('csv');
-    if (!interaction.member.permissions.has('MANAGE_CHANNELS')) {
+    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
         return await interaction.editReply('チャンネルを管理する権限がないでし！');
     }
 
-    if (!interaction.member.permissions.has('MANAGE_ROLES')) {
+    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
@@ -87,7 +87,7 @@ module.exports = async function handleCreateRoom(interaction) {
                         }
 
                         if (categoryName != '') {
-                            var categoryId = await createChannel(guild, null, categoryName, 'GUILD_CATEGORY');
+                            var categoryId = await createChannel(guild, null, categoryName, ChannelType.GuildCategory);
                         } else {
                             categoryId = null;
                         }
@@ -95,7 +95,7 @@ module.exports = async function handleCreateRoom(interaction) {
                         if (channelName != '') {
                             channelType = checkChannelType(channelType);
 
-                            if (channelType != '') {
+                            if (channelType !== '') {
                                 if (channelType != 'ERROR!') {
                                     channelId = await createChannel(guild, categoryId, channelName, channelType);
                                 }
@@ -148,7 +148,7 @@ module.exports = async function handleCreateRoom(interaction) {
 
                 const csvString = stringify(resultData);
                 fs.writeFileSync('./temp/temp.csv', csvString);
-                const attachment = new MessageAttachment('./temp/temp.csv', 'output.csv');
+                const attachment = new AttachmentBuilder('./temp/temp.csv', 'output.csv');
                 await interaction.editReply({
                     content: '終わったでし！下に結果を出すでし！',
                     files: [attachment],
@@ -167,9 +167,9 @@ module.exports = async function handleCreateRoom(interaction) {
 
 function checkChannelType(channelType) {
     if (channelType == 'txt' || channelType == 'TEXT' || channelType == 'GUILD_TEXT') {
-        return 'GUILD_TEXT';
+        return ChannelType.GuildText;
     } else if (channelType == 'vc' || channelType == 'VOICE' || channelType == 'GUILD_VOICE') {
-        return 'GUILD_VOICE';
+        return ChannelType.GuildVoice;
     } else if (channelType == '') {
         return '';
     } else {
@@ -180,11 +180,12 @@ function checkChannelType(channelType) {
 async function setRoleToChanel(guild, roleId, channelId, channelType) {
     // set permission to channel
     if (channelId != null && channelType != 'ERROR!') {
-        await guild.channels.fetch(channelId).permissionOverwrites.edit(roleId, {
-            VIEW_CHANNEL: true,
+        const channel = await guild.channels.fetch(channelId);
+        channel.permissionOverwrites.edit(roleId, {
+            ViewChannel: true,
         });
-        await guild.channels.fetch(channelId).permissionOverwrites.edit(guild.roles.everyone.id, {
-            VIEW_CHANNEL: false,
+        await channel.permissionOverwrites.edit(guild.roles.everyone.id, {
+            ViewChannel: false,
         });
     }
 }
@@ -268,5 +269,5 @@ function setDeleteCommandsText(resultData) {
     }
 
     fs.writeFileSync('./temp/temp.txt', resultStr);
-    return new MessageAttachment('./temp/temp.txt', 'delete_commands.txt');
+    return new AttachmentBuilder('./temp/temp.txt', 'delete_commands.txt');
 }

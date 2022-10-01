@@ -12,7 +12,7 @@ module.exports = async function removeRookie(msg) {
         const hasBeginnerRole = member.roles.cache.find((role) => role.id === beginnerRole.id);
         if (hasBeginnerRole) {
             msg.member.roles.remove([beginnerRole.id]);
-            const embed = new Discord.MessageEmbed();
+            const embed = new Discord.EmbedBuilder();
             embed.setDescription('新入部員期間が終わったでし！\nこれからもイカ部心得を守ってイカ部生活をエンジョイするでし！');
             embed.setAuthor({
                 name: member.displayName,

@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../common/button_components');
@@ -36,7 +36,7 @@ async function sendPrivateRecruit(interaction, options) {
     let authorName = host_member.displayName;
     let authorAvatarUrl = host_member.avatarURL();
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
         .setAuthor({
             name: authorName,
             iconURL: authorAvatarUrl,

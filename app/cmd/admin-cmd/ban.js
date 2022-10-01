@@ -1,3 +1,4 @@
+const { PermissionsBitField } = require('discord.js');
 module.exports = async function handleBan(interaction) {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
@@ -7,7 +8,7 @@ module.exports = async function handleBan(interaction) {
     let banTarget = options.getUser('ban対象');
     let reason = options.getString('ban理由');
 
-    if (interaction.member.permissions.has('BAN_MEMBERS')) {
+    if (interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)) {
         let memberId = banTarget.id;
 
         const guild = await interaction.guild.fetch();

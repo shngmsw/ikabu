@@ -1,5 +1,5 @@
 const wiki = require('wikijs').default;
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = async function handleWiki(interaction) {
     try {
@@ -19,7 +19,7 @@ module.exports = async function handleWiki(interaction) {
             await interaction.followUp({ content: '見つからなかったでし！', ephemeral: false });
             return;
         }
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle(page.raw.title)
             .setURL(decodeURI(url))
             .setColor(0xf02d7d)

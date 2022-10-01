@@ -12,7 +12,7 @@ const {
     recruitActionRowWithChannel,
     unlockChannelButton,
 } = require('../../../common/button_components.js');
-const { MessageAttachment, Permissions } = require('discord.js');
+const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const schedule_url = 'https://splatoon2.ink/data/schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
@@ -187,9 +187,9 @@ async function sendRegularMatch(
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, user3, condition, channel_name);
-    const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
+    const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new MessageAttachment(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
+    const rule = new AttachmentBuilder(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
 
     try {
         const mention_id = await searchRoleIdByName(guild, 'スプラ2');
@@ -210,8 +210,8 @@ async function sendRegularMatch(
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: interaction.guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
-                    { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
+                    { id: host_member.user.id, allow: [PermissionsBitField.Flags.Connect] },
                 ],
                 'Reserve Voice Channel',
             );
@@ -231,7 +231,7 @@ async function sendRegularMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.fetch(sentMessage.id);
+        let cmd_message = await channel.messages.fetch({ message: sentMessage.id });
         if (cmd_message != undefined) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
@@ -281,17 +281,17 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, user
     let member_urls = [];
 
     if (user1 != null) {
-        member_urls.push(user1.displayAvatarURL({ format: 'png' }));
+        member_urls.push(user1.displayAvatarURL({ extension: 'png' }));
     }
     if (user2 != null) {
-        member_urls.push(user2.displayAvatarURL({ format: 'png' }));
+        member_urls.push(user2.displayAvatarURL({ extension: 'png' }));
     }
     if (user3 != null) {
-        member_urls.push(user3.displayAvatarURL({ format: 'png' }));
+        member_urls.push(user3.displayAvatarURL({ extension: 'png' }));
     }
 
     // 募集主の画像
-    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));
+    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ extension: 'png' }));
     recruit_ctx.save();
     drawArcImage(recruit_ctx, host_img, 40, 120, 40);
     recruit_ctx.strokeStyle = '#1e1f23';

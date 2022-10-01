@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const { searchRoleIdByName } = require('../../../manager/roleManager');
 const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../common/button_components');
 
@@ -35,7 +35,7 @@ async function sendPrivateRecruit(interaction, options) {
     let authorName = host_member.displayName;
     let authorAvatarUrl = host_member.avatarURL();
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
         .setAuthor({
             name: authorName,
             iconURL: authorAvatarUrl,
@@ -84,7 +84,7 @@ async function sendPrivateRecruit(interaction, options) {
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await interaction.channel.messages.fetch(sentMessage.id);
+        let cmd_message = await interaction.channel.messages.fetch({ message: sentMessage.id });
         if (cmd_message != undefined) {
             sentMessage.edit({ components: [recruitActionRow(header)] });
         } else {
