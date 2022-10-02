@@ -51,22 +51,22 @@ module.exports = async function handleHelp(interaction) {
                         },
                         {
                             name: '/buki',
-                            value: '```ブキをランダムで選出\nブキの数とブキ種を指定可能でし```',
+                            value: '```ブキをランダムで選出\nブキの数とブキ種を指定可能```',
                             inline: true,
                         },
                         {
                             name: '/pick 選択肢を半スペ空けで記入',
-                            value: '```選択肢の中からランダム選出\n選択する数を指定可能でし```',
+                            value: '```選択肢の中からランダム選出\n選択する数を指定可能```',
                             inline: true,
                         },
                         {
                             name: '/vpick',
-                            value: '```VCに接続している人をランダム抽出\n2人以上を抽出可能でし```',
+                            value: '```VCに接続している人をランダム抽出\n2人以上を抽出可能```',
                             inline: true,
                         },
                         {
                             name: '/kansen',
-                            value: '```プラベの観戦者をランダムな組み合わせで抽出\n5試合分を指定するとキリがいいでし```',
+                            value: '```プラベの観戦者をランダムな組み合わせで抽出\n5試合分を指定するのがおすすめです。```',
                             inline: true,
                         },
                         {
@@ -86,17 +86,17 @@ module.exports = async function handleHelp(interaction) {
                         },
                         {
                             name: '/wiki 〇〇',
-                            value: '```wikipediaで調べる```',
+                            value: '```wikipediaを検索して表示```',
                             inline: true,
                         },
                         {
                             name: '/timer',
-                            value: '```n分後にお知らせするでし！```',
+                            value: '```n分後に通知```',
                             inline: true,
                         },
                         {
                             name: '/voice_channel',
-                            value: '```今いるVCに人数制限をかけることができるでし。ゲームに集中したい場合に使うでし```',
+                            value: '```今いるVCに人数制限を設定。ゲームに集中したい場合に使ってください。```',
                             inline: true,
                         },
                     ]),
@@ -118,7 +118,7 @@ module.exports = async function handleHelp(interaction) {
                         },
                         {
                             name: '/プラベ募集 button',
-                            value: '```everyone通知と参加ボタンのみ表示。通常のチャットでプラベ概要を書く場合はこっちを使うでし```',
+                            value: '```everyone通知と参加ボタンのみ表示。通常のチャットでプラベ概要を書いた後に使ってください。```',
                         },
                         {
                             name: '/バンカラ募集 now',
