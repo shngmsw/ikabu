@@ -89,6 +89,16 @@ module.exports = async function handleHelp(interaction) {
                             value: '```wikipediaで調べる```',
                             inline: true,
                         },
+                        {
+                            name: '/timer',
+                            value: '```n分後にお知らせするでし！```',
+                            inline: true,
+                        },
+                        {
+                            name: '/voice_channel',
+                            value: '```今いるVCに人数制限をかけることができるでし。ゲームに集中したい場合に使うでし```',
+                            inline: true,
+                        },
                     ]),
             ],
         });
