@@ -17,16 +17,19 @@ module.exports = async function handleHelp(interaction) {
                     .setColor(0x1bc2a5)
                     .addFields([
                         {
-                            name: 'ボイスチャンネルにブキチを参加',
-                            value: '```/voice join```\n',
+                            name: '/voice join',
+                            value: '```ボイスチャンネルにブキチを参加```',
+                            inline: true,
                         },
                         {
-                            name: '音声タイプを変更します',
-                            value: '```/voice type```\n',
+                            name: '/voice type',
+                            value: '```音声タイプを変更します\n選択肢から指定可能```',
+                            inline: true,
                         },
                         {
-                            name: 'ボイスチャンネルからブキチを切断',
-                            value: '```/voice kill```\n',
+                            name: '/voice kill',
+                            value: '```ボイスチャンネルからブキチを切断```',
+                            inline: true,
                         },
                     ]),
             ],
@@ -42,40 +45,49 @@ module.exports = async function handleHelp(interaction) {
                     .setColor(0x1bc2a5)
                     .addFields([
                         {
-                            name: 'ステージ情報を表示[now / next / nawabari / run]',
-                            value: '```/show ○○○```\n',
+                            name: '/show ○○○',
+                            value: '```ステージ情報を表示[now / next / nawabari / run]```',
+                            inline: true,
                         },
                         {
-                            name: 'ランダム系コマンド',
-                            value: 'ブキをランダムで選出：```/buki 複数の場合は数字を記入```\n',
+                            name: '/buki',
+                            value: '```ブキをランダムで選出\nブキの数とブキ種を指定可能でし```',
+                            inline: true,
                         },
                         {
-                            name: '選択肢の中からランダム選出',
-                            value: '```/pick 複数選出の場合は数字を記入 選択肢を半スペ空けで記入```',
+                            name: '/pick 選択肢を半スペ空けで記入',
+                            value: '```選択肢の中からランダム選出\n選択する数を指定可能でし```',
+                            inline: true,
                         },
                         {
-                            name: '接続してるボイチャから数字分のヒトをランダム抽出',
-                            value: '```/vpick 複数選出の場合は数字を記入```',
+                            name: '/vpick',
+                            value: '```VCに接続している人をランダム抽出\n2人以上を抽出可能でし```',
+                            inline: true,
                         },
                         {
-                            name: 'プラベの観戦者を抽出',
-                            value: '```/kansen 試合回数分の数字を記入```',
+                            name: '/kansen',
+                            value: '```プラベの観戦者をランダムな組み合わせで抽出\n5試合分を指定するとキリがいいでし```',
+                            inline: true,
                         },
                         {
-                            name: '自分のフレンドコードを表示',
-                            value: '```/friend_code show``\n「自己紹介」チャンネルの直近100件に書いてあればそちらを優先します。',
+                            name: '/friend_code show',
+                            value: '```フレンドコードを表示\n登録がない場合は「自己紹介」チャンネルから引用します(直近100件のみ)```',
+                            inline: true,
                         },
                         {
-                            name: '自分のフレンドコードを登録',
-                            value: '```/friend_code add SW-0000-0000-0000```\nもう一度登録すると上書きされます。他人のは登録できません。',
+                            name: '/friend_code add SW-0000-0000-0000',
+                            value: '```フレンドコードを登録\nもう一度登録すると上書きされます。他人のは登録できません。```',
+                            inline: true,
                         },
                         {
-                            name: '自分のイカ部歴を表示',
-                            value: '```/イカ部歴```\n',
+                            name: '/イカ部歴',
+                            value: '```自分のイカ部歴を表示```',
+                            inline: true,
                         },
                         {
-                            name: 'wikipediaで調べる',
-                            value: '```/wiki 〇〇```',
+                            name: '/wiki 〇〇',
+                            value: '```wikipediaで調べる```',
+                            inline: true,
                         },
                     ]),
             ],
@@ -91,45 +103,73 @@ module.exports = async function handleHelp(interaction) {
                     .setColor(0x1bc2a5)
                     .addFields([
                         {
-                            name: 'botのコマンド一覧を表示',
-                            value: '```/help recruit または /help other または /help voice```',
+                            name: '/プラベ募集 recruit',
+                            value: '```開始時刻 所要時間 募集人数 内容または参加条件があれば記載```',
                         },
                         {
-                            name: 'プラベ募集コマンド',
-                            value: '```/プラベ募集 recruit 開始時刻 所要時間 募集人数 内容または参加条件があれば記載```\n',
+                            name: '/プラベ募集 button',
+                            value: '```everyone通知と参加ボタンのみ表示。通常のチャットでプラベ概要を書く場合はこっちを使うでし```',
                         },
                         {
-                            name: '現在のリグマ情報を表示して募集',
-                            value: '```/リグマ募集 now 募集人数 参加メンバー 参加条件があれば記載```\n',
+                            name: '/バンカラ募集 now',
+                            value: '```現在のバンカラ情報を表示して募集```',
                         },
                         {
-                            name: '次回のリグマ情報を表示して募集',
-                            value: '```/リグマ募集 next 募集人数 参加メンバー 参加条件があれば記載```\n',
+                            name: '/バンカラ募集 next',
+                            value: '```次回のバンカラ情報を表示して募集```',
+                        },
+                        // {
+                        //     name: '/リグマ募集 now',
+                        //     value: '```現在のリグマ情報を表示して募集```',
+                        // },
+                        // {
+                        //     name: '/リグマ募集 next',
+                        //     value: '```次回のリグマ情報を表示して募集```',
+                        // },
+                        {
+                            name: '/ナワバリ募集 now',
+                            value: '```現在のナワバリ情報を表示して募集```',
                         },
                         {
-                            name: '現在のナワバリ情報を表示して募集',
-                            value: '```/ナワバリ募集 now 募集人数 参加条件があれば記載```\n',
+                            name: '/ナワバリ募集 next',
+                            value: '```次回のナワバリ情報を表示して募集```',
                         },
                         {
-                            name: '次回のナワバリ情報を表示して募集',
-                            value: '```/ナワバリ募集 next 募集人数 参加条件があれば記載```\n',
+                            name: '/〇〇陣営 now',
+                            value: '```現在のフェス情報を表示して募集```',
                         },
                         {
-                            name: 'フェス募集コマンド',
-                            value: '```/〇〇陣営 fes 募集人数 参加条件があれば記載```\n',
+                            name: '/〇〇陣営 next',
+                            value: '```次回のフェス情報を表示して募集```',
                         },
                         {
-                            name: 'サーモンラン情報を表示して募集',
-                            value: '```/サーモンラン募集 run 募集人数 参加条件があれば記載```\n',
+                            name: '/サーモンラン募集 run',
+                            value: '```サーモンラン情報を表示して募集```',
                         },
                         {
-                            name: '別ゲー募集コマンド',
-                            value:
-                                'Dead by Daylight：```/別ゲー募集 dbd 募集人数 参加条件があれば記載```\n' +
-                                'VALORANT：```/別ゲー募集 valo 募集人数 参加条件があれば記載```\n' +
-                                'モンスターハンターライズ：```/別ゲー募集 mhr 募集人数 参加条件があれば記載```\n' +
-                                'ApexLegends：```/別ゲー募集 apex 募集人数 参加条件があれば記載```\n' +
-                                'その他:```/別ゲー募集 other ゲーム名 募集人数 参加条件があれば記載```\n',
+                            name: '/別ゲー募集 dbd',
+                            value: '```Dead by Daylightの募集```',
+                            inline: true,
+                        },
+                        {
+                            name: '/別ゲー募集 valo',
+                            value: '```VALORANTの募集```',
+                            inline: true,
+                        },
+                        {
+                            name: '/別ゲー募集 mhr',
+                            value: '```モンスターハンターライズの募集```',
+                            inline: true,
+                        },
+                        {
+                            name: '/別ゲー募集 apex',
+                            value: '```ApexLegendsの募集```',
+                            inline: true,
+                        },
+                        {
+                            name: '/別ゲー募集 other',
+                            value: '```その他別ゲーを自由に入力して募集```',
+                            inline: true,
                         },
                     ]),
             ],
