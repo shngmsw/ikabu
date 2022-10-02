@@ -1,17 +1,16 @@
-const { MessageAttachment } = require('discord.js');
+const { AttachmentBuilder, PermissionsBitField, ChannelType } = require('discord.js');
 const request = require('request');
 const fs = require('fs');
 const { parse } = require('csv');
 const { stringify } = require('csv-stringify/sync');
-const app = require('app-root-path').resolve('app');
-const { searchChannelById } = require(app + '/manager/channelManager.js');
+const { searchChannelById } = require('../../manager/channelManager');
 
 module.exports = async function handleDeleteCategory(interaction) {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    if (!interaction.member.permissions.has('MANAGE_CHANNELS')) {
+    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
         return await interaction.followUp('チャンネルを管理する権限がないでし！');
     }
 
@@ -79,7 +78,7 @@ async function deleteCategory(interaction, categoryIdList) {
             } else {
                 var channels = await deleteChannelsByCategoryId(guild, categoryId);
                 const channelCollection = await guild.channels.fetch();
-                var category = channelCollection.find((c) => c.id == categoryId && c.type == 'GUILD_CATEGORY');
+                var category = channelCollection.find((c) => c.id == categoryId && c.type == ChannelType.GuildCategory);
                 categoryName = category.name;
                 await category.delete();
                 await guild.channels.fetch();
@@ -100,7 +99,7 @@ async function deleteCategory(interaction, categoryIdList) {
 
     const csvString = stringify(removed);
     fs.writeFileSync('./temp/temp.csv', csvString);
-    const attachment = new MessageAttachment('./temp/temp.csv', 'removed_category.csv');
+    const attachment = new AttachmentBuilder('./temp/temp.csv', 'removed_category.csv');
 
     await interaction.followUp({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
@@ -111,11 +110,11 @@ async function deleteCategory(interaction, categoryIdList) {
 async function deleteChannelsByCategoryId(guild, categoryId) {
     let channels = [];
     let channelCollection = await guild.channels.fetch();
-    while (channelCollection.find((c) => c.type != 'GUILD_CATEGORY' && c.parent == categoryId) != null) {
-        var channel = channelCollection.find((c) => c.type != 'GUILD_CATEGORY' && c.parent == categoryId);
-        if (channel.type == 'GUILD_TEXT') {
+    while (channelCollection.find((c) => c.type != ChannelType.GuildCategory && c.parent == categoryId) != null) {
+        var channel = channelCollection.find((c) => c.type != ChannelType.GuildCategory && c.parent == categoryId);
+        if (channel.type == ChannelType.GuildText) {
             channels.push([channel.id, '#' + channel.name]);
-        } else if (channel.type == 'GUILD_VOICE') {
+        } else if (channel.type == ChannelType.GuildVoice) {
             channels.push([channel.id, '🔊' + channel.name]);
         }
         await channel.delete();

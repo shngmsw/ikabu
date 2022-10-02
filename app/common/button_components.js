@@ -1,4 +1,4 @@
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { URLSearchParams } = require('url');
 
 module.exports = {
@@ -23,10 +23,10 @@ function recruitDeleteButtonWithChannel(msg, channel_id, header) {
     deleteParams.append('hmid', header.id);
     deleteParams.append('vid', channel_id);
 
-    let button = new MessageActionRow();
+    let button = new ActionRowBuilder();
     button.addComponents([
-        new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
-        new MessageButton().setCustomId(deleteParams.toString()).setLabel('削除').setStyle('DANGER'),
+        new ButtonBuilder().setCustomId(joinParams.toString()).setLabel('参加').setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId(deleteParams.toString()).setLabel('削除').setStyle(ButtonStyle.Danger),
     ]);
     return button;
 }
@@ -47,10 +47,10 @@ function recruitActionRowWithChannel(channel_id, header) {
     closeParams.append('hmid', header.id);
     closeParams.append('vid', channel_id);
 
-    return new MessageActionRow().addComponents([
-        new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
-        new MessageButton().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle('DANGER'),
-        new MessageButton().setCustomId(closeParams.toString()).setLabel('〆').setStyle('SECONDARY'),
+    return new ActionRowBuilder().addComponents([
+        new ButtonBuilder().setCustomId(joinParams.toString()).setLabel('参加').setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId(closeParams.toString()).setLabel('〆').setStyle(ButtonStyle.Secondary),
     ]);
 }
 
@@ -64,10 +64,10 @@ function recruitDeleteButton(msg, header) {
     deleteParams.append('mid', msg.id);
     deleteParams.append('hmid', header.id);
 
-    let button = new MessageActionRow();
+    let button = new ActionRowBuilder();
     button.addComponents([
-        new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
-        new MessageButton().setCustomId(deleteParams.toString()).setLabel('削除').setStyle('DANGER'),
+        new ButtonBuilder().setCustomId(joinParams.toString()).setLabel('参加').setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId(deleteParams.toString()).setLabel('削除').setStyle(ButtonStyle.Danger),
     ]);
     return button;
 }
@@ -85,10 +85,10 @@ function recruitActionRow(header) {
     closeParams.append('d', 'close');
     closeParams.append('hmid', header.id);
 
-    return new MessageActionRow().addComponents([
-        new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
-        new MessageButton().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle('DANGER'),
-        new MessageButton().setCustomId(closeParams.toString()).setLabel('〆').setStyle('SECONDARY'),
+    return new ActionRowBuilder().addComponents([
+        new ButtonBuilder().setCustomId(joinParams.toString()).setLabel('参加').setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId(closeParams.toString()).setLabel('〆').setStyle(ButtonStyle.Secondary),
     ]);
 }
 
@@ -105,18 +105,18 @@ function notifyActionRow(interaction) {
     closeParams.append('d', 'nclose');
     closeParams.append('hid', interaction.member.id);
 
-    return new MessageActionRow().addComponents([
-        new MessageButton().setCustomId(joinParams.toString()).setLabel('参加').setStyle('PRIMARY'),
-        new MessageButton().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle('DANGER'),
-        new MessageButton().setCustomId(closeParams.toString()).setLabel('〆').setStyle('SECONDARY'),
+    return new ActionRowBuilder().addComponents([
+        new ButtonBuilder().setCustomId(joinParams.toString()).setLabel('参加').setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId(closeParams.toString()).setLabel('〆').setStyle(ButtonStyle.Secondary),
     ]);
 }
 
 function disableButtons() {
-    let buttons = new MessageActionRow().addComponents([
-        new MessageButton().setCustomId('join').setLabel('参加').setStyle('PRIMARY').setDisabled(),
-        new MessageButton().setCustomId('cancel').setLabel('キャンセル').setStyle('DANGER').setDisabled(),
-        new MessageButton().setCustomId('close').setLabel('〆').setStyle('SECONDARY').setDisabled(),
+    let buttons = new ActionRowBuilder().addComponents([
+        new ButtonBuilder().setCustomId('join').setLabel('参加').setStyle(ButtonStyle.Primary).setDisabled(),
+        new ButtonBuilder().setCustomId('cancel').setLabel('キャンセル').setStyle(ButtonStyle.Danger).setDisabled(),
+        new ButtonBuilder().setCustomId('close').setLabel('〆').setStyle(ButtonStyle.Secondary).setDisabled(),
     ]);
     return buttons;
 }
@@ -126,8 +126,8 @@ function unlockChannelButton(channel_id) {
     buttonParams.append('d', 'unl');
     buttonParams.append('vid', channel_id);
 
-    let button = new MessageActionRow().addComponents([
-        new MessageButton().setCustomId(buttonParams.toString()).setLabel('ボイスチャンネルのロック解除').setStyle('SECONDARY'),
+    let button = new ActionRowBuilder().addComponents([
+        new ButtonBuilder().setCustomId(buttonParams.toString()).setLabel('ボイスチャンネルのロック解除').setStyle(ButtonStyle.Secondary),
     ]);
     return button;
 }

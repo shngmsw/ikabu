@@ -1,10 +1,9 @@
 const Canvas = require('canvas');
 const fetch = require('node-fetch');
-const app = require('app-root-path').resolve('app');
-const common = require(app + '/common.js');
-const { createRoundRect, fillTextWithStroke } = require(app + '/common/canvas_components.js');
-const { sp3unixTime2mdwhm, sp3coop_stage2txt } = require(app + '/common.js');
-const { MessageEmbed, MessageAttachment } = require('discord.js');
+const common = require('../../common');
+const { createRoundRect, fillTextWithStroke } = require('../../common/canvas_components');
+const { sp3unixTime2mdwhm, sp3coop_stage2txt } = require('../../common');
+const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
@@ -19,7 +18,7 @@ async function sendStageInfo(interaction, data, scheduleNum) {
     if (common.checkFes(data, scheduleNum)) {
         const result = common.getRegular(data, scheduleNum);
 
-        const nawabariEmbed = new MessageEmbed()
+        const nawabariEmbed = new EmbedBuilder()
             .setAuthor({
                 name: title + 'の' + result.matchName,
                 iconURL: result.iconURL,
@@ -55,7 +54,7 @@ async function sendStageInfo(interaction, data, scheduleNum) {
         const x_rule = x_args[1];
         const x_stage = x_args[2];
         const x_thumbnail = rule2image(x_rule);
-        const leagueEmbed = new MessageEmbed()
+        const leagueEmbed = new EmbedBuilder()
             .setAuthor({
                 name: title + 'のリーグマッチ',
                 iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
@@ -67,7 +66,7 @@ async function sendStageInfo(interaction, data, scheduleNum) {
             })
             .setThumbnail(l_thumbnail);
 
-        const challengeEmbed = new MessageEmbed()
+        const challengeEmbed = new EmbedBuilder()
             .setAuthor({
                 name: title + 'のバンカラマッチ (チャレンジ)',
                 iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
@@ -79,7 +78,7 @@ async function sendStageInfo(interaction, data, scheduleNum) {
             })
             .setThumbnail(c_thumbnail);
 
-        const openEmbed = new MessageEmbed()
+        const openEmbed = new EmbedBuilder()
             .setAuthor({
                 name: title + 'のバンカラマッチ (オープン)',
                 iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
@@ -91,7 +90,7 @@ async function sendStageInfo(interaction, data, scheduleNum) {
             })
             .setThumbnail(o_thumbnail);
 
-        const xMatchEmbed = new MessageEmbed()
+        const xMatchEmbed = new EmbedBuilder()
             .setAuthor({
                 name: title + 'のXマッチ',
 
@@ -132,7 +131,7 @@ module.exports = async function handleShow(interaction) {
             const data = await response.json();
             const result = common.getRegular(data, 0);
 
-            const nawabariEmbed = new MessageEmbed()
+            const nawabariEmbed = new EmbedBuilder()
                 .setAuthor({
                     name: result.matchName,
                     iconURL: result.iconURL,
@@ -159,10 +158,10 @@ module.exports = async function handleShow(interaction) {
                 let weapon2 = coopSetting.weapons[1].image.url;
                 let weapon3 = coopSetting.weapons[2].image.url;
                 let weapon4 = coopSetting.weapons[3].image.url;
-                let weaponsImage = new MessageAttachment(await salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4), 'weapons.png');
+                let weaponsImage = new AttachmentBuilder(await salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4), 'weapons.png');
                 let stageImage = coopSetting.coopStage.thumbnailImage.url;
 
-                const salmonEmbed = new MessageEmbed()
+                const salmonEmbed = new EmbedBuilder()
                     .setAuthor({
                         name: 'SALMON RUN',
                         iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',

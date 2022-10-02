@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = async function handleHelp(interaction) {
     if (!interaction.isCommand()) return;
@@ -9,7 +9,7 @@ module.exports = async function handleHelp(interaction) {
     if (subCommand === 'voice') {
         await interaction.editReply({
             embeds: [
-                new MessageEmbed()
+                new EmbedBuilder()
                     .setAuthor({
                         name: 'ブキチの使い方(読み上げbot)',
                         iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
@@ -34,7 +34,7 @@ module.exports = async function handleHelp(interaction) {
     } else if (subCommand === 'other') {
         await interaction.editReply({
             embeds: [
-                new MessageEmbed()
+                new EmbedBuilder()
                     .setAuthor({
                         name: 'ブキチの使い方(2/2)',
                         iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
@@ -83,7 +83,7 @@ module.exports = async function handleHelp(interaction) {
     } else if (subCommand === 'recruit') {
         await interaction.editReply({
             embeds: [
-                new MessageEmbed()
+                new EmbedBuilder()
                     .setAuthor({
                         name: 'ブキチの使い方(1/2)',
                         iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',

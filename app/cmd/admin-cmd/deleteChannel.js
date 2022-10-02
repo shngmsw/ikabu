@@ -1,15 +1,14 @@
-const { MessageAttachment } = require('discord.js');
+const { AttachmentBuilder, PermissionsBitField, ChannelType } = require('discord.js');
 const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
-const app = require('app-root-path').resolve('app');
-const { searchChannelById } = require(app + '/manager/channelManager.js');
+const { searchChannelById } = require('../../manager/channelManager');
 
 module.exports = async function handleDeleteChannel(interaction) {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    if (!interaction.member.permissions.has('MANAGE_CHANNELS')) {
+    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
         return await interaction.followUp('チャンネルを管理する権限がないでし！');
     }
     const { options } = interaction;
@@ -49,12 +48,12 @@ module.exports = async function handleDeleteChannel(interaction) {
             // if channel ID is not found, consider as an error.
             if (channel == null) {
                 channelName = 'NOT_FOUND!';
-            } else if (channel.type == 'GUILD_CATEGORY') {
+            } else if (channel.type == ChannelType.GuildCategory) {
                 channelName = 'THIS_IS_CATEGORY';
             } else {
-                if (channel.type == 'GUILD_TEXT') {
+                if (channel.type == ChannelType.GuildText) {
                     channelName = '#' + channel.name;
-                } else if (channel.type == 'GUILD_VOICE') {
+                } else if (channel.type == ChannelType.GuildVoice) {
                     channelName = '🔊' + channel.name;
                 }
                 await channel.delete();
@@ -71,7 +70,7 @@ module.exports = async function handleDeleteChannel(interaction) {
 
     const csvString = stringify(removed);
     fs.writeFileSync('./temp/temp.csv', csvString);
-    const attachment = new MessageAttachment('./temp/temp.csv', 'removed_channel.csv');
+    const attachment = new AttachmentBuilder('./temp/temp.csv', 'removed_channel.csv');
 
     await interaction.followUp({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',

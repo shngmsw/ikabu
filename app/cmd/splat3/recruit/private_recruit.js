@@ -1,8 +1,7 @@
-const { MessageEmbed } = require('discord.js');
-const app = require('app-root-path').resolve('app');
-const { searchMessageById } = require(app + '/manager/messageManager.js');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
-const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require(app + '/common/button_components.js');
+const { EmbedBuilder } = require('discord.js');
+const { searchMessageById } = require('../../../manager/messageManager');
+const { searchMemberById } = require('../../../manager/memberManager');
+const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../common/button_components');
 
 module.exports = {
     privateRecruit: privateRecruit,
@@ -37,7 +36,7 @@ async function sendPrivateRecruit(interaction, options) {
     let authorName = host_member.displayName;
     let authorAvatarUrl = host_member.avatarURL();
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
         .setAuthor({
             name: authorName,
             iconURL: authorAvatarUrl,

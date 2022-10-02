@@ -1,8 +1,7 @@
 const Canvas = require('canvas');
 const path = require('path');
 const Discord = require('discord.js');
-const app = require('app-root-path').resolve('app');
-const { dateDiff } = require(app + '/common');
+const { dateDiff } = require('../../common');
 const backgroundImgPaths = [
     './images/over4years.jpg',
     './images/4years.jpg',
@@ -64,7 +63,7 @@ module.exports = async function handleIkabuExperience(interaction) {
     context.restore();
 
     // load avatar image
-    const avatar = await Canvas.loadImage(author.displayAvatarURL({ format: 'png' }));
+    const avatar = await Canvas.loadImage(author.displayAvatarURL({ extension: 'png' }));
 
     // set path for clip
     context.beginPath();
@@ -109,7 +108,7 @@ module.exports = async function handleIkabuExperience(interaction) {
     context.lineWidth = 2;
     context.strokeText(output, (400 - textWidth) / 2 + 230, 210);
 
-    const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'ikabu_experience.png');
+    const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), 'ikabu_experience.png');
 
     await interaction.editReply({ files: [attachment] });
 };

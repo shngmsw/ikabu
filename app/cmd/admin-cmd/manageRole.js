@@ -1,8 +1,7 @@
-const { MessageAttachment } = require('discord.js');
+const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
-const app = require('app-root-path').resolve('app');
-const { createRole, searchRoleById, setColorToRole, searchRoleIdByName } = require(app + '/manager/roleManager.js');
+const { createRole, searchRoleById, setColorToRole, searchRoleIdByName } = require('../../manager/roleManager');
 
 module.exports = {
     handleCreateRole: handleCreateRole,
@@ -17,7 +16,7 @@ async function handleCreateRole(interaction) {
     await interaction.deferReply();
     const { options } = interaction;
 
-    if (!interaction.member.permissions.has('MANAGE_ROLES')) {
+    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
@@ -60,7 +59,7 @@ async function handleDeleteRole(interaction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
-    if (!interaction.member.permissions.has('MANAGE_ROLES')) {
+    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
@@ -113,7 +112,7 @@ async function handleDeleteRole(interaction) {
 
     const csvString = stringify(removed);
     fs.writeFileSync('./temp/temp.csv', csvString);
-    const attachment = new MessageAttachment('./temp/temp.csv', 'removed_role.csv');
+    const attachment = new AttachmentBuilder('./temp/temp.csv', 'removed_role.csv');
 
     await interaction.followUp({
         content: '操作が完了したでし！\nしゃべると長くなるから下に削除したロールをまとめておいたでし！',
@@ -127,7 +126,7 @@ async function handleAssignRole(interaction) {
     await interaction.deferReply();
     const { options } = interaction;
 
-    if (!interaction.member.permissions.has('MANAGE_ROLES')) {
+    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
@@ -155,7 +154,7 @@ async function handleUnassignRole(interaction) {
     await interaction.deferReply();
     const { options } = interaction;
 
-    if (!interaction.member.permissions.has('MANAGE_ROLES')) {
+    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 

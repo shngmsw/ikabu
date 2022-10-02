@@ -1,12 +1,11 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
-const app = require('app-root-path').resolve('app');
-const { searchMessageById } = require(app + '/manager/messageManager.js');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
-const { checkFes, sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw } = require(app + '/common.js');
-const { searchChannelIdByName } = require(app + '/manager/channelManager.js');
-const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
+const { searchMessageById } = require('../../../manager/messageManager');
+const { searchMemberById } = require('../../../manager/memberManager');
+const { checkFes, sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw } = require('../../../common');
+const { searchChannelIdByName } = require('../../../manager/channelManager');
+const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const {
     recruitDeleteButton,
     recruitActionRow,
@@ -14,9 +13,9 @@ const {
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require(app + '/common/button_components.js');
-const { MessageAttachment, Permissions } = require('discord.js');
-const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
+} = require('../../../common/button_components');
+const { AttachmentBuilder, ChannelType, PermissionsBitField } = require('discord.js');
+const { searchRoleIdByName } = require('../../../manager/roleManager');
 
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
@@ -114,7 +113,7 @@ async function anarchyRecruit(interaction) {
         const response = await fetch(schedule_url);
         const data = await response.json();
         if (checkFes(data, type)) {
-            const fes_channel_id = await searchChannelIdByName(guild, 'フェス募集', 'GUILD_TEXT', null);
+            const fes_channel_id = await searchChannelIdByName(guild, 'フェス募集', ChannelType.GuildText, null);
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！\nフェス募集をするには<#${fes_channel_id}>のチャンネルを使うでし！`,
                 ephemeral: true,
@@ -241,9 +240,9 @@ async function sendAnarchyMatch(
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, rank, channel_name);
-    const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
+    const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new MessageAttachment(await ruleCanvas(a_rule, a_date, a_time, a_stage1, a_stage2, stageImages, thumbnail), 'rules.png');
+    const rule = new AttachmentBuilder(await ruleCanvas(a_rule, a_date, a_time, a_stage1, a_stage2, stageImages, thumbnail), 'rules.png');
 
     try {
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
@@ -262,8 +261,8 @@ async function sendAnarchyMatch(
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
-                    { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
+                    { id: host_member.user.id, allow: [PermissionsBitField.Flags.Connect] },
                 ],
                 'Reserve Voice Channel',
             );
@@ -331,7 +330,7 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
     fillTextWithStroke(recruit_ctx, 'バンカラマッチ', '51px Splatfont', '#000000', '#F14400', 3, 115, 80);
 
     // 募集主の画像
-    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));
+    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ extension: 'png' }));
     recruit_ctx.save();
     drawArcImage(recruit_ctx, host_img, 40, 120, 50);
     recruit_ctx.strokeStyle = '#1e1f23';
@@ -345,12 +344,12 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
 
     // 参加者指定があれば、画像を拾ってくる
     if (user1 != null && user2 != null) {
-        user1_url = user1.displayAvatarURL({ format: 'png' });
-        user2_url = user2.displayAvatarURL({ format: 'png' });
+        user1_url = user1.displayAvatarURL({ extension: 'png' });
+        user2_url = user2.displayAvatarURL({ extension: 'png' });
     } else if (user1 != null && user2 == null) {
-        user1_url = user1.displayAvatarURL({ format: 'png' });
+        user1_url = user1.displayAvatarURL({ extension: 'png' });
     } else if (user1 == null && user2 != null) {
-        user1_url = user2.displayAvatarURL({ format: 'png' });
+        user1_url = user2.displayAvatarURL({ extension: 'png' });
     }
 
     let user1_img = await Canvas.loadImage(user1_url);

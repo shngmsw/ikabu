@@ -1,6 +1,5 @@
-const { MessageEmbed } = require('discord.js');
-const app = require('app-root-path').resolve('app');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
+const { EmbedBuilder } = require('discord.js');
+const { searchMemberById } = require('./manager/memberManager.js');
 
 module.exports = {
     isInteger: isInteger,
@@ -36,8 +35,10 @@ module.exports = {
 };
 
 async function composeEmbed(message, url) {
-    const embed = new MessageEmbed();
-    embed.setDescription(message.content);
+    const embed = new EmbedBuilder();
+    if (isNotEmpty(message.content)) {
+        embed.setDescription(message.content);
+    }
     embed.setTimestamp(message.createdAt);
     const member = await searchMemberById(message.guild, message.author.id);
     if (isNotEmpty(url)) {
@@ -746,7 +747,7 @@ function sendCloseMessage(msg, command) {
 }
 
 function getCloseEmbed() {
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setDescription(`↑の募集 〆`);
     return embed;
 }
@@ -788,7 +789,7 @@ function getCommandHelpEmbed(channelName) {
             break;
     }
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setDescription('募集コマンドは ' + `${commandMessage}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
     return embed;
 }

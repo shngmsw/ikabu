@@ -1,8 +1,6 @@
 const Discord = require('discord.js');
-const root = require('app-root-path');
-const getMember = require(root + '/db/members_select.js');
-const app = require('app-root-path').resolve('app');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
+const getMember = require('../../db/members_select.js');
+const { searchMemberById } = require('../manager/memberManager');
 module.exports = async function removeRookie(msg) {
     const dt = new Date();
     const lastMonth = dt.setMonth(dt.getMonth() - 1);
@@ -14,7 +12,7 @@ module.exports = async function removeRookie(msg) {
         const hasBeginnerRole = member.roles.cache.find((role) => role.id === beginnerRole.id);
         if (hasBeginnerRole) {
             msg.member.roles.remove([beginnerRole.id]);
-            const embed = new Discord.MessageEmbed();
+            const embed = new Discord.EmbedBuilder();
             embed.setDescription('新入部員期間が終わったでし！\nこれからもイカ部心得を守ってイカ部生活をエンジョイするでし！');
             embed.setAuthor({
                 name: member.displayName,

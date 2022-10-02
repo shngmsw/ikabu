@@ -1,14 +1,13 @@
-const { MessageEmbed, Permissions } = require('discord.js');
-const app = require('app-root-path').resolve('app');
-const { searchMessageById } = require(app + '/manager/messageManager.js');
-const { searchMemberById } = require(app + '/manager/memberManager.js');
+const { EmbedBuilder, PermissionsBitField } = require('discord.js');
+const { searchMessageById } = require('../../../manager/messageManager');
+const { searchMemberById } = require('../../../manager/memberManager');
 const {
     recruitDeleteButton,
     recruitActionRow,
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require(app + '/common/button_components.js');
+} = require('../../../common/button_components.js');
 
 module.exports = {
     otherGameRecruit: otherGameRecruit,
@@ -128,7 +127,7 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
     let author = await searchMemberById(guild, interaction.member.user.id);
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
-    let embed = new MessageEmbed()
+    let embed = new EmbedBuilder()
         .setAuthor({
             name: author.displayName,
             iconURL: author.displayAvatarURL(),
@@ -170,8 +169,8 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
-                    { id: interaction.member.user.id, allow: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
+                    { id: interaction.member.user.id, allow: [PermissionsBitField.Flags.Connect] },
                 ],
                 'Reserve Voice Channel',
             );

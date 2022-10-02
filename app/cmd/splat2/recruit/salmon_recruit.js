@@ -1,18 +1,17 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
-const app = require('app-root-path').resolve('app');
-const { unixTime2mdwhm, coop_stage2txt, weapon2txt } = require(app + '/common.js');
-const { createRoundRect, drawArcImage, fillTextWithStroke } = require(app + '/common/canvas_components.js');
-const { searchRoleIdByName } = require(app + '/manager/roleManager.js');
+const { unixTime2mdwhm, coop_stage2txt, weapon2txt } = require('../../../common');
+const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
+const { searchRoleIdByName } = require('../../../manager/roleManager.js');
 const {
     recruitDeleteButton,
     recruitActionRow,
     recruitDeleteButtonWithChannel,
     recruitActionRowWithChannel,
     unlockChannelButton,
-} = require(app + '/common/button_components.js');
-const { MessageAttachment, Permissions } = require('discord.js');
+} = require('../../../common/button_components.js');
+const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
@@ -140,9 +139,9 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
-    const recruit = new MessageAttachment(recruitBuffer, 'ikabu_recruit.png');
+    const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new MessageAttachment(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
+    const rule = new AttachmentBuilder(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
 
     try {
         const mention_id = await searchRoleIdByName(guild, 'スプラ2');
@@ -167,8 +166,8 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
             reserve_channel.permissionOverwrites.set(
                 [
-                    { id: guild.roles.everyone.id, deny: [Permissions.FLAGS.CONNECT] },
-                    { id: host_member.user.id, allow: [Permissions.FLAGS.CONNECT] },
+                    { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
+                    { id: host_member.user.id, allow: [PermissionsBitField.Flags.Connect] },
                 ],
                 'Reserve Voice Channel',
             );
@@ -188,7 +187,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await channel.messages.fetch(sentMessage.id);
+        let cmd_message = await channel.messages.fetch({ message: sentMessage.id });
         if (cmd_message != undefined) {
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
@@ -226,7 +225,7 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
     fillTextWithStroke(recruit_ctx, 'サーモンラン', '50px Splatfont', '#FF5600', '#FF9A00', 2, 115, 80);
 
     // 募集主の画像
-    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ format: 'png' }));
+    let host_img = await Canvas.loadImage(host_member.displayAvatarURL({ extension: 'png' }));
     recruit_ctx.save();
     drawArcImage(recruit_ctx, host_img, 40, 120, 50);
     recruit_ctx.strokeStyle = '#1e1f23';
@@ -240,12 +239,12 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
 
     // 参加者指定があれば、画像を拾ってくる
     if (user1 != null && user2 != null) {
-        user1_url = user1.displayAvatarURL({ format: 'png' });
-        user2_url = user2.displayAvatarURL({ format: 'png' });
+        user1_url = user1.displayAvatarURL({ extension: 'png' });
+        user2_url = user2.displayAvatarURL({ extension: 'png' });
     } else if (user1 != null && user2 == null) {
-        user1_url = user1.displayAvatarURL({ format: 'png' });
+        user1_url = user1.displayAvatarURL({ extension: 'png' });
     } else if (user1 == null && user2 != null) {
-        user1_url = user2.displayAvatarURL({ format: 'png' });
+        user1_url = user2.displayAvatarURL({ extension: 'png' });
     }
 
     let user1_img = await Canvas.loadImage(user1_url);

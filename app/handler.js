@@ -1,5 +1,3 @@
-const root = require('app-root-path');
-
 const handleBan = require('./cmd/admin-cmd/ban.js');
 const handleBuki = require('./cmd/splat3/buki.js');
 const handleHelp = require('./cmd/other/help.js');
@@ -13,7 +11,7 @@ const { handleCreateRole, handleDeleteRole, handleAssignRole, handleUnassignRole
 const handleDeleteCategory = require('./cmd/admin-cmd/deleteCategory.js');
 const handleDeleteChannel = require('./cmd/admin-cmd/deleteChannel.js');
 const handleCreateRoom = require('./cmd/admin-cmd/createRoom.js');
-const { commandNames } = require(root + '/constant.js');
+const { commandNames } = require('../constant.js');
 
 module.exports = {
     call: call,
