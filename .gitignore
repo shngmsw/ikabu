@@ -5,3 +5,4 @@ local/*
 package-lock.json
 .history/
 ikabu.code-workspace
+.vscode/settings.json
