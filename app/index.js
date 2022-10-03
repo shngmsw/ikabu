@@ -1,5 +1,5 @@
 // Discord bot implements
-const { Client, GatewayIntentBits, PermissionsBitField } = require('discord.js');
+const { Client, GatewayIntentBits, PermissionsBitField, ActivityType } = require('discord.js');
 const { URLSearchParams } = require('url');
 const client = new Client({
     intents: [
@@ -90,6 +90,8 @@ client.on('messageCreate', async (msg) => {
 
 client.on('guildMemberAdd', (member) => {
     join(member);
+    const guild = member.guild;
+    client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
 });
 
 client.on('guildMemberRemove', async (member) => {
@@ -113,7 +115,8 @@ client.on('ready', async () => {
     // そのようなことを避けるためready内でハンドラを登録する。
     // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
     await registerSlashCommands();
-    client.user.setActivity('通常営業', { type: 'PLAYING' });
+    const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID);
+    client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
