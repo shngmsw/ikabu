@@ -102,6 +102,10 @@ client.on('guildMemberRemove', async (member) => {
         if (retire_log != null) {
             retire_log.send(`${tag} さんが退部しました。入部日: ${member.joinedAt} 入部期間：${period}日間`);
         }
+        const guild = member.guild;
+        client.user.setActivity(`${guild.memberCount}人`, {
+            type: ActivityType.Playing,
+        });
     } catch (err) {
         console.log('guildMemberRemove');
         console.log({ err });
