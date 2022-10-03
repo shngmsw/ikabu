@@ -88,9 +88,9 @@ client.on('messageCreate', async (msg) => {
     removeRookie(msg);
 });
 
-client.on('guildMemberAdd', (member) => {
+client.on('guildMemberAdd', async (member) => {
     join(member);
-    const guild = member.guild;
+    const guild = await member.guild.fetch();
     client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
 });
 
@@ -102,7 +102,7 @@ client.on('guildMemberRemove', async (member) => {
         if (retire_log != null) {
             retire_log.send(`${tag} さんが退部しました。入部日: ${member.joinedAt} 入部期間：${period}日間`);
         }
-        const guild = member.guild;
+        const guild = await member.guild.fetch();
         client.user.setActivity(`${guild.memberCount}人`, {
             type: ActivityType.Playing,
         });
