@@ -91,7 +91,11 @@ client.on('messageCreate', async (msg) => {
 client.on('guildMemberAdd', async (member) => {
     join(member);
     const guild = await member.guild.fetch();
-    client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
+    if (guild.id === process.env.SERVER_ID) {
+        client.user.setActivity(`${guild.memberCount}人`, {
+            type: ActivityType.Playing,
+        });
+    }
 });
 
 client.on('guildMemberRemove', async (member) => {
@@ -103,9 +107,11 @@ client.on('guildMemberRemove', async (member) => {
             retire_log.send(`${tag} さんが退部しました。入部日: ${member.joinedAt} 入部期間：${period}日間`);
         }
         const guild = await member.guild.fetch();
-        client.user.setActivity(`${guild.memberCount}人`, {
-            type: ActivityType.Playing,
-        });
+        if (guild.id === process.env.SERVER_ID) {
+            client.user.setActivity(`${guild.memberCount}人`, {
+                type: ActivityType.Playing,
+            });
+        }
     } catch (err) {
         console.log('guildMemberRemove');
         console.log({ err });
