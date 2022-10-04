@@ -1,5 +1,5 @@
 // Discord bot implements
-const { Client, GatewayIntentBits, PermissionsBitField } = require('discord.js');
+const { Client, GatewayIntentBits, PermissionsBitField, ActivityType } = require('discord.js');
 const { URLSearchParams } = require('url');
 const client = new Client({
     intents: [
@@ -88,8 +88,10 @@ client.on('messageCreate', async (msg) => {
     removeRookie(msg);
 });
 
-client.on('guildMemberAdd', (member) => {
+client.on('guildMemberAdd', async (member) => {
     join(member);
+    const guild = await member.guild.fetch();
+    client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
 });
 
 client.on('guildMemberRemove', async (member) => {
@@ -100,6 +102,10 @@ client.on('guildMemberRemove', async (member) => {
         if (retire_log != null) {
             retire_log.send(`${tag} さんが退部しました。入部日: ${member.joinedAt} 入部期間：${period}日間`);
         }
+        const guild = await member.guild.fetch();
+        client.user.setActivity(`${guild.memberCount}人`, {
+            type: ActivityType.Playing,
+        });
     } catch (err) {
         console.log('guildMemberRemove');
         console.log({ err });
@@ -113,7 +119,8 @@ client.on('ready', async () => {
     // そのようなことを避けるためready内でハンドラを登録する。
     // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
     await registerSlashCommands();
-    client.user.setActivity('通常営業', { type: 'PLAYING' });
+    const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID);
+    client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {

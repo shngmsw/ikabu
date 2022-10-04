@@ -1,8 +1,6 @@
 {
   "git.ignoreLimitWarning": true,
   "files.eol": "\n",
-  "cSpell.words": [
-    "splatoon",
-    "Valorant"
-  ]
+  "editor.formatOnPaste": false,
+  "cSpell.words": ["splatoon", "Valorant"]
 }
