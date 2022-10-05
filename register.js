@@ -633,16 +633,30 @@ const otherGame = new SlashCommandBuilder()
     )
     .addSubcommand((subcommand) =>
         subcommand
-            .setName('dbd')
-            .setDescription('Dead by Daylightの募集')
+            .setName('valo')
+            .setDescription('Valorantの募集')
             .addStringOption((option) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
+            .addChannelOption((option) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            )
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
         subcommand
-            .setName('valo')
-            .setDescription('Valorantの募集')
+            .setName('overwatch')
+            .setDescription('OverWatch2の募集')
             .addStringOption((option) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
+            .addChannelOption((option) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            )
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     )
     .addSubcommand((subcommand) =>
