@@ -145,6 +145,10 @@ async function join(interaction, params) {
 async function cancel(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
+        await interaction.deferReply({
+            ephemeral: false,
+        });
+
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
@@ -155,10 +159,6 @@ async function cancel(interaction, params) {
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
 
         if (member.user.id == host_id) {
-            await interaction.deferReply({
-                ephemeral: false,
-            });
-
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
 
@@ -174,7 +174,6 @@ async function cancel(interaction, params) {
             });
             await interaction.editReply({ embeds: [embed] });
         } else {
-            await interaction.deferReply({ ephemeral: true });
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
@@ -183,16 +182,16 @@ async function cancel(interaction, params) {
 
                 // ホストに通知
                 await editMemberListMessage(interaction);
+                await interaction.deleteReply();
                 await interaction.message.reply({
                     content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
-                await interaction.followUp({
-                    content: `キャンセルを受け付けたでし！`,
-                });
                 return;
             } else {
-                await interaction.editReply({
+                await interaction.deleteReply();
+                await interaction.followUp({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
+                    ephemeral: true,
                 });
             }
         }
@@ -250,6 +249,10 @@ async function close(interaction, params) {
     /** @type {Discord.Snowflake} */
 
     try {
+        await interaction.deferReply({
+            ephemeral: false,
+        });
+
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
@@ -261,9 +264,6 @@ async function close(interaction, params) {
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
 
         if (member.user.id === host_id) {
-            await interaction.deferReply({
-                ephemeral: false,
-            });
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
 
@@ -282,9 +282,6 @@ async function close(interaction, params) {
             await interaction.editReply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
-            await interaction.deferReply({
-                ephemeral: false,
-            });
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             // recruitテーブルから削除
@@ -303,7 +300,8 @@ async function close(interaction, params) {
             await interaction.editReply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
-            await interaction.reply({
+            await interaction.deleteReply();
+            await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
@@ -387,6 +385,10 @@ async function joinNotify(interaction, params) {
 async function cancelNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
+        await interaction.deferReply({
+            ephemeral: false,
+        });
+
         const guild = await interaction.guild.fetch();
         await guild.channels.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -395,9 +397,6 @@ async function cancelNotify(interaction, params) {
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
 
         if (member.user.id == host_id) {
-            await interaction.deferReply({
-                ephemeral: false,
-            });
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
             await header_msg.edit({
@@ -406,7 +405,6 @@ async function cancelNotify(interaction, params) {
             });
             await interaction.editReply({ embeds: [embed] });
         } else {
-            await interaction.deferReply({ ephemeral: true });
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
@@ -415,16 +413,16 @@ async function cancelNotify(interaction, params) {
 
                 // ホストに通知
                 await editMemberListMessage(interaction);
+                await interaction.deleteReply();
                 await interaction.message.reply({
                     content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
-                await interaction.followUp({
-                    content: `キャンセルを受け付けたでし！`,
-                });
                 return;
             } else {
-                await interaction.reply({
+                await interaction.deleteReply();
+                await interaction.followUp({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
+                    ephemeral: true,
                 });
             }
         }
@@ -436,6 +434,10 @@ async function cancelNotify(interaction, params) {
 async function closeNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
+        await interaction.deferReply({
+            ephemeral: false,
+        });
+
         const guild = await interaction.guild.fetch();
         await guild.channels.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -445,9 +447,6 @@ async function closeNotify(interaction, params) {
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
 
         if (member.user.id === host_id) {
-            await interaction.deferReply({
-                ephemeral: false,
-            });
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             await header_msg.edit({
@@ -459,9 +458,6 @@ async function closeNotify(interaction, params) {
             await interaction.editReply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
-            await interaction.deferReply({
-                ephemeral: false,
-            });
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             await header_msg.edit({
@@ -474,7 +470,8 @@ async function closeNotify(interaction, params) {
             await interaction.editReply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
-            await interaction.reply({
+            await interaction.deleteReply();
+            await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
