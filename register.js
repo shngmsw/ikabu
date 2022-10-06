@@ -648,7 +648,7 @@ const otherGame = new SlashCommandBuilder()
     .addSubcommand((subcommand) =>
         subcommand
             .setName('overwatch')
-            .setDescription('OverWatch2の募集')
+            .setDescription('Overwatch2の募集')
             .addStringOption((option) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
             .addChannelOption((option) =>
                 option
