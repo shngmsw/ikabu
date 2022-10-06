@@ -48,8 +48,8 @@ async function otherGameRecruit(interaction) {
         apexLegends(interaction, roles);
     } else if (options.getSubcommand() === 'mhr') {
         monsterHunterRise(interaction, roles);
-    } else if (options.getSubcommand() === 'dbd') {
-        deadByDayLight(interaction, roles);
+    } else if (options.getSubcommand() === 'overwatch') {
+        overwatch(interaction, roles);
     } else if (options.getSubcommand() === 'valo') {
         valorant(interaction, roles);
     } else if (options.getSubcommand() === 'other') {
@@ -81,15 +81,15 @@ function apexLegends(interaction, roles) {
     sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function deadByDayLight(interaction, roles) {
-    const role_id = roles.find((role) => role.name === 'DbD');
-    let title = 'Dead by Daylight';
+function overwatch(interaction, roles) {
+    const role_id = roles.find((role) => role.name === 'Overwatch2');
+    let title = 'Overwatch2';
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
-    const txt = `<@${interaction.member.id}>` + 'たんがDbD参加者募集中でし！\n';
-    let color = '#84331F';
-    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/DeadByDaylight.jpg';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/deadbydaylight_logo.png';
+    const txt = `<@${interaction.member.id}>` + 'たんがOverwatch2の参加者募集中でし！\n';
+    let color = '#ED6516';
+    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch2.png';
+    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch_logo.png';
     sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
 }
 

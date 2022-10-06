@@ -758,7 +758,7 @@ const recruit_command = {
     バンカラ募集: '`/バンカラ募集 now` or `/バンカラ募集 next`',
     フェス募集: '`/〇〇陣営 now` or `/〇〇陣営 next`',
     サーモン募集: `/サーモンラン募集 run`,
-    別ゲー募集: '`/別ゲー募集 apex` or `/別ゲー募集 dbd` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`',
+    別ゲー募集: '`/別ゲー募集 apex` or `/別ゲー募集 overwatch` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`',
 };
 
 function getCommandHelpEmbed(channelName) {
