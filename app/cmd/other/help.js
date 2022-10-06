@@ -157,8 +157,8 @@ module.exports = async function handleHelp(interaction) {
                             value: '```サーモンラン情報を表示して募集```',
                         },
                         {
-                            name: '/別ゲー募集 dbd',
-                            value: '```Dead by Daylightの募集```',
+                            name: '/別ゲー募集 overwatch',
+                            value: '```Overwatch2の募集```',
                             inline: true,
                         },
                         {
