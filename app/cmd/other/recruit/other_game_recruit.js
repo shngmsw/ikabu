@@ -82,7 +82,7 @@ function apexLegends(interaction, roles) {
 }
 
 function overwatch(interaction, roles) {
-    const role_id = roles.find((role) => role.name === 'Overwatch2');
+    const role_id = roles.find((role) => role.name === 'ヒーロー');
     let title = 'Overwatch2';
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
