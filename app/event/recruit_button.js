@@ -4,7 +4,7 @@ const { insert_recruit } = require('../../db/recruit_insert');
 const { delete_recruit, deleteRecruitByMemberId } = require('../../db/recruit_delete.js');
 const { getRecruitMessageByMemberId, getRecruitAllByMessageId } = require('../../db/recruit_select.js');
 const { searchMemberById } = require('../manager/memberManager.js');
-const { searchMessageById } = require('../manager/messageManager.js');
+const { searchMessageById, getFullMessageObject } = require('../manager/messageManager.js');
 const { searchChannelById } = require('../manager/channelManager.js');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -56,7 +56,7 @@ async function join(interaction, params) {
         const member = await searchMemberById(guild, interaction.member.user.id);
         const channels = await guild.channels.fetch();
         const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
+        const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
         const channelId = params.get('vid');
@@ -152,8 +152,9 @@ async function cancel(interaction, params) {
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
-        const host_id = header_message.interaction.user.id;
+        const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
+        const host = header_message.interaction.user;
+        const host_id = host.id;
         const channelId = params.get('vid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
@@ -214,8 +215,9 @@ async function del(interaction, params) {
         const msg_id = params.get('mid');
         const cmd_message = await searchMessageById(guild, interaction.channel, msg_id);
         const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
-        const host_id = header_message.interaction.user.id;
+        const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
+        const host = header_message.interaction.user;
+        const host_id = host.id;
         const channelId = params.get('vid');
         if (member.user.id == host_id) {
             if (channelId != undefined) {
@@ -256,9 +258,10 @@ async function close(interaction, params) {
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
+        const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
         const helpEmbed = await getHelpEmbed(guild, header_message.channel.id);
-        const host_id = header_message.interaction.user.id;
+        const host = header_message.interaction.user;
+        const host_id = host.id;
         const channelId = params.get('vid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
