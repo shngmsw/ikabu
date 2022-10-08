@@ -303,11 +303,11 @@ async function close(interaction, params) {
             await interaction.editReply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
-            await interaction.deleteReply();
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
+            await interaction.deleteReply();
         }
     } catch (err) {
         handleError(err, { interaction });
@@ -422,11 +422,11 @@ async function cancelNotify(interaction, params) {
                 });
                 return;
             } else {
-                await interaction.deleteReply();
                 await interaction.followUp({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
                     ephemeral: true,
                 });
+                await interaction.deleteReply();
             }
         }
     } catch (err) {
