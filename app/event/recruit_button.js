@@ -7,6 +7,9 @@ const { searchMemberById } = require('../manager/memberManager.js');
 const { searchMessageById, getFullMessageObject } = require('../manager/messageManager.js');
 const { searchChannelById } = require('../manager/channelManager.js');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const axios = require('axios');
+const DISCORD_WEBHOOK_URL =
+    'https://discord.com/api/webhooks/1028318570205167656/_CGHWBk8VZJMvSl9-5Q7ACD8gKnTQugRrUx3JF7lYYVLc83r5GLlL1FxFaDPGGblpfuD';
 
 module.exports = {
     join: join,
@@ -19,6 +22,12 @@ module.exports = {
     unlock: unlock,
 };
 
+async function sendLogWebhook(log_content) {
+    await axios.post(
+        DISCORD_WEBHOOK_URL,
+        { content: log_content }, // このオブジェクトがJSONとして送信される
+    );
+}
 /**
  *
  * @param {unknown} err
@@ -33,6 +42,15 @@ async function handleError(err, { interaction }) {
     if (err.code === 10062 || err.code === 40060) {
         return;
     } else {
+        await sendLogWebhook(```${err}```);
+        await sendLogWebhook(
+            JSON.stringify({
+                member_user_id: member.user.id,
+                channel_id: interaction.channel.id,
+                message_id: interaction.message.id,
+                member_id: interaction.member.id,
+            }),
+        );
         console.log(err);
     }
 }
@@ -60,6 +78,9 @@ async function join(interaction, params) {
         const host = header_message.interaction.user;
         const host_id = host.id;
         const channelId = params.get('vid');
+
+        await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんが参加ボタンを押したでし`);
+
         if (member.user.id === host_id) {
             await interaction.followUp({
                 content: `募集主は参加表明できないでし！`,
@@ -158,6 +179,8 @@ async function cancel(interaction, params) {
         const channelId = params.get('vid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
+
+        await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんがキャンセルボタンを押したでし`);
 
         if (member.user.id == host_id) {
             // recruitテーブルから削除
@@ -266,6 +289,8 @@ async function close(interaction, params) {
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
 
+        await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんが〆ボタンを押したでし`);
+
         if (member.user.id === host_id) {
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
@@ -303,11 +328,11 @@ async function close(interaction, params) {
             await interaction.editReply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
-            await interaction.deleteReply();
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
+            await interaction.deleteReply();
         }
     } catch (err) {
         handleError(err, { interaction });
@@ -422,11 +447,11 @@ async function cancelNotify(interaction, params) {
                 });
                 return;
             } else {
-                await interaction.deleteReply();
                 await interaction.followUp({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
                     ephemeral: true,
                 });
+                await interaction.deleteReply();
             }
         }
     } catch (err) {
