@@ -104,7 +104,7 @@ async function sendStageInfo(interaction, data, scheduleNum) {
             .setThumbnail(x_thumbnail);
 
         await interaction.editReply({
-            embeds: [openEmbed, challengeEmbed],
+            embeds: [challengeEmbed, openEmbed],
         });
         // TODO: リーグマッチとXマッチはゲーム内で実装後に表示
         // await interaction.editReply({

@@ -44,7 +44,7 @@ async function sf(msg) {
         });
         embedStr_x.setColor('#0edb9b');
         msg.channel.send({
-            embeds: [embedStr_league, embedStr_open, embedStr_challenge, embedStr_x],
+            embeds: [embedStr_challenge, embedStr_open],
         });
     } catch (error) {
         msg.channel.send('なんかエラーでてるわ');
@@ -60,13 +60,13 @@ async function stageinfo(msg) {
         const response = await fetch(schedule_url);
         const data = await response.json();
 
-        const embedStr_league = getLeagueEmbed(data.data.leagueSchedules.nodes);
-        embedStr_league.setAuthor({
-            name: 'リーグマッチ',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
-        });
-        embedStr_league.setColor('#ED2D7C');
-        msg.channel.send({ embeds: [embedStr_league] });
+        // const embedStr_league = getLeagueEmbed(data.data.leagueSchedules.nodes);
+        // embedStr_league.setAuthor({
+        //     name: 'リーグマッチ',
+        //     iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
+        // });
+        // embedStr_league.setColor('#ED2D7C');
+        // msg.channel.send({ embeds: [embedStr_league] });
 
         const embedStr_challenge = getACEmbed(data.data.bankaraSchedules.nodes);
         embedStr_challenge.setAuthor({
@@ -84,13 +84,13 @@ async function stageinfo(msg) {
         embedStr_open.setColor('#F54910');
         msg.channel.send({ embeds: [embedStr_open] });
 
-        const embedStr_x = getXMatchEmbed(data.data.xSchedules.nodes);
-        embedStr_x.setAuthor({
-            name: 'Xマッチ',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
-        });
-        embedStr_x.setColor('#0edb9b');
-        msg.channel.send({ embeds: [embedStr_x] });
+        // const embedStr_x = getXMatchEmbed(data.data.xSchedules.nodes);
+        // embedStr_x.setAuthor({
+        //     name: 'Xマッチ',
+        //     iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
+        // });
+        // embedStr_x.setColor('#0edb9b');
+        // msg.channel.send({ embeds: [embedStr_x] });
     } catch (error) {
         msg.channel.send('なんかエラーでてるわ');
         console.error(error);
