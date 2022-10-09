@@ -66,7 +66,7 @@ async function searchMessageById(guild, channelId, messageId) {
     let message = null;
     if (channel) {
         try {
-            message = await channel.messages.fetch(messageId);
+            message = await channel.messages.fetch({ message: messageId });
         } catch (error) {
             console.log('dispandar: message missing');
         }

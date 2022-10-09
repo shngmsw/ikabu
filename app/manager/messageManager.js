@@ -34,7 +34,7 @@ async function getFullMessageObject(guild, channelId, messageId) {
     let message;
     if (channel) {
         try {
-            message = await channel.messages.fetch(messageId);
+            message = await channel.messages.fetch({ message: messageId });
         } catch (error) {
             console.log('MessageManager: message missing');
         }
