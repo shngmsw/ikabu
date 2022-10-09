@@ -69,7 +69,6 @@ async function mode_api(msg) {
         if (replacedMessage.length == 0) {
             return null;
         }
-        console.log({ replacedMessage });
         pitch = pitchList[selectPitch];
         speed = speedList[selectSpeed];
         return voiceText.fetchBuffer(replacedMessage, {
