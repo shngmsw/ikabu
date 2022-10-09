@@ -8,8 +8,7 @@ const { searchMessageById, getFullMessageObject } = require('../manager/messageM
 const { searchChannelById } = require('../manager/channelManager.js');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const axios = require('axios');
-const DISCORD_WEBHOOK_URL =
-    'https://discord.com/api/webhooks/1028318570205167656/_CGHWBk8VZJMvSl9-5Q7ACD8gKnTQugRrUx3JF7lYYVLc83r5GLlL1FxFaDPGGblpfuD';
+const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
 module.exports = {
     join: join,
