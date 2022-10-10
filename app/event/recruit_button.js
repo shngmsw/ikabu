@@ -9,6 +9,7 @@ const { searchChannelById } = require('../manager/channelManager.js');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const axios = require('axios');
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+let in_process = [];
 
 module.exports = {
     join: join,
@@ -19,6 +20,7 @@ module.exports = {
     cancelNotify: cancelNotify,
     closeNotify: closeNotify,
     unlock: unlock,
+    sendLogWebhook: sendLogWebhook,
 };
 
 async function sendLogWebhook(log_content) {
@@ -26,6 +28,12 @@ async function sendLogWebhook(log_content) {
         DISCORD_WEBHOOK_URL,
         { content: log_content }, // このオブジェクトがJSONとして送信される
     );
+}
+
+function inProcessClear(id) {
+    in_process = in_process.filter(function (item) {
+        return item !== id;
+    });
 }
 /**
  *
@@ -38,22 +46,21 @@ async function sendLogWebhook(log_content) {
  */
 async function handleError(err, { interaction }) {
     // UnKnown Interactionエラーはコンポーネント削除してるから出ちゃうのはしょうがないっぽい？のでスルー
-    if (err.code === 10062 || err.code === 40060) {
-        return;
-    } else {
-        await sendLogWebhook(```${err}```);
-        await sendLogWebhook(
-            JSON.stringify({
-                member_user_id: member.user.id,
-                channel_id: interaction.channel.id,
-                message_id: interaction.message.id,
-                member_id: interaction.member.id,
-            }),
-        );
-        console.log(err);
-    }
+    // if (err.code === 10062 || err.code === 40060) {
+    //     console.log(`err:${err.code}`);
+    // } else {
+    //     await sendLogWebhook(err.code);
+    //     await sendLogWebhook({
+    //         member_user_id: member.user.id,
+    //         channel_id: interaction.channel.id,
+    //         message_id: interaction.message.id,
+    //         member_id: interaction.member.id,
+    //     });
+    console.log(err);
+    // }
+    // NOTE: 処理中リストから削除する
+    inProcessClear(interaction.member.user.id);
 }
-
 /**
  *
  * @param {Discord.ButtonInteraction} interaction
@@ -62,16 +69,21 @@ async function handleError(err, { interaction }) {
  */
 async function join(interaction, params) {
     /** @type {Discord.Snowflake} */
-
     try {
+        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
+        if (in_process.includes(interaction.member.user.id)) {
+            console.log({ in_process });
+            return;
+        }
         await interaction.deferReply({
             ephemeral: true,
         });
+        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
+        in_process.push(interaction.member.user.id);
 
         const guild = await interaction.guild.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchMemberById(guild, interaction.member.user.id);
-        const channels = await guild.channels.fetch();
         const header_msg_id = params.get('hmid');
         const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
         const host = header_message.interaction.user;
@@ -85,6 +97,9 @@ async function join(interaction, params) {
                 content: `募集主は参加表明できないでし！`,
                 ephemeral: true,
             });
+            // NOTE: ボタンの処理が終わったら処理中リストから削除する
+            inProcessClear(interaction.member.user.id);
+            return;
         } else {
             // 参加済みかチェック
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
@@ -97,6 +112,8 @@ async function join(interaction, params) {
                     content: `すでに参加ボタンを押してるでし！`,
                     ephemeral: true,
                 });
+                // NOTE: ボタンの処理が終わったら処理中リストから削除する
+                inProcessClear(interaction.member.user.id);
                 return;
             }
 
@@ -113,7 +130,7 @@ async function join(interaction, params) {
             let notify_to_host_message = null;
             let host_guild_member = await searchMemberById(guild, host_id);
             if (host_guild_member.voice.channelId) {
-                let host_joined_vc = channels.find((channel) => channel.id === host_guild_member.voice.channelId);
+                let host_joined_vc = interaction.guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
                 await host_joined_vc.send({
                     embeds: [embed],
                     components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
@@ -145,6 +162,8 @@ async function join(interaction, params) {
 
             await editMemberListMessage(interaction);
 
+            // NOTE: ボタンの処理が終わったら処理中リストから削除する
+            inProcessClear(interaction.member.user.id);
             // 5分後にホストへの通知を削除
             if (notify_to_host_message != null) {
                 await sleep(300000);
@@ -165,9 +184,16 @@ async function join(interaction, params) {
 async function cancel(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
+        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
+        if (in_process.includes(interaction.member.user.id)) {
+            console.log({ in_process });
+            return;
+        }
         await interaction.deferReply({
             ephemeral: false,
         });
+        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
+        in_process.push(interaction.member.user.id);
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -209,7 +235,6 @@ async function cancel(interaction, params) {
                 await interaction.message.reply({
                     content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
-                return;
             } else {
                 await interaction.deleteReply();
                 await interaction.followUp({
@@ -218,6 +243,8 @@ async function cancel(interaction, params) {
                 });
             }
         }
+        // NOTE: ボタンの処理が終わったら処理中リストから削除する
+        inProcessClear(interaction.member.user.id);
     } catch (err) {
         handleError(err, { interaction });
     }
@@ -225,13 +252,19 @@ async function cancel(interaction, params) {
 
 async function del(interaction, params) {
     /** @type {Discord.Snowflake} */
-
-    // Discord APIの処理待ち時に削除ボタン連打されるのを防ぐため
-    await interaction.deferReply({
-        ephemeral: true,
-    });
-
     try {
+        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
+        if (in_process.includes(interaction.member.user.id)) {
+            console.log({ in_process });
+            return;
+        }
+        // Discord APIの処理待ち時に削除ボタン連打されるのを防ぐため
+        await interaction.deferReply({
+            ephemeral: true,
+        });
+        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
+        in_process.push(interaction.member.user.id);
+
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const msg_id = params.get('mid');
@@ -258,6 +291,8 @@ async function del(interaction, params) {
         } else {
             await interaction.editReply({ content: '他人の募集は消せる訳無いでし！！！', ephemeral: true });
         }
+        // NOTE: ボタンの処理が終わったら処理中リストから削除する
+        inProcessClear(interaction.member.user.id);
     } catch (err) {
         handleError(err, { interaction });
     }
@@ -271,11 +306,17 @@ async function del(interaction, params) {
  */
 async function close(interaction, params) {
     /** @type {Discord.Snowflake} */
-
     try {
+        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
+        if (in_process.includes(interaction.member.user.id)) {
+            console.log({ in_process });
+            return;
+        }
         await interaction.deferReply({
             ephemeral: false,
         });
+        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
+        in_process.push(interaction.member.user.id);
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -327,12 +368,14 @@ async function close(interaction, params) {
             await interaction.editReply({ embeds: [embed] });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
+            await interaction.deleteReply();
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
-            await interaction.deleteReply();
         }
+        // NOTE: ボタンの処理が終わったら処理中リストから削除する
+        inProcessClear(interaction.member.user.id);
     } catch (err) {
         handleError(err, { interaction });
     }
@@ -340,14 +383,19 @@ async function close(interaction, params) {
 
 async function joinNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
-
     try {
+        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
+        if (in_process.includes(interaction.member.user.id)) {
+            console.log({ in_process });
+            return;
+        }
         await interaction.deferReply({
             ephemeral: true,
         });
+        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
+        in_process.push(interaction.member.user.id);
 
         const guild = await interaction.guild.fetch();
-        const channels = await interaction.guild.channels.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
@@ -356,6 +404,9 @@ async function joinNotify(interaction, params) {
                 content: `募集主は参加表明できないでし！`,
                 ephemeral: true,
             });
+            // NOTE: ボタンの処理が終わったら処理中リストから削除する
+            inProcessClear(interaction.member.user.id);
+            return;
         } else {
             // 参加済みかチェック
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
@@ -364,6 +415,8 @@ async function joinNotify(interaction, params) {
                     content: `すでに参加ボタンを押してるでし！`,
                     ephemeral: true,
                 });
+                // NOTE: ボタンの処理が終わったら処理中リストから削除する
+                inProcessClear(interaction.member.user.id);
                 return;
             }
 
@@ -379,7 +432,7 @@ async function joinNotify(interaction, params) {
             let notify_to_host_message = null;
             let host_guild_member = await searchMemberById(guild, host_id);
             if (host_guild_member.voice.channelId) {
-                let host_joined_vc = channels.find((channel) => channel.id === host_guild_member.voice.channelId);
+                let host_joined_vc = interaction.guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
                 await host_joined_vc.send({
                     content: `<@${host_id}>`,
                     embeds: [embed],
@@ -398,6 +451,8 @@ async function joinNotify(interaction, params) {
             });
 
             await editMemberListMessage(interaction);
+            // NOTE: ボタンの処理が終わったら処理中リストから削除する
+            inProcessClear(interaction.member.user.id);
             // 5分後にホストへの通知を削除
             if (notify_to_host_message != null) {
                 await sleep(300000);
@@ -412,12 +467,18 @@ async function joinNotify(interaction, params) {
 async function cancelNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
+        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
+        if (in_process.includes(interaction.member.user.id)) {
+            console.log({ in_process });
+            return;
+        }
         await interaction.deferReply({
             ephemeral: false,
         });
+        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
+        in_process.push(interaction.member.user.id);
 
         const guild = await interaction.guild.fetch();
-        await guild.channels.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
@@ -444,15 +505,16 @@ async function cancelNotify(interaction, params) {
                 await interaction.message.reply({
                     content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
-                return;
             } else {
+                await interaction.deleteReply();
                 await interaction.followUp({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
                     ephemeral: true,
                 });
-                await interaction.deleteReply();
             }
         }
+        // NOTE: ボタンの処理が終わったら処理中リストから削除する
+        inProcessClear(interaction.member.user.id);
     } catch (err) {
         handleError(err, { interaction });
     }
@@ -461,12 +523,18 @@ async function cancelNotify(interaction, params) {
 async function closeNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
+        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
+        if (in_process.includes(interaction.member.user.id)) {
+            console.log({ in_process });
+            return;
+        }
         await interaction.deferReply({
             ephemeral: false,
         });
+        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
+        in_process.push(interaction.member.user.id);
 
         const guild = await interaction.guild.fetch();
-        await guild.channels.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
@@ -503,6 +571,8 @@ async function closeNotify(interaction, params) {
                 ephemeral: true,
             });
         }
+        // NOTE: ボタンの処理が終わったら処理中リストから削除する
+        inProcessClear(interaction.member.user.id);
     } catch (err) {
         handleError(err, { interaction });
     }
