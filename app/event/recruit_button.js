@@ -46,20 +46,18 @@ function inProcessClear(id) {
  */
 async function handleError(err, { interaction }) {
     // UnKnown Interactionエラーはコンポーネント削除してるから出ちゃうのはしょうがないっぽい？のでスルー
-    if (err.code === 10062 || err.code === 40060) {
-        console.log(`err:${err.code}`);
-    } else {
-        await sendLogWebhook(```${err}```);
-        await sendLogWebhook(
-            JSON.stringify({
-                member_user_id: member.user.id,
-                channel_id: interaction.channel.id,
-                message_id: interaction.message.id,
-                member_id: interaction.member.id,
-            }),
-        );
-        console.log(err);
-    }
+    // if (err.code === 10062 || err.code === 40060) {
+    //     console.log(`err:${err.code}`);
+    // } else {
+    //     await sendLogWebhook(err.code);
+    //     await sendLogWebhook({
+    //         member_user_id: member.user.id,
+    //         channel_id: interaction.channel.id,
+    //         message_id: interaction.message.id,
+    //         member_id: interaction.member.id,
+    //     });
+    console.log(err);
+    // }
     // NOTE: 処理中リストから削除する
     inProcessClear(interaction.member.user.id);
 }
@@ -86,7 +84,6 @@ async function join(interaction, params) {
         const guild = await interaction.guild.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchMemberById(guild, interaction.member.user.id);
-        const channels = await guild.channels.fetch();
         const header_msg_id = params.get('hmid');
         const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
         const host = header_message.interaction.user;
@@ -133,7 +130,7 @@ async function join(interaction, params) {
             let notify_to_host_message = null;
             let host_guild_member = await searchMemberById(guild, host_id);
             if (host_guild_member.voice.channelId) {
-                let host_joined_vc = channels.find((channel) => channel.id === host_guild_member.voice.channelId);
+                let host_joined_vc = interaction.guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
                 await host_joined_vc.send({
                     embeds: [embed],
                     components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
@@ -399,7 +396,6 @@ async function joinNotify(interaction, params) {
         in_process.push(interaction.member.user.id);
 
         const guild = await interaction.guild.fetch();
-        const channels = await interaction.guild.channels.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
@@ -436,7 +432,7 @@ async function joinNotify(interaction, params) {
             let notify_to_host_message = null;
             let host_guild_member = await searchMemberById(guild, host_id);
             if (host_guild_member.voice.channelId) {
-                let host_joined_vc = channels.find((channel) => channel.id === host_guild_member.voice.channelId);
+                let host_joined_vc = interaction.guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
                 await host_joined_vc.send({
                     content: `<@${host_id}>`,
                     embeds: [embed],
@@ -483,7 +479,6 @@ async function cancelNotify(interaction, params) {
         in_process.push(interaction.member.user.id);
 
         const guild = await interaction.guild.fetch();
-        await guild.channels.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
@@ -540,7 +535,6 @@ async function closeNotify(interaction, params) {
         in_process.push(interaction.member.user.id);
 
         const guild = await interaction.guild.fetch();
-        await guild.channels.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
