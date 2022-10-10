@@ -100,6 +100,9 @@ async function join(interaction, params) {
                 content: `募集主は参加表明できないでし！`,
                 ephemeral: true,
             });
+            // NOTE: ボタンの処理が終わったら処理中リストから削除する
+            inProcessClear(interaction.member.user.id);
+            return;
         } else {
             // 参加済みかチェック
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
@@ -405,6 +408,9 @@ async function joinNotify(interaction, params) {
                 content: `募集主は参加表明できないでし！`,
                 ephemeral: true,
             });
+            // NOTE: ボタンの処理が終わったら処理中リストから削除する
+            inProcessClear(interaction.member.user.id);
+            return;
         } else {
             // 参加済みかチェック
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
