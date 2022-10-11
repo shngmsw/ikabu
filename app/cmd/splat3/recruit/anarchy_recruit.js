@@ -3,17 +3,10 @@ const path = require('path');
 const fetch = require('node-fetch');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const { checkFes, sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw } = require('../../../common');
+const { isNotEmpty, checkFes, sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw } = require('../../../common');
 const { searchChannelIdByName } = require('../../../manager/channelManager');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
-const {
-    recruitDeleteButton,
-    recruitActionRow,
-    disableButtons,
-    recruitDeleteButtonWithChannel,
-    recruitActionRowWithChannel,
-    unlockChannelButton,
-} = require('../../../common/button_components');
+const { recruitActionRow, disableButtons, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
 const { AttachmentBuilder, ChannelType, PermissionsBitField } = require('discord.js');
 const { searchRoleIdByName } = require('../../../manager/roleManager');
 
@@ -257,8 +250,12 @@ async function sendAnarchyMatch(
             isLock = true;
         }
 
+        let deleteButtonMsg;
         if (isLock) {
-            sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
+            sentMessage.edit({ components: [recruitActionRow(header, reserve_channel.id)] });
+            deleteButtonMsg = await interaction.channel.send({
+                components: [recruitDeleteButton(sentMessage, header, reserve_channel.id)],
+            });
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
@@ -273,22 +270,21 @@ async function sendAnarchyMatch(
                 ephemeral: true,
             });
         } else {
+            sentMessage.edit({ components: [recruitActionRow(header)] });
+            deleteButtonMsg = await interaction.channel.send({
+                components: [recruitDeleteButton(sentMessage, header)],
+            });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
             });
-            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
         }
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await searchMessageById(guild, interaction.channel.id, sentMessage.id);
-        if (cmd_message) {
-            if (isLock == false) {
-                sentMessage.edit({ components: [recruitActionRow(header)] });
-            } else {
-                sentMessage.edit({ components: [recruitActionRowWithChannel(reserve_channel.id, header)] });
-            }
+        const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
+        if (isNotEmpty(deleteButtonCheck)) {
+            deleteButtonCheck.delete();
         }
 
         // 2時間後にボタンを無効化する

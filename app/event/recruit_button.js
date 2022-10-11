@@ -1,15 +1,15 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { isNotEmpty, datetimeDiff } = require('../common');
+const { isEmpty, datetimeDiff } = require('../common');
 const { insert_recruit } = require('../../db/recruit_insert');
 const { delete_recruit, deleteRecruitByMemberId } = require('../../db/recruit_delete.js');
 const { getRecruitMessageByMemberId, getRecruitAllByMessageId } = require('../../db/recruit_select.js');
 const { searchMemberById } = require('../manager/memberManager.js');
 const { searchMessageById, getFullMessageObject } = require('../manager/messageManager.js');
 const { searchChannelById } = require('../manager/channelManager.js');
+const { recruitActionRow, notifyActionRow, thinkingActionRow } = require('../common/button_components');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const axios = require('axios');
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-let in_process = [];
 
 module.exports = {
     join: join,
@@ -30,11 +30,6 @@ async function sendLogWebhook(log_content) {
     );
 }
 
-function inProcessClear(id) {
-    in_process = in_process.filter(function (item) {
-        return item !== id;
-    });
-}
 /**
  *
  * @param {unknown} err
@@ -58,8 +53,6 @@ async function handleError(err, { interaction }) {
     //     });
     console.log(err);
     // }
-    // NOTE: 処理中リストから削除する
-    inProcessClear(interaction.member.user.id);
 }
 /**
  *
@@ -70,16 +63,7 @@ async function handleError(err, { interaction }) {
 async function join(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
-        if (in_process.includes(interaction.member.user.id)) {
-            console.log({ in_process });
-            return;
-        }
-        await interaction.deferReply({
-            ephemeral: true,
-        });
-        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
-        in_process.push(interaction.member.user.id);
+        await interaction.update({ components: [thinkingActionRow('join')] });
 
         const guild = await interaction.guild.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
@@ -88,7 +72,10 @@ async function join(interaction, params) {
         const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
-        const channelId = params.get('vid');
+        let channelId = params.get('vid');
+        if (isEmpty(channelId)) {
+            channelId = null;
+        }
 
         await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんが参加ボタンを押したでし`);
 
@@ -97,23 +84,21 @@ async function join(interaction, params) {
                 content: `募集主は参加表明できないでし！`,
                 ephemeral: true,
             });
-            // NOTE: ボタンの処理が終わったら処理中リストから削除する
-            inProcessClear(interaction.member.user.id);
+
+            await interaction.editReply({ components: [recruitActionRow(header_message, channelId)] });
+
             return;
         } else {
             // 参加済みかチェック
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
-                // NOTE: 削除ボタンの切り替わり前に参加ボタン押されると
-                // 編集処理が中断されるので、もう一度押したときに参加表明一覧を更新する
-                await editMemberListMessage(interaction);
-
                 await interaction.followUp({
                     content: `すでに参加ボタンを押してるでし！`,
                     ephemeral: true,
                 });
-                // NOTE: ボタンの処理が終わったら処理中リストから削除する
-                inProcessClear(interaction.member.user.id);
+
+                await interaction.editReply({ components: [recruitActionRow(header_message, channelId)] });
+
                 return;
             }
 
@@ -146,7 +131,7 @@ async function join(interaction, params) {
                 });
             }
 
-            if (channelId == undefined) {
+            if (channelId == null) {
                 await interaction.followUp({
                     content: `<@${host_id}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
                     // components: [channelLinkButtons(interaction.guildId, thread_message.url)], TODO: スレッド内へのリンクボタンを作る
@@ -160,10 +145,11 @@ async function join(interaction, params) {
                 });
             }
 
-            await editMemberListMessage(interaction);
+            await interaction.editReply({
+                content: await memberListMessage(interaction),
+                components: [recruitActionRow(header_message, channelId)],
+            });
 
-            // NOTE: ボタンの処理が終わったら処理中リストから削除する
-            inProcessClear(interaction.member.user.id);
             // 5分後にホストへの通知を削除
             if (notify_to_host_message != null) {
                 await sleep(300000);
@@ -184,16 +170,7 @@ async function join(interaction, params) {
 async function cancel(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
-        if (in_process.includes(interaction.member.user.id)) {
-            console.log({ in_process });
-            return;
-        }
-        await interaction.deferReply({
-            ephemeral: false,
-        });
-        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
-        in_process.push(interaction.member.user.id);
+        await interaction.update({ components: [thinkingActionRow('cancel')] });
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -201,9 +178,12 @@ async function cancel(interaction, params) {
         const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
-        const channelId = params.get('vid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
-        const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
+        const cmd_message = interaction.message;
+        let channelId = params.get('vid');
+        if (isEmpty(channelId)) {
+            channelId = null;
+        }
 
         await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんがキャンセルボタンを押したでし`);
 
@@ -211,17 +191,17 @@ async function cancel(interaction, params) {
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
 
-            if (channelId != undefined) {
+            if (channelId != null) {
                 let channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
 
-            await header_msg.edit({
+            await cmd_message.edit({
                 content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
                 components: [disableButtons()],
             });
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.followUp({ embeds: [embed], ephemeral: false });
         } else {
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
@@ -230,21 +210,21 @@ async function cancel(interaction, params) {
                 await deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
 
                 // ホストに通知
-                await editMemberListMessage(interaction);
-                await interaction.deleteReply();
                 await interaction.message.reply({
                     content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
+                await interaction.editReply({
+                    content: await memberListMessage(interaction),
+                    components: [recruitActionRow(header_message, channelId)],
+                });
             } else {
-                await interaction.deleteReply();
                 await interaction.followUp({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
                     ephemeral: true,
                 });
+                await interaction.editReply({ components: [recruitActionRow(header_message, channelId)] });
             }
         }
-        // NOTE: ボタンの処理が終わったら処理中リストから削除する
-        inProcessClear(interaction.member.user.id);
     } catch (err) {
         handleError(err, { interaction });
     }
@@ -253,17 +233,10 @@ async function cancel(interaction, params) {
 async function del(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
-        if (in_process.includes(interaction.member.user.id)) {
-            console.log({ in_process });
-            return;
-        }
-        // Discord APIの処理待ち時に削除ボタン連打されるのを防ぐため
+        // 処理待ち
         await interaction.deferReply({
             ephemeral: true,
         });
-        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
-        in_process.push(interaction.member.user.id);
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -273,15 +246,20 @@ async function del(interaction, params) {
         const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
-        const channelId = params.get('vid');
+        let channelId = params.get('vid');
+        if (isEmpty(channelId)) {
+            channelId = null;
+        }
         if (member.user.id == host_id) {
-            if (channelId != undefined) {
+            if (channelId != null) {
                 let channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
+            await interaction.message.delete();
             await cmd_message.delete();
             await header_message.delete();
+
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
             await interaction.editReply({
@@ -291,8 +269,6 @@ async function del(interaction, params) {
         } else {
             await interaction.editReply({ content: '他人の募集は消せる訳無いでし！！！', ephemeral: true });
         }
-        // NOTE: ボタンの処理が終わったら処理中リストから削除する
-        inProcessClear(interaction.member.user.id);
     } catch (err) {
         handleError(err, { interaction });
     }
@@ -307,16 +283,7 @@ async function del(interaction, params) {
 async function close(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
-        if (in_process.includes(interaction.member.user.id)) {
-            console.log({ in_process });
-            return;
-        }
-        await interaction.deferReply({
-            ephemeral: false,
-        });
-        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
-        in_process.push(interaction.member.user.id);
+        await interaction.update({ components: [thinkingActionRow('close')] });
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -325,9 +292,12 @@ async function close(interaction, params) {
         const helpEmbed = await getHelpEmbed(guild, header_message.channel.id);
         const host = header_message.interaction.user;
         const host_id = host.id;
-        const channelId = params.get('vid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
-        const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
+        const cmd_message = interaction.message;
+        let channelId = params.get('vid');
+        if (isEmpty(channelId)) {
+            channelId = null;
+        }
 
         await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんが〆ボタンを押したでし`);
 
@@ -338,16 +308,16 @@ async function close(interaction, params) {
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
 
-            if (channelId != undefined) {
+            if (channelId != null) {
                 let channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
-            await header_msg.edit({
+            await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
@@ -355,27 +325,25 @@ async function close(interaction, params) {
             // recruitテーブルから削除
             deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
 
-            if (channelId != undefined) {
+            if (channelId != null) {
                 let channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
-            await header_msg.edit({
+            await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
             const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
-            await interaction.deleteReply();
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
+            await interaction.editReply({ components: [recruitActionRow(header_message, channelId)] });
         }
-        // NOTE: ボタンの処理が終わったら処理中リストから削除する
-        inProcessClear(interaction.member.user.id);
     } catch (err) {
         handleError(err, { interaction });
     }
@@ -384,16 +352,7 @@ async function close(interaction, params) {
 async function joinNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
-        if (in_process.includes(interaction.member.user.id)) {
-            console.log({ in_process });
-            return;
-        }
-        await interaction.deferReply({
-            ephemeral: true,
-        });
-        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
-        in_process.push(interaction.member.user.id);
+        await interaction.update({ components: [thinkingActionRow('join')] });
 
         const guild = await interaction.guild.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
@@ -404,8 +363,9 @@ async function joinNotify(interaction, params) {
                 content: `募集主は参加表明できないでし！`,
                 ephemeral: true,
             });
-            // NOTE: ボタンの処理が終わったら処理中リストから削除する
-            inProcessClear(interaction.member.user.id);
+
+            await interaction.editReply({ components: [notifyActionRow(host_id)] });
+
             return;
         } else {
             // 参加済みかチェック
@@ -415,8 +375,9 @@ async function joinNotify(interaction, params) {
                     content: `すでに参加ボタンを押してるでし！`,
                     ephemeral: true,
                 });
-                // NOTE: ボタンの処理が終わったら処理中リストから削除する
-                inProcessClear(interaction.member.user.id);
+
+                await interaction.editReply({ components: [notifyActionRow(host_id)] });
+
                 return;
             }
 
@@ -450,9 +411,11 @@ async function joinNotify(interaction, params) {
                 ephemeral: true,
             });
 
-            await editMemberListMessage(interaction);
-            // NOTE: ボタンの処理が終わったら処理中リストから削除する
-            inProcessClear(interaction.member.user.id);
+            await interaction.editReply({
+                content: await memberListMessage(interaction),
+                components: [notifyActionRow(host_id)],
+            });
+
             // 5分後にホストへの通知を削除
             if (notify_to_host_message != null) {
                 await sleep(300000);
@@ -467,31 +430,22 @@ async function joinNotify(interaction, params) {
 async function cancelNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
-        if (in_process.includes(interaction.member.user.id)) {
-            console.log({ in_process });
-            return;
-        }
-        await interaction.deferReply({
-            ephemeral: false,
-        });
-        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
-        in_process.push(interaction.member.user.id);
+        await interaction.update({ components: [thinkingActionRow('cancel')] });
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
-        const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
+        const cmd_message = interaction.message;
 
         if (member.user.id == host_id) {
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
-            await header_msg.edit({
+            await cmd_message.edit({
                 content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
                 components: [disableButtons()],
             });
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.followUp({ embeds: [embed], ephemeral: false });
         } else {
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
@@ -500,21 +454,21 @@ async function cancelNotify(interaction, params) {
                 await deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
 
                 // ホストに通知
-                await editMemberListMessage(interaction);
-                await interaction.deleteReply();
                 await interaction.message.reply({
                     content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
+                await interaction.editReply({
+                    content: await memberListMessage(interaction),
+                    components: [notifyActionRow(host_id)],
+                });
             } else {
-                await interaction.deleteReply();
                 await interaction.followUp({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
                     ephemeral: true,
                 });
+                await interaction.editReply({ components: [notifyActionRow(host_id)] });
             }
         }
-        // NOTE: ボタンの処理が終わったら処理中リストから削除する
-        inProcessClear(interaction.member.user.id);
     } catch (err) {
         handleError(err, { interaction });
     }
@@ -523,56 +477,48 @@ async function cancelNotify(interaction, params) {
 async function closeNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        // NOTE: ボタン処理中のリストにinteractionユーザーがいる場合は処理しない
-        if (in_process.includes(interaction.member.user.id)) {
-            console.log({ in_process });
-            return;
-        }
-        await interaction.deferReply({
-            ephemeral: false,
-        });
-        // NOTE: ボタン処理中のリストにinteractionユーザーを追加
-        in_process.push(interaction.member.user.id);
+        await interaction.update({ components: [thinkingActionRow('close')] });
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const helpEmbed = await getHelpEmbed(guild, interaction.channel.id);
-        const header_msg = await searchMessageById(guild, interaction.channel.id, interaction.message.id);
+        const cmd_message = interaction.message;
 
         if (member.user.id === host_id) {
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
-            await header_msg.edit({
+            await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({ embeds: [helpEmbed] });
+
+            return;
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
-            await header_msg.edit({
+            await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
             // recruitテーブルから削除
             deleteRecruitByMemberId(interaction.message.id);
             const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else {
-            await interaction.deleteReply();
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
         }
-        // NOTE: ボタンの処理が終わったら処理中リストから削除する
-        inProcessClear(interaction.member.user.id);
+
+        await interaction.editReply({ components: [notifyActionRow(host_id)] });
     } catch (err) {
         handleError(err, { interaction });
     }
@@ -665,13 +611,9 @@ function getMemberMentions(members) {
     return mentionString;
 }
 
-async function editMemberListMessage(interaction) {
-    const guild = await interaction.guild.fetch();
+async function memberListMessage(interaction) {
     const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
     const member_list = getMemberMentions(recruit_data);
-    const interaction_message = await searchMessageById(guild, interaction.channel, interaction.message.id);
-    const message_first_row = interaction_message.content.split('\n')[0];
-    interaction_message.edit({
-        content: message_first_row + '\n' + member_list,
-    });
+    const message_first_row = interaction.message.content.split('\n')[0];
+    return message_first_row + '\n' + member_list;
 }
