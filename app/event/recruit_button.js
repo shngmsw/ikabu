@@ -92,10 +92,6 @@ async function join(interaction, params) {
             // 参加済みかチェック
             const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
-                // // NOTE: 削除ボタンの切り替わり前に参加ボタン押されると
-                // // 編集処理が中断されるので、もう一度押したときに参加表明一覧を更新する
-                // await editMemberListMessage(interaction);
-
                 await interaction.followUp({
                     content: `すでに参加ボタンを押してるでし！`,
                     ephemeral: true,
@@ -150,7 +146,7 @@ async function join(interaction, params) {
             }
 
             await interaction.editReply({
-                content: await MemberListMessage(interaction),
+                content: await memberListMessage(interaction),
                 components: [recruitActionRow(header_message, channelId)],
             });
 
@@ -218,7 +214,7 @@ async function cancel(interaction, params) {
                     content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
                 await interaction.editReply({
-                    content: await MemberListMessage(interaction),
+                    content: await memberListMessage(interaction),
                     components: [recruitActionRow(header_message, channelId)],
                 });
             } else {
@@ -416,7 +412,7 @@ async function joinNotify(interaction, params) {
             });
 
             await interaction.editReply({
-                content: await MemberListMessage(interaction),
+                content: await memberListMessage(interaction),
                 components: [notifyActionRow(host_id)],
             });
 
@@ -462,7 +458,7 @@ async function cancelNotify(interaction, params) {
                     content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
                 await interaction.editReply({
-                    content: await MemberListMessage(interaction),
+                    content: await memberListMessage(interaction),
                     components: [notifyActionRow(host_id)],
                 });
             } else {
@@ -615,7 +611,7 @@ function getMemberMentions(members) {
     return mentionString;
 }
 
-async function MemberListMessage(interaction) {
+async function memberListMessage(interaction) {
     const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
     const member_list = getMemberMentions(recruit_data);
     const message_first_row = interaction.message.content.split('\n')[0];
