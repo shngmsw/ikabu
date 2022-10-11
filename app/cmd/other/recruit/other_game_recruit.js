@@ -1,13 +1,7 @@
 const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const {
-    recruitDeleteButton,
-    recruitActionRow,
-    recruitDeleteButtonWithChannel,
-    recruitActionRowWithChannel,
-    unlockChannelButton,
-} = require('../../../common/button_components.js');
+const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
 
 module.exports = {
     otherGameRecruit: otherGameRecruit,
@@ -166,7 +160,7 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
         if (reserve_channel == null) {
             sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
         } else {
-            sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
+            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header, reserve_channel.id)] });
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
@@ -183,7 +177,7 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
             if (reserve_channel == null) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
             } else {
-                sentMessage.edit({ components: [recruitActionRowWithChannel(reserve_channel.id, header)] });
+                sentMessage.edit({ components: [recruitActionRow(header, reserve_channel.id)] });
             }
         }
     } catch (error) {

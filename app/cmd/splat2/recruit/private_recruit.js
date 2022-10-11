@@ -75,20 +75,22 @@ async function sendPrivateRecruit(interaction, options) {
         const sentMessage = await interaction.channel.send({
             content: mention + ` ボタンを押して参加表明するでし！`,
         });
+        // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
+        sentMessage.edit({ components: [recruitActionRow(header)] });
+        let deleteButtonMsg = await interaction.channel.send({
+            components: [recruitDeleteButton(sentMessage, header)],
+        });
+
         await interaction.followUp({
             content: '募集完了でし！参加者が来るまで気長に待つでし！\n15秒間は募集を取り消せるでし！',
             ephemeral: true,
         });
-        // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header)] });
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        let cmd_message = await interaction.channel.messages.fetch({ message: sentMessage.id });
-        if (cmd_message != undefined) {
-            sentMessage.edit({ components: [recruitActionRow(header)] });
-        } else {
-            return;
+        const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
+        if (isNotEmpty(deleteButtonCheck)) {
+            deleteButtonCheck.delete();
         }
     } catch (error) {
         console.log(error);
@@ -99,7 +101,7 @@ async function sendNotification(interaction) {
     const guild = await interaction.guild.fetch();
     const mention_id = await searchRoleIdByName(guild, 'スプラ2');
     const mention = `<@&${mention_id}>`;
-    const sentMessage = await interaction.channel.send({
+    const sentMessage = await interaction.editReply({
         content: mention + ` ボタンを押して参加表明するでし！`,
     });
     await interaction.followUp({
@@ -107,5 +109,5 @@ async function sendNotification(interaction) {
         ephemeral: true,
     });
     // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-    sentMessage.edit({ components: [notifyActionRow(interaction)] });
+    sentMessage.edit({ components: [notifyActionRow(interaction.member.id)] });
 }

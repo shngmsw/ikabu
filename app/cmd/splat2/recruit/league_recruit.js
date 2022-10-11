@@ -3,14 +3,7 @@ const path = require('path');
 const fetch = require('node-fetch');
 const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require('../../../common');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
-const {
-    recruitDeleteButton,
-    recruitActionRow,
-    disableButtons,
-    recruitDeleteButtonWithChannel,
-    recruitActionRowWithChannel,
-    unlockChannelButton,
-} = require('../../../common/button_components.js');
+const { recruitActionRow, disableButtons, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const { searchRoleIdByName } = require('../../../manager/roleManager');
 
@@ -231,7 +224,7 @@ async function sendLeagueMatch(
         }
 
         if (isLock) {
-            sentMessage.edit({ components: [recruitDeleteButtonWithChannel(sentMessage, reserve_channel.id, header)] });
+            sentMessage.edit({ components: [recruitDeleteButton(sentMessage, header, reserve_channel.id)] });
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
@@ -265,7 +258,7 @@ async function sendLeagueMatch(
             if (isLock == false) {
                 sentMessage.edit({ components: [recruitActionRow(header)] });
             } else {
-                sentMessage.edit({ components: [recruitActionRowWithChannel(reserve_channel.id, header)] });
+                sentMessage.edit({ components: [recruitActionRow(header, reserve_channel.id)] });
             }
         }
 
