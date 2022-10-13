@@ -271,6 +271,9 @@ async function sendLeagueMatch(
             content: `${host_mention}たんの募集は〆！`,
             components: [disableButtons()],
         });
+        // ピン留め解除
+        header.unpin();
+
         if (reserve_channel != null) {
             reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
