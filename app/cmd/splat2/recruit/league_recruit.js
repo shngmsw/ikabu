@@ -253,6 +253,8 @@ async function sendLeagueMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
+        // ピン留め
+        header.pin();
         let cmd_message = await channel.messages.fetch({ message: sentMessage.id });
         if (cmd_message != undefined) {
             if (isLock == false) {

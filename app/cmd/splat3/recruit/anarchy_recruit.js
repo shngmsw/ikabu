@@ -287,6 +287,9 @@ async function sendAnarchyMatch(
             deleteButtonCheck.delete();
         }
 
+        // ピン留め
+        header.pin();
+
         // 2時間後にボタンを無効化する
         await sleep(7200000 - 15000);
         const host_mention = `<@${host_member.user.id}>`;

@@ -89,6 +89,8 @@ async function sendPrivateRecruit(interaction, options) {
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
+        // ピン留め
+        header.pin();
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
@@ -103,6 +105,8 @@ async function sendNotification(interaction) {
     const sentMessage = await interaction.editReply({
         content: mention + ` ボタンを押して参加表明するでし！`,
     });
+    // ピン留め
+    sentMessage.pin();
     await interaction.followUp({
         content: '募集完了でし！参加者が来るまで気長に待つでし！',
         ephemeral: true,

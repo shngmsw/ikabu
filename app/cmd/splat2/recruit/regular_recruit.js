@@ -231,6 +231,8 @@ async function sendRegularMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
+        // ピン留め
+        header.pin();
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
