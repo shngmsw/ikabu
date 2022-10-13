@@ -3,6 +3,7 @@ const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const { isNotEmpty } = require('../../../common');
 const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../common/button_components');
+const e = require('express');
 
 module.exports = {
     privateRecruit: privateRecruit,
@@ -89,11 +90,11 @@ async function sendPrivateRecruit(interaction, options) {
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        // ピン留め
-        header.pin();
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
+            // ピン留め
+            header.pin();
         }
     } catch (error) {
         console.log(error);

@@ -204,6 +204,8 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
+            // ピン留め
+            header.pin();
         }
 
         // 2時間後にVCロックを解除する

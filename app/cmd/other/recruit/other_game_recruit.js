@@ -197,6 +197,8 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
+            // ピン留め
+            header.pin();
         }
     } catch (error) {
         console.log(error);

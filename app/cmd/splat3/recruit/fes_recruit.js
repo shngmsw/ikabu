@@ -246,8 +246,8 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
-        }
-
+            // ピン留め
+            header.pin();
         // 2時間後にボタンを無効化する
         await sleep(7200000 - 15000);
         const host_mention = `<@${host_member.user.id}>`;

@@ -285,10 +285,8 @@ async function sendAnarchyMatch(
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
-        }
-
-        // ピン留め
-        header.pin();
+            // ピン留め
+            header.pin();
 
         // 2時間後にボタンを無効化する
         await sleep(7200000 - 15000);
