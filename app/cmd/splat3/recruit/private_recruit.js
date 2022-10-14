@@ -3,6 +3,7 @@ const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const { isNotEmpty } = require('../../../common');
 const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../common/button_components');
+const e = require('express');
 
 module.exports = {
     privateRecruit: privateRecruit,
@@ -92,6 +93,8 @@ async function sendPrivateRecruit(interaction, options) {
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
+            // ピン留め
+            header.pin();
         }
     } catch (error) {
         console.log(error);
@@ -103,6 +106,8 @@ async function sendNotification(interaction) {
     const sentMessage = await interaction.editReply({
         content: mention + ` ボタンを押して参加表明するでし！`,
     });
+    // ピン留め
+    sentMessage.pin();
     await interaction.followUp({
         content: '募集完了でし！参加者が来るまで気長に待つでし！',
         ephemeral: true,

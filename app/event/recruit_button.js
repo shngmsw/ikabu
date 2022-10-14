@@ -188,6 +188,9 @@ async function cancel(interaction, params) {
         await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんがキャンセルボタンを押したでし`);
 
         if (member.user.id == host_id) {
+            // ピン留め解除
+            header_message.unpin();
+
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
 
@@ -304,6 +307,8 @@ async function close(interaction, params) {
         if (member.user.id === host_id) {
             const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
+            // ピン留め解除
+            header_message.unpin();
 
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
@@ -439,6 +444,8 @@ async function cancelNotify(interaction, params) {
         const cmd_message = interaction.message;
 
         if (member.user.id == host_id) {
+            // ピン留め解除
+            cmd_message.unpin();
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
             await cmd_message.edit({
@@ -493,6 +500,8 @@ async function closeNotify(interaction, params) {
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
+            // ピン留め解除
+            header_message.unpin();
             // recruitテーブルから削除
             await delete_recruit(interaction.message.id);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
