@@ -231,6 +231,8 @@ async function sendRegularMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
+        // ピン留め
+        header.pin();
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
@@ -243,6 +245,8 @@ async function sendRegularMatch(
             content: `${host_mention}たんの募集は〆！`,
             components: [disableButtons()],
         });
+        // ピン留め解除
+        header.unpin();
         if (reserve_channel != null) {
             reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
