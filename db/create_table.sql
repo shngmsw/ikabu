@@ -24,3 +24,14 @@ CREATE TABLE IF NOT EXISTS recruit (
     ,member_id varchar(20)
     ,created_at timestamp
 );
+
+CREATE TABLE IF NOT EXISTS team_divider (
+    message_id varchar(20)
+    ,member_id varchar(20)
+    ,member_name varchar(64)
+    ,team integer
+    ,joined_match_count integer
+    ,win integer
+    ,force_spectate boolean
+    ,created_at timestamp
+);
