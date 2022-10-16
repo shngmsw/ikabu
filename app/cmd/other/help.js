@@ -99,6 +99,11 @@ module.exports = async function handleHelp(interaction) {
                             value: '```今いるVCに人数制限を設定。ゲームに集中したい場合に使ってください。```',
                             inline: true,
                         },
+                        {
+                            name: '/チーム分け team',
+                            value: '```チームごとの勝率が均等になるようにチーム分けします。勝率1位と2位は別チームになります。```',
+                            inline: true,
+                        },
                     ]),
             ],
         });

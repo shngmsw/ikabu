@@ -5,6 +5,7 @@ module.exports = {
         friend_code: 'friend_code',
         wiki: 'wiki',
         kansen: 'kansen',
+        team_divider: 'チーム分け',
         timer: 'timer',
         pick: 'pick',
         voice_pick: 'vpick',

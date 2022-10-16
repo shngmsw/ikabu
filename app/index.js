@@ -19,7 +19,7 @@ const Dispandar = require('./event/dispandar.js');
 const VOICE_API = require('./tts/voice_bot_node.js');
 const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const handleStageInfo = require('./cmd/splat3/stageinfo.js');
-const { getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
+const { isNotEmpty, getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
 const { otherGameRecruit } = require('./cmd/other/recruit/other_game_recruit.js');
 const { regular2Recruit } = require('./cmd/splat2/recruit/regular_recruit.js');
 const { regularRecruit } = require('./cmd/splat3/recruit/regular_recruit.js');
@@ -35,6 +35,7 @@ const chatCountUp = require('./event/members.js');
 const join = require('./event/join.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
+const divider = require('./cmd/other/team_divider/divider');
 const handleIkabuExperience = require('./cmd/other/experience.js');
 const { commandNames } = require('../constant');
 const registerSlashCommands = require('../register.js');
@@ -147,17 +148,6 @@ client.on('messageReactionRemove', async (reaction, user) => {
     }
 });
 
-// buttonごとに呼び出すファンクション
-const buttons = {
-    jr: recruitButton.join,
-    cr: recruitButton.cancel,
-    del: recruitButton.del,
-    close: recruitButton.close,
-    unl: recruitButton.unlock,
-    njr: recruitButton.joinNotify,
-    ncr: recruitButton.cancelNotify,
-    nclose: recruitButton.closeNotify,
-};
 /**
  *
  * @param {Discord.Interaction} interaction
@@ -165,16 +155,38 @@ const buttons = {
 async function onInteraction(interaction) {
     try {
         if (interaction.isButton()) {
-            const customIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
-            if (customIds.includes(interaction.customId)) {
+            const params = new URLSearchParams(interaction.customId);
+            const voiceLockerIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
+            if (voiceLockerIds.includes(interaction.customId)) {
                 voiceLockerUpdate(interaction);
             } else if (interaction.customId == 'fchide') {
                 deleteFriendCode(interaction);
-            } else {
-                const params = new URLSearchParams(interaction.customId);
-                await buttons[params.get('d')](interaction, params);
-                return;
+            } else if (isNotEmpty(params.get('d'))) {
+                // buttonごとに呼び出すファンクション
+                const recruitButtons = {
+                    jr: recruitButton.join,
+                    cr: recruitButton.cancel,
+                    del: recruitButton.del,
+                    close: recruitButton.close,
+                    unl: recruitButton.unlock,
+                    njr: recruitButton.joinNotify,
+                    ncr: recruitButton.cancelNotify,
+                    nclose: recruitButton.closeNotify,
+                };
+                await recruitButtons[params.get('d')](interaction, params);
+            } else if (isNotEmpty(params.get('t'))) {
+                const dividerButtons = {
+                    join: divider.joinButton,
+                    register: divider.registerButton,
+                    cancel: divider.cancelButton,
+                    alfa: divider.alfaButton,
+                    bravo: divider.bravoButton,
+                    spectate: divider.spectateButton,
+                    end: divider.endButton,
+                };
+                await dividerButtons[params.get('t')](interaction, params);
             }
+            return;
         }
         if (interaction.isCommand()) {
             const { commandName } = interaction;
@@ -189,6 +201,8 @@ async function onInteraction(interaction) {
                         embeds: [embed, getCommandHelpEmbed(interaction.channel.name)],
                     });
                 }
+            } else if (commandName === commandNames.team_divider) {
+                await divider.dividerInitialMessage(interaction);
             } else if (commandName === commandNames.regular) {
                 if (interaction.channel.parentId == process.env.CATEGORY_SPLAT2_ID) {
                     await regular2Recruit(interaction);
