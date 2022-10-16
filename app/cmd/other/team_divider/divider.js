@@ -221,9 +221,9 @@ async function registerButton(interaction, params) {
 
         const initButtons = disableInitButtons();
 
-        interaction.channel.send({ embeds: [embed], components: [buttons] });
-        interaction.message.edit({ components: [initButtons] });
-        await interaction.editReply({ content: 'チームを更新したでし！', ephemeral: true });
+        await interaction.channel.send({ embeds: [embed], components: [buttons] });
+        await interaction.message.edit({ components: [initButtons] });
+        await interaction.followUp({ content: 'チームを更新したでし！', ephemeral: true });
     } catch (err) {
         console.error(err);
         interaction.channel.send('なんかエラー出てるわ');
