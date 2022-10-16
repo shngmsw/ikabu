@@ -1,7 +1,7 @@
 const { getPostgresClient } = require('../../../../db/db');
 
 module.exports = {
-    registeredMembersString: registeredMembersString,
+    registeredMembersStrings: registeredMembersStrings,
     registerMemberToDB: registerMemberToDB,
     selectMemberFromDB: selectMemberFromDB,
     selectAllMemberFromDB: selectAllMemberFromDB,
@@ -16,7 +16,7 @@ module.exports = {
     setWin: setWin,
 };
 
-async function registeredMembersString(messageId) {
+async function registeredMembersStrings(messageId) {
     const db = await getPostgresClient();
     let result;
     try {
@@ -34,7 +34,9 @@ async function registeredMembersString(messageId) {
             const member = result[i];
             usersString = usersString + `\n${member.member_name}`;
         }
-        return usersString;
+
+        registerResults = [usersString, result.length];
+        return registerResults;
     } catch (err) {
         console.error(err);
         interaction.channel.send('なんかエラー出てるわ');
@@ -213,7 +215,25 @@ async function getTeamMember(messageId, team) {
     const db = await getPostgresClient();
     let result;
     try {
-        const sql = 'SELECT * FROM team_divider WHERE message_id = $1 and team = $2 order by created_at';
+        const sql = `SELECT
+                        message_id,
+                        member_id,
+                        member_name,
+                        team,
+                        joined_match_count,
+                        win,
+                        force_spectate,
+                        CASE
+                            WHEN joined_match_count = 0 then 0
+                            ELSE(win * 1.0) / joined_match_count
+                        END as win_rate
+                    FROM
+                        team_divider
+                    WHERE
+                        message_id = $1
+                    and team = $2
+                    order by
+                        created_at`;
         const params = [messageId, team];
         await db.begin();
         result = await db.execute(sql, params);
@@ -264,7 +284,6 @@ async function getParticipants(messageId, teamNum) {
                         and message_id = $1
                     order by
                         joined_match_count
-                        ,win_rate
                     limit $2;`;
         const params = [messageId, teamNum * 2];
         await db.begin();

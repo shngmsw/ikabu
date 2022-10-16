@@ -2,7 +2,7 @@ const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('
 const { searchMemberById } = require('../../../manager/memberManager');
 const { isEmpty } = require('../../../common');
 const {
-    registeredMembersString,
+    registeredMembersStrings,
     registerMemberToDB,
     selectMemberFromDB,
     deleteMemberFromDB,
@@ -100,6 +100,8 @@ async function joinButton(interaction, params) {
         // DB登録処理 (messageId=interaction.message.id, memberId=member.id, team=0, count=0, win=0, spectator=false)
         await registerMemberToDB(messageId, member.id, member.displayName, 0, 0, 0, false);
 
+        const registeredMembers = await registeredMembersStrings(interaction.message.id);
+
         const embed = new EmbedBuilder();
         embed.setAuthor({ name: 'チーム分けツール', iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/dice.png' });
         embed.addFields([
@@ -109,8 +111,8 @@ async function joinButton(interaction, params) {
                 inline: true,
             },
             {
-                name: '参加者一覧',
-                value: await registeredMembersString(interaction.message.id),
+                name: '参加者一覧　' + `[${registeredMembers[1]}]`,
+                value: registeredMembers[0],
                 inline: false,
             },
         ]);
@@ -137,9 +139,9 @@ async function cancelButton(interaction, params) {
         if ((await selectMemberFromDB(messageId, member.id)).length != 0) {
             await deleteMemberFromDB(messageId, member.id);
 
-            let memberList = await registeredMembersString(messageId);
-            if (isEmpty(memberList)) {
-                memberList = '参加者がいません';
+            let registeredMembers = await registeredMembersStrings(messageId);
+            if (registeredMembers[1] == 0) {
+                registeredMembers = '参加者がいません';
             }
             const embed = new EmbedBuilder();
             embed.setAuthor({ name: 'チーム分けツール', iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/dice.png' });
@@ -150,8 +152,8 @@ async function cancelButton(interaction, params) {
                     inline: true,
                 },
                 {
-                    name: '参加者一覧',
-                    value: memberList,
+                    name: '参加者一覧　' + `[${registeredMembers[1]}]`,
+                    value: registeredMembers[0],
                     inline: false,
                 },
             ]);
@@ -229,20 +231,32 @@ async function registerButton(interaction, params) {
 }
 
 async function alfaButton(interaction, params) {
-    await interaction.update({ components: [disableButton('alfa')] });
-
     await matching(interaction, params, 0);
 }
 
 async function bravoButton(interaction, params) {
-    await interaction.update({ components: [disableButton('bravo')] });
-
     await matching(interaction, params, 1);
 }
 
 async function matching(interaction, params, winTeam) {
     try {
+        let winTeamName;
+        switch (winTeam) {
+            case 0:
+                winTeamName = 'alfa';
+                break;
+            case 1:
+                winTeamName = 'bravo';
+                break;
+            default:
+                winTeamName = 'unknown';
+                break;
+        }
+
+        await interaction.update({ components: [disableButton(winTeamName)] });
+
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        interaction.message.reply({ content: `${winTeamName}が勝ったでし！` });
         const messageId = params.get('mid');
         const hostId = params.get('hid');
         const teamNum = params.get('num');
@@ -265,6 +279,7 @@ async function matching(interaction, params, winTeam) {
 
         let participantsIdList = participants.map((participant) => participant.member_id);
 
+        // 観戦者セット
         for (let member of fullMembers) {
             if (!participantsIdList.includes(member.member_id)) {
                 await setTeam(messageId, member.member_id, 2);
@@ -273,9 +288,11 @@ async function matching(interaction, params, winTeam) {
         }
 
         // NOTE: 1位と最下位を同じチームにし、1位と2位を別チームにする
+
         // 上位半分は偶数をalfa、奇数をbravo
-        let upperHalfParticipants = participants.slice(0, participants.length / 2);
-        let lowerHalfParticipants = participants.slice(participants.length / 2);
+        let orderByWinRateArray = orderByWinRate(participants);
+        let upperHalfParticipants = orderByWinRateArray.slice(0, orderByWinRateArray.length / 2);
+        let lowerHalfParticipants = orderByWinRateArray.slice(orderByWinRateArray.length / 2);
         for (let i in upperHalfParticipants) {
             if (i % 2 == 0) {
                 await setTeam(messageId, upperHalfParticipants[i].member_id, 0);
@@ -611,18 +628,18 @@ function disableButton(thinking = 'none') {
 
 function usersString(array) {
     try {
-        let orderByWinTimesArray = orderByWinTimes(array);
+        let orderByWinRateArray = orderByWinRate(array);
         let usersString = '';
 
-        for (let i = 0; i < orderByWinTimesArray.length; i++) {
-            const member = orderByWinTimesArray[i];
+        for (let i = 0; i < orderByWinRateArray.length; i++) {
+            const member = orderByWinRateArray[i];
             let winRate;
             if (member.joined_match_count != 0) {
-                winRate = ((member.win / member.joined_match_count) * 100).toFixed(1);
+                winRate = (member.win_rate * 100).toFixed(1);
             } else {
                 winRate = ' - ';
             }
-            const maxNameLength = getMaxNameLength(orderByWinTimesArray);
+            const maxNameLength = getMaxNameLength(orderByWinRateArray);
             const truncatedName = truncateString(member.member_name);
             const username = spacePadding(truncatedName, maxNameLength);
             usersString = usersString + `\n${username}　\`${member.win}勝(${winRate}％)\``;
@@ -634,10 +651,10 @@ function usersString(array) {
     }
 }
 
-function orderByWinTimes(array) {
+function orderByWinRate(array) {
     return array.sort(function (p1, p2) {
-        let p1Key = p1.win,
-            p2Key = p2.win;
+        let p1Key = p1.win_rate,
+            p2Key = p2.win_rate;
         if (p1Key < p2Key) {
             return 1;
         }
