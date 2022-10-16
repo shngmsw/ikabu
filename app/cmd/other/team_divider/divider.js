@@ -288,7 +288,7 @@ async function matching(interaction, params, winTeam) {
         }
 
         // NOTE: 1位と最下位を同じチームにし、1位と2位を別チームにする
-        //
+
         // 上位半分は偶数をalfa、奇数をbravo
         let orderByWinRateArray = orderByWinRate(participants);
         let upperHalfParticipants = orderByWinRateArray.slice(0, orderByWinRateArray.length / 2);
