@@ -20,11 +20,12 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.8.0",
-    "@discordjs/voice": "^0.9.0",
+    "@discordjs/voice": "^0.13.0",
     "axios": "^1.1.2",
     "canvas": "^2.9.1",
     "config": "^3.3.7",
     "config-reloadable": "^1.0.9",
+    "crypto-js": "^4.1.1",
     "csv": "^6.0.5",
     "csv-stringify": "^6.0.5",
     "data-utils": "0.0.2",

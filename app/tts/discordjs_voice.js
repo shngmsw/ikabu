@@ -92,11 +92,11 @@ async function play(msg) {
         // メッセージから音声ファイルを取得
         const buffer = await mode_api(msg);
         if (buffer == null) return;
-        const stream = await bufferToStream(buffer);
+        const stream = bufferToStream(buffer);
 
         // ボイスチャットセッションの音声プレイヤーに音声ファイルのURLを指定して再生させます。
         const player = subscription.player;
-        const resource = await createAudioResource(stream, {
+        const resource = createAudioResource(stream, {
             inputType: StreamType.Arbitrary,
         });
 
