@@ -670,11 +670,24 @@ const otherGame = new SlashCommandBuilder()
             .addStringOption((option) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
     );
 
+const teamDivider = new SlashCommandBuilder()
+    .setName(commandNames.team_divider)
+    .setDescription('チーム分けを行います。')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('team')
+            .setDescription('勝率に応じてチーム分けを行うことができます。')
+            .addIntegerOption((option) =>
+                option.setName('各チームのメンバー数').setDescription('それぞれのチームメンバー数(ex: スプラ=4, valo=5)').setRequired(true),
+            ),
+    );
+
 const commands = [
     voiceLock,
     friendCode,
     wiki,
     kansen,
+    teamDivider,
     minutesTimer,
     pick,
     vpick,
