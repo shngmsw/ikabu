@@ -215,7 +215,7 @@ async function registerButton(interaction, params) {
         }
 
         const embed = await loadTeamEmbed(messageId, Number(count) + 1, member);
-        const buttons = createButton(messageId, teamNum, hostId, Number(count) + 1);
+        const buttons = createButtons(messageId, teamNum, hostId, Number(count) + 1);
 
         const initButtons = disableInitButtons();
 
@@ -250,7 +250,7 @@ async function matching(interaction, params, winTeam) {
 
         if (member.id != hostId) {
             await interaction.followUp({ content: 'このボタンはコマンドを使用したユーザーしか使えないでし！', ephemeral: true });
-            await interaction.message.edit({ components: [createButton(messageId, teamNum, hostId, count)] });
+            await interaction.message.edit({ components: [createButtons(messageId, teamNum, hostId, count)] });
             return;
         }
 
@@ -293,7 +293,7 @@ async function matching(interaction, params, winTeam) {
         }
 
         const embed = await loadTeamEmbed(messageId, Number(count) + 1, member);
-        const buttons = createButton(messageId, teamNum, hostId, Number(count) + 1);
+        const buttons = createButtons(messageId, teamNum, hostId, Number(count) + 1);
 
         for (let participant of participants) {
             await setCount(messageId, participant.member_id, Number(participant.joined_match_count + 1));
@@ -319,11 +319,11 @@ async function spectateButton(interaction, params) {
         const hostMember = await searchMemberById(interaction.guild, hostId);
         const teamNum = params.get('num');
         const count = params.get('count');
-        const FullMembers = await selectAllMemberFromDB(messageId);
+        const fullMembers = await selectAllMemberFromDB(messageId);
 
-        let fullIdList = FullMembers.map((member) => member.member_id);
+        let fullIdList = fullMembers.map((member) => member.member_id);
 
-        const buttons = createButton(messageId, teamNum, hostId, count);
+        const buttons = createButtons(messageId, teamNum, hostId, count);
 
         if (!fullIdList.includes(member.id)) {
             await interaction.followUp({ content: 'このチーム分けに参加してないでし！', ephemeral: true });
@@ -341,7 +341,7 @@ async function spectateButton(interaction, params) {
 
             await interaction.followUp({ content: '観戦希望を取り下げたでし！', ephemeral: true });
         } else {
-            if (wantSpectateIdList.length > FullMembers.length - teamNum * 2 - 1) {
+            if (wantSpectateIdList.length > fullMembers.length - teamNum * 2 - 1) {
                 await interaction.followUp({ content: '観戦席はもう空いてないでし！', ephemeral: true });
                 await interaction.message.edit({ components: [buttons] });
                 return;
@@ -374,7 +374,7 @@ async function endButton(interaction, params) {
 
         if (member.id != hostId) {
             await interaction.followUp({ content: 'このボタンはコマンドを使用したユーザーしか使えないでし！', ephemeral: true });
-            await interaction.message.edit({ components: [createButton(messageId, teamNum, hostId, count)] });
+            await interaction.message.edit({ components: [createButtons(messageId, teamNum, hostId, count)] });
             return;
         }
 
@@ -477,7 +477,7 @@ function createInitButtons(hostId, teamNum) {
     return buttons;
 }
 
-function createButton(messageId, teamNum, hostId, count) {
+function createButtons(messageId, teamNum, hostId, count) {
     const alfaParams = new URLSearchParams();
     alfaParams.append('t', 'alfa');
     alfaParams.append('num', teamNum);
