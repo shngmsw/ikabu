@@ -12,6 +12,8 @@ module.exports = {
 const { VoiceText } = require('voice-text');
 const { Readable } = require('stream');
 const conf = require('config-reloadable');
+const { searchMemberById } = require('../manager/memberManager.js');
+const SHA256 = require('crypto-js/sha256');
 
 let config = conf();
 const voiceLists1 = {
@@ -63,8 +65,12 @@ function readConfig() {
 async function mode_api(msg) {
     if (mode === 1) {
         // ユーザーによって音声変える
-        let selectPitch = msg.author.id.substr(17, 1);
-        let selectSpeed = msg.author.id.substr(16, 1);
+        let member = await searchMemberById(msg.guild, msg.author.id);
+        let displayNameSha256 = SHA256(member.displayName);
+        let numberOnly = displayNameSha256.toString().replace(/[^0-9]/g, '');
+
+        let selectPitch = numberOnly.substr(1, 1);
+        let selectSpeed = numberOnly.substr(2, 1);
         const replacedMessage = await messageReplace(msg);
         if (replacedMessage.length == 0) {
             return null;
