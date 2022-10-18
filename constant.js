@@ -25,5 +25,6 @@ module.exports = {
         fesB: 'マンタロー陣営',
         fesC: 'ウツホ陣営',
         private: 'プラベ募集',
+        buttonEnable: 'ボタンを有効化',
     },
 };

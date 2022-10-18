@@ -15,8 +15,12 @@ const {
     getParticipants,
     setWin,
     setForceSpectate,
+    deleteMatchingResult,
+    droptable,
+    setHideWin,
 } = require('./dviderDB');
-const { searchMessageById } = require('../../../manager/messageManager');
+const { setButtonEnable, recoveryThinkingButton, disableThinkingButton, setButtonDisable } = require('../../../common/button_components');
+const { searchMessageById, getFullMessageObject } = require('../../../manager/messageManager');
 
 module.exports = {
     dividerInitialMessage: dividerInitialMessage,
@@ -27,13 +31,23 @@ module.exports = {
     bravoButton: bravoButton,
     spectateButton: spectateButton,
     endButton: endButton,
+    correctButton: correctButton,
+    hideButton: hideButton,
 };
 
+/**
+ * チーム分けコマンド実行時の登録メッセージを出す
+ * @param {*} interaction コマンドのインタラクション
+ */
 async function dividerInitialMessage(interaction) {
     try {
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
         const hostId = member.id;
         const teamNum = interaction.options.getInteger('各チームのメンバー数');
+        let hideWin = interaction.options.getBoolean('勝利数と勝率を隠す');
+        if (isEmpty(hideWin)) {
+            hideWin = false;
+        }
 
         if (teamNum <= 1 || teamNum >= 9) {
             // あまり多すぎるとEmbedの制限にひっかかってエラー吐きそうなので
@@ -61,7 +75,7 @@ async function dividerInitialMessage(interaction) {
             },
         ]);
 
-        const buttons = createInitButtons(hostId, teamNum);
+        const buttons = createInitButtons(hostId, teamNum, hideWin);
 
         await interaction.editReply({
             embeds: [embed],
@@ -69,36 +83,43 @@ async function dividerInitialMessage(interaction) {
         });
     } catch (err) {
         console.error(err);
-        interaction.channel.send('なんかエラー出てるわ');
+        await interaction.channel.send('なんかエラー出てるわ');
     }
 }
 
+/**
+ * 参加ボタンの処理
+ * @param {*} interaction ボタンのインタラクション
+ * @param {*} params ボタンのパラメーター
+ */
 async function joinButton(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.update({ components: [disableInitButtons('join')] });
+        await interaction.update({
+            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+        });
 
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
         const hostId = params.get('hid');
-        const teamNum = params.get('num');
+        const hideWin = params.get('hide');
         const host_member = await searchMemberById(interaction.guild, hostId);
         const messageId = interaction.message.id;
         const channelId = interaction.channel.id;
 
         if (member.voice.channelId != channelId) {
             await interaction.followUp({ content: 'VC参加者のみ参加できるでし！', ephemeral: true });
-            await interaction.message.edit({ components: [createInitButtons(hostId, teamNum)] });
+            await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '参加') });
             return;
         }
 
-        if ((await selectMemberFromDB(messageId, member.id)).length != 0) {
+        if ((await selectMemberFromDB(messageId, 0, member.id)).length != 0) {
             await interaction.followUp({ content: '参加登録済みでし！', ephemeral: true });
-            await interaction.message.edit({ components: [createInitButtons(hostId, teamNum)] });
+            await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '参加') });
             return;
         }
 
-        // DB登録処理 (messageId=interaction.message.id, memberId=member.id, team=0, count=0, win=0, spectator=false)
-        await registerMemberToDB(messageId, member.id, member.displayName, 0, 0, 0, false);
+        // DB登録処理
+        await registerMemberToDB(messageId, member.id, member.displayName, 0, 0, 0, 0, false, hideWin);
 
         const registeredMembers = await registeredMembersStrings(interaction.message.id);
 
@@ -117,18 +138,25 @@ async function joinButton(interaction, params) {
             },
         ]);
 
-        await interaction.message.edit({ embeds: [embed], components: [createInitButtons(hostId, teamNum)] });
+        await interaction.message.edit({ embeds: [embed], components: await recoveryThinkingButton(interaction, '参加') });
         await interaction.followUp({ content: '登録したでし！', ephemeral: true });
     } catch (err) {
         console.error(err);
-        interaction.channel.send('なんかエラー出てるわ');
+        await interaction.channel.send('なんかエラー出てるわ');
     }
 }
 
+/**
+ * キャンセルボタンの処理
+ * @param {*} interaction ボタンのインタラクション
+ * @param {*} params ボタンのパラメーター
+ */
 async function cancelButton(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.update({ components: [disableInitButtons('cancel')] });
+        await interaction.update({
+            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+        });
         const messageId = interaction.message.id;
         const hostId = params.get('hid');
         const teamNum = params.get('num');
@@ -136,12 +164,12 @@ async function cancelButton(interaction, params) {
         const host_member = await searchMemberById(interaction.guild, hostId);
 
         // キャンセルボタンを押した人が参加登録をしている場合
-        if ((await selectMemberFromDB(messageId, member.id)).length != 0) {
+        if ((await selectMemberFromDB(messageId, 0, member.id)).length != 0) {
             await deleteMemberFromDB(messageId, member.id);
 
             let registeredMembers = await registeredMembersStrings(messageId);
             if (registeredMembers[1] == 0) {
-                registeredMembers = '参加者がいません';
+                registeredMembers[0] = '参加者がいません';
             }
             const embed = new EmbedBuilder();
             embed.setAuthor({ name: 'チーム分けツール', iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/dice.png' });
@@ -158,7 +186,7 @@ async function cancelButton(interaction, params) {
                 },
             ]);
 
-            await interaction.message.edit({ embeds: [embed], components: [createInitButtons(hostId, teamNum)] });
+            await interaction.message.edit({ embeds: [embed], components: await recoveryThinkingButton(interaction, 'キャンセル') });
             await interaction.followUp({ content: '参加をキャンセルしたでし！', ephemeral: true });
         } else if (hostId == interaction.member.user.id) {
             await deleteAllMemberFromDB(messageId);
@@ -166,78 +194,114 @@ async function cancelButton(interaction, params) {
             await interaction.followUp({ content: 'チーム分けをキャンセルしたでし！', ephemeral: true });
         } else {
             await interaction.followUp({ content: 'チーム分けをキャンセルできるのはホストだけでし！', ephemeral: true });
-            await interaction.message.edit({ components: [createInitButtons(hostId, teamNum)] });
+            await interaction.message.edit({ components: await recoveryThinkingButton(interaction, 'キャンセル') });
         }
     } catch (err) {
         console.error(err);
-        interaction.channel.send('なんかエラー出てるわ');
+        await interaction.channel.send('なんかエラー出てるわ');
     }
 }
 
+/**
+ * 登録完了ボタンの処理
+ * @param {*} interaction ボタンのインタラクション
+ * @param {*} params ボタンのパラメーター
+ */
 async function registerButton(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.update({ components: [disableInitButtons('register')] });
+        await interaction.update({
+            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+        });
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
         const messageId = interaction.message.id;
         const hostId = params.get('hid');
         const teamNum = params.get('num');
-        const count = 0;
+        const count = 1;
 
         if (hostId != member.id) {
             await interaction.followUp({ content: '登録完了ボタンはコマンドを使用したユーザーしか使えないでし！', ephemeral: true });
-            await interaction.message.edit({ components: [createInitButtons(hostId, teamNum)] });
+            await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '登録完了') });
             return;
         }
 
-        const memberList = await selectAllMemberFromDB(messageId);
+        const memberList = await selectAllMemberFromDB(messageId, 0);
 
         if (memberList.length < teamNum * 2) {
             await interaction.followUp({ content: '参加メンバーが少なすぎるでし！', ephemeral: true });
-            await interaction.message.edit({ components: [createInitButtons(hostId, teamNum)] });
+            await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '登録完了') });
             return;
         }
 
         let participants = arrayShuffle(memberList);
 
+        for (let member of participants) {
+            await registerMemberToDB(
+                messageId,
+                member.member_id,
+                member.member_name,
+                member.team,
+                count,
+                member.joined_match_count,
+                member.win,
+                member.force_spectate,
+                member.hide_win,
+            );
+        }
+
         for (let i = 0; i < participants.length; i++) {
             if (i < teamNum) {
-                await setTeam(messageId, participants[i].member_id, 0);
-                await setCount(messageId, participants[i].member_id, participants[i].joined_match_count + 1);
+                await setTeam(messageId, participants[i].member_id, count, 0);
+                await setCount(messageId, participants[i].member_id, count, participants[i].joined_match_count + 1);
             } else if (i >= teamNum && i < teamNum * 2) {
-                await setTeam(messageId, participants[i].member_id, 1);
-                await setCount(messageId, participants[i].member_id, participants[i].joined_match_count + 1);
+                await setTeam(messageId, participants[i].member_id, count, 1);
+                await setCount(messageId, participants[i].member_id, count, participants[i].joined_match_count + 1);
             } else if (i >= teamNum * 2) {
-                await setTeam(messageId, participants[i].member_id, 2);
+                await setTeam(messageId, participants[i].member_id, count, 2);
             } else {
                 await interaction.followUp({ content: 'チーム分けエラー', ephemeral: true });
-                await interaction.message.edit({ components: [createInitButtons(hostId, teamNum)] });
+                await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '登録完了') });
                 return;
             }
         }
 
-        const embed = await loadTeamEmbed(messageId, Number(count) + 1, member);
-        const buttons = createButtons(messageId, teamNum, hostId, Number(count) + 1);
+        const embed = await loadTeamEmbed(messageId, 1, member);
+        const buttons = createButtons(messageId, teamNum, hostId, Number(count));
+        const correctButton = createSecondButtons(hostId, messageId, interaction.message.id, Number(count));
 
-        const initButtons = disableInitButtons();
-
-        await interaction.channel.send({ embeds: [embed], components: [buttons] });
-        await interaction.message.edit({ components: [initButtons] });
+        await interaction.channel.send({ embeds: [embed], components: [buttons, correctButton] });
+        await interaction.message.edit({ components: await disableThinkingButton(interaction, '登録完了') });
         await interaction.followUp({ content: 'チームを更新したでし！', ephemeral: true });
     } catch (err) {
         console.error(err);
-        interaction.channel.send('なんかエラー出てるわ');
+        await interaction.channel.send('なんかエラー出てるわ');
     }
 }
 
+/**
+ * alfaボタンの処理
+ * @param {*} interaction ボタンのインタラクション
+ * @param {*} params ボタンのパラメーター
+ */
 async function alfaButton(interaction, params) {
     await matching(interaction, params, 0);
 }
 
+/**
+ * bravoボタンの処理
+ * @param {*} interaction ボタンのインタラクション
+ * @param {*} params ボタンのパラメーター
+ */
 async function bravoButton(interaction, params) {
     await matching(interaction, params, 1);
 }
 
+/**
+ * 試合勝利処理＆マッチング処理を行う
+ * @param {*} interaction ボタンのインタラクション
+ * @param {*} params ボタンのパラメーター
+ * @param {*} winTeam 勝利チーム(alfa=0, bravo=1, 観戦=2)
+ */
 async function matching(interaction, params, winTeam) {
     try {
         let winTeamName;
@@ -253,10 +317,11 @@ async function matching(interaction, params, winTeam) {
                 break;
         }
 
-        await interaction.update({ components: [disableButton(winTeamName)] });
+        await interaction.update({
+            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+        });
 
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
-        interaction.message.reply({ content: `${winTeamName}が勝ったでし！` });
         const messageId = params.get('mid');
         const hostId = params.get('hid');
         const teamNum = params.get('num');
@@ -264,26 +329,42 @@ async function matching(interaction, params, winTeam) {
 
         if (member.id != hostId) {
             await interaction.followUp({ content: 'このボタンはコマンドを使用したユーザーしか使えないでし！', ephemeral: true });
-            await interaction.message.edit({ components: [createButtons(messageId, teamNum, hostId, count)] });
+            await interaction.message.edit({ components: await recoveryThinkingButton(interaction, winTeamName) });
             return;
         }
 
-        const winMember = await getTeamMember(messageId, winTeam);
+        const fullMember = await selectAllMemberFromDB(messageId, Number(count) - 1);
 
-        for (let member of winMember) {
-            await setWin(messageId, member.member_id, Number(member.win) + 1);
+        for (let member of fullMember) {
+            await registerMemberToDB(
+                messageId,
+                member.member_id,
+                member.member_name,
+                member.team,
+                count,
+                member.joined_match_count,
+                member.win,
+                member.force_spectate,
+                member.hide_win,
+            );
         }
 
-        const participants = await getParticipants(messageId, teamNum);
-        const fullMembers = await selectAllMemberFromDB(messageId);
+        const winMember = await getTeamMember(messageId, count, winTeam);
+
+        for (let member of winMember) {
+            await setWin(messageId, member.member_id, count, Number(member.win) + 1);
+        }
+
+        const participants = await getParticipants(messageId, count, teamNum);
+        const fullMembers = await selectAllMemberFromDB(messageId, count);
 
         let participantsIdList = participants.map((participant) => participant.member_id);
 
         // 観戦者セット
         for (let member of fullMembers) {
             if (!participantsIdList.includes(member.member_id)) {
-                await setTeam(messageId, member.member_id, 2);
-                await setForceSpectate(messageId, member.member_id, false);
+                await setTeam(messageId, member.member_id, count, 2);
+                await setForceSpectate(messageId, member.member_id, count, false);
             }
         }
 
@@ -295,40 +376,50 @@ async function matching(interaction, params, winTeam) {
         let lowerHalfParticipants = orderByWinRateArray.slice(orderByWinRateArray.length / 2);
         for (let i in upperHalfParticipants) {
             if (i % 2 == 0) {
-                await setTeam(messageId, upperHalfParticipants[i].member_id, 0);
+                await setTeam(messageId, upperHalfParticipants[i].member_id, count, 0);
             } else {
-                await setTeam(messageId, upperHalfParticipants[i].member_id, 1);
+                await setTeam(messageId, upperHalfParticipants[i].member_id, count, 1);
             }
         }
         // 下位半分は偶数をbravo、奇数をalfa
         for (let i in lowerHalfParticipants) {
             if (i % 2 == 0) {
-                await setTeam(messageId, lowerHalfParticipants[i].member_id, 1);
+                await setTeam(messageId, lowerHalfParticipants[i].member_id, count, 1);
             } else {
-                await setTeam(messageId, lowerHalfParticipants[i].member_id, 0);
+                await setTeam(messageId, lowerHalfParticipants[i].member_id, count, 0);
             }
         }
 
-        const embed = await loadTeamEmbed(messageId, Number(count) + 1, member);
-        const buttons = createButtons(messageId, teamNum, hostId, Number(count) + 1);
+        const embed = await loadTeamEmbed(messageId, Number(count), member);
+        const buttons = createButtons(messageId, teamNum, hostId, Number(count));
+        const correctButton = createSecondButtons(hostId, messageId, interaction.message.id, Number(count));
 
         for (let participant of participants) {
-            await setCount(messageId, participant.member_id, Number(participant.joined_match_count + 1));
+            await setCount(messageId, participant.member_id, count, Number(participant.joined_match_count + 1));
         }
 
-        const disableButtons = disableButton();
-        interaction.message.edit({ components: [disableButtons] });
-        interaction.channel.send({ embeds: [embed], components: [buttons] });
-        await interaction.followUp({ content: 'チームを更新したでし！', ephemeral: true });
+        await interaction.message.edit({ components: await disableThinkingButton(interaction, winTeamName) });
+        await interaction.message.reply({
+            content: `\`【${count - 1}回戦: ${winTeamName}チーム勝利】\`\nチームを更新したでし！`,
+            embeds: [embed],
+            components: [buttons, correctButton],
+        });
     } catch (err) {
         console.error(err);
-        interaction.channel.send('なんかエラー出てるわ');
+        await interaction.channel.send('なんかエラー出てるわ');
     }
 }
 
+/**
+ * 観戦希望ボタンの処理
+ * @param {*} interaction ボタンのインタラクション
+ * @param {*} params ボタンのパラメーター
+ */
 async function spectateButton(interaction, params) {
     try {
-        await interaction.update({ components: [disableButton('spectate')] });
+        await interaction.update({
+            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+        });
 
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
         const messageId = params.get('mid');
@@ -336,37 +427,35 @@ async function spectateButton(interaction, params) {
         const hostMember = await searchMemberById(interaction.guild, hostId);
         const teamNum = params.get('num');
         const count = params.get('count');
-        const fullMembers = await selectAllMemberFromDB(messageId);
+        const fullMembers = await selectAllMemberFromDB(messageId, count);
 
         let fullIdList = fullMembers.map((member) => member.member_id);
 
-        const buttons = createButtons(messageId, teamNum, hostId, count);
-
         if (!fullIdList.includes(member.id)) {
             await interaction.followUp({ content: 'このチーム分けに参加してないでし！', ephemeral: true });
-            await interaction.message.edit({ components: [buttons] });
+            await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '観戦希望') });
             return;
         }
 
-        const wantSpectateList = await getForceSpectate(messageId);
+        const wantSpectateList = await getForceSpectate(messageId, count);
         let wantSpectateIdList = wantSpectateList.map((member) => member.member_id);
 
         if (wantSpectateIdList.includes(member.id)) {
-            await setForceSpectate(messageId, member.id, false);
+            await setForceSpectate(messageId, member.id, count, false);
             const embed = await loadTeamEmbed(messageId, count, member);
-            await interaction.message.edit({ embeds: [embed], components: [buttons] });
+            await interaction.message.edit({ embeds: [embed], components: await recoveryThinkingButton(interaction, '観戦希望') });
 
             await interaction.followUp({ content: '観戦希望を取り下げたでし！', ephemeral: true });
         } else {
             if (wantSpectateIdList.length > fullMembers.length - teamNum * 2 - 1) {
                 await interaction.followUp({ content: '観戦席はもう空いてないでし！', ephemeral: true });
-                await interaction.message.edit({ components: [buttons] });
+                await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '観戦希望') });
                 return;
             }
 
-            await setForceSpectate(messageId, member.id, true);
+            await setForceSpectate(messageId, member.id, count, true);
             const embed = await loadTeamEmbed(messageId, count, hostMember);
-            await interaction.message.edit({ embeds: [embed], components: [buttons] });
+            await interaction.message.edit({ embeds: [embed], components: await recoveryThinkingButton(interaction, '観戦希望') });
 
             await interaction.followUp({
                 content: '観戦希望を申し込んだでし！\nもう一度押すと希望を取り下げられるでし！',
@@ -375,36 +464,142 @@ async function spectateButton(interaction, params) {
         }
     } catch (err) {
         console.error(err);
-        interaction.channel.send('なんかエラー出てるわ');
+        await interaction.channel.send('なんかエラー出てるわ');
     }
 }
 
+/**
+ * 終了ボタンの処理
+ * @param {*} interaction ボタンのインタラクション
+ * @param {*} params ボタンのパラメーター
+ */
 async function endButton(interaction, params) {
     try {
-        await interaction.update({ components: [disableButton('end')] });
+        await interaction.update({
+            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+        });
 
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
         const messageId = params.get('mid');
         const hostId = params.get('hid');
-        const teamNum = params.get('num');
-        const count = params.get('count');
 
         if (member.id != hostId) {
             await interaction.followUp({ content: 'このボタンはコマンドを使用したユーザーしか使えないでし！', ephemeral: true });
-            await interaction.message.edit({ components: [createButtons(messageId, teamNum, hostId, count)] });
+            await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '終了') });
             return;
         }
 
-        await interaction.message.edit({ components: [disableButton()] });
+        interaction.message.edit({ components: await disableThinkingButton(interaction, '終了') });
         await deleteAllMemberFromDB(messageId);
         const message = await searchMessageById(interaction.guild, interaction.channel.id, interaction.message.id);
         message.reply({ content: 'チーム分けを終了したでし！' });
     } catch (err) {
         console.error(err);
-        interaction.channel.send('なんかエラー出てるわ');
+        await interaction.channel.send('なんかエラー出てるわ');
     }
 }
 
+/**
+ * 直前訂正ボタンの処理
+ * @param {*} interaction ボタンのインタラクション
+ * @param {*} params ボタンのパラメーター
+ */
+async function correctButton(interaction, params) {
+    try {
+        await interaction.update({
+            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+        });
+
+        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        const messageId = params.get('mid');
+        const preMessageId = params.get('pmid');
+        const count = params.get('count');
+        const guild = interaction.guild;
+        const channelId = interaction.channel.id;
+        const message = await getFullMessageObject(guild, channelId, messageId);
+        const hostId = message.interaction.user.id;
+
+        if (member.id != hostId) {
+            await interaction.followUp({ content: 'このボタンはコマンドを使用したユーザーしか使えないでし！', ephemeral: true });
+            await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '直前訂正') });
+            return;
+        }
+
+        await interaction.message.delete();
+
+        await deleteMatchingResult(messageId, count);
+
+        const preMessage = await searchMessageById(guild, channelId, preMessageId);
+
+        await preMessage.edit({ components: await setButtonEnable(guild, channelId, preMessageId) });
+
+        await interaction.followUp({
+            content: '最新のチーム分けを削除したでし！\nもう一度同じ操作をしても違うチーム分けになる場合があるでし！',
+            ephemeral: true,
+        });
+    } catch (err) {
+        console.error(err);
+        await interaction.channel.send('なんかエラー出てるわ');
+        await interaction.channel.send(
+            'しばらく経ってからボタンを押して見るでし！\nそれでもだめなら「サポートセンターまでご連絡お願い致します。」でし！',
+        );
+    }
+}
+
+/**
+ * 戦績表示切替ボタンの処理
+ * @param {*} interaction ボタンのインタラクション
+ * @param {*} params ボタンのパラメーター
+ */
+async function hideButton(interaction, params) {
+    try {
+        await interaction.update({
+            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+        });
+
+        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        const messageId = params.get('mid');
+        const hostId = params.get('hid');
+        const count = params.get('count');
+
+        if (member.id != hostId) {
+            await interaction.followUp({ content: 'このボタンはコマンドを使用したユーザーしか使えないでし！', ephemeral: true });
+            await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '戦績表示切替') });
+            return;
+        }
+
+        const hostMember = await searchMemberById(interaction.guild, hostId);
+
+        const allMembers = await selectAllMemberFromDB(messageId, count);
+
+        let hideWin = allMembers[0].hide_win;
+
+        if (hideWin) {
+            setHideWin(messageId, false);
+            await interaction.followUp({
+                content: '戦績を表示するでし！',
+                ephemeral: true,
+            });
+        } else {
+            setHideWin(messageId, true);
+            await interaction.followUp({
+                content: '戦績を非表示にするでし！',
+                ephemeral: true,
+            });
+        }
+        const embed = await loadTeamEmbed(messageId, count, hostMember);
+        await interaction.message.edit({ embeds: [embed], components: await recoveryThinkingButton(interaction, '戦績表示切替') });
+    } catch (err) {
+        console.error(err);
+        await interaction.channel.send('なんかエラー出てるわ');
+    }
+}
+
+/**
+ * 配列内の要素のシャッフルを行う
+ * @param {*} array 該当配列
+ * @returns 並べ替え後の配列
+ */
 function arrayShuffle(array) {
     for (var i = array.length - 1; 0 < i; i--) {
         // 0〜(i+1)の範囲で値を取得
@@ -418,63 +613,82 @@ function arrayShuffle(array) {
     return array;
 }
 
+/**
+ * チーム分けした後のEmbedを作成
+ * @param {*} messageId 登録メッセージID
+ * @param {*} count 試合数
+ * @param {*} hostMember コマンド使用者のメンバーオブジェクト
+ * @returns 作成したEmbedを返す
+ */
 async function loadTeamEmbed(messageId, count, hostMember) {
-    let alfaList = usersString(await getTeamMember(messageId, 0));
-    let bravoList = usersString(await getTeamMember(messageId, 1));
-    let spectators = await getTeamMember(messageId, 2);
-    let wantSpectate = await getForceSpectate(messageId);
+    try {
+        let alfaList = usersString(await getTeamMember(messageId, count, 0));
+        let bravoList = usersString(await getTeamMember(messageId, count, 1));
+        let spectators = await getTeamMember(messageId, count, 2);
+        let wantSpectate = await getForceSpectate(messageId, count);
 
-    if (isEmpty(spectators)) {
-        spectators = 'なし';
-    } else {
-        spectators = usersString(spectators);
+        if (isEmpty(spectators)) {
+            spectators = 'なし';
+        } else {
+            spectators = usersString(spectators);
+        }
+
+        if (isEmpty(wantSpectate)) {
+            wantSpectate = 'なし';
+        } else {
+            wantSpectate = usersString(wantSpectate);
+        }
+
+        const embed = new EmbedBuilder();
+        embed.setAuthor({
+            name: 'チーム分けツール　【' + `${count}回戦】`,
+            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/dice.png',
+        });
+        embed.addFields([
+            {
+                name: `${hostMember.displayName}` + 'たんは勝ったチームのボタンを押すでし！',
+                value: `次回観戦したい人は観戦希望ボタンを押すでし！\n（観戦も自動決定するため非推奨）`,
+                inline: true,
+            },
+            {
+                name: 'alfaチーム　勝利数(勝率)',
+                value: alfaList,
+                inline: false,
+            },
+            {
+                name: 'bravoチーム　勝利数(勝率)',
+                value: bravoList,
+                inline: false,
+            },
+            {
+                name: '観戦席',
+                value: spectators,
+                inline: false,
+            },
+            {
+                name: '次回観戦希望者',
+                value: wantSpectate,
+                inline: false,
+            },
+        ]);
+        return embed;
+    } catch (err) {
+        console.error(err);
+        await interaction.channel.send('なんかエラー出てるわ');
     }
-
-    if (isEmpty(wantSpectate)) {
-        wantSpectate = 'なし';
-    } else {
-        wantSpectate = usersString(wantSpectate);
-    }
-
-    const embed = new EmbedBuilder();
-    embed.setAuthor({
-        name: 'チーム分けツール　【' + `${count}回戦】`,
-        iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/dice.png',
-    });
-    embed.addFields([
-        {
-            name: `${hostMember.displayName}` + 'たんは勝ったチームのボタンを押すでし！',
-            value: `次回観戦したい人は観戦希望ボタンを押すでし！\n（観戦も自動決定するため非推奨）`,
-            inline: true,
-        },
-        {
-            name: 'alfaチーム　勝利数(勝率)',
-            value: alfaList,
-            inline: false,
-        },
-        {
-            name: 'bravoチーム　勝利数(勝率)',
-            value: bravoList,
-            inline: false,
-        },
-        {
-            name: '観戦席',
-            value: spectators,
-            inline: false,
-        },
-        {
-            name: '次回観戦希望者',
-            value: wantSpectate,
-            inline: false,
-        },
-    ]);
-    return embed;
 }
 
-function createInitButtons(hostId, teamNum) {
+/**
+ * コマンド使用時に使うボタンを作成
+ * @param {*} hostId ホストID
+ * @param {*} teamNum 1チームのメンバー数
+ * @param {*} hideWin 戦績非表示フラグ
+ * @returns ボタンのActionRowを返す
+ */
+function createInitButtons(hostId, teamNum, hideWin) {
     const joinParams = new URLSearchParams();
     joinParams.append('t', 'join');
-    joinParams.append('num', teamNum);
+    joinParams.append('hide', hideWin);
     joinParams.append('hid', hostId);
 
     const registerParams = new URLSearchParams();
@@ -494,20 +708,28 @@ function createInitButtons(hostId, teamNum) {
     return buttons;
 }
 
+/**
+ * チーム分け画面のボタン(1段目)の作成
+ * @param {*} messageId 登録メッセージID
+ * @param {*} teamNum 1チームのメンバー数
+ * @param {*} hostId ホストID
+ * @param {*} count 試合数
+ * @returns ボタンのActionRowを返す
+ */
 function createButtons(messageId, teamNum, hostId, count) {
     const alfaParams = new URLSearchParams();
     alfaParams.append('t', 'alfa');
     alfaParams.append('num', teamNum);
     alfaParams.append('hid', hostId);
     alfaParams.append('mid', messageId);
-    alfaParams.append('count', count);
+    alfaParams.append('count', count + 1);
 
     const bravoParams = new URLSearchParams();
     bravoParams.append('t', 'bravo');
     bravoParams.append('num', teamNum);
     bravoParams.append('hid', hostId);
     bravoParams.append('mid', messageId);
-    bravoParams.append('count', count);
+    bravoParams.append('count', count + 1);
 
     const spectateParams = new URLSearchParams();
     spectateParams.append('t', 'spectate');
@@ -518,10 +740,8 @@ function createButtons(messageId, teamNum, hostId, count) {
 
     const endParams = new URLSearchParams();
     endParams.append('t', 'end');
-    endParams.append('num', teamNum);
     endParams.append('hid', hostId);
     endParams.append('mid', messageId);
-    endParams.append('count', count);
 
     const buttons = new ActionRowBuilder();
     buttons.addComponents([new ButtonBuilder().setCustomId(alfaParams.toString()).setLabel('alfa').setStyle(ButtonStyle.Danger)]);
@@ -533,99 +753,40 @@ function createButtons(messageId, teamNum, hostId, count) {
     return buttons;
 }
 
-function disableInitButtons(thinking = 'none') {
-    const initButtons = new ActionRowBuilder();
-    if (thinking == 'join') {
-        initButtons.addComponents([
-            new ButtonBuilder()
-                .setCustomId('join')
-                .setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID)
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(),
-        ]);
-    } else {
-        initButtons.addComponents([new ButtonBuilder().setCustomId('join').setLabel('参加').setStyle(ButtonStyle.Primary).setDisabled()]);
-    }
-    if (thinking == 'register') {
-        initButtons.addComponents([
-            new ButtonBuilder()
-                .setCustomId('register')
-                .setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID)
-                .setStyle(ButtonStyle.Success)
-                .setDisabled(),
-        ]);
-    } else {
-        initButtons.addComponents([
-            new ButtonBuilder().setCustomId('register').setLabel('登録完了').setStyle(ButtonStyle.Success).setDisabled(),
-        ]);
-    }
-    if (thinking == 'cancel') {
-        initButtons.addComponents([
-            new ButtonBuilder()
-                .setCustomId('cancel')
-                .setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID)
-                .setStyle(ButtonStyle.Danger)
-                .setDisabled(),
-        ]);
-    } else {
-        initButtons.addComponents([
-            new ButtonBuilder().setCustomId('cancel').setLabel('キャンセル').setStyle(ButtonStyle.Danger).setDisabled(),
-        ]);
-    }
-    return initButtons;
-}
+/**
+ * チーム分け画面のボタン(2段目)の作成
+ * @param {*} hostId ホストID
+ * @param {*} messageId 登録メッセージID
+ * @param {*} PreMessageId 1つ前のチーム分けメッセージID
+ * @param {*} count 試合数
+ * @returns ボタンのActionRowを返す
+ */
+function createSecondButtons(hostId, messageId, PreMessageId, count) {
+    const correctParams = new URLSearchParams();
+    correctParams.append('t', 'correct');
+    correctParams.append('mid', messageId);
+    correctParams.append('pmid', PreMessageId);
+    correctParams.append('count', count);
 
-function disableButton(thinking = 'none') {
+    const hideParams = new URLSearchParams();
+    hideParams.append('t', 'hide');
+    hideParams.append('hid', hostId);
+    hideParams.append('mid', messageId);
+    hideParams.append('count', count);
+
     const buttons = new ActionRowBuilder();
-    if (thinking == 'alfa') {
-        buttons.addComponents([
-            new ButtonBuilder()
-                .setCustomId('alfa')
-                .setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID)
-                .setStyle(ButtonStyle.Danger)
-                .setDisabled(),
-        ]);
-    } else {
-        buttons.addComponents([new ButtonBuilder().setCustomId('alfa').setLabel('alfa').setStyle(ButtonStyle.Danger).setDisabled()]);
-    }
-    if (thinking == 'bravo') {
-        buttons.addComponents([
-            new ButtonBuilder()
-                .setCustomId('bravo')
-                .setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID)
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(),
-        ]);
-    } else {
-        buttons.addComponents([new ButtonBuilder().setCustomId('bravo').setLabel('bravo').setStyle(ButtonStyle.Primary).setDisabled()]);
-    }
-    if (thinking == 'spectate') {
-        buttons.addComponents([
-            new ButtonBuilder()
-                .setCustomId('spectate')
-                .setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID)
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(),
-        ]);
-    } else {
-        buttons.addComponents([
-            new ButtonBuilder().setCustomId('spectate').setLabel('観戦希望').setStyle(ButtonStyle.Secondary).setDisabled(),
-        ]);
-    }
-    if (thinking == 'end') {
-        buttons.addComponents([
-            new ButtonBuilder()
-                .setCustomId('end')
-                .setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID)
-                .setStyle(ButtonStyle.Danger)
-                .setDisabled(),
-        ]);
-    } else {
-        buttons.addComponents([new ButtonBuilder().setCustomId('end').setLabel('終了').setStyle(ButtonStyle.Danger).setDisabled()]);
-    }
+    buttons.addComponents([new ButtonBuilder().setCustomId(correctParams.toString()).setLabel('直前訂正').setStyle(ButtonStyle.Success)]);
+    buttons.addComponents([
+        new ButtonBuilder().setCustomId(hideParams.toString()).setLabel('戦績表示切替').setStyle(ButtonStyle.Secondary),
+    ]);
     return buttons;
 }
 
+/**
+ * チーム分け画面のEmbedに表示する文字列を作成
+ * @param {*} array DBからのresult
+ * @returns 表示文字列
+ */
 function usersString(array) {
     try {
         let orderByWinRateArray = orderByWinRate(array);
@@ -642,7 +803,11 @@ function usersString(array) {
             const maxNameLength = getMaxNameLength(orderByWinRateArray);
             const truncatedName = truncateString(member.member_name);
             const username = spacePadding(truncatedName, maxNameLength);
-            usersString = usersString + `\n${username}　\`${member.win}勝(${winRate}％)\``;
+            if (member.hide_win) {
+                usersString = usersString + `\n${username}　\`戦績非表示\``;
+            } else {
+                usersString = usersString + `\n${username}　\`${member.win}勝(${winRate}％)\``;
+            }
         }
         return usersString;
     } catch (err) {
@@ -651,6 +816,11 @@ function usersString(array) {
     }
 }
 
+/**
+ * 勝率に応じて並べ替え
+ * @param {*} array DBからのresult
+ * @returns 並べ替え後の配列
+ */
 function orderByWinRate(array) {
     return array.sort(function (p1, p2) {
         let p1Key = p1.win_rate,
@@ -665,6 +835,11 @@ function orderByWinRate(array) {
     });
 }
 
+/**
+ * 配列内のメンバーのうち最も名前が長い人の名前の文字数を取り出す
+ * @param {*} array DBからのresult
+ * @returns 全角文字数
+ */
 function getMaxNameLength(array) {
     const nameLengthList = array.map((member) => getLengthBasedOnZenkaku(truncateString(member.member_name)));
     const aryMax = function (a, b) {
