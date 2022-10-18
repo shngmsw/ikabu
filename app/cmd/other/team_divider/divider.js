@@ -58,6 +58,14 @@ async function dividerInitialMessage(interaction) {
             return;
         }
 
+        if (isEmpty(member.voice.channelId)) {
+            await interaction.reply({
+                content: 'このコマンドはVC参加中しか使えないでし！',
+                ephemeral: true,
+            });
+            return;
+        }
+
         await interaction.deferReply();
 
         const embed = new EmbedBuilder();
@@ -104,10 +112,9 @@ async function joinButton(interaction, params) {
         const hideWin = params.get('hide');
         const host_member = await searchMemberById(interaction.guild, hostId);
         const messageId = interaction.message.id;
-        const channelId = interaction.channel.id;
 
-        if (member.voice.channelId != channelId) {
-            await interaction.followUp({ content: 'VC参加者のみ参加できるでし！', ephemeral: true });
+        if (member.voice.channelId != host_member.voice.channelId) {
+            await interaction.followUp({ content: 'ホストと同じVC参加者のみ参加できるでし！', ephemeral: true });
             await interaction.message.edit({ components: await recoveryThinkingButton(interaction, '参加') });
             return;
         }
@@ -577,13 +584,13 @@ async function hideButton(interaction, params) {
         if (hideWin) {
             setHideWin(messageId, false);
             await interaction.followUp({
-                content: '戦績を表示するでし！',
+                content: '`【戦績表示】: 表示`',
                 ephemeral: true,
             });
         } else {
             setHideWin(messageId, true);
             await interaction.followUp({
-                content: '戦績を非表示にするでし！',
+                content: '`【戦績表示】: 非表示`',
                 ephemeral: true,
             });
         }
