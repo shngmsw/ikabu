@@ -143,7 +143,7 @@ function unlockChannelButton(channel_id) {
  * @returns 新しいActionRowオブジェクト
  */
 async function recoveryThinkingButton(interaction, label) {
-    const message = await searchMessageById(interaction.guild, interaction.channel.id, interaction.message.id);
+    const message = interaction.message;
     let newActionRow = await message.components.map((oldActionRow) => {
         //create a new action row to add the new data
         updatedActionRow = new ActionRowBuilder();
@@ -176,7 +176,7 @@ async function recoveryThinkingButton(interaction, label) {
  * @returns 新しいActionRowオブジェクト
  */
 async function disableThinkingButton(interaction, label) {
-    const message = await searchMessageById(interaction.guild, interaction.channel.id, interaction.message.id);
+    const message = interaction.message;
     let newActionRow = await message.components.map((oldActionRow) => {
         //create a new action row to add the new data
         updatedActionRow = new ActionRowBuilder();
@@ -207,8 +207,7 @@ async function disableThinkingButton(interaction, label) {
  * @param {*} message ボタンが含まれるmessageオブジェクト
  * @returns 新しいActionRowオブジェクト
  */
-async function setButtonEnable(guild, channelId, messageId) {
-    const message = await searchMessageById(guild, channelId, messageId);
+async function setButtonEnable(message) {
     let newActionRow = await message.components.map((oldActionRow) => {
         //create a new action row to add the new data
         updatedActionRow = new ActionRowBuilder();
@@ -235,9 +234,7 @@ async function setButtonEnable(guild, channelId, messageId) {
  * @param {*} interaction 考え中にする場合押されたボタンのインタラクション
  * @returns 新しいActionRowオブジェクト
  */
-async function setButtonDisable(guild, channelId, messageId, interaction = null) {
-    const message = await searchMessageById(guild, channelId, messageId);
-
+async function setButtonDisable(message, interaction = null) {
     let newActionRow = await message.components.map((oldActionRow) => {
         //create a new action row to add the new data
         updatedActionRow = new ActionRowBuilder();
