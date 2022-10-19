@@ -679,8 +679,17 @@ const teamDivider = new SlashCommandBuilder()
             .setDescription('勝率に応じてチーム分けを行うことができます。')
             .addIntegerOption((option) =>
                 option.setName('各チームのメンバー数').setDescription('それぞれのチームメンバー数(ex: スプラ=4, valo=5)').setRequired(true),
-            ),
+            )
+            .addBooleanOption((option) => option.setName('勝利数と勝率を隠す').setDescription('勝利数と勝率を隠すことができます。')),
     );
+
+const buttonEnable = new SlashCommandBuilder()
+    .setName(commandNames.buttonEnable)
+    .setDescription('ボタンを有効化します。(エラー落ちしたとき用)')
+    .addChannelOption((option) =>
+        option.setName('チャンネル').setDescription('有効化するボタンが投稿されているチャンネルを選択').setRequired(true),
+    )
+    .addStringOption((option) => option.setName('メッセージid').setDescription('有効化するボタンのメッセージIDを入力').setRequired(true));
 
 const commands = [
     voiceLock,
@@ -708,6 +717,7 @@ const commands = [
     fesA,
     fesB,
     fesC,
+    buttonEnable,
 ];
 
 //登録用関数

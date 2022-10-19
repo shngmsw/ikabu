@@ -30,6 +30,7 @@ const { salmon2Recruit } = require('./cmd/splat2/recruit/salmon_recruit.js');
 const { salmonRecruit } = require('./cmd/splat3/recruit/salmon_recruit.js');
 const { private2Recruit } = require('./cmd/splat2/recruit/private_recruit.js');
 const { privateRecruit } = require('./cmd/splat3/recruit/private_recruit.js');
+const { ButtonEnable } = require('./cmd/admin-cmd/enableButton');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
 const join = require('./event/join.js');
@@ -183,6 +184,8 @@ async function onInteraction(interaction) {
                     bravo: divider.bravoButton,
                     spectate: divider.spectateButton,
                     end: divider.endButton,
+                    correct: divider.correctButton,
+                    hide: divider.hideButton,
                 };
                 await dividerButtons[params.get('t')](interaction, params);
             }
@@ -237,6 +240,8 @@ async function onInteraction(interaction) {
                 await handleFriendCode(interaction);
             } else if (commandName === commandNames.experience) {
                 handleIkabuExperience(interaction);
+            } else if (commandName === commandNames.buttonEnable) {
+                ButtonEnable(interaction);
             } else if (commandName === commandNames.voice) {
                 // 'インタラクションに失敗'が出ないようにするため
                 await interaction.deferReply();

@@ -612,7 +612,7 @@ function messageLinkButtons(guildId, channelId, messageId, label) {
 }
 
 function getMemberMentions(members) {
-    let mentionString = `【参加表明一覧】`;
+    let mentionString = `**【参加表明一覧】**` + `\`[${members.length}]\``;
     for (let i = 0; i < members.length; i++) {
         const member = members[i].member_id;
         mentionString = mentionString + `\n<@${member}> `;
