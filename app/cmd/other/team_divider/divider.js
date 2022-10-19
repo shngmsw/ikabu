@@ -104,7 +104,7 @@ async function joinButton(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+            components: await setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
@@ -162,11 +162,10 @@ async function cancelButton(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+            components: await setButtonDisable(interaction.message, interaction),
         });
         const messageId = interaction.message.id;
         const hostId = params.get('hid');
-        const teamNum = params.get('num');
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
         const host_member = await searchMemberById(interaction.guild, hostId);
 
@@ -218,7 +217,7 @@ async function registerButton(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+            components: await setButtonDisable(interaction.message, interaction),
         });
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
         const messageId = interaction.message.id;
@@ -325,7 +324,7 @@ async function matching(interaction, params, winTeam) {
         }
 
         await interaction.update({
-            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+            components: await setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
@@ -425,7 +424,7 @@ async function matching(interaction, params, winTeam) {
 async function spectateButton(interaction, params) {
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+            components: await setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
@@ -483,7 +482,7 @@ async function spectateButton(interaction, params) {
 async function endButton(interaction, params) {
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+            components: await setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
@@ -514,7 +513,7 @@ async function endButton(interaction, params) {
 async function correctButton(interaction, params) {
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+            components: await setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
@@ -538,7 +537,7 @@ async function correctButton(interaction, params) {
 
         const preMessage = await searchMessageById(guild, channelId, preMessageId);
 
-        await preMessage.edit({ components: await setButtonEnable(guild, channelId, preMessageId) });
+        await preMessage.edit({ components: await setButtonEnable(preMessage) });
 
         await interaction.followUp({
             content: '最新のチーム分けを削除したでし！\nもう一度同じ操作をしても違うチーム分けになる場合があるでし！',
@@ -561,7 +560,7 @@ async function correctButton(interaction, params) {
 async function hideButton(interaction, params) {
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.guild, interaction.channel.id, interaction.message.id, interaction),
+            components: await setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchMemberById(interaction.guild, interaction.member.user.id);
@@ -705,7 +704,6 @@ function createInitButtons(hostId, teamNum, hideWin) {
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('t', 'cancel');
-    cancelParams.append('num', teamNum);
     cancelParams.append('hid', hostId);
 
     const buttons = new ActionRowBuilder();
