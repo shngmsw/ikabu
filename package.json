@@ -43,6 +43,7 @@
     "opusscript": "^0.0.8",
     "pg": "^8.7.3",
     "request": "^2.88.2",
+    "sqlite3": "^5.1.2",
     "tweetnacl": "^1.0.3",
     "voice-text": "^0.1.2",
     "wikijs": "^6.3.3",
