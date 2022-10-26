@@ -44,6 +44,7 @@ const { voiceLocker, voiceLockerUpdate } = require('./cmd/other/voice_locker.js'
 const { handleFriendCode, deleteFriendCode } = require('./cmd/other/friendcode.js');
 const DBCommon = require('../db/db.js');
 const RecruitService = require('../db/recruit_service.js');
+const TeamDividerService = require('../db/team_divider_service.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
@@ -131,6 +132,7 @@ client.on('ready', async () => {
     await registerSlashCommands();
     DBCommon.init();
     await RecruitService.createTableIfNotExists();
+    await TeamDividerService.createTableIfNotExists();
     const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID);
     client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
 });

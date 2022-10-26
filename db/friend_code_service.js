@@ -3,37 +3,31 @@ const FriendCode = require('./model/friend_code');
 
 module.exports = class FriendCodeService {
     static async createTableIfNotExists() {
-        const db = DBCommon.get();
-        return new Promise((resolve, reject) => {
-            try {
-                // force_spectate,hide_winはbooleanだがsqliteにないので0,1で扱う
-                db.serialize(() => {
-                    db.run(`CREATE TABLE IF NOT EXISTS friend_code (
+        try {
+            // force_spectate,hide_winはbooleanだがsqliteにないので0,1で扱う
+            DBCommon.init();
+            await DBCommon.run(`CREATE TABLE IF NOT EXISTS friend_code (
                                 user_id text primary key,
                                 code text
                     )`);
-                });
-                return resolve();
-            } catch (err) {
-                return reject(err);
-            }
-        });
+            DBCommon.close();
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     static async save(id, code) {
-        const db = DBCommon.get();
-        return new Promise((resolve, reject) => {
-            try {
-                db.run(`insert or replace into friend_code (user_id, code) values ($1, $2)`, id, code);
-                return resolve();
-            } catch (err) {
-                return reject(err);
-            }
-        });
+        try {
+            DBCommon.init();
+            DBCommon.run(`insert or replace into friend_code (user_id, code) values ($1, $2)`, [id, code]);
+            DBCommon.close();
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     static async getFriendCodeByUserId(user_id) {
-        const db = DBCommon.get();
+        const db = DBCommon.open();
         const result = [];
         return new Promise((resolve, reject) => {
             db.serialize(() => {
@@ -42,6 +36,7 @@ module.exports = class FriendCodeService {
                     rows.forEach((row) => {
                         result.push(new FriendCode(row['user_id'], row['code']));
                     });
+                    DBCommon.close();
                     return resolve(result);
                 });
             });
