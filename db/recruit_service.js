@@ -12,7 +12,7 @@ module.exports = class RecruitService {
                                 message_id text,
                                 author_id text,
                                 member_id text,
-                                created_at text
+                                created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime'))
                     )`);
                 });
                 return resolve();
@@ -68,10 +68,10 @@ module.exports = class RecruitService {
         const result = [];
         return new Promise((resolve, reject) => {
             db.serialize(() => {
-                db.all(`select * from recruit where message_id = ${message_id} order by created`, (err, rows) => {
+                db.all(`select * from recruit where message_id = ${message_id} order by created_at`, (err, rows) => {
                     if (err) return reject(err);
                     rows.forEach((row) => {
-                        result.push(new Recruit(row['user_id'], row['author_id'], row['member_id'], row['created']));
+                        result.push(new Recruit(row['user_id'], row['author_id'], row['member_id'], row['created_at']));
                     });
                     return resolve(result);
                 });
@@ -87,7 +87,7 @@ module.exports = class RecruitService {
                 db.all(`select message_id from recruit where author_id = ${author_id}`, (err, rows) => {
                     if (err) return reject(err);
                     rows.forEach((row) => {
-                        result.push(new Recruit(row['user_id'], row['author_id'], row['member_id'], row['created']));
+                        result.push(new Recruit(row['user_id'], row['author_id'], row['member_id'], row['created_at']));
                     });
                     return resolve(result);
                 });
@@ -103,7 +103,7 @@ module.exports = class RecruitService {
                 db.all(`select message_id from recruit where message_id = ${message_id} and member_id =${member_id}`, (err, rows) => {
                     if (err) return reject(err);
                     rows.forEach((row) => {
-                        result.push(new Recruit(row['user_id'], row['author_id'], row['member_id'], row['created']));
+                        result.push(new Recruit(row['user_id'], row['author_id'], row['member_id'], row['created_at']));
                     });
                     return resolve(result);
                 });

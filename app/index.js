@@ -93,7 +93,7 @@ client.on('messageCreate', async (msg) => {
 });
 
 client.on('guildMemberAdd', async (member) => {
-    // join(member);
+    join(member);
     const guild = await member.guild.fetch();
     if (guild.id === process.env.SERVER_ID) {
         client.user.setActivity(`${guild.memberCount}人`, {
@@ -249,10 +249,10 @@ async function onInteraction(interaction) {
             } else if (commandName === commandNames.voice) {
                 // 'インタラクションに失敗'が出ないようにするため
                 await interaction.deferReply();
-                handleVoiceCommand(interaction);
-                setting(interaction);
+                DISCORD_VOICE.handleVoiceCommand(interaction);
+                VOICE_API.setting(interaction);
             } else {
-                call(interaction);
+                Handler.call(interaction);
             }
             return;
         }
@@ -267,30 +267,30 @@ async function onInteraction(interaction) {
 }
 client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
 
-// client.on('voiceStateUpdate', (oldState, newState) => onVoiceStateUpdate(oldState, newState));
-// const pattern = /^[a-m]/;
-// // NOTE:VC切断時に0人になったら人数制限を0にする
-// async function onVoiceStateUpdate(oldState, newState) {
-//     // StateUpdateが同じチャンネルの場合は対象外
-//     if (oldState.channelId === newState.channelId) {
-//         return;
-//     }
+client.on('voiceStateUpdate', (oldState, newState) => onVoiceStateUpdate(oldState, newState));
+const pattern = /^[a-m]/;
+// NOTE:VC切断時に0人になったら人数制限を0にする
+async function onVoiceStateUpdate(oldState, newState) {
+    // StateUpdateが同じチャンネルの場合は対象外
+    if (oldState.channelId === newState.channelId) {
+        return;
+    }
 
-//     if (oldState.channelId != null) {
-//         const oldChannel = await oldState.guild.channels.fetch(oldState.channelId);
-//         // a～mから始まらない場合は対象外にする
-//         if (!oldChannel.name.match(pattern)) {
-//             return;
-//         }
-//         if (oldChannel.members.size == 0) {
-//             oldChannel.setUserLimit(0);
-//         }
-//     }
-//     if (newState.channelId != null) {
-//         const newChannel = await newState.guild.channels.fetch(newState.channelId);
-//         if (newChannel.members.size != 0) {
-//             newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
-//             newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
-//         }
-//     }
-// }
+    if (oldState.channelId != null) {
+        const oldChannel = await oldState.guild.channels.fetch(oldState.channelId);
+        // a～mから始まらない場合は対象外にする
+        if (!oldChannel.name.match(pattern)) {
+            return;
+        }
+        if (oldChannel.members.size == 0) {
+            oldChannel.setUserLimit(0);
+        }
+    }
+    if (newState.channelId != null) {
+        const newChannel = await newState.guild.channels.fetch(newState.channelId);
+        if (newChannel.members.size != 0) {
+            newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
+            newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
+        }
+    }
+}

@@ -7,7 +7,6 @@ const { searchChannelById } = require('../manager/channelManager.js');
 const { recruitActionRow, notifyActionRow, thinkingActionRow } = require('../common/button_components');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const axios = require('axios');
-const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
 module.exports = {
     join: join,
@@ -23,7 +22,7 @@ module.exports = {
 
 async function sendLogWebhook(log_content) {
     await axios.post(
-        DISCORD_WEBHOOK_URL,
+        process.env.DISCORD_WEBHOOK_URL,
         { content: log_content }, // このオブジェクトがJSONとして送信される
     );
 }
