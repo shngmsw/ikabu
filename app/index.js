@@ -43,6 +43,7 @@ const registerSlashCommands = require('../register.js');
 const { voiceLocker, voiceLockerUpdate } = require('./cmd/other/voice_locker.js');
 const { handleFriendCode, deleteFriendCode } = require('./cmd/other/friendcode.js');
 const DBCommon = require('../db/db.js');
+const RecruitService = require('../db/recruit_service.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
@@ -83,12 +84,12 @@ client.on('messageCreate', async (msg) => {
         msg.reply({ files: [Kairu] });
     }
 
-    // await deleteToken(msg);
+    await deleteToken(msg);
     Handler.call(msg);
-    // Dispandar.dispand(msg);
-    // DISCORD_VOICE.play(msg);
+    Dispandar.dispand(msg);
+    DISCORD_VOICE.play(msg);
     await chatCountUp(msg);
-    // removeRookie(msg);
+    removeRookie(msg);
 });
 
 client.on('guildMemberAdd', async (member) => {
@@ -129,6 +130,7 @@ client.on('ready', async () => {
     // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
     await registerSlashCommands();
     DBCommon.init();
+    await RecruitService.createTableIfNotExists();
     const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID);
     client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
 });
@@ -167,14 +169,14 @@ async function onInteraction(interaction) {
             } else if (isNotEmpty(params.get('d'))) {
                 // buttonごとに呼び出すファンクション
                 const recruitButtons = {
-                    jr: join,
-                    cr: cancel,
-                    del: del,
-                    close: close,
-                    unl: unlock,
-                    njr: joinNotify,
-                    ncr: cancelNotify,
-                    nclose: closeNotify,
+                    jr: recruitButton.join,
+                    cr: recruitButton.cancel,
+                    del: recruitButton.del,
+                    close: recruitButton.close,
+                    unl: recruitButton.unlock,
+                    njr: recruitButton.joinNotify,
+                    ncr: recruitButton.cancelNotify,
+                    nclose: recruitButton.closeNotify,
                 };
                 await recruitButtons[params.get('d')](interaction, params);
             } else if (isNotEmpty(params.get('t'))) {

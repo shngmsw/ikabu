@@ -1,4 +1,4 @@
-const { getPostgresClient } = require('../../../../db/db');
+const { getPostgresClient } = require('../../../../db/db.js');
 
 module.exports = {
     registeredMembersStrings: registeredMembersStrings,
