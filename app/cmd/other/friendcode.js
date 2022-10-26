@@ -12,7 +12,7 @@ async function _handleFriendCode(interaction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply({ ephemeral: false });
     // friend_codeテーブルがなければ作る
-    FriendCodeService.createTableIfNotExists();
+    await FriendCodeService.createTableIfNotExists();
 
     const options = interaction.options;
     const subCommand = options.getSubcommand();

@@ -84,10 +84,10 @@ client.on('messageCreate', async (msg) => {
     }
 
     // await deleteToken(msg);
-    call(msg);
+    Handler.call(msg);
     // Dispandar.dispand(msg);
     // DISCORD_VOICE.play(msg);
-    // chatCountUp(msg);
+    await chatCountUp(msg);
     // removeRookie(msg);
 });
 

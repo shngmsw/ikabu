@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const getMember = require('../../db/members_select.js');
+const MembersService = require('../../db/members_service.js');
 const { searchMemberById } = require('../manager/memberManager');
 module.exports = async function removeRookie(msg) {
     const dt = new Date();
@@ -24,7 +24,7 @@ module.exports = async function removeRookie(msg) {
 };
 
 async function getMessageCount(id) {
-    const result = await getMember(id);
+    const result = await MembersService.getMemberByUserId(id);
     if (result[0] != null) {
         return result[0].message_count;
     }

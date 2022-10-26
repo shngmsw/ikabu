@@ -1,16 +1,16 @@
 const DBCommon = require('./db.js');
-const FriendCode = require('./model/friend_code');
+const Members = require('./model/members');
 
-module.exports = class FriendCodeService {
+module.exports = class MembersService {
     static async createTableIfNotExists() {
         const db = DBCommon.get();
         return new Promise((resolve, reject) => {
             try {
                 // force_spectate,hide_winはbooleanだがsqliteにないので0,1で扱う
                 db.serialize(() => {
-                    db.run(`CREATE TABLE IF NOT EXISTS friend_code (
+                    db.run(`CREATE TABLE IF NOT EXISTS members (
                                 user_id text primary key,
-                                code text
+                                message_count integer
                     )`);
                 });
                 return resolve();
@@ -20,11 +20,11 @@ module.exports = class FriendCodeService {
         });
     }
 
-    static async save(id, code) {
+    static async save(id, count) {
         const db = DBCommon.get();
         return new Promise((resolve, reject) => {
             try {
-                db.run(`insert or replace into friend_code (user_id, code) values ($1, $2)`, id, code);
+                db.run(`insert or replace into members (user_id, message_count)  values ($1, $2)`, id, count);
                 return resolve();
             } catch (err) {
                 return reject(err);
@@ -32,15 +32,15 @@ module.exports = class FriendCodeService {
         });
     }
 
-    static async getFriendCodeByUserId(user_id) {
+    static async getMemberByUserId(user_id) {
         const db = DBCommon.get();
         const result = [];
         return new Promise((resolve, reject) => {
             db.serialize(() => {
-                db.all(`select user_id, code from friend_code where user_id = ${user_id}`, (err, rows) => {
+                db.all(`select * from members where user_id = ${user_id}`, (err, rows) => {
                     if (err) return reject(err);
                     rows.forEach((row) => {
-                        result.push(new FriendCode(row['user_id'], row['code']));
+                        result.push(new Members(row['user_id'], row['message_count']));
                     });
                     return resolve(result);
                 });
