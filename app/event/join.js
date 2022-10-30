@@ -1,7 +1,7 @@
 const { searchChannelById } = require('../manager/channelManager');
 const { searchMemberById } = require('../manager/memberManager');
-const getMember = require('../../db/members_select.js');
-const getFC = require('../../db/fc_select.js');
+const MembersService = require('../../db/members_service.js');
+const { FriendCodeService } = require('../../db/friend_code_service.js');
 const common = require('../common');
 
 module.exports = async function guildMemberAddEvent(member) {
@@ -32,7 +32,7 @@ module.exports = async function guildMemberAddEvent(member) {
     }
 
     const messageCount = await getMessageCount(member.id);
-    const friendCode = await getFriendCode(member.id);
+    const friendCode = await FriendCodeService.getFriendCodeByUserId(member.id);
     var setRookieRole = async function (beginnerRole, messageCount, friendCode) {
         if (beginnerRole) {
             if (messageCount == 0 && friendCode.length == 0) {
@@ -49,13 +49,9 @@ module.exports = async function guildMemberAddEvent(member) {
 };
 
 async function getMessageCount(id) {
-    const result = await getMember(id);
+    const result = await MembersService.getMemberByUserId(id);
     if (result[0] != null) {
         return result[0].message_count;
     }
     return 0;
-}
-
-async function getFriendCode(id) {
-    return await getFC(id);
 }

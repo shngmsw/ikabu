@@ -1,15 +1,12 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { isEmpty, datetimeDiff } = require('../common');
-const { insert_recruit } = require('../../db/recruit_insert');
-const { delete_recruit, deleteRecruitByMemberId } = require('../../db/recruit_delete.js');
-const { getRecruitMessageByMemberId, getRecruitAllByMessageId } = require('../../db/recruit_select.js');
+const RecruitService = require('../../db/recruit_service.js');
 const { searchMemberById } = require('../manager/memberManager.js');
 const { searchMessageById, getFullMessageObject } = require('../manager/messageManager.js');
 const { searchChannelById } = require('../manager/channelManager.js');
 const { recruitActionRow, notifyActionRow, thinkingActionRow } = require('../common/button_components');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const axios = require('axios');
-const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
 module.exports = {
     join: join,
@@ -25,7 +22,7 @@ module.exports = {
 
 async function sendLogWebhook(log_content) {
     await axios.post(
-        DISCORD_WEBHOOK_URL,
+        process.env.DISCORD_WEBHOOK_URL,
         { content: log_content }, // このオブジェクトがJSONとして送信される
     );
 }
@@ -90,7 +87,7 @@ async function join(interaction, params) {
             return;
         } else {
             // 参加済みかチェック
-            const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
                 await interaction.followUp({
                     content: `すでに参加ボタンを押してるでし！`,
@@ -109,7 +106,7 @@ async function join(interaction, params) {
             });
 
             // recruitテーブルにデータ追加
-            await insert_recruit(interaction.message.id, host_id, member.user.id);
+            await RecruitService.save(interaction.message.id, host_id, member.user.id);
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
@@ -192,7 +189,7 @@ async function cancel(interaction, params) {
             header_message.unpin();
 
             // recruitテーブルから削除
-            await delete_recruit(interaction.message.id);
+            await RecruitService.deleteByMessageId(interaction.message.id);
 
             if (channelId != null) {
                 let channel = await searchChannelById(guild, channelId);
@@ -207,10 +204,10 @@ async function cancel(interaction, params) {
             await interaction.followUp({ embeds: [embed], ephemeral: false });
         } else {
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
-            const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
                 // recruitテーブルから自分のデータのみ削除
-                await deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
+                await RecruitService.deleteByMemberId(interaction.message.id, interaction.member.id);
 
                 // ホストに通知
                 await interaction.message.reply({
@@ -264,7 +261,7 @@ async function del(interaction, params) {
             await header_message.delete();
 
             // recruitテーブルから削除
-            await delete_recruit(interaction.message.id);
+            await RecruitService.deleteByMessageId(interaction.message.id);
             await interaction.editReply({
                 content: '募集を削除したでし！\n次回は内容をしっかり確認してから送信するでし！',
                 ephemeral: true,
@@ -305,13 +302,13 @@ async function close(interaction, params) {
         await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんが〆ボタンを押したでし`);
 
         if (member.user.id === host_id) {
-            const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
+            const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             // ピン留め解除
             header_message.unpin();
 
             // recruitテーブルから削除
-            await delete_recruit(interaction.message.id);
+            await RecruitService.deleteByMessageId(interaction.message.id);
 
             if (channelId != null) {
                 let channel = await searchChannelById(guild, channelId);
@@ -325,10 +322,10 @@ async function close(interaction, params) {
             await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({ embeds: [helpEmbed] });
         } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
-            const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
+            const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             // recruitテーブルから削除
-            deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
+            await RecruitService.deleteByMemberId(interaction.message.id, interaction.member.id);
 
             if (channelId != null) {
                 let channel = await searchChannelById(guild, channelId);
@@ -374,7 +371,7 @@ async function joinNotify(interaction, params) {
             return;
         } else {
             // 参加済みかチェック
-            const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
                 await interaction.followUp({
                     content: `すでに参加ボタンを押してるでし！`,
@@ -392,7 +389,7 @@ async function joinNotify(interaction, params) {
                 iconURL: member.displayAvatarURL(),
             });
             // recruitテーブルにデータ追加
-            await insert_recruit(interaction.message.id, interaction.member.user.id, member.user.id);
+            await RecruitService.save(interaction.message.id, interaction.member.user.id, member.user.id);
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
@@ -447,7 +444,7 @@ async function cancelNotify(interaction, params) {
             // ピン留め解除
             cmd_message.unpin();
             // recruitテーブルから削除
-            await delete_recruit(interaction.message.id);
+            await RecruitService.deleteByMessageId(interaction.message.id);
             await cmd_message.edit({
                 content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
                 components: [disableButtons()],
@@ -455,10 +452,10 @@ async function cancelNotify(interaction, params) {
             await interaction.followUp({ embeds: [embed], ephemeral: false });
         } else {
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
-            const member_data = await getRecruitMessageByMemberId(interaction.message.id, member.user.id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user.id);
             if (member_data.length > 0) {
                 // recruitテーブルから自分のデータのみ削除
-                await deleteRecruitByMemberId(interaction.message.id, interaction.member.id);
+                await RecruitService.deleteByMemberId(interaction.message.id, interaction.member.id);
 
                 // ホストに通知
                 await interaction.message.reply({
@@ -494,7 +491,7 @@ async function closeNotify(interaction, params) {
         const cmd_message = interaction.message;
 
         if (member.user.id === host_id) {
-            const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
+            const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
@@ -503,20 +500,20 @@ async function closeNotify(interaction, params) {
             // ピン留め解除
             header_message.unpin();
             // recruitテーブルから削除
-            await delete_recruit(interaction.message.id);
+            await RecruitSservice.deleteByMessageId(interaction.message.id);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({ embeds: [helpEmbed] });
 
             return;
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
-            const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
+            const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
             });
             // recruitテーブルから削除
-            deleteRecruitByMemberId(interaction.message.id);
+            await RecruitService.deleteByMessageId(interaction.message.id);
             const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({ embeds: [helpEmbed] });
@@ -621,7 +618,7 @@ function getMemberMentions(members) {
 }
 
 async function memberListMessage(interaction) {
-    const recruit_data = await getRecruitAllByMessageId(interaction.message.id);
+    const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
     const member_list = getMemberMentions(recruit_data);
     const message_first_row = interaction.message.content.split('\n')[0];
     return message_first_row + '\n' + member_list;

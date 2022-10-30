@@ -42,6 +42,9 @@ const { commandNames } = require('../constant');
 const registerSlashCommands = require('../register.js');
 const { voiceLocker, voiceLockerUpdate } = require('./cmd/other/voice_locker.js');
 const { handleFriendCode, deleteFriendCode } = require('./cmd/other/friendcode.js');
+const DBCommon = require('../db/db.js');
+const RecruitService = require('../db/recruit_service.js');
+const TeamDividerService = require('../db/team_divider_service.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.on('messageCreate', async (msg) => {
@@ -86,7 +89,7 @@ client.on('messageCreate', async (msg) => {
     Handler.call(msg);
     Dispandar.dispand(msg);
     DISCORD_VOICE.play(msg);
-    chatCountUp(msg);
+    await chatCountUp(msg);
     removeRookie(msg);
 });
 
@@ -127,6 +130,9 @@ client.on('ready', async () => {
     // そのようなことを避けるためready内でハンドラを登録する。
     // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => console.error(err)));
     await registerSlashCommands();
+    DBCommon.init();
+    await RecruitService.createTableIfNotExists();
+    await TeamDividerService.createTableIfNotExists();
     const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID);
     client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
 });
