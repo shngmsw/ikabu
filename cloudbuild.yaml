@@ -1,4 +1,10 @@
 steps:
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  - name: 'copy src'
     entrypoint: gcloud
-    args: ['compute', 'scp', '--project', 'ikabu-bot', '--zone', 'us-west1-a',  '--recurse', '/src', '.env', 'package.json', 'bukichi@ikabu-host:/home/$BRANCH_NAME/']
+    args: ['compute', 'scp', '--project', 'ikabu-bot', '--zone', 'us-west1-a',  '--recurse', '/src', 'bukichi@ikabu-host:/home/$BRANCH_NAME/']
+  - name: 'copy env'
+    entrypoint: gcloud
+    args: ['compute', 'scp', '--project', 'ikabu-bot', '--zone', 'us-west1-a',  '--recurse', '.env', 'bukichi@ikabu-host:/home/$BRANCH_NAME/']
+  - name: 'copy package.json'
+    entrypoint: gcloud
+    args: ['compute', 'scp', '--project', 'ikabu-bot', '--zone', 'us-west1-a',  '--recurse', 'package.json', 'bukichi@ikabu-host:/home/$BRANCH_NAME/']
