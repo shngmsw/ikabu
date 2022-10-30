@@ -1,4 +1,6 @@
 steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
-    args: ['compute', 'scp', '--project', 'ikabu-bot', '--zone', 'us-west1-a',  '--recurse', '../ikabu', 'bukichi@ikabu-host:/home/$BRANCH_NAME/']
+     run: |
+          gcloud compute scp --project ikabu-bot --zone us-west1-a --recurse /src bukichi@ikabu-host:/home/stg
+          gcloud compute scp --project ikabu-bot --zone us-west1-a --recurse .env bukichi@ikabu-host:/home/stg
+          gcloud compute scp --project ikabu-bot --zone us-west1-a --recurse package.json bukichi@ikabu-host:/home/stg

@@ -26,9 +26,9 @@ module.exports = async function handleIkabuExperience(interaction) {
     let months = dateDiff(joinDate, today, 'YM', true);
     let days = dateDiff(joinDate, today, 'MD', true);
 
-    Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
-    Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
-    Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
+    Canvas.registerFont(path.resolve('src/fonts/Splatfont.ttf'), { family: 'Splatfont' });
+    Canvas.registerFont(path.resolve('src/fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
+    Canvas.registerFont(path.resolve('src/fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 
     const canvas = Canvas.createCanvas(700, 250);
     const context = canvas.getContext('2d');

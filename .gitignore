@@ -6,4 +6,4 @@ package-lock.json
 .history/
 ikabu.code-workspace
 .vscode/settings.json
-ikabu.sqlite3
+src/ikabu.sqlite3

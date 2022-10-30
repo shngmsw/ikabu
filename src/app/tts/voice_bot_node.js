@@ -32,7 +32,6 @@ const pitchList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
 const speedList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
 let context;
 let voiceTextApiKey = null;
-let prefix = '/';
 let autoRestart = true;
 let readMe = false;
 let apiType = 1;
@@ -49,16 +48,6 @@ const voiceText = new VoiceText(voiceTextApiKey); //Voice Text API key
 
 function readConfig() {
     voiceTextApiKey = process.env.VOICE_TEXT_API_KEY;
-    prefix = config.get('Prefix');
-    autoRestart = config.get('AutoRestart');
-    if (typeof autoRestart !== 'boolean') throw new Error('Require a boolean type.');
-    readMe = config.get('ReadMe');
-    if (typeof readMe !== 'boolean') throw new Error('Require a boolean type.');
-    apiType = config.get('Defalut.apiType');
-    if (!modeList1[apiType]) throw new Error('Unknown api.');
-    voiceType = config.get('Defalut.voiceType');
-    if (!voiceLists1[voiceType]) throw new Error('Unknown voice.');
-    blackList = config.get('BlackLists');
     return true;
 }
 

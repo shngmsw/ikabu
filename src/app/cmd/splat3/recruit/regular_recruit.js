@@ -1,25 +1,27 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
-const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require('../../../common');
+const { searchMessageById } = require('../../../manager/messageManager');
+const { searchMemberById } = require('../../../manager/memberManager');
+const { isNotEmpty, checkFes, getRegular } = require('../../../common');
+const { searchChannelIdByName } = require('../../../manager/channelManager');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
-const { searchRoleIdByName } = require('../../../manager/roleManager.js');
-const { recruitActionRow, disableButtons, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
-const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
-const schedule_url = 'https://splatoon2.ink/data/schedules.json';
+const { recruitActionRow, disableButtons, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
+const { AttachmentBuilder, ChannelType, PermissionsBitField } = require('discord.js');
+const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
-Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
-Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Medium.ttf'), { family: 'Genshin' });
-Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
-Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
+Canvas.registerFont(path.resolve('./src/fonts/Splatfont.ttf'), { family: 'Splatfont' });
+Canvas.registerFont(path.resolve('./src/fonts/GenShinGothic-P-Medium.ttf'), { family: 'Genshin' });
+Canvas.registerFont(path.resolve('./src/fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
+Canvas.registerFont(path.resolve('./src/fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 
 module.exports = {
-    regular2Recruit: regular2Recruit,
+    regularRecruit: regularRecruit,
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function regular2Recruit(interaction) {
+async function regularRecruit(interaction) {
     if (!interaction.isCommand()) return;
 
     const options = interaction.options;
@@ -28,7 +30,7 @@ async function regular2Recruit(interaction) {
     let recruit_num = options.getInteger('募集人数');
     let condition = options.getString('参加条件');
     const guild = await interaction.guild.fetch();
-    const host_member = await guild.members.fetch(interaction.member.user.id);
+    const host_member = await searchMemberById(guild, interaction.member.user.id);
     let user1 = options.getUser('参加者1');
     let user2 = options.getUser('参加者2');
     let user3 = options.getUser('参加者3');
@@ -88,7 +90,15 @@ async function regular2Recruit(interaction) {
     try {
         const response = await fetch(schedule_url);
         const data = await response.json();
-        const args = getRegular(data, type).split(',');
+        if (checkFes(data, type)) {
+            const fes_channel_id = await searchChannelIdByName(guild, 'フェス募集', ChannelType.GuildText, null);
+            await interaction.editReply({
+                content: `募集を建てようとした期間はフェス中でし！<#${fes_channel_id}>のチャンネルを使うでし！`,
+                ephemeral: true,
+            });
+            return;
+        }
+        const regularResult = getRegular(data, type);
         let txt = `<@${host_member.user.id}>` + 'たんがナワバリ募集中でし！\n';
         let members = [];
 
@@ -116,8 +126,9 @@ async function regular2Recruit(interaction) {
         txt += 'よければ合流しませんか？';
 
         if (condition == null) condition = 'なし';
-        const stage_a = 'https://splatoon2.ink/assets/splatnet' + data.regular[type].stage_a.image;
-        const stage_b = 'https://splatoon2.ink/assets/splatnet' + data.regular[type].stage_b.image;
+        const stageImageSource = data.data.regularSchedules.nodes[type].regularMatchSetting.vsStages;
+        const stage_a = stageImageSource[0].image.url;
+        const stage_b = stageImageSource[1].image.url;
         const stageImages = [stage_a, stage_b];
         await sendRegularMatch(
             interaction,
@@ -130,7 +141,7 @@ async function regular2Recruit(interaction) {
             user1,
             user2,
             user3,
-            args,
+            regularResult,
             stageImages,
         );
     } catch (error) {
@@ -150,14 +161,14 @@ async function sendRegularMatch(
     user1,
     user2,
     user3,
-    args,
+    regularResult,
     stageImages,
 ) {
-    let r_date = args[0]; // 日付
-    let r_time = args[1]; // 時間
+    let r_date = regularResult.date; // 日付
+    let r_time = regularResult.time; // 時間
     let r_rule = 'ナワバリバトル';
-    let r_stage1 = args[3]; // ステージ1
-    let r_stage2 = args[4]; // ステージ2
+    let r_stage1 = regularResult.stage1; // ステージ1
+    let r_stage2 = regularResult.stage2; // ステージ2
 
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
@@ -170,13 +181,13 @@ async function sendRegularMatch(
     const guild = await interaction.guild.fetch();
     // サーバーメンバーとして取得し直し
     if (user1 != null) {
-        user1 = await guild.members.fetch(user1.id);
+        user1 = await searchMemberById(guild, user1.id);
     }
     if (user2 != null) {
-        user2 = await guild.members.fetch(user2.id);
+        user2 = await searchMemberById(guild, user2.id);
     }
     if (user3 != null) {
-        user3 = await guild.members.fetch(user3.id);
+        user3 = await searchMemberById(guild, user3.id);
     }
 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, user3, condition, channel_name);
@@ -185,8 +196,7 @@ async function sendRegularMatch(
     const rule = new AttachmentBuilder(await ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImages), 'rules.png');
 
     try {
-        const mention_id = await searchRoleIdByName(guild, 'スプラ2');
-        const mention = `<@&${mention_id}>`;
+        const mention = `@everyone`;
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
@@ -195,7 +205,6 @@ async function sendRegularMatch(
         let isLock = false;
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         if (reserve_channel != null && interaction.member.voice.channelId != reserve_channel.id) {
-            // vc指定なし
             isLock = true;
         }
 
@@ -231,11 +240,11 @@ async function sendRegularMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15000);
-        // ピン留め
-        header.pin();
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
+            // ピン留め
+            header.pin();
         }
 
         // 2時間後にボタンを無効化する
@@ -247,7 +256,7 @@ async function sendRegularMatch(
         });
         // ピン留め解除
         header.unpin();
-        if (reserve_channel != null) {
+        if (isLock) {
             reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }
@@ -273,10 +282,10 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, user
     recruit_ctx.lineWidth = 4;
     recruit_ctx.stroke();
 
-    let regular_icon = await Canvas.loadImage('https://splatoon2.ink/assets/img/battle-regular.01b5ef.png');
-    recruit_ctx.drawImage(regular_icon, 25, 25, 70, 70);
+    let regular_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png');
+    recruit_ctx.drawImage(regular_icon, 25, 25, 75, 75);
 
-    fillTextWithStroke(recruit_ctx, 'レギュラーマッチ', '50px Splatfont', '#CFF622', '#45520B', 1, 115, 80);
+    fillTextWithStroke(recruit_ctx, 'レギュラーマッチ', '51px Splatfont', '#000000', '#B3FF00', 3, 115, 80);
 
     let member_urls = [];
 
@@ -321,7 +330,7 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, user
 
     recruit_ctx.save();
     recruit_ctx.textAlign = 'right';
-    fillTextWithStroke(recruit_ctx, channel_name, '33px "Splatfont"', '#FFFFFF', '#2D3130', 1, 680, 60);
+    fillTextWithStroke(recruit_ctx, channel_name, '33px "Splatfont"', '#FFFFFF', '#2D3130', 1, 680, 70);
     recruit_ctx.restore();
 
     fillTextWithStroke(recruit_ctx, '募集人数', '41px "Splatfont"', '#FFFFFF', '#2D3130', 1, 490, 185);
@@ -429,24 +438,4 @@ async function ruleCanvas(r_rule, r_date, r_time, r_stage1, r_stage2, stageImage
 
     const rule = ruleCanvas.toBuffer();
     return rule;
-}
-
-/**
- * commonにあるgetRegularを、情報を2行に分けるためにカスタムしたもの
- */
-function getRegular(data, x) {
-    let stage1;
-    let stage2;
-    let date;
-    let time;
-    let rule;
-    let rstr;
-
-    date = unixTime2ymdw(data.regular[x].start_time);
-    time = unixTime2hm(data.regular[x].start_time) + ' – ' + unixTime2hm(data.regular[x].end_time);
-    rule = rule2txt(data.regular[x].rule.key);
-    stage1 = stage2txt(data.regular[x].stage_a.id);
-    stage2 = stage2txt(data.regular[x].stage_b.id);
-    rstr = date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
-    return rstr;
 }

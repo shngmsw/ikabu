@@ -1,10 +1,10 @@
 const Canvas = require('canvas');
 const path = require('path');
 
-Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
-Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Medium.ttf'), { family: 'Genshin' });
-Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
-Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
+Canvas.registerFont(path.resolve('src/fonts/Splatfont.ttf'), { family: 'Splatfont' });
+Canvas.registerFont(path.resolve('src/fonts/GenShinGothic-P-Medium.ttf'), { family: 'Genshin' });
+Canvas.registerFont(path.resolve('src/fonts/GenShinGothic-P-Bold.ttf'), { family: 'Genshin-Bold' });
+Canvas.registerFont(path.resolve('src/fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 
 /**
  * canvasを用いた募集
