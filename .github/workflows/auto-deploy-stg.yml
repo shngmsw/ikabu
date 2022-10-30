@@ -1,4 +1,4 @@
-name: Auto Deploy to stg
+name: Auto-Deploy-stg
 
 on:
   pull_request:
@@ -23,6 +23,13 @@ jobs:
             git pull origin stg
 
       - name: npm install
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd ${{ secrets.SERVER_DEPLOY_DIR_STG }}
             npm install
       
