@@ -1,0 +1,4 @@
+steps:
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: ['compute', 'scp', '--project', 'ikabu-bot', '--zone', 'us-west1-a', --recurse, '$BRANCH_NAME', 'gcp-instance-name:~/ikabu-host']
