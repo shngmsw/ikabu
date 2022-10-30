@@ -6,5 +6,5 @@ steps:
     entrypoint: gcloud
     args: ['compute', 'scp', '--project', 'ikabu-bot', '--zone', 'us-west1-a',  'package.json', 'bukichi@ikabu-host:/home/$BRANCH_NAME/']
   - name: 'gcr.io/cloud-builders/npm'
-    entrypoint: 'node'
+    entrypoint: 'npm'
     args: ['install']
