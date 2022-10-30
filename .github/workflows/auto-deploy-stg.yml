@@ -22,7 +22,7 @@ jobs:
             cd ${{ secrets.SERVER_DEPLOY_DIR_STG }}
             git pull origin stg
 
-      - name: npm install
+      - name: install-modules
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
