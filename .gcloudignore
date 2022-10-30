@@ -19,3 +19,8 @@
 # Exclude dependencies
 node_modules/
 ikabu.sqlite3
+.history/
+ikabu.code-workspace
+.vscode/settings.json
+local/*
+launch.json
