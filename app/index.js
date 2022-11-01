@@ -46,10 +46,9 @@ const DBCommon = require('../db/db.js');
 const RecruitService = require('../db/recruit_service.js');
 const TeamDividerService = require('../db/team_divider_service.js');
 const log4js = require('log4js');
-require('dotenv').config();
 client.login(process.env.DISCORD_BOT_TOKEN);
 
-log4js.configure('config/log4js-config.json');
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger();
 
 client.on('messageCreate', async (msg) => {

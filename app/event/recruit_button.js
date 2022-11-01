@@ -8,7 +8,7 @@ const { recruitActionRow, notifyActionRow, thinkingActionRow } = require('../com
 const log4js = require('log4js');
 const axios = require('axios');
 
-log4js.configure('config/log4js-config.json');
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruitButton');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

@@ -3,7 +3,6 @@ const { ChannelType } = require('discord-api-types/v10');
 const { commandNames } = require('./constant.js');
 const log4js = require('log4js');
 
-require('dotenv').config();
 const voiceLock = new SlashCommandBuilder()
     .setName(commandNames.voice_channel)
     .setDescription('ボイスチャンネルの人数制限を設定します。')
@@ -726,7 +725,7 @@ const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v10');
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
 module.exports = async function registerSlashCommands() {
-    log4js.configure('config/log4js-config.json');
+    log4js.configure(process.env.LOG4JS_CONFIG_PATH);
     const logger = log4js.getLogger();
 
     const mode = process.env.SLASH_COMMAND_REGISTER_MODE;

@@ -1,0 +1,30 @@
+{
+    "appenders": {
+        "stdout": {
+            "type": "stdout",
+            "layout": {
+                "type": "pattern",
+                "pattern":"[[%p] %c] %m"
+            }
+        }
+    },
+
+    "categories": {
+        "default": { "appenders": ["stdout"], "level": "all" },
+        "guildMemberRemove": { "appenders": ["stdout"], "level": "all" },
+        "guildMemberAdd": { "appenders": ["stdout"], "level": "all" },
+        "messageReactionAdd": { "appenders": ["stdout"], "level": "all" },
+        "messageReactionRemove": { "appenders": ["stdout"], "level": "all" },
+        "voiceStateUpdate": { "appenders": ["stdout"], "level": "all" },
+        "message": { "appenders": ["stdout"], "level": "all" },
+        "interaction": { "appenders": ["stdout"], "level": "all" },
+        "recruit": { "appenders": ["stdout"], "level": "all" },
+        "recruitButton": { "appenders": ["stdout"], "level": "all" },
+        "ban": { "appenders": ["stdout"], "level": "all" },
+        "database": { "appenders": ["stdout"], "level": "all" },
+        "dispander": { "appenders": ["stdout"], "level": "all" },
+        "ChannelManager": { "appenders": ["stdout"], "level": "all" },
+        "RoleManager": { "appenders": ["stdout"], "level": "all" },
+        "MessageManager": { "appenders": ["stdout"], "level": "all" }
+    }
+}

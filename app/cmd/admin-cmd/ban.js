@@ -6,7 +6,7 @@ module.exports = async function handleBan(interaction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply({ ephemeral: false });
 
-    log4js.configure('config/log4js-config.json');
+    log4js.configure(process.env.LOG4JS_CONFIG_PATH);
     const logger = log4js.getLogger('ban');
 
     const options = interaction.options;

@@ -17,7 +17,7 @@ const INDEX_ROLE_NAME = 6;
 const INDEX_COLOR_CODE = 7;
 const INDEX_MEMBER_ID_START = 8;
 
-log4js.configure('config/log4js-config.json');
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('ChannelManager');
 
 module.exports = async function handleCreateRoom(interaction) {

@@ -8,7 +8,7 @@ const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
 
-log4js.configure('config/log4js-config.json');
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
 
 const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';

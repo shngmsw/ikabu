@@ -2,10 +2,9 @@ const wiki = require('wikijs').default;
 const { EmbedBuilder } = require('discord.js');
 const log4js = require('log4js');
 
-log4js.configure('config/log4js-config.json');
-const logger = log4js.getLogger('interaction');
-
 module.exports = async function handleWiki(interaction) {
+    log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+    const logger = log4js.getLogger('interaction');
     try {
         if (!interaction.isCommand()) return;
         // 'インタラクションに失敗'が出ないようにするため

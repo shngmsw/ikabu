@@ -10,7 +10,7 @@ const { recruitActionRow, disableButtons, recruitDeleteButton, unlockChannelButt
 const { AttachmentBuilder, ChannelType, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
 
-log4js.configure('config/log4js-config.json');
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
 
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
