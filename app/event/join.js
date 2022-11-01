@@ -3,6 +3,10 @@ const { searchMemberById } = require('../manager/memberManager');
 const MembersService = require('../../db/members_service.js');
 const { FriendCodeService } = require('../../db/friend_code_service.js');
 const common = require('../common');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('guildMemberAdd');
 
 module.exports = async function guildMemberAddEvent(member) {
     const guild = await member.guild.fetch();
@@ -28,7 +32,9 @@ module.exports = async function guildMemberAddEvent(member) {
                     `${guild.name}のみんなが歓迎していますよ〜`,
             )
             .then((sentMessage) => sentMessage.react('👍'))
-            .catch(console.error);
+            .catch((error) => {
+                logger.error(error);
+            });
     }
 
     const messageCount = await getMessageCount(member.id);
@@ -38,7 +44,9 @@ module.exports = async function guildMemberAddEvent(member) {
             if (messageCount == 0 && friendCode.length == 0) {
                 const fetch_member = await searchMemberById(guild, member.id);
                 if (fetch_member) {
-                    fetch_member.roles.set([beginnerRole.id]).catch(console.error);
+                    fetch_member.roles.set([beginnerRole.id]).catch((error) => {
+                        logger.error(error);
+                    });
                 }
             }
         }

@@ -1,4 +1,8 @@
 const sqlite3 = require('sqlite3');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('database');
 
 let database;
 
@@ -17,7 +21,7 @@ module.exports = class DBCommon {
     static close() {
         database.close((err) => {
             if (err) {
-                return console.log('※close時にエラー', err);
+                return logger.error('※close時にエラー', err);
             }
         });
     }

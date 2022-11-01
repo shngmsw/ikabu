@@ -5,6 +5,11 @@ const { setButtonEnable, recoveryThinkingButton, disableThinkingButton, setButto
 const { searchMessageById, getFullMessageObject } = require('../../../manager/messageManager');
 const TeamDividerService = require('../../../../db/team_divider_service');
 const TeamDivider = require('../../../../db/model/team_divider');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('interaction');
+
 module.exports = {
     dividerInitialMessage: dividerInitialMessage,
     joinButton: joinButton,
@@ -73,7 +78,7 @@ async function dividerInitialMessage(interaction) {
             components: [buttons],
         });
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         await interaction.channel.send('なんかエラー出てるわ');
     }
 }
@@ -133,7 +138,7 @@ async function joinButton(interaction, params) {
         await interaction.message.edit({ embeds: [embed], components: await recoveryThinkingButton(interaction, '参加') });
         await interaction.followUp({ content: '登録したでし！', ephemeral: true });
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         await interaction.channel.send('なんかエラー出てるわ');
     }
 }
@@ -188,7 +193,7 @@ async function cancelButton(interaction, params) {
             await interaction.message.edit({ components: await recoveryThinkingButton(interaction, 'キャンセル') });
         }
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         await interaction.channel.send('なんかエラー出てるわ');
     }
 }
@@ -275,7 +280,7 @@ async function registerButton(interaction, params) {
         await interaction.message.edit({ components: await disableThinkingButton(interaction, '登録完了') });
         await interaction.followUp({ content: 'チームを更新したでし！', ephemeral: true });
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         await interaction.channel.send('なんかエラー出てるわ');
     }
 }
@@ -408,7 +413,7 @@ async function matching(interaction, params, winTeam) {
             components: [buttons, correctButton],
         });
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         await interaction.channel.send('なんかエラー出てるわ');
     }
 }
@@ -466,7 +471,7 @@ async function spectateButton(interaction, params) {
             });
         }
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         await interaction.channel.send('なんかエラー出てるわ');
     }
 }
@@ -497,7 +502,7 @@ async function endButton(interaction, params) {
         const message = await searchMessageById(interaction.guild, interaction.channel.id, interaction.message.id);
         message.reply({ content: 'チーム分けを終了したでし！' });
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         await interaction.channel.send('なんかエラー出てるわ');
     }
 }
@@ -541,7 +546,7 @@ async function correctButton(interaction, params) {
             ephemeral: true,
         });
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         await interaction.channel.send('なんかエラー出てるわ');
         await interaction.channel.send(
             'しばらく経ってからボタンを押して見るでし！\nそれでもだめなら「サポートセンターまでご連絡お願い致します。」でし！',
@@ -593,7 +598,7 @@ async function hideButton(interaction, params) {
         const embed = await loadTeamEmbed(messageId, count, hostMember);
         await interaction.message.edit({ embeds: [embed], components: await recoveryThinkingButton(interaction, '戦績表示切替') });
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         await interaction.channel.send('なんかエラー出てるわ');
     }
 }
@@ -676,7 +681,7 @@ async function loadTeamEmbed(messageId, count, hostMember) {
         ]);
         return embed;
     } catch (err) {
-        console.error(err);
+        logger.error(err);
     }
 }
 
@@ -812,7 +817,7 @@ function usersString(array) {
         }
         return usersString;
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         interaction.channel.send('なんかエラー出てるわ');
     }
 }

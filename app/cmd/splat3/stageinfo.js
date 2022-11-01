@@ -1,8 +1,11 @@
 const fetch = require('node-fetch');
 const common = require('../../common');
 const Discord = require('discord.js');
-const { checkFes } = require('../../common');
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('interaction');
 
 module.exports = function handleStageInfo(msg) {
     if (msg.content.startsWith('stageinfo')) {
@@ -48,7 +51,7 @@ async function sf(msg) {
         });
     } catch (error) {
         msg.channel.send('なんかエラーでてるわ');
-        console.error(error);
+        logger.error(error);
     }
 }
 
@@ -93,7 +96,7 @@ async function stageinfo(msg) {
         // msg.channel.send({ embeds: [embedStr_x] });
     } catch (error) {
         msg.channel.send('なんかエラーでてるわ');
-        console.error(error);
+        logger.error(error);
     }
 }
 

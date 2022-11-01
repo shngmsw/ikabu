@@ -1,5 +1,9 @@
 const DBCommon = require('./db.js');
 const TeamDivider = require('./model/team_divider');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('database');
 
 module.exports = class TeamDividerService {
     static async createTableIfNotExists() {
@@ -19,7 +23,7 @@ module.exports = class TeamDividerService {
                     )`);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -60,13 +64,13 @@ module.exports = class TeamDividerService {
                         }
                         db.close((err) => {
                             if (err) {
-                                return console.log('※close時にエラー', err);
+                                return logger.error('※close時にエラー', err);
                             }
                         });
 
                         return resolve([usersString, result.length]);
                     } catch (err) {
-                        console.error(err);
+                        logger.error(err);
                         interaction.channel.send('なんかエラー出てるわ');
                     }
                 });
@@ -84,7 +88,7 @@ module.exports = class TeamDividerService {
             ]);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -112,7 +116,7 @@ module.exports = class TeamDividerService {
             );
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -154,7 +158,7 @@ module.exports = class TeamDividerService {
                         });
                         db.close((err) => {
                             if (err) {
-                                return console.log('※close時にエラー', err);
+                                return logger.error('※close時にエラー', err);
                             }
                         });
                         return resolve(result);
@@ -196,7 +200,7 @@ module.exports = class TeamDividerService {
                     });
                     db.close((err) => {
                         if (err) {
-                            return console.log('※close時にエラー', err);
+                            return logger.error('※close時にエラー', err);
                         }
                     });
                     return resolve(result);
@@ -215,7 +219,7 @@ module.exports = class TeamDividerService {
             await DBCommon.run(`DELETE from team_divider where message_id = ?`, [message_id]);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -237,7 +241,7 @@ module.exports = class TeamDividerService {
             ]);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -258,7 +262,7 @@ module.exports = class TeamDividerService {
             );
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -280,7 +284,7 @@ module.exports = class TeamDividerService {
             ]);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -295,7 +299,7 @@ module.exports = class TeamDividerService {
             await DBCommon.run(`UPDATE team_divider SET hide_win = $1 WHERE message_id = $2`, [flag ? 1 : 0, message_id]);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -317,7 +321,7 @@ module.exports = class TeamDividerService {
             ]);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -379,7 +383,7 @@ module.exports = class TeamDividerService {
                         });
                         db.close((err) => {
                             if (err) {
-                                return console.log('※close時にエラー', err);
+                                return logger.error('※close時にエラー', err);
                             }
                         });
                         return resolve(result);
@@ -425,7 +429,7 @@ module.exports = class TeamDividerService {
                         });
                         db.close((err) => {
                             if (err) {
-                                return console.log('※close時にエラー', err);
+                                return logger.error('※close時にエラー', err);
                             }
                         });
                         return resolve(result);
@@ -490,7 +494,7 @@ module.exports = class TeamDividerService {
                         });
                         db.close((err) => {
                             if (err) {
-                                return console.log('※close時にエラー', err);
+                                return logger.error('※close時にエラー', err);
                             }
                         });
                         return resolve(result);
@@ -512,7 +516,7 @@ module.exports = class TeamDividerService {
                     });
                     db.close((err) => {
                         if (err) {
-                            return console.log('※close時にエラー', err);
+                            return logger.error('※close時にエラー', err);
                         }
                     });
                     return resolve(result);
@@ -532,7 +536,7 @@ module.exports = class TeamDividerService {
             DBCommon.run(`DELETE from team_divider where message_id = $1 and match_num = $2`, [message_id, match_num]);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 };

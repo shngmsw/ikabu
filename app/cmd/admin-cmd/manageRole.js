@@ -2,6 +2,10 @@ const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
 const { createRole, searchRoleById, setColorToRole, searchRoleIdByName } = require('../../manager/roleManager');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('RoleManager');
 
 module.exports = {
     handleCreateRole: handleCreateRole,
@@ -49,7 +53,7 @@ async function handleCreateRole(interaction) {
             'ロール名`' + role.name + '`を作ったでし！\nロールIDは`' + roleId + '`、カラーコードは`' + colorCode + '`でし！',
         );
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         await interaction.followUp('なんかエラーでてるわ');
     }
 }
@@ -106,7 +110,7 @@ async function handleDeleteRole(interaction) {
             await interaction.editReply(parseInt(((+i + 1) / roleIdList.length) * 100, 10) + '% 完了');
         }
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         await interaction.editReply('ロール削除中にエラーでし！');
     }
 
@@ -143,7 +147,7 @@ async function handleAssignRole(interaction) {
 
         await interaction.editReply('`' + targetRole.name + '`のメンバーに`' + assignRole.name + '`のロールつけたでし！');
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         await interaction.editReply('なんかエラーでてるわ');
     }
 }
@@ -171,7 +175,7 @@ async function handleUnassignRole(interaction) {
 
         await interaction.editReply('`' + targetRole.name + '`のメンバーから`' + unAssignRole.name + '`のロールを削除したでし！');
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         await interaction.editReply('なんかエラーでてるわ');
     }
 }

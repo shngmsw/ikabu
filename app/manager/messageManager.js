@@ -1,4 +1,8 @@
 const { searchChannelById } = require('../manager/channelManager');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('MessageManager');
 
 module.exports = {
     searchMessageById: searchMessageById,
@@ -36,7 +40,7 @@ async function getFullMessageObject(guild, channelId, messageId) {
         try {
             message = await channel.messages.fetch({ message: messageId });
         } catch (error) {
-            console.log('MessageManager: message missing');
+            logger.warn('message missing');
         }
     }
     return message;
