@@ -1,5 +1,9 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { setTimeout } = require('timers/promises');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('interaction');
 
 /*
  * スラコマ打たれたときの動作
@@ -45,7 +49,9 @@ module.exports.voiceLocker = async function (interaction) {
             components: [button],
             fetchReply: true,
         })
-        .catch(console.error);
+        .catch((error) => {
+            logger.error(error);
+        });
 
     // 1分後にメッセージを削除
     await setTimeout(60000);
@@ -105,7 +111,9 @@ module.exports.voiceLockerUpdate = async function (interaction) {
     } else {
         // ロックされていないのに'＋'or'－'が押されたときの動作
         if (interaction.customId === 'voiceLock_inc' || interaction.customId === 'voiceLock_dec') {
-            await interaction.reply({ content: '今はロックされてないでし！', ephemeral: true, fetchReply: true }).catch(console.error);
+            await interaction.reply({ content: '今はロックされてないでし！', ephemeral: true, fetchReply: true }).catch((error) => {
+                logger.error(error);
+            });
             return;
         }
     }
@@ -116,7 +124,9 @@ module.exports.voiceLockerUpdate = async function (interaction) {
             components: [createButton(channelState)],
             fetchReply: true,
         })
-        .catch(console.error);
+        .catch((error) => {
+            logger.error(error);
+        });
 };
 
 /**

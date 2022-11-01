@@ -1,0 +1,29 @@
+{
+    "appenders": {
+        "console": {
+            "type": "console",
+            "layout": {
+                "type": "pattern",
+                "pattern": "%[ [[%p] %c] %]%m"
+            }
+        }
+    },
+    "categories": {
+        "default": { "appenders": ["console"], "level": "all" },
+        "guildMemberRemove": { "appenders": ["console"], "level": "all" },
+        "guildMemberAdd": { "appenders": ["console"], "level": "all" },
+        "messageReactionAdd": { "appenders": ["console"], "level": "all" },
+        "messageReactionRemove": { "appenders": ["console"], "level": "all" },
+        "voiceStateUpdate": { "appenders": ["console"], "level": "all" },
+        "message": { "appenders": ["console"], "level": "all" },
+        "interaction": { "appenders": ["console"], "level": "all" },
+        "recruit": { "appenders": ["console"], "level": "all" },
+        "recruitButton": { "appenders": ["console"], "level": "all" },
+        "ban": { "appenders": ["console"], "level": "all" },
+        "database": { "appenders": ["console"], "level": "all" },
+        "dispander": { "appenders": ["console"], "level": "all" },
+        "ChannelManager": { "appenders": ["console"], "level": "all" },
+        "RoleManager": { "appenders": ["console"], "level": "all" },
+        "MessageManager": { "appenders": ["console"], "level": "all" }
+    }
+}

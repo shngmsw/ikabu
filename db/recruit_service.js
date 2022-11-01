@@ -1,5 +1,9 @@
 const DBCommon = require('./db.js');
 const Recruit = require('./model/recruit');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('database');
 
 module.exports = class RecruitService {
     static async createTableIfNotExists() {
@@ -13,7 +17,7 @@ module.exports = class RecruitService {
                     )`);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -27,7 +31,7 @@ module.exports = class RecruitService {
             ]);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -37,7 +41,7 @@ module.exports = class RecruitService {
             await DBCommon.run(`DELETE from recruit where message_id = ${message_id}`);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -47,7 +51,7 @@ module.exports = class RecruitService {
             await DBCommon.run(`DELETE from recruit where message_id = ${message_id} and member_id = ${member_id}`);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 

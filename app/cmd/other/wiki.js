@@ -1,5 +1,9 @@
 const wiki = require('wikijs').default;
 const { EmbedBuilder } = require('discord.js');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('interaction');
 
 module.exports = async function handleWiki(interaction) {
     try {
@@ -31,6 +35,6 @@ module.exports = async function handleWiki(interaction) {
 
         await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-        console.log(err.name + ': ' + err.message);
+        logger.error(err.name + ': ' + err.message);
     }
 };

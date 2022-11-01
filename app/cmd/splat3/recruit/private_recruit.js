@@ -4,6 +4,10 @@ const { searchMemberById } = require('../../../manager/memberManager');
 const { isNotEmpty } = require('../../../common');
 const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../common/button_components');
 const e = require('express');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('recruit');
 
 module.exports = {
     privateRecruit: privateRecruit,
@@ -97,7 +101,7 @@ async function sendPrivateRecruit(interaction, options) {
             header.pin();
         }
     } catch (error) {
-        console.log(error);
+        logger.error(error);
     }
 }
 

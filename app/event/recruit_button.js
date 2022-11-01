@@ -5,8 +5,13 @@ const { searchMemberById } = require('../manager/memberManager.js');
 const { searchMessageById, getFullMessageObject } = require('../manager/messageManager.js');
 const { searchChannelById } = require('../manager/channelManager.js');
 const { recruitActionRow, notifyActionRow, thinkingActionRow } = require('../common/button_components');
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const log4js = require('log4js');
 const axios = require('axios');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('recruitButton');
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 module.exports = {
     join: join,
@@ -39,7 +44,7 @@ async function sendLogWebhook(log_content) {
 async function handleError(err, { interaction }) {
     // UnKnown Interactionエラーはコンポーネント削除してるから出ちゃうのはしょうがないっぽい？のでスルー
     // if (err.code === 10062 || err.code === 40060) {
-    //     console.log(`err:${err.code}`);
+    //     logger.error(`err:${err.code}`);
     // } else {
     //     await sendLogWebhook(err.code);
     //     await sendLogWebhook({
@@ -48,7 +53,7 @@ async function handleError(err, { interaction }) {
     //         message_id: interaction.message.id,
     //         member_id: interaction.member.id,
     //     });
-    console.log(err);
+    logger.error(err);
     // }
 }
 /**

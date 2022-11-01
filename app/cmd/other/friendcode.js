@@ -1,6 +1,10 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const FriendCodeService = require('../../../db/friend_code_service.js');
 const { searchMemberById } = require('../../manager/memberManager.js');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger();
 
 module.exports = {
     handleFriendCode: _handleFriendCode,
@@ -29,7 +33,9 @@ async function selectFriendCode(interaction) {
     let id = interaction.member.user.id;
     const channelCollection = await guild.channels.fetch();
     let ch = channelCollection.find((channel) => channel.name === '自己紹介');
-    let messages = await ch.messages.fetch({ limit: 100 }).catch(console.error);
+    let messages = await ch.messages.fetch({ limit: 100 }).catch((error) => {
+        logger.error(error);
+    });
     let list = await messages.filter((m) => targetUser.id === m.author.id && !m.author.bot);
     let result = list.map(function (value) {
         return value.content;

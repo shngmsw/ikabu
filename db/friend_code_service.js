@@ -1,5 +1,9 @@
 const DBCommon = require('./db.js');
 const FriendCode = require('./model/friend_code');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('database');
 
 module.exports = class FriendCodeService {
     static async createTableIfNotExists() {
@@ -12,7 +16,7 @@ module.exports = class FriendCodeService {
                     )`);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -22,7 +26,7 @@ module.exports = class FriendCodeService {
             DBCommon.run(`insert or replace into friend_code (user_id, code) values ($1, $2)`, [id, code]);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 

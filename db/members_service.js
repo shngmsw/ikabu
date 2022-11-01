@@ -1,5 +1,9 @@
 const DBCommon = require('./db.js');
 const Members = require('./model/members');
+const log4js = require('log4js');
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger('database');
 
 module.exports = class MembersService {
     static async createTableIfNotExists() {
@@ -11,7 +15,7 @@ module.exports = class MembersService {
                     )`);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 
@@ -21,7 +25,7 @@ module.exports = class MembersService {
             await DBCommon.run(`insert or replace into members (user_id, message_count)  values ($1, $2)`, [id, count]);
             DBCommon.close();
         } catch (err) {
-            console.log(err);
+            logger.error(err);
         }
     }
 

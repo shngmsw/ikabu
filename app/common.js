@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { searchMemberById } = require('./manager/memberManager.js');
+const log4js = require('log4js');
 
 module.exports = {
     isInteger: isInteger,
@@ -33,6 +34,9 @@ module.exports = {
     getCloseEmbed: getCloseEmbed,
     getCommandHelpEmbed: getCommandHelpEmbed,
 };
+
+log4js.configure('config/log4js-config.json');
+const logger = log4js.getLogger();
 
 async function composeEmbed(message, url) {
     const embed = new EmbedBuilder();
@@ -742,7 +746,7 @@ function sendCloseMessage(msg, command) {
     try {
         msg.delete();
     } catch (error) {
-        console.log(error);
+        logger.error(error);
     }
 }
 
