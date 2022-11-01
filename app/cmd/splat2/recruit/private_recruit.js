@@ -3,7 +3,7 @@ const { searchRoleIdByName } = require('../../../manager/roleManager');
 const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../common/button_components');
 const log4js = require('log4js');
 
-log4js.configure('config/log4js-config.json');
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
 
 module.exports = {

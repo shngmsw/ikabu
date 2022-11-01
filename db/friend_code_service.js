@@ -2,7 +2,7 @@ const DBCommon = require('./db.js');
 const FriendCode = require('./model/friend_code');
 const log4js = require('log4js');
 
-log4js.configure('config/log4js-config.json');
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('database');
 
 module.exports = class FriendCodeService {

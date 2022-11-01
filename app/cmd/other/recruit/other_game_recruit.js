@@ -5,7 +5,7 @@ const { isNotEmpty } = require('../../../common');
 const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
 const log4js = require('log4js');
 
-log4js.configure('config/log4js-config.json');
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
 
 module.exports = {
