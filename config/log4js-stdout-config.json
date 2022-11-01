@@ -6,25 +6,43 @@
                 "type": "pattern",
                 "pattern":"[[%p] %c] %m"
             }
+        },
+        "stderr": {
+            "type": "stderr",
+            "layout": {
+                "type": "pattern",
+                "pattern":"[[%p] %c] %m"
+            }
+        },
+        "not-error": {
+            "type": "logLevelFilter",
+            "appender": "stdout",
+            "level": "trace",
+            "maxLevel": "warn"
+        },
+        "just-errors": {
+            "type": "logLevelFilter",
+            "appender": "stderr",
+            "level": "error"
         }
     },
 
     "categories": {
-        "default": { "appenders": ["stdout"], "level": "all" },
-        "guildMemberRemove": { "appenders": ["stdout"], "level": "all" },
-        "guildMemberAdd": { "appenders": ["stdout"], "level": "all" },
-        "messageReactionAdd": { "appenders": ["stdout"], "level": "all" },
-        "messageReactionRemove": { "appenders": ["stdout"], "level": "all" },
-        "voiceStateUpdate": { "appenders": ["stdout"], "level": "all" },
-        "message": { "appenders": ["stdout"], "level": "all" },
-        "interaction": { "appenders": ["stdout"], "level": "all" },
-        "recruit": { "appenders": ["stdout"], "level": "all" },
-        "recruitButton": { "appenders": ["stdout"], "level": "all" },
-        "ban": { "appenders": ["stdout"], "level": "all" },
-        "database": { "appenders": ["stdout"], "level": "all" },
-        "dispander": { "appenders": ["stdout"], "level": "all" },
-        "ChannelManager": { "appenders": ["stdout"], "level": "all" },
-        "RoleManager": { "appenders": ["stdout"], "level": "all" },
-        "MessageManager": { "appenders": ["stdout"], "level": "all" }
+        "default": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "guildMemberRemove": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "guildMemberAdd": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "messageReactionAdd": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "messageReactionRemove": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "voiceStateUpdate": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "message": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "interaction": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "recruit": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "recruitButton": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "ban": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "database": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "dispander": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "ChannelManager": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "RoleManager": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "MessageManager": { "appenders": ["not-error", "just-errors"], "level": "all" }
     }
 }
