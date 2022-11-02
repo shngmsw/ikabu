@@ -47,7 +47,9 @@ const join = async (interaction) => {
             adapterCreator: member.voice.guild.voiceAdapterCreator,
         });
         subscription = connection.subscribe(createAudioPlayer());
-        connection.on('error', logger.warn(error));
+        connection.on('error', (error) => {
+            logger.warn(error);
+        });
         subscriptions.set(guildId, subscription);
         channels.set(guildId, channelId);
         await interaction.followUp('ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！');
