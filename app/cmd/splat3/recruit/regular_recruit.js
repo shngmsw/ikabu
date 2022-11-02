@@ -8,6 +8,11 @@ const { searchChannelIdByName } = require('../../../manager/channelManager');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const { recruitActionRow, disableButtons, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
 const { AttachmentBuilder, ChannelType, PermissionsBitField } = require('discord.js');
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('recruit');
+
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
@@ -146,7 +151,7 @@ async function regularRecruit(interaction) {
         );
     } catch (error) {
         channel.send('なんかエラーでてるわ');
-        console.error(error);
+        logger.error(error);
     }
 }
 
@@ -261,7 +266,7 @@ async function sendRegularMatch(
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }
     } catch (error) {
-        console.log(error);
+        logger.error(error);
     }
 }
 

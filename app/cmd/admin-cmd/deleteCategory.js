@@ -4,6 +4,10 @@ const fs = require('fs');
 const { parse } = require('csv');
 const { stringify } = require('csv-stringify/sync');
 const { searchChannelById } = require('../../manager/channelManager');
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('ChannelManager');
 
 module.exports = async function handleDeleteCategory(interaction) {
     if (!interaction.isCommand()) return;
@@ -40,7 +44,7 @@ module.exports = async function handleDeleteCategory(interaction) {
                     }
                     categoryIdList = Array.from(new Set(categoryIdList));
                 } catch (error) {
-                    console.error(error);
+                    logger.error(error);
                     await interaction.followUp('CSVファイル読み込み中にエラーでし！');
                 }
                 deleteCategory(interaction, categoryIdList);
@@ -93,7 +97,7 @@ async function deleteCategory(interaction, categoryIdList) {
             await interaction.editReply(parseInt(((+i + 1) / categoryIdList.length) * 100, 10) + '% 完了');
         }
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         await interaction.followUp('カテゴリ削除中にエラーでし！');
     }
 

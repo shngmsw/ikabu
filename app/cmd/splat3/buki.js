@@ -3,6 +3,10 @@ const { searchMemberById } = require('../../manager/memberManager');
 const common = require('../../common');
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 const { EmbedBuilder } = require('discord.js');
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('interaction');
 
 module.exports = async function handleBuki(interaction) {
     if (!interaction.isCommand()) return;
@@ -63,6 +67,6 @@ async function buki(interaction) {
         }
     } catch (error) {
         await interaction.followUp('なんかエラーでてるわ');
-        console.error(error);
+        logger.error(error);
     }
 }

@@ -1,8 +1,12 @@
 const { searchChannelById } = require('../manager/channelManager');
 const { searchMemberById } = require('../manager/memberManager');
-const getMember = require('../../db/members_select.js');
-const getFC = require('../../db/fc_select.js');
+const MembersService = require('../../db/members_service.js');
+const { FriendCodeService } = require('../../db/friend_code_service.js');
 const common = require('../common');
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('guildMemberAdd');
 
 module.exports = async function guildMemberAddEvent(member) {
     const guild = await member.guild.fetch();
@@ -28,17 +32,21 @@ module.exports = async function guildMemberAddEvent(member) {
                     `${guild.name}のみんなが歓迎していますよ〜`,
             )
             .then((sentMessage) => sentMessage.react('👍'))
-            .catch(console.error);
+            .catch((error) => {
+                logger.error(error);
+            });
     }
 
     const messageCount = await getMessageCount(member.id);
-    const friendCode = await getFriendCode(member.id);
+    const friendCode = await FriendCodeService.getFriendCodeByUserId(member.id);
     var setRookieRole = async function (beginnerRole, messageCount, friendCode) {
         if (beginnerRole) {
             if (messageCount == 0 && friendCode.length == 0) {
                 const fetch_member = await searchMemberById(guild, member.id);
                 if (fetch_member) {
-                    fetch_member.roles.set([beginnerRole.id]).catch(console.error);
+                    fetch_member.roles.set([beginnerRole.id]).catch((error) => {
+                        logger.error(error);
+                    });
                 }
             }
         }
@@ -49,13 +57,9 @@ module.exports = async function guildMemberAddEvent(member) {
 };
 
 async function getMessageCount(id) {
-    const result = await getMember(id);
+    const result = await MembersService.getMemberByUserId(id);
     if (result[0] != null) {
         return result[0].message_count;
     }
     return 0;
-}
-
-async function getFriendCode(id) {
-    return await getFC(id);
 }

@@ -4,6 +4,11 @@ const common = require('../../common');
 const { createRoundRect, fillTextWithStroke } = require('../../common/canvas_components');
 const { sp3unixTime2mdwhm, sp3coop_stage2txt } = require('../../common');
 const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('interaction');
+
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
@@ -183,12 +188,12 @@ module.exports = async function handleShow(interaction) {
                 });
             } catch (error) {
                 await interaction.followUp('なんかエラーでてるわ');
-                console.error(error);
+                logger.error(error);
             }
         }
     } catch (error) {
         await interaction.followUp('なんかエラーでてるわ');
-        console.error(error);
+        logger.error(error);
     }
 };
 

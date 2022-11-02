@@ -1,4 +1,9 @@
 const common = require('../common');
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('dispander');
+
 const regexDiscordMessageUrl =
     'https://(ptb.|canary.)?discord(app)?.com/channels/' + '(?<guild>[0-9]{18,19})/(?<channel>[0-9]{18,19})/(?<message>[0-9]{18,19})';
 
@@ -28,7 +33,7 @@ async function dispand(message) {
             }
         }
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         message.reply('なんかエラー出てるわ');
     }
 }
@@ -68,7 +73,7 @@ async function searchMessageById(guild, channelId, messageId) {
         try {
             message = await channel.messages.fetch({ message: messageId });
         } catch (error) {
-            console.log('dispandar: message missing');
+            logger.warn('message missing');
         }
     }
     return message;
@@ -86,7 +91,7 @@ async function searchChannelById(guild, channelId) {
     try {
         channel = await guild.channels.fetch(channelId);
     } catch (error) {
-        console.log('dispandar: channel missing');
+        logger.warn('channel missing');
     }
     return channel;
 }

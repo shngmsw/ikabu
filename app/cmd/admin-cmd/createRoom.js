@@ -5,6 +5,7 @@ const { parse } = require('csv');
 const { stringify } = require('csv-stringify/sync');
 const { createChannel } = require('../../manager/channelManager');
 const { createRole, setColorToRole, searchRoleById, setRoleToMember } = require('../../manager/roleManager');
+const log4js = require('log4js');
 
 const INDEX_CATEGORY_ID = 0;
 const INDEX_CATEGORY_NAME = 1;
@@ -15,6 +16,9 @@ const INDEX_ROLE_ID = 5;
 const INDEX_ROLE_NAME = 6;
 const INDEX_COLOR_CODE = 7;
 const INDEX_MEMBER_ID_START = 8;
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('ChannelManager');
 
 module.exports = async function handleCreateRoom(interaction) {
     if (!interaction.isCommand()) return;
@@ -129,7 +133,7 @@ module.exports = async function handleCreateRoom(interaction) {
 
                         await interaction.editReply(parseInt((i / (data.length - 1)) * 100, 10) + '% 完了');
                     } catch (error) {
-                        console.error(error);
+                        logger.error(error);
                         await interaction.followUp('データの' + i + '行目でエラーでし！');
                     }
                 }

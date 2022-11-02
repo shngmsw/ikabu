@@ -1,8 +1,8 @@
 const { SlashCommandBuilder } = require(`@discordjs/builders`);
 const { ChannelType } = require('discord-api-types/v10');
 const { commandNames } = require('./constant.js');
+const log4js = require('log4js');
 
-require('dotenv').config();
 const voiceLock = new SlashCommandBuilder()
     .setName(commandNames.voice_channel)
     .setDescription('ボイスチャンネルの人数制限を設定します。')
@@ -725,16 +725,23 @@ const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v10');
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
 module.exports = async function registerSlashCommands() {
+    log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+    const logger = log4js.getLogger();
+
     const mode = process.env.SLASH_COMMAND_REGISTER_MODE;
     if (mode === 'guild') {
         await rest
             .put(Routes.applicationGuildCommands(process.env.DISCORD_BOT_ID, process.env.SERVER_ID), { body: commands })
-            .then(() => console.log('Successfully registered application guild commands.'))
-            .catch(console.error);
+            .then(() => logger.info('Successfully registered application guild commands.'))
+            .catch((error) => {
+                logger.error(error);
+            });
     } else if (mode === 'global') {
         await rest
             .put(Routes.applicationCommands(process.env.DISCORD_BOT_ID), { body: commands })
-            .then(() => console.log('Successfully registered application global commands.'))
-            .catch(console.error);
+            .then(() => logger.info('Successfully registered application global commands.'))
+            .catch((error) => {
+                logger.error(error);
+            });
     }
 };

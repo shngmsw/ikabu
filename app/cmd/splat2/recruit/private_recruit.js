@@ -1,6 +1,10 @@
 const { EmbedBuilder } = require('discord.js');
 const { searchRoleIdByName } = require('../../../manager/roleManager');
 const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../common/button_components');
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('recruit');
 
 module.exports = {
     private2Recruit: private2Recruit,
@@ -95,7 +99,7 @@ async function sendPrivateRecruit(interaction, options) {
             deleteButtonCheck.delete();
         }
     } catch (error) {
-        console.log(error);
+        logger.error(error);
     }
 }
 

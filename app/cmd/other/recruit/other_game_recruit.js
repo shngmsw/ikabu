@@ -3,6 +3,10 @@ const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const { isNotEmpty } = require('../../../common');
 const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('recruit');
 
 module.exports = {
     otherGameRecruit: otherGameRecruit,
@@ -199,6 +203,6 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
             header.pin();
         }
     } catch (error) {
-        console.log(error);
+        logger.error(error);
     }
 }

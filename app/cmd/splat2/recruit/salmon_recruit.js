@@ -6,6 +6,11 @@ const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../
 const { searchRoleIdByName } = require('../../../manager/roleManager.js');
 const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('recruit');
+
 const coop_schedule_url = 'https://splatoon2.ink/data/coop-schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
@@ -102,7 +107,7 @@ async function salmon2Recruit(interaction) {
         await sendSalmonRun(interaction, channel, txt, recruit_num, condition, member_counter, host_member, user1, user2, data.details[0]);
     } catch (error) {
         channel.send('なんかエラーでてるわ');
-        console.error(error);
+        logger.error(error);
     }
 }
 
@@ -195,7 +200,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             deleteButtonCheck.delete();
         }
     } catch (error) {
-        console.log(error);
+        logger.error(error);
     }
 }
 

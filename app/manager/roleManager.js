@@ -1,3 +1,8 @@
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('RoleManager');
+
 module.exports = {
     createRole: createRole,
     searchRoleIdByName: searchRoleIdByName,
@@ -125,7 +130,7 @@ async function setRoleToMember(guild, roleId, memberId) {
                 try {
                     member = await guild.members.fetch(memberId);
                 } catch (error) {
-                    console.log('roleManager: member missing');
+                    logger.warn('member missing');
                     member = null;
                 }
             } else {

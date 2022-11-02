@@ -9,7 +9,12 @@ const {
     NoSubscriberBehavior,
     generateDependencyReport,
 } = require('@discordjs/voice');
-console.log(generateDependencyReport());
+const log4js = require('log4js');
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger();
+
+logger.info(generateDependencyReport());
 const { mode_api, messageReplace, bufferToStream } = require('./voice_bot_node');
 
 // ボイスチャットセッション保存用のMapです。
@@ -42,7 +47,9 @@ const join = async (interaction) => {
             adapterCreator: member.voice.guild.voiceAdapterCreator,
         });
         subscription = connection.subscribe(createAudioPlayer());
-        connection.on('error', console.warn);
+        connection.on('error', (error) => {
+            logger.warn(error);
+        });
         subscriptions.set(guildId, subscription);
         channels.set(guildId, channelId);
         await interaction.followUp('ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！');

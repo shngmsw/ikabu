@@ -1,0 +1,48 @@
+{
+    "appenders": {
+        "stdout": {
+            "type": "stdout",
+            "layout": {
+                "type": "pattern",
+                "pattern":"[[%p] %c] %m"
+            }
+        },
+        "stderr": {
+            "type": "stderr",
+            "layout": {
+                "type": "pattern",
+                "pattern":"[[%p] %c] %m"
+            }
+        },
+        "not-error": {
+            "type": "logLevelFilter",
+            "appender": "stdout",
+            "level": "trace",
+            "maxLevel": "warn"
+        },
+        "just-errors": {
+            "type": "logLevelFilter",
+            "appender": "stderr",
+            "level": "error"
+        }
+    },
+
+    "categories": {
+        "default": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "guildMemberRemove": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "guildMemberAdd": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "messageReactionAdd": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "messageReactionRemove": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "voiceStateUpdate": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "message": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "interaction": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "recruit": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "recruitButton": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "ban": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "database": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "dispander": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "ChannelManager": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "RoleManager": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "MessageManager": { "appenders": ["not-error", "just-errors"], "level": "all" }
+    }
+}
