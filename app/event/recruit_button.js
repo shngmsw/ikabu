@@ -329,6 +329,9 @@ async function close(interaction, params) {
         } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
+
+            header_message.unpin();
+
             // recruitテーブルから削除
             await RecruitService.deleteByMemberId(interaction.message.id, interaction.member.id);
 
@@ -503,9 +506,9 @@ async function closeNotify(interaction, params) {
                 components: [disableButtons()],
             });
             // ピン留め解除
-            header_message.unpin();
+            cmd_message.unpin();
             // recruitテーブルから削除
-            await RecruitSservice.deleteByMessageId(interaction.message.id);
+            await RecruitService.deleteByMessageId(interaction.message.id);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({ embeds: [helpEmbed] });
 
@@ -513,6 +516,9 @@ async function closeNotify(interaction, params) {
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
+
+            cmd_message.unpin();
+
             await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
                 components: [disableButtons()],
