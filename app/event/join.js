@@ -1,7 +1,7 @@
 const { searchChannelById } = require('../manager/channelManager');
 const { searchMemberById } = require('../manager/memberManager');
 const MembersService = require('../../db/members_service.js');
-const { FriendCodeService } = require('../../db/friend_code_service.js');
+const FriendCodeService = require('../../db/friend_code_service.js');
 const common = require('../common');
 const log4js = require('log4js');
 
