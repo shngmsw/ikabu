@@ -4,7 +4,7 @@ const RecruitService = require('../../db/recruit_service.js');
 const { searchMemberById } = require('../manager/memberManager.js');
 const { searchMessageById, getFullMessageObject } = require('../manager/messageManager.js');
 const { searchChannelById } = require('../manager/channelManager.js');
-const { recruitActionRow, notifyActionRow, thinkingActionRow } = require('../common/button_components');
+const { recoveryThinkingButton, disableThinkingButton, setButtonDisable } = require('../common/button_components');
 const log4js = require('log4js');
 const axios = require('axios');
 
@@ -65,7 +65,7 @@ async function handleError(err, { interaction }) {
 async function join(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.update({ components: [thinkingActionRow('join')] });
+        await interaction.update({ components: await setButtonDisable(interaction.message, interaction) });
 
         const guild = await interaction.guild.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
@@ -87,8 +87,7 @@ async function join(interaction, params) {
                 ephemeral: true,
             });
 
-            await interaction.editReply({ components: [recruitActionRow(header_message, channelId)] });
-
+            await interaction.editReply({ components: await recoveryThinkingButton(interaction, '参加') });
             return;
         } else {
             // 参加済みかチェック
@@ -99,8 +98,7 @@ async function join(interaction, params) {
                     ephemeral: true,
                 });
 
-                await interaction.editReply({ components: [recruitActionRow(header_message, channelId)] });
-
+                await interaction.editReply({ components: await recoveryThinkingButton(interaction, '参加') });
                 return;
             }
 
@@ -149,7 +147,7 @@ async function join(interaction, params) {
 
             await interaction.editReply({
                 content: await memberListMessage(interaction),
-                components: [recruitActionRow(header_message, channelId)],
+                components: await recoveryThinkingButton(interaction, '参加'),
             });
 
             // 5分後にホストへの通知を削除
@@ -172,7 +170,7 @@ async function join(interaction, params) {
 async function cancel(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.update({ components: [thinkingActionRow('cancel')] });
+        await interaction.update({ components: await setButtonDisable(interaction.message, interaction) });
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -204,7 +202,7 @@ async function cancel(interaction, params) {
 
             await cmd_message.edit({
                 content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
-                components: [disableButtons()],
+                components: await disableThinkingButton(interaction, 'キャンセル'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
         } else {
@@ -220,14 +218,14 @@ async function cancel(interaction, params) {
                 });
                 await interaction.editReply({
                     content: await memberListMessage(interaction),
-                    components: [recruitActionRow(header_message, channelId)],
+                    components: await recoveryThinkingButton(interaction, 'キャンセル'),
                 });
             } else {
                 await interaction.followUp({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
                     ephemeral: true,
                 });
-                await interaction.editReply({ components: [recruitActionRow(header_message, channelId)] });
+                await interaction.editReply({ components: await recoveryThinkingButton(interaction, 'キャンセル') });
             }
         }
     } catch (err) {
@@ -291,7 +289,7 @@ async function del(interaction, params) {
 async function close(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.update({ components: [thinkingActionRow('close')] });
+        await interaction.update({ components: await setButtonDisable(interaction.message, interaction) });
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -325,7 +323,7 @@ async function close(interaction, params) {
             }
             await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
-                components: [disableButtons()],
+                components: await disableThinkingButton(interaction, '〆'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({ embeds: [helpEmbed] });
@@ -345,7 +343,7 @@ async function close(interaction, params) {
             }
             await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
-                components: [disableButtons()],
+                components: await disableThinkingButton(interaction, '〆'),
             });
             const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
@@ -355,7 +353,7 @@ async function close(interaction, params) {
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
-            await interaction.editReply({ components: [recruitActionRow(header_message, channelId)] });
+            await interaction.editReply({ components: [await recoveryThinkingButton(interaction, '〆')] });
         }
     } catch (err) {
         handleError(err, { interaction });
@@ -365,7 +363,7 @@ async function close(interaction, params) {
 async function joinNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.update({ components: [thinkingActionRow('join')] });
+        await interaction.update({ components: await setButtonDisable(interaction.message, interaction) });
 
         const guild = await interaction.guild.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
@@ -377,7 +375,7 @@ async function joinNotify(interaction, params) {
                 ephemeral: true,
             });
 
-            await interaction.editReply({ components: [notifyActionRow(host_id)] });
+            await interaction.editReply({ components: await recoveryThinkingButton(interaction, '参加') });
 
             return;
         } else {
@@ -389,7 +387,7 @@ async function joinNotify(interaction, params) {
                     ephemeral: true,
                 });
 
-                await interaction.editReply({ components: [notifyActionRow(host_id)] });
+                await interaction.editReply({ components: await recoveryThinkingButton(interaction, '参加') });
 
                 return;
             }
@@ -426,7 +424,7 @@ async function joinNotify(interaction, params) {
 
             await interaction.editReply({
                 content: await memberListMessage(interaction),
-                components: [notifyActionRow(host_id)],
+                components: await recoveryThinkingButton(interaction, '参加'),
             });
 
             // 5分後にホストへの通知を削除
@@ -443,7 +441,7 @@ async function joinNotify(interaction, params) {
 async function cancelNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.update({ components: [thinkingActionRow('cancel')] });
+        await interaction.update({ components: await setButtonDisable(interaction.message, interaction) });
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -458,7 +456,7 @@ async function cancelNotify(interaction, params) {
             await RecruitService.deleteByMessageId(interaction.message.id);
             await cmd_message.edit({
                 content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
-                components: [disableButtons()],
+                components: await disableThinkingButton(interaction, 'キャンセル'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
         } else {
@@ -474,14 +472,14 @@ async function cancelNotify(interaction, params) {
                 });
                 await interaction.editReply({
                     content: await memberListMessage(interaction),
-                    components: [notifyActionRow(host_id)],
+                    components: await recoveryThinkingButton(interaction, 'キャンセル'),
                 });
             } else {
                 await interaction.followUp({
                     content: `他人の募集は勝手にキャンセルできないでし！！`,
                     ephemeral: true,
                 });
-                await interaction.editReply({ components: [notifyActionRow(host_id)] });
+                await interaction.editReply({ components: await recoveryThinkingButton(interaction, 'キャンセル') });
             }
         }
     } catch (err) {
@@ -492,7 +490,7 @@ async function cancelNotify(interaction, params) {
 async function closeNotify(interaction, params) {
     /** @type {Discord.Snowflake} */
     try {
-        await interaction.update({ components: [thinkingActionRow('close')] });
+        await interaction.update({ components: await setButtonDisable(interaction.message, interaction) });
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
@@ -506,7 +504,7 @@ async function closeNotify(interaction, params) {
             const member_list = getMemberMentions(recruit_data);
             await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
-                components: [disableButtons()],
+                components: await disableThinkingButton(interaction, '〆'),
             });
             // ピン留め解除
             cmd_message.unpin();
@@ -524,7 +522,7 @@ async function closeNotify(interaction, params) {
 
             await cmd_message.edit({
                 content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
-                components: [disableButtons()],
+                components: await disableThinkingButton(interaction, '〆'),
             });
             // recruitテーブルから削除
             await RecruitService.deleteByMessageId(interaction.message.id);
@@ -538,7 +536,7 @@ async function closeNotify(interaction, params) {
             });
         }
 
-        await interaction.editReply({ components: [notifyActionRow(host_id)] });
+        await interaction.editReply({ components: [await recoveryThinkingButton(interaction, '〆')] });
     } catch (err) {
         handleError(err, { interaction });
     }
@@ -585,15 +583,6 @@ async function getHelpEmbed(guild, chid) {
     const embed = new EmbedBuilder();
     embed.setDescription('募集コマンドは ' + `${command}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
     return embed;
-}
-
-function disableButtons() {
-    let buttons = new ActionRowBuilder().addComponents([
-        new ButtonBuilder().setCustomId('join').setLabel('参加').setStyle(ButtonStyle.Primary).setDisabled(),
-        new ButtonBuilder().setCustomId('cancel').setLabel('キャンセル').setStyle(ButtonStyle.Danger).setDisabled(),
-        new ButtonBuilder().setCustomId('close').setLabel('〆').setStyle(ButtonStyle.Secondary).setDisabled(),
-    ]);
-    return buttons;
 }
 
 function disableUnlockButton() {

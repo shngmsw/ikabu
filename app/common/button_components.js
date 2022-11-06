@@ -1,12 +1,10 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { URLSearchParams } = require('url');
 const { isNotEmpty } = require('../common');
-const { searchMessageById } = require('../manager/messageManager');
 
 module.exports = {
     recruitDeleteButton: recruitDeleteButton,
     recruitActionRow: recruitActionRow,
-    thinkingActionRow: thinkingActionRow,
     disableButtons: disableButtons,
     unlockChannelButton: unlockChannelButton,
     notifyActionRow: notifyActionRow,
@@ -77,43 +75,6 @@ function notifyActionRow(host_id) {
         new ButtonBuilder().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle(ButtonStyle.Danger),
         new ButtonBuilder().setCustomId(closeParams.toString()).setLabel('〆').setStyle(ButtonStyle.Secondary),
     ]);
-}
-
-function thinkingActionRow(pushedButton) {
-    const buttons = new ActionRowBuilder();
-
-    if (pushedButton === 'join') {
-        buttons.addComponents([
-            new ButtonBuilder()
-                .setCustomId('join')
-                .setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID)
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(),
-            new ButtonBuilder().setCustomId('cancel').setLabel('キャンセル').setStyle(ButtonStyle.Danger).setDisabled(),
-            new ButtonBuilder().setCustomId('close').setLabel('〆').setStyle(ButtonStyle.Secondary).setDisabled(),
-        ]);
-    } else if (pushedButton === 'cancel') {
-        buttons.addComponents([
-            new ButtonBuilder().setCustomId('join').setLabel('参加').setStyle(ButtonStyle.Primary).setDisabled(),
-            new ButtonBuilder()
-                .setCustomId('cancel')
-                .setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID)
-                .setStyle(ButtonStyle.Danger)
-                .setDisabled(),
-            new ButtonBuilder().setCustomId('close').setLabel('〆').setStyle(ButtonStyle.Secondary).setDisabled(),
-        ]);
-    } else if (pushedButton === 'close') {
-        buttons.addComponents([
-            new ButtonBuilder().setCustomId('join').setLabel('参加').setStyle(ButtonStyle.Primary).setDisabled(),
-            new ButtonBuilder().setCustomId('cancel').setLabel('キャンセル').setStyle(ButtonStyle.Danger).setDisabled(),
-            new ButtonBuilder()
-                .setCustomId('close')
-                .setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID)
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(),
-        ]);
-    }
-    return buttons;
 }
 
 function disableButtons() {
