@@ -22,7 +22,7 @@ module.exports = class DBCommon {
         database.close((err) => {
             if (err) {
                 if (err.errno === 21) {
-                    return logger.warn('既にcloseされてます', err);
+                    return logger.warn('already closed');
                 } else {
                     return logger.error('※close時にエラー', err);
                 }

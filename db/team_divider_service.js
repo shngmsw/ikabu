@@ -64,7 +64,11 @@ module.exports = class TeamDividerService {
                         }
                         db.close((err) => {
                             if (err) {
-                                return logger.error('※close時にエラー', err);
+                                if (err.errno === 21) {
+                                    return logger.warn('already closed');
+                                } else {
+                                    return logger.error('※close時にエラー', err);
+                                }
                             }
                         });
 
@@ -158,7 +162,11 @@ module.exports = class TeamDividerService {
                         });
                         db.close((err) => {
                             if (err) {
-                                return logger.error('※close時にエラー', err);
+                                if (err.errno === 21) {
+                                    return logger.warn('already closed');
+                                } else {
+                                    return logger.error('※close時にエラー', err);
+                                }
                             }
                         });
                         return resolve(result);
@@ -200,7 +208,11 @@ module.exports = class TeamDividerService {
                     });
                     db.close((err) => {
                         if (err) {
-                            return logger.error('※close時にエラー', err);
+                            if (err.errno === 21) {
+                                return logger.warn('already closed');
+                            } else {
+                                return logger.error('※close時にエラー', err);
+                            }
                         }
                     });
                     return resolve(result);
@@ -383,7 +395,11 @@ module.exports = class TeamDividerService {
                         });
                         db.close((err) => {
                             if (err) {
-                                return logger.error('※close時にエラー', err);
+                                if (err.errno === 21) {
+                                    return logger.warn('already closed');
+                                } else {
+                                    return logger.error('※close時にエラー', err);
+                                }
                             }
                         });
                         return resolve(result);
@@ -429,7 +445,11 @@ module.exports = class TeamDividerService {
                         });
                         db.close((err) => {
                             if (err) {
-                                return logger.error('※close時にエラー', err);
+                                if (err.errno === 21) {
+                                    return logger.warn('already closed');
+                                } else {
+                                    return logger.error('※close時にエラー', err);
+                                }
                             }
                         });
                         return resolve(result);
@@ -494,7 +514,11 @@ module.exports = class TeamDividerService {
                         });
                         db.close((err) => {
                             if (err) {
-                                return logger.error('※close時にエラー', err);
+                                if (err.errno === 21) {
+                                    return logger.warn('already closed');
+                                } else {
+                                    return logger.error('※close時にエラー', err);
+                                }
                             }
                         });
                         return resolve(result);
@@ -516,7 +540,11 @@ module.exports = class TeamDividerService {
                     });
                     db.close((err) => {
                         if (err) {
-                            return logger.error('※close時にエラー', err);
+                            if (err.errno === 21) {
+                                return logger.warn('already closed');
+                            } else {
+                                return logger.error('※close時にエラー', err);
+                            }
                         }
                     });
                     return resolve(result);
