@@ -268,7 +268,7 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }
     } catch (error) {
-        logger.log(error);
+        logger.error(error);
     }
 }
 
