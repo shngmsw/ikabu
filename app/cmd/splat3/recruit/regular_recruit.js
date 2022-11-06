@@ -250,6 +250,8 @@ async function sendRegularMatch(
             deleteButtonCheck.delete();
             // ピン留め
             header.pin();
+        } else {
+            return;
         }
 
         // 2時間後にボタンを無効化する
