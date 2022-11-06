@@ -201,6 +201,8 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
             deleteButtonCheck.delete();
             // ピン留め
             header.pin();
+        } else {
+            return;
         }
     } catch (error) {
         logger.error(error);

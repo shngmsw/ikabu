@@ -251,6 +251,8 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
             deleteButtonCheck.delete();
             // ピン留め
             header.pin();
+        } else {
+            return;
         }
         // 2時間後にボタンを無効化する
         await sleep(7200000 - 15000);

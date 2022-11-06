@@ -209,10 +209,14 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             deleteButtonCheck.delete();
             // ピン留め
             header.pin();
+        } else {
+            return;
         }
 
         // 2時間後にVCロックを解除する
         await sleep(7200000 - 15000);
+        // ピン留め解除
+        header.unpin();
         if (isLock) {
             reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
