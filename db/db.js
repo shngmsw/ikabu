@@ -21,7 +21,11 @@ module.exports = class DBCommon {
     static close() {
         database.close((err) => {
             if (err) {
-                return logger.error('※close時にエラー', err);
+                if (err.errno === 21) {
+                    return logger.warn('既にcloseされてます', err);
+                } else {
+                    return logger.error('※close時にエラー', err);
+                }
             }
         });
     }
