@@ -252,6 +252,9 @@ async function del(interaction, params) {
         const host = header_message.interaction.user;
         const host_id = host.id;
         let channelId = params.get('vid');
+
+        await sendLogWebhook(`${host.tag}[${host_id}]の募集で${member.displayName}たんが募集削除ボタンを押したでし`);
+
         if (isEmpty(channelId)) {
             channelId = null;
         }
