@@ -353,7 +353,7 @@ async function close(interaction, params) {
                 content: `募集主以外は募集を〆られないでし。`,
                 ephemeral: true,
             });
-            await interaction.editReply({ components: [await recoveryThinkingButton(interaction, '〆')] });
+            await interaction.editReply({ components: await recoveryThinkingButton(interaction, '〆') });
         }
     } catch (err) {
         handleError(err, { interaction });
@@ -536,7 +536,7 @@ async function closeNotify(interaction, params) {
             });
         }
 
-        await interaction.editReply({ components: [await recoveryThinkingButton(interaction, '〆')] });
+        await interaction.editReply({ components: await recoveryThinkingButton(interaction, '〆') });
     } catch (err) {
         handleError(err, { interaction });
     }
