@@ -731,12 +731,24 @@ module.exports = async function registerSlashCommands() {
     const mode = process.env.SLASH_COMMAND_REGISTER_MODE;
     if (mode === 'guild') {
         await rest
+            .put(Routes.applicationCommands(process.env.DISCORD_BOT_ID), { body: [] })
+            .then(() => logger.info('Successfully deleted application global commands.'))
+            .catch((error) => {
+                logger.error(error);
+            });
+        await rest
             .put(Routes.applicationGuildCommands(process.env.DISCORD_BOT_ID, process.env.SERVER_ID), { body: commands })
             .then(() => logger.info('Successfully registered application guild commands.'))
             .catch((error) => {
                 logger.error(error);
             });
     } else if (mode === 'global') {
+        await rest
+            .put(Routes.applicationGuildCommands(process.env.DISCORD_BOT_ID, process.env.SERVER_ID), { body: [] })
+            .then(() => logger.info('Successfully deleted application guild commands.'))
+            .catch((error) => {
+                logger.error(error);
+            });
         await rest
             .put(Routes.applicationCommands(process.env.DISCORD_BOT_ID), { body: commands })
             .then(() => logger.info('Successfully registered application global commands.'))
