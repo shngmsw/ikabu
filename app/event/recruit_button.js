@@ -262,7 +262,11 @@ async function del(interaction, params) {
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
-            await interaction.message.delete();
+            try {
+                await interaction.message.delete();
+            } catch (error) {
+                logger.warn('button already deleted');
+            }
             await cmd_message.delete();
             await header_message.delete();
 
