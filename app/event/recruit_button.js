@@ -23,6 +23,7 @@ module.exports = {
     closeNotify: closeNotify,
     unlock: unlock,
     sendLogWebhook: sendLogWebhook,
+    getMemberMentions: getMemberMentions,
 };
 
 async function sendLogWebhook(log_content) {

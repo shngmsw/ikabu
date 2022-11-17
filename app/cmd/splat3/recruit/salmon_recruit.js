@@ -91,7 +91,7 @@ async function salmonRecruit(interaction) {
     try {
         const response = await fetch(coop_schedule_url);
         const data = await response.json();
-        let txt = `<@${host_member.user.id}>` + 'たんがバイト中でし！\n';
+        let txt = `<@${host_member.user.id}>` + '**たんのバイト募集**\n';
 
         if (user1 != null && user2 != null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
@@ -202,13 +202,14 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
             });
         }
 
+        // ピン留め
+        header.pin();
+
         // 15秒後に削除ボタンを消す
         await sleep(15000);
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
-            // ピン留め
-            header.pin();
         } else {
             return;
         }

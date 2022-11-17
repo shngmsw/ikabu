@@ -5,7 +5,6 @@ const { isNotEmpty } = require('../common');
 module.exports = {
     recruitDeleteButton: recruitDeleteButton,
     recruitActionRow: recruitActionRow,
-    disableButtons: disableButtons,
     unlockChannelButton: unlockChannelButton,
     notifyActionRow: notifyActionRow,
     setButtonEnable: setButtonEnable,
@@ -75,15 +74,6 @@ function notifyActionRow(host_id) {
         new ButtonBuilder().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle(ButtonStyle.Danger),
         new ButtonBuilder().setCustomId(closeParams.toString()).setLabel('〆').setStyle(ButtonStyle.Secondary),
     ]);
-}
-
-function disableButtons() {
-    let buttons = new ActionRowBuilder().addComponents([
-        new ButtonBuilder().setCustomId('join').setLabel('参加').setStyle(ButtonStyle.Primary).setDisabled(),
-        new ButtonBuilder().setCustomId('cancel').setLabel('キャンセル').setStyle(ButtonStyle.Danger).setDisabled(),
-        new ButtonBuilder().setCustomId('close').setLabel('〆').setStyle(ButtonStyle.Secondary).setDisabled(),
-    ]);
-    return buttons;
 }
 
 function unlockChannelButton(channel_id) {
