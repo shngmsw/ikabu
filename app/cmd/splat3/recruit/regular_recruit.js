@@ -1,12 +1,14 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
+const RecruitService = require('../../../../db/recruit_service');
+const { getMemberMentions } = require('../../../event/recruit_button');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const { isNotEmpty, checkFes, getRegular } = require('../../../common');
 const { searchChannelIdByName } = require('../../../manager/channelManager');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
-const { recruitActionRow, disableButtons, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
+const { recruitActionRow, setButtonDisable, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
 const { AttachmentBuilder, ChannelType, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
 
@@ -104,7 +106,7 @@ async function regularRecruit(interaction) {
             return;
         }
         const regularResult = getRegular(data, type);
-        let txt = `<@${host_member.user.id}>` + 'たんがナワバリ募集中でし！\n';
+        let txt = `<@${host_member.user.id}>` + '**たんのナワバリ募集**\n';
         let members = [];
 
         if (user1 != null) {
@@ -243,23 +245,32 @@ async function sendRegularMatch(
             });
         }
 
+        // ピン留め
+        header.pin();
+
         // 15秒後に削除ボタンを消す
         await sleep(15000);
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
-            // ピン留め
-            header.pin();
         } else {
             return;
         }
 
         // 2時間後にボタンを無効化する
         await sleep(7200000 - 15000);
+        const checkMessage = await searchMessageById(guild, interaction.channel.id, sentMessage.id);
+        const message_first_row = checkMessage.content.split('\n')[0];
+        if (message_first_row.indexOf('〆') !== -1 || message_first_row.indexOf('キャンセル') !== -1) {
+            return;
+        }
+        const recruit_data = await RecruitService.getRecruitAllByMessageId(checkMessage.id);
+        const member_list = getMemberMentions(recruit_data);
         const host_mention = `<@${host_member.user.id}>`;
-        sentMessage.edit({
-            content: `${host_mention}たんの募集は〆！`,
-            components: [disableButtons()],
+
+        checkMessage.edit({
+            content: '`[自動〆]`\n' + `${host_mention}たんの募集は〆！\n${member_list}`,
+            components: await setButtonDisable(checkMessage),
         });
         // ピン留め解除
         header.unpin();
