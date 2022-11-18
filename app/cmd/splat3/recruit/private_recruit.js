@@ -72,7 +72,7 @@ async function sendPrivateRecruit(interaction, options) {
 
     try {
         const header = await interaction.editReply({
-            content: `<@${interaction.member.id}>たんがプライベートマッチ募集中でし！`,
+            content: `<@${interaction.member.id}>**たんのプライベートマッチ募集**`,
             embeds: [embed],
             ephemeral: false,
         });
@@ -92,13 +92,14 @@ async function sendPrivateRecruit(interaction, options) {
             ephemeral: true,
         });
 
+        // ピン留め
+        header.pin();
+
         // 15秒後に削除ボタンを消す
         await sleep(15000);
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
-            // ピン留め
-            header.pin();
         } else {
             return;
         }

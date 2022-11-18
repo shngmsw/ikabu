@@ -1,10 +1,12 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
+const RecruitService = require('../../../../db/recruit_service');
+const { getMemberMentions } = require('../../../event/recruit_button');
 const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require('../../../common');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const { searchRoleIdByName } = require('../../../manager/roleManager.js');
-const { recruitActionRow, disableButtons, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
+const { recruitActionRow, setButtonDisable, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
 
@@ -247,10 +249,12 @@ async function sendRegularMatch(
 
         // 2時間後にボタンを無効化する
         await sleep(7200000 - 15000);
+        const recruit_data = await RecruitService.getRecruitAllByMessageId(sentMessage.id);
+        const member_list = getMemberMentions(recruit_data);
         const host_mention = `<@${host_member.user.id}>`;
         sentMessage.edit({
-            content: `${host_mention}たんの募集は〆！`,
-            components: [disableButtons()],
+            content: `${host_mention}たんの募集は〆！\n${member_list}`,
+            components: await setButtonDisable(sentMessage),
         });
         // ピン留め解除
         header.unpin();

@@ -61,7 +61,7 @@ function monsterHunterRise(interaction, roles) {
     let title = 'MONSTER HUNTER RISE';
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
-    let txt = `<@${interaction.member.id}>` + 'たんがモンハンライズ参加者募集中でし！\n';
+    let txt = `<@${interaction.member.id}>` + '**たんのモンハンライズ募集**\n';
     let color = '#b71008';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak_logo.png';
@@ -73,7 +73,7 @@ function apexLegends(interaction, roles) {
     let title = 'Apex Legends';
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
-    let txt = `<@${interaction.member.id}>` + 'たんがApexLegendsの参加者募集中でし！\n';
+    let txt = `<@${interaction.member.id}>` + '**たんのApexLegends募集**\n';
     let color = '#F30100';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends_logo.png';
@@ -85,7 +85,7 @@ function overwatch(interaction, roles) {
     let title = 'Overwatch2';
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
-    const txt = `<@${interaction.member.id}>` + 'たんがOverwatch2の参加者募集中でし！\n';
+    const txt = `<@${interaction.member.id}>` + '**たんのOverwatch2募集**\n';
     let color = '#ED6516';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch2.png';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch_logo.png';
@@ -97,7 +97,7 @@ function valorant(interaction, roles) {
     let title = 'VALORANT';
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
-    const txt = `<@${interaction.member.id}>` + 'たんがVALORANT参加者募集中でし！\n';
+    const txt = `<@${interaction.member.id}>` + '**たんのVALORANT募集**\n';
     let color = '#FF4654';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant_logo.png';
@@ -109,7 +109,7 @@ function others(interaction, roles) {
     let title = interaction.options.getString('ゲームタイトル');
     let recruitNumText = interaction.options.getString('募集人数');
     let mention = role_id.toString();
-    const txt = `<@${interaction.member.id}>` + `たんが${title}参加者募集中でし！\n`;
+    const txt = `<@${interaction.member.id}>` + `**たんの${title}募集**\n`;
     let color = '#379C30';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others_logo.png';
@@ -194,13 +194,14 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
             });
         }
 
+        // ピン留め
+        header.pin();
+
         // 15秒後に削除ボタンを消す
         await sleep(15000);
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
-            // ピン留め
-            header.pin();
         } else {
             return;
         }
