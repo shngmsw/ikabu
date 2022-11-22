@@ -26,5 +26,6 @@ module.exports = {
         fesC: 'ウツホ陣営',
         private: 'プラベ募集',
         buttonEnable: 'ボタンを有効化',
+        voiceChannelMention: 'ボイスメンション',
     },
 };
