@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ChannelType } = require('discord.js');
 const log4js = require('log4js');
 const { isNotEmpty, isEmpty } = require('../../common');
 const { searchChannelById } = require('../../manager/channelManager');
@@ -20,6 +20,13 @@ async function voiceMention(interaction) {
         let channel = interaction.options.getChannel('チャンネル');
         if (isEmpty(channel)) {
             channel = interaction.channel;
+            if (channel.type == ChannelType.GuildText) {
+                await interaction.editReply({
+                    content:
+                        'このチャンネルはテキストチャンネルでし！\nここにメンションしたい場合は、オプションでメンションしたいメンバーがいるチャンネルを指定するでし！',
+                });
+                return;
+            }
         }
         const author = await searchMemberById(guild, interaction.member.user.id);
         channel = await searchChannelById(guild, channel.id);
