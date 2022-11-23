@@ -43,6 +43,7 @@
         "dispander": { "appenders": ["not-error", "just-errors"], "level": "all" },
         "ChannelManager": { "appenders": ["not-error", "just-errors"], "level": "all" },
         "RoleManager": { "appenders": ["not-error", "just-errors"], "level": "all" },
-        "MessageManager": { "appenders": ["not-error", "just-errors"], "level": "all" }
+        "MessageManager": { "appenders": ["not-error", "just-errors"], "level": "all" },
+        "MemberManager": { "appenders": ["not-error", "just-errors"], "level": "all" }
     }
 }

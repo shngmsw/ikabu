@@ -5,7 +5,7 @@ const RecruitService = require('../../../../db/recruit_service');
 const { getMemberMentions } = require('../../../event/recruit_button');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const { isNotEmpty, checkFes, sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw } = require('../../../common');
+const { checkFes, sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw, isEmpty } = require('../../../common');
 const { searchChannelIdByName } = require('../../../manager/channelManager');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const { recruitActionRow, setButtonDisable, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
@@ -301,10 +301,15 @@ async function sendAnarchyMatch(
         // 2時間後にボタンを無効化する
         await sleep(7200000 - 15000);
         const checkMessage = await searchMessageById(guild, interaction.channel.id, sentMessage.id);
+
+        if (isEmpty(checkMessage)) {
+            return;
+        }
         const message_first_row = checkMessage.content.split('\n')[0];
         if (message_first_row.indexOf('〆') !== -1 || message_first_row.indexOf('キャンセル') !== -1) {
             return;
         }
+
         const recruit_data = await RecruitService.getRecruitAllByMessageId(checkMessage.id);
         const member_list = getMemberMentions(recruit_data);
         const host_mention = `<@${host_member.user.id}>`;
