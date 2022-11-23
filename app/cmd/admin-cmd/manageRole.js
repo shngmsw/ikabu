@@ -135,9 +135,11 @@ async function handleAssignRole(interaction) {
     }
 
     try {
-        const targetRole = options.getMentionable('ターゲットロール');
+        const targetRoleId = options.getMentionable('ターゲットロール').id;
         const assignRole = options.getMentionable('割当ロール');
         let assignRoleId = assignRole.id;
+
+        const targetRole = await searchRoleById(interaction.guild, targetRoleId);
 
         let targets = targetRole.members;
 
@@ -163,9 +165,11 @@ async function handleUnassignRole(interaction) {
     }
 
     try {
-        const targetRole = options.getMentionable('ターゲットロール');
+        const targetRoleId = options.getMentionable('ターゲットロール').id;
         const unAssignRole = options.getMentionable('解除ロール');
         let unAssignRoleId = unAssignRole.id;
+
+        const targetRole = await searchRoleById(interaction.guild, targetRoleId);
 
         var targets = targetRole.members;
 
