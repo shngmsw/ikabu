@@ -691,6 +691,25 @@ const buttonEnable = new SlashCommandBuilder()
     )
     .addStringOption((option) => option.setName('メッセージid').setDescription('有効化するボタンのメッセージIDを入力').setRequired(true));
 
+const voiceChannelMention = new SlashCommandBuilder()
+    .setName(commandNames.voiceChannelMention)
+    .setDescription('VCメンバー全員にメンションを送ります。')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('vcmention')
+            .setDescription('このチャンネルに、指定したVCにいるメンバー全員へのメンションを送ります。')
+            .addStringOption((option) =>
+                option.setName('メッセージ').setDescription('メンションと一緒に送るメッセージを入力します。').setRequired(true),
+            )
+            .addChannelOption((option) =>
+                option
+                    .setName('チャンネル')
+                    .setDescription('メンションを送りたいメンバーがいるVCを指定します。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            ),
+    );
+
 const commands = [
     voiceLock,
     friendCode,
@@ -718,6 +737,7 @@ const commands = [
     fesB,
     fesC,
     buttonEnable,
+    voiceChannelMention,
 ];
 
 //登録用関数

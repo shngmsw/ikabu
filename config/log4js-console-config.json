@@ -24,6 +24,7 @@
         "dispander": { "appenders": ["console"], "level": "all" },
         "ChannelManager": { "appenders": ["console"], "level": "all" },
         "RoleManager": { "appenders": ["console"], "level": "all" },
-        "MessageManager": { "appenders": ["console"], "level": "all" }
+        "MessageManager": { "appenders": ["console"], "level": "all" },
+        "MemberManager": { "appenders": ["console"], "level": "all" }
     }
 }
