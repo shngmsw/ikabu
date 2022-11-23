@@ -34,8 +34,11 @@ function getMemberColor(member) {
     try {
         if (isNotEmpty(member)) {
             let role = member.roles.color;
-            if (isEmpty(role)) return '#FFFFFF';
-            else return role.hexColor;
+            if (isEmpty(role)) {
+                return '#FFFFFF';
+            } else {
+                return role.hexColor;
+            }
         } else {
             return '#FFFFFF';
         }
