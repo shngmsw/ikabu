@@ -6,7 +6,7 @@ const logger = log4js.getLogger('MemberManager');
 
 module.exports = {
     searchMemberById: searchMemberById,
-    checkColor: checkColor,
+    getMemberColor: getMemberColor,
 };
 
 /**
@@ -23,7 +23,14 @@ async function searchMemberById(guild, userId) {
     return member;
 }
 
-function checkColor(member) {
+/**
+ * メンバーのカラー(名前の色)を返す
+ * @param {*} member 対象メンバー
+ * @returns {String} HEX COLOR CODE
+ */
+function getMemberColor(member) {
+    /* member.displayColorでもとれるけど、@everyoneが#000000(BLACK)になるので
+       ロール有無チェックしてなければ#FFFFFF(WHITE)を返す */
     try {
         if (isNotEmpty(member)) {
             let role = member.roles.color;

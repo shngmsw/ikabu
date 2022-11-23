@@ -2,7 +2,7 @@ const { EmbedBuilder, ChannelType } = require('discord.js');
 const log4js = require('log4js');
 const { isNotEmpty, isEmpty } = require('../../common');
 const { searchChannelById } = require('../../manager/channelManager');
-const { searchMemberById, checkColor } = require('../../manager/memberManager');
+const { searchMemberById, getMemberColor } = require('../../manager/memberManager');
 
 module.exports = {
     voiceMention: voiceMention,
@@ -59,7 +59,7 @@ async function voiceMention(interaction) {
 
 async function createEmbed(author, text, createdAt) {
     const embed = new EmbedBuilder();
-    let color = checkColor(author);
+    let color = getMemberColor(author);
     if (isNotEmpty(text)) {
         embed.setDescription(text);
     }
