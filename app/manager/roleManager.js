@@ -71,7 +71,7 @@ async function searchRoleById(guild, roleId) {
  * @param {string} color カラーコード
  * @returns セットしたカラーコード
  */
-async function setColorToRole(guild, role, color) {
+async function setColorToRole(guild, role, color = null) {
     if (color != null) {
         await role.setColor(color);
         await guild.roles.fetch();
