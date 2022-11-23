@@ -1,6 +1,7 @@
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
+const { isEmpty, isNotEmpty } = require('../../common');
 const { createRole, searchRoleById, setColorToRole, searchRoleIdByName } = require('../../manager/roleManager');
 const log4js = require('log4js');
 
@@ -30,15 +31,17 @@ async function handleCreateRole(interaction) {
         let roleName = options.getString('ロール名');
         let colorInput = options.getString('ロールカラー');
 
-        if (!colorInput.match('^#([\\da-fA-F]{6})$')) {
+        if (isNotEmpty(await searchRoleIdByName(guild, roleName))) {
+            return await interaction.followUp('その名前のロールはもうあるでし！\n別のロール名を使うでし！');
+        }
+
+        if (isEmpty(colorInput)) {
+            await interaction.followUp('色はこっちで決めさせてもらうでし！');
+        } else if (!colorInput.match('^#([\\da-fA-F]{6})$')) {
             await interaction.followUp(
                 '`' + colorInput + '`はカラーコードじゃないでし！\n`[ex]: #5d4efd, #111`\n色はこっちで決めさせてもらうでし！',
             );
             colorInput = null;
-        }
-
-        if (searchRoleIdByName(guild, roleName) != null) {
-            return await interaction.followUp('その名前のロールはもうあるでし！\n別のロール名を使うでし！');
         }
 
         var roleId = await createRole(guild, roleName);
