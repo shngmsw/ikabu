@@ -5,6 +5,7 @@ const RecruitService = require('../../../../db/recruit_service');
 const { getMemberMentions } = require('../../../event/recruit_button');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
+const { isNotEmpty } = require('../../../common');
 const { checkFes, sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw, isEmpty } = require('../../../common');
 const { searchChannelIdByName } = require('../../../manager/channelManager');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
