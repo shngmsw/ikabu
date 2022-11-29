@@ -165,7 +165,10 @@ module.exports = async function handleShow(interaction) {
                     let weapon2 = coopSetting.weapons[1].image.url;
                     let weapon3 = coopSetting.weapons[2].image.url;
                     let weapon4 = coopSetting.weapons[3].image.url;
-                    let weaponsImage = new AttachmentBuilder(await salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4), 'weapons.png');
+                    let weaponsImage = new AttachmentBuilder(await salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4), {
+                        name: 'weapons.png',
+                        description: '',
+                    });
                     let stageImage = coopSetting.coopStage.thumbnailImage.url;
 
                     const salmonEmbed = new EmbedBuilder()
@@ -174,18 +177,15 @@ module.exports = async function handleShow(interaction) {
                             iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
                         })
                         .setTitle(date)
-                        .setColor('#ff5500')
+                        .setColor('#FC892C')
                         .addFields({
                             name: 'ステージ',
                             value: coop_stage,
                         })
-                        .setImage(stageImage)
+                        .setImage('attachment://weapons.png')
                         .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
-
                     await interaction.channel.send({
                         embeds: [salmonEmbed],
-                    });
-                    await interaction.channel.send({
                         files: [weaponsImage],
                     });
                 }
