@@ -109,9 +109,9 @@ async function sendStageInfo(interaction, data, scheduleNum) {
             .setThumbnail(x_thumbnail);
 
         await interaction.editReply({
-            embeds: [challengeEmbed, openEmbed],
+            embeds: [xMatchEmbed, challengeEmbed, openEmbed],
         });
-        // TODO: リーグマッチとXマッチはゲーム内で実装後に表示
+        // TODO: リーグマッチはゲーム内で実装後に表示
         // await interaction.editReply({
         //     embeds: [leagueEmbed, openEmbed, challengeEmbed, xMatchEmbed],
         // });
@@ -155,37 +155,40 @@ module.exports = async function handleShow(interaction) {
             try {
                 const response = await fetch(coop_schedule_url);
                 const data = await response.json();
-                const salmon_data = data.data.coopGroupingSchedule.regularSchedules.nodes[0];
-                const coopSetting = salmon_data.setting;
-                let date = sp3unixTime2mdwhm(salmon_data.startTime) + ' – ' + sp3unixTime2mdwhm(salmon_data.endTime);
-                let coop_stage = sp3coop_stage2txt(coopSetting.coopStage.coopStageId);
-                let weapon1 = coopSetting.weapons[0].image.url;
-                let weapon2 = coopSetting.weapons[1].image.url;
-                let weapon3 = coopSetting.weapons[2].image.url;
-                let weapon4 = coopSetting.weapons[3].image.url;
-                let weaponsImage = new AttachmentBuilder(await salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4), 'weapons.png');
-                let stageImage = coopSetting.coopStage.thumbnailImage.url;
+                await interaction.editReply({ content: '3つ先まで表示するでし！' });
+                for (let i = 0; i < 3; i++) {
+                    const salmon_data = data.data.coopGroupingSchedule.regularSchedules.nodes[i];
+                    const coopSetting = salmon_data.setting;
+                    let date = sp3unixTime2mdwhm(salmon_data.startTime) + ' – ' + sp3unixTime2mdwhm(salmon_data.endTime);
+                    let coop_stage = sp3coop_stage2txt(coopSetting.coopStage.coopStageId);
+                    let weapon1 = coopSetting.weapons[0].image.url;
+                    let weapon2 = coopSetting.weapons[1].image.url;
+                    let weapon3 = coopSetting.weapons[2].image.url;
+                    let weapon4 = coopSetting.weapons[3].image.url;
+                    let weaponsImage = new AttachmentBuilder(await salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4), 'weapons.png');
+                    let stageImage = coopSetting.coopStage.thumbnailImage.url;
 
-                const salmonEmbed = new EmbedBuilder()
-                    .setAuthor({
-                        name: 'SALMON RUN',
-                        iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
-                    })
-                    .setTitle(date)
-                    .setColor('#ff5500')
-                    .addFields({
-                        name: 'ステージ',
-                        value: coop_stage,
-                    })
-                    .setImage(stageImage)
-                    .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
+                    const salmonEmbed = new EmbedBuilder()
+                        .setAuthor({
+                            name: 'SALMON RUN',
+                            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
+                        })
+                        .setTitle(date)
+                        .setColor('#ff5500')
+                        .addFields({
+                            name: 'ステージ',
+                            value: coop_stage,
+                        })
+                        .setImage(stageImage)
+                        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
 
-                await interaction.editReply({
-                    embeds: [salmonEmbed],
-                });
-                await interaction.channel.send({
-                    files: [weaponsImage],
-                });
+                    await interaction.channel.send({
+                        embeds: [salmonEmbed],
+                    });
+                    await interaction.channel.send({
+                        files: [weaponsImage],
+                    });
+                }
             } catch (error) {
                 await interaction.followUp('なんかエラーでてるわ');
                 logger.error(error);
