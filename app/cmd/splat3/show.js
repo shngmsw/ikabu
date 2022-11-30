@@ -210,7 +210,7 @@ async function salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4) {
     const weapon_ctx = weaponCanvas.getContext('2d');
 
     createRoundRect(weapon_ctx, 1, 1, canvas_width - 2, canvas_height - 2, 0);
-    weapon_ctx.fillStyle = '#2F3136';
+    weapon_ctx.fillStyle = '#2F313600';
     weapon_ctx.fill();
 
     fillTextWithStroke(weapon_ctx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 45);
