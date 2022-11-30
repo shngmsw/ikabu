@@ -155,8 +155,8 @@ module.exports = async function handleShow(interaction) {
             try {
                 const response = await fetch(coop_schedule_url);
                 const data = await response.json();
-                await interaction.editReply({ content: '3つ先まで表示するでし！' });
-                for (let i = 0; i < 3; i++) {
+                await interaction.editReply({ content: '2つ先まで表示するでし！' });
+                for (let i = 0; i < 2; i++) {
                     const salmon_data = data.data.coopGroupingSchedule.regularSchedules.nodes[i];
                     const coopSetting = salmon_data.setting;
                     let date = sp3unixTime2mdwhm(salmon_data.startTime) + ' – ' + sp3unixTime2mdwhm(salmon_data.endTime);

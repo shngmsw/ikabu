@@ -85,7 +85,7 @@ const show = new SlashCommandBuilder()
     .addSubcommand((subcommand) => subcommand.setName('now').setDescription('現在のX,バンカラマッチのステージ情報を表示'))
     .addSubcommand((subcommand) => subcommand.setName('next').setDescription('次のX,バンカラマッチのステージ情報を表示'))
     .addSubcommand((subcommand) => subcommand.setName('nawabari').setDescription('現在のナワバリのステージ情報を表示'))
-    .addSubcommand((subcommand) => subcommand.setName('run').setDescription('3つ先までのシフトを表示'));
+    .addSubcommand((subcommand) => subcommand.setName('run').setDescription('2つ先までのシフトを表示'));
 
 const help = new SlashCommandBuilder()
     .setName(commandNames.help)
