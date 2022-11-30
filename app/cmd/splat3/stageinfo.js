@@ -71,6 +71,14 @@ async function stageinfo(msg) {
         // embedStr_league.setColor('#ED2D7C');
         // msg.channel.send({ embeds: [embedStr_league] });
 
+        const embedStr_x = getXMatchEmbed(data.data.xSchedules.nodes);
+        embedStr_x.setAuthor({
+            name: 'Xマッチ',
+            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
+        });
+        embedStr_x.setColor('#0edb9b');
+        msg.channel.send({ embeds: [embedStr_x] });
+
         const embedStr_challenge = getACEmbed(data.data.bankaraSchedules.nodes);
         embedStr_challenge.setAuthor({
             name: 'バンカラマッチ (チャレンジ)',
@@ -86,14 +94,6 @@ async function stageinfo(msg) {
         });
         embedStr_open.setColor('#F54910');
         msg.channel.send({ embeds: [embedStr_open] });
-
-        // const embedStr_x = getXMatchEmbed(data.data.xSchedules.nodes);
-        // embedStr_x.setAuthor({
-        //     name: 'Xマッチ',
-        //     iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
-        // });
-        // embedStr_x.setColor('#0edb9b');
-        // msg.channel.send({ embeds: [embedStr_x] });
     } catch (error) {
         msg.channel.send('なんかエラーでてるわ');
         logger.error(error);
