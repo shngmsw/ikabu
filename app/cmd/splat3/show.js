@@ -109,9 +109,9 @@ async function sendStageInfo(interaction, data, scheduleNum) {
             .setThumbnail(x_thumbnail);
 
         await interaction.editReply({
-            embeds: [challengeEmbed, openEmbed],
+            embeds: [xMatchEmbed, challengeEmbed, openEmbed],
         });
-        // TODO: リーグマッチとXマッチはゲーム内で実装後に表示
+        // TODO: リーグマッチはゲーム内で実装後に表示
         // await interaction.editReply({
         //     embeds: [leagueEmbed, openEmbed, challengeEmbed, xMatchEmbed],
         // });
@@ -155,37 +155,40 @@ module.exports = async function handleShow(interaction) {
             try {
                 const response = await fetch(coop_schedule_url);
                 const data = await response.json();
-                const salmon_data = data.data.coopGroupingSchedule.regularSchedules.nodes[0];
-                const coopSetting = salmon_data.setting;
-                let date = sp3unixTime2mdwhm(salmon_data.startTime) + ' – ' + sp3unixTime2mdwhm(salmon_data.endTime);
-                let coop_stage = sp3coop_stage2txt(coopSetting.coopStage.coopStageId);
-                let weapon1 = coopSetting.weapons[0].image.url;
-                let weapon2 = coopSetting.weapons[1].image.url;
-                let weapon3 = coopSetting.weapons[2].image.url;
-                let weapon4 = coopSetting.weapons[3].image.url;
-                let weaponsImage = new AttachmentBuilder(await salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4), 'weapons.png');
-                let stageImage = coopSetting.coopStage.thumbnailImage.url;
+                await interaction.editReply({ content: '2つ先まで表示するでし！' });
+                for (let i = 0; i < 2; i++) {
+                    const salmon_data = data.data.coopGroupingSchedule.regularSchedules.nodes[i];
+                    const coopSetting = salmon_data.setting;
+                    let date = sp3unixTime2mdwhm(salmon_data.startTime) + ' – ' + sp3unixTime2mdwhm(salmon_data.endTime);
+                    let coop_stage = sp3coop_stage2txt(coopSetting.coopStage.coopStageId);
+                    let weapon1 = coopSetting.weapons[0].image.url;
+                    let weapon2 = coopSetting.weapons[1].image.url;
+                    let weapon3 = coopSetting.weapons[2].image.url;
+                    let weapon4 = coopSetting.weapons[3].image.url;
+                    let weaponsImage = new AttachmentBuilder(await salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4), {
+                        name: 'weapons.png',
+                        description: '',
+                    });
+                    let stageImage = coopSetting.coopStage.thumbnailImage.url;
 
-                const salmonEmbed = new EmbedBuilder()
-                    .setAuthor({
-                        name: 'SALMON RUN',
-                        iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
-                    })
-                    .setTitle(date)
-                    .setColor('#ff5500')
-                    .addFields({
-                        name: 'ステージ',
-                        value: coop_stage,
-                    })
-                    .setImage(stageImage)
-                    .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
-
-                await interaction.editReply({
-                    embeds: [salmonEmbed],
-                });
-                await interaction.channel.send({
-                    files: [weaponsImage],
-                });
+                    const salmonEmbed = new EmbedBuilder()
+                        .setAuthor({
+                            name: 'SALMON RUN',
+                            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
+                        })
+                        .setTitle(date)
+                        .setColor('#FC892C')
+                        .addFields({
+                            name: 'ステージ',
+                            value: coop_stage,
+                        })
+                        .setImage('attachment://weapons.png')
+                        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
+                    await interaction.channel.send({
+                        embeds: [salmonEmbed],
+                        files: [weaponsImage],
+                    });
+                }
             } catch (error) {
                 await interaction.followUp('なんかエラーでてるわ');
                 logger.error(error);
@@ -207,7 +210,7 @@ async function salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4) {
     const weapon_ctx = weaponCanvas.getContext('2d');
 
     createRoundRect(weapon_ctx, 1, 1, canvas_width - 2, canvas_height - 2, 0);
-    weapon_ctx.fillStyle = '#2F3136';
+    weapon_ctx.fillStyle = '#2F313600';
     weapon_ctx.fill();
 
     fillTextWithStroke(weapon_ctx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 45);
