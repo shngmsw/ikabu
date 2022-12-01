@@ -232,12 +232,12 @@ function sp3stage2txt(key) {
         //     return '';
         case 6:
             return 'ナメロウ金属';
-        // case 7:
-        //     return '';
+        case 7:
+            return 'クサヤ温泉';
         // case 8:
         //     return '';
-        // case 9:
-        //     return '';
+        case 9:
+            return 'ヒラメが丘団地';
         case 10:
             return 'マサバ海峡大橋';
         case 11:
@@ -290,19 +290,19 @@ function sp3coop_stage2txt(key) {
     switch (key) {
         // case 0:
         //     return '';
-        case 1:
+        case 'Spawning Grounds':
             return 'シェケナダム';
-        case 2:
+        case 'Sockeye Station':
             return 'アラマキ砦';
-        // case 3:
-        //     return '';
+        case "Marooner's Bay":
+            return '難破船ドン・ブラコ';
         // case 4:
         //     return '';
         // case 5:
         //     return '';
         // case 6:
         //     return '';
-        case 7:
+        case 'Gone Fission Hydroplant':
             return 'ムニ・エール海洋発電所';
         // case 8:
         //     return '';
