@@ -10,12 +10,12 @@ module.exports = {
     getLeague: getLeague,
     getRegular: getRegular,
     checkFes: checkFes,
+    sp2unixTime2hm: sp2unixTime2hm,
     unixTime2hm: unixTime2hm,
-    sp3unixTime2hm: sp3unixTime2hm,
+    sp2unixTime2mdwhm: sp2unixTime2mdwhm,
     unixTime2mdwhm: unixTime2mdwhm,
-    sp3unixTime2mdwhm: sp3unixTime2mdwhm,
-    sp3unixTime2ymdw: sp3unixTime2ymdw,
     unixTime2ymdw: unixTime2ymdw,
+    sp2unixTime2ymdw: sp2unixTime2ymdw,
     rule2txt: rule2txt,
     sp3rule2txt: sp3rule2txt,
     stage2txt: stage2txt,
@@ -74,7 +74,8 @@ function rgbToHex(r, g, b) {
         .join('');
 }
 
-function unixTime2hm(intTime) {
+// そのうち消す
+function sp2unixTime2hm(intTime) {
     const d = new Date(intTime * 1000 + 9 * 60 * 60 * 1000);
     const month = d.getUTCMonth() + 1;
     const day = d.getUTCDate();
@@ -85,7 +86,7 @@ function unixTime2hm(intTime) {
     return hour + ':' + min;
 }
 
-function sp3unixTime2hm(datetime) {
+function unixTime2hm(datetime) {
     const date = new Date(datetime);
     const d = new Date(date.getTime() + 9 * 60 * 60 * 1000); // UTC = UTC + 9
     const hour = d.getUTCHours();
@@ -93,7 +94,8 @@ function sp3unixTime2hm(datetime) {
     return hour + ':' + min;
 }
 
-function unixTime2mdwhm(intTime) {
+// そのうち消す
+function sp2unixTime2mdwhm(intTime) {
     const d = new Date(intTime * 1000 + 9 * 60 * 60 * 1000);
     const month = d.getUTCMonth() + 1;
     const day = d.getUTCDate();
@@ -104,7 +106,7 @@ function unixTime2mdwhm(intTime) {
     return month + '/' + day + '(' + week + ') ' + hour + ':' + min;
 }
 
-function sp3unixTime2mdwhm(datetime) {
+function unixTime2mdwhm(datetime) {
     const date = new Date(datetime);
     const d = new Date(date.getTime() + 9 * 60 * 60 * 1000); // UTC = UTC + 9
     const month = d.getUTCMonth() + 1;
@@ -116,7 +118,8 @@ function sp3unixTime2mdwhm(datetime) {
     return month + '/' + day + '(' + week + ') ' + hour + ':' + min;
 }
 
-function unixTime2ymdw(intTime) {
+// そのうち消す
+function sp2unixTime2ymdw(intTime) {
     const d = new Date(intTime * 1000 + 9 * 60 * 60 * 1000);
     const year = d.getUTCFullYear();
     const month = d.getUTCMonth() + 1;
@@ -126,7 +129,7 @@ function unixTime2ymdw(intTime) {
     return year + '/' + month + '/' + day + ' (' + week + ')';
 }
 
-function sp3unixTime2ymdw(datetime) {
+function unixTime2ymdw(datetime) {
     const date = new Date(datetime);
     const d = new Date(date.getTime() + 9 * 60 * 60 * 1000); // UTC = UTC + 9
     const year = d.getUTCFullYear();
@@ -484,7 +487,7 @@ function getLeague(data, x) {
     let stage;
     let date;
     let rule;
-    date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
+    date = unixTime2ymdw(data[x].startTime) + ' ' + unixTime2hm(data[x].startTime) + ' – ' + unixTime2hm(data[x].endTime);
     if (data[x].leagueMatchSettingleagueMatchSetting == null) {
         rule = 'フェス期間中';
         stage = 'フェス期間中はお休みでし';
@@ -502,7 +505,7 @@ function getOpen(data, x) {
     let stage;
     let date;
     let rule;
-    date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
+    date = unixTime2ymdw(data[x].startTime) + ' ' + unixTime2hm(data[x].startTime) + ' – ' + unixTime2hm(data[x].endTime);
     if (data[x].bankaraMatchSettings == null) {
         rule = 'フェス期間中';
         stage = 'フェス期間中はお休みでし';
@@ -520,7 +523,7 @@ function getChallenge(data, x) {
     let stage;
     let date;
     let rule;
-    date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
+    date = unixTime2ymdw(data[x].startTime) + ' ' + unixTime2hm(data[x].startTime) + ' – ' + unixTime2hm(data[x].endTime);
     if (data[x].bankaraMatchSettings == null) {
         rule = 'フェス期間中';
         stage = 'フェス期間中はお休みでし';
@@ -538,7 +541,7 @@ function getXMatch(data, x) {
     let stage;
     let date;
     let rule;
-    date = sp3unixTime2ymdw(data[x].startTime) + ' ' + sp3unixTime2hm(data[x].startTime) + ' – ' + sp3unixTime2hm(data[x].endTime);
+    date = unixTime2ymdw(data[x].startTime) + ' ' + unixTime2hm(data[x].startTime) + ' – ' + unixTime2hm(data[x].endTime);
     if (data[x].xMatchSetting == null) {
         rule = 'フェス期間中';
         stage = 'フェス期間中はお休みでし';
@@ -567,8 +570,8 @@ function getRegular(data, x) {
         const fest_list = data.data.festSchedules.nodes;
         const f_setting = fest_list[x].festMatchSetting;
 
-        date = sp3unixTime2ymdw(fest_list[x].startTime);
-        time = sp3unixTime2hm(fest_list[x].startTime) + ' – ' + sp3unixTime2hm(fest_list[x].endTime);
+        date = unixTime2ymdw(fest_list[x].startTime);
+        time = unixTime2hm(fest_list[x].startTime) + ' – ' + unixTime2hm(fest_list[x].endTime);
         rule = sp3rule2txt(f_setting.vsRule.name);
         stage1 = sp3stage2txt(f_setting.vsStages[0].vsStageId);
         stage2 = sp3stage2txt(f_setting.vsStages[1].vsStageId);
@@ -579,8 +582,8 @@ function getRegular(data, x) {
         const regular_list = data.data.regularSchedules.nodes;
         const r_setting = regular_list[x].regularMatchSetting;
 
-        date = sp3unixTime2ymdw(regular_list[x].startTime);
-        time = sp3unixTime2hm(regular_list[x].startTime) + ' – ' + sp3unixTime2hm(regular_list[x].endTime);
+        date = unixTime2ymdw(regular_list[x].startTime);
+        time = unixTime2hm(regular_list[x].startTime) + ' – ' + unixTime2hm(regular_list[x].endTime);
         rule = sp3rule2txt(r_setting.vsRule.name);
         stage1 = sp3stage2txt(r_setting.vsStages[0].vsStageId);
         stage2 = sp3stage2txt(r_setting.vsStages[1].vsStageId);

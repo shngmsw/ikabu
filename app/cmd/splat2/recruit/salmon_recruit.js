@@ -1,7 +1,7 @@
 const Canvas = require('canvas');
 const path = require('path');
 const fetch = require('node-fetch');
-const { unixTime2mdwhm, coop_stage2txt, weapon2txt } = require('../../../common');
+const { sp2unixTime2mdwhm, coop_stage2txt, weapon2txt } = require('../../../common');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const { searchRoleIdByName } = require('../../../manager/roleManager.js');
 const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
@@ -112,7 +112,7 @@ async function salmon2Recruit(interaction) {
 }
 
 async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, count, host_member, user1, user2, detail) {
-    let date = unixTime2mdwhm(detail.start_time) + ' – ' + unixTime2mdwhm(detail.end_time);
+    let date = sp2unixTime2mdwhm(detail.start_time) + ' – ' + sp2unixTime2mdwhm(detail.end_time);
     let coop_stage = coop_stage2txt(detail.stage.image);
     let weapon1 = weapon2txt(detail.weapons[0].id);
     let weapon2 = weapon2txt(detail.weapons[1].id);

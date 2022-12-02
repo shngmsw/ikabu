@@ -1,11 +1,11 @@
 const Canvas = require('canvas');
 const path = require('path');
-const fetch = require('node-fetch');
 const RecruitService = require('../../../../db/recruit_service');
 const { getMemberMentions } = require('../../../event/recruit_button');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const { isNotEmpty, checkFes, sp3stage2txt, sp3rule2txt, sp3unixTime2hm, sp3unixTime2ymdw, isEmpty } = require('../../../common');
+const { checkFes, getFesRecruitData, fetchSchedule } = require('../../../common/apis/splatoon3_ink');
+const { isNotEmpty, isEmpty } = require('../../../common');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const { recruitActionRow, setButtonDisable, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
@@ -14,8 +14,6 @@ const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
-
-const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
 Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Medium.ttf'), { family: 'Genshin' });
@@ -94,16 +92,16 @@ async function fesRecruit(interaction) {
     await interaction.deferReply();
 
     try {
-        const response = await fetch(schedule_url);
-        const data = await response.json();
-        if (!checkFes(data, type)) {
+        const schedule = await fetchSchedule();
+        const fes_data = await getFesRecruitData(schedule, type);
+        if (!checkFes(schedule, type)) {
             await interaction.editReply({
                 content: '募集を建てようとした期間はフェスが行われていないでし！',
                 ephemeral: true,
             });
             return;
         }
-        const args = getFes(data, type).split(',');
+
         let txt = `<@${host_member.user.id}>` + '**たんのフェスマッチ募集**\n';
         let members = [];
 
@@ -128,37 +126,15 @@ async function fesRecruit(interaction) {
         txt += 'よければ合流しませんか？';
 
         if (condition == null) condition = 'なし';
-        const stageImageSource = data.data.festSchedules.nodes[type].festMatchSetting.vsStages;
-        const stage_a = stageImageSource[0].image.url;
-        const stage_b = stageImageSource[1].image.url;
-        const stageImages = [stage_a, stage_b];
-        await sendFesMatch(
-            interaction,
-            channel,
-            team,
-            txt,
-            recruit_num,
-            condition,
-            member_counter,
-            host_member,
-            user1,
-            user2,
-            args,
-            stageImages,
-        );
+
+        await sendFesMatch(interaction, team, txt, recruit_num, condition, member_counter, host_member, user1, user2, fes_data);
     } catch (error) {
         channel.send('なんかエラーでてるわ');
         logger.error(error);
     }
 }
 
-async function sendFesMatch(interaction, channel, team, txt, recruit_num, condition, count, host_member, user1, user2, args, stageImages) {
-    let f_date = args[0]; // 日付
-    let f_time = args[1]; // 時間
-    let f_rule = 'ナワバリバトル';
-    let f_stage1 = args[3]; // ステージ1
-    let f_stage2 = args[4]; // ステージ2
-
+async function sendFesMatch(interaction, team, txt, recruit_num, condition, count, host_member, user1, user2, fes_data) {
     const guild = await interaction.guild.fetch();
     const mention_id = await searchRoleIdByName(guild, team);
     const team_role = await searchRoleById(guild, mention_id);
@@ -200,7 +176,7 @@ async function sendFesMatch(interaction, channel, team, txt, recruit_num, condit
     );
     const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new AttachmentBuilder(await ruleCanvas(f_rule, f_date, f_time, f_stage1, f_stage2, stageImages), 'rules.png');
+    const rule = new AttachmentBuilder(await ruleCanvas(fes_data), 'rules.png');
 
     try {
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
@@ -418,7 +394,7 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, team
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-async function ruleCanvas(f_rule, f_date, f_time, f_stage1, f_stage2, stageImages) {
+async function ruleCanvas(fes_data) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
     const rule_ctx = ruleCanvas.getContext('2d');
 
@@ -431,26 +407,26 @@ async function ruleCanvas(f_rule, f_date, f_time, f_stage1, f_stage2, stageImage
 
     fillTextWithStroke(rule_ctx, 'ルール', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
-    rule_width = rule_ctx.measureText(f_rule).width;
-    fillTextWithStroke(rule_ctx, f_rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - rule_width) / 2, 145); // 中央寄せ
+    rule_width = rule_ctx.measureText(fes_data.rule).width;
+    fillTextWithStroke(rule_ctx, fes_data.rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - rule_width) / 2, 145); // 中央寄せ
 
     fillTextWithStroke(rule_ctx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
 
-    date_width = rule_ctx.measureText(f_date).width;
-    fillTextWithStroke(rule_ctx, f_date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - date_width) / 2, 270); // 中央寄せ
+    date_width = rule_ctx.measureText(fes_data.date).width;
+    fillTextWithStroke(rule_ctx, fes_data.date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - date_width) / 2, 270); // 中央寄せ
 
-    time_width = rule_ctx.measureText(f_time).width;
-    fillTextWithStroke(rule_ctx, f_time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - time_width) / 2, 320); // 中央寄せ
+    time_width = rule_ctx.measureText(fes_data.time).width;
+    fillTextWithStroke(rule_ctx, fes_data.time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - time_width) / 2, 320); // 中央寄せ
 
     fillTextWithStroke(rule_ctx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
 
-    stage1_width = rule_ctx.measureText(f_stage1).width;
-    fillTextWithStroke(rule_ctx, f_stage1, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage1_width) / 2 + 10, 440); // 中央寄せ
+    stage1_width = rule_ctx.measureText(fes_data.stage1).width;
+    fillTextWithStroke(rule_ctx, fes_data.stage1, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage1_width) / 2 + 10, 440); // 中央寄せ
 
-    stage2_width = rule_ctx.measureText(f_stage2).width;
-    fillTextWithStroke(rule_ctx, f_stage2, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage2_width) / 2 + 10, 490); // 中央寄せ
+    stage2_width = rule_ctx.measureText(fes_data.stage2).width;
+    fillTextWithStroke(rule_ctx, fes_data.stage2, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage2_width) / 2 + 10, 490); // 中央寄せ
 
-    let stage1_img = await Canvas.loadImage(stageImages[0]);
+    let stage1_img = await Canvas.loadImage(fes_data.stageImage1);
     rule_ctx.save();
     rule_ctx.beginPath();
     createRoundRect(rule_ctx, 370, 130, 308, 176, 10);
@@ -461,7 +437,7 @@ async function ruleCanvas(f_rule, f_date, f_time, f_stage1, f_stage2, stageImage
     rule_ctx.stroke();
     rule_ctx.restore();
 
-    let stage2_img = await Canvas.loadImage(stageImages[1]);
+    let stage2_img = await Canvas.loadImage(fes_data.stageImage2);
     rule_ctx.save();
     rule_ctx.beginPath();
     createRoundRect(rule_ctx, 370, 340, 308, 176, 10);
@@ -477,23 +453,4 @@ async function ruleCanvas(f_rule, f_date, f_time, f_stage1, f_stage2, stageImage
 
     const rule = ruleCanvas.toBuffer();
     return rule;
-}
-
-function getFes(data, x) {
-    const fest_list = data.data.festSchedules.nodes;
-    const f_setting = fest_list[x].festMatchSetting;
-    let stage1;
-    let stage2;
-    let date;
-    let time;
-    let rule;
-    let rstr;
-
-    date = sp3unixTime2ymdw(fest_list[x].startTime);
-    time = sp3unixTime2hm(fest_list[x].startTime) + ' – ' + sp3unixTime2hm(fest_list[x].endTime);
-    rule = sp3rule2txt(f_setting.vsRule.name);
-    stage1 = sp3stage2txt(f_setting.vsStages[0].vsStageId);
-    stage2 = sp3stage2txt(f_setting.vsStages[1].vsStageId);
-    rstr = date + ',' + time + ',' + rule + ',' + stage1 + ',' + stage2;
-    return rstr;
 }
