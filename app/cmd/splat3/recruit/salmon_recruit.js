@@ -126,7 +126,7 @@ async function salmonRecruit(interaction) {
 async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, count, host_member, user1, user2, detail) {
     const coopSetting = detail.setting;
     let date = sp3unixTime2mdwhm(detail.startTime) + ' – ' + sp3unixTime2mdwhm(detail.endTime);
-    let coop_stage = sp3coop_stage2txt(coopSetting.coopStage.coopStageId);
+    let coop_stage = sp3coop_stage2txt(coopSetting.coopStage.name);
     let weapon1 = coopSetting.weapons[0].image.url;
     let weapon2 = coopSetting.weapons[1].image.url;
     let weapon3 = coopSetting.weapons[2].image.url;
