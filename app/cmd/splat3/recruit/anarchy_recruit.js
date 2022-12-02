@@ -4,7 +4,7 @@ const RecruitService = require('../../../../db/recruit_service');
 const { getMemberMentions } = require('../../../event/recruit_button');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const { checkFes, getAnarchyRecruitData, fetchSchedule } = require('../../../common/apis/splatoon3_ink');
+const { checkFes, getAnarchyOpenData, fetchSchedule } = require('../../../common/apis/splatoon3_ink');
 const { isEmpty, isNotEmpty } = require('../../../common');
 const { searchChannelIdByName } = require('../../../manager/channelManager');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
@@ -118,7 +118,7 @@ async function anarchyRecruit(interaction) {
             return;
         }
 
-        const anarchy_data = await getAnarchyRecruitData(schedule, type);
+        const anarchy_data = await getAnarchyOpenData(schedule, type);
 
         let txt = `<@${host_member.user.id}>` + '**たんのバンカラ募集**\n';
         if (user1 != null && user2 != null) {

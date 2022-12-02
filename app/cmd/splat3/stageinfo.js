@@ -1,5 +1,14 @@
 const fetch = require('node-fetch');
-const common = require('../../common');
+const {
+    getLeagueList,
+    getAnarchyList,
+    getXMatchList,
+    getAnarchyChallengeData,
+    getAnarchyOpenData,
+    getLeagueData,
+    getXMatchData,
+    checkFes,
+} = require('../../common/apis/splatoon3_ink');
 const Discord = require('discord.js');
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const log4js = require('log4js');
@@ -19,35 +28,40 @@ async function sf(msg) {
         const response = await fetch(schedule_url);
         const data = await response.json();
 
-        const embedStr_league = getLeagueEmbed(data.data.leagueSchedules.nodes);
+        const embedStr_league = await getLeagueEmbed(data);
         embedStr_league.setAuthor({
             name: 'リーグマッチ',
             iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
         });
         embedStr_league.setColor('#ED2D7C');
 
-        const embedStr_challenge = getACEmbed(data.data.bankaraSchedules.nodes);
+        const embedStr_challenge = await getACEmbed(data);
         embedStr_challenge.setAuthor({
             name: 'バンカラマッチ (チャレンジ)',
             iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
         });
         embedStr_challenge.setColor('#F54910');
 
-        const embedStr_open = getAOEmbed(data.data.bankaraSchedules.nodes);
+        const embedStr_open = await getAOEmbed(data);
         embedStr_open.setAuthor({
             name: 'バンカラマッチ (オープン)',
             iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
         });
         embedStr_open.setColor('#F54910');
 
-        const embedStr_x = getXMatchEmbed(data.data.xSchedules.nodes);
+        const embedStr_x = await getXMatchEmbed(data);
         embedStr_x.setAuthor({
             name: 'Xマッチ',
             iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
         });
         embedStr_x.setColor('#0edb9b');
+        // msg.channel.send({
+        //     embeds: [embedStr_league, embedStr_challenge, embedStr_open, embedStr_x],
+        // });
+
+        // TODO リグマ追加時に表示
         msg.channel.send({
-            embeds: [embedStr_challenge, embedStr_open],
+            embeds: [embedStr_challenge, embedStr_open, embedStr_x],
         });
     } catch (error) {
         msg.channel.send('なんかエラーでてるわ');
@@ -60,67 +74,28 @@ async function stageinfo(msg) {
     msgDelete(msg);
 
     try {
-        const response = await fetch(schedule_url);
-        const data = await response.json();
-
-        // const embedStr_league = getLeagueEmbed(data.data.leagueSchedules.nodes);
-        // embedStr_league.setAuthor({
-        //     name: 'リーグマッチ',
-        //     iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
-        // });
-        // embedStr_league.setColor('#ED2D7C');
-        // msg.channel.send({ embeds: [embedStr_league] });
-
-        const embedStr_x = getXMatchEmbed(data.data.xSchedules.nodes);
-        embedStr_x.setAuthor({
-            name: 'Xマッチ',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
-        });
-        embedStr_x.setColor('#0edb9b');
-        msg.channel.send({ embeds: [embedStr_x] });
-
-        const embedStr_challenge = getACEmbed(data.data.bankaraSchedules.nodes);
-        embedStr_challenge.setAuthor({
-            name: 'バンカラマッチ (チャレンジ)',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
-        });
-        embedStr_challenge.setColor('#F54910');
-        msg.channel.send({ embeds: [embedStr_challenge] });
-
-        const embedStr_open = getAOEmbed(data.data.bankaraSchedules.nodes);
-        embedStr_open.setAuthor({
-            name: 'バンカラマッチ (オープン)',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
-        });
-        embedStr_open.setColor('#F54910');
-        msg.channel.send({ embeds: [embedStr_open] });
+        sf(msg);
     } catch (error) {
         msg.channel.send('なんかエラーでてるわ');
         logger.error(error);
     }
 }
 
-function getLeagueEmbed(league_list) {
+async function getLeagueEmbed(data) {
     const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
-    for (var attributename in league_list) {
+    const num = getLeagueList(data).length;
+    for (let i = 0; i < num; i++) {
+        let league_data = await getLeagueData(data, i);
         let stage;
-        let date;
         let rule;
-        date =
-            common.sp3unixTime2mdwhm(league_list[attributename].startTime) +
-            ' – ' +
-            common.sp3unixTime2hm(league_list[attributename].endTime);
-        if (league_list[attributename].leagueMatchSetting == null) {
+        if (checkFes(data, i)) {
             rule = 'フェス期間中';
             stage = 'フェス期間中はお休みでし';
         } else {
-            rule = common.sp3rule2txt(league_list[attributename].leagueMatchSetting.vsRule.name);
-            stage =
-                common.sp3stage2txt(league_list[attributename].leagueMatchSetting.vsStages[0].vsStageId) +
-                '／' +
-                common.sp3stage2txt(league_list[attributename].leagueMatchSetting.vsStages[1].vsStageId);
+            rule = league_data.rule;
+            stage = league_data.stage1 + '／' + league_data.stage2;
         }
-        let name = date + ' 【' + rule + '】';
+        let name = league_data.date + ' 【' + rule + '】';
         stageEmbed.addFields([{ name: name, value: stage }]);
     }
     stageEmbed.setTimestamp();
@@ -128,27 +103,21 @@ function getLeagueEmbed(league_list) {
     return stageEmbed;
 }
 
-function getAOEmbed(anarchy_list) {
+async function getAOEmbed(data) {
     const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
-    for (var attributename in anarchy_list) {
+    const num = getAnarchyList(data).length;
+    for (let i = 0; i < num; i++) {
+        let anarchy_data = await getAnarchyOpenData(data, i);
         let stage;
-        let date;
         let rule;
-        date =
-            common.sp3unixTime2mdwhm(anarchy_list[attributename].startTime) +
-            ' – ' +
-            common.sp3unixTime2hm(anarchy_list[attributename].endTime);
-        if (anarchy_list[attributename].bankaraMatchSettings == null) {
+        if (checkFes(data, i)) {
             rule = 'フェス期間中';
             stage = 'フェス期間中はお休みでし';
         } else {
-            rule = common.sp3rule2txt(anarchy_list[attributename].bankaraMatchSettings[1].vsRule.name);
-            stage =
-                common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[0].vsStageId) +
-                '／' +
-                common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[1].vsStages[1].vsStageId);
+            rule = anarchy_data.rule;
+            stage = anarchy_data.stage1 + '／' + anarchy_data.stage2;
         }
-        let name = date + ' 【' + rule + '】';
+        let name = anarchy_data.date + ' 【' + rule + '】';
         stageEmbed.addFields([{ name: name, value: stage }]);
     }
     stageEmbed.setTimestamp();
@@ -156,27 +125,21 @@ function getAOEmbed(anarchy_list) {
     return stageEmbed;
 }
 
-function getACEmbed(anarchy_list) {
+async function getACEmbed(data) {
     const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
-    for (var attributename in anarchy_list) {
+    const num = getAnarchyList(data).length;
+    for (let i = 0; i < num; i++) {
+        let anarchy_data = await getAnarchyChallengeData(data, i);
         let stage;
-        let date;
         let rule;
-        date =
-            common.sp3unixTime2mdwhm(anarchy_list[attributename].startTime) +
-            ' – ' +
-            common.sp3unixTime2hm(anarchy_list[attributename].endTime);
-        if (anarchy_list[attributename].bankaraMatchSettings == null) {
+        if (checkFes(data, i)) {
             rule = 'フェス期間中';
             stage = 'フェス期間中はお休みでし';
         } else {
-            rule = common.sp3rule2txt(anarchy_list[attributename].bankaraMatchSettings[0].vsRule.name);
-            stage =
-                common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[0].vsStageId) +
-                '／' +
-                common.sp3stage2txt(anarchy_list[attributename].bankaraMatchSettings[0].vsStages[1].vsStageId);
+            rule = anarchy_data.rule;
+            stage = anarchy_data.stage1 + '／' + anarchy_data.stage2;
         }
-        let name = date + ' 【' + rule + '】';
+        let name = anarchy_data.date + ' 【' + rule + '】';
         stageEmbed.addFields([{ name: name, value: stage }]);
     }
     stageEmbed.setTimestamp();
@@ -184,24 +147,21 @@ function getACEmbed(anarchy_list) {
     return stageEmbed;
 }
 
-function getXMatchEmbed(x_list) {
+async function getXMatchEmbed(data) {
     const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
-    for (var attributename in x_list) {
+    const num = getXMatchList(data).length;
+    for (let i = 0; i < num; i++) {
+        let x_data = await getXMatchData(data, i);
         let stage;
-        let date;
         let rule;
-        date = common.sp3unixTime2mdwhm(x_list[attributename].startTime) + ' – ' + common.sp3unixTime2hm(x_list[attributename].endTime);
-        if (x_list[attributename].xMatchSetting == null) {
+        if (checkFes(data, i)) {
             rule = 'フェス期間中';
             stage = 'フェス期間中はお休みでし';
         } else {
-            rule = common.sp3rule2txt(x_list[attributename].xMatchSetting.vsRule.name);
-            stage =
-                common.sp3stage2txt(x_list[attributename].xMatchSetting.vsStages[0].vsStageId) +
-                '／' +
-                common.sp3stage2txt(x_list[attributename].xMatchSetting.vsStages[1].vsStageId);
+            rule = x_data.rule;
+            stage = x_data.stage1 + '／' + x_data.stage2;
         }
-        let name = date + ' 【' + rule + '】';
+        let name = x_data.date + ' 【' + rule + '】';
         stageEmbed.addFields([{ name: name, value: stage }]);
     }
     stageEmbed.setTimestamp();

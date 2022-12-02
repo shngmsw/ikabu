@@ -4,7 +4,7 @@ const RecruitService = require('../../../../db/recruit_service');
 const { getMemberMentions } = require('../../../event/recruit_button');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const { checkFes, getRegularRecruitData, fetchSchedule } = require('../../../common/apis/splatoon3_ink');
+const { checkFes, getRegularData, fetchSchedule } = require('../../../common/apis/splatoon3_ink');
 const { isNotEmpty, isEmpty } = require('../../../common');
 const { searchChannelIdByName } = require('../../../manager/channelManager');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
@@ -103,7 +103,7 @@ async function regularRecruit(interaction) {
             return;
         }
 
-        const regular_data = await getRegularRecruitData(schedule, type);
+        const regular_data = await getRegularData(schedule, type);
 
         let txt = `<@${host_member.user.id}>` + '**たんのナワバリ募集**\n';
         let members = [];

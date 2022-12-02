@@ -7,7 +7,7 @@ const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../
 const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
-const { fetchSchedule, getSalmonRecruitData } = require('../../../common/apis/splatoon3_ink');
+const { fetchSchedule, getSalmonData } = require('../../../common/apis/splatoon3_ink');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
@@ -330,7 +330,7 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
  */
 async function ruleCanvas() {
     const data = await fetchSchedule();
-    const salmon_data = await getSalmonRecruitData(data, 0);
+    const salmon_data = await getSalmonData(data, 0);
 
     const ruleCanvas = Canvas.createCanvas(720, 550);
     const rule_ctx = ruleCanvas.getContext('2d');

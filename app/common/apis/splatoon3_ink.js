@@ -10,12 +10,17 @@ module.exports = {
     checkFes: checkFes,
     getRegularList: getRegularList,
     getAnarchyList: getAnarchyList,
+    getLeagueList: getLeagueList,
     getSalmonList: getSalmonList,
+    getXMatchList: getXMatchList,
     getFesList: getFesList,
-    getRegularRecruitData: getRegularRecruitData,
-    getAnarchyRecruitData: getAnarchyRecruitData,
-    getSalmonRecruitData: getSalmonRecruitData,
-    getFesRecruitData: getFesRecruitData,
+    getRegularData: getRegularData,
+    getAnarchyChallengeData: getAnarchyChallengeData,
+    getAnarchyOpenData: getAnarchyOpenData,
+    getLeagueData: getLeagueData,
+    getSalmonData: getSalmonData,
+    getXMatchData: getXMatchData,
+    getFesData: getFesData,
 };
 
 const logger = log4js.getLogger('api');
@@ -75,12 +80,36 @@ function getAnarchyList(data) {
 }
 
 /**
+ * dataからリグマ用のリストだけ返す
+ * @param {*} data スケジュールデータ
+ */
+function getLeagueList(data) {
+    try {
+        return data.data.leagueSchedules.nodes;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
  * dataからサーモン用のリストだけ返す
  * @param {*} data スケジュールデータ
  */
 function getSalmonList(data) {
     try {
         return data.data.coopGroupingSchedule.regularSchedules.nodes;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
+ * dataからXマッチ用のリストだけ返す
+ * @param {*} data スケジュールデータ
+ */
+function getXMatchList(data) {
+    try {
+        return data.data.xSchedules.nodes;
     } catch (error) {
         logger.error(error);
     }
@@ -104,7 +133,7 @@ function getFesList(data) {
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
-async function getRegularRecruitData(data, num) {
+async function getRegularData(data, num) {
     try {
         const regular_list = getRegularList(data);
         const r_setting = regular_list[num].regularMatchSetting;
@@ -124,15 +153,40 @@ async function getRegularRecruitData(data, num) {
 }
 
 /**
+ * バンカラ(チャレンジ)用データに整形する
+ * @param {*} data スケジュールデータ
+ * @param {Number} num スケジュール番号
+ * @returns 連想配列で返す
+ */
+async function getAnarchyChallengeData(data, num) {
+    try {
+        const anarchy_list = getAnarchyList(data);
+        const a_settings = anarchy_list[num].bankaraMatchSettings; // a_settings[0]: Challenge
+
+        let result = {};
+        result.date = unixTime2ymdw(anarchy_list[num].startTime);
+        result.time = unixTime2hm(anarchy_list[num].startTime) + ' – ' + unixTime2hm(anarchy_list[num].endTime);
+        result.rule = await rule2txt(a_settings[0].vsRule.id);
+        result.stage1 = await stage2txt(a_settings[0].vsStages[0].id);
+        result.stage2 = await stage2txt(a_settings[0].vsStages[1].id);
+        result.stageImage1 = a_settings[0].vsStages[0].image.url;
+        result.stageImage2 = a_settings[0].vsStages[1].image.url;
+        return result;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
  * バンカラ募集用データに整形する
  * @param {*} data スケジュールデータ
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
-async function getAnarchyRecruitData(data, num) {
+async function getAnarchyOpenData(data, num) {
     try {
         const anarchy_list = getAnarchyList(data);
-        const a_settings = anarchy_list[num].bankaraMatchSettings; // 0: Challenge, 1: Open
+        const a_settings = anarchy_list[num].bankaraMatchSettings; // a_settings[1]: Open
 
         let result = {};
         result.date = unixTime2ymdw(anarchy_list[num].startTime);
@@ -149,24 +203,74 @@ async function getAnarchyRecruitData(data, num) {
 }
 
 /**
+ * リグマ募集用データに整形する
+ * @param {*} data スケジュールデータ
+ * @param {Number} num スケジュール番号
+ * @returns 連想配列で返す
+ */
+async function getLeagueData(data, num) {
+    try {
+        const league_list = getLeagueList(data);
+        const l_settings = league_list[num].leagueMatchSetting;
+
+        let result = {};
+        result.date = unixTime2ymdw(league_list[num].startTime);
+        result.time = unixTime2hm(league_list[num].startTime) + ' – ' + unixTime2hm(league_list[num].endTime);
+        result.rule = await rule2txt(l_settings.vsRule.id);
+        result.stage1 = await stage2txt(l_settings.vsStages[0].id);
+        result.stage2 = await stage2txt(l_settings.vsStages[1].id);
+        result.stageImage1 = l_settings.vsStages[0].image.url;
+        result.stageImage2 = l_settings.vsStages[1].image.url;
+        return result;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
  * サーモン募集用データに整形する
  * @param {*} data スケジュールデータ
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
-async function getSalmonRecruitData(data, num) {
+async function getSalmonData(data, num) {
     try {
         const salmon_list = getSalmonList(data);
-        const c_setting = salmon_list[num].setting;
+        const s_setting = salmon_list[num].setting;
 
         let result = {};
         result.date = unixTime2mdwhm(salmon_list[num].startTime) + ' – ' + unixTime2mdwhm(salmon_list[num].endTime);
-        result.stage = await stage2txt(c_setting.coopStage.id);
-        result.weapon1 = c_setting.weapons[0].image.url;
-        result.weapon2 = c_setting.weapons[1].image.url;
-        result.weapon3 = c_setting.weapons[2].image.url;
-        result.weapon4 = c_setting.weapons[3].image.url;
-        result.stageImage = c_setting.coopStage.thumbnailImage.url;
+        result.stage = await stage2txt(s_setting.coopStage.id);
+        result.weapon1 = s_setting.weapons[0].image.url;
+        result.weapon2 = s_setting.weapons[1].image.url;
+        result.weapon3 = s_setting.weapons[2].image.url;
+        result.weapon4 = s_setting.weapons[3].image.url;
+        result.stageImage = s_setting.coopStage.thumbnailImage.url;
+        return result;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
+ * Xマッチ用データに整形する
+ * @param {*} data スケジュールデータ
+ * @param {Number} num スケジュール番号
+ * @returns 連想配列で返す
+ */
+async function getXMatchData(data, num) {
+    try {
+        const x_list = getXMatchList(data);
+        const x_settings = x_list[num].xMatchSetting;
+
+        let result = {};
+        result.date = unixTime2ymdw(x_list[num].startTime);
+        result.time = unixTime2hm(x_list[num].startTime) + ' – ' + unixTime2hm(x_list[num].endTime);
+        result.rule = await rule2txt(x_settings.vsRule.id);
+        result.stage1 = await stage2txt(x_settings.vsStages[0].id);
+        result.stage2 = await stage2txt(x_settings.vsStages[1].id);
+        result.stageImage1 = x_settings.vsStages[0].image.url;
+        result.stageImage2 = x_settings.vsStages[1].image.url;
         return result;
     } catch (error) {
         logger.error(error);
@@ -179,7 +283,7 @@ async function getSalmonRecruitData(data, num) {
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
-async function getFesRecruitData(data, num) {
+async function getFesData(data, num) {
     try {
         const fes_list = getFesList(data);
         const f_setting = fes_list[num].festMatchSetting;

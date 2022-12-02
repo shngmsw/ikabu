@@ -4,7 +4,7 @@ const RecruitService = require('../../../../db/recruit_service');
 const { getMemberMentions } = require('../../../event/recruit_button');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const { checkFes, getFesRecruitData, fetchSchedule } = require('../../../common/apis/splatoon3_ink');
+const { checkFes, getFesData, fetchSchedule } = require('../../../common/apis/splatoon3_ink');
 const { isNotEmpty, isEmpty } = require('../../../common');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const { recruitActionRow, setButtonDisable, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
@@ -93,7 +93,7 @@ async function fesRecruit(interaction) {
 
     try {
         const schedule = await fetchSchedule();
-        const fes_data = await getFesRecruitData(schedule, type);
+        const fes_data = await getFesData(schedule, type);
         if (!checkFes(schedule, type)) {
             await interaction.editReply({
                 content: '募集を建てようとした期間はフェスが行われていないでし！',
