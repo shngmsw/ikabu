@@ -8,6 +8,7 @@ const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
 const { fetchSchedule, getSalmonData } = require('../../../common/apis/splatoon3_ink');
+const { dateformat, formatDatetime } = require('../../../common/convert_datetime');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
@@ -332,6 +333,9 @@ async function ruleCanvas() {
     const data = await fetchSchedule();
     const salmon_data = await getSalmonData(data, 0);
 
+    const datetime =
+        formatDatetime(salmon_data.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(salmon_data.endTime, dateformat.mdwhm);
+
     const ruleCanvas = Canvas.createCanvas(720, 550);
     const rule_ctx = ruleCanvas.getContext('2d');
 
@@ -344,8 +348,8 @@ async function ruleCanvas() {
 
     fillTextWithStroke(rule_ctx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
-    date_width = rule_ctx.measureText(salmon_data.date).width;
-    fillTextWithStroke(rule_ctx, salmon_data.date, '37px Splatfont', '#FFFFFF', '#2D3130', 1, (650 - date_width) / 2, 145);
+    date_width = rule_ctx.measureText(datetime).width;
+    fillTextWithStroke(rule_ctx, datetime, '37px Splatfont', '#FFFFFF', '#2D3130', 1, (650 - date_width) / 2, 145);
 
     fillTextWithStroke(rule_ctx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 245);
 

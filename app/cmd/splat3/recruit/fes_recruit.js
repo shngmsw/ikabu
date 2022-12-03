@@ -10,6 +10,8 @@ const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../
 const { recruitActionRow, setButtonDisable, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const { searchRoleIdByName, searchRoleById } = require('../../../manager/roleManager');
+const { dateformat, formatDatetime } = require('../../../common/convert_datetime');
+
 const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -92,15 +94,17 @@ async function fesRecruit(interaction) {
     await interaction.deferReply();
 
     try {
-        const schedule = await fetchSchedule();
-        const fes_data = await getFesData(schedule, type);
-        if (!checkFes(schedule, type)) {
+        const data = await fetchSchedule();
+
+        if (!checkFes(data.schedule, type)) {
             await interaction.editReply({
                 content: '募集を建てようとした期間はフェスが行われていないでし！',
                 ephemeral: true,
             });
             return;
         }
+
+        const fes_data = await getFesData(data, type);
 
         let txt = `<@${host_member.user.id}>` + '**たんのフェスマッチ募集**\n';
         let members = [];
@@ -396,6 +400,10 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, team
  */
 async function ruleCanvas(fes_data) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
+
+    const date = formatDatetime(fes_data.startTime, dateformat.ymdw);
+    const time = formatDatetime(fes_data.startTime, dateformat.hm) + ' - ' + formatDatetime(fes_data.endTime, dateformat.hm);
+
     const rule_ctx = ruleCanvas.getContext('2d');
 
     createRoundRect(rule_ctx, 1, 1, 718, 548, 30);
@@ -412,11 +420,11 @@ async function ruleCanvas(fes_data) {
 
     fillTextWithStroke(rule_ctx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
 
-    date_width = rule_ctx.measureText(fes_data.date).width;
-    fillTextWithStroke(rule_ctx, fes_data.date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - date_width) / 2, 270); // 中央寄せ
+    date_width = rule_ctx.measureText(date).width;
+    fillTextWithStroke(rule_ctx, date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - date_width) / 2, 270); // 中央寄せ
 
-    time_width = rule_ctx.measureText(fes_data.time).width;
-    fillTextWithStroke(rule_ctx, fes_data.time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - time_width) / 2, 320); // 中央寄せ
+    time_width = rule_ctx.measureText(time).width;
+    fillTextWithStroke(rule_ctx, time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - time_width) / 2, 320); // 中央寄せ
 
     fillTextWithStroke(rule_ctx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
 

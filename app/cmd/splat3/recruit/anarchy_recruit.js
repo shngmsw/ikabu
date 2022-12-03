@@ -12,6 +12,7 @@ const { recruitActionRow, setButtonDisable, recruitDeleteButton, unlockChannelBu
 const { AttachmentBuilder, ChannelType, PermissionsBitField } = require('discord.js');
 const { searchRoleIdByName } = require('../../../manager/roleManager');
 const log4js = require('log4js');
+const { dateformat, formatDatetime } = require('../../../common/convert_datetime');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
@@ -107,9 +108,9 @@ async function anarchyRecruit(interaction) {
         rank = '指定なし';
     }
     try {
-        const schedule = await fetchSchedule();
+        const data = await fetchSchedule();
 
-        if (checkFes(schedule, type)) {
+        if (checkFes(data.schedule, type)) {
             const fes_channel_id = await searchChannelIdByName(guild, 'フェス募集', ChannelType.GuildText, null);
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！\nフェス募集をするには<#${fes_channel_id}>のチャンネルを使うでし！`,
@@ -118,7 +119,7 @@ async function anarchyRecruit(interaction) {
             return;
         }
 
-        const anarchy_data = await getAnarchyOpenData(schedule, type);
+        const anarchy_data = await getAnarchyOpenData(data, type);
 
         let txt = `<@${host_member.user.id}>` + '**たんのバンカラ募集**\n';
         if (user1 != null && user2 != null) {
@@ -186,7 +187,8 @@ async function sendAnarchyMatch(interaction, mention, txt, recruit_num, conditio
             thumbScaleY = 100;
             break;
         default:
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fleague.png';
+            thumbnail_url =
+                'http://placehold.jp/15/4c4d57/ffffff/100x100.png?text=ここに画像を貼りたかったんだが、どうやらエラーみたいだ…。';
             thumbnailXP = 595;
             thumbnailYP = 20;
             thumbScaleX = 100;
@@ -435,6 +437,10 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
  */
 async function ruleCanvas(anarchy_data, thumbnail) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
+
+    const date = formatDatetime(anarchy_data.startTime, dateformat.ymdw);
+    const time = formatDatetime(anarchy_data.startTime, dateformat.hm) + ' - ' + formatDatetime(anarchy_data.endTime, dateformat.hm);
+
     const rule_ctx = ruleCanvas.getContext('2d');
 
     createRoundRect(rule_ctx, 1, 1, 718, 548, 30);
@@ -451,11 +457,11 @@ async function ruleCanvas(anarchy_data, thumbnail) {
 
     fillTextWithStroke(rule_ctx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
 
-    date_width = rule_ctx.measureText(anarchy_data.date).width;
-    fillTextWithStroke(rule_ctx, anarchy_data.date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - date_width) / 2, 270); // 中央寄せ
+    date_width = rule_ctx.measureText(date).width;
+    fillTextWithStroke(rule_ctx, date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - date_width) / 2, 270); // 中央寄せ
 
-    time_width = rule_ctx.measureText(anarchy_data.time).width;
-    fillTextWithStroke(rule_ctx, anarchy_data.time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - time_width) / 2, 320); // 中央寄せ
+    time_width = rule_ctx.measureText(time).width;
+    fillTextWithStroke(rule_ctx, time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - time_width) / 2, 320); // 中央寄せ
 
     fillTextWithStroke(rule_ctx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
 

@@ -1,9 +1,11 @@
 const fetch = require('node-fetch');
 const log4js = require('log4js');
-const { unixTime2hm, unixTime2mdwhm, unixTime2ymdw } = require('../../common');
+const { isEmpty } = require('../../common');
+const { unixTime2hm, unixTime2mdwhm, unixTime2ymdw } = require('../convert_datetime');
 
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const locale_url = 'https://splatoon3.ink/data/locale/ja-JP.json';
+const { formatDatetime, dateformat } = require('../../common/convert_datetime.js');
 
 module.exports = {
     fetchSchedule: fetchSchedule,
@@ -27,23 +29,26 @@ const logger = log4js.getLogger('api');
 
 async function fetchSchedule() {
     try {
-        const response = await fetch(schedule_url);
-        const data = await response.json();
-        return data;
+        const schedule = await fetch(schedule_url); // スケジュール情報のfetch
+        const schedule_data = await schedule.json();
+        const locale = await fetch(locale_url); // 名前解決のためのlocale情報のfetch
+        const locale_data = await locale.json();
+        const result_data = { schedule: schedule_data, locale: locale_data }; // dataを一つにまとめる
+        return result_data;
     } catch (error) {
-        logger.error(error);
+        logger.error(result_data);
     }
 }
 
 /**
  * フェス中かチェックする
- * @param {*} data スケジュールデータ
+ * @param {*} schedule スケジュールデータ
  * @param {Number} num スケジュール番号
  * @returns フェス中ならtrueを返す
  */
-function checkFes(data, num) {
+function checkFes(schedule, num) {
     try {
-        const fest_list = data.data.festSchedules.nodes;
+        const fest_list = schedule.data.festSchedules.nodes;
         const f_setting = fest_list[num].festMatchSetting;
         if (f_setting == null) {
             return false;
@@ -57,11 +62,11 @@ function checkFes(data, num) {
 
 /**
  * dataからレギュラー用のリストだけ返す
- * @param {*} data スケジュールデータ
+ * @param {*} schedule スケジュールデータ
  */
-function getRegularList(data) {
+function getRegularList(schedule) {
     try {
-        return data.data.regularSchedules.nodes;
+        return schedule.data.regularSchedules.nodes;
     } catch (error) {
         logger.error(error);
     }
@@ -69,11 +74,11 @@ function getRegularList(data) {
 
 /**
  * dataからバンカラ用のリストだけ返す
- * @param {*} data スケジュールデータ
+ * @param {*} schedule スケジュールデータ
  */
-function getAnarchyList(data) {
+function getAnarchyList(schedule) {
     try {
-        return data.data.bankaraSchedules.nodes;
+        return schedule.data.bankaraSchedules.nodes;
     } catch (error) {
         logger.error(error);
     }
@@ -81,11 +86,11 @@ function getAnarchyList(data) {
 
 /**
  * dataからリグマ用のリストだけ返す
- * @param {*} data スケジュールデータ
+ * @param {*} schedule スケジュールデータ
  */
-function getLeagueList(data) {
+function getLeagueList(schedule) {
     try {
-        return data.data.leagueSchedules.nodes;
+        return schedule.data.leagueSchedules.nodes;
     } catch (error) {
         logger.error(error);
     }
@@ -93,11 +98,11 @@ function getLeagueList(data) {
 
 /**
  * dataからサーモン用のリストだけ返す
- * @param {*} data スケジュールデータ
+ * @param {*} schedule スケジュールデータ
  */
-function getSalmonList(data) {
+function getSalmonList(schedule) {
     try {
-        return data.data.coopGroupingSchedule.regularSchedules.nodes;
+        return schedule.data.coopGroupingSchedule.regularSchedules.nodes;
     } catch (error) {
         logger.error(error);
     }
@@ -105,11 +110,11 @@ function getSalmonList(data) {
 
 /**
  * dataからXマッチ用のリストだけ返す
- * @param {*} data スケジュールデータ
+ * @param {*} schedule スケジュールデータ
  */
-function getXMatchList(data) {
+function getXMatchList(schedule) {
     try {
-        return data.data.xSchedules.nodes;
+        return schedule.data.xSchedules.nodes;
     } catch (error) {
         logger.error(error);
     }
@@ -117,11 +122,11 @@ function getXMatchList(data) {
 
 /**
  * dataからフェス用のリストだけ返す
- * @param {*} data スケジュールデータ
+ * @param {*} schedule スケジュールデータ
  */
-function getFesList(data) {
+function getFesList(schedule) {
     try {
-        return data.data.festSchedules.nodes;
+        return schedule.data.festSchedules.nodes;
     } catch (error) {
         logger.error(error);
     }
@@ -129,21 +134,21 @@ function getFesList(data) {
 
 /**
  * レギュラー募集用データに整形する
- * @param {*} data スケジュールデータ
+ * @param {*} data フェッチしたデータ
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
 async function getRegularData(data, num) {
     try {
-        const regular_list = getRegularList(data);
+        const regular_list = getRegularList(data.schedule);
         const r_setting = regular_list[num].regularMatchSetting;
 
         result = {};
-        result.date = unixTime2ymdw(regular_list[num].startTime);
-        result.time = unixTime2hm(regular_list[num].startTime) + ' – ' + unixTime2hm(regular_list[num].endTime);
-        result.rule = await rule2txt(r_setting.vsRule.id);
-        result.stage1 = await stage2txt(r_setting.vsStages[0].id);
-        result.stage2 = await stage2txt(r_setting.vsStages[1].id);
+        result.startTime = regular_list[num].startTime;
+        result.endTime = regular_list[num].endTime;
+        result.rule = await rule2txt(data.locale, r_setting.vsRule.id);
+        result.stage1 = await stage2txt(data.locale, r_setting.vsStages[0].id);
+        result.stage2 = await stage2txt(data.locale, r_setting.vsStages[1].id);
         result.stageImage1 = r_setting.vsStages[0].image.url;
         result.stageImage2 = r_setting.vsStages[1].image.url;
         return result;
@@ -154,21 +159,21 @@ async function getRegularData(data, num) {
 
 /**
  * バンカラ(チャレンジ)用データに整形する
- * @param {*} data スケジュールデータ
+ * @param {*} data フェッチしたデータ
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
 async function getAnarchyChallengeData(data, num) {
     try {
-        const anarchy_list = getAnarchyList(data);
+        const anarchy_list = getAnarchyList(data.schedule);
         const a_settings = anarchy_list[num].bankaraMatchSettings; // a_settings[0]: Challenge
 
         let result = {};
-        result.date = unixTime2ymdw(anarchy_list[num].startTime);
-        result.time = unixTime2hm(anarchy_list[num].startTime) + ' – ' + unixTime2hm(anarchy_list[num].endTime);
-        result.rule = await rule2txt(a_settings[0].vsRule.id);
-        result.stage1 = await stage2txt(a_settings[0].vsStages[0].id);
-        result.stage2 = await stage2txt(a_settings[0].vsStages[1].id);
+        result.startTime = anarchy_list[num].startTime;
+        result.endTime = anarchy_list[num].endTime;
+        result.rule = await rule2txt(data.locale, a_settings[0].vsRule.id);
+        result.stage1 = await stage2txt(data.locale, a_settings[0].vsStages[0].id);
+        result.stage2 = await stage2txt(data.locale, a_settings[0].vsStages[1].id);
         result.stageImage1 = a_settings[0].vsStages[0].image.url;
         result.stageImage2 = a_settings[0].vsStages[1].image.url;
         return result;
@@ -179,21 +184,21 @@ async function getAnarchyChallengeData(data, num) {
 
 /**
  * バンカラ募集用データに整形する
- * @param {*} data スケジュールデータ
+ * @param {*} data フェッチしたデータ
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
 async function getAnarchyOpenData(data, num) {
     try {
-        const anarchy_list = getAnarchyList(data);
+        const anarchy_list = getAnarchyList(data.schedule);
         const a_settings = anarchy_list[num].bankaraMatchSettings; // a_settings[1]: Open
 
         let result = {};
-        result.date = unixTime2ymdw(anarchy_list[num].startTime);
-        result.time = unixTime2hm(anarchy_list[num].startTime) + ' – ' + unixTime2hm(anarchy_list[num].endTime);
-        result.rule = await rule2txt(a_settings[1].vsRule.id);
-        result.stage1 = await stage2txt(a_settings[1].vsStages[0].id);
-        result.stage2 = await stage2txt(a_settings[1].vsStages[1].id);
+        result.startTime = anarchy_list[num].startTime;
+        result.endTime = anarchy_list[num].endTime;
+        result.rule = await rule2txt(data.locale, a_settings[1].vsRule.id);
+        result.stage1 = await stage2txt(data.locale, a_settings[1].vsStages[0].id);
+        result.stage2 = await stage2txt(data.locale, a_settings[1].vsStages[1].id);
         result.stageImage1 = a_settings[1].vsStages[0].image.url;
         result.stageImage2 = a_settings[1].vsStages[1].image.url;
         return result;
@@ -204,21 +209,21 @@ async function getAnarchyOpenData(data, num) {
 
 /**
  * リグマ募集用データに整形する
- * @param {*} data スケジュールデータ
+ * @param {*} data フェッチしたデータ
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
 async function getLeagueData(data, num) {
     try {
-        const league_list = getLeagueList(data);
+        const league_list = getLeagueList(data.schedule);
         const l_settings = league_list[num].leagueMatchSetting;
 
         let result = {};
-        result.date = unixTime2ymdw(league_list[num].startTime);
-        result.time = unixTime2hm(league_list[num].startTime) + ' – ' + unixTime2hm(league_list[num].endTime);
-        result.rule = await rule2txt(l_settings.vsRule.id);
-        result.stage1 = await stage2txt(l_settings.vsStages[0].id);
-        result.stage2 = await stage2txt(l_settings.vsStages[1].id);
+        result.startTime = league_list[num].startTime;
+        result.endTime = league_list[num].endTime;
+        result.rule = await rule2txt(data.locale, l_settings.vsRule.id);
+        result.stage1 = await stage2txt(data.locale, l_settings.vsStages[0].id);
+        result.stage2 = await stage2txt(data.locale, l_settings.vsStages[1].id);
         result.stageImage1 = l_settings.vsStages[0].image.url;
         result.stageImage2 = l_settings.vsStages[1].image.url;
         return result;
@@ -229,18 +234,19 @@ async function getLeagueData(data, num) {
 
 /**
  * サーモン募集用データに整形する
- * @param {*} data スケジュールデータ
+ * @param {*} data フェッチしたデータ
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
 async function getSalmonData(data, num) {
     try {
-        const salmon_list = getSalmonList(data);
+        const salmon_list = getSalmonList(data.schedule);
         const s_setting = salmon_list[num].setting;
 
         let result = {};
-        result.date = unixTime2mdwhm(salmon_list[num].startTime) + ' – ' + unixTime2mdwhm(salmon_list[num].endTime);
-        result.stage = await stage2txt(s_setting.coopStage.id);
+        result.startTime = salmon_list[num].startTime;
+        result.endTime = salmon_list[num].endTime;
+        result.stage = await stage2txt(data.locale, s_setting.coopStage.id);
         result.weapon1 = s_setting.weapons[0].image.url;
         result.weapon2 = s_setting.weapons[1].image.url;
         result.weapon3 = s_setting.weapons[2].image.url;
@@ -254,21 +260,21 @@ async function getSalmonData(data, num) {
 
 /**
  * Xマッチ用データに整形する
- * @param {*} data スケジュールデータ
+ * @param {*} data フェッチしたデータ
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
 async function getXMatchData(data, num) {
     try {
-        const x_list = getXMatchList(data);
+        const x_list = getXMatchList(data.schedule);
         const x_settings = x_list[num].xMatchSetting;
 
         let result = {};
-        result.date = unixTime2ymdw(x_list[num].startTime);
-        result.time = unixTime2hm(x_list[num].startTime) + ' – ' + unixTime2hm(x_list[num].endTime);
-        result.rule = await rule2txt(x_settings.vsRule.id);
-        result.stage1 = await stage2txt(x_settings.vsStages[0].id);
-        result.stage2 = await stage2txt(x_settings.vsStages[1].id);
+        result.startTime = x_list[num].startTime;
+        result.endTime = x_list[num].endTime;
+        result.rule = await rule2txt(data.locale, x_settings.vsRule.id);
+        result.stage1 = await stage2txt(data.locale, x_settings.vsStages[0].id);
+        result.stage2 = await stage2txt(data.locale, x_settings.vsStages[1].id);
         result.stageImage1 = x_settings.vsStages[0].image.url;
         result.stageImage2 = x_settings.vsStages[1].image.url;
         return result;
@@ -279,21 +285,21 @@ async function getXMatchData(data, num) {
 
 /**
  * フェス募集用データに整形する
- * @param {*} data スケジュールデータ
+ * @param {*} data フェッチしたデータ
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
 async function getFesData(data, num) {
     try {
-        const fes_list = getFesList(data);
+        const fes_list = getFesList(data.schedule);
         const f_setting = fes_list[num].festMatchSetting;
 
         let result = {};
-        result.date = unixTime2ymdw(fes_list[num].startTime);
-        result.time = unixTime2hm(fes_list[num].startTime) + ' – ' + unixTime2hm(fes_list[num].endTime);
-        result.rule = await rule2txt(f_setting.vsRule.id);
-        result.stage1 = await stage2txt(f_setting.vsStages[0].id);
-        result.stage2 = await stage2txt(f_setting.vsStages[1].id);
+        result.startTime = fes_list[num].startTime;
+        result.endTime = fes_list[num].endTime;
+        result.rule = await rule2txt(data.locale, f_setting.vsRule.id);
+        result.stage1 = await stage2txt(data.locale, f_setting.vsStages[0].id);
+        result.stage2 = await stage2txt(data.locale, f_setting.vsStages[1].id);
         result.stageImage1 = f_setting.vsStages[0].image.url;
         result.stageImage2 = f_setting.vsStages[1].image.url;
         return result;
@@ -302,23 +308,39 @@ async function getFesData(data, num) {
     }
 }
 
-async function stage2txt(id) {
+/**
+ * localeをもとにIDをステージ名に変換
+ * @param {*} locale ロケールデータ
+ * @param {*} id 変換するID
+ * @returns ステージ名
+ */
+async function stage2txt(locale, id) {
     try {
-        const response = await fetch(locale_url);
-        const data = await response.json();
-        const stages = data.stages;
-        return stages[id].name;
+        const stages = locale.stages;
+        if (isEmpty(stages[id])) {
+            return 'そーりー・あんでふぁいんど';
+        } else {
+            return stages[id].name;
+        }
     } catch (error) {
         logger.error(error);
     }
 }
 
-async function rule2txt(id) {
+/**
+ * localeをもとにIDをルール名に変換
+ * @param {*} locale ロケールデータ
+ * @param {*} id 変換するID
+ * @returns ルール名
+ */
+async function rule2txt(locale, id) {
     try {
-        const response = await fetch(locale_url);
-        const data = await response.json();
-        const rules = data.rules;
-        return rules[id].name;
+        const rules = locale.rules;
+        if (isEmpty(rules[id])) {
+            return 'そーりー・あんでふぁいんど';
+        } else {
+            return rules[id].name;
+        }
     } catch (error) {
         logger.error(error);
     }

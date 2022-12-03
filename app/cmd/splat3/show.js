@@ -1,6 +1,9 @@
 const Canvas = require('canvas');
 const { createRoundRect, fillTextWithStroke } = require('../../common/canvas_components');
 const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const { formatDatetime, dateformat } = require('../../common/convert_datetime.js');
+const { getUnixTime } = require('date-fns');
+
 const log4js = require('log4js');
 const {
     fetchSchedule,
@@ -26,19 +29,19 @@ module.exports = async function handleShow(interaction) {
         const subCommand = options.getSubcommand();
         const data = await fetchSchedule();
         if (subCommand === `now`) {
-            if (checkFes(data, 0)) {
+            if (checkFes(data.schedule, 0)) {
                 await sendFesInfo(interaction, data, 0);
             } else {
                 await sendStageInfo(interaction, data, 0);
             }
         } else if (subCommand === 'next') {
-            if (checkFes(data, 1)) {
+            if (checkFes(data.schedule, 1)) {
                 await sendFesInfo(interaction, data, 1);
             } else {
                 await sendStageInfo(interaction, data, 1);
             }
         } else if (subCommand === 'nawabari') {
-            if (checkFes(data, 1)) {
+            if (checkFes(data.schedule, 1)) {
                 await sendFesInfo(interaction, data, 0);
             } else {
                 await sendRegularInfo(interaction, data, 0);
@@ -70,6 +73,8 @@ async function sendStageInfo(interaction, data, scheduleNum) {
     const o_thumbnail = rule2image(open_data.rule);
     const x_thumbnail = rule2image(X_data.rule);
 
+    const league_start_date = formatDatetime(league_data.startTime, dateformat.ymdwhm);
+    const league_end_date = formatDatetime(league_data.endTime, dateformat.hm);
     const leagueEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のリーグマッチ',
@@ -77,11 +82,13 @@ async function sendStageInfo(interaction, data, scheduleNum) {
         })
         .setColor('#ED2D7C')
         .addFields({
-            name: league_data.date + ' ' + league_data.time,
+            name: league_start_date + '-' + league_end_date,
             value: league_data.stage1 + '／' + league_data.stage2,
         })
         .setThumbnail(l_thumbnail);
 
+    const challenge_start_date = formatDatetime(challenge_data.startTime, dateformat.ymdwhm);
+    const challenge_end_date = formatDatetime(challenge_data.endTime, dateformat.hm);
     const challengeEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のバンカラマッチ (チャレンジ)',
@@ -89,11 +96,13 @@ async function sendStageInfo(interaction, data, scheduleNum) {
         })
         .setColor('#F54910')
         .addFields({
-            name: challenge_data.date + ' ' + challenge_data.time,
+            name: challenge_start_date + '-' + challenge_end_date,
             value: challenge_data.stage1 + '／' + challenge_data.stage2,
         })
         .setThumbnail(c_thumbnail);
 
+    const open_start_date = formatDatetime(open_data.startTime, dateformat.ymdwhm);
+    const open_end_date = formatDatetime(open_data.endTime, dateformat.hm);
     const openEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のバンカラマッチ (オープン)',
@@ -101,11 +110,13 @@ async function sendStageInfo(interaction, data, scheduleNum) {
         })
         .setColor('#F54910')
         .addFields({
-            name: open_data.date + ' ' + open_data.time,
+            name: open_start_date + '-' + open_end_date,
             value: open_data.stage1 + '／' + open_data.stage2,
         })
         .setThumbnail(o_thumbnail);
 
+    const x_start_date = formatDatetime(X_data.startTime, dateformat.ymdwhm);
+    const x_end_date = formatDatetime(X_data.endTime, dateformat.hm);
     const xMatchEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のXマッチ',
@@ -114,7 +125,7 @@ async function sendStageInfo(interaction, data, scheduleNum) {
         })
         .setColor('#0edb9b')
         .addFields({
-            name: X_data.date + ' ' + X_data.time,
+            name: x_start_date + '-' + x_end_date,
             value: X_data.stage1 + '／' + X_data.stage2,
         })
         .setThumbnail(x_thumbnail);
@@ -130,6 +141,8 @@ async function sendStageInfo(interaction, data, scheduleNum) {
 
 async function sendRegularInfo(interaction, data, scheduleNum) {
     const regular_data = await getRegularData(data, scheduleNum);
+    const start_date = formatDatetime(regular_data.startTime, dateformat.ymdwhm);
+    const end_date = formatDatetime(regular_data.endTime, dateformat.hm);
 
     if (scheduleNum == 0) {
         title = '現在';
@@ -144,7 +157,7 @@ async function sendRegularInfo(interaction, data, scheduleNum) {
         })
         .setColor('#B3FF00')
         .addFields({
-            name: regular_data.date + ' ' + regular_data.time,
+            name: start_date + '-' + end_date,
             value: regular_data.stage1 + '／' + regular_data.stage2,
         })
         .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png');
@@ -156,6 +169,8 @@ async function sendRegularInfo(interaction, data, scheduleNum) {
 
 async function sendFesInfo(interaction, data, scheduleNum) {
     const fes_data = await getFesData(data, scheduleNum);
+    const start_date = formatDatetime(fes_data.startTime, dateformat.ymdwhm);
+    const end_date = formatDatetime(fes_data.endTime, dateformat.hm);
 
     if (scheduleNum == 0) {
         title = '現在';
@@ -170,7 +185,7 @@ async function sendFesInfo(interaction, data, scheduleNum) {
         })
         .setColor('#ead147')
         .addFields({
-            name: fes_data.date + ' ' + fes_data.time,
+            name: start_date + '-' + end_date,
             value: fes_data.stage1 + '／' + fes_data.stage2,
         })
         .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png');
@@ -189,6 +204,8 @@ async function sendRunInfo(interaction, data) {
                 title = '次';
             }
             const salmon_data = await getSalmonData(data, i);
+            const start_date = formatDatetime(salmon_data.startTime, dateformat.ymdwhm);
+            const end_date = formatDatetime(salmon_data.endTime, dateformat.ymdwhm);
 
             let weaponsImage = new AttachmentBuilder(
                 await salmonWeaponCanvas(salmon_data.weapon1, salmon_data.weapon2, salmon_data.weapon3, salmon_data.weapon4),
@@ -200,15 +217,21 @@ async function sendRunInfo(interaction, data) {
 
             const salmonEmbed = new EmbedBuilder()
                 .setAuthor({
-                    name: 'SALMON RUN',
+                    name: title + 'のSALMON RUN',
                     iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
                 })
-                .setTitle(salmon_data.date)
+                .setTitle(salmon_data.stage)
                 .setColor('#FC892C')
-                .addFields({
-                    name: 'ステージ',
-                    value: salmon_data.stage,
-                })
+                .addFields(
+                    {
+                        name: '開始日時',
+                        value: start_date + '【' + `<t:${getUnixTime(new Date(salmon_data.startTime))}:R>` + '】',
+                    },
+                    {
+                        name: '終了日時',
+                        value: end_date + '【' + `<t:${getUnixTime(new Date(salmon_data.endTime))}:R>` + '】',
+                    },
+                )
                 .setImage('attachment://weapons.png')
                 .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
 
@@ -275,5 +298,7 @@ function rule2image(rule) {
             return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
         case 'ガチアサリ':
             return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
+        default:
+            return 'http://placehold.jp/15/4c4d57/ffffff/100x100.png?text=ここに画像を貼りたかったんだが、どうやらエラーみたいだ…。';
     }
 }
