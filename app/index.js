@@ -21,14 +21,10 @@ const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const handleStageInfo = require('./cmd/splat3/stageinfo.js');
 const { isNotEmpty, getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
 const { otherGameRecruit } = require('./cmd/other/recruit/other_game_recruit.js');
-const { regular2Recruit } = require('./cmd/splat2/recruit/regular_recruit.js');
 const { regularRecruit } = require('./cmd/splat3/recruit/regular_recruit.js');
 const { fesRecruit } = require('./cmd/splat3/recruit/fes_recruit');
-const { leagueRecruit } = require('./cmd/splat2/recruit/league_recruit.js');
 const { anarchyRecruit } = require('./cmd/splat3/recruit/anarchy_recruit.js');
-const { salmon2Recruit } = require('./cmd/splat2/recruit/salmon_recruit.js');
 const { salmonRecruit } = require('./cmd/splat3/recruit/salmon_recruit.js');
-const { private2Recruit } = require('./cmd/splat2/recruit/private_recruit.js');
 const { privateRecruit } = require('./cmd/splat3/recruit/private_recruit.js');
 const { ButtonEnable } = require('./cmd/admin-cmd/enableButton');
 const { voiceMention } = require('./cmd/other/voice_mention.js');
@@ -242,23 +238,15 @@ async function onInteraction(interaction) {
             } else if (commandName === commandNames.team_divider) {
                 await divider.dividerInitialMessage(interaction);
             } else if (commandName === commandNames.regular) {
-                if (interaction.channel.parentId == process.env.CATEGORY_SPLAT2_ID) {
-                    await regular2Recruit(interaction);
-                } else {
-                    await regularRecruit(interaction);
-                }
+                await regularRecruit(interaction);
             } else if (commandName === commandNames.other_game) {
                 await otherGameRecruit(interaction);
             } else if (commandName === commandNames.anarchy) {
                 await anarchyRecruit(interaction);
             } else if (commandName === commandNames.private) {
-                if (interaction.channel.parentId == process.env.CATEGORY_SPLAT2_ID) {
-                    await private2Recruit(interaction);
-                } else {
-                    await privateRecruit(interaction);
-                }
+                await privateRecruit(interaction);
             } else if (commandName === commandNames.league) {
-                await leagueRecruit(interaction);
+                // await leagueRecruit(interaction);
             } else if (commandName === commandNames.fesA) {
                 await fesRecruit(interaction);
             } else if (commandName === commandNames.fesB) {
@@ -266,11 +254,7 @@ async function onInteraction(interaction) {
             } else if (commandName === commandNames.fesC) {
                 await fesRecruit(interaction);
             } else if (commandName === commandNames.salmon) {
-                if (interaction.channel.parentId == process.env.CATEGORY_SPLAT2_ID) {
-                    await salmon2Recruit(interaction);
-                } else {
-                    await salmonRecruit(interaction);
-                }
+                await salmonRecruit(interaction);
             } else if (commandName === commandNames.friend_code) {
                 await handleFriendCode(interaction);
             } else if (commandName === commandNames.experience) {
