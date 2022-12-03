@@ -3,7 +3,7 @@ const path = require('path');
 const fetch = require('node-fetch');
 const RecruitService = require('../../../../db/recruit_service');
 const { getMemberMentions } = require('../../../event/recruit_button');
-const { stage2txt, rule2txt, unixTime2hm, unixTime2ymdw } = require('../../../common');
+const { stage2txt, rule2txt, sp2unixTime2hm, sp2unixTime2ymdw } = require('../../../common');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const { recruitActionRow, setButtonDisable, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
@@ -490,8 +490,8 @@ function getLeague(data, x) {
     let rule;
     let rstr;
 
-    date = unixTime2ymdw(data.league[x].start_time);
-    time = unixTime2hm(data.league[x].start_time) + ' – ' + unixTime2hm(data.league[x].end_time);
+    date = sp2unixTime2ymdw(data.league[x].start_time);
+    time = sp2unixTime2hm(data.league[x].start_time) + ' – ' + sp2unixTime2hm(data.league[x].end_time);
     rule = rule2txt(data.league[x].rule.key);
     stage1 = stage2txt(data.league[x].stage_a.id);
     stage2 = stage2txt(data.league[x].stage_b.id);

@@ -1,18 +1,17 @@
 const Canvas = require('canvas');
 const path = require('path');
-const fetch = require('node-fetch');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const { isNotEmpty, sp3unixTime2mdwhm, sp3coop_stage2txt } = require('../../../common');
+const { isNotEmpty } = require('../../../common');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
+const { fetchSchedule, getSalmonData } = require('../../../common/apis/splatoon3_ink');
+const { dateformat, formatDatetime } = require('../../../common/convert_datetime');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
-
-const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -89,8 +88,6 @@ async function salmonRecruit(interaction) {
     await interaction.deferReply();
 
     try {
-        const response = await fetch(coop_schedule_url);
-        const data = await response.json();
         let txt = `<@${host_member.user.id}>` + '**たんのバイト募集**\n';
 
         if (user1 != null && user2 != null) {
@@ -105,34 +102,14 @@ async function salmonRecruit(interaction) {
 
         if (condition == null) condition = 'なし';
 
-        await sendSalmonRun(
-            interaction,
-            channel,
-            txt,
-            recruit_num,
-            condition,
-            member_counter,
-            host_member,
-            user1,
-            user2,
-            data.data.coopGroupingSchedule.regularSchedules.nodes[0],
-        );
+        await sendSalmonRun(interaction, txt, recruit_num, condition, member_counter, host_member, user1, user2);
     } catch (error) {
         channel.send('なんかエラーでてるわ');
         logger.error(error);
     }
 }
 
-async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, count, host_member, user1, user2, detail) {
-    const coopSetting = detail.setting;
-    let date = sp3unixTime2mdwhm(detail.startTime) + ' – ' + sp3unixTime2mdwhm(detail.endTime);
-    let coop_stage = sp3coop_stage2txt(coopSetting.coopStage.name);
-    let weapon1 = coopSetting.weapons[0].image.url;
-    let weapon2 = coopSetting.weapons[1].image.url;
-    let weapon3 = coopSetting.weapons[2].image.url;
-    let weapon4 = coopSetting.weapons[3].image.url;
-    let stageImage = coopSetting.coopStage.thumbnailImage.url;
-
+async function sendSalmonRun(interaction, txt, recruit_num, condition, count, host_member, user1, user2) {
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
     if (reserve_channel == null) {
@@ -153,7 +130,7 @@ async function sendSalmonRun(interaction, channel, txt, recruit_num, condition, 
     const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
     const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new AttachmentBuilder(await ruleCanvas(date, coop_stage, weapon1, weapon2, weapon3, weapon4, stageImage), 'schedule.png');
+    const rule = new AttachmentBuilder(await ruleCanvas(), 'schedule.png');
 
     try {
         const mention = `@everyone`;
@@ -352,7 +329,13 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-async function ruleCanvas(date, stage, weapon1, weapon2, weapon3, weapon4, stageImage) {
+async function ruleCanvas() {
+    const data = await fetchSchedule();
+    const salmon_data = await getSalmonData(data, 0);
+
+    const datetime =
+        formatDatetime(salmon_data.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(salmon_data.endTime, dateformat.mdwhm);
+
     const ruleCanvas = Canvas.createCanvas(720, 550);
     const rule_ctx = ruleCanvas.getContext('2d');
 
@@ -365,29 +348,29 @@ async function ruleCanvas(date, stage, weapon1, weapon2, weapon3, weapon4, stage
 
     fillTextWithStroke(rule_ctx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
-    date_width = rule_ctx.measureText(date).width;
-    fillTextWithStroke(rule_ctx, date, '37px Splatfont', '#FFFFFF', '#2D3130', 1, (650 - date_width) / 2, 145);
+    date_width = rule_ctx.measureText(datetime).width;
+    fillTextWithStroke(rule_ctx, datetime, '37px Splatfont', '#FFFFFF', '#2D3130', 1, (650 - date_width) / 2, 145);
 
     fillTextWithStroke(rule_ctx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 245);
 
-    let weapon1_img = await Canvas.loadImage(weapon1);
+    let weapon1_img = await Canvas.loadImage(salmon_data.weapon1);
     rule_ctx.drawImage(weapon1_img, 50, 280, 110, 110);
 
-    let weapon2_img = await Canvas.loadImage(weapon2);
+    let weapon2_img = await Canvas.loadImage(salmon_data.weapon2);
     rule_ctx.drawImage(weapon2_img, 190, 280, 110, 110);
 
-    let weapon3_img = await Canvas.loadImage(weapon3);
+    let weapon3_img = await Canvas.loadImage(salmon_data.weapon3);
     rule_ctx.drawImage(weapon3_img, 50, 410, 110, 110);
 
-    let weapon4_img = await Canvas.loadImage(weapon4);
+    let weapon4_img = await Canvas.loadImage(salmon_data.weapon4);
     rule_ctx.drawImage(weapon4_img, 190, 410, 110, 110);
 
     fillTextWithStroke(rule_ctx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 350, 245);
 
-    stage_width = rule_ctx.measureText(stage).width;
-    fillTextWithStroke(rule_ctx, stage, '38px Splatfont', '#FFFFFF', '#2D3130', 1, 150 + (700 - stage_width) / 2, 300);
+    stage_width = rule_ctx.measureText(salmon_data.stage).width;
+    fillTextWithStroke(rule_ctx, salmon_data.stage, '38px Splatfont', '#FFFFFF', '#2D3130', 1, 150 + (700 - stage_width) / 2, 300);
 
-    let stage_img = await Canvas.loadImage(stageImage);
+    let stage_img = await Canvas.loadImage(salmon_data.stageImage);
     rule_ctx.save();
     rule_ctx.beginPath();
     createRoundRect(rule_ctx, 370, 340, 308, 176, 10);

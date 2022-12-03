@@ -1,122 +1,24 @@
 const Canvas = require('canvas');
-const fetch = require('node-fetch');
-const common = require('../../common');
 const { createRoundRect, fillTextWithStroke } = require('../../common/canvas_components');
-const { sp3unixTime2mdwhm, sp3coop_stage2txt } = require('../../common');
 const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const { formatDatetime, dateformat } = require('../../common/convert_datetime.js');
+const { getUnixTime } = require('date-fns');
+
 const log4js = require('log4js');
+const {
+    fetchSchedule,
+    checkFes,
+    getFesData,
+    getRegularData,
+    getSalmonData,
+    getLeagueData,
+    getAnarchyChallengeData,
+    getAnarchyOpenData,
+    getXMatchData,
+} = require('../../common/apis/splatoon3_ink');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('interaction');
-
-const schedule_url = 'https://splatoon3.ink/data/schedules.json';
-const coop_schedule_url = 'https://splatoon3.ink/data/schedules.json';
-
-async function sendStageInfo(interaction, data, scheduleNum) {
-    var title;
-    if (scheduleNum == 0) {
-        title = '現在';
-    } else {
-        title = '次';
-    }
-    // フェス期間中はフェスマッチ情報を返す
-    if (common.checkFes(data, scheduleNum)) {
-        const result = common.getRegular(data, scheduleNum);
-
-        const nawabariEmbed = new EmbedBuilder()
-            .setAuthor({
-                name: title + 'の' + result.matchName,
-                iconURL: result.iconURL,
-            })
-            .setColor(result.color)
-            .addFields({
-                name: result.date + ' ' + result.time,
-                value: result.stage1 + '／' + result.stage2,
-            })
-            .setThumbnail(result.iconURL);
-
-        await interaction.editReply({
-            embeds: [nawabariEmbed],
-        });
-    } else {
-        const l_args = common.getLeague(data.data.leagueSchedules.nodes, scheduleNum).split(',');
-        const c_args = common.getChallenge(data.data.bankaraSchedules.nodes, scheduleNum).split(',');
-        const o_args = common.getOpen(data.data.bankaraSchedules.nodes, scheduleNum).split(',');
-        const x_args = common.getXMatch(data.data.xSchedules.nodes, scheduleNum).split(',');
-        const l_date = l_args[0];
-        const l_rule = l_args[1];
-        const l_stage = l_args[2];
-        const l_thumbnail = rule2image(l_rule);
-        const c_date = c_args[0];
-        const c_rule = c_args[1];
-        const c_stage = c_args[2];
-        const c_thumbnail = rule2image(c_rule);
-        const o_date = o_args[0];
-        const o_rule = o_args[1];
-        const o_stage = o_args[2];
-        const o_thumbnail = rule2image(o_rule);
-        const x_date = x_args[0];
-        const x_rule = x_args[1];
-        const x_stage = x_args[2];
-        const x_thumbnail = rule2image(x_rule);
-        const leagueEmbed = new EmbedBuilder()
-            .setAuthor({
-                name: title + 'のリーグマッチ',
-                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
-            })
-            .setColor('#ED2D7C')
-            .addFields({
-                name: l_date + '　' + l_rule,
-                value: l_stage,
-            })
-            .setThumbnail(l_thumbnail);
-
-        const challengeEmbed = new EmbedBuilder()
-            .setAuthor({
-                name: title + 'のバンカラマッチ (チャレンジ)',
-                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
-            })
-            .setColor('#F54910')
-            .addFields({
-                name: c_date + '　' + c_rule,
-                value: c_stage,
-            })
-            .setThumbnail(c_thumbnail);
-
-        const openEmbed = new EmbedBuilder()
-            .setAuthor({
-                name: title + 'のバンカラマッチ (オープン)',
-                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
-            })
-            .setColor('#F54910')
-            .addFields({
-                name: o_date + '　' + o_rule,
-                value: o_stage,
-            })
-            .setThumbnail(o_thumbnail);
-
-        const xMatchEmbed = new EmbedBuilder()
-            .setAuthor({
-                name: title + 'のXマッチ',
-
-                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
-            })
-            .setColor('#0edb9b')
-            .addFields({
-                name: x_date + '　' + x_rule,
-                value: x_stage,
-            })
-            .setThumbnail(x_thumbnail);
-
-        await interaction.editReply({
-            embeds: [xMatchEmbed, challengeEmbed, openEmbed],
-        });
-        // TODO: リーグマッチはゲーム内で実装後に表示
-        // await interaction.editReply({
-        //     embeds: [leagueEmbed, openEmbed, challengeEmbed, xMatchEmbed],
-        // });
-    }
-}
 
 module.exports = async function handleShow(interaction) {
     try {
@@ -125,80 +27,231 @@ module.exports = async function handleShow(interaction) {
         await interaction.deferReply();
         const { options } = interaction;
         const subCommand = options.getSubcommand();
-        const response = await fetch(schedule_url);
-        const data = await response.json();
+        const data = await fetchSchedule();
         if (subCommand === `now`) {
-            await sendStageInfo(interaction, data, 0);
-        } else if (subCommand === 'next') {
-            await sendStageInfo(interaction, data, 1);
-        } else if (subCommand === 'nawabari') {
-            const response = await fetch(schedule_url);
-            const data = await response.json();
-            const result = common.getRegular(data, 0);
-
-            const nawabariEmbed = new EmbedBuilder()
-                .setAuthor({
-                    name: result.matchName,
-                    iconURL: result.iconURL,
-                })
-                .setColor(result.color)
-                .addFields({
-                    name: result.date + ' ' + result.time,
-                    value: result.stage1 + '／' + result.stage2,
-                })
-                .setThumbnail(result.iconURL);
-
-            await interaction.editReply({
-                embeds: [nawabariEmbed],
-            });
-        } else if (subCommand === 'run') {
-            try {
-                const response = await fetch(coop_schedule_url);
-                const data = await response.json();
-                await interaction.editReply({ content: '2つ先まで表示するでし！' });
-                for (let i = 0; i < 2; i++) {
-                    const salmon_data = data.data.coopGroupingSchedule.regularSchedules.nodes[i];
-                    const coopSetting = salmon_data.setting;
-                    let date = sp3unixTime2mdwhm(salmon_data.startTime) + ' – ' + sp3unixTime2mdwhm(salmon_data.endTime);
-                    let coop_stage = sp3coop_stage2txt(coopSetting.coopStage.name);
-                    let weapon1 = coopSetting.weapons[0].image.url;
-                    let weapon2 = coopSetting.weapons[1].image.url;
-                    let weapon3 = coopSetting.weapons[2].image.url;
-                    let weapon4 = coopSetting.weapons[3].image.url;
-                    let weaponsImage = new AttachmentBuilder(await salmonWeaponCanvas(weapon1, weapon2, weapon3, weapon4), {
-                        name: 'weapons.png',
-                        description: '',
-                    });
-                    let stageImage = coopSetting.coopStage.thumbnailImage.url;
-
-                    const salmonEmbed = new EmbedBuilder()
-                        .setAuthor({
-                            name: 'SALMON RUN',
-                            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
-                        })
-                        .setTitle(date)
-                        .setColor('#FC892C')
-                        .addFields({
-                            name: 'ステージ',
-                            value: coop_stage,
-                        })
-                        .setImage('attachment://weapons.png')
-                        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
-                    await interaction.channel.send({
-                        embeds: [salmonEmbed],
-                        files: [weaponsImage],
-                    });
-                }
-            } catch (error) {
-                await interaction.followUp('なんかエラーでてるわ');
-                logger.error(error);
+            if (checkFes(data.schedule, 0)) {
+                await sendFesInfo(interaction, data, 0);
+            } else {
+                await sendStageInfo(interaction, data, 0);
             }
+        } else if (subCommand === 'next') {
+            if (checkFes(data.schedule, 1)) {
+                await sendFesInfo(interaction, data, 1);
+            } else {
+                await sendStageInfo(interaction, data, 1);
+            }
+        } else if (subCommand === 'nawabari') {
+            if (checkFes(data.schedule, 1)) {
+                await sendFesInfo(interaction, data, 0);
+            } else {
+                await sendRegularInfo(interaction, data, 0);
+            }
+        } else if (subCommand === 'run') {
+            await sendRunInfo(interaction, data);
         }
     } catch (error) {
         await interaction.followUp('なんかエラーでてるわ');
         logger.error(error);
     }
 };
+
+async function sendStageInfo(interaction, data, scheduleNum) {
+    var title;
+    if (scheduleNum == 0) {
+        title = '現在';
+    } else {
+        title = '次';
+    }
+
+    const league_data = await getLeagueData(data, scheduleNum);
+    const challenge_data = await getAnarchyChallengeData(data, scheduleNum);
+    const open_data = await getAnarchyOpenData(data, scheduleNum);
+    const X_data = await getXMatchData(data, scheduleNum);
+
+    const l_thumbnail = rule2image(league_data.rule);
+    const c_thumbnail = rule2image(challenge_data.rule);
+    const o_thumbnail = rule2image(open_data.rule);
+    const x_thumbnail = rule2image(X_data.rule);
+
+    const league_start_date = formatDatetime(league_data.startTime, dateformat.ymdwhm);
+    const league_end_date = formatDatetime(league_data.endTime, dateformat.hm);
+    const leagueEmbed = new EmbedBuilder()
+        .setAuthor({
+            name: title + 'のリーグマッチ',
+            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
+        })
+        .setColor('#ED2D7C')
+        .addFields({
+            name: league_start_date + '-' + league_end_date,
+            value: league_data.stage1 + '／' + league_data.stage2,
+        })
+        .setThumbnail(l_thumbnail);
+
+    const challenge_start_date = formatDatetime(challenge_data.startTime, dateformat.ymdwhm);
+    const challenge_end_date = formatDatetime(challenge_data.endTime, dateformat.hm);
+    const challengeEmbed = new EmbedBuilder()
+        .setAuthor({
+            name: title + 'のバンカラマッチ (チャレンジ)',
+            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+        })
+        .setColor('#F54910')
+        .addFields({
+            name: challenge_start_date + '-' + challenge_end_date,
+            value: challenge_data.stage1 + '／' + challenge_data.stage2,
+        })
+        .setThumbnail(c_thumbnail);
+
+    const open_start_date = formatDatetime(open_data.startTime, dateformat.ymdwhm);
+    const open_end_date = formatDatetime(open_data.endTime, dateformat.hm);
+    const openEmbed = new EmbedBuilder()
+        .setAuthor({
+            name: title + 'のバンカラマッチ (オープン)',
+            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+        })
+        .setColor('#F54910')
+        .addFields({
+            name: open_start_date + '-' + open_end_date,
+            value: open_data.stage1 + '／' + open_data.stage2,
+        })
+        .setThumbnail(o_thumbnail);
+
+    const x_start_date = formatDatetime(X_data.startTime, dateformat.ymdwhm);
+    const x_end_date = formatDatetime(X_data.endTime, dateformat.hm);
+    const xMatchEmbed = new EmbedBuilder()
+        .setAuthor({
+            name: title + 'のXマッチ',
+
+            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
+        })
+        .setColor('#0edb9b')
+        .addFields({
+            name: x_start_date + '-' + x_end_date,
+            value: X_data.stage1 + '／' + X_data.stage2,
+        })
+        .setThumbnail(x_thumbnail);
+
+    await interaction.editReply({
+        embeds: [xMatchEmbed, challengeEmbed, openEmbed],
+    });
+    // TODO: リーグマッチはゲーム内で実装後に表示
+    // await interaction.editReply({
+    //     embeds: [leagueEmbed, openEmbed, challengeEmbed, xMatchEmbed],
+    // });
+}
+
+async function sendRegularInfo(interaction, data, scheduleNum) {
+    const regular_data = await getRegularData(data, scheduleNum);
+    const start_date = formatDatetime(regular_data.startTime, dateformat.ymdwhm);
+    const end_date = formatDatetime(regular_data.endTime, dateformat.hm);
+
+    if (scheduleNum == 0) {
+        title = '現在';
+    } else {
+        title = '次';
+    }
+
+    const regularEmbed = new EmbedBuilder()
+        .setAuthor({
+            name: title + 'のレギュラーマッチ',
+            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png',
+        })
+        .setColor('#B3FF00')
+        .addFields({
+            name: start_date + '-' + end_date,
+            value: regular_data.stage1 + '／' + regular_data.stage2,
+        })
+        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png');
+
+    await interaction.editReply({
+        embeds: [regularEmbed],
+    });
+}
+
+async function sendFesInfo(interaction, data, scheduleNum) {
+    const fes_data = await getFesData(data, scheduleNum);
+    const start_date = formatDatetime(fes_data.startTime, dateformat.ymdwhm);
+    const end_date = formatDatetime(fes_data.endTime, dateformat.hm);
+
+    if (scheduleNum == 0) {
+        title = '現在';
+    } else {
+        title = '次';
+    }
+
+    const fesEmbed = new EmbedBuilder()
+        .setAuthor({
+            name: title + 'のフェスマッチ',
+            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png',
+        })
+        .setColor('#ead147')
+        .addFields({
+            name: start_date + '-' + end_date,
+            value: fes_data.stage1 + '／' + fes_data.stage2,
+        })
+        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png');
+
+    await interaction.editReply({
+        embeds: [fesEmbed],
+    });
+}
+
+async function sendRunInfo(interaction, data) {
+    try {
+        for (let i = 0; i < 2; i++) {
+            if (i == 0) {
+                title = '現在';
+            } else if (i == 1) {
+                title = '次';
+            }
+            const salmon_data = await getSalmonData(data, i);
+            const start_date = formatDatetime(salmon_data.startTime, dateformat.ymdwhm);
+            const end_date = formatDatetime(salmon_data.endTime, dateformat.ymdwhm);
+
+            let weaponsImage = new AttachmentBuilder(
+                await salmonWeaponCanvas(salmon_data.weapon1, salmon_data.weapon2, salmon_data.weapon3, salmon_data.weapon4),
+                {
+                    name: 'weapons.png',
+                    description: '',
+                },
+            );
+
+            const salmonEmbed = new EmbedBuilder()
+                .setAuthor({
+                    name: title + 'のSALMON RUN',
+                    iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
+                })
+                .setTitle(salmon_data.stage)
+                .setColor('#FC892C')
+                .addFields(
+                    {
+                        name: '開始日時',
+                        value: start_date + '【' + `<t:${getUnixTime(new Date(salmon_data.startTime))}:R>` + '】',
+                    },
+                    {
+                        name: '終了日時',
+                        value: end_date + '【' + `<t:${getUnixTime(new Date(salmon_data.endTime))}:R>` + '】',
+                    },
+                )
+                .setImage('attachment://weapons.png')
+                .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
+
+            if (i == 0) {
+                await interaction.editReply({
+                    embeds: [salmonEmbed],
+                    files: [weaponsImage],
+                });
+            } else {
+                await interaction.channel.send({
+                    embeds: [salmonEmbed],
+                    files: [weaponsImage],
+                });
+            }
+        }
+    } catch (error) {
+        await interaction.followUp('なんかエラーでてるわ');
+        logger.error(error);
+    }
+}
 
 /*
  * ルール情報のキャンバス(2枚目)を作成する
@@ -245,5 +298,7 @@ function rule2image(rule) {
             return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
         case 'ガチアサリ':
             return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
+        default:
+            return 'http://placehold.jp/15/4c4d57/ffffff/100x100.png?text=ここに画像を貼りたかったんだが、どうやらエラーみたいだ…。';
     }
 }
