@@ -1,11 +1,8 @@
 const fetch = require('node-fetch');
 const log4js = require('log4js');
 const { isEmpty } = require('../../common');
-const { unixTime2hm, unixTime2mdwhm, unixTime2ymdw } = require('../convert_datetime');
-
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const locale_url = 'https://splatoon3.ink/data/locale/ja-JP.json';
-const { formatDatetime, dateformat } = require('../../common/convert_datetime.js');
 
 module.exports = {
     fetchSchedule: fetchSchedule,
