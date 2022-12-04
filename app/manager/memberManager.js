@@ -1,13 +1,13 @@
+module.exports = {
+    searchMemberById: searchMemberById,
+    getMemberColor: getMemberColor,
+};
+
 const { isNotEmpty, isEmpty } = require('../common');
 const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('MemberManager');
-
-module.exports = {
-    searchMemberById: searchMemberById,
-    getMemberColor: getMemberColor,
-};
 
 /**
  * ユーザーIDからメンバーを検索する．ない場合はnullを返す．
@@ -16,11 +16,15 @@ module.exports = {
  * @returns メンバーオブジェクト
  */
 async function searchMemberById(guild, userId) {
-    // APIからのメンバーオブジェクト(discord.jsのGuildMemberでないもの)がそのまま渡ってくることがあるのでfetchすることで確実にGuildMemberとする。
-    const members = await guild.members.fetch();
-    let member = members.find((member) => member.id === userId);
+    try {
+        // APIからのメンバーオブジェクト(discord.jsのGuildMemberでないもの)がそのまま渡ってくることがあるのでfetchすることで確実にGuildMemberとする。
+        const members = await guild.members.fetch();
+        let member = members.find((member) => member.id === userId);
 
-    return member;
+        return member;
+    } catch (error) {
+        logger.error(error);
+    }
 }
 
 /**
