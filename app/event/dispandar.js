@@ -1,4 +1,4 @@
-const common = require('../common');
+const { isNotEmpty, composeEmbed } = require('../common');
 const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -16,12 +16,13 @@ async function dispand(message) {
         var messages = await extractMessages(message);
         var url;
 
-        if (common.isNotEmpty(messages)) {
+        if (isNotEmpty(messages)) {
             for (var m in messages) {
                 if (message.content) {
                     url = message.content.match(regexDiscordMessageUrl);
+                    embed = await composeEmbed(messages[m], url[0]);
                     await message.channel.send({
-                        embeds: [await common.composeEmbed(messages[m], url[0])],
+                        embeds: [embed],
                     });
                 }
                 for (var embed in messages[m].embeds) {
@@ -49,7 +50,7 @@ async function extractMessages(message) {
         return;
     }
     const fetchedMessage = await searchMessageById(guild, matches.groups.channel, matches.groups.message);
-    if (common.isNotEmpty(fetchedMessage)) {
+    if (isNotEmpty(fetchedMessage)) {
         messages.push(fetchedMessage);
     } else {
         message.reply('メッセージが見つからなかったでし！');
