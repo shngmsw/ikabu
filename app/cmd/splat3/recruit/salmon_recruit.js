@@ -7,8 +7,10 @@ const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../
 const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
-const { fetchSchedule, getSalmonData } = require('../../../common/apis/splatoon3_ink');
+const { fetchSchedule, getSalmonData, checkBigRun } = require('../../../common/apis/splatoon3_ink');
 const { dateformat, formatDatetime } = require('../../../common/convert_datetime');
+const big_run_recruit = require('./big_run_recruit');
+const { recruitBigRunCanvas, ruleBigRunCanvas } = require('./big_run_recruit');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
@@ -127,10 +129,25 @@ async function sendSalmonRun(interaction, txt, recruit_num, condition, count, ho
         user2 = await searchMemberById(guild, user2.id);
     }
 
-    const recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
+    const data = await fetchSchedule();
+
+    let recruitBuffer;
+    if (checkBigRun(data.schedule, 0)) {
+        recruitBuffer = await recruitBigRunCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
+    } else {
+        recruitBuffer = await recruitCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
+    }
+
+    let ruleBuffer;
+    if (checkBigRun(data.schedule, 0)) {
+        ruleBuffer = await ruleBigRunCanvas(data);
+    } else {
+        ruleBuffer = await ruleCanvas(data);
+    }
+
     const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
 
-    const rule = new AttachmentBuilder(await ruleCanvas(), 'schedule.png');
+    const rule = new AttachmentBuilder(ruleBuffer, 'schedule.png');
 
     try {
         const mention = `@everyone`;
@@ -329,8 +346,7 @@ async function recruitCanvas(recruit_num, count, host_member, user1, user2, cond
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-async function ruleCanvas() {
-    const data = await fetchSchedule();
+async function ruleCanvas(data) {
     const salmon_data = await getSalmonData(data, 0);
 
     const datetime =
