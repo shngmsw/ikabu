@@ -7,12 +7,14 @@ const locale_url = 'https://splatoon3.ink/data/locale/ja-JP.json';
 module.exports = {
     fetchSchedule: fetchSchedule,
     checkFes: checkFes,
+    checkBigRun: checkBigRun,
     getRegularList: getRegularList,
     getAnarchyList: getAnarchyList,
     getLeagueList: getLeagueList,
     getSalmonList: getSalmonList,
     getXMatchList: getXMatchList,
     getFesList: getFesList,
+    getBigRunList: getBigRunList,
     getRegularData: getRegularData,
     getAnarchyChallengeData: getAnarchyChallengeData,
     getAnarchyOpenData: getAnarchyOpenData,
@@ -20,6 +22,7 @@ module.exports = {
     getSalmonData: getSalmonData,
     getXMatchData: getXMatchData,
     getFesData: getFesData,
+    getBigRunData: getBigRunData,
 };
 
 const logger = log4js.getLogger('api');
@@ -45,9 +48,39 @@ async function fetchSchedule() {
  */
 function checkFes(schedule, num) {
     try {
-        const fest_list = schedule.data.festSchedules.nodes;
+        const fest_list = getFesList(schedule);
         const f_setting = fest_list[num].festMatchSetting;
-        if (f_setting == null) {
+        if (isEmpty(f_setting)) {
+            return false;
+        } else {
+            return true;
+        }
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
+ * ビッグラン中かチェックする
+ * @param {*} schedule スケジュールデータ
+ * @param {Number} num スケジュール番号
+ * @returns ビッグラン中ならtrueを返す
+ */
+function checkBigRun(schedule, num) {
+    try {
+        const big_run_list = getBigRunList(schedule);
+        const b_setting = big_run_list[num].setting;
+
+        if (isEmpty(b_setting)) {
+            return false;
+        }
+
+        start_datetime = new Date(big_run_list[num].startTime);
+        end_datetime = new Date(big_run_list[num].endTime);
+        now_datetime = new Date();
+        if (now_datetime - start_datetime < 0) {
+            return false;
+        } else if (end_datetime - now_datetime < 0) {
             return false;
         } else {
             return true;
@@ -124,6 +157,18 @@ function getXMatchList(schedule) {
 function getFesList(schedule) {
     try {
         return schedule.data.festSchedules.nodes;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
+ * dataからビッグラン用のリストだけ返す
+ * @param {*} schedule スケジュールデータ
+ */
+function getBigRunList(schedule) {
+    try {
+        return schedule.data.coopGroupingSchedule.bigRunSchedules.nodes;
     } catch (error) {
         logger.error(error);
     }
@@ -299,6 +344,32 @@ async function getFesData(data, num) {
         result.stage2 = await stage2txt(data.locale, f_setting.vsStages[1].id);
         result.stageImage1 = f_setting.vsStages[0].image.url;
         result.stageImage2 = f_setting.vsStages[1].image.url;
+        return result;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
+ * ビッグラン募集用データに整形する
+ * @param {*} data フェッチしたデータ
+ * @param {Number} num スケジュール番号
+ * @returns 連想配列で返す
+ */
+async function getBigRunData(data, num) {
+    try {
+        const big_run_list = getBigRunList(data.schedule);
+        const b_setting = big_run_list[num].setting;
+
+        let result = {};
+        result.startTime = big_run_list[num].startTime;
+        result.endTime = big_run_list[num].endTime;
+        result.stage = await stage2txt(data.locale, b_setting.coopStage.id);
+        result.weapon1 = b_setting.weapons[0].image.url;
+        result.weapon2 = b_setting.weapons[1].image.url;
+        result.weapon3 = b_setting.weapons[2].image.url;
+        result.weapon4 = b_setting.weapons[3].image.url;
+        result.stageImage = b_setting.coopStage.thumbnailImage.url;
         return result;
     } catch (error) {
         logger.error(error);
