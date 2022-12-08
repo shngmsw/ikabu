@@ -4,6 +4,7 @@ module.exports = {
 
 const { EmbedBuilder } = require('discord.js');
 const { searchMemberById } = require('../manager/memberManager');
+const { sendEmbedsWebhook } = require('../common/webhook');
 
 async function sendCommandLog(interaction) {
     const guild = interaction.guild;
