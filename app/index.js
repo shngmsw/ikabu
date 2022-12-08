@@ -43,6 +43,7 @@ const DBCommon = require('../db/db.js');
 const RecruitService = require('../db/recruit_service.js');
 const TeamDividerService = require('../db/team_divider_service.js');
 const log4js = require('log4js');
+const { sendCommandLog } = require('./event/command_log.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -224,6 +225,8 @@ async function onInteraction(interaction) {
         }
         if (interaction.isCommand()) {
             const { commandName } = interaction;
+
+            sendCommandLog(interaction); // ログ処理待たせたくないのでawaitなし
 
             if (commandName === commandNames.voice_channel && !(interaction.replied || interaction.deferred)) {
                 await voiceLocker(interaction);

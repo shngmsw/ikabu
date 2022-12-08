@@ -6,7 +6,7 @@ const { searchMessageById, getFullMessageObject } = require('../manager/messageM
 const { searchChannelById } = require('../manager/channelManager.js');
 const { recoveryThinkingButton, disableThinkingButton, setButtonDisable } = require('../common/button_components');
 const log4js = require('log4js');
-const axios = require('axios');
+const { sendContentWebhook } = require('../common/webhook');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruitButton');
@@ -22,16 +22,8 @@ module.exports = {
     cancelNotify: cancelNotify,
     closeNotify: closeNotify,
     unlock: unlock,
-    sendLogWebhook: sendLogWebhook,
     getMemberMentions: getMemberMentions,
 };
-
-async function sendLogWebhook(log_content) {
-    await axios.post(
-        process.env.DISCORD_WEBHOOK_URL,
-        { content: log_content }, // このオブジェクトがJSONとして送信される
-    );
-}
 
 /**
  *
@@ -80,7 +72,10 @@ async function join(interaction, params) {
             channelId = null;
         }
 
-        await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんが参加ボタンを押したでし`);
+        await sendContentWebhook(
+            process.env.BUTTON_LOG_WEBHOOK_URL,
+            `${host.tag}[${host.id}]の募集で${member.displayName}たんが参加ボタンを押したでし`,
+        );
 
         if (member.user.id === host_id) {
             await interaction.followUp({
@@ -186,7 +181,10 @@ async function cancel(interaction, params) {
             channelId = null;
         }
 
-        await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんがキャンセルボタンを押したでし`);
+        await sendContentWebhook(
+            process.env.BUTTON_LOG_WEBHOOK_URL,
+            `${host.tag}[${host.id}]の募集で${member.displayName}たんがキャンセルボタンを押したでし`,
+        );
 
         if (member.user.id == host_id) {
             // ピン留め解除
@@ -252,7 +250,10 @@ async function del(interaction, params) {
         const host_id = host.id;
         let channelId = params.get('vid');
 
-        await sendLogWebhook(`${host.tag}[${host_id}]の募集で${member.displayName}たんが募集削除ボタンを押したでし`);
+        await sendContentWebhook(
+            process.env.BUTTON_LOG_WEBHOOK_URL,
+            `${host.tag}[${host_id}]の募集で${member.displayName}たんが募集削除ボタンを押したでし`,
+        );
 
         if (isEmpty(channelId)) {
             channelId = null;
@@ -310,7 +311,10 @@ async function close(interaction, params) {
             channelId = null;
         }
 
-        await sendLogWebhook(`${host.tag}[${host.id}]の募集で${member.displayName}たんが〆ボタンを押したでし`);
+        await sendContentWebhook(
+            process.env.BUTTON_LOG_WEBHOOK_URL,
+            `${host.tag}[${host.id}]の募集で${member.displayName}たんが〆ボタンを押したでし`,
+        );
 
         if (member.user.id === host_id) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
