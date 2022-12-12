@@ -69,6 +69,11 @@ function checkFes(schedule, num) {
 function checkBigRun(schedule, num) {
     try {
         const big_run_list = getBigRunList(schedule);
+
+        if (big_run_list.length == 0) {
+            return false;
+        }
+
         const b_setting = big_run_list[num].setting;
 
         if (isEmpty(b_setting)) {
