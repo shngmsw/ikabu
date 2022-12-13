@@ -55,13 +55,18 @@ async function searchRoleIdByName(guild, roleName) {
  * @returns ロールオブジェクト
  */
 async function searchRoleById(guild, roleId) {
-    const roles = await guild.roles.fetch();
-    var role = roles.find((role) => role.id === roleId);
+    try {
+        let role;
+        try {
+            // fetch(mid)とすれば、cache見てなければフェッチしてくる
+            role = await guild.roles.fetch(roleId);
+        } catch (error) {
+            logger.warn('role missing');
+        }
 
-    if (role != null) {
         return role;
-    } else {
-        return null;
+    } catch (error) {
+        logger.error(error);
     }
 }
 
