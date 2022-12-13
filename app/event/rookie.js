@@ -1,13 +1,12 @@
 const Discord = require('discord.js');
 const MembersService = require('../../db/members_service.js');
 const { searchMemberById } = require('../manager/memberManager');
-const { searchRoleIdByName } = require('../manager/roleManager.js');
 module.exports = async function removeRookie(msg) {
     const dt = new Date();
     const guild = msg.guild;
     const lastMonth = dt.setMonth(dt.getMonth() - 1);
     const member = await searchMemberById(guild, msg.author.id);
-    const beginnerRoleId = await searchRoleIdByName(guild, '🔰新入部員');
+    const beginnerRoleId = process.env.ROOKIE_ROLE_ID;
     const messageCount = await getMessageCount(msg.member.id);
     if (msg.member.joinedTimestamp < lastMonth || messageCount > 99) {
         const hasBeginnerRole = member.roles.cache.find((role) => role.id === beginnerRoleId);
