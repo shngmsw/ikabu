@@ -38,7 +38,7 @@ async function guildMemberAddEvent(member) {
         } else {
             const messageCount = await getMessageCount(member.id);
             const friendCode = await FriendCodeService.getFriendCodeByUserId(member.id);
-            await sleep(6 * 1000);
+            await sleep(600 * 1000);
             await setRookieRole(guild, member, beginnerRole, messageCount, friendCode);
             await sentMessage.react('👍');
         }
