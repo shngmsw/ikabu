@@ -80,6 +80,16 @@ module.exports = async function handleHelp(interaction) {
                             inline: true,
                         },
                         {
+                            name: '/ボイスロック vclock',
+                            value: '```今いるVCに人数制限を設定。ゲームに集中したい場合に使ってください。```',
+                            inline: true,
+                        },
+                        {
+                            name: '/ボイスメンション vcmention',
+                            value: '```VCに居るメンバー全員にメンションを飛ばします。```',
+                            inline: true,
+                        },
+                        {
                             name: '/イカ部歴',
                             value: '```自分のイカ部歴を表示```',
                             inline: true,
@@ -92,11 +102,6 @@ module.exports = async function handleHelp(interaction) {
                         {
                             name: '/timer',
                             value: '```n分後に通知```',
-                            inline: true,
-                        },
-                        {
-                            name: '/voice_channel',
-                            value: '```今いるVCに人数制限を設定。ゲームに集中したい場合に使ってください。```',
                             inline: true,
                         },
                         {
