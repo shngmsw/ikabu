@@ -1,8 +1,8 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { isEmpty, datetimeDiff } = require('../common');
+const { isEmpty, datetimeDiff, sleep } = require('../common');
 const RecruitService = require('../../db/recruit_service.js');
 const { searchMemberById } = require('../manager/memberManager.js');
-const { searchMessageById, getFullMessageObject } = require('../manager/messageManager.js');
+const { searchMessageById } = require('../manager/messageManager.js');
 const { searchChannelById } = require('../manager/channelManager.js');
 const { recoveryThinkingButton, disableThinkingButton, setButtonDisable } = require('../common/button_components');
 const log4js = require('log4js');
@@ -10,8 +10,6 @@ const { sendContentWebhook } = require('../common/webhook');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruitButton');
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 module.exports = {
     join: join,
@@ -64,7 +62,7 @@ async function join(interaction, params) {
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
-        const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
         let channelId = params.get('vid');
@@ -148,7 +146,7 @@ async function join(interaction, params) {
 
             // 5分後にホストへの通知を削除
             if (notify_to_host_message != null) {
-                await sleep(300000);
+                await sleep(300);
                 notify_to_host_message.delete();
             }
         }
@@ -171,7 +169,7 @@ async function cancel(interaction, params) {
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
-        const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
@@ -245,7 +243,7 @@ async function del(interaction, params) {
         const msg_id = params.get('mid');
         const cmd_message = await searchMessageById(guild, interaction.channel, msg_id);
         const header_msg_id = params.get('hmid');
-        const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
         let channelId = params.get('vid');
@@ -300,7 +298,7 @@ async function close(interaction, params) {
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
-        const header_message = await getFullMessageObject(guild, interaction.channel, header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
         const helpEmbed = await getHelpEmbed(guild, header_message.channel.id);
         const host = header_message.interaction.user;
         const host_id = host.id;
@@ -438,7 +436,7 @@ async function joinNotify(interaction, params) {
 
             // 5分後にホストへの通知を削除
             if (notify_to_host_message != null) {
-                await sleep(300000);
+                await sleep(300);
                 notify_to_host_message.delete();
             }
         }

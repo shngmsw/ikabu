@@ -6,7 +6,6 @@ const logger = log4js.getLogger('MessageManager');
 
 module.exports = {
     searchMessageById: searchMessageById,
-    getFullMessageObject: getFullMessageObject,
 };
 
 /**
@@ -20,25 +19,9 @@ async function searchMessageById(guild, channelId, messageId) {
     const channel = await searchChannelById(guild, channelId);
     let message;
     if (channel) {
-        const messages = await channel.messages.fetch();
-        message = messages.find((message) => message.id === messageId);
-    }
-    return message;
-}
-
-/**
- * メッセージIDからメッセージオブジェクトをfetchする．ない場合はnullを返す．
- * @param {string} guild Guildオブジェクト
- * @param {string} channelId チャンネルID
- * @param {string} messageId メッセージID
- * @returns メッセージオブジェクト
- */
-async function getFullMessageObject(guild, channelId, messageId) {
-    const channel = await searchChannelById(guild, channelId);
-    let message;
-    if (channel) {
         try {
-            message = await channel.messages.fetch({ message: messageId });
+            // fetch(mid)とすれば、cache見てなければフェッチしてくる
+            message = await channel.messages.fetch(messageId);
         } catch (error) {
             logger.warn('message missing');
         }

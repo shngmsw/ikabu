@@ -21,8 +21,8 @@ module.exports.voiceLocker = async function (interaction) {
     let channelState;
 
     // optionの判定
-    if (interaction.options.getInteger('limit') != null) {
-        let limitNum = interaction.options.getInteger('limit');
+    if (interaction.options.getInteger('人数') != null) {
+        let limitNum = interaction.options.getInteger('人数');
         if (limitNum < 0 || limitNum > 99) {
             await interaction.reply({ content: '制限人数は0～99の間で指定するでし！', ephemeral: true });
             return;

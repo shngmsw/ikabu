@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const { isNotEmpty } = require('../../../common');
+const { isNotEmpty, sleep } = require('../../../common');
 const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../common/button_components');
 const e = require('express');
 const log4js = require('log4js');
@@ -12,8 +12,6 @@ const logger = log4js.getLogger('recruit');
 module.exports = {
     privateRecruit: privateRecruit,
 };
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function privateRecruit(interaction) {
     if (!interaction.isCommand()) return;
@@ -96,7 +94,7 @@ async function sendPrivateRecruit(interaction, options) {
         header.pin();
 
         // 15秒後に削除ボタンを消す
-        await sleep(15000);
+        await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();

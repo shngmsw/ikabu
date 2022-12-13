@@ -5,7 +5,7 @@ const { getMemberMentions } = require('../../../event/recruit_button');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const { checkFes, getRegularData, fetchSchedule } = require('../../../common/apis/splatoon3_ink');
-const { isNotEmpty, isEmpty } = require('../../../common');
+const { isNotEmpty, isEmpty, sleep } = require('../../../common');
 const { searchChannelIdByName } = require('../../../manager/channelManager');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const { recruitActionRow, setButtonDisable, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
@@ -25,8 +25,6 @@ Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 module.exports = {
     regularRecruit: regularRecruit,
 };
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function regularRecruit(interaction) {
     if (!interaction.isCommand()) return;
@@ -215,7 +213,7 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
         header.pin();
 
         // 15秒後に削除ボタンを消す
-        await sleep(15000);
+        await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
@@ -224,7 +222,7 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
         }
 
         // 2時間後にボタンを無効化する
-        await sleep(7200000 - 15000);
+        await sleep(7200 - 15);
         const checkMessage = await searchMessageById(guild, interaction.channel.id, sentMessage.id);
 
         if (isEmpty(checkMessage)) {
