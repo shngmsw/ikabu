@@ -15,8 +15,6 @@ async function _handleFriendCode(interaction) {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply({ ephemeral: false });
-    // friend_codeテーブルがなければ作る
-    await FriendCodeService.createTableIfNotExists();
 
     const options = interaction.options;
     const subCommand = options.getSubcommand();

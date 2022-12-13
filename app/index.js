@@ -30,7 +30,7 @@ const { ButtonEnable } = require('./cmd/admin-cmd/enableButton');
 const { voiceMention } = require('./cmd/other/voice_mention.js');
 const removeRookie = require('./event/rookie.js');
 const chatCountUp = require('./event/members.js');
-const join = require('./event/join.js');
+const { guildMemberAddEvent } = require('./event/join.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
 const divider = require('./cmd/other/team_divider/divider');
@@ -44,6 +44,8 @@ const RecruitService = require('../db/recruit_service.js');
 const TeamDividerService = require('../db/team_divider_service.js');
 const log4js = require('log4js');
 const { sendCommandLog } = require('./event/command_log.js');
+const FriendCodeService = require('../db/friend_code_service.js');
+const MembersService = require('../db/members_service.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -102,7 +104,7 @@ client.on('messageCreate', async (msg) => {
 
 client.on('guildMemberAdd', async (member) => {
     try {
-        join(member);
+        guildMemberAddEvent(member);
         const guild = await member.guild.fetch();
         if (guild.id === process.env.SERVER_ID) {
             client.user.setActivity(`${guild.memberCount}人`, {
@@ -144,7 +146,9 @@ client.on('ready', async () => {
         // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => logger.error(err)));
         await registerSlashCommands();
         DBCommon.init();
+        await FriendCodeService.createTableIfNotExists();
         await RecruitService.createTableIfNotExists();
+        await MembersService.createTableIfNotExists();
         await TeamDividerService.createTableIfNotExists();
         const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID);
         client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
