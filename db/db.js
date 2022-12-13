@@ -9,10 +9,13 @@ let database;
 module.exports = class DBCommon {
     static init() {
         database = new sqlite3.Database('ikabu.sqlite3');
+        database.configure('busyTimeout', 5000);
     }
 
     static open() {
-        return (database = new sqlite3.Database('ikabu.sqlite3'));
+        database = new sqlite3.Database('ikabu.sqlite3');
+        database.configure('busyTimeout', 5000);
+        return database;
     }
 
     static get() {
