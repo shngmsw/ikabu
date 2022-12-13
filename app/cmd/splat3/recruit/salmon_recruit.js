@@ -2,7 +2,7 @@ const Canvas = require('canvas');
 const path = require('path');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const { isNotEmpty } = require('../../../common');
+const { isNotEmpty, sleep } = require('../../../common');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
 const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
@@ -29,8 +29,6 @@ Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 module.exports = {
     salmonRecruit: salmonRecruit,
 };
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function salmonRecruit(interaction) {
     if (!interaction.isCommand()) return;
@@ -200,7 +198,7 @@ async function sendSalmonRun(interaction, txt, recruit_num, condition, count, ho
         header.pin();
 
         // 15秒後に削除ボタンを消す
-        await sleep(15000);
+        await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
@@ -209,7 +207,7 @@ async function sendSalmonRun(interaction, txt, recruit_num, condition, count, ho
         }
 
         // 2時間後にVCロックを解除する
-        await sleep(7200000 - 15000);
+        await sleep(7200 - 15);
         // ピン留め解除
         header.unpin();
         if (isLock) {

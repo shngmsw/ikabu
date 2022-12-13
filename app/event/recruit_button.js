@@ -1,5 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { isEmpty, datetimeDiff } = require('../common');
+const { isEmpty, datetimeDiff, sleep } = require('../common');
 const RecruitService = require('../../db/recruit_service.js');
 const { searchMemberById } = require('../manager/memberManager.js');
 const { searchMessageById } = require('../manager/messageManager.js');
@@ -10,8 +10,6 @@ const { sendContentWebhook } = require('../common/webhook');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruitButton');
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 module.exports = {
     join: join,
@@ -148,7 +146,7 @@ async function join(interaction, params) {
 
             // 5分後にホストへの通知を削除
             if (notify_to_host_message != null) {
-                await sleep(300000);
+                await sleep(300);
                 notify_to_host_message.delete();
             }
         }
@@ -438,7 +436,7 @@ async function joinNotify(interaction, params) {
 
             // 5分後にホストへの通知を削除
             if (notify_to_host_message != null) {
-                await sleep(300000);
+                await sleep(300);
                 notify_to_host_message.delete();
             }
         }

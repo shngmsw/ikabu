@@ -13,6 +13,7 @@ module.exports = {
     datetimeDiff: datetimeDiff,
     getCloseEmbed: getCloseEmbed,
     getCommandHelpEmbed: getCommandHelpEmbed,
+    sleep: sleep,
 };
 
 async function composeEmbed(message, url) {
@@ -124,6 +125,10 @@ function dateAdd(dt, dd, u) {
         r.setFullYear(y, m, d > e ? e : d);
     }
     return r;
+}
+
+async function sleep(sec) {
+    return new Promise((resolve) => setTimeout(resolve, sec * 1000));
 }
 
 /*

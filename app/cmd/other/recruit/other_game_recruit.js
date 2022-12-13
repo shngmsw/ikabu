@@ -1,7 +1,7 @@
 const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
-const { isNotEmpty } = require('../../../common');
+const { isNotEmpty, sleep } = require('../../../common');
 const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components.js');
 const log4js = require('log4js');
 
@@ -11,8 +11,6 @@ const logger = log4js.getLogger('recruit');
 module.exports = {
     otherGameRecruit: otherGameRecruit,
 };
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function otherGameRecruit(interaction) {
     // subCommands取得
@@ -198,7 +196,7 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
         header.pin();
 
         // 15秒後に削除ボタンを消す
-        await sleep(15000);
+        await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();

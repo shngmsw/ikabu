@@ -2,7 +2,7 @@ const { searchChannelById } = require('../manager/channelManager');
 const { searchMemberById } = require('../manager/memberManager');
 const MembersService = require('../../db/members_service.js');
 const FriendCodeService = require('../../db/friend_code_service.js');
-const { isEmpty } = require('../common');
+const { isEmpty, sleep } = require('../common');
 const log4js = require('log4js');
 const { searchRoleById } = require('../manager/roleManager');
 
@@ -12,8 +12,6 @@ module.exports = {
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('guildMemberAdd');
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function guildMemberAddEvent(member) {
     try {
@@ -38,7 +36,7 @@ async function guildMemberAddEvent(member) {
         } else {
             const messageCount = await getMessageCount(member.id);
             const friendCode = await FriendCodeService.getFriendCodeByUserId(member.id);
-            await sleep(600 * 1000);
+            await sleep(600);
             await setRookieRole(guild, member, beginnerRole, messageCount, friendCode);
             await sentMessage.react('👍');
         }
