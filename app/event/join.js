@@ -18,6 +18,9 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function guildMemberAddEvent(member) {
     try {
         const guild = await member.guild.fetch();
+        if (guild.id != process.env.SERVER_ID) {
+            return;
+        }
         const lobby_channel = await searchChannelById(guild, process.env.CHANNEL_ID_ROBBY);
         const beginnerRole = await searchRoleById(guild, process.env.ROOKIE_ROLE_ID);
 
