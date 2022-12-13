@@ -2,7 +2,7 @@ const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('
 const { searchMemberById } = require('../../../manager/memberManager');
 const { isEmpty } = require('../../../common');
 const { setButtonEnable, recoveryThinkingButton, disableThinkingButton, setButtonDisable } = require('../../../common/button_components');
-const { searchMessageById, getFullMessageObject } = require('../../../manager/messageManager');
+const { searchMessageById } = require('../../../manager/messageManager');
 const TeamDividerService = require('../../../../db/team_divider_service');
 const TeamDivider = require('../../../../db/model/team_divider');
 const log4js = require('log4js');
@@ -524,7 +524,7 @@ async function correctButton(interaction, params) {
         const count = params.get('count');
         const guild = interaction.guild;
         const channelId = interaction.channel.id;
-        const message = await getFullMessageObject(guild, channelId, messageId);
+        const message = await searchMessageById(guild, channelId, messageId);
         const hostId = message.interaction.user.id;
 
         if (member.id != hostId) {
