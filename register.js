@@ -4,11 +4,17 @@ const { commandNames } = require('./constant.js');
 const log4js = require('log4js');
 
 const voiceLock = new SlashCommandBuilder()
-    .setName(commandNames.voice_channel)
-    .setDescription('ボイスチャンネルの人数制限を設定します。')
-    .addIntegerOption((option) =>
-        option.setName('limit').setDescription('制限人数を指定する場合は1～99で指定してください。').setRequired(false),
+    .setName(commandNames.vclock)
+    .setDescription('ボイスチャンネルに人数制限を設定します。')
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('vclock')
+            .setDescription('このボイスチャンネルに人数制限をかけます')
+            .addIntegerOption((option) =>
+                option.setName('人数').setDescription('制限人数を指定する場合は1～99で指定してください。').setRequired(false),
+            ),
     );
+
 const friendCode = new SlashCommandBuilder()
     .setName(commandNames.friend_code)
     .setDescription('フレンドコードの登録・表示')

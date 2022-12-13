@@ -228,7 +228,7 @@ async function onInteraction(interaction) {
 
             sendCommandLog(interaction); // ログ処理待たせたくないのでawaitなし
 
-            if (commandName === commandNames.voice_channel && !(interaction.replied || interaction.deferred)) {
+            if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
                 await voiceLocker(interaction);
             } else if (commandName === commandNames.close) {
                 //serverコマンド
