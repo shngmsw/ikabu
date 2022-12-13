@@ -1,5 +1,5 @@
 const { setButtonEnable } = require('../../common/button_components');
-const { getFullMessageObject } = require('../../manager/messageManager');
+const { searchMessageById } = require('../../manager/messageManager');
 const log4js = require('log4js');
 
 module.exports = {
@@ -15,7 +15,7 @@ async function ButtonEnable(interaction) {
 
         const messageId = interaction.options.getString('メッセージid');
         const channelId = interaction.options.getChannel('チャンネル').id;
-        const message = await getFullMessageObject(interaction.guild, channelId, messageId);
+        const message = await searchMessageById(interaction.guild, channelId, messageId);
 
         await message.edit({ components: await setButtonEnable(message) });
 

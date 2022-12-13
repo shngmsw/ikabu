@@ -17,9 +17,13 @@ const logger = log4js.getLogger('MemberManager');
  */
 async function searchMemberById(guild, userId) {
     try {
-        // APIからのメンバーオブジェクト(discord.jsのGuildMemberでないもの)がそのまま渡ってくることがあるのでfetchすることで確実にGuildMemberとする。
-        const members = await guild.members.fetch();
-        let member = members.find((member) => member.id === userId);
+        let member;
+        try {
+            // fetch(mid)とすれば、cache見てなければフェッチしてくる
+            member = await guild.members.fetch(userId);
+        } catch (error) {
+            logger.warn('member missing');
+        }
 
         return member;
     } catch (error) {
