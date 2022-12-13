@@ -1,7 +1,3 @@
-module.exports = {
-    guildMemberAddEvent: guildMemberAddEvent,
-};
-
 const { searchChannelById } = require('../manager/channelManager');
 const { searchMemberById } = require('../manager/memberManager');
 const MembersService = require('../../db/members_service.js');
@@ -9,6 +5,10 @@ const FriendCodeService = require('../../db/friend_code_service.js');
 const { isEmpty } = require('../common');
 const log4js = require('log4js');
 const { searchRoleById } = require('../manager/roleManager');
+
+module.exports = {
+    guildMemberAddEvent: guildMemberAddEvent,
+};
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('guildMemberAdd');
@@ -48,7 +48,7 @@ async function guildMemberAddEvent(member) {
 }
 
 async function setRookieRole(guild, member, beginnerRole, messageCount, friendCode) {
-    if (messageCount < 100 && friendCode.length == 0) {
+    if (messageCount == 0 && friendCode.length == 0) {
         const fetch_member = await searchMemberById(guild, member.id);
         if (fetch_member) {
             fetch_member.roles.set([beginnerRole.id]).catch((error) => {
