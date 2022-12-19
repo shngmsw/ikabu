@@ -27,5 +27,6 @@ module.exports = {
         private: 'プラベ募集',
         buttonEnable: 'ボタンを有効化',
         voiceChannelMention: 'ボイスメンション',
+        variablesSettings: '環境変数設定',
     },
 };
