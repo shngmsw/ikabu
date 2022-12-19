@@ -1,7 +1,6 @@
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
 const fs = require('fs').promises;
-const os = require('os');
 const path = require('path');
 
 const ENV_FILE_PATH = path.resolve('./', '.env');
@@ -45,7 +44,7 @@ async function setVariables(interaction) {
  */
 async function setEnvValue(key, value) {
     const envFile = await fs.readFile(ENV_FILE_PATH, 'utf-8');
-    const envVars = envFile.split(os.EOL);
+    const envVars = envFile.split('\n');
     const targetLine = envVars.find((line) => line.split('=')[0] === key);
     if (targetLine !== undefined) {
         const targetLineIndex = envVars.indexOf(targetLine);
@@ -56,5 +55,5 @@ async function setEnvValue(key, value) {
         envVars.push(`${key}=${value}`);
     }
     // ファイル書き込み
-    await fs.writeFile(ENV_FILE_PATH, envVars.join(os.EOL));
+    await fs.writeFile(ENV_FILE_PATH, envVars.join('\n'));
 }
