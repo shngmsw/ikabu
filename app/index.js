@@ -46,6 +46,7 @@ const log4js = require('log4js');
 const { sendCommandLog } = require('./event/command_log.js');
 const FriendCodeService = require('../db/friend_code_service.js');
 const MembersService = require('../db/members_service.js');
+const { variablesHandler } = require('./cmd/admin-cmd/environment_variables/variables_handler.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -270,6 +271,8 @@ async function onInteraction(interaction) {
                 ButtonEnable(interaction);
             } else if (commandName === commandNames.voiceChannelMention) {
                 voiceMention(interaction);
+            } else if (commandName === commandNames.variablesSettings) {
+                variablesHandler(interaction);
             } else if (commandName === commandNames.voice) {
                 // 'インタラクションに失敗'が出ないようにするため
                 await interaction.deferReply();
