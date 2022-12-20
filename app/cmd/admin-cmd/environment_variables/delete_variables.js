@@ -1,5 +1,6 @@
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
+const os = require('os');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -46,17 +47,22 @@ async function deleteVariables(interaction) {
  * @returns 成功すればtrue, 失敗すればfalseを返す
  */
 async function deleteEnvValue(key) {
-    const envFile = await fs.readFile(ENV_FILE_PATH, 'utf-8');
-    const envVars = envFile.split('\n');
-    const targetLine = envVars.find((line) => line.split('=')[0] === key);
-    if (targetLine !== undefined) {
-        const targetLineIndex = envVars.indexOf(targetLine);
-        // keyとvalueを置き換え
-        envVars.splice(targetLineIndex, 1);
-        // ファイル書き込み
-        await fs.writeFile(ENV_FILE_PATH, envVars.join('\n'));
-        return true;
-    } else {
-        return false;
+    try {
+        const envFile = await fs.readFile(ENV_FILE_PATH, 'utf-8');
+        // 複数の改行コードに対応
+        const envVars = envFile.split(/\r\n|\n/);
+        const targetLine = envVars.find((line) => line.split('=')[0] === key);
+        if (targetLine !== undefined) {
+            const targetLineIndex = envVars.indexOf(targetLine);
+            // keyとvalueを置き換え
+            envVars.splice(targetLineIndex, 1);
+            // ファイル書き込み (os標準の改行コードで保存)
+            await fs.writeFile(ENV_FILE_PATH, envVars.join(os.EOL));
+            return true;
+        } else {
+            return false;
+        }
+    } catch (error) {
+        logger.error(error);
     }
 }
