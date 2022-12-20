@@ -171,7 +171,7 @@ async function messageReplace(message) {
     let mention_replaced = mention_replace(w_replaced);
     let nickname_replaced = nickname_mention_replace(mention_replaced);
     let role_mention_replaced = role_mention_replace(nickname_replaced);
-    let channel_replaced = channel_replace(role_mention_replaced);
+    let channel_replaced = await channel_replace(role_mention_replaced);
 
     const yomiage_message = await over200_cut(channel_replaced);
     return yomiage_message;

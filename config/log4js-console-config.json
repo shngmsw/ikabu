@@ -26,6 +26,7 @@
         "RoleManager": { "appenders": ["console"], "level": "all" },
         "MessageManager": { "appenders": ["console"], "level": "all" },
         "MemberManager": { "appenders": ["console"], "level": "all" },
-        "api": { "appenders": ["console"], "level": "all" }
+        "api": { "appenders": ["console"], "level": "all" },
+        "voice": { "appenders": ["console"], "level": "all" }
     }
 }

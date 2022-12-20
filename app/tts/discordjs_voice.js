@@ -12,10 +12,12 @@ const {
 const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-const logger = log4js.getLogger();
+const infoLogger = log4js.getLogger();
+const interactionLogger = log4js.getLogger('interaction');
+const logger = log4js.getLogger('voice');
 
-logger.info(generateDependencyReport());
-const { mode_api, messageReplace, bufferToStream } = require('./voice_bot_node');
+infoLogger.info(generateDependencyReport());
+const { mode_api, bufferToStream } = require('./voice_bot_node');
 
 // ボイスチャットセッション保存用のMapです。
 const subscriptions = new Map();
@@ -75,10 +77,10 @@ const kill = async (interaction) => {
 };
 
 async function handleVoiceCommand(interaction) {
-    if (!interaction.isCommand()) return;
-    const { options } = interaction;
-    const subCommand = options.getSubcommand();
     try {
+        if (!interaction.isCommand()) return;
+        const { options } = interaction;
+        const subCommand = options.getSubcommand();
         switch (subCommand) {
             case 'join':
                 join(interaction);
@@ -87,27 +89,31 @@ async function handleVoiceCommand(interaction) {
                 kill(interaction);
                 break;
         }
-    } catch (err) {
-        kill(interaction);
+    } catch (error) {
+        interactionLogger.error(error);
     }
 }
 
 async function play(msg) {
-    const { guildId, channelId } = msg;
-    let subscription = subscriptions.get(guildId);
-    if (subscription && channels.get(guildId) === channelId) {
-        // メッセージから音声ファイルを取得
-        const buffer = await mode_api(msg);
-        if (buffer == null) return;
-        const stream = bufferToStream(buffer);
+    try {
+        const { guildId, channelId } = msg;
+        let subscription = subscriptions.get(guildId);
+        if (subscription && channels.get(guildId) === channelId) {
+            // メッセージから音声ファイルを取得
+            const buffer = await mode_api(msg);
+            if (buffer == null) return;
+            const stream = bufferToStream(buffer);
 
-        // ボイスチャットセッションの音声プレイヤーに音声ファイルのURLを指定して再生させます。
-        const player = subscription.player;
-        const resource = createAudioResource(stream, {
-            inputType: StreamType.Arbitrary,
-        });
+            // ボイスチャットセッションの音声プレイヤーに音声ファイルのURLを指定して再生させます。
+            const player = subscription.player;
+            const resource = createAudioResource(stream, {
+                inputType: StreamType.Arbitrary,
+            });
 
-        player.play(resource);
-        await entersState(player, AudioPlayerStatus.Idle, 1000 * 900);
+            player.play(resource);
+            await entersState(player, AudioPlayerStatus.Idle, 1000 * 900);
+        }
+    } catch (error) {
+        logger.error(error);
     }
 }
