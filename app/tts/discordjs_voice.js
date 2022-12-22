@@ -30,49 +30,58 @@ module.exports = {
 };
 
 const join = async (interaction) => {
-    const guildId = interaction.guild.id;
-    const channelId = interaction.channel.id;
-    const member = interaction.member;
+    try {
+        const guildId = interaction.guild.id;
+        const channelId = interaction.channel.id;
+        const member = interaction.member;
 
-    let subscription = subscriptions.get(guildId);
-    if (!subscription) {
-        // yoshi-taroがボイスチャンネルに入っていなければ参加
-        if (!member.voice.channelId) {
-            // メンバーがVCにいるかチェック
-            await interaction.followUp('ボイチャに参加してからコマンドを使うでし！');
-            return;
+        let subscription = subscriptions.get(guildId);
+        if (!subscription) {
+            // yoshi-taroがボイスチャンネルに入っていなければ参加
+            if (!member.voice.channelId) {
+                // メンバーがVCにいるかチェック
+                await interaction.followUp('ボイチャに参加してからコマンドを使うでし！');
+                return;
+            }
+            const connection = joinVoiceChannel({
+                selfMute: false,
+                channelId: member.voice.channelId, // メンバーが居るVCのチャンネル
+                guildId: guildId,
+                adapterCreator: member.voice.guild.voiceAdapterCreator,
+            });
+            subscription = connection.subscribe(createAudioPlayer());
+            connection.on('error', (error) => {
+                logger.warn(error);
+            });
+            subscriptions.set(guildId, subscription);
+            channels.set(guildId, channelId);
+            await interaction.followUp('ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！');
+        } else if (channels.get(guildId) === channelId) {
+            await interaction.followUp('既に接続済みでし！');
+        } else {
+            await interaction.followUp('他の部屋で営業中でし！');
         }
-        const connection = joinVoiceChannel({
-            selfMute: false,
-            channelId: member.voice.channelId, // メンバーが居るVCのチャンネル
-            guildId: guildId,
-            adapterCreator: member.voice.guild.voiceAdapterCreator,
-        });
-        subscription = connection.subscribe(createAudioPlayer());
-        connection.on('error', (error) => {
-            logger.warn(error);
-        });
-        subscriptions.set(guildId, subscription);
-        channels.set(guildId, channelId);
-        await interaction.followUp('ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！');
-    } else if (channels.get(guildId) === channelId) {
-        await interaction.followUp('既に接続済みでし！');
-    } else {
-        await interaction.followUp('他の部屋で営業中でし！');
+    } catch (error) {
+        kill(interaction);
+        interactionLogger.error(error);
     }
 };
 
 const kill = async (interaction) => {
-    const guildId = interaction.guild.id;
-    const channelId = interaction.channel.id;
-    let subscription = subscriptions.get(guildId);
-    if (subscription && channels.get(guildId) === channelId) {
-        subscription.connection.destroy();
-        subscriptions.delete(guildId);
-        channels.delete(guildId);
-        await interaction.followUp(':dash:');
-    } else if (channels.get(guildId) != channelId) {
-        await interaction.followUp('他の部屋で営業中でし！');
+    try {
+        const guildId = interaction.guild.id;
+        const channelId = interaction.channel.id;
+        let subscription = subscriptions.get(guildId);
+        if (subscription && channels.get(guildId) === channelId) {
+            subscription.connection.destroy();
+            subscriptions.delete(guildId);
+            channels.delete(guildId);
+            await interaction.followUp(':dash:');
+        } else if (channels.get(guildId) != channelId) {
+            await interaction.followUp('他の部屋で営業中でし！');
+        }
+    } catch (error) {
+        interactionLogger.error(error);
     }
 };
 
