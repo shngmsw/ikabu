@@ -716,6 +716,24 @@ const voiceChannelMention = new SlashCommandBuilder()
             ),
     );
 
+const variablesSettings = new SlashCommandBuilder()
+    .setName(commandNames.variablesSettings)
+    .setDescription('環境変数の設定・表示ができます。')
+    .addSubcommand((subcommand) => subcommand.setName('表示').setDescription('環境変数ファイル(.env)の設定内容を表示します。'))
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('登録更新')
+            .setDescription('環境変数ファイル(.env)を上書きします。')
+            .addStringOption((option) => option.setName('key').setDescription('変数名を入力').setRequired(true))
+            .addStringOption((option) => option.setName('value').setDescription('登録する値を入力').setRequired(true)),
+    )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName('削除')
+            .setDescription('環境変数ファイル(.env)から変数を削除します。')
+            .addStringOption((option) => option.setName('key').setDescription('変数名を入力').setRequired(true)),
+    );
+
 const commands = [
     voiceLock,
     friendCode,
@@ -744,6 +762,7 @@ const commands = [
     fesC,
     buttonEnable,
     voiceChannelMention,
+    variablesSettings,
 ];
 
 //登録用関数
