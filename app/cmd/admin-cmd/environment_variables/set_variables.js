@@ -1,4 +1,4 @@
-const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
+const { AttachmentBuilder } = require('discord.js');
 const log4js = require('log4js');
 const os = require('os');
 const fs = require('fs').promises;
@@ -15,14 +15,9 @@ const logger = log4js.getLogger('interaction');
 
 async function setVariables(interaction) {
     try {
-        await interaction.deferReply();
         const options = interaction.options;
         const key = options.getString('key');
         const value = options.getString('value');
-
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
-            return await interaction.editReply({ content: 'チャンネルを管理する権限がないでし！', ephemeral: true });
-        }
 
         // .envファイル更新
         await setEnvValue(key, value);
