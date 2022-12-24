@@ -62,7 +62,6 @@ async function searchChannelIdByName(guild, channelName, channelType, categoryId
  * チャンネルIDからチャンネルを検索する．ない場合はnullを返す．
  * @param {string} guild Guildオブジェクト
  * @param {string} channelId チャンネルID
- * @param {string} categoryId カテゴリID or null
  * @returns チャンネルオブジェクト
  */
 async function searchChannelById(guild, channelId) {
