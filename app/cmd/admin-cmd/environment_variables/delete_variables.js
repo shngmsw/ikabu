@@ -44,14 +44,14 @@ async function deleteEnvValue(key) {
     try {
         const envFile = await fs.readFile(ENV_FILE_PATH, 'utf-8');
         // 複数の改行コードに対応
-        const envVars = envFile.split(/\r\n|\n/);
+        const envVars = envFile.split(/\r\n|\n|\r/);
         const targetLine = envVars.find((line) => line.split('=')[0] === key);
         if (targetLine !== undefined) {
             const targetLineIndex = envVars.indexOf(targetLine);
             // keyとvalueを置き換え
             envVars.splice(targetLineIndex, 1);
             // ファイル書き込み (os標準の改行コードで保存)
-            await fs.writeFile(ENV_FILE_PATH, envVars.join(os.EOL));
+            await fs.writeFile(ENV_FILE_PATH, envVars.join('\n'));
             return true;
         } else {
             return false;

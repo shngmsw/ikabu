@@ -41,7 +41,7 @@ async function setVariables(interaction) {
 async function setEnvValue(key, value) {
     try {
         const envFile = await fs.readFile(ENV_FILE_PATH, 'utf-8');
-        const envVars = envFile.split(/\r\n|\n/);
+        const envVars = envFile.split(/\r\n|\n|\r/);
         const targetLine = envVars.find((line) => line.split('=')[0] === key);
         if (targetLine !== undefined) {
             const targetLineIndex = envVars.indexOf(targetLine);
@@ -52,7 +52,7 @@ async function setEnvValue(key, value) {
             envVars.push(`${key}=${value}`);
         }
         // ファイル書き込み (os標準の改行コードで保存)
-        await fs.writeFile(ENV_FILE_PATH, envVars.join(os.EOL));
+        await fs.writeFile(ENV_FILE_PATH, envVars.join('\n'));
     } catch (error) {
         logger.error(error);
     }
