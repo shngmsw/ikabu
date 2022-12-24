@@ -28,8 +28,7 @@ async function deleteVariables(interaction) {
         env_file = new AttachmentBuilder('./.env', { name: 'env.txt' });
 
         // 現在のprocess.env更新
-        process.env[key] = undefined;
-
+        process.env[key] = '';
         await interaction.editReply({ content: '削除したでし！', files: [env_file] });
     } catch (error) {
         logger.error(error);
