@@ -1,6 +1,9 @@
 const Discord = require('discord.js');
-const MembersService = require('../../db/members_service.js');
-const { searchMemberById } = require('../manager/memberManager');
+const MembersService = require('../../../db/members_service.js');
+const { isNotEmpty } = require('../../common.js');
+const { searchMemberById } = require('../../manager/memberManager');
+const { sendIntentionConfirmReply } = require('./send_questionnaire.js');
+
 module.exports = async function removeRookie(msg) {
     const dt = new Date();
     const guild = msg.guild;
@@ -18,7 +21,10 @@ module.exports = async function removeRookie(msg) {
                 name: member.displayName,
                 iconURL: member.displayAvatarURL(),
             });
-            msg.channel.send({ embeds: [embed] }).catch();
+            await msg.channel.send({ embeds: [embed] }).catch();
+            if (isNotEmpty(process.env.QUESTIONNAIRE_URL)) {
+                sendIntentionConfirmReply(msg, member);
+            }
         }
     }
 };
