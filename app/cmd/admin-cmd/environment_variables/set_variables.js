@@ -50,7 +50,7 @@ async function setEnvValue(key, value) {
             // 新しくkeyとvalueを設定
             envVars.push(`${key}=${value}`);
         }
-        // ファイル書き込み (os標準の改行コードで保存)
+        // ファイル書き込み
         await fs.writeFile(ENV_FILE_PATH, envVars.join('\n'));
     } catch (error) {
         logger.error(error);

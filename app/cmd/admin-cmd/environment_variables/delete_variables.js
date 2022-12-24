@@ -52,7 +52,7 @@ async function deleteEnvValue(key) {
             const targetLineIndex = envVars.indexOf(targetLine);
             // keyとvalueを置き換え
             envVars.splice(targetLineIndex, 1);
-            // ファイル書き込み (os標準の改行コードで保存)
+            // ファイル書き込み
             await fs.writeFile(ENV_FILE_PATH, envVars.join('\n'));
             return true;
         } else {
