@@ -1,6 +1,5 @@
 const { AttachmentBuilder } = require('discord.js');
 const log4js = require('log4js');
-const os = require('os');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -24,8 +23,8 @@ async function setVariables(interaction) {
 
         env_file = new AttachmentBuilder('./.env', { name: 'env.txt' });
 
-        // 現在のprocess.env更新
-        process.env[key] = value;
+        // dotenv更新 (override trueにしないと上書きされない)
+        require('dotenv').config({ override: true });
 
         await interaction.editReply({ content: '設定したでし！', files: [env_file] });
     } catch (error) {

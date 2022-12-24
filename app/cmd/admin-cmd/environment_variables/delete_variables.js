@@ -1,6 +1,5 @@
 const { AttachmentBuilder } = require('discord.js');
 const log4js = require('log4js');
-const os = require('os');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -27,9 +26,12 @@ async function deleteVariables(interaction) {
 
         env_file = new AttachmentBuilder('./.env', { name: 'env.txt' });
 
-        // 現在のprocess.env更新
+        // 現在のprocess.env更新 (process.envは消せないので空文字で上書きすることで対応)
         process.env[key] = '';
-        await interaction.editReply({ content: '削除したでし！', files: [env_file] });
+        await interaction.editReply({
+            content: '削除したでし！\n挙動がおかしくなる場合があるので再起動を推奨するでし！',
+            files: [env_file],
+        });
     } catch (error) {
         logger.error(error);
     }
