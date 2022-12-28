@@ -28,12 +28,13 @@ const { salmonRecruit } = require('./cmd/splat3/recruit/salmon_recruit.js');
 const { privateRecruit } = require('./cmd/splat3/recruit/private_recruit.js');
 const { ButtonEnable } = require('./cmd/admin-cmd/enableButton');
 const { voiceMention } = require('./cmd/other/voice_mention.js');
-const removeRookie = require('./event/rookie.js');
+const removeRookie = require('./event/rookie/remove_rookie.js');
 const chatCountUp = require('./event/members.js');
-const { guildMemberAddEvent } = require('./event/join.js');
+const { guildMemberAddEvent } = require('./event/rookie/set_rookie.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
 const divider = require('./cmd/other/team_divider/divider');
+const questionnaire = require('./event/rookie/send_questionnaire');
 const handleIkabuExperience = require('./cmd/other/experience.js');
 const { commandNames } = require('../constant');
 const registerSlashCommands = require('../register.js');
@@ -225,6 +226,12 @@ async function onInteraction(interaction) {
                     hide: divider.hideButton,
                 };
                 await dividerButtons[params.get('t')](interaction, params);
+            } else if (isNotEmpty(params.get('q'))) {
+                const questionnaireButtons = {
+                    yes: questionnaire.sendQuestionnaireFollowUp,
+                    no: questionnaire.disableQuestionnaireButtons,
+                };
+                await questionnaireButtons[params.get('q')](interaction, params);
             }
             return;
         }
