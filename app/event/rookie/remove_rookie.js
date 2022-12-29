@@ -22,7 +22,7 @@ module.exports = async function removeRookie(msg) {
                 iconURL: member.displayAvatarURL(),
             });
             await msg.channel.send({ embeds: [embed] }).catch();
-            if (isNotEmpty(process.env.QUESTIONNAIRE_URL)) {
+            if (isNotEmpty(process.env.QUESTIONNAIRE_ROOKIE_URL)) {
                 sendIntentionConfirmReply(msg, member);
             }
         }
