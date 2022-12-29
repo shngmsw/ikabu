@@ -8,6 +8,7 @@ module.exports = {
     isEmpty: isEmpty,
     isNotEmpty: isNotEmpty,
     random: randomSelect,
+    randomBool: randomBool,
     dateAdd: dateAdd,
     dateDiff: dateDiff,
     datetimeDiff: datetimeDiff,
@@ -101,6 +102,21 @@ function randomSelect(array, num) {
     }
     return r;
 }
+
+/**
+ * 指定した確率でtrueを返し、それ以外はfalseを返す
+ * @param {*} probability 確率(割合)
+ * @returns boolean
+ */
+function randomBool(probability) {
+    const num = Math.random();
+    if (num < probability) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 /*
  *  日数または月数を加算
  *

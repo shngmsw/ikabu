@@ -19,7 +19,7 @@ const Dispandar = require('./event/dispandar.js');
 const VOICE_API = require('./tts/voice_bot_node.js');
 const DISCORD_VOICE = require('./tts/discordjs_voice.js');
 const handleStageInfo = require('./cmd/splat3/stageinfo.js');
-const { isNotEmpty, getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
+const { randomBool, isNotEmpty, getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
 const { otherGameRecruit } = require('./cmd/other/recruit/other_game_recruit.js');
 const { regularRecruit } = require('./cmd/splat3/recruit/regular_recruit.js');
 const { fesRecruit } = require('./cmd/splat3/recruit/fes_recruit');
@@ -76,6 +76,12 @@ client.on('messageCreate', async (msg) => {
                 });
                 if (member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
                     handleStageInfo(msg);
+                }
+            }
+
+            if (isNotEmpty(process.env.QUESTIONNAIRE_URL)) {
+                if (msg.channel.id != process.env.CHANNEL_ID_BOT_CMD && randomBool(0.00025)) {
+                    questionnaire.sendIntentionConfirmReply(msg, msg.author);
                 }
             }
         }
