@@ -1,5 +1,6 @@
 const { isNotEmpty, composeEmbed } = require('../common');
 const log4js = require('log4js');
+const { searchMessageById } = require('../manager/messageManager');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('dispander');
@@ -58,41 +59,4 @@ async function extractMessages(message) {
     }
 
     return messages;
-}
-
-/**
- * メッセージIDからメッセージを検索する．ない場合はnullを返す．
- * @param {string} guild Guildオブジェクト
- * @param {string} channelId チャンネルID
- * @param {string} messageId メッセージID
- * @returns メッセージオブジェクト
- */
-async function searchMessageById(guild, channelId, messageId) {
-    const channel = await searchChannelById(guild, channelId);
-    let message = null;
-    if (channel) {
-        try {
-            message = await channel.messages.fetch({ message: messageId });
-        } catch (error) {
-            logger.warn('message missing');
-        }
-    }
-    return message;
-}
-
-/**
- * チャンネルIDからチャンネルを検索する．ない場合はnullを返す．
- * @param {string} guild Guildオブジェクト
- * @param {string} channelId チャンネルID
- * @param {string} categoryId カテゴリID or null
- * @returns チャンネルオブジェクト
- */
-async function searchChannelById(guild, channelId) {
-    let channel = null;
-    try {
-        channel = await guild.channels.fetch(channelId);
-    } catch (error) {
-        logger.warn('channel missing');
-    }
-    return channel;
 }
