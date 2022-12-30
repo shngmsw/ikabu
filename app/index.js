@@ -34,7 +34,7 @@ const { guildMemberAddEvent } = require('./event/rookie/set_rookie.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
 const divider = require('./cmd/other/team_divider/divider');
-const questionnaire = require('./event/rookie/send_questionnaire');
+const { sendIntentionConfirmReply, sendQuestionnaireFollowUp, disableQuestionnaireButtons } = require('./event/rookie/send_questionnaire');
 const handleIkabuExperience = require('./cmd/other/experience.js');
 const { commandNames } = require('../constant');
 const registerSlashCommands = require('../register.js');
@@ -81,7 +81,7 @@ client.on('messageCreate', async (msg) => {
 
             if (isNotEmpty(process.env.QUESTIONNAIRE_URL)) {
                 if (msg.channel.id != process.env.CHANNEL_ID_BOT_CMD && randomBool(0.00025)) {
-                    questionnaire.sendIntentionConfirmReply(msg, msg.author);
+                    sendIntentionConfirmReply(msg, msg.author, 'QUESTIONNAIRE_URL');
                 }
             }
         }
@@ -234,8 +234,8 @@ async function onInteraction(interaction) {
                 await dividerButtons[params.get('t')](interaction, params);
             } else if (isNotEmpty(params.get('q'))) {
                 const questionnaireButtons = {
-                    yes: questionnaire.sendQuestionnaireFollowUp,
-                    no: questionnaire.disableQuestionnaireButtons,
+                    yes: sendQuestionnaireFollowUp,
+                    no: disableQuestionnaireButtons,
                 };
                 await questionnaireButtons[params.get('q')](interaction, params);
             }

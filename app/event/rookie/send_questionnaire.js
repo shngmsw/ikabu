@@ -14,11 +14,12 @@ module.exports = {
  * アンケートに答えるか選択してもらうためのリプライを送信
  * @param {*} message リプライ元
  * @param {*} member 答えるメンバー
+ * @param {*} url_key アンケートURLを格納している環境変数のキー名
  */
-async function sendIntentionConfirmReply(message, member) {
+async function sendIntentionConfirmReply(message, member, url_key) {
     const logger = log4js.getLogger('message');
     try {
-        const buttons = questionnaireButton(member.id);
+        const buttons = questionnaireButton(member.id, url_key);
         const sentReply = await message.reply({
             content:
                 'よりよい環境づくりのために良ければアンケート調査に協力してほしいでし！\n' +
@@ -44,12 +45,13 @@ async function sendIntentionConfirmReply(message, member) {
     }
 }
 
-function questionnaireButton(user_id) {
+function questionnaireButton(user_id, url_key) {
     const logger = log4js.getLogger();
     try {
         const yesParams = new URLSearchParams();
         yesParams.append('q', 'yes');
         yesParams.append('uid', user_id);
+        yesParams.append('type', url_key); // 直接URLだと文字数が多すぎる可能性があるため
 
         const noParams = new URLSearchParams();
         noParams.append('q', 'no');
@@ -79,10 +81,10 @@ async function sendQuestionnaireFollowUp(interaction, params) {
             return;
         }
 
+        const q_url = process.env[params.get('type')];
+
         const q_url_button = new ActionRowBuilder();
-        q_url_button.addComponents([
-            new ButtonBuilder().setURL(process.env.QUESTIONNAIRE_URL).setLabel('回答画面へ行く').setStyle(ButtonStyle.Link),
-        ]);
+        q_url_button.addComponents([new ButtonBuilder().setURL(q_url).setLabel('回答画面へ行く').setStyle(ButtonStyle.Link)]);
 
         interaction.followUp({
             content:
