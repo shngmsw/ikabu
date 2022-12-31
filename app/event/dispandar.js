@@ -50,7 +50,7 @@ async function extractMessages(message) {
     if (guild.id != matches.groups.guild) {
         return;
     }
-    const fetchedMessage = await searchMessageById(guild, matches.groups.channel.id, matches.groups.message);
+    const fetchedMessage = await searchMessageById(guild, matches.groups.channel, matches.groups.message);
     if (isNotEmpty(fetchedMessage)) {
         messages.push(fetchedMessage);
     } else {
