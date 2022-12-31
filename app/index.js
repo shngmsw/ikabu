@@ -1,5 +1,5 @@
 // Discord bot implements
-const { Client, GatewayIntentBits, PermissionsBitField, ActivityType } = require('discord.js');
+const { Client, GatewayIntentBits, PermissionsBitField, ActivityType, Partials } = require('discord.js');
 const { URLSearchParams } = require('url');
 const client = new Client({
     intents: [
@@ -12,6 +12,7 @@ const client = new Client({
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.MessageContent,
     ],
+    partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Reaction],
 });
 
 const Handler = require('./handler.js');
@@ -30,6 +31,7 @@ const { ButtonEnable } = require('./cmd/admin-cmd/enableButton');
 const { voiceMention } = require('./cmd/other/voice_mention.js');
 const removeRookie = require('./event/rookie/remove_rookie.js');
 const chatCountUp = require('./event/members.js');
+const emojiCountUp = require('./event/reactions.js');
 const { guildMemberAddEvent } = require('./event/rookie/set_rookie.js');
 const deleteToken = require('./event/delete_token.js');
 const recruitButton = require('./event/recruit_button.js');
@@ -178,6 +180,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                 return;
             }
         }
+        await emojiCountUp(reaction);
     } catch (error) {
         loggerMRA.error(error);
     }
