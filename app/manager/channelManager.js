@@ -77,15 +77,22 @@ async function searchChannelIdByName(guild, channelName, channelType, categoryId
  */
 async function searchChannelById(guild, channelId) {
     var channel;
-    const channels = await guild.channels.fetch();
-    channel = channels.find((c) => c.id == channelId);
-    if (common.isEmpty(channel)) {
-        channels.forEach((c) => {
-            if (c.type != ChannelType.GuildCategory && c.type != ChannelType.GuildVoice && c.threads.cache.size > 0) {
-                channel = c.threads.cache.find((t) => t.id == channelId);
+    try {
+        channel = await guild.channels.fetch(channelId);
+        // fetch by idで見つからなかったら従来の方法で検索
+        if (common.isEmpty(channel)) {
+            const channels = await guild.channels.fetch();
+            channel = channels.find((c) => c.id == channelId);
+            if (common.isEmpty(channel)) {
+                channels.forEach((c) => {
+                    if (c.type != ChannelType.GuildCategory && c.type != ChannelType.GuildVoice && c.threads.cache.size > 0) {
+                        channel = c.threads.cache.find((t) => t.id == channelId);
+                    }
+                });
             }
-        });
+        }
+    } catch (error) {
+        logger.warn('channel missing');
     }
-
     return channel;
 }
