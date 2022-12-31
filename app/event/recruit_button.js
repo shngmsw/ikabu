@@ -62,7 +62,7 @@ async function join(interaction, params) {
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
         let channelId = params.get('vid');
@@ -169,7 +169,7 @@ async function cancel(interaction, params) {
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
@@ -241,9 +241,9 @@ async function del(interaction, params) {
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const msg_id = params.get('mid');
-        const cmd_message = await searchMessageById(guild, interaction.channel, msg_id);
+        const cmd_message = await searchMessageById(guild, interaction.channelId, msg_id);
         const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
         const host = header_message.interaction.user;
         const host_id = host.id;
         let channelId = params.get('vid');
@@ -298,7 +298,7 @@ async function close(interaction, params) {
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channel, header_msg_id);
+        const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
         const helpEmbed = await getHelpEmbed(guild, header_message.channel.id);
         const host = header_message.interaction.user;
         const host_id = host.id;
