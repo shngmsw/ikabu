@@ -23,7 +23,7 @@ module.exports = async function removeRookie(msg) {
             });
             await msg.channel.send({ embeds: [embed] }).catch();
             if (isNotEmpty(process.env.QUESTIONNAIRE_ROOKIE_URL)) {
-                sendIntentionConfirmReply(msg, member);
+                sendIntentionConfirmReply(msg, member, 'QUESTIONNAIRE_ROOKIE_URL');
             }
         }
     }
