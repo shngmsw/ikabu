@@ -1,6 +1,6 @@
 const { ChannelType } = require('discord.js');
 const log4js = require('log4js');
-
+const common = require('../common');
 module.exports = {
     createChannel: createChannel,
     searchChannelIdByName: searchChannelIdByName,
@@ -76,11 +76,16 @@ async function searchChannelIdByName(guild, channelName, channelType, categoryId
  * @returns チャンネルオブジェクト
  */
 async function searchChannelById(guild, channelId) {
-    let channel = null;
-    try {
-        channel = await guild.channels.fetch(channelId);
-    } catch (error) {
-        logger.warn('channel missing');
+    var channel;
+    const channels = await guild.channels.fetch();
+    channel = channels.find((c) => c.id == channelId);
+    if (common.isEmpty(channel)) {
+        channels.forEach((c) => {
+            if (c.type != ChannelType.GuildCategory && c.type != ChannelType.GuildVoice && c.threads.cache.size > 0) {
+                channel = c.threads.cache.find((t) => t.id == channelId);
+            }
+        });
     }
+
     return channel;
 }
