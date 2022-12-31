@@ -1,11 +1,14 @@
 const { ChannelType } = require('discord.js');
-const common = require('../common');
+const log4js = require('log4js');
 
 module.exports = {
     createChannel: createChannel,
     searchChannelIdByName: searchChannelIdByName,
     searchChannelById: searchChannelById,
 };
+
+log4js.configure(process.env.LOG4JS_CONFIG_PATH);
+const logger = log4js.getLogger('ChannelManager');
 
 /**
  * チャンネルを作成し，作成したチャンネルのIDを返す．
@@ -17,20 +20,24 @@ module.exports = {
  * @returns チャンネルID
  */
 async function createChannel(guild, categoryId, channelName, channelType) {
-    if (channelName == '') {
-        return null;
-    }
+    try {
+        if (channelName == '') {
+            return null;
+        }
 
-    var parentId = categoryId;
-    if (categoryId == '') {
-        parentId = null;
-    }
-    var channel;
-    if ((await searchChannelIdByName(guild, channelName, channelType, parentId)) != null) {
-        return await searchChannelIdByName(guild, channelName, channelType, parentId);
-    } else {
-        channel = await guild.channels.create({ name: channelName, type: channelType, parent: parentId });
-        return channel.id;
+        var parentId = categoryId;
+        if (categoryId == '') {
+            parentId = null;
+        }
+        var channel;
+        if ((await searchChannelIdByName(guild, channelName, channelType, parentId)) != null) {
+            return await searchChannelIdByName(guild, channelName, channelType, parentId);
+        } else {
+            channel = await guild.channels.create({ name: channelName, type: channelType, parent: parentId });
+            return channel.id;
+        }
+    } catch (error) {
+        logger.error(error);
     }
 }
 
@@ -43,18 +50,22 @@ async function createChannel(guild, categoryId, channelName, channelType) {
  * @returns チャンネルID
  */
 async function searchChannelIdByName(guild, channelName, channelType, categoryId) {
-    var channel;
-    const channels = await guild.channels.fetch();
-    if (categoryId != null) {
-        channel = channels.find((c) => c.name == channelName && c.type == channelType && c.parent == categoryId);
-    } else {
-        channel = channels.find((c) => c.name == channelName && c.type == channelType);
-    }
+    try {
+        var channel;
+        const channels = await guild.channels.fetch();
+        if (categoryId != null) {
+            channel = channels.find((c) => c.name == channelName && c.type == channelType && c.parent == categoryId);
+        } else {
+            channel = channels.find((c) => c.name == channelName && c.type == channelType);
+        }
 
-    if (channel != null) {
-        return channel.id;
-    } else {
-        return null;
+        if (channel != null) {
+            return channel.id;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        logger.error(error);
     }
 }
 
@@ -65,16 +76,11 @@ async function searchChannelIdByName(guild, channelName, channelType, categoryId
  * @returns チャンネルオブジェクト
  */
 async function searchChannelById(guild, channelId) {
-    var channel;
-    const channels = await guild.channels.fetch();
-    channel = channels.find((c) => c.id == channelId);
-    if (common.isEmpty(channel)) {
-        channels.forEach((c) => {
-            if (c.type != ChannelType.GuildCategory && c.type != ChannelType.GuildVoice && c.threads.cache.size > 0) {
-                channel = c.threads.cache.find((t) => t.id == channelId);
-            }
-        });
+    let channel = null;
+    try {
+        channel = await guild.channels.fetch(channelId);
+    } catch (error) {
+        logger.warn('channel missing');
     }
-
     return channel;
 }
