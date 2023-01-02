@@ -1,5 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { isEmpty, datetimeDiff, sleep } = require('../common');
+const { isEmpty, datetimeDiff, sleep, getCommandHelpEmbed } = require('../common');
 const RecruitService = require('../../db/recruit_service.js');
 const { searchMemberById } = require('../manager/memberManager.js');
 const { searchMessageById } = require('../manager/messageManager.js');
@@ -299,7 +299,7 @@ async function close(interaction, params) {
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
         const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
-        const helpEmbed = await getHelpEmbed(guild, header_message.channel.id);
+        const helpEmbed = getCommandHelpEmbed(header_message.channel.name);
         const host = header_message.interaction.user;
         const host_id = host.id;
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
@@ -503,7 +503,7 @@ async function closeNotify(interaction, params) {
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
-        const helpEmbed = await getHelpEmbed(guild, interaction.channel.id);
+        const helpEmbed = getCommandHelpEmbed(interaction.channel.name);
         const cmd_message = interaction.message;
 
         if (member.user.id === host_id) {
@@ -565,30 +565,6 @@ async function unlock(interaction, params) {
     } catch (err) {
         handleError(err, { interaction });
     }
-}
-
-async function getHelpEmbed(guild, chid) {
-    const channels = await guild.channels.fetch();
-    const sendChannel = channels.find((channel) => channel.id === chid);
-    let command = '';
-    if (sendChannel.name.match('リグマ募集')) {
-        command = '`/リグマ募集 now` or `/リグマ募集 next`';
-    } else if (sendChannel.name.match('ナワバリ')) {
-        command = '`/ナワバリ募集 now` or `/ナワバリ募集 next`';
-    } else if (sendChannel.name.match('バンカラ募集')) {
-        command = '`/バンカラ募集 now` or `/バンカラ募集 next`';
-    } else if (sendChannel.name.match('サーモン募集')) {
-        command = '`/サーモンラン募集 run`';
-    } else if (sendChannel.name.match('別ゲー募集')) {
-        command = '`/別ゲー募集 apex` or `/別ゲー募集 overwatch` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`';
-    } else if (sendChannel.name.match('プラベ募集')) {
-        command = '`/プラベ募集 recruit` or `/プラベ募集 button`';
-    } else if (sendChannel.name.match('フェス')) {
-        command = '`/〇〇陣営 now` or `/〇〇陣営 next`';
-    }
-    const embed = new EmbedBuilder();
-    embed.setDescription('募集コマンドは ' + `${command}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
-    return embed;
 }
 
 function disableUnlockButton() {
