@@ -7,6 +7,7 @@ module.exports = {
     recruitActionRow: recruitActionRow,
     notifyActionRow: notifyActionRow,
     unlockChannelButton: unlockChannelButton,
+    createNewRecruitButton: createNewRecruitButton,
 };
 
 function recruitDeleteButton(msg, header, channel_id = null) {
@@ -80,5 +81,33 @@ function unlockChannelButton(channel_id) {
     let button = new ActionRowBuilder().addComponents([
         new ButtonBuilder().setCustomId(buttonParams.toString()).setLabel('ボイスチャンネルのロック解除').setStyle(ButtonStyle.Secondary),
     ]);
+    return button;
+}
+
+function createNewRecruitButton(channelName) {
+    const allowed_channel = ['ナワバリ募集', 'バンカラ募集', 'リグマ募集', 'サーモン募集', 'ウツホ募集', 'フウカ募集', 'マンタロー募集'];
+
+    const buttonParams = new URLSearchParams();
+    buttonParams.append('d', 'newr');
+    buttonParams.append('cn', channelName);
+    const button = new ActionRowBuilder();
+    if (allowed_channel.includes(channelName)) {
+        button.addComponents([
+            new ButtonBuilder()
+                .setCustomId(buttonParams.toString())
+                .setLabel('簡易' + channelName + 'をする')
+                .setStyle(ButtonStyle.Success),
+        ]);
+    }
+    if (isNotEmpty(process.env.HOW_TO_RECRUIT_URL)) {
+        button.addComponents([
+            new ButtonBuilder().setURL(process.env.HOW_TO_RECRUIT_URL).setLabel('募集方法を確認').setStyle(ButtonStyle.Link),
+        ]);
+    } else {
+        button.addComponents([
+            new ButtonBuilder().setLabel('✗ 募集方法を確認').setCustomId('dummy').setStyle(ButtonStyle.Secondary).setDisabled(true),
+        ]);
+    }
+
     return button;
 }

@@ -50,6 +50,8 @@ const { sendCommandLog } = require('./event/command_log.js');
 const FriendCodeService = require('../db/friend_code_service.js');
 const MembersService = require('../db/members_service.js');
 const { variablesHandler } = require('./cmd/admin-cmd/environment_variables/variables_handler.js');
+const { createNewRecruitButton } = require('./buttons/create_recruit_buttons.js');
+const { handleCreateModal } = require('./modals/create_recruit_modal.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -220,6 +222,7 @@ async function onInteraction(interaction) {
                     njr: recruitButton.joinNotify,
                     ncr: recruitButton.cancelNotify,
                     nclose: recruitButton.closeNotify,
+                    newr: handleCreateModal,
                 };
                 await recruitButtons[params.get('d')](interaction, params);
             } else if (isNotEmpty(params.get('t'))) {
@@ -257,6 +260,7 @@ async function onInteraction(interaction) {
                 if (!interaction.replied) {
                     await interaction.reply({
                         embeds: [embed, getCommandHelpEmbed(interaction.channel.name)],
+                        components: [createNewRecruitButton(interaction.channel.name)],
                     });
                 }
             } else if (commandName === commandNames.team_divider) {

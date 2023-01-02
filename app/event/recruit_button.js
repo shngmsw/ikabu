@@ -7,6 +7,7 @@ const { searchChannelById } = require('../manager/channelManager.js');
 const { recoveryThinkingButton, disableThinkingButton, setButtonDisable } = require('../common/button_components');
 const log4js = require('log4js');
 const { sendContentWebhook } = require('../common/webhook');
+const { createNewRecruitButton } = require('../buttons/create_recruit_buttons');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruitButton');
@@ -333,7 +334,7 @@ async function close(interaction, params) {
                 components: await disableThinkingButton(interaction, '〆'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            await interaction.channel.send({ embeds: [helpEmbed] });
+            await interaction.channel.send({ embeds: [helpEmbed], components: createNewRecruitButton(header_message.channel.name) });
         } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
@@ -354,7 +355,7 @@ async function close(interaction, params) {
             });
             const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            await interaction.channel.send({ embeds: [helpEmbed] });
+            await interaction.channel.send({ embeds: [helpEmbed], components: createNewRecruitButton(header_message.channel.name) });
         } else {
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
@@ -518,7 +519,7 @@ async function closeNotify(interaction, params) {
             // recruitテーブルから削除
             await RecruitService.deleteByMessageId(interaction.message.id);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            await interaction.channel.send({ embeds: [helpEmbed] });
+            await interaction.channel.send({ embeds: [helpEmbed], components: createNewRecruitButton(interaction.channel.name) });
 
             return;
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
@@ -535,7 +536,7 @@ async function closeNotify(interaction, params) {
             await RecruitService.deleteByMessageId(interaction.message.id);
             const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            await interaction.channel.send({ embeds: [helpEmbed] });
+            await interaction.channel.send({ embeds: [helpEmbed], components: createNewRecruitButton(interaction.channel.name) });
         } else {
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
