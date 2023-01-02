@@ -4,12 +4,11 @@ const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const { isNotEmpty, sleep } = require('../../../common');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
-const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../common/button_components');
+const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../buttons/create_recruit_buttons');
 const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const log4js = require('log4js');
 const { fetchSchedule, getSalmonData, checkBigRun } = require('../../../common/apis/splatoon3_ink');
 const { dateformat, formatDatetime } = require('../../../common/convert_datetime');
-const big_run_recruit = require('./big_run_recruit');
 const { recruitBigRunCanvas, ruleBigRunCanvas } = require('./big_run_recruit');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
