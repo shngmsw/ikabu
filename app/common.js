@@ -105,8 +105,9 @@ function getMentionsFromMessage(message, id_only = false) {
             let delete_backward = delete_lead.slice(0, -1); // remove >
             results.push(delete_backward);
         }
+        return results;
     }
-    return results;
+    return matched;
 }
 
 function randomSelect(array, num) {

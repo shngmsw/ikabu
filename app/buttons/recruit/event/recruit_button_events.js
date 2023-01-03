@@ -64,13 +64,14 @@ async function join(interaction, params) {
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
         const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
+        const participants = getMentionsFromMessage(header_message, true);
+        const pmentions = getMentionsFromMessage(header_message);
         let host_id;
         if (isNotEmpty(header_message.interaction)) {
             let host = header_message.interaction.user;
             host_id = host.id;
         } else {
-            let mentions = getMentionsFromMessage(header_message, true);
-            host_id = mentions[0];
+            host_id = participants[0];
         }
         const host_member = await searchMemberById(guild, host_id);
         let channelId = params.get('vid');
@@ -83,9 +84,10 @@ async function join(interaction, params) {
             `${host_member.displayName}[${host_id}]の募集で${member.displayName}たんが〆ボタンを押したでし`,
         );
 
-        if (member.user.id === host_id) {
+        //if (member.user.id === host_id) {  // 募集主のみ
+        if (participants.includes(member.user.id)) {
             await interaction.followUp({
-                content: `募集主は参加表明できないでし！`,
+                content: `募集メンバーは参加表明できないでし！`,
                 ephemeral: true,
             });
 
@@ -123,12 +125,12 @@ async function join(interaction, params) {
                     components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
                 });
                 notify_to_host_message = await interaction.message.reply({
-                    content: `<@${host_id}>`,
+                    content: pmentions.join(' '),
                     embeds: [embed],
                 });
             } else {
                 notify_to_host_message = await interaction.message.reply({
-                    content: `<@${host_id}>`,
+                    content: pmentions.join(' '),
                     embeds: [embed],
                 });
             }
@@ -178,13 +180,14 @@ async function cancel(interaction, params) {
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
         const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
+        const participants = getMentionsFromMessage(header_message, true);
+        const pmentions = getMentionsFromMessage(header_message);
         let host_id;
         if (isNotEmpty(header_message.interaction)) {
             let host = header_message.interaction.user;
             host_id = host.id;
         } else {
-            let mentions = getMentionsFromMessage(header_message, true);
-            host_id = mentions[0];
+            host_id = participants[0];
         }
         const host_member = await searchMemberById(guild, host_id);
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
@@ -200,7 +203,8 @@ async function cancel(interaction, params) {
             `${host_member.displayName}[${host_id}]の募集で${member.displayName}たんが〆ボタンを押したでし`,
         );
 
-        if (member.user.id == host_id) {
+        //if (member.user.id === host_id) {  // 募集主のみ
+        if (participants.includes(member.user.id)) {
             // ピン留め解除
             header_message.unpin();
 
@@ -228,7 +232,7 @@ async function cancel(interaction, params) {
 
                 // ホストに通知
                 await interaction.message.reply({
-                    content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
+                    content: pmentions.join(' ') + `\n<@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
                 await interaction.editReply({
                     content: await memberListMessage(interaction),
@@ -261,13 +265,13 @@ async function del(interaction, params) {
         const cmd_message = await searchMessageById(guild, interaction.channelId, msg_id);
         const header_msg_id = params.get('hmid');
         const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
+        const participants = getMentionsFromMessage(header_message, true);
         let host_id;
         if (isNotEmpty(header_message.interaction)) {
             let host = header_message.interaction.user;
             host_id = host.id;
         } else {
-            let mentions = getMentionsFromMessage(header_message, true);
-            host_id = mentions[0];
+            host_id = participants[0];
         }
         const host_member = await searchMemberById(guild, host_id);
         let channelId = params.get('vid');
@@ -280,7 +284,9 @@ async function del(interaction, params) {
         if (isEmpty(channelId)) {
             channelId = null;
         }
-        if (member.user.id == host_id) {
+
+        //if (member.user.id === host_id) {  // 募集主のみ
+        if (participants.includes(member.user.id)) {
             if (channelId != null) {
                 let channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
@@ -324,13 +330,13 @@ async function close(interaction, params) {
         const header_msg_id = params.get('hmid');
         const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
         const helpEmbed = getCommandHelpEmbed(header_message.channel.name);
+        const participants = getMentionsFromMessage(header_message, true);
         let host_id;
         if (isNotEmpty(header_message.interaction)) {
             let host = header_message.interaction.user;
             host_id = host.id;
         } else {
-            let mentions = getMentionsFromMessage(header_message, true);
-            host_id = mentions[0];
+            host_id = participants[0];
         }
         const host_member = await searchMemberById(guild, host_id);
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
@@ -345,7 +351,8 @@ async function close(interaction, params) {
             `${host_member.displayName}[${host_id}]の募集で${member.displayName}たんが〆ボタンを押したでし`,
         );
 
-        if (member.user.id === host_id) {
+        // if (member.user.id === host_id) {  // 募集主のみ
+        if (participants.includes(member.user.id)) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             // ピン留め解除
