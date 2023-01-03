@@ -155,9 +155,9 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
     }
 
     const recruitBuffer = await recruitRegularCanvas(recruit_num, count, host_member, user1, user2, user3, condition, channel_name);
-    const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
+    const recruit = new AttachmentBuilder(recruitBuffer, { name: 'ikabu_recruit.png' });
 
-    const rule = new AttachmentBuilder(await ruleRegularCanvas(regular_data), 'rules.png');
+    const rule = new AttachmentBuilder(await ruleRegularCanvas(regular_data), { name: 'rules.png' });
 
     try {
         const mention = `@everyone`;

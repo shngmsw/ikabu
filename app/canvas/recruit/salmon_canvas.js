@@ -1,8 +1,8 @@
 const Canvas = require('canvas');
 const path = require('path');
-const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
-const { getSalmonData } = require('../../../common/apis/splatoon3_ink');
-const { dateformat, formatDatetime } = require('../../../common/convert_datetime');
+const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../common/canvas_components');
+const { dateformat, formatDatetime } = require('../../common/convert_datetime');
+const { getSalmonData } = require('../../common/apis/splatoon3_ink');
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), { family: 'Splatfont' });
 Canvas.registerFont(path.resolve('./fonts/GenShinGothic-P-Medium.ttf'), { family: 'Genshin' });

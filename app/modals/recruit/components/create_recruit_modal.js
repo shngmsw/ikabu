@@ -34,7 +34,7 @@ async function handleCreateModal(interaction, params) {
 
 async function createRegularModal(interaction) {
     const modalParams = new URLSearchParams();
-    modalParams.append('m', 'regrec');
+    modalParams.append('recm', 'regrec');
 
     const modal = new ModalBuilder().setCustomId(modalParams.toString()).setTitle('ナワバリ募集を作成');
 
@@ -78,7 +78,7 @@ async function createRegularModal(interaction) {
 
 async function createAnarchyModal(interaction) {
     const modalParams = new URLSearchParams();
-    modalParams.append('m', 'anarec');
+    modalParams.append('recm', 'anarec');
 
     const modal = new ModalBuilder().setCustomId(modalParams.toString()).setTitle('バンカラ募集を作成');
 
@@ -130,7 +130,7 @@ async function createAnarchyModal(interaction) {
 
 async function createFesModal(interaction, channelName) {
     const modalParams = new URLSearchParams();
-    modalParams.append('m', 'fesrec');
+    modalParams.append('recm', 'fesrec');
     modalParams.append('cn', channelName);
 
     const modal = new ModalBuilder().setCustomId(modalParams.toString()).setTitle(channelName + 'を作成');
@@ -183,7 +183,7 @@ async function createFesModal(interaction, channelName) {
 
 async function createSalmonModal(interaction) {
     const modalParams = new URLSearchParams();
-    modalParams.append('m', 'salrec');
+    modalParams.append('recm', 'salrec');
 
     const modal = new ModalBuilder().setCustomId(modalParams.toString()).setTitle('サーモン募集を作成');
 

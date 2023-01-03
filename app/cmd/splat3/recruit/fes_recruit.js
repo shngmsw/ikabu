@@ -169,9 +169,9 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
         condition,
         channel_name,
     );
-    const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
+    const recruit = new AttachmentBuilder(recruitBuffer, { name: 'ikabu_recruit.png' });
 
-    const rule = new AttachmentBuilder(await ruleFesCanvas(fes_data), 'rules.png');
+    const rule = new AttachmentBuilder(await ruleFesCanvas(fes_data), { name: 'rules.png' });
 
     try {
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });

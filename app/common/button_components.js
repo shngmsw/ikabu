@@ -1,5 +1,4 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { URLSearchParams } = require('url');
 const { isNotEmpty } = require('../common');
 
 module.exports = {

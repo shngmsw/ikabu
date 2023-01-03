@@ -207,9 +207,9 @@ async function sendAnarchyMatch(interaction, mention, txt, recruit_num, conditio
     }
 
     const recruitBuffer = await recruitAnarchyCanvas(recruit_num, count, host_member, user1, user2, condition, rank, channel_name);
-    const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
+    const recruit = new AttachmentBuilder(recruitBuffer, { name: 'ikabu_recruit.png' }.png);
 
-    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchy_data, thumbnail), 'rules.png');
+    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchy_data, thumbnail), { name: 'rules.png' });
 
     try {
         const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });

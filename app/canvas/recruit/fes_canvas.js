@@ -1,7 +1,7 @@
 const Canvas = require('canvas');
 const path = require('path');
-const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
-const { dateformat, formatDatetime } = require('../../../common/convert_datetime');
+const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../common/canvas_components');
+const { dateformat, formatDatetime } = require('../../common/convert_datetime');
 
 module.exports = {
     recruitFesCanvas: recruitFesCanvas,

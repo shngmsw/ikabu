@@ -1,8 +1,8 @@
 const Canvas = require('canvas');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../common/canvas_components');
-const log4js = require('log4js');
 const { getBigRunData } = require('../../common/apis/splatoon3_ink');
 const { dateformat, formatDatetime } = require('../../common/convert_datetime');
+const log4js = require('log4js');
 
 module.exports = {
     recruitBigRunCanvas: recruitBigRunCanvas,

@@ -51,7 +51,13 @@ const FriendCodeService = require('../db/friend_code_service.js');
 const MembersService = require('../db/members_service.js');
 const { variablesHandler } = require('./cmd/admin-cmd/environment_variables/variables_handler.js');
 const { createNewRecruitButton } = require('./buttons/create_recruit_buttons.js');
-const { handleCreateModal } = require('./modals/create_recruit_modal.js');
+const { handleCreateModal } = require('./modals/recruit/components/create_recruit_modal.js');
+const {
+    modalRegularRecruit,
+    modalAnarchyRecruit,
+    modalSalmonRecruit,
+    modalFesRecruit,
+} = require('./modals/recruit/event/extract_recruit_modal.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -247,6 +253,20 @@ async function onInteraction(interaction) {
             }
             return;
         }
+
+        if (interaction.isModalSubmit()) {
+            const params = new URLSearchParams(interaction.customId);
+            if (isNotEmpty(params.get('recm'))) {
+                const recruitModals = {
+                    regrec: modalRegularRecruit,
+                    anarec: modalAnarchyRecruit,
+                    salrec: modalSalmonRecruit,
+                    fesrec: modalFesRecruit,
+                };
+                await recruitModals[params.get('recm')](interaction, params);
+            }
+        }
+
         if (interaction.isCommand()) {
             const { commandName } = interaction;
 

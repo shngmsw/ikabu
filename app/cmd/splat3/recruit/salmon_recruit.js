@@ -128,7 +128,7 @@ async function sendSalmonRun(interaction, txt, recruit_num, condition, count, ho
         ruleBuffer = await ruleSalmonCanvas(data);
     }
 
-    const recruit = new AttachmentBuilder(recruitBuffer, 'ikabu_recruit.png');
+    const recruit = new AttachmentBuilder(recruitBuffer, { name: 'ikabu_recruit.png' });
 
     const rule = new AttachmentBuilder(ruleBuffer, 'schedule.png');
 
