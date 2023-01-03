@@ -7,6 +7,7 @@ const { sendRegularMatch } = require('./regular_recruit_modal');
 const { sendAnarchyMatch } = require('./anarchy_recruit_modal');
 const { sendSalmonRun } = require('./salmon_recruit_modal');
 const { sendFesMatch } = require('./fes_recruit_modal');
+const { sendRecruitModalLog } = require('../../../event/command_log');
 const log4js = require('log4js');
 
 module.exports = {
@@ -61,6 +62,8 @@ async function modalRegularRecruit(interaction, params) {
 
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
+
+    sendRecruitModalLog(interaction);
 
     try {
         const data = await fetchSchedule();
@@ -153,6 +156,9 @@ async function modalAnarchyRecruit(interaction, params) {
 
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
+
+    sendRecruitModalLog(interaction);
+
     const rank = '指定なし';
 
     const members = await guild.members.fetch();
@@ -271,6 +277,8 @@ async function modalSalmonRecruit(interaction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
+    sendRecruitModalLog(interaction);
+
     try {
         const members = await guild.members.fetch();
 
@@ -376,6 +384,8 @@ async function modalFesRecruit(interaction, params) {
 
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
+
+    sendRecruitModalLog(interaction);
 
     try {
         const data = await fetchSchedule();
