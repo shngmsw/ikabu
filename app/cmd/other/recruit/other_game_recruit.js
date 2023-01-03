@@ -2,7 +2,11 @@ const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const { isNotEmpty, sleep } = require('../../../common');
-const { recruitActionRow, recruitDeleteButton, unlockChannelButton } = require('../../../buttons/create_recruit_buttons');
+const {
+    recruitActionRow,
+    recruitDeleteButton,
+    unlockChannelButton,
+} = require('../../../buttons/recruit/components/create_recruit_buttons');
 const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);

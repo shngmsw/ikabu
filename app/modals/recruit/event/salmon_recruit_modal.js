@@ -1,6 +1,6 @@
 const { searchMessageById } = require('../../../manager/messageManager');
 const { isNotEmpty, sleep } = require('../../../common');
-const { recruitActionRow, recruitDeleteButton } = require('../../../buttons/create_recruit_buttons');
+const { recruitActionRow, recruitDeleteButton } = require('../../../buttons/recruit/components/create_recruit_buttons');
 const { AttachmentBuilder } = require('discord.js');
 const { fetchSchedule, checkBigRun } = require('../../../common/apis/splatoon3_ink');
 const { recruitBigRunCanvas, ruleBigRunCanvas } = require('../../../canvas/recruit/big_run_canvas');

@@ -34,7 +34,7 @@ const chatCountUp = require('./event/members.js');
 const emojiCountUp = require('./event/reactions.js');
 const { guildMemberAddEvent } = require('./event/rookie/set_rookie.js');
 const deleteToken = require('./event/delete_token.js');
-const recruitButton = require('./event/recruit_button.js');
+const recruitButton = require('./buttons/recruit/event/recruit_button_events.js');
 const divider = require('./cmd/other/team_divider/divider');
 const { sendIntentionConfirmReply, sendQuestionnaireFollowUp, disableQuestionnaireButtons } = require('./event/rookie/send_questionnaire');
 const handleIkabuExperience = require('./cmd/other/experience.js');
@@ -50,7 +50,7 @@ const { sendCommandLog } = require('./event/command_log.js');
 const FriendCodeService = require('../db/friend_code_service.js');
 const MembersService = require('../db/members_service.js');
 const { variablesHandler } = require('./cmd/admin-cmd/environment_variables/variables_handler.js');
-const { createNewRecruitButton } = require('./buttons/create_recruit_buttons.js');
+const { createNewRecruitButton } = require('./buttons/recruit/components/create_recruit_buttons.js');
 const { handleCreateModal } = require('./modals/recruit/components/create_recruit_modal.js');
 const {
     modalRegularRecruit,
