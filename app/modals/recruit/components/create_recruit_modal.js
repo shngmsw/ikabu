@@ -43,6 +43,7 @@ async function createRegularModal(interaction) {
         .setLabel('募集人数')
         .setStyle(TextInputStyle.Short)
         .setPlaceholder('例: 5')
+        .setMaxLength(1)
         .setRequired(true);
 
     const participantsNumInput = new TextInputBuilder()
@@ -50,6 +51,7 @@ async function createRegularModal(interaction) {
         .setLabel('既にいる参加者の数 (あなたを除く)')
         .setStyle(TextInputStyle.Short)
         .setPlaceholder('例: 2')
+        .setMaxLength(1)
         .setRequired(true);
 
     const participantsList = new TextInputBuilder()
@@ -64,6 +66,7 @@ async function createRegularModal(interaction) {
         .setLabel('参加条件')
         .setStyle(TextInputStyle.Paragraph)
         .setPlaceholder('例: 21時まで えんじょい！')
+        .setMaxLength(120)
         .setRequired(true);
 
     const actionRow1 = new ActionRowBuilder().addComponents(recruitNumInput);
@@ -87,6 +90,7 @@ async function createAnarchyModal(interaction) {
         .setLabel('募集人数')
         .setStyle(TextInputStyle.Short)
         .setPlaceholder('例: 2')
+        .setMaxLength(1)
         .setRequired(true);
 
     const participantsNumInput = new TextInputBuilder()
@@ -94,6 +98,7 @@ async function createAnarchyModal(interaction) {
         .setLabel('既にいる参加者の数 (あなたを除く)')
         .setStyle(TextInputStyle.Short)
         .setPlaceholder('例: 1')
+        .setMaxLength(1)
         .setRequired(true);
 
     const participant1 = new TextInputBuilder()
@@ -115,6 +120,7 @@ async function createAnarchyModal(interaction) {
         .setLabel('参加条件')
         .setStyle(TextInputStyle.Paragraph)
         .setPlaceholder('例: 21時まで えんじょい！')
+        .setMaxLength(120)
         .setRequired(true);
 
     const actionRow1 = new ActionRowBuilder().addComponents(recruitNumInput);
@@ -140,6 +146,7 @@ async function createFesModal(interaction, channelName) {
         .setLabel('募集人数')
         .setStyle(TextInputStyle.Short)
         .setPlaceholder('例: 2')
+        .setMaxLength(1)
         .setRequired(true);
 
     const participantsNumInput = new TextInputBuilder()
@@ -147,6 +154,7 @@ async function createFesModal(interaction, channelName) {
         .setLabel('既にいる参加者の数 (あなたを除く)')
         .setStyle(TextInputStyle.Short)
         .setPlaceholder('例: 1')
+        .setMaxLength(1)
         .setRequired(true);
 
     const participant1 = new TextInputBuilder()
@@ -168,6 +176,7 @@ async function createFesModal(interaction, channelName) {
         .setLabel('参加条件')
         .setStyle(TextInputStyle.Paragraph)
         .setPlaceholder('例: 21時まで えんじょい！')
+        .setMaxLength(120)
         .setRequired(true);
 
     const actionRow1 = new ActionRowBuilder().addComponents(recruitNumInput);
@@ -192,6 +201,7 @@ async function createSalmonModal(interaction) {
         .setLabel('募集人数')
         .setStyle(TextInputStyle.Short)
         .setPlaceholder('例: 2')
+        .setMaxLength(1)
         .setRequired(true);
 
     const participantsNumInput = new TextInputBuilder()
@@ -199,6 +209,7 @@ async function createSalmonModal(interaction) {
         .setLabel('既にいる参加者の数 (あなたを除く)')
         .setStyle(TextInputStyle.Short)
         .setPlaceholder('例: 1')
+        .setMaxLength(1)
         .setRequired(true);
 
     const participant1 = new TextInputBuilder()
@@ -220,6 +231,7 @@ async function createSalmonModal(interaction) {
         .setLabel('参加条件')
         .setStyle(TextInputStyle.Paragraph)
         .setPlaceholder('例: 21時まで えんじょい！')
+        .setMaxLength(120)
         .setRequired(true);
 
     const actionRow1 = new ActionRowBuilder().addComponents(recruitNumInput);
