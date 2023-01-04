@@ -4,6 +4,7 @@ const { sendEmbedsWebhook } = require('../common/webhook');
 
 module.exports = {
     sendCommandLog: sendCommandLog,
+    sendRecruitButtonLog: sendRecruitButtonLog,
     sendRecruitModalLog: sendRecruitModalLog,
 };
 
@@ -15,7 +16,7 @@ async function sendCommandLog(interaction) {
     const author = await searchMemberById(guild, authorId);
     const commandName = interaction.toString();
 
-    embed = new EmbedBuilder();
+    const embed = new EmbedBuilder();
     embed.setTitle('コマンドログ');
     embed.setAuthor({
         name: `${author.displayName} [${interaction.member.user.id}]`,
@@ -33,9 +34,22 @@ async function sendCommandLog(interaction) {
             inline: false,
         },
     ]);
-    embed.setColor('#FFFFFF');
+    embed.setColor('#CFCFCF');
     embed.setTimestamp(interaction.createdAt);
     await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
+}
+
+async function sendRecruitButtonLog(interaction, member, host_member, button_name, color) {
+    const embed = new EmbedBuilder();
+    embed.setTitle(interaction.channel.name + 'で' + button_name + 'ボタンが押されたでし！');
+    embed.setAuthor({
+        name: `${member.displayName} [${member.user.id}]`,
+        iconURL: member.displayAvatarURL(),
+    });
+    embed.setDescription('**募集主**: ' + host_member.displayName + ' [' + host_member.user.id + ']');
+    embed.setColor(color);
+    embed.setTimestamp(interaction.createdAt);
+    await sendEmbedsWebhook(process.env.BUTTON_LOG_WEBHOOK_URL, [embed]);
 }
 
 async function sendRecruitModalLog(interaction) {
@@ -51,7 +65,7 @@ async function sendRecruitModalLog(interaction) {
         commandLog = commandLog + subcomponents.components[0].customId + ': ' + subcomponents.components[0].value + '\n';
     }
 
-    embed = new EmbedBuilder();
+    const embed = new EmbedBuilder();
     embed.setTitle('モーダルログ');
     embed.setAuthor({
         name: `${author.displayName} [${interaction.member.user.id}]`,
