@@ -193,11 +193,13 @@ async function getRegularData(data, num) {
         result = {};
         result.startTime = regular_list[num].startTime;
         result.endTime = regular_list[num].endTime;
-        result.rule = await rule2txt(data.locale, r_setting.vsRule.id);
-        result.stage1 = await stage2txt(data.locale, r_setting.vsStages[0].id);
-        result.stage2 = await stage2txt(data.locale, r_setting.vsStages[1].id);
-        result.stageImage1 = r_setting.vsStages[0].image.url;
-        result.stageImage2 = r_setting.vsStages[1].image.url;
+        if (!checkFes(data.schedule, num)) {
+            result.rule = await rule2txt(data.locale, r_setting.vsRule.id);
+            result.stage1 = await stage2txt(data.locale, r_setting.vsStages[0].id);
+            result.stage2 = await stage2txt(data.locale, r_setting.vsStages[1].id);
+            result.stageImage1 = r_setting.vsStages[0].image.url;
+            result.stageImage2 = r_setting.vsStages[1].image.url;
+        }
         return result;
     } catch (error) {
         logger.error(error);
@@ -218,11 +220,13 @@ async function getAnarchyChallengeData(data, num) {
         let result = {};
         result.startTime = anarchy_list[num].startTime;
         result.endTime = anarchy_list[num].endTime;
-        result.rule = await rule2txt(data.locale, a_settings[0].vsRule.id);
-        result.stage1 = await stage2txt(data.locale, a_settings[0].vsStages[0].id);
-        result.stage2 = await stage2txt(data.locale, a_settings[0].vsStages[1].id);
-        result.stageImage1 = a_settings[0].vsStages[0].image.url;
-        result.stageImage2 = a_settings[0].vsStages[1].image.url;
+        if (!checkFes(data.schedule, num)) {
+            result.rule = await rule2txt(data.locale, a_settings[0].vsRule.id);
+            result.stage1 = await stage2txt(data.locale, a_settings[0].vsStages[0].id);
+            result.stage2 = await stage2txt(data.locale, a_settings[0].vsStages[1].id);
+            result.stageImage1 = a_settings[0].vsStages[0].image.url;
+            result.stageImage2 = a_settings[0].vsStages[1].image.url;
+        }
         return result;
     } catch (error) {
         logger.error(error);
@@ -243,11 +247,13 @@ async function getAnarchyOpenData(data, num) {
         let result = {};
         result.startTime = anarchy_list[num].startTime;
         result.endTime = anarchy_list[num].endTime;
-        result.rule = await rule2txt(data.locale, a_settings[1].vsRule.id);
-        result.stage1 = await stage2txt(data.locale, a_settings[1].vsStages[0].id);
-        result.stage2 = await stage2txt(data.locale, a_settings[1].vsStages[1].id);
-        result.stageImage1 = a_settings[1].vsStages[0].image.url;
-        result.stageImage2 = a_settings[1].vsStages[1].image.url;
+        if (!checkFes(data.schedule, num)) {
+            result.rule = await rule2txt(data.locale, a_settings[1].vsRule.id);
+            result.stage1 = await stage2txt(data.locale, a_settings[1].vsStages[0].id);
+            result.stage2 = await stage2txt(data.locale, a_settings[1].vsStages[1].id);
+            result.stageImage1 = a_settings[1].vsStages[0].image.url;
+            result.stageImage2 = a_settings[1].vsStages[1].image.url;
+        }
         return result;
     } catch (error) {
         logger.error(error);
@@ -268,11 +274,13 @@ async function getLeagueData(data, num) {
         let result = {};
         result.startTime = league_list[num].startTime;
         result.endTime = league_list[num].endTime;
-        result.rule = await rule2txt(data.locale, l_settings.vsRule.id);
-        result.stage1 = await stage2txt(data.locale, l_settings.vsStages[0].id);
-        result.stage2 = await stage2txt(data.locale, l_settings.vsStages[1].id);
-        result.stageImage1 = l_settings.vsStages[0].image.url;
-        result.stageImage2 = l_settings.vsStages[1].image.url;
+        if (!checkFes(data.schedule, num)) {
+            result.rule = await rule2txt(data.locale, l_settings.vsRule.id);
+            result.stage1 = await stage2txt(data.locale, l_settings.vsStages[0].id);
+            result.stage2 = await stage2txt(data.locale, l_settings.vsStages[1].id);
+            result.stageImage1 = l_settings.vsStages[0].image.url;
+            result.stageImage2 = l_settings.vsStages[1].image.url;
+        }
         return result;
     } catch (error) {
         logger.error(error);
@@ -319,11 +327,13 @@ async function getXMatchData(data, num) {
         let result = {};
         result.startTime = x_list[num].startTime;
         result.endTime = x_list[num].endTime;
-        result.rule = await rule2txt(data.locale, x_settings.vsRule.id);
-        result.stage1 = await stage2txt(data.locale, x_settings.vsStages[0].id);
-        result.stage2 = await stage2txt(data.locale, x_settings.vsStages[1].id);
-        result.stageImage1 = x_settings.vsStages[0].image.url;
-        result.stageImage2 = x_settings.vsStages[1].image.url;
+        if (!checkFes(data.schedule, num)) {
+            result.rule = await rule2txt(data.locale, x_settings.vsRule.id);
+            result.stage1 = await stage2txt(data.locale, x_settings.vsStages[0].id);
+            result.stage2 = await stage2txt(data.locale, x_settings.vsStages[1].id);
+            result.stageImage1 = x_settings.vsStages[0].image.url;
+            result.stageImage2 = x_settings.vsStages[1].image.url;
+        }
         return result;
     } catch (error) {
         logger.error(error);
@@ -344,11 +354,13 @@ async function getFesData(data, num) {
         let result = {};
         result.startTime = fes_list[num].startTime;
         result.endTime = fes_list[num].endTime;
-        result.rule = await rule2txt(data.locale, f_setting.vsRule.id);
-        result.stage1 = await stage2txt(data.locale, f_setting.vsStages[0].id);
-        result.stage2 = await stage2txt(data.locale, f_setting.vsStages[1].id);
-        result.stageImage1 = f_setting.vsStages[0].image.url;
-        result.stageImage2 = f_setting.vsStages[1].image.url;
+        if (checkFes(data.schedule, num)) {
+            result.rule = await rule2txt(data.locale, f_setting.vsRule.id);
+            result.stage1 = await stage2txt(data.locale, f_setting.vsStages[0].id);
+            result.stage2 = await stage2txt(data.locale, f_setting.vsStages[1].id);
+            result.stageImage1 = f_setting.vsStages[0].image.url;
+            result.stageImage2 = f_setting.vsStages[1].image.url;
+        }
         return result;
     } catch (error) {
         logger.error(error);
