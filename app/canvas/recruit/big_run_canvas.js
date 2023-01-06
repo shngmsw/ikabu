@@ -1,13 +1,14 @@
+const Canvas = require('canvas');
+const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../common/canvas_components');
+const { getBigRunData } = require('../../common/apis/splatoon3_ink');
+const { dateformat, formatDatetime } = require('../../common/convert_datetime');
+const log4js = require('log4js');
+const { modalRecruit } = require('../../../constant.js');
+
 module.exports = {
     recruitBigRunCanvas: recruitBigRunCanvas,
     ruleBigRunCanvas: ruleBigRunCanvas,
 };
-
-const Canvas = require('canvas');
-const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../../common/canvas_components');
-const log4js = require('log4js');
-const { getBigRunData } = require('../../../common/apis/splatoon3_ink');
-const { dateformat, formatDatetime } = require('../../../common/convert_datetime');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruit');
@@ -42,46 +43,31 @@ async function recruitBigRunCanvas(recruit_num, count, host_member, user1, user2
         recruit_ctx.stroke();
         recruit_ctx.restore();
 
-        let user1_url = blank_avatar_url;
-        let user2_url = blank_avatar_url;
-        let user3_url = blank_avatar_url;
+        let member_urls = [];
 
-        // 参加者指定があれば、画像を拾ってくる
-        if (user1 != null && user2 != null) {
-            user1_url = user1.displayAvatarURL({ extension: 'png' });
-            user2_url = user2.displayAvatarURL({ extension: 'png' });
-        } else if (user1 != null && user2 == null) {
-            user1_url = user1.displayAvatarURL({ extension: 'png' });
-        } else if (user1 == null && user2 != null) {
-            user1_url = user2.displayAvatarURL({ extension: 'png' });
+        if (user1 === 'dummy_icon') {
+            member_urls.push(modalRecruit.placeHold);
+        } else if (user1 != null) {
+            member_urls.push(user1.displayAvatarURL({ extension: 'png' }));
         }
 
-        let user1_img = await Canvas.loadImage(user1_url);
-        recruit_ctx.save();
-        drawArcImage(recruit_ctx, user1_img, 158, 120, 50);
-        recruit_ctx.strokeStyle = '#1e1f23';
-        recruit_ctx.lineWidth = 9;
-        recruit_ctx.stroke();
-        recruit_ctx.restore();
-
-        if (count >= 3) {
-            let user2_img = await Canvas.loadImage(user2_url);
-            recruit_ctx.save();
-            drawArcImage(recruit_ctx, user2_img, 276, 120, 50);
-            recruit_ctx.strokeStyle = '#1e1f23';
-            recruit_ctx.lineWidth = 9;
-            recruit_ctx.stroke();
-            recruit_ctx.restore();
+        if (user2 === 'dummy_icon') {
+            member_urls.push(modalRecruit.placeHold);
+        } else if (user2 != null) {
+            member_urls.push(user2.displayAvatarURL({ extension: 'png' }));
         }
 
-        if (count == 4) {
-            let user3_img = await Canvas.loadImage(user3_url);
-            recruit_ctx.save();
-            drawArcImage(recruit_ctx, user3_img, 394, 120, 50);
-            recruit_ctx.strokeStyle = '#1e1f23';
-            recruit_ctx.lineWidth = 9;
-            recruit_ctx.stroke();
-            recruit_ctx.restore();
+        for (let i = 0; i < 4; i++) {
+            if (count >= i + 2) {
+                let user_url = member_urls[i] != null ? member_urls[i] : blank_avatar_url;
+                let user_img = await Canvas.loadImage(user_url);
+                recruit_ctx.save();
+                drawArcImage(recruit_ctx, user_img, i * 118 + 158, 120, 50);
+                recruit_ctx.strokeStyle = '#1e1f23';
+                recruit_ctx.lineWidth = 9;
+                recruit_ctx.stroke();
+                recruit_ctx.restore();
+            }
         }
 
         let host_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');

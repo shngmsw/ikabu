@@ -1,12 +1,13 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { isEmpty, datetimeDiff, sleep } = require('../common');
-const RecruitService = require('../../db/recruit_service.js');
-const { searchMemberById } = require('../manager/memberManager.js');
-const { searchMessageById } = require('../manager/messageManager.js');
-const { searchChannelById } = require('../manager/channelManager.js');
-const { recoveryThinkingButton, disableThinkingButton, setButtonDisable } = require('../common/button_components');
+const { isEmpty, datetimeDiff, sleep, getCommandHelpEmbed, isNotEmpty, getMentionsFromMessage } = require('../../../common');
+const RecruitService = require('../../../../db/recruit_service.js');
+const { searchMemberById } = require('../../../manager/memberManager.js');
+const { searchMessageById } = require('../../../manager/messageManager.js');
+const { searchChannelById } = require('../../../manager/channelManager.js');
+const { recoveryThinkingButton, disableThinkingButton, setButtonDisable } = require('../../../common/button_components');
+const { createNewRecruitButton } = require('../components/create_recruit_buttons');
+const { sendRecruitButtonLog } = require('../../../event/command_log');
 const log4js = require('log4js');
-const { sendContentWebhook } = require('../common/webhook');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('recruitButton');
@@ -63,21 +64,27 @@ async function join(interaction, params) {
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
         const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
-        const host = header_message.interaction.user;
-        const host_id = host.id;
+        const participants = getMentionsFromMessage(header_message, true);
+        const pmentions = getMentionsFromMessage(header_message);
+        let host_id;
+        if (isNotEmpty(header_message.interaction)) {
+            let host = header_message.interaction.user;
+            host_id = host.id;
+        } else {
+            host_id = participants[0];
+        }
+        const host_member = await searchMemberById(guild, host_id);
         let channelId = params.get('vid');
         if (isEmpty(channelId)) {
             channelId = null;
         }
 
-        await sendContentWebhook(
-            process.env.BUTTON_LOG_WEBHOOK_URL,
-            `${host.tag}[${host.id}]の募集で${member.displayName}たんが参加ボタンを押したでし`,
-        );
+        sendRecruitButtonLog(interaction, member, host_member, '参加', '#5865f2');
 
-        if (member.user.id === host_id) {
+        //if (member.user.id === host_id) {  // 募集主のみ
+        if (participants.includes(member.user.id)) {
             await interaction.followUp({
-                content: `募集主は参加表明できないでし！`,
+                content: `募集メンバーは参加表明できないでし！`,
                 ephemeral: true,
             });
 
@@ -115,12 +122,12 @@ async function join(interaction, params) {
                     components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
                 });
                 notify_to_host_message = await interaction.message.reply({
-                    content: `<@${host_id}>`,
+                    content: pmentions.join(' '),
                     embeds: [embed],
                 });
             } else {
                 notify_to_host_message = await interaction.message.reply({
-                    content: `<@${host_id}>`,
+                    content: pmentions.join(' '),
                     embeds: [embed],
                 });
             }
@@ -170,21 +177,28 @@ async function cancel(interaction, params) {
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
         const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
-        const host = header_message.interaction.user;
-        const host_id = host.id;
+        const participants = getMentionsFromMessage(header_message, true);
+        const pmentions = getMentionsFromMessage(header_message);
+        let host_id;
+        if (isNotEmpty(header_message.interaction)) {
+            let host = header_message.interaction.user;
+            host_id = host.id;
+        } else {
+            host_id = participants[0];
+        }
+        const host_member = await searchMemberById(guild, host_id);
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
+        const helpEmbed = getCommandHelpEmbed(interaction.channel.name);
         const cmd_message = interaction.message;
         let channelId = params.get('vid');
         if (isEmpty(channelId)) {
             channelId = null;
         }
 
-        await sendContentWebhook(
-            process.env.BUTTON_LOG_WEBHOOK_URL,
-            `${host.tag}[${host.id}]の募集で${member.displayName}たんがキャンセルボタンを押したでし`,
-        );
+        sendRecruitButtonLog(interaction, member, host_member, 'キャンセル', '#f04747');
 
-        if (member.user.id == host_id) {
+        //if (member.user.id === host_id) {  // 募集主のみ
+        if (participants.includes(member.user.id)) {
             // ピン留め解除
             header_message.unpin();
 
@@ -202,6 +216,7 @@ async function cancel(interaction, params) {
                 components: await disableThinkingButton(interaction, 'キャンセル'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
+            await interaction.channel.send({ embeds: [helpEmbed], components: [createNewRecruitButton(interaction.channel.name)] });
         } else {
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
             const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user.id);
@@ -211,7 +226,7 @@ async function cancel(interaction, params) {
 
                 // ホストに通知
                 await interaction.message.reply({
-                    content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
+                    content: pmentions.join(' ') + `\n<@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
                 await interaction.editReply({
                     content: await memberListMessage(interaction),
@@ -244,19 +259,25 @@ async function del(interaction, params) {
         const cmd_message = await searchMessageById(guild, interaction.channelId, msg_id);
         const header_msg_id = params.get('hmid');
         const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
-        const host = header_message.interaction.user;
-        const host_id = host.id;
+        const participants = getMentionsFromMessage(header_message, true);
+        let host_id;
+        if (isNotEmpty(header_message.interaction)) {
+            let host = header_message.interaction.user;
+            host_id = host.id;
+        } else {
+            host_id = participants[0];
+        }
+        const host_member = await searchMemberById(guild, host_id);
         let channelId = params.get('vid');
 
-        await sendContentWebhook(
-            process.env.BUTTON_LOG_WEBHOOK_URL,
-            `${host.tag}[${host_id}]の募集で${member.displayName}たんが募集削除ボタンを押したでし`,
-        );
+        sendRecruitButtonLog(interaction, member, host_member, '削除', '#f04747');
 
         if (isEmpty(channelId)) {
             channelId = null;
         }
-        if (member.user.id == host_id) {
+
+        //if (member.user.id === host_id) {  // 募集主のみ
+        if (participants.includes(member.user.id)) {
             if (channelId != null) {
                 let channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
@@ -299,9 +320,16 @@ async function close(interaction, params) {
         const member = await searchMemberById(guild, interaction.member.user.id);
         const header_msg_id = params.get('hmid');
         const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
-        const helpEmbed = await getHelpEmbed(guild, header_message.channel.id);
-        const host = header_message.interaction.user;
-        const host_id = host.id;
+        const helpEmbed = getCommandHelpEmbed(header_message.channel.name);
+        const participants = getMentionsFromMessage(header_message, true);
+        let host_id;
+        if (isNotEmpty(header_message.interaction)) {
+            let host = header_message.interaction.user;
+            host_id = host.id;
+        } else {
+            host_id = participants[0];
+        }
+        const host_member = await searchMemberById(guild, host_id);
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const cmd_message = interaction.message;
         let channelId = params.get('vid');
@@ -309,12 +337,10 @@ async function close(interaction, params) {
             channelId = null;
         }
 
-        await sendContentWebhook(
-            process.env.BUTTON_LOG_WEBHOOK_URL,
-            `${host.tag}[${host.id}]の募集で${member.displayName}たんが〆ボタンを押したでし`,
-        );
+        sendRecruitButtonLog(interaction, member, host_member, '〆', '#4f545c');
 
-        if (member.user.id === host_id) {
+        // if (member.user.id === host_id) {  // 募集主のみ
+        if (participants.includes(member.user.id)) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             // ピン留め解除
@@ -333,7 +359,7 @@ async function close(interaction, params) {
                 components: await disableThinkingButton(interaction, '〆'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            await interaction.channel.send({ embeds: [helpEmbed] });
+            await interaction.channel.send({ embeds: [helpEmbed], components: [createNewRecruitButton(header_message.channel.name)] });
         } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
@@ -354,7 +380,7 @@ async function close(interaction, params) {
             });
             const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            await interaction.channel.send({ embeds: [helpEmbed] });
+            await interaction.channel.send({ embeds: [helpEmbed], components: [createNewRecruitButton(header_message.channel.name)] });
         } else {
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
@@ -376,6 +402,10 @@ async function joinNotify(interaction, params) {
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
+        const host_member = await searchMemberById(guild, host_id);
+
+        sendRecruitButtonLog(interaction, member, host_member, '参加', '#5865f2');
+
         if (member.user.id === host_id) {
             await interaction.followUp({
                 content: `募集主は参加表明できないでし！`,
@@ -455,6 +485,9 @@ async function cancelNotify(interaction, params) {
         const host_id = params.get('hid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const cmd_message = interaction.message;
+        const host_member = await searchMemberById(guild, host_id);
+
+        sendRecruitButtonLog(interaction, member, host_member, 'キャンセル', '#f04747');
 
         if (member.user.id == host_id) {
             // ピン留め解除
@@ -502,9 +535,12 @@ async function closeNotify(interaction, params) {
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
+        const host_member = await searchMemberById(guild, host_id);
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
-        const helpEmbed = await getHelpEmbed(guild, interaction.channel.id);
+        const helpEmbed = getCommandHelpEmbed(interaction.channel.name);
         const cmd_message = interaction.message;
+
+        sendRecruitButtonLog(interaction, member, host_member, '〆', '#4f545c');
 
         if (member.user.id === host_id) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
@@ -518,7 +554,7 @@ async function closeNotify(interaction, params) {
             // recruitテーブルから削除
             await RecruitService.deleteByMessageId(interaction.message.id);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            await interaction.channel.send({ embeds: [helpEmbed] });
+            await interaction.channel.send({ embeds: [helpEmbed], components: [createNewRecruitButton(interaction.channel.name)] });
 
             return;
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
@@ -535,7 +571,7 @@ async function closeNotify(interaction, params) {
             await RecruitService.deleteByMessageId(interaction.message.id);
             const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            await interaction.channel.send({ embeds: [helpEmbed] });
+            await interaction.channel.send({ embeds: [helpEmbed], components: [createNewRecruitButton(interaction.channel.name)] });
         } else {
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,
@@ -565,30 +601,6 @@ async function unlock(interaction, params) {
     } catch (err) {
         handleError(err, { interaction });
     }
-}
-
-async function getHelpEmbed(guild, chid) {
-    const channels = await guild.channels.fetch();
-    const sendChannel = channels.find((channel) => channel.id === chid);
-    let command = '';
-    if (sendChannel.name.match('リグマ募集')) {
-        command = '`/リグマ募集 now` or `/リグマ募集 next`';
-    } else if (sendChannel.name.match('ナワバリ')) {
-        command = '`/ナワバリ募集 now` or `/ナワバリ募集 next`';
-    } else if (sendChannel.name.match('バンカラ募集')) {
-        command = '`/バンカラ募集 now` or `/バンカラ募集 next`';
-    } else if (sendChannel.name.match('サーモン募集')) {
-        command = '`/サーモンラン募集 run`';
-    } else if (sendChannel.name.match('別ゲー募集')) {
-        command = '`/別ゲー募集 apex` or `/別ゲー募集 overwatch` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`';
-    } else if (sendChannel.name.match('プラベ募集')) {
-        command = '`/プラベ募集 recruit` or `/プラベ募集 button`';
-    } else if (sendChannel.name.match('フェス')) {
-        command = '`/〇〇陣営 now` or `/〇〇陣営 next`';
-    }
-    const embed = new EmbedBuilder();
-    embed.setDescription('募集コマンドは ' + `${command}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
-    return embed;
 }
 
 function disableUnlockButton() {

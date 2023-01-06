@@ -2,7 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const { isNotEmpty, sleep } = require('../../../common');
-const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../common/button_components');
+const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../buttons/recruit/components/create_recruit_buttons');
 const e = require('express');
 const log4js = require('log4js');
 
