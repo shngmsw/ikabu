@@ -2,7 +2,7 @@ const path = require('path');
 const Canvas = require('canvas');
 const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../common/canvas_components');
 const { dateformat, formatDatetime } = require('../../common/convert_datetime');
-const { isNotEmpty } = require('../../common');
+const { modalRecruit } = require('../../../constant.js');
 
 module.exports = {
     recruitAnarchyCanvas: recruitAnarchyCanvas,
@@ -48,17 +48,13 @@ async function recruitAnarchyCanvas(recruit_num, count, host_member, user1, user
     let member_urls = [];
 
     if (user1 === 'dummy_icon') {
-        member_urls.push(
-            'http://placehold.jp/30/3d4070/ffffff/150x150.png?text=%E8%A1%A8%E7%A4%BA%E3%81%99%E3%82%8B%E3%81%AB%E3%81%AF%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%81%A7%E5%8B%9F%E9%9B%86',
-        );
+        member_urls.push(modalRecruit.placeHold);
     } else if (user1 != null) {
         member_urls.push(user1.displayAvatarURL({ extension: 'png' }));
     }
 
     if (user2 === 'dummy_icon') {
-        member_urls.push(
-            'http://placehold.jp/30/3d4070/ffffff/150x150.png?text=%E8%A1%A8%E7%A4%BA%E3%81%99%E3%82%8B%E3%81%AB%E3%81%AF%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%81%A7%E5%8B%9F%E9%9B%86',
-        );
+        member_urls.push(modalRecruit.placeHold);
     } else if (user2 != null) {
         member_urls.push(user2.displayAvatarURL({ extension: 'png' }));
     }

@@ -3,6 +3,7 @@ const { createRoundRect, drawArcImage, fillTextWithStroke } = require('../../com
 const { getBigRunData } = require('../../common/apis/splatoon3_ink');
 const { dateformat, formatDatetime } = require('../../common/convert_datetime');
 const log4js = require('log4js');
+const { modalRecruit } = require('../../../constant.js');
 
 module.exports = {
     recruitBigRunCanvas: recruitBigRunCanvas,
@@ -45,17 +46,13 @@ async function recruitBigRunCanvas(recruit_num, count, host_member, user1, user2
         let member_urls = [];
 
         if (user1 === 'dummy_icon') {
-            member_urls.push(
-                'http://placehold.jp/30/3d4070/ffffff/150x150.png?text=%E8%A1%A8%E7%A4%BA%E3%81%99%E3%82%8B%E3%81%AB%E3%81%AF%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%81%A7%E5%8B%9F%E9%9B%86',
-            );
+            member_urls.push(modalRecruit.placeHold);
         } else if (user1 != null) {
             member_urls.push(user1.displayAvatarURL({ extension: 'png' }));
         }
 
         if (user2 === 'dummy_icon') {
-            member_urls.push(
-                'http://placehold.jp/30/3d4070/ffffff/150x150.png?text=%E8%A1%A8%E7%A4%BA%E3%81%99%E3%82%8B%E3%81%AB%E3%81%AF%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%81%A7%E5%8B%9F%E9%9B%86',
-            );
+            member_urls.push(modalRecruit.placeHold);
         } else if (user2 != null) {
             member_urls.push(user2.displayAvatarURL({ extension: 'png' }));
         }

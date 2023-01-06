@@ -29,4 +29,8 @@ module.exports = {
         voiceChannelMention: 'ボイスメンション',
         variablesSettings: '環境変数設定',
     },
+    modalRecruit: {
+        placeHold:
+            'https://placehold.jp/22/4650bc/ffffff/150x150.png?text=%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E5%8B%9F%E9%9B%86%0A%E3%81%AA%E3%82%89%E8%A1%A8%E7%A4%BA%E5%8F%AF%E8%83%BD',
+    },
 };
