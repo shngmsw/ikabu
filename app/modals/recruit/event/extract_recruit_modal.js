@@ -400,6 +400,37 @@ async function modalFesRecruit(interaction, params) {
 
         const fes_data = await getFesData(data, type);
 
+        const members = await guild.members.fetch();
+
+        let user1_mention;
+        let user2_mention;
+
+        if (isNotEmpty(user1)) {
+            // ユーザータグからメンバー取得
+            let member = members.find((member) => member.user.tag === user1);
+            if (isNotEmpty(member)) {
+                user1 = member;
+                user1_mention = `<@${member.user.id}>`;
+            } else {
+                user1_mention = user1;
+            }
+        } else {
+            user1 = null;
+        }
+
+        if (isNotEmpty(user2)) {
+            // ユーザータグからメンバー取得
+            let member = members.find((member) => member.user.tag === user2);
+            if (isNotEmpty(member)) {
+                user2 = member;
+                user2_mention = `<@${member.user.id}>`;
+            } else {
+                user2_mention = user2;
+            }
+        } else {
+            user2 = null;
+        }
+
         let txt = `<@${host_member.user.id}>` + '**たんのフェスマッチ募集**\n';
         if (user1 != null && user2 != null) {
             txt = txt + user1_mention + 'たんと' + user2_mention + 'たんの参加が既に決定しているでし！';
