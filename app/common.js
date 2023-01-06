@@ -7,6 +7,7 @@ module.exports = {
     isInteger: isInteger,
     isEmpty: isEmpty,
     isNotEmpty: isNotEmpty,
+    getMentionsFromMessage: getMentionsFromMessage,
     random: randomSelect,
     randomBool: randomBool,
     dateAdd: dateAdd,
@@ -86,6 +87,27 @@ function isEmpty(obj) {
  */
 function isNotEmpty(obj) {
     return !isEmpty(obj);
+}
+
+/**
+ * メッセージから順番に取得したメンションを配列で返す
+ * @param {*} message メッセージ
+ * @param {boolean} id_only 取得したメンションをIDで返す場合はtrue
+ * @returns メンション文字列を格納した配列を返す
+ */
+function getMentionsFromMessage(message, id_only = false) {
+    const content = message.content;
+    const matched = content.match(/<@\d{18,19}>/g);
+    let results = [];
+    if (id_only) {
+        for (let mention of matched) {
+            let delete_lead = mention.slice(2); // remove <@
+            let delete_backward = delete_lead.slice(0, -1); // remove >
+            results.push(delete_backward);
+        }
+        return results;
+    }
+    return matched;
 }
 
 function randomSelect(array, num) {
@@ -208,17 +230,21 @@ function getCloseEmbed() {
 }
 
 const recruit_command = {
+    プラベ募集: '`/プラベ募集 recruit` or `/プラベ募集 button`',
     リグマ募集: '`/リグマ募集 now` or `/リグマ募集 next`',
     ナワバリ募集: '`/ナワバリ募集 now` or `/ナワバリ募集 next`',
     バンカラ募集: '`/バンカラ募集 now` or `/バンカラ募集 next`',
     フェス募集: '`/〇〇陣営 now` or `/〇〇陣営 next`',
-    サーモン募集: `/サーモンラン募集 run`,
+    サーモン募集: '`/サーモンラン募集 run`',
     別ゲー募集: '`/別ゲー募集 apex` or `/別ゲー募集 overwatch` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`',
 };
 
 function getCommandHelpEmbed(channelName) {
     let commandMessage;
     switch (channelName) {
+        case 'プラベ募集':
+            commandMessage = recruit_command.プラベ募集;
+            break;
         case 'リグマ募集':
         case 'リグマ募集2':
         case '🔰リグマ募集':
@@ -230,7 +256,9 @@ function getCommandHelpEmbed(channelName) {
         case 'バンカラ募集':
             commandMessage = recruit_command.バンカラ募集;
             break;
-        case 'フェス募集':
+        case 'フウカ募集':
+        case 'ウツホ募集':
+        case 'マンタロー募集':
             commandMessage = recruit_command.フェス募集;
             break;
         case 'サーモン募集':

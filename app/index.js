@@ -34,7 +34,7 @@ const chatCountUp = require('./event/members.js');
 const emojiCountUp = require('./event/reactions.js');
 const { guildMemberAddEvent } = require('./event/rookie/set_rookie.js');
 const deleteToken = require('./event/delete_token.js');
-const recruitButton = require('./event/recruit_button.js');
+const recruitButton = require('./buttons/recruit/event/recruit_button_events.js');
 const divider = require('./cmd/other/team_divider/divider');
 const { sendIntentionConfirmReply, sendQuestionnaireFollowUp, disableQuestionnaireButtons } = require('./event/rookie/send_questionnaire');
 const handleIkabuExperience = require('./cmd/other/experience.js');
@@ -50,6 +50,14 @@ const { sendCommandLog } = require('./event/command_log.js');
 const FriendCodeService = require('../db/friend_code_service.js');
 const MembersService = require('../db/members_service.js');
 const { variablesHandler } = require('./cmd/admin-cmd/environment_variables/variables_handler.js');
+const { createNewRecruitButton } = require('./buttons/recruit/components/create_recruit_buttons.js');
+const { handleCreateModal } = require('./modals/recruit/components/create_recruit_modals.js');
+const {
+    modalRegularRecruit,
+    modalAnarchyRecruit,
+    modalSalmonRecruit,
+    modalFesRecruit,
+} = require('./modals/recruit/event/extract_recruit_modal.js');
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -220,6 +228,7 @@ async function onInteraction(interaction) {
                     njr: recruitButton.joinNotify,
                     ncr: recruitButton.cancelNotify,
                     nclose: recruitButton.closeNotify,
+                    newr: handleCreateModal,
                 };
                 await recruitButtons[params.get('d')](interaction, params);
             } else if (isNotEmpty(params.get('t'))) {
@@ -244,6 +253,20 @@ async function onInteraction(interaction) {
             }
             return;
         }
+
+        if (interaction.isModalSubmit()) {
+            const params = new URLSearchParams(interaction.customId);
+            if (isNotEmpty(params.get('recm'))) {
+                const recruitModals = {
+                    regrec: modalRegularRecruit,
+                    anarec: modalAnarchyRecruit,
+                    salrec: modalSalmonRecruit,
+                    fesrec: modalFesRecruit,
+                };
+                await recruitModals[params.get('recm')](interaction, params);
+            }
+        }
+
         if (interaction.isCommand()) {
             const { commandName } = interaction;
 
@@ -257,6 +280,7 @@ async function onInteraction(interaction) {
                 if (!interaction.replied) {
                     await interaction.reply({
                         embeds: [embed, getCommandHelpEmbed(interaction.channel.name)],
+                        components: [createNewRecruitButton(interaction.channel.name)],
                     });
                 }
             } else if (commandName === commandNames.team_divider) {
