@@ -60,7 +60,10 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
             components: [recruitDeleteButton(sentMessage, header)],
         });
         await interaction.followUp({
-            content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
+            content:
+                '募集完了でし！\nこの方法での募集は推奨しないでし！\n次回は`/' +
+                team +
+                ' now`を使ってみるでし！\nコマンドを使用すると次のスケジュールの募集を建てたり、素早く募集を建てたりできるでし！',
             ephemeral: true,
         });
 
