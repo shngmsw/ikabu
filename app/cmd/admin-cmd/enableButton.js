@@ -1,6 +1,7 @@
 const { setButtonEnable } = require('../../common/button_components');
 const { searchMessageById } = require('../../manager/messageManager');
 const log4js = require('log4js');
+const { isNotEmpty, isEmpty } = require('../../common');
 
 module.exports = {
     ButtonEnable: ButtonEnable,
@@ -14,8 +15,20 @@ async function ButtonEnable(interaction) {
         await interaction.deferReply({ ephemeral: false });
 
         const messageId = interaction.options.getString('メッセージid');
-        const channelId = interaction.options.getChannel('チャンネル').id;
+        let channelId;
+        if (isNotEmpty(interaction.options.getChannel('チャンネル'))) {
+            channelId = interaction.options.getChannel('チャンネル').id;
+        } else {
+            channelId = interaction.channel.id;
+        }
         const message = await searchMessageById(interaction.guild, channelId, messageId);
+
+        if (isEmpty(message)) {
+            await interaction.editReply({
+                content: '該当メッセージが見つからなかったでし！',
+            });
+            return;
+        }
 
         await message.edit({ components: await setButtonEnable(message) });
 
