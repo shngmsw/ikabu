@@ -692,10 +692,10 @@ const teamDivider = new SlashCommandBuilder()
 const buttonEnable = new SlashCommandBuilder()
     .setName(commandNames.buttonEnable)
     .setDescription('ボタンを有効化します。(エラー落ちしたとき用)')
+    .addStringOption((option) => option.setName('メッセージid').setDescription('有効化するボタンのメッセージIDを入力').setRequired(true))
     .addChannelOption((option) =>
-        option.setName('チャンネル').setDescription('有効化するボタンが投稿されているチャンネルを選択').setRequired(true),
-    )
-    .addStringOption((option) => option.setName('メッセージid').setDescription('有効化するボタンのメッセージIDを入力').setRequired(true));
+        option.setName('チャンネル').setDescription('有効化するボタンが投稿されているチャンネルを選択').setRequired(false),
+    );
 
 const voiceChannelMention = new SlashCommandBuilder()
     .setName(commandNames.voiceChannelMention)
