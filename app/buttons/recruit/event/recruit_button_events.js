@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType } = require('discord.js');
 const { isEmpty, datetimeDiff, sleep, getCommandHelpEmbed, isNotEmpty, getMentionsFromMessage } = require('../../../common');
 const RecruitService = require('../../../../db/recruit_service.js');
 const { searchMemberById } = require('../../../manager/memberManager.js');
@@ -115,22 +115,21 @@ async function join(interaction, params) {
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
             let host_guild_member = await searchMemberById(guild, host_id);
-            if (host_guild_member.voice.channelId) {
-                let host_joined_vc = interaction.guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
-                await host_joined_vc.send({
-                    embeds: [embed],
-                    components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
-                });
-                notify_to_host_message = await interaction.message.reply({
-                    content: pmentions.join(' '),
-                    embeds: [embed],
-                });
-            } else {
-                notify_to_host_message = await interaction.message.reply({
-                    content: pmentions.join(' '),
-                    embeds: [embed],
-                });
+            if (host_guild_member.voice.channel.type === ChannelType.GuildVoice) {
+                let host_joined_vc = await searchChannelById(guild, host_guild_member.voice.channelId);
+                try {
+                    await host_joined_vc.send({
+                        embeds: [embed],
+                        components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
+                    });
+                } catch (error) {
+                    logger.error(error);
+                }
             }
+            notify_to_host_message = await interaction.message.reply({
+                content: pmentions.join(' '),
+                embeds: [embed],
+            });
 
             if (channelId == null) {
                 await interaction.followUp({
@@ -440,19 +439,21 @@ async function joinNotify(interaction, params) {
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
             let host_guild_member = await searchMemberById(guild, host_id);
-            if (host_guild_member.voice.channelId) {
-                let host_joined_vc = interaction.guild.channels.cache.find((channel) => channel.id === host_guild_member.voice.channelId);
-                await host_joined_vc.send({
-                    content: `<@${host_id}>`,
-                    embeds: [embed],
-                    components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
-                });
-            } else {
-                notify_to_host_message = await interaction.message.reply({
-                    content: `<@${host_id}>`,
-                    embeds: [embed],
-                });
+            if (host_guild_member.voice.channel.type === ChannelType.GuildVoice) {
+                let host_joined_vc = await searchChannelById(guild, host_guild_member.voice.channelId);
+                try {
+                    await host_joined_vc.send({
+                        embeds: [embed],
+                        components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
+                    });
+                } catch (error) {
+                    logger.error(error);
+                }
             }
+            notify_to_host_message = await interaction.message.reply({
+                content: `<@${host_id}>`,
+                embeds: [embed],
+            });
 
             await interaction.followUp({
                 content: `<@${host_id}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
