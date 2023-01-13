@@ -115,16 +115,17 @@ async function join(interaction, params) {
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
             let host_guild_member = await searchMemberById(guild, host_id);
-            if (host_guild_member.voice.channel.type === ChannelType.GuildVoice) {
-                let host_joined_vc = await searchChannelById(guild, host_guild_member.voice.channelId);
-                try {
+            try {
+                if (isNotEmpty(host_guild_member.voice.channel) && host_guild_member.voice.channel.type === ChannelType.GuildVoice) {
+                    let host_joined_vc = await searchChannelById(guild, host_guild_member.voice.channelId);
+
                     await host_joined_vc.send({
                         embeds: [embed],
                         components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
                     });
-                } catch (error) {
-                    logger.error(error);
                 }
+            } catch (error) {
+                logger.error(error);
             }
             notify_to_host_message = await interaction.message.reply({
                 content: pmentions.join(' '),
@@ -439,16 +440,17 @@ async function joinNotify(interaction, params) {
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
             let host_guild_member = await searchMemberById(guild, host_id);
-            if (host_guild_member.voice.channel.type === ChannelType.GuildVoice) {
-                let host_joined_vc = await searchChannelById(guild, host_guild_member.voice.channelId);
-                try {
+            try {
+                if (isNotEmpty(host_guild_member.voice.channel) && host_guild_member.voice.channel.type === ChannelType.GuildVoice) {
+                    let host_joined_vc = await searchChannelById(guild, host_guild_member.voice.channelId);
+
                     await host_joined_vc.send({
                         embeds: [embed],
                         components: [messageLinkButtons(interaction.guildId, interaction.channel.id, interaction.message.id)],
                     });
-                } catch (error) {
-                    logger.error(error);
                 }
+            } catch (error) {
+                logger.error(error);
             }
             notify_to_host_message = await interaction.message.reply({
                 content: `<@${host_id}>`,
