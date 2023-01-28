@@ -125,5 +125,7 @@ async function play(msg) {
         }
     } catch (error) {
         logger.warn(error);
+        logger.warn(error.code);
+        logger.warn(error.message);
     }
 }
