@@ -123,6 +123,6 @@ async function play(msg) {
             await entersState(player, AudioPlayerStatus.Idle, 1000 * 900);
         }
     } catch (error) {
-        logger.error(error);
+        logger.warn(error);
     }
 }

@@ -13,6 +13,7 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
     ],
     partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Reaction],
+    restRequestTimeout: 60000,
 });
 
 const Handler = require('./handler.js');
