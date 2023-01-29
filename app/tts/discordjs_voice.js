@@ -9,6 +9,7 @@ const {
     NoSubscriberBehavior,
     generateDependencyReport,
 } = require('@discordjs/voice');
+const { isNotEmpty } = require('../common.js');
 const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -107,7 +108,7 @@ async function play(msg) {
     try {
         const { guildId, channelId } = msg;
         let subscription = subscriptions.get(guildId);
-        if (subscription && channels.get(guildId) === channelId) {
+        if (isNotEmpty(subscription) && channels.get(guildId) === channelId) {
             // メッセージから音声ファイルを取得
             const buffer = await mode_api(msg);
             if (buffer == null) return;
@@ -123,6 +124,8 @@ async function play(msg) {
             await entersState(player, AudioPlayerStatus.Idle, 1000 * 900);
         }
     } catch (error) {
-        logger.error(error);
+        logger.warn(error);
+        logger.warn(error.code);
+        logger.warn(error.message);
     }
 }
