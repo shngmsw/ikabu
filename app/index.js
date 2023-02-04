@@ -41,7 +41,7 @@ const { sendIntentionConfirmReply, sendQuestionnaireFollowUp, disableQuestionnai
 const handleIkabuExperience = require('./cmd/other/experience.js');
 const { commandNames } = require('../constant');
 const registerSlashCommands = require('../register.js');
-const { voiceLocker, voiceLockerUpdate } = require('./cmd/other/voice_locker.js');
+const { voiceLocker, voiceLockerUpdate, disableLimit } = require('./cmd/other/voice_locker.js');
 const { handleFriendCode, deleteFriendCode } = require('./cmd/other/friendcode.js');
 const DBCommon = require('../db/db.js');
 const RecruitService = require('../db/recruit_service.js');
@@ -62,6 +62,7 @@ const {
 const { editThreadTag } = require('./event/support/edit_tag.js');
 const { sendCloseButton } = require('./event/support/send_support_close_button.js');
 const { setResolvedTag } = require('./event/support/resolved_support.js');
+const { autokill } = require('./tts/discordjs_voice.js');
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
@@ -274,6 +275,12 @@ async function onInteraction(interaction) {
             }
         }
 
+        if (interaction.isMessageContextMenuCommand()) {
+            if (interaction.commandName == commandNames.buttonEnabler) {
+                ButtonEnable(interaction);
+            }
+        }
+
         if (interaction.isCommand()) {
             const { commandName } = interaction;
 
@@ -314,8 +321,6 @@ async function onInteraction(interaction) {
                 await handleFriendCode(interaction);
             } else if (commandName === commandNames.experience) {
                 handleIkabuExperience(interaction);
-            } else if (commandName === commandNames.buttonEnable) {
-                ButtonEnable(interaction);
             } else if (commandName === commandNames.voiceChannelMention) {
                 voiceMention(interaction);
             } else if (commandName === commandNames.variablesSettings) {
@@ -349,35 +354,34 @@ client.on('threadCreate', async (thread) => {
     }
 });
 
-client.on('voiceStateUpdate', (oldState, newState) => onVoiceStateUpdate(oldState, newState));
-const pattern = /^[a-m]/;
-// NOTE:VC切断時に0人になったら人数制限を0にする
-async function onVoiceStateUpdate(oldState, newState) {
+client.on('voiceStateUpdate', (oldState, newState) => {
     try {
-        // StateUpdateが同じチャンネルの場合は対象外
         if (oldState.channelId === newState.channelId) {
-            return;
-        }
-
-        if (oldState.channelId != null) {
-            const oldChannel = await oldState.guild.channels.fetch(oldState.channelId);
-            // a～mから始まらない場合は対象外にする
-            if (!oldChannel.name.match(pattern)) {
-                return;
-            }
-            if (oldChannel.members.size == 0) {
-                oldChannel.setUserLimit(0);
-            }
-        }
-        if (newState.channelId != null) {
-            const newChannel = await newState.guild.channels.fetch(newState.channelId);
-            if (newChannel.members.size != 0) {
-                newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
-                newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
-            }
+            // ここはミュートなどの動作を行ったときに発火する場所
+        } else if (oldState.channelId === null && newState.channelId != null) {
+            // ここはconnectしたときに発火する場所
+            deleteLimitPermission(newState);
+        } else if (oldState.channelId != null && newState.channelId === null) {
+            // ここはdisconnectしたときに発火する場所
+            disableLimit(oldState);
+            autokill(oldState);
+        } else {
+            // ここはチャンネル移動を行ったときに発火する場所
+            deleteLimitPermission(newState);
+            disableLimit(oldState);
+            autokill(oldState);
         }
     } catch (error) {
         const loggerVSU = log4js.getLogger('voiceStateUpdate');
         loggerVSU.error(error);
+    }
+});
+
+// 募集時のVCロックの解除
+async function deleteLimitPermission(newState) {
+    const newChannel = await newState.guild.channels.fetch(newState.channelId);
+    if (newChannel.members.size != 0) {
+        newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
+        newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
     }
 }

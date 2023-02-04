@@ -1,5 +1,5 @@
-const { SlashCommandBuilder } = require(`@discordjs/builders`);
-const { ChannelType } = require('discord-api-types/v10');
+const { SlashCommandBuilder, ContextMenuCommandBuilder } = require(`@discordjs/builders`);
+const { ChannelType, ApplicationCommandType } = require('discord-api-types/v10');
 const { commandNames } = require('./constant.js');
 const log4js = require('log4js');
 
@@ -689,13 +689,7 @@ const teamDivider = new SlashCommandBuilder()
             .addBooleanOption((option) => option.setName('勝利数と勝率を隠す').setDescription('勝利数と勝率を隠すことができます。')),
     );
 
-const buttonEnable = new SlashCommandBuilder()
-    .setName(commandNames.buttonEnable)
-    .setDescription('ボタンを有効化します。(エラー落ちしたとき用)')
-    .addStringOption((option) => option.setName('メッセージid').setDescription('有効化するボタンのメッセージIDを入力').setRequired(true))
-    .addChannelOption((option) =>
-        option.setName('チャンネル').setDescription('有効化するボタンが投稿されているチャンネルを選択').setRequired(false),
-    );
+const buttonEnabler = new ContextMenuCommandBuilder().setName(commandNames.buttonEnabler).setType(ApplicationCommandType.Message);
 
 const voiceChannelMention = new SlashCommandBuilder()
     .setName(commandNames.voiceChannelMention)
@@ -760,7 +754,7 @@ const commands = [
     fesA,
     fesB,
     fesC,
-    buttonEnable,
+    buttonEnabler,
     voiceChannelMention,
     variablesSettings,
 ];

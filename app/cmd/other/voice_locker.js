@@ -5,10 +5,16 @@ const log4js = require('log4js');
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('interaction');
 
+module.exports = {
+    voiceLocker: voiceLocker,
+    voiceLockerUpdate: voiceLockerUpdate,
+    disableLimit: disableLimit,
+};
+
 /*
  * スラコマ打たれたときの動作
  */
-module.exports.voiceLocker = async function (interaction) {
+async function voiceLocker(interaction) {
     const author = interaction.member;
     const channel = interaction.channel;
 
@@ -56,12 +62,12 @@ module.exports.voiceLocker = async function (interaction) {
     // 1分後にメッセージを削除
     await setTimeout(60000);
     await interaction.deleteReply();
-};
+}
 
 /*
  * ボタンが押されたときの動作
  */
-module.exports.voiceLockerUpdate = async function (interaction) {
+async function voiceLockerUpdate(interaction) {
     const member = interaction.member;
     const channel = interaction.channel;
     // ボイスチャンネル内のメンバー数
@@ -127,7 +133,34 @@ module.exports.voiceLockerUpdate = async function (interaction) {
         .catch((error) => {
             logger.error(error);
         });
-};
+}
+
+async function disableLimit(oldState) {
+    const usable_channel = [
+        'alfa',
+        'bravo',
+        'charlie',
+        'delta',
+        'echo',
+        'fox',
+        'golf',
+        'hotel',
+        'india',
+        'juliett',
+        'kilo',
+        'lima',
+        'mike',
+    ];
+    const oldChannel = await oldState.guild.channels.fetch(oldState.channelId);
+    // 使用可能VCかチェック
+    if (!usable_channel.includes(oldChannel.name)) {
+        return;
+    }
+
+    if (oldChannel.members.size == 0) {
+        oldChannel.setUserLimit(0);
+    }
+}
 
 /**
  * インタラクションからチャンネル情報を取得する用のオブジェクトを作成する
