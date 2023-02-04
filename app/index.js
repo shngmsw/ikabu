@@ -268,6 +268,12 @@ async function onInteraction(interaction) {
             }
         }
 
+        if (interaction.isMessageContextMenuCommand()) {
+            if (interaction.commandName == commandNames.buttonEnabler) {
+                ButtonEnable(interaction);
+            }
+        }
+
         if (interaction.isCommand()) {
             const { commandName } = interaction;
 
@@ -308,8 +314,6 @@ async function onInteraction(interaction) {
                 await handleFriendCode(interaction);
             } else if (commandName === commandNames.experience) {
                 handleIkabuExperience(interaction);
-            } else if (commandName === commandNames.buttonEnable) {
-                ButtonEnable(interaction);
             } else if (commandName === commandNames.voiceChannelMention) {
                 voiceMention(interaction);
             } else if (commandName === commandNames.variablesSettings) {
