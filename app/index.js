@@ -59,7 +59,11 @@ const {
     modalSalmonRecruit,
     modalFesRecruit,
 } = require('./modals/recruit/event/extract_recruit_modal.js');
+const { editThreadTag } = require('./event/support/edit_tag.js');
+const { sendCloseButton } = require('./event/support/send_support_close_button.js');
+const { setResolvedTag } = require('./event/support/resolved_support.js');
 const { autokill } = require('./tts/discordjs_voice.js');
+
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -219,6 +223,8 @@ async function onInteraction(interaction) {
                 voiceLockerUpdate(interaction);
             } else if (interaction.customId == 'fchide') {
                 deleteFriendCode(interaction);
+            } else if (interaction.customId == 'support_resolved') {
+                setResolvedTag(interaction);
             } else if (isNotEmpty(params.get('d'))) {
                 // buttonごとに呼び出すファンクション
                 const recruitButtons = {
@@ -340,6 +346,13 @@ async function onInteraction(interaction) {
     }
 }
 client.on('interactionCreate', (interaction) => onInteraction(interaction));
+
+client.on('threadCreate', async (thread) => {
+    if (isNotEmpty(thread.parentId) && thread.parentId == process.env.CHANNEL_ID_SUPPORT_CENTER) {
+        editThreadTag(thread);
+        sendCloseButton(thread);
+    }
+});
 
 client.on('voiceStateUpdate', (oldState, newState) => {
     try {
