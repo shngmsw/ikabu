@@ -27,7 +27,10 @@ const { regularRecruit } = require('./cmd/splat3/recruit/regular_recruit.js');
 const { fesRecruit } = require('./cmd/splat3/recruit/fes_recruit');
 const { anarchyRecruit } = require('./cmd/splat3/recruit/anarchy_recruit.js');
 const { salmonRecruit } = require('./cmd/splat3/recruit/salmon_recruit.js');
+<<<<<<< HEAD
 const { privateRecruit } = require('./cmd/splat3/recruit/private_recruit.js');
+=======
+>>>>>>> 5493dc9fa6958b6c7759611c0238449238187012
 const { buttonEnable } = require('./cmd/admin-cmd/enableButton');
 const { voiceMention } = require('./cmd/other/voice_mention.js');
 const removeRookie = require('./event/rookie/remove_rookie.js');
