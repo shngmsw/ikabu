@@ -28,7 +28,7 @@ const { fesRecruit } = require('./cmd/splat3/recruit/fes_recruit');
 const { anarchyRecruit } = require('./cmd/splat3/recruit/anarchy_recruit.js');
 const { salmonRecruit } = require('./cmd/splat3/recruit/salmon_recruit.js');
 const { privateRecruit } = require('./cmd/splat3/recruit/private_recruit.js');
-const { ButtonEnable } = require('./cmd/admin-cmd/enableButton');
+const { buttonEnable } = require('./cmd/admin-cmd/enableButton');
 const { voiceMention } = require('./cmd/other/voice_mention.js');
 const removeRookie = require('./event/rookie/remove_rookie.js');
 const chatCountUp = require('./event/members.js');
@@ -41,7 +41,7 @@ const { sendIntentionConfirmReply, sendQuestionnaireFollowUp, disableQuestionnai
 const handleIkabuExperience = require('./cmd/other/experience.js');
 const { commandNames } = require('../constant');
 const registerSlashCommands = require('../register.js');
-const { voiceLocker, voiceLockerUpdate } = require('./cmd/other/voice_locker.js');
+const { voiceLocker, voiceLockerUpdate, disableLimit } = require('./cmd/other/voice_locker.js');
 const { handleFriendCode, deleteFriendCode } = require('./cmd/other/friendcode.js');
 const DBCommon = require('../db/db.js');
 const RecruitService = require('../db/recruit_service.js');
@@ -59,6 +59,11 @@ const {
     modalSalmonRecruit,
     modalFesRecruit,
 } = require('./modals/recruit/event/extract_recruit_modal.js');
+const { editThreadTag } = require('./event/support/edit_tag.js');
+const { sendCloseButton } = require('./event/support/send_support_close_button.js');
+const { setResolvedTag } = require('./event/support/resolved_support.js');
+const { autokill } = require('./tts/discordjs_voice.js');
+
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
@@ -218,6 +223,8 @@ async function onInteraction(interaction) {
                 voiceLockerUpdate(interaction);
             } else if (interaction.customId == 'fchide') {
                 deleteFriendCode(interaction);
+            } else if (interaction.customId == 'support_resolved') {
+                setResolvedTag(interaction);
             } else if (isNotEmpty(params.get('d'))) {
                 // buttonごとに呼び出すファンクション
                 const recruitButtons = {
@@ -266,6 +273,14 @@ async function onInteraction(interaction) {
                 };
                 await recruitModals[params.get('recm')](interaction, params);
             }
+            return;
+        }
+
+        if (interaction.isMessageContextMenuCommand()) {
+            if (interaction.commandName == commandNames.buttonEnabler) {
+                buttonEnable(interaction);
+            }
+            return;
         }
 
         if (interaction.isCommand()) {
@@ -308,8 +323,6 @@ async function onInteraction(interaction) {
                 await handleFriendCode(interaction);
             } else if (commandName === commandNames.experience) {
                 handleIkabuExperience(interaction);
-            } else if (commandName === commandNames.buttonEnable) {
-                ButtonEnable(interaction);
             } else if (commandName === commandNames.voiceChannelMention) {
                 voiceMention(interaction);
             } else if (commandName === commandNames.variablesSettings) {
@@ -336,35 +349,41 @@ async function onInteraction(interaction) {
 }
 client.on('interactionCreate', (interaction) => onInteraction(interaction));
 
-client.on('voiceStateUpdate', (oldState, newState) => onVoiceStateUpdate(oldState, newState));
-const pattern = /^[a-m]/;
-// NOTE:VC切断時に0人になったら人数制限を0にする
-async function onVoiceStateUpdate(oldState, newState) {
-    try {
-        // StateUpdateが同じチャンネルの場合は対象外
-        if (oldState.channelId === newState.channelId) {
-            return;
-        }
+client.on('threadCreate', async (thread) => {
+    if (isNotEmpty(thread.parentId) && thread.parentId == process.env.CHANNEL_ID_SUPPORT_CENTER) {
+        editThreadTag(thread);
+        sendCloseButton(thread);
+    }
+});
 
-        if (oldState.channelId != null) {
-            const oldChannel = await oldState.guild.channels.fetch(oldState.channelId);
-            // a～mから始まらない場合は対象外にする
-            if (!oldChannel.name.match(pattern)) {
-                return;
-            }
-            if (oldChannel.members.size == 0) {
-                oldChannel.setUserLimit(0);
-            }
-        }
-        if (newState.channelId != null) {
-            const newChannel = await newState.guild.channels.fetch(newState.channelId);
-            if (newChannel.members.size != 0) {
-                newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
-                newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
-            }
+client.on('voiceStateUpdate', (oldState, newState) => {
+    try {
+        if (oldState.channelId === newState.channelId) {
+            // ここはミュートなどの動作を行ったときに発火する場所
+        } else if (oldState.channelId === null && newState.channelId != null) {
+            // ここはconnectしたときに発火する場所
+            deleteLimitPermission(newState);
+        } else if (oldState.channelId != null && newState.channelId === null) {
+            // ここはdisconnectしたときに発火する場所
+            disableLimit(oldState);
+            autokill(oldState);
+        } else {
+            // ここはチャンネル移動を行ったときに発火する場所
+            deleteLimitPermission(newState);
+            disableLimit(oldState);
+            autokill(oldState);
         }
     } catch (error) {
         const loggerVSU = log4js.getLogger('voiceStateUpdate');
         loggerVSU.error(error);
+    }
+});
+
+// 募集時のVCロックの解除
+async function deleteLimitPermission(newState) {
+    const newChannel = await newState.guild.channels.fetch(newState.channelId);
+    if (newChannel.members.size != 0) {
+        newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
+        newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
     }
 }

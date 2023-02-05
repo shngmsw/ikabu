@@ -28,6 +28,7 @@ const channels = new Map();
 module.exports = {
     handleVoiceCommand: handleVoiceCommand,
     play: play,
+    autokill: autokill,
 };
 
 const join = async (interaction) => {
@@ -85,6 +86,22 @@ const kill = async (interaction) => {
         interactionLogger.error(error);
     }
 };
+
+async function autokill(oldState) {
+    const guildId = oldState.guild.id;
+    const channelId = oldState.channel.id;
+    const oldChannel = await oldState.guild.channels.fetch(oldState.channelId);
+    let subscription = subscriptions.get(guildId);
+    if (isNotEmpty(subscription) && channels.get(guildId) === channelId) {
+        if (oldChannel.members.size != 1) {
+            return;
+        }
+        subscription.connection.destroy();
+        subscriptions.delete(guildId);
+        channels.delete(guildId);
+        await oldState.channel.send(':dash:');
+    }
+}
 
 async function handleVoiceCommand(interaction) {
     try {

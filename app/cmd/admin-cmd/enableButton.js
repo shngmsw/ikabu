@@ -1,27 +1,24 @@
+const { PermissionsBitField } = require('discord.js');
 const { setButtonEnable } = require('../../common/button_components');
-const { searchMessageById } = require('../../manager/messageManager');
 const log4js = require('log4js');
-const { isNotEmpty, isEmpty } = require('../../common');
+const { isEmpty } = require('../../common');
 
 module.exports = {
-    ButtonEnable: ButtonEnable,
+    buttonEnable: buttonEnable,
 };
 
-async function ButtonEnable(interaction) {
+async function buttonEnable(interaction) {
     log4js.configure(process.env.LOG4JS_CONFIG_PATH);
     const logger = log4js.getLogger('interaction');
+
+    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
+        return await interaction.reply({ content: '操作を実行する権限がないでし！', ephemeral: true });
+    }
 
     try {
         await interaction.deferReply({ ephemeral: false });
 
-        const messageId = interaction.options.getString('メッセージid');
-        let channelId;
-        if (isNotEmpty(interaction.options.getChannel('チャンネル'))) {
-            channelId = interaction.options.getChannel('チャンネル').id;
-        } else {
-            channelId = interaction.channel.id;
-        }
-        const message = await searchMessageById(interaction.guild, channelId, messageId);
+        const message = interaction.targetMessage;
 
         if (isEmpty(message)) {
             await interaction.editReply({
