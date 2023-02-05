@@ -4,10 +4,10 @@ const log4js = require('log4js');
 const { isEmpty } = require('../../common');
 
 module.exports = {
-    ButtonEnable: ButtonEnable,
+    buttonEnable: buttonEnable,
 };
 
-async function ButtonEnable(interaction) {
+async function buttonEnable(interaction) {
     log4js.configure(process.env.LOG4JS_CONFIG_PATH);
     const logger = log4js.getLogger('interaction');
 
