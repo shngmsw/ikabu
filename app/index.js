@@ -273,12 +273,14 @@ async function onInteraction(interaction) {
                 };
                 await recruitModals[params.get('recm')](interaction, params);
             }
+            return;
         }
 
         if (interaction.isMessageContextMenuCommand()) {
             if (interaction.commandName == commandNames.buttonEnabler) {
                 buttonEnable(interaction);
             }
+            return;
         }
 
         if (interaction.isCommand()) {
