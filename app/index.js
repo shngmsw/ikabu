@@ -27,8 +27,7 @@ const { regularRecruit } = require('./cmd/splat3/recruit/regular_recruit.js');
 const { fesRecruit } = require('./cmd/splat3/recruit/fes_recruit');
 const { anarchyRecruit } = require('./cmd/splat3/recruit/anarchy_recruit.js');
 const { salmonRecruit } = require('./cmd/splat3/recruit/salmon_recruit.js');
-const { privateRecruit } = require('./cmd/splat3/recruit/private_recruit.js');
-const { ButtonEnable } = require('./cmd/admin-cmd/enableButton');
+const { buttonEnable } = require('./cmd/admin-cmd/enableButton');
 const { voiceMention } = require('./cmd/other/voice_mention.js');
 const removeRookie = require('./event/rookie/remove_rookie.js');
 const chatCountUp = require('./event/members.js');
@@ -270,7 +269,7 @@ async function onInteraction(interaction) {
 
         if (interaction.isMessageContextMenuCommand()) {
             if (interaction.commandName == commandNames.buttonEnabler) {
-                ButtonEnable(interaction);
+                buttonEnable(interaction);
             }
         }
 
