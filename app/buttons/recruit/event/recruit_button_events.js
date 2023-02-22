@@ -62,13 +62,13 @@ async function join(interaction, params) {
         const guild = await interaction.guild.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchMemberById(guild, interaction.member.user.id);
-        const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
-        const participants = getMentionsFromMessage(header_message, true);
-        const pmentions = getMentionsFromMessage(header_message);
+        const image1_msg_id = params.get('imid1');
+        const image1_message = await searchMessageById(guild, interaction.channelId, image1_msg_id);
+        const participants = getMentionsFromMessage(image1_message, true);
+        const pmentions = getMentionsFromMessage(image1_message);
         let host_id;
-        if (isNotEmpty(header_message.interaction)) {
-            let host = header_message.interaction.user;
+        if (isNotEmpty(image1_message.interaction)) {
+            let host = image1_message.interaction.user;
             host_id = host.id;
         } else {
             host_id = participants[0];
@@ -175,13 +175,13 @@ async function cancel(interaction, params) {
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
-        const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
-        const participants = getMentionsFromMessage(header_message, true);
-        const pmentions = getMentionsFromMessage(header_message);
+        const image1_msg_id = params.get('imid1');
+        const image1_message = await searchMessageById(guild, interaction.channelId, image1_msg_id);
+        const participants = getMentionsFromMessage(image1_message, true);
+        const pmentions = getMentionsFromMessage(image1_message);
         let host_id;
-        if (isNotEmpty(header_message.interaction)) {
-            let host = header_message.interaction.user;
+        if (isNotEmpty(image1_message.interaction)) {
+            let host = image1_message.interaction.user;
             host_id = host.id;
         } else {
             host_id = participants[0];
@@ -200,7 +200,7 @@ async function cancel(interaction, params) {
         //if (member.user.id === host_id) {  // 募集主のみ
         if (participants.includes(member.user.id)) {
             // ピン留め解除
-            header_message.unpin();
+            image1_message.unpin();
 
             // recruitテーブルから削除
             await RecruitService.deleteByMessageId(interaction.message.id);
@@ -257,39 +257,51 @@ async function del(interaction, params) {
         const member = await searchMemberById(guild, interaction.member.user.id);
         const msg_id = params.get('mid');
         const cmd_message = await searchMessageById(guild, interaction.channelId, msg_id);
-        const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
-        const participants = getMentionsFromMessage(header_message, true);
+        const image1_msg_id = params.get('imid1');
+        const image1_message = await searchMessageById(guild, interaction.channelId, image1_msg_id);
+        const image2_msg_id = params.get('imid2');
+        let image2_message;
+        if (isNotEmpty(image2_msg_id)) {
+            image2_message = await searchMessageById(guild, interaction.channelId, image2_msg_id);
+        }
+        const participants = getMentionsFromMessage(image1_message, true);
+
         let host_id;
-        if (isNotEmpty(header_message.interaction)) {
-            let host = header_message.interaction.user;
+        if (isNotEmpty(image1_message.interaction)) {
+            let host = image1_message.interaction.user;
             host_id = host.id;
         } else {
             host_id = participants[0];
         }
         const host_member = await searchMemberById(guild, host_id);
-        let channelId = params.get('vid');
 
         sendRecruitButtonLog(interaction, member, host_member, '削除', '#f04747');
 
-        if (isEmpty(channelId)) {
-            channelId = null;
-        }
-
         //if (member.user.id === host_id) {  // 募集主のみ
         if (participants.includes(member.user.id)) {
-            if (channelId != null) {
-                let channel = await searchChannelById(guild, channelId);
-                channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
-            }
             try {
                 await interaction.message.delete();
             } catch (error) {
-                logger.warn('button already deleted');
+                logger.warn('recruit delete button has already been deleted');
             }
-            await cmd_message.delete();
-            await header_message.delete();
+
+            try {
+                await image1_message.delete();
+            } catch (error) {
+                logger.warn('recruit message or recruit image has already been deleted');
+            }
+
+            try {
+                await image2_message.delete();
+            } catch (error) {
+                logger.warn('rule image is either not set or has already been deleted.');
+            }
+
+            try {
+                await cmd_message.delete();
+            } catch (error) {
+                logger.warn('recruit components has already been deleted');
+            }
 
             // recruitテーブルから削除
             await RecruitService.deleteByMessageId(interaction.message.id);
@@ -318,13 +330,13 @@ async function close(interaction, params) {
 
         const guild = await interaction.guild.fetch();
         const member = await searchMemberById(guild, interaction.member.user.id);
-        const header_msg_id = params.get('hmid');
-        const header_message = await searchMessageById(guild, interaction.channelId, header_msg_id);
-        const helpEmbed = getCommandHelpEmbed(header_message.channel.name);
-        const participants = getMentionsFromMessage(header_message, true);
+        const image1_msg_id = params.get('imid1');
+        const image1_message = await searchMessageById(guild, interaction.channelId, image1_msg_id);
+        const helpEmbed = getCommandHelpEmbed(image1_message.channel.name);
+        const participants = getMentionsFromMessage(image1_message, true);
         let host_id;
-        if (isNotEmpty(header_message.interaction)) {
-            let host = header_message.interaction.user;
+        if (isNotEmpty(image1_message.interaction)) {
+            let host = image1_message.interaction.user;
             host_id = host.id;
         } else {
             host_id = participants[0];
@@ -344,7 +356,7 @@ async function close(interaction, params) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             // ピン留め解除
-            header_message.unpin();
+            image1_message.unpin();
 
             // recruitテーブルから削除
             await RecruitService.deleteByMessageId(interaction.message.id);
@@ -359,12 +371,12 @@ async function close(interaction, params) {
                 components: await disableThinkingButton(interaction, '〆'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            await interaction.channel.send({ embeds: [helpEmbed], components: [createNewRecruitButton(header_message.channel.name)] });
-        } else if (datetimeDiff(new Date(), header_message.createdAt) > 120) {
+            await interaction.channel.send({ embeds: [helpEmbed], components: [createNewRecruitButton(image1_message.channel.name)] });
+        } else if (datetimeDiff(new Date(), image1_message.createdAt) > 120) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
 
-            header_message.unpin();
+            image1_message.unpin();
 
             // recruitテーブルから削除
             await RecruitService.deleteByMemberId(interaction.message.id, interaction.member.id);
@@ -380,7 +392,7 @@ async function close(interaction, params) {
             });
             const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            await interaction.channel.send({ embeds: [helpEmbed], components: [createNewRecruitButton(header_message.channel.name)] });
+            await interaction.channel.send({ embeds: [helpEmbed], components: [createNewRecruitButton(image1_message.channel.name)] });
         } else {
             await interaction.followUp({
                 content: `募集主以外は募集を〆られないでし。`,

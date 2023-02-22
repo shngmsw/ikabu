@@ -216,7 +216,8 @@ async function sendAnarchyMatch(interaction, mention, txt, recruit_num, conditio
     const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchy_data, thumbnail), { name: 'rules.png' });
 
     try {
-        const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
+        const image1_message = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
+        const image2_message = await interaction.channel.send({ files: [rule] });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
@@ -228,12 +229,12 @@ async function sendAnarchyMatch(interaction, mention, txt, recruit_num, conditio
             isLock = true;
         }
 
-        let deleteButtonMsg;
+        const deleteButtonMsg = await interaction.channel.send({
+            components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
+        });
+
         if (isLock) {
-            sentMessage.edit({ components: [recruitActionRow(header, reserve_channel.id)] });
-            deleteButtonMsg = await interaction.channel.send({
-                components: [recruitDeleteButton(sentMessage, header, reserve_channel.id)],
-            });
+            sentMessage.edit({ components: [recruitActionRow(image1_message, reserve_channel.id)] });
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
@@ -248,10 +249,7 @@ async function sendAnarchyMatch(interaction, mention, txt, recruit_num, conditio
                 ephemeral: true,
             });
         } else {
-            sentMessage.edit({ components: [recruitActionRow(header)] });
-            deleteButtonMsg = await interaction.channel.send({
-                components: [recruitDeleteButton(sentMessage, header)],
-            });
+            sentMessage.edit({ components: [recruitActionRow(image1_message)] });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -259,7 +257,7 @@ async function sendAnarchyMatch(interaction, mention, txt, recruit_num, conditio
         }
 
         // ピン留め
-        header.pin();
+        image1_message.pin();
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
@@ -267,6 +265,10 @@ async function sendAnarchyMatch(interaction, mention, txt, recruit_num, conditio
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
+            if (isLock) {
+                reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
+            }
             return;
         }
 
@@ -291,7 +293,7 @@ async function sendAnarchyMatch(interaction, mention, txt, recruit_num, conditio
             components: await setButtonDisable(checkMessage),
         });
         // ピン留め解除
-        header.unpin();
+        image1_message.unpin();
         if (isLock) {
             reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
