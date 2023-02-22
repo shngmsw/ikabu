@@ -48,16 +48,16 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
     const rule = new AttachmentBuilder(await ruleFesCanvas(fes_data), { name: 'rules.png' });
 
     try {
-        const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
-
+        const image1 = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
+        const image2 = await interaction.channel.send({ files: [rule] });
         const sentMessage = await interaction.channel.send({
             content: `<@&${mention_id}>` + ' ボタンを押して参加表明するでし！',
         });
 
         let deleteButtonMsg;
-        sentMessage.edit({ components: [recruitActionRow(header)] });
+        sentMessage.edit({ components: [recruitActionRow(image1)] });
         deleteButtonMsg = await interaction.channel.send({
-            components: [recruitDeleteButton(sentMessage, header)],
+            components: [recruitDeleteButton(sentMessage, image1, image2)],
         });
         await interaction.followUp({
             content:
@@ -68,7 +68,7 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
         });
 
         // ピン留め
-        header.pin();
+        image1.pin();
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
@@ -100,7 +100,7 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
             components: await setButtonDisable(checkMessage),
         });
         // ピン留め解除
-        header.unpin();
+        image1.unpin();
     } catch (error) {
         logger.error(error);
     }

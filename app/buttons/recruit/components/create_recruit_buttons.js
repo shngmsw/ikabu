@@ -4,17 +4,19 @@ const { isNotEmpty } = require('../../../common');
 
 module.exports = {
     recruitDeleteButton: recruitDeleteButton,
+    embedRecruitDeleteButton: embedRecruitDeleteButton,
     recruitActionRow: recruitActionRow,
     notifyActionRow: notifyActionRow,
     unlockChannelButton: unlockChannelButton,
     createNewRecruitButton: createNewRecruitButton,
 };
 
-function recruitDeleteButton(msg, header, channel_id = null) {
+function recruitDeleteButton(msg, image1, image2, channel_id = null) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
     deleteParams.append('mid', msg.id);
-    deleteParams.append('hmid', header.id);
+    deleteParams.append('imid1', image1.id);
+    deleteParams.append('imid2', image2.id);
     if (isNotEmpty(channel_id)) {
         deleteParams.append('vid', channel_id);
     }
@@ -24,24 +26,38 @@ function recruitDeleteButton(msg, header, channel_id = null) {
     return button;
 }
 
-function recruitActionRow(header, channel_id = null) {
+function embedRecruitDeleteButton(msg, header, channel_id = null) {
+    const deleteParams = new URLSearchParams();
+    deleteParams.append('d', 'del');
+    deleteParams.append('mid', msg.id);
+    deleteParams.append('imid1', header.id);
+    if (isNotEmpty(channel_id)) {
+        deleteParams.append('vid', channel_id);
+    }
+
+    let button = new ActionRowBuilder();
+    button.addComponents([new ButtonBuilder().setCustomId(deleteParams.toString()).setLabel('募集を削除').setStyle(ButtonStyle.Danger)]);
+    return button;
+}
+
+function recruitActionRow(image, channel_id = null) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
-    joinParams.append('hmid', header.id);
+    joinParams.append('imid1', image.id);
     if (isNotEmpty(channel_id)) {
         joinParams.append('vid', channel_id);
     }
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', 'cr');
-    cancelParams.append('hmid', header.id);
+    cancelParams.append('imid1', image.id);
     if (isNotEmpty(channel_id)) {
         cancelParams.append('vid', channel_id);
     }
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'close');
-    closeParams.append('hmid', header.id);
+    closeParams.append('imid1', image.id);
     if (isNotEmpty(channel_id)) {
         closeParams.append('vid', channel_id);
     }

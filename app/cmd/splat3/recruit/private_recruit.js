@@ -2,7 +2,11 @@ const { EmbedBuilder } = require('discord.js');
 const { searchMessageById } = require('../../../manager/messageManager');
 const { searchMemberById } = require('../../../manager/memberManager');
 const { isNotEmpty, sleep } = require('../../../common');
-const { recruitDeleteButton, recruitActionRow, notifyActionRow } = require('../../../buttons/recruit/components/create_recruit_buttons');
+const {
+    embedRecruitDeleteButton,
+    recruitActionRow,
+    notifyActionRow,
+} = require('../../../buttons/recruit/components/create_recruit_buttons');
 const e = require('express');
 const log4js = require('log4js');
 
@@ -82,7 +86,7 @@ async function sendPrivateRecruit(interaction, options) {
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         sentMessage.edit({ components: [recruitActionRow(header)] });
         let deleteButtonMsg = await interaction.channel.send({
-            components: [recruitDeleteButton(sentMessage, header)],
+            components: [embedRecruitDeleteButton(sentMessage, header)],
         });
 
         await interaction.followUp({

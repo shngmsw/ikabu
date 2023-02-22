@@ -41,18 +41,15 @@ async function sendSalmonRun(interaction, txt, recruit_num, condition, count, ho
 
     try {
         const mention = `@everyone`;
-        const header = await interaction.editReply({
-            content: txt,
-            files: [recruit, rule],
-            ephemeral: false,
-        });
+        const image1 = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
+        const image2 = await interaction.channel.send({ files: [rule] });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
-        sentMessage.edit({ components: [recruitActionRow(header)] });
+        sentMessage.edit({ components: [recruitActionRow(image1)] });
         deleteButtonMsg = await interaction.channel.send({
-            components: [recruitDeleteButton(sentMessage, header)],
+            components: [recruitDeleteButton(sentMessage, image1, image2)],
         });
         await interaction.followUp({
             content:
@@ -61,7 +58,7 @@ async function sendSalmonRun(interaction, txt, recruit_num, condition, count, ho
         });
 
         // ピン留め
-        header.pin();
+        image1.pin();
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
