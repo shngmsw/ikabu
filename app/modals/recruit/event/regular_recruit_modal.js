@@ -26,15 +26,15 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
 
     try {
         const mention = `@everyone`;
-        const image1 = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
-        const image2 = await interaction.channel.send({ files: [rule] });
+        const image1_message = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
+        const image2_message = await interaction.channel.send({ files: [rule] });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
-        sentMessage.edit({ components: [recruitActionRow(image1)] });
+        sentMessage.edit({ components: [recruitActionRow(image1_message)] });
         const deleteButtonMsg = await interaction.channel.send({
-            components: [recruitDeleteButton(sentMessage, image1, image2)],
+            components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
         });
         await interaction.followUp({
             content:
@@ -43,7 +43,7 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
         });
 
         // ピン留め
-        image1.pin();
+        image1_message.pin();
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
@@ -75,7 +75,7 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
             components: await setButtonDisable(checkMessage),
         });
         // ピン留め解除
-        image1.unpin();
+        image1_message.unpin();
     } catch (error) {
         logger.error(error);
     }

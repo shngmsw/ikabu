@@ -178,8 +178,8 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
     const rule = new AttachmentBuilder(await ruleFesCanvas(fes_data), { name: 'rules.png' });
 
     try {
-        const image1 = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
-        const image2 = await interaction.channel.send({ files: [rule] });
+        const image1_message = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
+        const image2_message = await interaction.channel.send({ files: [rule] });
         const sentMessage = await interaction.channel.send({
             content: `<@&${mention_id}>` + ' ボタンを押して参加表明するでし！',
         });
@@ -193,9 +193,9 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
 
         let deleteButtonMsg;
         if (isLock) {
-            sentMessage.edit({ components: [recruitActionRow(image1, reserve_channel.id)] });
+            sentMessage.edit({ components: [recruitActionRow(image1_message, reserve_channel.id)] });
             deleteButtonMsg = await interaction.channel.send({
-                components: [recruitDeleteButton(sentMessage, image1, image2, reserve_channel.id)],
+                components: [recruitDeleteButton(sentMessage, image1_message, image2_message, reserve_channel.id)],
             });
             reserve_channel.permissionOverwrites.set(
                 [
@@ -211,9 +211,9 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
                 ephemeral: true,
             });
         } else {
-            sentMessage.edit({ components: [recruitActionRow(image1)] });
+            sentMessage.edit({ components: [recruitActionRow(image1_message)] });
             deleteButtonMsg = await interaction.channel.send({
-                components: [recruitDeleteButton(sentMessage, image1)],
+                components: [recruitDeleteButton(sentMessage, image1_message)],
             });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
@@ -222,7 +222,7 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
         }
 
         // ピン留め
-        image1.pin();
+        image1_message.pin();
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
@@ -254,7 +254,7 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
             components: await setButtonDisable(checkMessage),
         });
         // ピン留め解除
-        image1.unpin();
+        image1_message.unpin();
         if (isLock) {
             reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');

@@ -11,12 +11,12 @@ module.exports = {
     createNewRecruitButton: createNewRecruitButton,
 };
 
-function recruitDeleteButton(msg, image1, image2, channel_id = null) {
+function recruitDeleteButton(msg, image1_message, image2_message, channel_id = null) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
     deleteParams.append('mid', msg.id);
-    deleteParams.append('imid1', image1.id);
-    deleteParams.append('imid2', image2.id);
+    deleteParams.append('imid1', image1_message.id);
+    deleteParams.append('imid2', image2_message.id);
     if (isNotEmpty(channel_id)) {
         deleteParams.append('vid', channel_id);
     }
@@ -40,24 +40,24 @@ function embedRecruitDeleteButton(msg, header, channel_id = null) {
     return button;
 }
 
-function recruitActionRow(image, channel_id = null) {
+function recruitActionRow(image_message, channel_id = null) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
-    joinParams.append('imid1', image.id);
+    joinParams.append('imid1', image_message.id);
     if (isNotEmpty(channel_id)) {
         joinParams.append('vid', channel_id);
     }
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', 'cr');
-    cancelParams.append('imid1', image.id);
+    cancelParams.append('imid1', image_message.id);
     if (isNotEmpty(channel_id)) {
         cancelParams.append('vid', channel_id);
     }
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'close');
-    closeParams.append('imid1', image.id);
+    closeParams.append('imid1', image_message.id);
     if (isNotEmpty(channel_id)) {
         closeParams.append('vid', channel_id);
     }
