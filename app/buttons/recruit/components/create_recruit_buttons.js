@@ -11,29 +11,23 @@ module.exports = {
     createNewRecruitButton: createNewRecruitButton,
 };
 
-function recruitDeleteButton(msg, image1_message, image2_message, channel_id = null) {
+function recruitDeleteButton(msg, image1_message, image2_message) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
     deleteParams.append('mid', msg.id);
     deleteParams.append('imid1', image1_message.id);
     deleteParams.append('imid2', image2_message.id);
-    if (isNotEmpty(channel_id)) {
-        deleteParams.append('vid', channel_id);
-    }
 
     let button = new ActionRowBuilder();
     button.addComponents([new ButtonBuilder().setCustomId(deleteParams.toString()).setLabel('募集を削除').setStyle(ButtonStyle.Danger)]);
     return button;
 }
 
-function embedRecruitDeleteButton(msg, header, channel_id = null) {
+function embedRecruitDeleteButton(msg, header) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
     deleteParams.append('mid', msg.id);
     deleteParams.append('imid1', header.id);
-    if (isNotEmpty(channel_id)) {
-        deleteParams.append('vid', channel_id);
-    }
 
     let button = new ActionRowBuilder();
     button.addComponents([new ButtonBuilder().setCustomId(deleteParams.toString()).setLabel('募集を削除').setStyle(ButtonStyle.Danger)]);

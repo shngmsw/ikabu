@@ -166,12 +166,12 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
             isLock = true;
         }
 
-        let deleteButtonMsg;
+        const deleteButtonMsg = await interaction.channel.send({
+            components: [embedRecruitDeleteButton(sentMessage, header)],
+        });
+
         if (isLock) {
             sentMessage.edit({ components: [recruitActionRow(header, reserve_channel.id)] });
-            deleteButtonMsg = await interaction.channel.send({
-                components: [embedRecruitDeleteButton(sentMessage, header, reserve_channel.id)],
-            });
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
@@ -187,9 +187,6 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
             });
         } else {
             sentMessage.edit({ components: [recruitActionRow(header)] });
-            deleteButtonMsg = await interaction.channel.send({
-                components: [embedRecruitDeleteButton(sentMessage, header)],
-            });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -205,7 +202,18 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
+            if (isLock) {
+                reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                reserve_channel.permissionOverwrites.delete(interaction.member.user, 'UnLock Voice Channel');
+            }
             return;
+        }
+
+        // 2時間後にVCロック解除
+        await sleep(7200 - 15);
+        if (isLock) {
+            reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+            reserve_channel.permissionOverwrites.delete(interaction.member.user, 'UnLock Voice Channel');
         }
     } catch (error) {
         logger.error(error);

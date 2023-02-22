@@ -191,12 +191,11 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
             isLock = true;
         }
 
-        let deleteButtonMsg;
+        const deleteButtonMsg = await interaction.channel.send({
+            components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
+        });
         if (isLock) {
             sentMessage.edit({ components: [recruitActionRow(image1_message, reserve_channel.id)] });
-            deleteButtonMsg = await interaction.channel.send({
-                components: [recruitDeleteButton(sentMessage, image1_message, image2_message, reserve_channel.id)],
-            });
             reserve_channel.permissionOverwrites.set(
                 [
                     { id: guild.roles.everyone.id, deny: [PermissionsBitField.Flags.Connect] },
@@ -212,9 +211,6 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
             });
         } else {
             sentMessage.edit({ components: [recruitActionRow(image1_message)] });
-            deleteButtonMsg = await interaction.channel.send({
-                components: [recruitDeleteButton(sentMessage, image1_message)],
-            });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -230,6 +226,10 @@ async function sendFesMatch(interaction, team, txt, recruit_num, condition, coun
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
+            if (isLock) {
+                reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
+            }
             return;
         }
 
