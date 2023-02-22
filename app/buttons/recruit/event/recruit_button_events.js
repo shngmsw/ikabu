@@ -274,21 +274,11 @@ async function del(interaction, params) {
             host_id = participants[0];
         }
         const host_member = await searchMemberById(guild, host_id);
-        let channelId = params.get('vid');
 
         sendRecruitButtonLog(interaction, member, host_member, '削除', '#f04747');
 
-        if (isEmpty(channelId)) {
-            channelId = null;
-        }
-
         //if (member.user.id === host_id) {  // 募集主のみ
         if (participants.includes(member.user.id)) {
-            if (channelId != null) {
-                let channel = await searchChannelById(guild, channelId);
-                channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
-            }
             try {
                 await interaction.message.delete();
             } catch (error) {
