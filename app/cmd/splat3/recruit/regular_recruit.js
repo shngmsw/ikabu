@@ -165,7 +165,8 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
 
     try {
         const mention = `@everyone`;
-        const header = await interaction.editReply({ content: txt, files: [recruit, rule], ephemeral: false });
+        const image1_message = await interaction.editReply({ content: txt, files: [recruit], ephemeral: false });
+        const image2_message = await interaction.channel.send({ files: [rule] });
         const sentMessage = await interaction.channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
@@ -178,9 +179,9 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
 
         let deleteButtonMsg;
         if (isLock) {
-            sentMessage.edit({ components: [recruitActionRow(header, reserve_channel.id)] });
+            sentMessage.edit({ components: [recruitActionRow(image1_message, reserve_channel.id)] });
             deleteButtonMsg = await interaction.channel.send({
-                components: [recruitDeleteButton(sentMessage, header, reserve_channel.id)],
+                components: [recruitDeleteButton(sentMessage, image1_message, image2_message, reserve_channel.id)],
             });
             reserve_channel.permissionOverwrites.set(
                 [
@@ -196,9 +197,9 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
                 ephemeral: true,
             });
         } else {
-            sentMessage.edit({ components: [recruitActionRow(header)] });
+            sentMessage.edit({ components: [recruitActionRow(image1_message)] });
             deleteButtonMsg = await interaction.channel.send({
-                components: [recruitDeleteButton(sentMessage, header)],
+                components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
             });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
@@ -207,7 +208,7 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
         }
 
         // ピン留め
-        header.pin();
+        image1_message.pin();
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
@@ -239,7 +240,7 @@ async function sendRegularMatch(interaction, txt, recruit_num, condition, count,
             components: await setButtonDisable(checkMessage),
         });
         // ピン留め解除
-        header.unpin();
+        image1_message.unpin();
         if (isLock) {
             reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');

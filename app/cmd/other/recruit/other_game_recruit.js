@@ -4,7 +4,7 @@ const { searchMemberById } = require('../../../manager/memberManager');
 const { isNotEmpty, sleep } = require('../../../common');
 const {
     recruitActionRow,
-    recruitDeleteButton,
+    embedRecruitDeleteButton,
     unlockChannelButton,
 } = require('../../../buttons/recruit/components/create_recruit_buttons');
 const log4js = require('log4js');
@@ -170,7 +170,7 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
         if (isLock) {
             sentMessage.edit({ components: [recruitActionRow(header, reserve_channel.id)] });
             deleteButtonMsg = await interaction.channel.send({
-                components: [recruitDeleteButton(sentMessage, header, reserve_channel.id)],
+                components: [embedRecruitDeleteButton(sentMessage, header, reserve_channel.id)],
             });
             reserve_channel.permissionOverwrites.set(
                 [
@@ -188,7 +188,7 @@ async function sendOtherGames(interaction, title, recruitNumText, mention, txt, 
         } else {
             sentMessage.edit({ components: [recruitActionRow(header)] });
             deleteButtonMsg = await interaction.channel.send({
-                components: [recruitDeleteButton(sentMessage, header)],
+                components: [embedRecruitDeleteButton(sentMessage, header)],
             });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
