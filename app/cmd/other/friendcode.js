@@ -26,9 +26,21 @@ async function _handleFriendCode(interaction) {
 }
 
 async function selectFriendCode(interaction) {
-    const guild = await interaction.guild.fetch();
-    let targetUser = await searchMemberById(guild, interaction.member.user.id);
-    let id = interaction.member.user.id;
+    const guild = interaction.guild;
+    const targetUser = await searchMemberById(guild, interaction.member.user.id);
+
+    const deleteButton = new ActionRowBuilder();
+    deleteButton.addComponents([new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger)]);
+    let fc = await FriendCodeService.getFriendCodeByUserId(targetUser.id);
+    if (fc[0] != null) {
+        await interaction.editReply({
+            embeds: [composeEmbed(targetUser, fc[0].code, true)],
+            components: [deleteButton],
+            ephemeral: false,
+        });
+        return;
+    }
+
     const channelCollection = await guild.channels.fetch();
     let ch = channelCollection.find((channel) => channel.name === '自己紹介');
     let messages = await ch.messages.fetch({ limit: 100 }).catch((error) => {
@@ -39,17 +51,6 @@ async function selectFriendCode(interaction) {
         return value.content;
     });
 
-    const deleteButton = new ActionRowBuilder();
-    deleteButton.addComponents([new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger)]);
-    let fc = await FriendCodeService.getFriendCodeByUserId(id);
-    if (fc[0] != null) {
-        await interaction.editReply({
-            embeds: [composeEmbed(targetUser, fc[0].code, true)],
-            components: [deleteButton],
-            ephemeral: false,
-        });
-        return;
-    }
     if (result.length > 0) {
         let embeds = [];
         for (var r of result) {
