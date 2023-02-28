@@ -28,12 +28,12 @@ async function sf(msg) {
     try {
         const data = await fetchSchedule();
 
-        const embedStr_league = await getLeagueEmbed(data);
-        embedStr_league.setAuthor({
-            name: 'リーグマッチ',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
-        });
-        embedStr_league.setColor('#ED2D7C');
+        // const embedStr_league = await getLeagueEmbed(data);
+        // embedStr_league.setAuthor({
+        //     name: 'リーグマッチ',
+        //     iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
+        // });
+        // embedStr_league.setColor('#ED2D7C');
 
         const embedStr_challenge = await getACEmbed(data);
         embedStr_challenge.setAuthor({
