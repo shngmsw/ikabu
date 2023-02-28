@@ -63,29 +63,29 @@ async function sendStageInfo(interaction, data, scheduleNum) {
         title = '次';
     }
 
-    const league_data = await getLeagueData(data, scheduleNum);
+    // const league_data = await getLeagueData(data, scheduleNum);
     const challenge_data = await getAnarchyChallengeData(data, scheduleNum);
     const open_data = await getAnarchyOpenData(data, scheduleNum);
     const X_data = await getXMatchData(data, scheduleNum);
 
-    const l_thumbnail = rule2image(league_data.rule);
+    // const l_thumbnail = rule2image(league_data.rule);
     const c_thumbnail = rule2image(challenge_data.rule);
     const o_thumbnail = rule2image(open_data.rule);
     const x_thumbnail = rule2image(X_data.rule);
 
-    const league_start_date = formatDatetime(league_data.startTime, dateformat.ymdwhm);
-    const league_end_date = formatDatetime(league_data.endTime, dateformat.hm);
-    const leagueEmbed = new EmbedBuilder()
-        .setAuthor({
-            name: title + 'のリーグマッチ',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
-        })
-        .setColor('#ED2D7C')
-        .addFields({
-            name: league_start_date + '-' + league_end_date,
-            value: league_data.stage1 + '／' + league_data.stage2,
-        })
-        .setThumbnail(l_thumbnail);
+    // const league_start_date = formatDatetime(league_data.startTime, dateformat.ymdwhm);
+    // const league_end_date = formatDatetime(league_data.endTime, dateformat.hm);
+    // const leagueEmbed = new EmbedBuilder()
+    //     .setAuthor({
+    //         name: title + 'のリーグマッチ',
+    //         iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
+    //     })
+    //     .setColor('#ED2D7C')
+    //     .addFields({
+    //         name: league_start_date + '-' + league_end_date,
+    //         value: league_data.stage1 + '／' + league_data.stage2,
+    //     })
+    //     .setThumbnail(l_thumbnail);
 
     const challenge_start_date = formatDatetime(challenge_data.startTime, dateformat.ymdwhm);
     const challenge_end_date = formatDatetime(challenge_data.endTime, dateformat.hm);
