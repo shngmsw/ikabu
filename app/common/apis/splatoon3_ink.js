@@ -6,6 +6,7 @@ const locale_url = 'https://splatoon3.ink/data/locale/ja-JP.json';
 
 module.exports = {
     fetchSchedule: fetchSchedule,
+    updateSchedule: updateSchedule,
     checkFes: checkFes,
     checkBigRun: checkBigRun,
     getRegularList: getRegularList,
@@ -29,14 +30,40 @@ const logger = log4js.getLogger('api');
 
 async function fetchSchedule() {
     try {
+        const result_data = global.schedule_data;
+
+        if (isEmpty(result_data)) {
+            logger.warn('schedule data was not found. (fetch)');
+            return await updateSchedule();
+        }
+
+        const regular_list = getRegularList(result_data.schedule); // レギュラーの1つ目の時間でフェッチするか決定
+        const end_datetime = new Date(regular_list[0].endTime);
+        const now_datetime = new Date();
+
+        // スケジュールデータの終了時間よりも現在の時間が遅い場合
+        if (end_datetime - now_datetime < 0) {
+            return await updateSchedule();
+        } else {
+            return result_data;
+        }
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+async function updateSchedule() {
+    try {
         const schedule = await fetch(schedule_url); // スケジュール情報のfetch
         const schedule_data = await schedule.json();
         const locale = await fetch(locale_url); // 名前解決のためのlocale情報のfetch
         const locale_data = await locale.json();
         const result_data = { schedule: schedule_data, locale: locale_data }; // dataを一つにまとめる
+        global.schedule_data = result_data;
+        logger.info('schedule fetched!');
         return result_data;
     } catch (error) {
-        logger.error(result_data);
+        logger.error(error);
     }
 }
 
@@ -80,9 +107,9 @@ function checkBigRun(schedule, num) {
             return false;
         }
 
-        start_datetime = new Date(big_run_list[num].startTime);
-        end_datetime = new Date(big_run_list[num].endTime);
-        now_datetime = new Date();
+        const start_datetime = new Date(big_run_list[num].startTime);
+        const end_datetime = new Date(big_run_list[num].endTime);
+        const now_datetime = new Date();
         if (now_datetime - start_datetime < 0) {
             return false;
         } else if (end_datetime - now_datetime < 0) {
