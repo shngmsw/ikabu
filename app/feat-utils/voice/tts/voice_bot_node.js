@@ -12,7 +12,7 @@ module.exports = {
 const { VoiceText } = require('voice-text');
 const { Readable } = require('stream');
 const conf = require('config-reloadable');
-const { searchMemberById } = require('../../../common/manager/memberManager.js');
+const { searchMemberById } = require('../../../common/manager/member_manager.js');
 const SHA256 = require('crypto-js/sha256');
 
 let config = conf();

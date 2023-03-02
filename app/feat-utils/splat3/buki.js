@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { searchMemberById } = require('../../common/manager/memberManager');
+const { searchMemberById } = require('../../common/manager/member_manager');
 const common = require('../../common/others');
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 const { EmbedBuilder } = require('discord.js');

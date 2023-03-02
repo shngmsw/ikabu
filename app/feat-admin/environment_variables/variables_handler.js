@@ -3,7 +3,7 @@ const { isEmpty } = require('../../common/others');
 const { deleteVariables } = require('./delete_variables');
 const { setVariables } = require('./set_variables');
 const { showVariables } = require('./show_variables');
-const { searchChannelById } = require('../../common/manager/channelManager');
+const { searchChannelById } = require('../../common/manager/channel_manager');
 
 module.exports = {
     variablesHandler: variablesHandler,

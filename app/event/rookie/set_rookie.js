@@ -1,9 +1,9 @@
-const { searchChannelById } = require('../../common/manager/channelManager');
-const { searchMemberById } = require('../../common/manager/memberManager');
+const { searchChannelById } = require('../../common/manager/channel_manager');
+const { searchMemberById } = require('../../common/manager/member_manager');
 const MembersService = require('../../../db/members_service.js');
 const FriendCodeService = require('../../../db/friend_code_service.js');
 const { isEmpty, sleep } = require('../../common/others');
-const { searchRoleById } = require('../../common/manager/roleManager');
+const { searchRoleById } = require('../../common/manager/role_manager');
 const log4js = require('log4js');
 
 module.exports = {

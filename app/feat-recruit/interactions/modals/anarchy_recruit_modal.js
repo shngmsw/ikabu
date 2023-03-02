@@ -1,7 +1,7 @@
 const { AttachmentBuilder } = require('discord.js');
 const RecruitService = require('../../../../db/recruit_service');
 const { getMemberMentions } = require('../../../feat-recruit/interactions/buttons/recruit_button_events');
-const { searchMessageById } = require('../../../common/manager/messageManager');
+const { searchMessageById } = require('../../../common/manager/message_manager');
 const { isNotEmpty, isEmpty, sleep } = require('../../../common/others');
 const { recruitActionRow, recruitDeleteButton } = require('../../../feat-recruit/buttons/create_recruit_buttons');
 const { setButtonDisable } = require('../../../common/button_components');

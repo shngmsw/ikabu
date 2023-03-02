@@ -3,7 +3,7 @@ const request = require('request');
 const fs = require('fs');
 const { parse } = require('csv');
 const { stringify } = require('csv-stringify/sync');
-const { searchChannelById } = require('../../common/manager/channelManager');
+const { searchChannelById } = require('../../common/manager/channel_manager');
 const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);

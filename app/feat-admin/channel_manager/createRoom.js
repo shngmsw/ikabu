@@ -3,8 +3,8 @@ const request = require('request');
 const fs = require('fs');
 const { parse } = require('csv');
 const { stringify } = require('csv-stringify/sync');
-const { createChannel } = require('../../common/manager/channelManager');
-const { createRole, setColorToRole, searchRoleById, setRoleToMember } = require('../../common/manager/roleManager');
+const { createChannel } = require('../../common/manager/channel_manager');
+const { createRole, setColorToRole, searchRoleById, setRoleToMember } = require('../../common/manager/role_manager');
 const log4js = require('log4js');
 
 const INDEX_CATEGORY_ID = 0;

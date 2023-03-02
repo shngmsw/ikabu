@@ -2,7 +2,7 @@ const { AttachmentBuilder, PermissionsBitField } = require('discord.js');
 const fs = require('fs');
 const { stringify } = require('csv-stringify/sync');
 const { isEmpty, isNotEmpty } = require('../../common/others');
-const { createRole, searchRoleById, setColorToRole, searchRoleIdByName } = require('../../common/manager/roleManager');
+const { createRole, searchRoleById, setColorToRole, searchRoleIdByName } = require('../../common/manager/role_manager');
 const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);

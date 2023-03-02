@@ -1,6 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const FriendCodeService = require('../../../db/friend_code_service.js');
-const { searchMemberById } = require('../../common/manager/memberManager.js');
+const { searchMemberById } = require('../../common/manager/member_manager.js');
 const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);

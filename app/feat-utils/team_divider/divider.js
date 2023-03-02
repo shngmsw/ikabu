@@ -1,8 +1,8 @@
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
-const { searchMemberById } = require('../../common/manager/memberManager');
+const { searchMemberById } = require('../../common/manager/member_manager');
 const { isEmpty } = require('../../common/others');
 const { setButtonEnable, recoveryThinkingButton, disableThinkingButton, setButtonDisable } = require('../../common/button_components');
-const { searchMessageById } = require('../../common/manager/messageManager');
+const { searchMessageById } = require('../../common/manager/message_manager');
 const TeamDividerService = require('../../../db/team_divider_service');
 const TeamDivider = require('../../../db/model/team_divider');
 const log4js = require('log4js');

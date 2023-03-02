@@ -16,7 +16,7 @@ module.exports = {
 };
 
 const { EmbedBuilder } = require('discord.js');
-const { searchMemberById } = require('./manager/memberManager.js');
+const { searchMemberById } = require('./manager/member_manager.js');
 
 async function composeEmbed(message, url) {
     const embed = new EmbedBuilder();

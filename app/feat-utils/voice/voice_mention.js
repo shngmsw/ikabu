@@ -1,8 +1,8 @@
 const { EmbedBuilder, ChannelType } = require('discord.js');
 const log4js = require('log4js');
 const { isNotEmpty, isEmpty } = require('../../common/others');
-const { searchChannelById } = require('../../common/manager/channelManager');
-const { searchMemberById, getMemberColor } = require('../../common/manager/memberManager');
+const { searchChannelById } = require('../../common/manager/channel_manager');
+const { searchMemberById, getMemberColor } = require('../../common/manager/member_manager');
 
 module.exports = {
     voiceMention: voiceMention,

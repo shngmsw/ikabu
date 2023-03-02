@@ -1,6 +1,6 @@
-const { isNotEmpty, composeEmbed } = require('../common/others');
+const { isNotEmpty, composeEmbed } = require('../../common/others');
 const log4js = require('log4js');
-const { searchMessageById } = require('../common/manager/messageManager');
+const { searchMessageById } = require('../../common/manager/message_manager');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger('dispander');

@@ -1,11 +1,11 @@
 const { PermissionsBitField, AttachmentBuilder } = require('discord.js');
-const Dispandar = require('../event/dispandar');
+const Dispander = require('../event/message_events/dispander');
 const DISCORD_VOICE = require('../feat-utils/voice/tts/discordjs_voice');
 const handleStageInfo = require('../feat-utils/splat3/stageinfo');
 const { randomBool, isNotEmpty } = require('../common/others');
 const removeRookie = require('../event/rookie/remove_rookie.js');
-const chatCountUp = require('../event/members.js');
-const deleteToken = require('../event/delete_token.js');
+const chatCountUp = require('../event/message_events/members.js');
+const deleteToken = require('../event/message_events/delete_token.js');
 const { sendIntentionConfirmReply } = require('../event/rookie/send_questionnaire');
 const log4js = require('log4js');
 
@@ -62,7 +62,7 @@ async function call(message) {
         }
 
         await deleteToken(message);
-        Dispandar.dispand(message);
+        Dispander.dispand(message);
         DISCORD_VOICE.play(message);
         await chatCountUp(message);
         removeRookie(message);

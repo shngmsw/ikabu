@@ -1,4 +1,4 @@
-const { searchChannelById } = require('../manager/channelManager');
+const { searchChannelById } = require('./channel_manager');
 const log4js = require('log4js');
 
 log4js.configure(process.env.LOG4JS_CONFIG_PATH);

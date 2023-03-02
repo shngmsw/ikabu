@@ -1,6 +1,6 @@
 const { EmbedBuilder, PermissionsBitField } = require('discord.js');
-const { searchMessageById } = require('../../../common/manager/messageManager');
-const { searchMemberById } = require('../../../common/manager/memberManager');
+const { searchMessageById } = require('../../../common/manager/message_manager');
+const { searchMemberById } = require('../../../common/manager/member_manager');
 const { isNotEmpty, sleep } = require('../../../common/others');
 const { recruitActionRow, embedRecruitDeleteButton, unlockChannelButton } = require('../../../feat-recruit/buttons/create_recruit_buttons');
 const log4js = require('log4js');

@@ -1,13 +1,13 @@
 const { ChannelType } = require('discord.js');
-const { searchMemberById } = require('../../../common/manager/memberManager');
+const { searchMemberById } = require('../../../common/manager/member_manager');
 const { checkFes, getRegularData, getAnarchyOpenData, getFesData, fetchSchedule } = require('../../../common/apis/splatoon3_ink');
 const { isEmpty, isNotEmpty } = require('../../../common/others');
-const { searchChannelIdByName } = require('../../../common/manager/channelManager');
+const { searchChannelIdByName } = require('../../../common/manager/channel_manager');
 const { sendRegularMatch } = require('./regular_recruit_modal');
 const { sendAnarchyMatch } = require('./anarchy_recruit_modal');
 const { sendSalmonRun } = require('./salmon_recruit_modal');
 const { sendFesMatch } = require('./fes_recruit_modal');
-const { sendRecruitModalLog } = require('../../../event/command_log');
+const { sendRecruitModalLog } = require('../../../logs/modals/recruit_modal_log');
 const log4js = require('log4js');
 
 module.exports = {
