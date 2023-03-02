@@ -33,6 +33,7 @@ const FriendCodeService = require('../db/friend_code_service.js');
 const MembersService = require('../db/members_service.js');
 const { editThreadTag } = require('./event/support_auto_tag/edit_tag');
 const { sendCloseButton } = require('./event/support_auto_tag/send_support_close_button');
+const { updateSchedule } = require('./common/apis/splatoon3_ink.js');
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
@@ -93,6 +94,7 @@ client.on('ready', async () => {
         await TeamDividerService.createTableIfNotExists();
         const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID);
         client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
+        updateSchedule();
     } catch (error) {
         logger.error(error);
     }
