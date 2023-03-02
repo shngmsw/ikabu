@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 const log4js = require('log4js');
-const { isEmpty } = require('../../common');
+const { isEmpty } = require('../../common/others');
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const locale_url = 'https://splatoon3.ink/data/locale/ja-JP.json';
 
