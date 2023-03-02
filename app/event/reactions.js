@@ -1,7 +1,7 @@
 const ReactionsService = require('../../db/reactions_service');
 const TotalReactionsService = require('../../db/total_reactions_service');
 const TotalReactions = require('../../db/model/total_reactions');
-const { isEmpty } = require('../common');
+const { isEmpty } = require('../common/others');
 
 module.exports = async function emojiCountUp(reaction) {
     let user_id = reaction.message.author.id;

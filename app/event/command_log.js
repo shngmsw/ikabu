@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const { searchMemberById } = require('../manager/memberManager');
+const { searchMemberById } = require('../common/manager/memberManager');
 const { sendEmbedsWebhook } = require('../common/webhook');
 
 module.exports = {

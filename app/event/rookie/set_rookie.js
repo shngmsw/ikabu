@@ -1,10 +1,10 @@
-const { searchChannelById } = require('../../manager/channelManager');
-const { searchMemberById } = require('../../manager/memberManager');
+const { searchChannelById } = require('../../common/manager/channelManager');
+const { searchMemberById } = require('../../common/manager/memberManager');
 const MembersService = require('../../../db/members_service.js');
 const FriendCodeService = require('../../../db/friend_code_service.js');
-const { isEmpty, sleep } = require('../../common');
+const { isEmpty, sleep } = require('../../common/others');
+const { searchRoleById } = require('../../common/manager/roleManager');
 const log4js = require('log4js');
-const { searchRoleById } = require('../../manager/roleManager');
 
 module.exports = {
     guildMemberAddEvent: guildMemberAddEvent,

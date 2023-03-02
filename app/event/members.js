@@ -1,4 +1,4 @@
-const MembersService = require('./../../db/members_service');
+const MembersService = require('../../db/members_service');
 
 module.exports = async function chatCountUp(msg) {
     let id = msg.author.id;

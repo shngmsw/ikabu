@@ -1,8 +1,8 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const log4js = require('log4js');
-const { sleep, isNotEmpty } = require('../../common');
+const { sleep, isNotEmpty } = require('../../common/others');
 const { setButtonDisable, disableThinkingButton, recoveryThinkingButton } = require('../../common/button_components');
-const { searchMessageById } = require('../../manager/messageManager');
+const { searchMessageById } = require('../../common/manager/messageManager');
+const log4js = require('log4js');
 
 module.exports = {
     sendIntentionConfirmReply: sendIntentionConfirmReply,

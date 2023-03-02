@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
 const MembersService = require('../../../db/members_service.js');
-const { isNotEmpty } = require('../../common.js');
-const { searchMemberById } = require('../../manager/memberManager');
-const { sendIntentionConfirmReply } = require('./send_questionnaire.js');
+const { isNotEmpty } = require('../../common/others');
+const { searchMemberById } = require('../../common/manager/memberManager');
+const { sendIntentionConfirmReply } = require('./send_questionnaire');
 
 module.exports = async function removeRookie(msg) {
     const dt = new Date();
