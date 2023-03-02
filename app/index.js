@@ -20,7 +20,7 @@ const CommandHandler = require('./handlers/command_handler');
 const ModalHandler = require('./handlers/modal_handler');
 const ButtonHandler = require('./handlers/button_handler');
 const ContextMenuHandler = require('./handlers/context_handler');
-const VCStateUpdateHander = require('./handlers/VCState_update_handler');
+const VCStateUpdateHandler = require('./handlers/vcState_update_handler');
 const { isNotEmpty } = require('./common/others');
 const emojiCountUp = require('./event/reaction_count/reactions.js');
 const { guildMemberAddEvent } = require('./event/rookie/set_rookie.js');
@@ -171,5 +171,5 @@ client.on('threadCreate', async (thread) => {
 });
 
 client.on('voiceStateUpdate', (oldState, newState) => {
-    VCStateUpdateHander.call(oldState, newState);
+    VCStateUpdateHandler.call(oldState, newState);
 });
