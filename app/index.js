@@ -1,6 +1,5 @@
 // Discord bot implements
-const { Client, GatewayIntentBits, PermissionsBitField, ActivityType, Partials } = require('discord.js');
-const { URLSearchParams } = require('url');
+const { Client, GatewayIntentBits, ActivityType, Partials } = require('discord.js');
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -16,53 +15,25 @@ const client = new Client({
     restRequestTimeout: 60000,
 });
 
-const Handler = require('./handler.js');
-const Dispandar = require('./event/dispandar.js');
-const VOICE_API = require('./tts/voice_bot_node.js');
-const DISCORD_VOICE = require('./tts/discordjs_voice.js');
-const handleStageInfo = require('./cmd/splat3/stageinfo.js');
-const { randomBool, isNotEmpty, getCloseEmbed, getCommandHelpEmbed } = require('./common.js');
-const { otherGameRecruit } = require('./cmd/other/recruit/other_game_recruit.js');
-const { regularRecruit } = require('./cmd/splat3/recruit/regular_recruit.js');
-const { fesRecruit } = require('./cmd/splat3/recruit/fes_recruit');
-const { anarchyRecruit } = require('./cmd/splat3/recruit/anarchy_recruit.js');
-const { salmonRecruit } = require('./cmd/splat3/recruit/salmon_recruit.js');
-const { privateRecruit } = require('./cmd/splat3/recruit/private_recruit.js');
-const { buttonEnable } = require('./cmd/admin-cmd/enableButton');
-const { voiceMention } = require('./cmd/other/voice_mention.js');
-const removeRookie = require('./event/rookie/remove_rookie.js');
-const chatCountUp = require('./event/members.js');
-const emojiCountUp = require('./event/reactions.js');
+const MessageHandler = require('./handlers/message_handler');
+const CommandHandler = require('./handlers/command_handler');
+const ModalHandler = require('./handlers/modal_handler');
+const ButtonHandler = require('./handlers/button_handler');
+const ContextMenuHandler = require('./handlers/context_handler');
+const VCStateUpdateHandler = require('./handlers/vcState_update_handler');
+const { isNotEmpty } = require('./common/others');
+const emojiCountUp = require('./event/reaction_count/reactions.js');
 const { guildMemberAddEvent } = require('./event/rookie/set_rookie.js');
-const deleteToken = require('./event/delete_token.js');
-const recruitButton = require('./buttons/recruit/event/recruit_button_events.js');
-const divider = require('./cmd/other/team_divider/divider');
-const { sendIntentionConfirmReply, sendQuestionnaireFollowUp, disableQuestionnaireButtons } = require('./event/rookie/send_questionnaire');
-const handleIkabuExperience = require('./cmd/other/experience.js');
-const { commandNames } = require('../constant');
 const registerSlashCommands = require('../register.js');
-const { voiceLocker, voiceLockerUpdate, disableLimit } = require('./cmd/other/voice_locker.js');
-const { handleFriendCode, deleteFriendCode } = require('./cmd/other/friendcode.js');
 const DBCommon = require('../db/db.js');
 const RecruitService = require('../db/recruit_service.js');
 const TeamDividerService = require('../db/team_divider_service.js');
 const log4js = require('log4js');
-const { sendCommandLog } = require('./event/command_log.js');
 const FriendCodeService = require('../db/friend_code_service.js');
 const MembersService = require('../db/members_service.js');
-const { variablesHandler } = require('./cmd/admin-cmd/environment_variables/variables_handler.js');
-const { createNewRecruitButton } = require('./buttons/recruit/components/create_recruit_buttons.js');
-const { handleCreateModal } = require('./modals/recruit/components/create_recruit_modals.js');
-const {
-    modalRegularRecruit,
-    modalAnarchyRecruit,
-    modalSalmonRecruit,
-    modalFesRecruit,
-} = require('./modals/recruit/event/extract_recruit_modal.js');
-const { editThreadTag } = require('./event/support/edit_tag.js');
-const { sendCloseButton } = require('./event/support/send_support_close_button.js');
-const { setResolvedTag } = require('./event/support/resolved_support.js');
-const { autokill } = require('./tts/discordjs_voice.js');
+const { editThreadTag } = require('./event/support_auto_tag/edit_tag');
+const { sendCloseButton } = require('./event/support_auto_tag/send_support_close_button');
+const { updateSchedule } = require('./common/apis/splatoon3_ink.js');
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
@@ -70,60 +41,7 @@ log4js.configure(process.env.LOG4JS_CONFIG_PATH);
 const logger = log4js.getLogger();
 
 client.on('messageCreate', async (msg) => {
-    try {
-        if (msg.author.bot) {
-            if (msg.content.startsWith('/poll')) {
-                if (msg.author.username === 'ブキチ') {
-                    logger.info(msg.author.username);
-                    msg.delete();
-                }
-            }
-            // ステージ情報
-            if (msg.content === 'stageinfo') {
-                handleStageInfo(msg);
-            }
-            return;
-        } else {
-            // ステージ情報デバッグ用
-            if (msg.content === 'stageinfo') {
-                const guild = await msg.guild.fetch();
-                const member = await guild.members.fetch(msg.author.id, {
-                    force: true, // intentsによってはGuildMemberUpdateが配信されないため
-                });
-                if (member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
-                    handleStageInfo(msg);
-                }
-            }
-
-            if (isNotEmpty(process.env.QUESTIONNAIRE_URL)) {
-                if (msg.channel.id != process.env.CHANNEL_ID_BOT_CMD && randomBool(0.00025)) {
-                    sendIntentionConfirmReply(msg, msg.author, 'QUESTIONNAIRE_URL');
-                }
-            }
-        }
-        if (msg.content.match('ボーリング')) {
-            msg.reply(
-                '```「ボウリング」とは、前方に正三角形に並べられた10本のピンと呼ばれる棒をめがけボールを転がし、倒れたピンの数によって得られる得点を競うスポーツでし。' +
-                    '専用施設のボウリング場に設置された細長いレーンの上で行われる屋内競技で、レーンの長さが約23m、ピンまでの距離は約18mで行われるのが一般的でし。' +
-                    '英語では “bowling” と書き、球を意味する “ball” ではなく、ラテン語で「泡」や「こぶ」を意味する “bowl” が語源とされているでし。' +
-                    '\n文部科学省は国語審議会で、球技を指す場合は「ボウリング」表記を用い、掘削を意味する「ボーリング」と区別することを推奨しているでし。```',
-            );
-        }
-        if (msg.content.match('お前を消す方法')) {
-            const Kairu = new AttachmentBuilder('./images/Kairu.png');
-            msg.reply({ files: [Kairu] });
-        }
-
-        await deleteToken(msg);
-        Handler.call(msg);
-        Dispandar.dispand(msg);
-        DISCORD_VOICE.play(msg);
-        await chatCountUp(msg);
-        removeRookie(msg);
-    } catch (error) {
-        const messageLogger = log4js.getLogger('message');
-        messageLogger.error(error);
-    }
+    MessageHandler.call(msg);
 });
 
 client.on('guildMemberAdd', async (member) => {
@@ -176,6 +94,7 @@ client.on('ready', async () => {
         await TeamDividerService.createTableIfNotExists();
         const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID);
         client.user.setActivity(`${guild.memberCount}人`, { type: ActivityType.Playing });
+        updateSchedule();
     } catch (error) {
         logger.error(error);
     }
@@ -217,125 +136,19 @@ client.on('messageReactionRemove', async (reaction, user) => {
 async function onInteraction(interaction) {
     try {
         if (interaction.isButton()) {
-            const params = new URLSearchParams(interaction.customId);
-            const voiceLockerIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
-            if (voiceLockerIds.includes(interaction.customId)) {
-                voiceLockerUpdate(interaction);
-            } else if (interaction.customId == 'fchide') {
-                deleteFriendCode(interaction);
-            } else if (interaction.customId == 'support_resolved') {
-                setResolvedTag(interaction);
-            } else if (isNotEmpty(params.get('d'))) {
-                // buttonごとに呼び出すファンクション
-                const recruitButtons = {
-                    jr: recruitButton.join,
-                    cr: recruitButton.cancel,
-                    del: recruitButton.del,
-                    close: recruitButton.close,
-                    unl: recruitButton.unlock,
-                    njr: recruitButton.joinNotify,
-                    ncr: recruitButton.cancelNotify,
-                    nclose: recruitButton.closeNotify,
-                    newr: handleCreateModal,
-                };
-                await recruitButtons[params.get('d')](interaction, params);
-            } else if (isNotEmpty(params.get('t'))) {
-                const dividerButtons = {
-                    join: divider.joinButton,
-                    register: divider.registerButton,
-                    cancel: divider.cancelButton,
-                    alfa: divider.alfaButton,
-                    bravo: divider.bravoButton,
-                    spectate: divider.spectateButton,
-                    end: divider.endButton,
-                    correct: divider.correctButton,
-                    hide: divider.hideButton,
-                };
-                await dividerButtons[params.get('t')](interaction, params);
-            } else if (isNotEmpty(params.get('q'))) {
-                const questionnaireButtons = {
-                    yes: sendQuestionnaireFollowUp,
-                    no: disableQuestionnaireButtons,
-                };
-                await questionnaireButtons[params.get('q')](interaction, params);
-            }
-            return;
+            ButtonHandler.call(interaction);
         }
 
         if (interaction.isModalSubmit()) {
-            const params = new URLSearchParams(interaction.customId);
-            if (isNotEmpty(params.get('recm'))) {
-                const recruitModals = {
-                    regrec: modalRegularRecruit,
-                    anarec: modalAnarchyRecruit,
-                    salrec: modalSalmonRecruit,
-                    fesrec: modalFesRecruit,
-                };
-                await recruitModals[params.get('recm')](interaction, params);
-            }
-            return;
+            ModalHandler.call(interaction);
         }
 
         if (interaction.isMessageContextMenuCommand()) {
-            if (interaction.commandName == commandNames.buttonEnabler) {
-                buttonEnable(interaction);
-            }
-            return;
+            ContextMenuHandler.call(interaction);
         }
 
         if (interaction.isCommand()) {
-            const { commandName } = interaction;
-
-            sendCommandLog(interaction); // ログ処理待たせたくないのでawaitなし
-
-            if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
-                await voiceLocker(interaction);
-            } else if (commandName === commandNames.close) {
-                //serverコマンド
-                const embed = getCloseEmbed();
-                if (!interaction.replied) {
-                    await interaction.reply({
-                        embeds: [embed, getCommandHelpEmbed(interaction.channel.name)],
-                        components: [createNewRecruitButton(interaction.channel.name)],
-                    });
-                }
-            } else if (commandName === commandNames.team_divider) {
-                await divider.dividerInitialMessage(interaction);
-            } else if (commandName === commandNames.regular) {
-                await regularRecruit(interaction);
-            } else if (commandName === commandNames.other_game) {
-                await otherGameRecruit(interaction);
-            } else if (commandName === commandNames.anarchy) {
-                await anarchyRecruit(interaction);
-            } else if (commandName === commandNames.private) {
-                await privateRecruit(interaction);
-            } else if (commandName === commandNames.league) {
-                // await leagueRecruit(interaction);
-            } else if (commandName === commandNames.fesA) {
-                await fesRecruit(interaction);
-            } else if (commandName === commandNames.fesB) {
-                await fesRecruit(interaction);
-            } else if (commandName === commandNames.fesC) {
-                await fesRecruit(interaction);
-            } else if (commandName === commandNames.salmon) {
-                await salmonRecruit(interaction);
-            } else if (commandName === commandNames.friend_code) {
-                await handleFriendCode(interaction);
-            } else if (commandName === commandNames.experience) {
-                handleIkabuExperience(interaction);
-            } else if (commandName === commandNames.voiceChannelMention) {
-                voiceMention(interaction);
-            } else if (commandName === commandNames.variablesSettings) {
-                variablesHandler(interaction);
-            } else if (commandName === commandNames.voice) {
-                // 'インタラクションに失敗'が出ないようにするため
-                await interaction.deferReply();
-                DISCORD_VOICE.handleVoiceCommand(interaction);
-                VOICE_API.setting(interaction);
-            } else {
-                Handler.call(interaction);
-            }
-            return;
+            CommandHandler.call(interaction);
         }
     } catch (error) {
         const interactionLogger = log4js.getLogger('interaction');
@@ -347,6 +160,7 @@ async function onInteraction(interaction) {
         interactionLogger.error(error_detail);
     }
 }
+
 client.on('interactionCreate', (interaction) => onInteraction(interaction));
 
 client.on('threadCreate', async (thread) => {
@@ -357,33 +171,5 @@ client.on('threadCreate', async (thread) => {
 });
 
 client.on('voiceStateUpdate', (oldState, newState) => {
-    try {
-        if (oldState.channelId === newState.channelId) {
-            // ここはミュートなどの動作を行ったときに発火する場所
-        } else if (oldState.channelId === null && newState.channelId != null) {
-            // ここはconnectしたときに発火する場所
-            deleteLimitPermission(newState);
-        } else if (oldState.channelId != null && newState.channelId === null) {
-            // ここはdisconnectしたときに発火する場所
-            disableLimit(oldState);
-            autokill(oldState);
-        } else {
-            // ここはチャンネル移動を行ったときに発火する場所
-            deleteLimitPermission(newState);
-            disableLimit(oldState);
-            autokill(oldState);
-        }
-    } catch (error) {
-        const loggerVSU = log4js.getLogger('voiceStateUpdate');
-        loggerVSU.error(error);
-    }
+    VCStateUpdateHandler.call(oldState, newState);
 });
-
-// 募集時のVCロックの解除
-async function deleteLimitPermission(newState) {
-    const newChannel = await newState.guild.channels.fetch(newState.channelId);
-    if (newChannel.members.size != 0) {
-        newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
-        newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
-    }
-}

@@ -1,5 +1,5 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { isNotEmpty } = require('../common');
+const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { isNotEmpty } = require('../common/others');
 
 module.exports = {
     setButtonEnable: setButtonEnable,
