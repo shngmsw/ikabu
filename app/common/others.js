@@ -29,10 +29,17 @@ async function composeEmbed(message, url) {
         embed.setTitle('引用元へジャンプ');
         embed.setURL(url);
     }
-    embed.setAuthor({
-        name: member.displayName,
-        iconURL: member.displayAvatarURL(),
-    });
+    if (isNotEmpty(member)) {
+        embed.setAuthor({
+            name: member.displayName,
+            iconURL: member.displayAvatarURL(),
+        });
+    } else {
+        embed.setAuthor({
+            name: '不明なユーザー',
+            iconURL: 'https://cdn.discordapp.com/embed/avatars/0.png',
+        });
+    }
     embed.setFooter({
         text: message.channel.name,
         iconURL: message.guild.iconURL(),
