@@ -7,3 +7,4 @@ package-lock.json
 ikabu.code-workspace
 .vscode/settings.json
 ikabu.sqlite3
+build/
