@@ -1,19 +1,5 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-const log4js = require('log4js');
-
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'logger'.
-const logger = log4js.getLogger('RoleManager');
-
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = {
-    createRole: createRole,
-    searchRoleIdByName: searchRoleIdByName,
-    searchRoleById: searchRoleById,
-    setColorToRole: setColorToRole,
-    setRoleToMember: setRoleToMember,
-};
+import { log4js_obj } from "../../../log4js_settings";
+const logger = log4js_obj.getLogger("RoleManager");
 
 /**
  * ロールを作成し，作成したロールのIDを返す．
@@ -22,18 +8,17 @@ module.exports = {
  * @param {string} roleName ロール名
  * @returns ロールID
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'createRole... Remove this comment to see the full error message
-async function createRole(guild: $TSFixMe, roleName: $TSFixMe) {
-    if (roleName == '') {
-        return null;
-    }
+export async function createRole(guild: $TSFixMe, roleName: $TSFixMe) {
+  if (roleName == "") {
+    return null;
+  }
 
-    if ((await searchRoleIdByName(guild, roleName)) != null) {
-        return searchRoleIdByName(guild, roleName);
-    } else {
-        var role = await guild.roles.create({ name: roleName });
-        return role.id;
-    }
+  if ((await searchRoleIdByName(guild, roleName)) != null) {
+    return searchRoleIdByName(guild, roleName);
+  } else {
+    var role = await guild.roles.create({ name: roleName });
+    return role.id;
+  }
 }
 
 /**
@@ -42,16 +27,15 @@ async function createRole(guild: $TSFixMe, roleName: $TSFixMe) {
  * @param {string} roleName ロール名
  * @returns ロールID
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchRole... Remove this comment to see the full error message
-async function searchRoleIdByName(guild: $TSFixMe, roleName: $TSFixMe) {
-    const roles = await guild.roles.fetch();
-    var role = roles.find((role: $TSFixMe) => role.name === roleName);
+export async function searchRoleIdByName(guild: $TSFixMe, roleName: $TSFixMe) {
+  const roles = await guild.roles.fetch();
+  var role = roles.find((role: $TSFixMe) => role.name === roleName);
 
-    if (role != null) {
-        return role.id;
-    } else {
-        return null;
-    }
+  if (role != null) {
+    return role.id;
+  } else {
+    return null;
+  }
 }
 
 /**
@@ -60,21 +44,20 @@ async function searchRoleIdByName(guild: $TSFixMe, roleName: $TSFixMe) {
  * @param {string} roleId ロールID
  * @returns ロールオブジェクト
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchRole... Remove this comment to see the full error message
-async function searchRoleById(guild: $TSFixMe, roleId: $TSFixMe) {
+export async function searchRoleById(guild: $TSFixMe, roleId: $TSFixMe) {
+  try {
+    let role;
     try {
-        let role;
-        try {
-            // fetch(mid)とすれば、cache見てなければフェッチしてくる
-            role = await guild.roles.fetch(roleId);
-        } catch (error) {
-            logger.warn('role missing');
-        }
-
-        return role;
+      // fetch(mid)とすれば、cache見てなければフェッチしてくる
+      role = await guild.roles.fetch(roleId);
     } catch (error) {
-        logger.error(error);
+      logger.warn("role missing");
     }
+
+    return role;
+  } catch (error) {
+    logger.error(error);
+  }
 }
 
 /**
@@ -83,44 +66,47 @@ async function searchRoleById(guild: $TSFixMe, roleId: $TSFixMe) {
  * @param {string} color カラーコード
  * @returns セットしたカラーコード
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'setColorTo... Remove this comment to see the full error message
-async function setColorToRole(guild: $TSFixMe, role: $TSFixMe, color = null) {
-    if (color != null) {
-        await role.setColor(color);
-        await guild.roles.fetch();
-        return color;
-    } else {
-        var colorList = [
-            '#E60012',
-            '#EB6100',
-            '#F39800',
-            '#FCC800',
-            '#FFF100',
-            '#CFDB00',
-            '#8FC31F',
-            '#22AC38',
-            '#009944',
-            '#009B6B',
-            '#009E96',
-            '#00A0C1',
-            '#00A0E9',
-            '#0086D1',
-            '#0068B7',
-            '#00479D',
-            '#1D2088',
-            '#601986',
-            '#920783',
-            '#BE0081',
-            '#E4007F',
-            '#E5006A',
-            '#E5004F',
-            '#E60033',
-        ];
-        var pickedColor = colorList[Math.floor(Math.random() * colorList.length)];
-        await role.setColor(pickedColor);
-        await guild.roles.fetch();
-        return await role.hexColor;
-    }
+export async function setColorToRole(
+  guild: $TSFixMe,
+  role: $TSFixMe,
+  color?: string
+) {
+  if (color != null) {
+    await role.setColor(color);
+    await guild.roles.fetch();
+    return color;
+  } else {
+    var colorList = [
+      "#E60012",
+      "#EB6100",
+      "#F39800",
+      "#FCC800",
+      "#FFF100",
+      "#CFDB00",
+      "#8FC31F",
+      "#22AC38",
+      "#009944",
+      "#009B6B",
+      "#009E96",
+      "#00A0C1",
+      "#00A0E9",
+      "#0086D1",
+      "#0068B7",
+      "#00479D",
+      "#1D2088",
+      "#601986",
+      "#920783",
+      "#BE0081",
+      "#E4007F",
+      "#E5006A",
+      "#E5004F",
+      "#E60033",
+    ];
+    var pickedColor = colorList[Math.floor(Math.random() * colorList.length)];
+    await role.setColor(pickedColor);
+    await guild.roles.fetch();
+    return await role.hexColor;
+  }
 }
 
 /**
@@ -130,37 +116,40 @@ async function setColorToRole(guild: $TSFixMe, role: $TSFixMe, color = null) {
  * @param {string} memberId メンバーID
  * @returns メンバーID
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'setRoleToM... Remove this comment to see the full error message
-async function setRoleToMember(guild: $TSFixMe, roleId: $TSFixMe, memberId: $TSFixMe) {
-    if (memberId == null || memberId == '') {
-        return null;
+export async function setRoleToMember(
+  guild: $TSFixMe,
+  roleId: $TSFixMe,
+  memberId: $TSFixMe
+) {
+  if (memberId == null || memberId == "") {
+    return null;
+  } else {
+    let member;
+
+    // 数値判定
+    if (!isNaN(memberId)) {
+      // 桁数判定
+      if (memberId.length == 18 || memberId.length == 19) {
+        try {
+          member = await guild.members.fetch(memberId);
+        } catch (error) {
+          logger.warn("member missing");
+          member = null;
+        }
+      } else {
+        member = null;
+      }
     } else {
-        let member;
-
-        // 数値判定
-        if (!isNaN(memberId)) {
-            // 桁数判定
-            if (memberId.length == 18 || memberId.length == 19) {
-                try {
-                    member = await guild.members.fetch(memberId);
-                } catch (error) {
-                    logger.warn('member missing');
-                    member = null;
-                }
-            } else {
-                member = null;
-            }
-        } else {
-            const members = await guild.members.fetch();
-            // ユーザータグからメンバー取得
-            member = members.find((member: $TSFixMe) => member.user.tag === memberId);
-        }
-
-        if (member != null) {
-            member.roles.add(await guild.roles.fetch(roleId));
-            return member.id;
-        } else {
-            return memberId + '(NOT_FOUND)';
-        }
+      const members = await guild.members.fetch();
+      // ユーザータグからメンバー取得
+      member = members.find((member: $TSFixMe) => member.user.tag === memberId);
     }
+
+    if (member != null) {
+      member.roles.add(await guild.roles.fetch(roleId));
+      return member.id;
+    } else {
+      return memberId + "(NOT_FOUND)";
+    }
+  }
 }

@@ -1,19 +1,7 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'ChannelTyp... Remove this comment to see the full error message
-const { ChannelType } = require('discord.js');
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-const log4js = require('log4js');
+import { ChannelType } from "discord.js";
+import { log4js_obj } from "../../../log4js_settings";
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = {
-    createChannel: createChannel,
-    searchChannelIdByName: searchChannelIdByName,
-    searchChannelById: searchChannelById,
-};
-
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'logger'.
-const logger = log4js.getLogger('ChannelManager');
+const logger = log4js_obj.getLogger("ChannelManager");
 
 /**
  * チャンネルを作成し，作成したチャンネルのIDを返す．
@@ -24,27 +12,47 @@ const logger = log4js.getLogger('ChannelManager');
  * @param {ChannelType} channelType チャンネルタイプ(discord.jsのenumを使用)
  * @returns チャンネルID
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'createChan... Remove this comment to see the full error message
-async function createChannel(guild: $TSFixMe, categoryId: $TSFixMe, channelName: $TSFixMe, channelType: $TSFixMe) {
-    try {
-        if (channelName == '') {
-            return null;
-        }
-
-        var parentId = categoryId;
-        if (categoryId == '') {
-            parentId = null;
-        }
-        var channel;
-        if ((await searchChannelIdByName(guild, channelName, channelType, parentId)) != null) {
-            return await searchChannelIdByName(guild, channelName, channelType, parentId);
-        } else {
-            channel = await guild.channels.create({ name: channelName, type: channelType, parent: parentId });
-            return channel.id;
-        }
-    } catch (error) {
-        logger.error(error);
+export async function createChannel(
+  guild: $TSFixMe,
+  categoryId: $TSFixMe,
+  channelName: $TSFixMe,
+  channelType: $TSFixMe
+) {
+  try {
+    if (channelName == "") {
+      return null;
     }
+
+    var parentId = categoryId;
+    if (categoryId == "") {
+      parentId = null;
+    }
+    var channel;
+    if (
+      (await searchChannelIdByName(
+        guild,
+        channelName,
+        channelType,
+        parentId
+      )) != null
+    ) {
+      return await searchChannelIdByName(
+        guild,
+        channelName,
+        channelType,
+        parentId
+      );
+    } else {
+      channel = await guild.channels.create({
+        name: channelName,
+        type: channelType,
+        parent: parentId,
+      });
+      return channel.id;
+    }
+  } catch (error) {
+    logger.error(error);
+  }
 }
 
 /**
@@ -55,25 +63,36 @@ async function createChannel(guild: $TSFixMe, categoryId: $TSFixMe, channelName:
  * @param {string} categoryId カテゴリID or null
  * @returns チャンネルID
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchChan... Remove this comment to see the full error message
-async function searchChannelIdByName(guild: $TSFixMe, channelName: $TSFixMe, channelType: $TSFixMe, categoryId: $TSFixMe) {
-    try {
-        var channel;
-        const channels = await guild.channels.fetch();
-        if (categoryId != null) {
-            channel = channels.find((c: $TSFixMe) => c.name == channelName && c.type == channelType && c.parent == categoryId);
-        } else {
-            channel = channels.find((c: $TSFixMe) => c.name == channelName && c.type == channelType);
-        }
-
-        if (channel != null) {
-            return channel.id;
-        } else {
-            return null;
-        }
-    } catch (error) {
-        logger.error(error);
+export async function searchChannelIdByName(
+  guild: $TSFixMe,
+  channelName: $TSFixMe,
+  channelType: $TSFixMe,
+  categoryId: $TSFixMe
+) {
+  try {
+    var channel;
+    const channels = await guild.channels.fetch();
+    if (categoryId != null) {
+      channel = channels.find(
+        (c: $TSFixMe) =>
+          c.name == channelName &&
+          c.type == channelType &&
+          c.parent == categoryId
+      );
+    } else {
+      channel = channels.find(
+        (c: $TSFixMe) => c.name == channelName && c.type == channelType
+      );
     }
+
+    if (channel != null) {
+      return channel.id;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    logger.error(error);
+  }
 }
 
 /**
@@ -82,13 +101,12 @@ async function searchChannelIdByName(guild: $TSFixMe, channelName: $TSFixMe, cha
  * @param {string} channelId チャンネルID
  * @returns チャンネルオブジェクト
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchChan... Remove this comment to see the full error message
-async function searchChannelById(guild: $TSFixMe, channelId: $TSFixMe) {
-    var channel;
-    try {
-        channel = await guild.channels.fetch(channelId);
-    } catch (error) {
-        logger.warn('channel missing');
-    }
-    return channel;
+export async function searchChannelById(guild: $TSFixMe, channelId: $TSFixMe) {
+  var channel;
+  try {
+    channel = await guild.channels.fetch(channelId);
+  } catch (error) {
+    logger.warn("channel missing");
+  }
+  return channel;
 }

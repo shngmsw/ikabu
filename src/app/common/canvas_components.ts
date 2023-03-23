@@ -1,12 +1,4 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'Canvas'.
-const Canvas = require('canvas');
-
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = {
-    createRoundRect: createRoundRect,
-    drawArcImage: drawArcImage,
-    fillTextWithStroke: fillTextWithStroke,
-};
+import Canvas from "canvas";
 
 /**
  *
@@ -19,14 +11,22 @@ module.exports = {
  * @param {float} x x座標
  * @param {float} y y座標
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'fillTextWi... Remove this comment to see the full error message
-function fillTextWithStroke(ctx: $TSFixMe, text: $TSFixMe, font_style: $TSFixMe, fill_color: $TSFixMe, stroke_color: $TSFixMe, strokeWidth: $TSFixMe, x: $TSFixMe, y: $TSFixMe) {
-    ctx.font = font_style;
-    ctx.fillStyle = fill_color;
-    ctx.fillText(text, x, y);
-    ctx.strokeStyle = stroke_color;
-    ctx.lineWidth = strokeWidth;
-    ctx.strokeText(text, x, y);
+export function fillTextWithStroke(
+  ctx: $TSFixMe,
+  text: $TSFixMe,
+  font_style: $TSFixMe,
+  fill_color: $TSFixMe,
+  stroke_color: $TSFixMe,
+  strokeWidth: $TSFixMe,
+  x: $TSFixMe,
+  y: $TSFixMe
+) {
+  ctx.font = font_style;
+  ctx.fillStyle = fill_color;
+  ctx.fillText(text, x, y);
+  ctx.strokeStyle = stroke_color;
+  ctx.lineWidth = strokeWidth;
+  ctx.strokeText(text, x, y);
 }
 /**
  * 角が丸い四角形を作成
@@ -37,18 +37,24 @@ function fillTextWithStroke(ctx: $TSFixMe, text: $TSFixMe, font_style: $TSFixMe,
  * @param {*} height 高さ
  * @param {*} radius 角の半径サイズ
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'createRoun... Remove this comment to see the full error message
-function createRoundRect(ctx: $TSFixMe, x: $TSFixMe, y: $TSFixMe, width: $TSFixMe, height: $TSFixMe, radius: $TSFixMe) {
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.arcTo(x + width, y, x + width, y + radius, radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
-    ctx.lineTo(x + radius, y + height);
-    ctx.arcTo(x, y + height, x, y + height - radius, radius);
-    ctx.lineTo(x, y + radius);
-    ctx.arcTo(x, y, x + radius, y, radius);
-    ctx.closePath();
+export function createRoundRect(
+  ctx: $TSFixMe,
+  x: $TSFixMe,
+  y: $TSFixMe,
+  width: $TSFixMe,
+  height: $TSFixMe,
+  radius: $TSFixMe
+) {
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.arcTo(x + width, y, x + width, y + radius, radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
+  ctx.lineTo(x + radius, y + height);
+  ctx.arcTo(x, y + height, x, y + height - radius, radius);
+  ctx.lineTo(x, y + radius);
+  ctx.arcTo(x, y, x + radius, y, radius);
+  ctx.closePath();
 }
 
 /**
@@ -59,11 +65,26 @@ function createRoundRect(ctx: $TSFixMe, x: $TSFixMe, y: $TSFixMe, width: $TSFixM
  * @param {*} yPosition y座標
  * @param {*} radius 半径
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'drawArcIma... Remove this comment to see the full error message
-function drawArcImage(ctx: $TSFixMe, img: $TSFixMe, xPosition: $TSFixMe, yPosition: $TSFixMe, radius: $TSFixMe) {
-    ctx.beginPath();
-    ctx.arc(xPosition + radius, yPosition + radius, radius, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.clip();
-    ctx.drawImage(img, 0, 0, img.width, img.height, xPosition, yPosition, radius * 2, radius * 2);
+export function drawArcImage(
+  ctx: $TSFixMe,
+  img: $TSFixMe,
+  xPosition: $TSFixMe,
+  yPosition: $TSFixMe,
+  radius: $TSFixMe
+) {
+  ctx.beginPath();
+  ctx.arc(xPosition + radius, yPosition + radius, radius, 0, Math.PI * 2, true);
+  ctx.closePath();
+  ctx.clip();
+  ctx.drawImage(
+    img,
+    0,
+    0,
+    img.width,
+    img.height,
+    xPosition,
+    yPosition,
+    radius * 2,
+    radius * 2
+  );
 }

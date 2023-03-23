@@ -42,4 +42,3 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             sudo systemctl restart bukichi-main.service
-      
