@@ -1,11 +1,7 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'Canvas'.
-const Canvas = require("canvas");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'path'.
-const path = require("path");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'Discord'.
-const Discord = require("discord.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'dateDiff'.
-const { dateDiff } = require("../../common/others");
+import Canvas from "canvas";
+import path from "path";
+import Discord from "discord.js";
+import { dateDiff } from "../../common/others";
 const backgroundImgPaths = [
   "./images/over4years.jpg",
   "./images/4years.jpg",
@@ -24,8 +20,7 @@ const colorCodes = [
   "#86828f",
   "#ad745c",
 ];
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = async function handleIkabuExperience(interaction: $TSFixMe) {
+export async function handleIkabuExperience(interaction: $TSFixMe) {
   if (!interaction.isCommand()) return;
   // 'インタラクションに失敗'が出ないようにするため
   await interaction.deferReply();
@@ -151,7 +146,7 @@ module.exports = async function handleIkabuExperience(interaction: $TSFixMe) {
 
   const attachment = new Discord.AttachmentBuilder(
     canvas.toBuffer(),
-    "ikabu_experience.png"
+    { name: "ikabu_experience.png" }
   );
 
   await interaction.editReply({ files: [attachment] });

@@ -1,29 +1,10 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'ActionRowB... Remove this comment to see the full error message
-const {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  EmbedBuilder,
-} = require("discord.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'FriendCode... Remove this comment to see the full error message
-const FriendCodeService = require("../../../../db/friend_code_service.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchMemb... Remove this comment to see the full error message
-const { searchMemberById } = require("../../common/manager/member_manager.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { FriendCodeService } from "../../../db/friend_code_service.js";
+import { log4js_obj } from "../../../log4js_settings.js";
+import { searchMemberById } from "../../common/manager/member_manager.js";
+const logger = log4js_obj.getLogger();
 
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'logger'.
-const logger = log4js.getLogger();
-
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = {
-  handleFriendCode: _handleFriendCode,
-  deleteFriendCode: _deleteFriendCode,
-};
-
-async function _handleFriendCode(interaction: $TSFixMe) {
+export async function handleFriendCode(interaction: $TSFixMe) {
   if (!interaction.isCommand()) return;
   // 'インタラクションに失敗'が出ないようにするため
   await interaction.deferReply({ ephemeral: false });
@@ -37,7 +18,7 @@ async function _handleFriendCode(interaction: $TSFixMe) {
   }
 }
 
-async function selectFriendCode(interaction: $TSFixMe) {
+export async function selectFriendCode(interaction: $TSFixMe) {
   const guild = interaction.guild;
   const targetUser = await searchMemberById(guild, interaction.member.user.id);
 
@@ -119,6 +100,6 @@ async function insertFriendCode(interaction: $TSFixMe) {
   });
 }
 
-async function _deleteFriendCode(interaction: $TSFixMe) {
+export async function deleteFriendCode(interaction: $TSFixMe) {
   await interaction.message.delete();
 }

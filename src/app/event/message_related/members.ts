@@ -1,7 +1,7 @@
 import { MembersService } from "../../../db/members_service";
 import { Members } from "../../../db/model/members";
 
-module.exports = async function chatCountUp(msg: $TSFixMe) {
+export async function chatCountUp(msg: $TSFixMe) {
   const id = msg.author.id;
   // membersテーブルがなければ作る
   await MembersService.createTableIfNotExists();

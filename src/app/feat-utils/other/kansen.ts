@@ -1,10 +1,7 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'EmbedBuild... Remove this comment to see the full error message
-const { EmbedBuilder } = require("discord.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const { Combination } = require("js-combinatorics");
+import { EmbedBuilder } from "discord.js";
+import { Combination } from "js-combinatorics";
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = async function handleKansen(interaction: $TSFixMe) {
+export async function handleKansen(interaction: $TSFixMe) {
   if (!interaction.isCommand()) return;
   // 'インタラクションに失敗'が出ないようにするため
   await interaction.deferReply();

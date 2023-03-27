@@ -1,17 +1,8 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'EmbedBuild... Remove this comment to see the full error message
-const { EmbedBuilder } = require("discord.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchMemb... Remove this comment to see the full error message
-const { searchMemberById } = require("../../common/manager/member_manager");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'sendEmbeds... Remove this comment to see the full error message
-const { sendEmbedsWebhook } = require("../../common/webhook");
+import { EmbedBuilder } from "discord.js";
+import { searchMemberById } from "../../common/manager/member_manager";
+import { sendEmbedsWebhook } from "../../common/webhook";
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = {
-  sendCommandLog: sendCommandLog,
-};
-
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'sendComman... Remove this comment to see the full error message
-async function sendCommandLog(interaction: $TSFixMe) {
+export async function sendCommandLog(interaction: $TSFixMe) {
   const guild = interaction.guild;
   const channelName = interaction.channel.name;
   const authorId = interaction.member.user.id;
@@ -39,6 +30,5 @@ async function sendCommandLog(interaction: $TSFixMe) {
   ]);
   embed.setColor("#CFCFCF");
   embed.setTimestamp(interaction.createdAt);
-  // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
   await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
 }

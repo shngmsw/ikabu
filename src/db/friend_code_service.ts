@@ -1,6 +1,7 @@
 import { log4js_obj } from "../log4js_settings";
 import { DBCommon } from "./db.js";
 import { FriendCode } from "./model/friend_code";
+import util from "node:util";
 
 const logger = log4js_obj.getLogger("database");
 
@@ -34,21 +35,11 @@ export class FriendCodeService {
 
   static async getFriendCodeByUserId(user_id: $TSFixMe) {
     const db = DBCommon.open();
-    const result: $TSFixMe = [];
-    return new Promise((resolve, reject) => {
-      db.serialize(() => {
-        db.all(
-          `select user_id, code from friend_code where user_id = ${user_id}`,
-          (err: $TSFixMe, rows: $TSFixMe) => {
-            if (err) return reject(err);
-            rows.forEach((row: $TSFixMe) => {
-              result.push(new FriendCode(row["user_id"], row["code"]));
-            });
-            DBCommon.close();
-            return resolve(result);
-          }
-        );
-      });
-    });
+    db.all = util.promisify(db.all); // https://stackoverflow.com/questions/56122812/async-await-sqlite-in-javascript
+    let results = (await db.all(
+      `select user_id, code from friend_code where user_id = ${user_id}`,
+    )) as FriendCode[];
+    DBCommon.close();
+    return results;
   }
 }

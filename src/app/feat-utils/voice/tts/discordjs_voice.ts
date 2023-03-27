@@ -1,44 +1,19 @@
-const {
-  joinVoiceChannel,
-  entersState,
-  VoiceConnectionStatus,
-  createAudioResource,
-  StreamType,
-  createAudioPlayer,
-  AudioPlayerStatus,
-  NoSubscriberBehavior,
-  generateDependencyReport,
-  // @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-} = require("@discordjs/voice");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'isNotEmpty... Remove this comment to see the full error message
-const { isNotEmpty } = require("../../../common/others");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
-
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-const infoLogger = log4js.getLogger();
-const interactionLogger = log4js.getLogger("interaction");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'logger'.
-const logger = log4js.getLogger("voice");
+import { joinVoiceChannel, entersState, VoiceConnectionStatus, createAudioResource, StreamType, createAudioPlayer, AudioPlayerStatus, NoSubscriberBehavior, generateDependencyReport } from "@discordjs/voice";
+import { isNotEmpty } from "../../../common/others";
+import { log4js_obj } from "../../../../log4js_settings";
+const infoLogger = log4js_obj.getLogger("info");
+const interactionLogger = log4js_obj.getLogger("interaction");
+const logger = log4js_obj.getLogger("voice");
 
 infoLogger.info(generateDependencyReport());
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'mode_api'.
-const { mode_api, bufferToStream } = require("./voice_bot_node");
+const { mode_api, bufferToStream } = require('./voice_bot_node');
 
 // ボイスチャットセッション保存用のMapです。
 const subscriptions = new Map();
 // 読み上げ対象のDicordチャンネル保存用のMapです。
 const channels = new Map();
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = {
-  handleVoiceCommand: handleVoiceCommand,
-  play: play,
-  autokill: autokill,
-};
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'join'.
 const join = async (interaction: $TSFixMe) => {
   try {
     const guildId = interaction.guild.id;
@@ -99,8 +74,7 @@ const kill = async (interaction: $TSFixMe) => {
   }
 };
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'autokill'.
-async function autokill(oldState: $TSFixMe) {
+export async function autokill(oldState: $TSFixMe) {
   const guildId = oldState.guild.id;
   const channelId = oldState.channel.id;
   const oldChannel = await oldState.guild.channels.fetch(oldState.channelId);
@@ -116,14 +90,13 @@ async function autokill(oldState: $TSFixMe) {
   }
 }
 
-async function handleVoiceCommand(interaction: $TSFixMe) {
+export async function handleVoiceCommand(interaction: $TSFixMe) {
   try {
     if (!interaction.isCommand()) return;
     const { options } = interaction;
     const subCommand = options.getSubcommand();
     switch (subCommand) {
       case "join":
-        // @ts-expect-error TS(2554): Expected 2 arguments, but got 1.
         join(interaction);
         break;
       case "kill":
@@ -135,7 +108,7 @@ async function handleVoiceCommand(interaction: $TSFixMe) {
   }
 }
 
-async function play(msg: $TSFixMe) {
+export async function play(msg: $TSFixMe) {
   try {
     const { guildId, channelId } = msg;
     let subscription = subscriptions.get(guildId);
@@ -154,11 +127,9 @@ async function play(msg: $TSFixMe) {
       player.play(resource);
       await entersState(player, AudioPlayerStatus.Idle, 1000 * 900);
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.warn(error);
-    // @ts-expect-error TS(2571): Object is of type 'unknown'.
     logger.warn(error.code);
-    // @ts-expect-error TS(2571): Object is of type 'unknown'.
     logger.warn(error.message);
   }
 }

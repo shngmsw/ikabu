@@ -1,34 +1,12 @@
-// @ts-expect-error TS(6200): Definitions of the following identifiers conflict ... Remove this comment to see the full error message
-const {
-  getLeagueList,
-  getAnarchyList,
-  getXMatchList,
-  getAnarchyChallengeData,
-  getAnarchyOpenData,
-  getLeagueData,
-  getXMatchData,
-  checkFes,
-  fetchSchedule,
-  // @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-} = require("../../common/apis/splatoon3_ink");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'Discord'.
-const Discord = require("discord.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'formatDate... Remove this comment to see the full error message
-const {
-  formatDatetime,
-  dateformat,
-} = require("../../common/convert_datetime.js");
+import { log4js_obj } from "../../../log4js_settings";
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
+import { getLeagueList, getAnarchyList, getXMatchList, getAnarchyChallengeData, getAnarchyOpenData, getLeagueData, getXMatchData, checkFes, fetchSchedule } from "../../common/apis/splatoon3_ink";
+import Discord from "discord.js";
+import { formatDatetime, dateformat } from "../../common/convert_datetime.js";
 
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'logger'.
-const logger = log4js.getLogger("interaction");
+const logger = log4js_obj.getLogger("interaction");
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = function handleStageInfo(msg: $TSFixMe) {
+export function handleStageInfo(msg: $TSFixMe) {
   if (msg.content.startsWith("stageinfo")) {
     stageinfo(msg);
   } else if (msg.content.startsWith("stage")) {
@@ -106,18 +84,14 @@ async function getLeagueEmbed(data: $TSFixMe) {
       rule = "フェス期間中";
       stage = "フェス期間中はお休みでし";
     } else {
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       rule = league_data.rule;
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       stage = league_data.stage1 + "／" + league_data.stage2;
     }
 
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
     const league_start_date = formatDatetime(
       league_data.startTime,
       dateformat.ymdwhm
     );
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
     const league_end_date = formatDatetime(league_data.endTime, dateformat.hm);
     let name = league_start_date + "-" + league_end_date + " 【" + rule + "】";
     stageEmbed.addFields([{ name: name, value: stage }]);
@@ -138,17 +112,13 @@ async function getAOEmbed(data: $TSFixMe) {
       rule = "フェス期間中";
       stage = "フェス期間中はお休みでし";
     } else {
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       rule = anarchy_data.rule;
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       stage = anarchy_data.stage1 + "／" + anarchy_data.stage2;
     }
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
     const anarchy_start_date = formatDatetime(
       anarchy_data.startTime,
       dateformat.ymdwhm
     );
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
     const anarchy_end_date = formatDatetime(
       anarchy_data.endTime,
       dateformat.hm
@@ -173,17 +143,13 @@ async function getACEmbed(data: $TSFixMe) {
       rule = "フェス期間中";
       stage = "フェス期間中はお休みでし";
     } else {
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       rule = anarchy_data.rule;
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       stage = anarchy_data.stage1 + "／" + anarchy_data.stage2;
     }
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
     const anarchy_start_date = formatDatetime(
       anarchy_data.startTime,
       dateformat.ymdwhm
     );
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
     const anarchy_end_date = formatDatetime(
       anarchy_data.endTime,
       dateformat.hm
@@ -208,14 +174,10 @@ async function getXMatchEmbed(data: $TSFixMe) {
       rule = "フェス期間中";
       stage = "フェス期間中はお休みでし";
     } else {
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       rule = x_data.rule;
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       stage = x_data.stage1 + "／" + x_data.stage2;
     }
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
     const xstart_date = formatDatetime(x_data.startTime, dateformat.ymdwhm);
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
     const x_end_date = formatDatetime(x_data.endTime, dateformat.hm);
     let name = xstart_date + "-" + x_end_date + " 【" + rule + "】";
     stageEmbed.addFields([{ name: name, value: stage }]);

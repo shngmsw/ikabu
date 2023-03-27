@@ -1,54 +1,19 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'EmbedBuild... Remove this comment to see the full error message
-const {
-  EmbedBuilder,
-  ButtonBuilder,
-  ActionRowBuilder,
-  ButtonStyle,
-} = require("discord.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchMemb... Remove this comment to see the full error message
-const { searchMemberById } = require("../../common/manager/member_manager");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'isEmpty'.
-const { isEmpty } = require("../../common/others");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'setButtonE... Remove this comment to see the full error message
-const {
-  setButtonEnable,
-  recoveryThinkingButton,
-  disableThinkingButton,
-  setButtonDisable,
-} = require("../../common/button_components");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchMess... Remove this comment to see the full error message
-const { searchMessageById } = require("../../common/manager/message_manager");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'TeamDivide... Remove this comment to see the full error message
-const TeamDividerService = require("../../../../db/team_divider_service");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'TeamDivide... Remove this comment to see the full error message
-const TeamDivider = require("../../../../db/model/team_divider");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
+import { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, APIEmbedField } from "discord.js";
+import { searchMemberById } from "../../common/manager/member_manager";
+import { isEmpty } from "../../common/others";
+import { setButtonEnable, recoveryThinkingButton, disableThinkingButton, setButtonDisable } from "../../common/button_components";
+import { searchMessageById } from "../../common/manager/message_manager";
+import { TeamDividerService } from "../../../db/team_divider_service";
+import { TeamDivider } from "../../../db/model/team_divider";
+import { log4js_obj } from "../../../log4js_settings";
 
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'logger'.
-const logger = log4js.getLogger("interaction");
-
-// @ts-expect-error TS(2580): Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
-module.exports = {
-  dividerInitialMessage,
-  joinButton,
-  cancelButton,
-  registerButton,
-  alfaButton,
-  bravoButton,
-  spectateButton,
-  endButton,
-  correctButton,
-  hideButton,
-};
+const logger = log4js_obj.getLogger("interaction");
 
 /**
  * チーム分けコマンド実行時の登録メッセージを出す
  * @param {*} interaction コマンドのインタラクション
  */
-async function dividerInitialMessage(interaction: $TSFixMe) {
+export async function dividerInitialMessage(interaction: $TSFixMe) {
   try {
     const member = await searchMemberById(
       interaction.guild,
@@ -117,7 +82,7 @@ async function dividerInitialMessage(interaction: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
   /** @type {Discord.Snowflake} */
   try {
     await interaction.update({
@@ -159,8 +124,8 @@ async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
     }
 
     // DB登録処理
-    const bool_hide_win = hideWin == "true";
-    const teamDivider = new TeamDivider(
+    const bool_hide_win = hideWin === "true";
+    const teamDivider: TeamDivider = new TeamDivider(
       messageId,
       member.id,
       member.displayName,
@@ -169,8 +134,11 @@ async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
       0,
       0,
       false,
-      bool_hide_win
+      bool_hide_win,
+      0,
+      new Date().toISOString()
     );
+
     await TeamDividerService.registerMemberToDB(teamDivider);
 
     const registeredMembers = await TeamDividerService.registeredMembersStrings(
@@ -183,18 +151,18 @@ async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
       iconURL:
         "https://raw.githubusercontent.com/shngmsw/ikabu/main/images/dice.png",
     });
-    embed.addFields([
-      {
-        name: "参加登録をするには参加ボタンを押すでし！",
-        value: `全員の登録が完了したら、${host_member.displayName}たんは登録完了ボタンを押すでし！`,
-        inline: true,
-      },
-      {
-        name: "参加者一覧　" + `[${registeredMembers[1]}]`,
-        value: registeredMembers[0],
-        inline: false,
-      },
-    ]);
+    const fields: APIEmbedField[] = [{
+      name: "参加登録をするには参加ボタンを押すでし！",
+      value: `全員の登録が完了したら、${host_member.displayName}たんは登録完了ボタンを押すでし！`,
+      inline: true,
+    },
+    {
+      name: `参加者一覧 [${registeredMembers[1]}]`,
+      value: registeredMembers[0].toString(),
+      inline: false,
+    }];
+    embed.addFields(fields);
+
 
     await interaction.message.edit({
       embeds: [embed],
@@ -212,7 +180,7 @@ async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
   /** @type {Discord.Snowflake} */
   try {
     await interaction.update({
@@ -244,18 +212,20 @@ async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
         iconURL:
           "https://raw.githubusercontent.com/shngmsw/ikabu/main/images/dice.png",
       });
-      embed.addFields([
-        {
-          name: "参加登録をするには参加ボタンを押すでし！",
-          value: `全員の登録が完了したら、${host_member.displayName}たんは登録完了ボタンを押すでし！`,
-          inline: true,
-        },
-        {
-          name: "参加者一覧　" + `[${registeredMembers[1]}]`,
-          value: registeredMembers[0],
-          inline: false,
-        },
-      ]);
+      const fields: APIEmbedField[] =
+        [
+          {
+            name: "参加登録をするには参加ボタンを押すでし！",
+            value: `全員の登録が完了したら、${host_member.displayName}たんは登録完了ボタンを押すでし！`,
+            inline: true,
+          },
+          {
+            name: "参加者一覧　" + `[${registeredMembers[1]}]`,
+            value: registeredMembers[0].toString(),
+            inline: false,
+          },
+        ];
+      embed.addFields(fields);
 
       await interaction.message.edit({
         embeds: [embed],
@@ -292,7 +262,7 @@ async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
   /** @type {Discord.Snowflake} */
   try {
     await interaction.update({
@@ -346,7 +316,9 @@ async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
         member.joined_match_count,
         member.win,
         member.force_spectate,
-        member.hide_win
+        member.hide_win,
+        0,
+        ""
       );
       await TeamDividerService.registerMemberToDB(teamDivider);
     }
@@ -428,7 +400,7 @@ async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-async function alfaButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function alfaButton(interaction: $TSFixMe, params: $TSFixMe) {
   await matching(interaction, params, 0);
 }
 
@@ -437,7 +409,7 @@ async function alfaButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-async function bravoButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function bravoButton(interaction: $TSFixMe, params: $TSFixMe) {
   await matching(interaction, params, 1);
 }
 
@@ -505,7 +477,9 @@ async function matching(
         member.joined_match_count,
         member.win,
         member.force_spectate,
-        member.hide_win
+        member.hide_win,
+        member.win_rate,
+        member.created_at
       );
       await TeamDividerService.registerMemberToDB(teamDivider);
     }
@@ -623,9 +597,8 @@ async function matching(
       components: await disableThinkingButton(interaction, winTeamName),
     });
     await interaction.message.reply({
-      content: `\`【${
-        count - 1
-      }回戦: ${winTeamName}チーム勝利】\`\nチームを更新したでし！`,
+      content: `\`【${count - 1
+        }回戦: ${winTeamName}チーム勝利】\`\nチームを更新したでし！`,
       embeds: [embed],
       components: [buttons, correctButton],
     });
@@ -640,7 +613,7 @@ async function matching(
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
   try {
     await interaction.update({
       components: await setButtonDisable(interaction.message, interaction),
@@ -739,7 +712,7 @@ async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-async function endButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function endButton(interaction: $TSFixMe, params: $TSFixMe) {
   try {
     await interaction.update({
       components: await setButtonDisable(interaction.message, interaction),
@@ -784,7 +757,7 @@ async function endButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
   try {
     await interaction.update({
       components: await setButtonDisable(interaction.message, interaction),
@@ -840,7 +813,7 @@ async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
   try {
     await interaction.update({
       components: await setButtonDisable(interaction.message, interaction),
@@ -1176,7 +1149,6 @@ function usersString(array: $TSFixMe) {
         winRate = " - ";
       }
       const maxNameLength = getMaxNameLength(orderByWinRateArray);
-      // @ts-expect-error TS(2554): Expected 3 arguments, but got 1.
       const truncatedName = truncateString(member.member_name);
       const username = spacePadding(truncatedName, maxNameLength);
       if (member.hide_win) {
@@ -1189,8 +1161,6 @@ function usersString(array: $TSFixMe) {
     return usersString;
   } catch (err) {
     logger.error(err);
-    // @ts-expect-error TS(2304): Cannot find name 'interaction'.
-    interaction.channel.send("なんかエラー出てるわ");
   }
 }
 
@@ -1219,7 +1189,6 @@ function orderByWinRate(array: $TSFixMe) {
  * @returns 全角文字数
  */
 function getMaxNameLength(array: $TSFixMe) {
-  // @ts-expect-error TS(2554): Expected 3 arguments, but got 1.
   const nameLengthList = array.map((member: $TSFixMe) =>
     getLengthBasedOnZenkaku(truncateString(member.member_name))
   );
@@ -1271,7 +1240,7 @@ function getHankakuCharCount(str: $TSFixMe) {
   return count;
 }
 
-function truncateString(str: $TSFixMe, size: $TSFixMe, suffix: $TSFixMe) {
+function truncateString(str?: $TSFixMe, size?: $TSFixMe, suffix?: $TSFixMe) {
   if (!str) str = "";
   if (!size) size = 21;
   if (!suffix) suffix = "…";

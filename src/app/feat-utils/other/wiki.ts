@@ -1,15 +1,9 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'wiki'.
-const wiki = require("wikijs").default;
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'EmbedBuild... Remove this comment to see the full error message
-const { EmbedBuilder } = require("discord.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
+import wiki from "wikijs";
+import { EmbedBuilder } from "discord.js";
+import { log4js_obj } from "../../../log4js_settings";
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = async function handleWiki(interaction: $TSFixMe) {
-  // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-  log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-  const logger = log4js.getLogger("interaction");
+export async function handleWiki(interaction: $TSFixMe) {
+  const logger = log4js_obj.getLogger("interaction");
   try {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
@@ -41,8 +35,7 @@ module.exports = async function handleWiki(interaction: $TSFixMe) {
       .setImage(decodeURI(imageURL));
 
     await interaction.editReply({ embeds: [embed] });
-  } catch (err) {
-    // @ts-expect-error TS(2571): Object is of type 'unknown'.
+  } catch (err: any) {
     logger.error(err.name + ": " + err.message);
   }
 };

@@ -44,10 +44,10 @@ export async function createRegularModal(interaction: $TSFixMe) {
     .setMaxLength(120)
     .setRequired(true);
 
-  const actionRow1 = new ActionRowBuilder().addComponents(recruitNumInput);
-  const actionRow2 = new ActionRowBuilder().addComponents(participantsNumInput);
-  const actionRow3 = new ActionRowBuilder().addComponents(participantsList);
-  const actionRow4 = new ActionRowBuilder().addComponents(conditionInput);
+  const actionRow1 = new ActionRowBuilder<TextInputBuilder>().addComponents(recruitNumInput);
+  const actionRow2 = new ActionRowBuilder<TextInputBuilder>().addComponents(participantsNumInput);
+  const actionRow3 = new ActionRowBuilder<TextInputBuilder>().addComponents(participantsList);
+  const actionRow4 = new ActionRowBuilder<TextInputBuilder>().addComponents(conditionInput);
 
   modal.addComponents(actionRow1, actionRow2, actionRow3, actionRow4);
 

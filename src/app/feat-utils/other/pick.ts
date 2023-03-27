@@ -1,7 +1,5 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'common'.
-const common = require("../../common/others");
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = async function handlePick(interaction: $TSFixMe) {
+import { randomSelect } from "../../common/others";
+export async function handlePick(interaction: $TSFixMe) {
   if (!interaction.isCommand()) return;
   // 'インタラクションに失敗'が出ないようにするため
   await interaction.deferReply();
@@ -18,7 +16,7 @@ module.exports = async function handlePick(interaction: $TSFixMe) {
   var kazu = Number(pickNum);
   if (kazu) {
     args.shift();
-    var picked = common.random(args, kazu).join("\n");
+    var picked: any = randomSelect(args, kazu).join("\n");
   } else {
     var picked = args[Math.floor(Math.random() * args.length)];
   }

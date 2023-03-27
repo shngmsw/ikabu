@@ -1,42 +1,15 @@
-// @ts-expect-error TS(6200): Definitions of the following identifiers conflict ... Remove this comment to see the full error message
-const Canvas = require("canvas");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'createRoun... Remove this comment to see the full error message
-const {
-  createRoundRect,
-  fillTextWithStroke,
-} = require("../../common/canvas_components");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'EmbedBuild... Remove this comment to see the full error message
-const { EmbedBuilder, AttachmentBuilder } = require("discord.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'formatDate... Remove this comment to see the full error message
-const {
-  formatDatetime,
-  dateformat,
-} = require("../../common/convert_datetime.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const { getUnixTime } = require("date-fns");
+import Canvas from "canvas";
+import { createRoundRect, fillTextWithStroke } from "../../common/canvas_components";
+import { EmbedBuilder, AttachmentBuilder } from "discord.js";
+import { formatDatetime, dateformat } from "../../common/convert_datetime.js";
+import { getUnixTime } from "date-fns";
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
-const {
-  fetchSchedule,
-  checkFes,
-  getFesData,
-  getRegularData,
-  getSalmonData,
-  getLeagueData,
-  getAnarchyChallengeData,
-  getAnarchyOpenData,
-  getXMatchData,
-  // @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-} = require("../../common/apis/splatoon3_ink");
+import { fetchSchedule, checkFes, getFesData, getRegularData, getSalmonData, getLeagueData, getAnarchyChallengeData, getAnarchyOpenData, getXMatchData } from "../../common/apis/splatoon3_ink";
+import { log4js_obj } from "../../../log4js_settings";
 
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'logger'.
-const logger = log4js.getLogger("interaction");
+const logger = log4js_obj.getLogger("interaction");
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = async function handleShow(interaction: $TSFixMe) {
+export async function handleShow(interaction: $TSFixMe) {
   try {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
@@ -89,11 +62,8 @@ async function sendStageInfo(
   const X_data = await getXMatchData(data, scheduleNum);
 
   // const l_thumbnail = rule2image(league_data.rule);
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const c_thumbnail = rule2image(challenge_data.rule);
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const o_thumbnail = rule2image(open_data.rule);
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const x_thumbnail = rule2image(X_data.rule);
 
   // const league_start_date = formatDatetime(league_data.startTime, dateformat.ymdwhm);
@@ -110,12 +80,10 @@ async function sendStageInfo(
   //     })
   //     .setThumbnail(l_thumbnail);
 
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const challenge_start_date = formatDatetime(
     challenge_data.startTime,
     dateformat.ymdwhm
   );
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const challenge_end_date = formatDatetime(
     challenge_data.endTime,
     dateformat.hm
@@ -129,17 +97,14 @@ async function sendStageInfo(
     .setColor("#F54910")
     .addFields({
       name: challenge_start_date + "-" + challenge_end_date,
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       value: challenge_data.stage1 + "／" + challenge_data.stage2,
     })
     .setThumbnail(c_thumbnail);
 
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const open_start_date = formatDatetime(
     open_data.startTime,
     dateformat.ymdwhm
   );
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const open_end_date = formatDatetime(open_data.endTime, dateformat.hm);
   const openEmbed = new EmbedBuilder()
     .setAuthor({
@@ -150,14 +115,11 @@ async function sendStageInfo(
     .setColor("#F54910")
     .addFields({
       name: open_start_date + "-" + open_end_date,
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       value: open_data.stage1 + "／" + open_data.stage2,
     })
     .setThumbnail(o_thumbnail);
 
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const x_start_date = formatDatetime(X_data.startTime, dateformat.ymdwhm);
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const x_end_date = formatDatetime(X_data.endTime, dateformat.hm);
   const xMatchEmbed = new EmbedBuilder()
     .setAuthor({
@@ -169,7 +131,6 @@ async function sendStageInfo(
     .setColor("#0edb9b")
     .addFields({
       name: x_start_date + "-" + x_end_date,
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       value: X_data.stage1 + "／" + X_data.stage2,
     })
     .setThumbnail(x_thumbnail);
@@ -192,17 +153,15 @@ async function sendRegularInfo(
   const start_date = formatDatetime(regular_data.startTime, dateformat.ymdwhm);
   const end_date = formatDatetime(regular_data.endTime, dateformat.hm);
 
+  let title = "";
   if (scheduleNum == 0) {
-    // @ts-expect-error TS(2304): Cannot find name 'title'.
     title = "現在";
   } else {
-    // @ts-expect-error TS(2304): Cannot find name 'title'.
     title = "次";
   }
 
   const regularEmbed = new EmbedBuilder()
     .setAuthor({
-      // @ts-expect-error TS(2304): Cannot find name 'title'.
       name: title + "のレギュラーマッチ",
       iconURL:
         "https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png",
@@ -227,22 +186,18 @@ async function sendFesInfo(
   scheduleNum: $TSFixMe
 ) {
   const fes_data = await getFesData(data, scheduleNum);
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const start_date = formatDatetime(fes_data.startTime, dateformat.ymdwhm);
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
   const end_date = formatDatetime(fes_data.endTime, dateformat.hm);
 
+  let title = "";
   if (scheduleNum == 0) {
-    // @ts-expect-error TS(2304): Cannot find name 'title'.
     title = "現在";
   } else {
-    // @ts-expect-error TS(2304): Cannot find name 'title'.
     title = "次";
   }
 
   const fesEmbed = new EmbedBuilder()
     .setAuthor({
-      // @ts-expect-error TS(2304): Cannot find name 'title'.
       name: title + "のフェスマッチ",
       iconURL:
         "https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png",
@@ -250,7 +205,6 @@ async function sendFesInfo(
     .setColor("#ead147")
     .addFields({
       name: start_date + "-" + end_date,
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       value: fes_data.stage1 + "／" + fes_data.stage2,
     })
     .setThumbnail(
@@ -265,24 +219,20 @@ async function sendFesInfo(
 async function sendRunInfo(interaction: $TSFixMe, data: $TSFixMe) {
   try {
     for (let i = 0; i < 2; i++) {
+      let title = "";
       if (i == 0) {
-        // @ts-expect-error TS(2304): Cannot find name 'title'.
         title = "現在";
       } else if (i == 1) {
-        // @ts-expect-error TS(2304): Cannot find name 'title'.
         title = "次";
       }
       const salmon_data = await getSalmonData(data, i);
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       const start_date = formatDatetime(
         salmon_data.startTime,
         dateformat.ymdwhm
       );
-      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
       const end_date = formatDatetime(salmon_data.endTime, dateformat.ymdwhm);
 
       let weaponsImage = new AttachmentBuilder(
-        // @ts-expect-error TS(2532): Object is possibly 'undefined'.
         await salmonWeaponCanvas(
           salmon_data.weapon1,
           salmon_data.weapon2,
@@ -297,18 +247,15 @@ async function sendRunInfo(interaction: $TSFixMe, data: $TSFixMe) {
 
       const salmonEmbed = new EmbedBuilder()
         .setAuthor({
-          // @ts-expect-error TS(2304): Cannot find name 'title'.
           name: title + "のSALMON RUN",
           iconURL:
             "https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png",
         })
-        // @ts-expect-error TS(2532): Object is possibly 'undefined'.
         .setTitle(salmon_data.stage)
         .setColor("#FC892C")
         .addFields(
           {
             name: "開始日時",
-            // @ts-expect-error TS(2532): Object is possibly 'undefined'.
             value:
               start_date +
               "【" +
@@ -317,7 +264,6 @@ async function sendRunInfo(interaction: $TSFixMe, data: $TSFixMe) {
           },
           {
             name: "終了日時",
-            // @ts-expect-error TS(2532): Object is possibly 'undefined'.
             value:
               end_date +
               "【" +

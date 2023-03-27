@@ -1,27 +1,12 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'EmbedBuild... Remove this comment to see the full error message
-const { EmbedBuilder, ChannelType } = require("discord.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'isNotEmpty... Remove this comment to see the full error message
-const { isNotEmpty, isEmpty } = require("../../common/others");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchChan... Remove this comment to see the full error message
-const { searchChannelById } = require("../../common/manager/channel_manager");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchMemb... Remove this comment to see the full error message
-const {
-  searchMemberById,
-  getMemberColor,
-} = require("../../common/manager/member_manager");
+import { EmbedBuilder, ChannelType } from "discord.js";
+import { isNotEmpty, isEmpty } from "../../common/others";
+import { searchChannelById } from "../../common/manager/channel_manager";
+import { searchMemberById, getMemberColor } from "../../common/manager/member_manager";
+import { log4js_obj } from "../../../log4js_settings";
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = {
-  voiceMention: voiceMention,
-};
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'voiceMenti... Remove this comment to see the full error message
-async function voiceMention(interaction: $TSFixMe) {
-  // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-  log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-  const logger = log4js.getLogger("interaction");
+export async function voiceMention(interaction: $TSFixMe) {
+  const logger = log4js_obj.getLogger("interaction");
 
   try {
     await interaction.deferReply({ ephemeral: false });
@@ -68,7 +53,6 @@ async function voiceMention(interaction: $TSFixMe) {
   }
 }
 
-// @ts-expect-error TS(2393): Duplicate function implementation.
 async function createEmbed(
   author: $TSFixMe,
   text: $TSFixMe,

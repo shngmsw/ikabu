@@ -6,8 +6,8 @@ export class TeamDivider {
   match_num: number;
   joined_match_count: number;
   win: number;
-  force_spectate: number;
-  hide_win: number;
+  force_spectate: boolean;
+  hide_win: boolean;
   win_rate: number;
   created_at: string;
   constructor(
@@ -18,8 +18,8 @@ export class TeamDivider {
     match_num: number,
     joined_match_count: number,
     win: number,
-    force_spectate: number,
-    hide_win: number,
+    force_spectate: boolean,
+    hide_win: boolean,
     win_rate: number,
     created_at: string
   ) {

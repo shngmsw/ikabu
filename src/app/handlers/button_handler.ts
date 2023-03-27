@@ -1,42 +1,22 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'URLSearchP... Remove this comment to see the full error message
-const { URLSearchParams } = require("url");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'isNotEmpty... Remove this comment to see the full error message
-const { isNotEmpty } = require("../common/others");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const recruitButton = require("../feat-recruit/interactions/buttons/recruit_button_events.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'divider'.
-const divider = require("../feat-utils/team_divider/divider");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'sendQuesti... Remove this comment to see the full error message
-const {
-  sendQuestionnaireFollowUp,
-  disableQuestionnaireButtons,
-} = require("../event/rookie/send_questionnaire");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'voiceLocke... Remove this comment to see the full error message
-const { voiceLockerUpdate } = require("../feat-utils/voice/voice_locker");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const { deleteFriendCode } = require("../feat-utils/other/friendcode");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'handleCrea... Remove this comment to see the full error message
-const {
-  handleCreateModal,
-} = require("../feat-recruit/modals/create_recruit_modals");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'setResolve... Remove this comment to see the full error message
-const {
-  setResolvedTag,
-} = require("../event/support_auto_tag/resolved_support");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
+import { URLSearchParams } from "url";
+import { isNotEmpty } from "../common/others";
+import { cancel, cancelNotify, closeNotify, del, join, joinNotify, close, unlock } from "../feat-recruit/interactions/buttons/recruit_button_events.js";
+import { alfaButton, bravoButton, cancelButton, correctButton, endButton, hideButton, joinButton, registerButton, spectateButton } from "../feat-utils/team_divider/divider";
+import { sendQuestionnaireFollowUp, disableQuestionnaireButtons } from "../event/rookie/send_questionnaire";
+import { voiceLockerUpdate } from "../feat-utils/voice/voice_locker";
+import { deleteFriendCode } from "../feat-utils/other/friendcode";
+import { handleCreateModal } from "../feat-recruit/modals/create_recruit_modals";
+import { setResolvedTag } from "../event/support_auto_tag/resolved_support";
 
-// @ts-expect-error TS(2580): Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
-module.exports = {
-  call: call,
-};
+interface buttonFunctions {
+  [key: string]: (interaction: any, params: any) => Promise<void>;
+}
 
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-
-// @ts-expect-error TS(2393): Duplicate function implementation.
-async function call(interaction: $TSFixMe) {
+export async function call(interaction: $TSFixMe) {
   const params = new URLSearchParams(interaction.customId);
+  const param_d = params.get("d") || null;
+  const param_t = params.get("t") || null;
+  const param_q = params.get("q") || null;
   const voiceLockerIds = [
     "voiceLock_inc",
     "voiceLock_dec",
@@ -48,42 +28,39 @@ async function call(interaction: $TSFixMe) {
     deleteFriendCode(interaction);
   } else if (interaction.customId == "support_resolved") {
     setResolvedTag(interaction);
-  } else if (isNotEmpty(params.get("d"))) {
+  } else if (isNotEmpty(param_d) && param_d != null) {
     // buttonごとに呼び出すファンクション
-    const recruitButtons = {
-      jr: recruitButton.join,
-      cr: recruitButton.cancel,
-      del: recruitButton.del,
-      close: recruitButton.close,
-      unl: recruitButton.unlock,
-      njr: recruitButton.joinNotify,
-      ncr: recruitButton.cancelNotify,
-      nclose: recruitButton.closeNotify,
+    const recruitButtons: buttonFunctions = {
+      jr: join,
+      cr: cancel,
+      del: del,
+      close: close,
+      unl: unlock,
+      njr: joinNotify,
+      ncr: cancelNotify,
+      nclose: closeNotify,
       newr: handleCreateModal,
     };
-    // @ts-expect-error TS(2538): Type 'null' cannot be used as an index type.
-    await recruitButtons[params.get("d")](interaction, params);
-  } else if (isNotEmpty(params.get("t"))) {
-    const dividerButtons = {
-      join: divider.joinButton,
-      register: divider.registerButton,
-      cancel: divider.cancelButton,
-      alfa: divider.alfaButton,
-      bravo: divider.bravoButton,
-      spectate: divider.spectateButton,
-      end: divider.endButton,
-      correct: divider.correctButton,
-      hide: divider.hideButton,
+    await recruitButtons[param_d](interaction, params);
+  } else if (isNotEmpty(param_t) && param_t != null) {
+    const dividerButtons: buttonFunctions = {
+      join: joinButton,
+      register: registerButton,
+      cancel: cancelButton,
+      alfa: alfaButton,
+      bravo: bravoButton,
+      spectate: spectateButton,
+      end: endButton,
+      correct: correctButton,
+      hide: hideButton,
     };
-    // @ts-expect-error TS(2538): Type 'null' cannot be used as an index type.
-    await dividerButtons[params.get("t")](interaction, params);
-  } else if (isNotEmpty(params.get("q"))) {
-    const questionnaireButtons = {
+    await dividerButtons[param_t](interaction, params);
+  } else if (isNotEmpty(param_q) && param_q != null) {
+    const questionnaireButtons: buttonFunctions = {
       yes: sendQuestionnaireFollowUp,
       no: disableQuestionnaireButtons,
     };
-    // @ts-expect-error TS(2538): Type 'null' cannot be used as an index type.
-    await questionnaireButtons[params.get("q")](interaction, params);
+    await questionnaireButtons[param_q](interaction, params);
   }
   return;
 }

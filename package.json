@@ -8,7 +8,7 @@
   "main": "server.js",
   "scripts": {
     "compile": "tsc -p .",
-    "start": "node build/server.js",
+    "start": "node -r dotenv/config ./build/server.js dotenv_config_path=./.env",
     "register": "node register.js",
     "lint": "run-p -l -c --aggregate-output lint:*",
     "lint:eslint": "eslint .",
@@ -20,9 +20,9 @@
     "unit": "jest"
   },
   "dependencies": {
-    "@types/log4js": "^2.3.5",
     "@discordjs/opus": "^0.9.0",
     "@discordjs/voice": "^0.15.0",
+    "@types/log4js": "^2.3.5",
     "axios": "^1.1.2",
     "canvas": "^2.9.1",
     "config": "^3.3.7",
@@ -68,6 +68,8 @@
     ]
   },
   "devDependencies": {
+    "@types/node": "^18.15.10",
+    "@types/node-fetch": "^2.6.2",
     "@types/request": "^2.48.8",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "eslint": "^8.35.0",

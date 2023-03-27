@@ -1,32 +1,13 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'EmbedBuild... Remove this comment to see the full error message
-const {
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-} = require("discord.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'setTimeout... Remove this comment to see the full error message
-const { setTimeout } = require("timers/promises");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
+import { log4js_obj } from "../../../log4js_settings";
 
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'logger'.
-const logger = log4js.getLogger("interaction");
-
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = {
-  voiceLocker: voiceLocker,
-  voiceLockerUpdate: voiceLockerUpdate,
-  disableLimit: disableLimit,
-};
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { setTimeout } from "timers/promises";
+const logger = log4js_obj.getLogger("interaction");
 
 /*
  * スラコマ打たれたときの動作
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'voiceLocke... Remove this comment to see the full error message
-async function voiceLocker(interaction: $TSFixMe) {
+export async function voiceLocker(interaction: $TSFixMe) {
   const author = interaction.member;
   const channel = interaction.channel;
 
@@ -78,7 +59,6 @@ async function voiceLocker(interaction: $TSFixMe) {
     });
 
   // 1分後にメッセージを削除
-  // @ts-expect-error TS(2345): Argument of type 'number' is not assignable to par... Remove this comment to see the full error message
   await setTimeout(60000);
   await interaction.deleteReply();
 }
@@ -86,8 +66,7 @@ async function voiceLocker(interaction: $TSFixMe) {
 /*
  * ボタンが押されたときの動作
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'voiceLocke... Remove this comment to see the full error message
-async function voiceLockerUpdate(interaction: $TSFixMe) {
+export async function voiceLockerUpdate(interaction: $TSFixMe) {
   const member = interaction.member;
   const channel = interaction.channel;
   // ボイスチャンネル内のメンバー数
@@ -167,8 +146,7 @@ async function voiceLockerUpdate(interaction: $TSFixMe) {
     });
 }
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'disableLim... Remove this comment to see the full error message
-async function disableLimit(oldState: $TSFixMe) {
+export async function disableLimit(oldState: $TSFixMe) {
   const usable_channel = [
     "alfa",
     "bravo",

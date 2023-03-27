@@ -282,8 +282,8 @@ export function getCommandHelpEmbed(channelName: $TSFixMe) {
   const embed = new EmbedBuilder();
   embed.setDescription(
     "募集コマンドは " +
-      `${commandMessage}` +
-      `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`
+    `${commandMessage}` +
+    `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`
   );
   return embed;
 }

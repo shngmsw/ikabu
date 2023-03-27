@@ -1,8 +1,6 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'EmbedBuild... Remove this comment to see the full error message
-const { EmbedBuilder } = require("discord.js");
+import { EmbedBuilder } from "discord.js";
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = async function handleHelp(interaction: $TSFixMe) {
+export async function handleHelp(interaction: $TSFixMe) {
   if (!interaction.isCommand()) return;
   // 'インタラクションに失敗'が出ないようにするため
   await interaction.deferReply();

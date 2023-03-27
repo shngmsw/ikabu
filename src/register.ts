@@ -1,16 +1,6 @@
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const {
-  SlashCommandBuilder,
-  ContextMenuCommandBuilder,
-} = require("@discordjs/builders");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'ChannelTyp... Remove this comment to see the full error message
-const {
-  ChannelType,
-  ApplicationCommandType,
-} = require("discord-api-types/v10");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'commandNam... Remove this comment to see the full error message
-const { commandNames } = require("./constant.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
+import { SlashCommandBuilder, ContextMenuCommandBuilder } from "@discordjs/builders";
+import { ChannelType, ApplicationCommandType } from "discord-api-types/v10";
+import { commandNames } from "./constant.js";
 import log4js from "log4js";
 
 const voiceLock = new SlashCommandBuilder()
@@ -50,7 +40,6 @@ const friendCode = new SlashCommandBuilder()
       )
   );
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'wiki'.
 const wiki = new SlashCommandBuilder()
   .setName(commandNames.wiki)
   .setDescription("wikipediaで調べる")
@@ -109,7 +98,6 @@ const vpick = new SlashCommandBuilder()
       .setRequired(false)
   );
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'buki'.
 const buki = new SlashCommandBuilder()
   .setName(commandNames.buki)
   .setDescription("ブキをランダムに抽出します。")
@@ -1209,26 +1197,27 @@ const commands = [
 ];
 
 // 登録用関数
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const { REST } = require("@discordjs/rest");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const { Routes } = require("discord-api-types/v10");
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
+import { REST } from "@discordjs/rest";
+import { Routes } from "discord-api-types/v10";
+import { log4js_obj } from "./log4js_settings.js";
 const rest = new REST({ version: "10" }).setToken(
-  process.env.DISCORD_BOT_TOKEN
+  process.env.DISCORD_BOT_TOKEN || ""
 );
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = async function registerSlashCommands() {
-  // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-  log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-  const logger = log4js.getLogger();
+export async function registerSlashCommands() {
+  const logger = log4js_obj.getLogger();
+  const bot_id = process.env.DISCORD_BOT_ID;
+  if (bot_id === undefined) {
+    throw new Error("DISCORD_BOT_ID is not defined.");
+  }
+  const server_id = process.env.SERVER_ID;
+  if (server_id === undefined) {
+    throw new Error("SERVER_ID is not defined.");
+  }
 
-  // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
   const mode = process.env.SLASH_COMMAND_REGISTER_MODE;
   if (mode === "guild") {
     await rest
-      // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-      .put(Routes.applicationCommands(process.env.DISCORD_BOT_ID), { body: [] })
+      .put(Routes.applicationCommands(bot_id), { body: [] })
       .then(() =>
         logger.info("Successfully deleted application global commands.")
       )
@@ -1236,11 +1225,10 @@ module.exports = async function registerSlashCommands() {
         logger.error(error);
       });
     await rest
-      // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
       .put(
         Routes.applicationGuildCommands(
-          process.env.DISCORD_BOT_ID,
-          process.env.SERVER_ID
+          bot_id,
+          server_id
         ),
         { body: commands }
       )
@@ -1252,11 +1240,10 @@ module.exports = async function registerSlashCommands() {
       });
   } else if (mode === "global") {
     await rest
-      // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
       .put(
         Routes.applicationGuildCommands(
-          process.env.DISCORD_BOT_ID,
-          process.env.SERVER_ID
+          bot_id,
+          server_id
         ),
         { body: [] }
       )
@@ -1267,8 +1254,7 @@ module.exports = async function registerSlashCommands() {
         logger.error(error);
       });
     await rest
-      // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-      .put(Routes.applicationCommands(process.env.DISCORD_BOT_ID), {
+      .put(Routes.applicationCommands(bot_id), {
         body: commands,
       })
       .then(() =>

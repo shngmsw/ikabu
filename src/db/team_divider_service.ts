@@ -4,7 +4,7 @@ import { DBCommon } from "./db";
 import { TeamDivider } from "./model/team_divider";
 const logger = log4js_obj.getLogger("database");
 
-module.exports = class TeamDividerService {
+export class TeamDividerService {
   static async createTableIfNotExists() {
     try {
       DBCommon.init();
@@ -37,7 +37,7 @@ module.exports = class TeamDividerService {
     let results = (await db.all(
       `SELECT
           message_id,
-          member_id,
+          member_id,t
           member_name,
           team,
           match_num,
@@ -57,7 +57,12 @@ module.exports = class TeamDividerService {
       `
     )) as TeamDivider[];
     DBCommon.close();
-    return results;
+    let usersString = '';
+    for (let i = 0; i < results.length; i++) {
+      const member = results[i];
+      usersString = usersString + `\n${member.member_name}`;
+    }
+    return [usersString, results.length];
   }
 
   static async deleteMemberFromDB(message_id: $TSFixMe, member_id: $TSFixMe) {
@@ -385,8 +390,8 @@ module.exports = class TeamDividerService {
             joined_match_count,
             hide_win,
             CASE
-                WHEN joined_match_count = 0 then 0 
-                ELSE (win * 1.0) / joined_match_count 
+                WHEN joined_match_count = 0 then 0
+                ELSE (win * 1.0) / joined_match_count
             END as win_rate
         from
             team_divider

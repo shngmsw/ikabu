@@ -4,7 +4,7 @@ import { searchMemberById } from "../../common/manager/member_manager";
 import { isNotEmpty } from "../../common/others";
 import { sendIntentionConfirmReply } from "./send_questionnaire";
 
-module.exports = async function removeRookie(msg: $TSFixMe) {
+export async function removeRookie(msg: $TSFixMe) {
   const dt = new Date();
   const guild = msg.guild;
   const lastMonth = dt.setMonth(dt.getMonth() - 1);

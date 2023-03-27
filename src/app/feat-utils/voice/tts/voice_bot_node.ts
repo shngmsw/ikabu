@@ -2,29 +2,19 @@
  * MIT License
  * Copyright (c) 2020 noriokun4649
  */
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = {
-  setting: setting,
-  mode_api: mode_api,
-  messageReplace: messageReplace,
-  bufferToStream: bufferToStream,
-};
 
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const { VoiceText } = require("voice-text");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const { Readable } = require("stream");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const conf = require("config-reloadable");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchMemb... Remove this comment to see the full error message
-const {
-  searchMemberById,
-} = require("../../../common/manager/member_manager.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
+import { searchMemberById } from "../../../common/manager/member_manager.js";
 const SHA256 = require("crypto-js/sha256");
 
 let config = conf();
-const voiceLists1 = {
+interface VoiceTypes {
+  [key: string]: string;
+}
+
+const voiceLists1: VoiceTypes = {
   hikari: "ひかり（女性）",
   haruka: "はるか（女性）",
   takeru: "たける（男性）",
@@ -33,7 +23,12 @@ const voiceLists1 = {
   show: "ショウ（男性）",
 };
 
-const modeList1 = {
+interface ModeTypes {
+  [key: string]: string;
+}
+
+
+const modeList1: ModeTypes = {
   1: "HOYA VoiceText API",
 };
 const pitchList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
@@ -43,8 +38,8 @@ let voiceTextApiKey = null;
 let prefix = "/";
 let autoRestart = true;
 let readMe = false;
-let apiType = 1;
-let voiceType = "haruka";
+let apiType: string = "1";
+let voiceType: string = "haruka";
 let blackList;
 let speed = 100;
 let pitch = 100;
@@ -56,7 +51,6 @@ let mode = apiType;
 const voiceText = new VoiceText(voiceTextApiKey); //Voice Text API key
 
 function readConfig() {
-  // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
   voiceTextApiKey = process.env.VOICE_TEXT_API_KEY;
   prefix = config.get("Prefix");
   autoRestart = config.get("AutoRestart");
@@ -65,18 +59,15 @@ function readConfig() {
   readMe = config.get("ReadMe");
   if (typeof readMe !== "boolean") throw new Error("Require a boolean type.");
   apiType = config.get("Defalut.apiType");
-  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   if (!modeList1[apiType]) throw new Error("Unknown api.");
   voiceType = config.get("Defalut.voiceType");
-  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   if (!voiceLists1[voiceType]) throw new Error("Unknown voice.");
   blackList = config.get("BlackLists");
   return true;
 }
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'mode_api'.
-async function mode_api(msg: $TSFixMe) {
-  if (mode === 1) {
+export async function mode_api(msg: $TSFixMe) {
+  if (mode === "1") {
     // ユーザーによって音声変える
     let member = await searchMemberById(msg.guild, msg.author.id);
     let displayNameSha256 = SHA256(member.displayName);
@@ -101,8 +92,7 @@ async function mode_api(msg: $TSFixMe) {
   }
 }
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'bufferToSt... Remove this comment to see the full error message
-function bufferToStream(buffer: $TSFixMe) {
+export function bufferToStream(buffer: $TSFixMe) {
   const hwm = 1024 * 1024;
   const stream = new Readable({ highWaterMark: hwm });
   stream.push(buffer);
@@ -130,8 +120,7 @@ async function messageReplace(message: $TSFixMe) {
     return str.replace(pat, "");
   };
 
-  // @ts-expect-error TS(7023): 'role_mention_replace' implicitly has return type ... Remove this comment to see the full error message
-  const role_mention_replace = (str: $TSFixMe) => {
+  const role_mention_replace = (str: $TSFixMe): string => {
     const [matchAllElement] = str.matchAll(/<@&(\d*)>/g);
     if (matchAllElement === undefined) return str;
     for (var i = 0; i < [matchAllElement].length; i++) {
@@ -141,8 +130,7 @@ async function messageReplace(message: $TSFixMe) {
     return role_mention_replace(str);
   };
 
-  // @ts-expect-error TS(7023): 'nickname_mention_replace' implicitly has return t... Remove this comment to see the full error message
-  const nickname_mention_replace = (str: $TSFixMe) => {
+  const nickname_mention_replace = (str: $TSFixMe): string => {
     const [matchAllElement] = str.matchAll(/<@!(\d*)>/g);
     if (matchAllElement === undefined) return str;
     for (var i = 0; i < [matchAllElement].length; i++) {
@@ -154,8 +142,7 @@ async function messageReplace(message: $TSFixMe) {
     return nickname_mention_replace(str);
   };
 
-  // @ts-expect-error TS(7023): 'mention_replace' implicitly has return type 'any'... Remove this comment to see the full error message
-  const mention_replace = (str: $TSFixMe) => {
+  const mention_replace = (str: $TSFixMe): string => {
     const [matchAllElement] = str.matchAll(/<@(\d*)>/g);
     if (matchAllElement === undefined) return str;
     for (var i = 0; i < [matchAllElement].length; i++) {
@@ -167,8 +154,7 @@ async function messageReplace(message: $TSFixMe) {
     return mention_replace(str);
   };
 
-  // @ts-expect-error TS(7023): 'channel_replace' implicitly has return type 'any'... Remove this comment to see the full error message
-  const channel_replace = async (str: $TSFixMe) => {
+  const channel_replace = async (str: $TSFixMe): Promise<string> => {
     const [matchAllElement] = str.matchAll(/<#(\d*)>/g);
     if (matchAllElement === undefined) return str;
     for (var i = 0; i < [matchAllElement].length; i++) {
@@ -176,7 +162,7 @@ async function messageReplace(message: $TSFixMe) {
         .name;
       str = str.replace([matchAllElement][i][0], chName);
     }
-    return channel_replace(str);
+    return await channel_replace(str);
   };
 
   const over200_cut = (str: $TSFixMe) => {
@@ -200,7 +186,7 @@ async function messageReplace(message: $TSFixMe) {
   return yomiage_message;
 }
 
-async function setting(interaction: $TSFixMe) {
+export async function setting(interaction: $TSFixMe) {
   if (!interaction.isCommand()) return;
   if (!interaction.guild) return;
   const { options } = interaction;
@@ -209,7 +195,6 @@ async function setting(interaction: $TSFixMe) {
   if (subCommand != null && subCommand === "type") {
     const type = options.getString("音声の種類");
     voicePattern1 = type;
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     const voiceMessage = `読み上げ音声を${voiceLists1[type]}に設定したでし`;
 
     await interaction.followUp(voiceMessage);

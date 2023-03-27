@@ -1,98 +1,37 @@
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleBan = require("../feat-admin/ban/ban");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleBuki = require("../feat-utils/splat3/buki");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleHelp = require("../feat-utils/other/help.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleKansen = require("../feat-utils/other/kansen.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handlePick = require("../feat-utils/other/pick.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleShow = require("../feat-utils/splat3/show");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleTimer = require("../feat-utils/other/timer.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleVoicePick = require("../feat-utils/voice/vpick.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleWiki = require("../feat-utils/other/wiki.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'handleCrea... Remove this comment to see the full error message
-const {
-  handleCreateRole,
-  handleDeleteRole,
-  handleAssignRole,
-  handleUnassignRole,
-} = require("../feat-admin/channel_manager/manageRole.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleDeleteCategory = require("../feat-admin/channel_manager/deleteCategory.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleDeleteChannel = require("../feat-admin/channel_manager/deleteChannel.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleCreateRoom = require("../feat-admin/channel_manager/createRoom.js");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const VOICE_API = require("../feat-utils/voice/tts/voice_bot_node");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'DISCORD_VO... Remove this comment to see the full error message
-const DISCORD_VOICE = require("../feat-utils/voice/tts/discordjs_voice");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'getCloseEm... Remove this comment to see the full error message
-const { getCloseEmbed, getCommandHelpEmbed } = require("../common/others");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'otherGameR... Remove this comment to see the full error message
-const {
-  otherGameRecruit,
-} = require("../feat-recruit/interactions/commands/other_game_recruit");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'regularRec... Remove this comment to see the full error message
-const {
-  regularRecruit,
-} = require("../feat-recruit/interactions/commands/regular_recruit");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'fesRecruit... Remove this comment to see the full error message
-const {
-  fesRecruit,
-} = require("../feat-recruit/interactions/commands/fes_recruit");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'anarchyRec... Remove this comment to see the full error message
-const {
-  anarchyRecruit,
-} = require("../feat-recruit/interactions/commands/anarchy_recruit");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'salmonRecr... Remove this comment to see the full error message
-const {
-  salmonRecruit,
-} = require("../feat-recruit/interactions/commands/salmon_recruit");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'privateRec... Remove this comment to see the full error message
-const {
-  privateRecruit,
-} = require("../feat-recruit/interactions/commands/private_recruit");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'voiceMenti... Remove this comment to see the full error message
-const { voiceMention } = require("../feat-utils/voice/voice_mention.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'divider'.
-const divider = require("../feat-utils/team_divider/divider");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const handleIkabuExperience = require("../feat-utils/other/experience.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'voiceLocke... Remove this comment to see the full error message
-const { voiceLocker } = require("../feat-utils/voice/voice_locker");
-// @ts-expect-error TS(2580): Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
-const { handleFriendCode } = require("../feat-utils/other/friendcode");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'sendComman... Remove this comment to see the full error message
-const { sendCommandLog } = require("../logs/commands/command_log.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'variablesH... Remove this comment to see the full error message
-const {
-  variablesHandler,
-} = require("../feat-admin/environment_variables/variables_handler");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'createNewR... Remove this comment to see the full error message
-const {
-  createNewRecruitButton,
-} = require("../feat-recruit/buttons/create_recruit_buttons");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'commandNam... Remove this comment to see the full error message
-const { commandNames } = require("../../constant.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
+import { handleBan } from "../feat-admin/ban/ban";
+import { handleBuki } from "../feat-utils/splat3/buki";
+import { handleHelp } from "../feat-utils/other/help.js";
+import { handleKansen } from "../feat-utils/other/kansen.js";
+import { handlePick } from "../feat-utils/other/pick.js";
+import { handleShow } from "../feat-utils/splat3/show";
+import { handleTimer } from "../feat-utils/other/timer.js";
+import { handleVoicePick } from "../feat-utils/voice/vpick.js";
+import { handleWiki } from "../feat-utils/other/wiki.js";
+import { handleCreateRole, handleDeleteRole, handleAssignRole, handleUnassignRole } from "../feat-admin/channel_manager/manageRole.js";
+import { handleDeleteCategory } from "../feat-admin/channel_manager/deleteCategory.js";
+import { handleDeleteChannel } from "../feat-admin/channel_manager/deleteChannel.js";
+import { handleCreateRoom } from "../feat-admin/channel_manager/createRoom.js";
+import { getCloseEmbed, getCommandHelpEmbed } from "../common/others";
+import { otherGameRecruit } from "../feat-recruit/interactions/commands/other_game_recruit";
+import { regularRecruit } from "../feat-recruit/interactions/commands/regular_recruit";
+import { fesRecruit } from "../feat-recruit/interactions/commands/fes_recruit";
+import { anarchyRecruit } from "../feat-recruit/interactions/commands/anarchy_recruit";
+import { salmonRecruit } from "../feat-recruit/interactions/commands/salmon_recruit";
+import { privateRecruit } from "../feat-recruit/interactions/commands/private_recruit";
+import { voiceMention } from "../feat-utils/voice/voice_mention.js";
+import { dividerInitialMessage } from "../feat-utils/team_divider/divider";
+import { handleIkabuExperience } from "../feat-utils/other/experience.js";
+import { voiceLocker } from "../feat-utils/voice/voice_locker";
+import { handleFriendCode } from "../feat-utils/other/friendcode";
+import { sendCommandLog } from "../logs/commands/command_log";
+import { variablesHandler } from "../feat-admin/environment_variables/variables_handler";
+import { createNewRecruitButton } from "../feat-recruit/buttons/create_recruit_buttons";
+import { commandNames } from "../../constant.js";
+import { setting } from "../feat-utils/voice/tts/voice_bot_node";
+import { handleVoiceCommand } from "../feat-utils/voice/tts/discordjs_voice";
 
-// @ts-expect-error TS(2580): Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
-module.exports = {
-  call: call,
-};
 
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-
-async function call(interaction: $TSFixMe) {
+export async function call(interaction: $TSFixMe) {
   const { commandName } = interaction;
   const { options } = interaction;
 
@@ -113,7 +52,7 @@ async function call(interaction: $TSFixMe) {
       });
     }
   } else if (commandName === commandNames.team_divider) {
-    await divider.dividerInitialMessage(interaction);
+    await dividerInitialMessage(interaction);
   } else if (commandName === commandNames.regular) {
     await regularRecruit(interaction);
   } else if (commandName === commandNames.other_game) {
@@ -161,8 +100,8 @@ async function call(interaction: $TSFixMe) {
   } else if (commandName === commandNames.voice) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
-    DISCORD_VOICE.handleVoiceCommand(interaction);
-    VOICE_API.setting(interaction);
+    handleVoiceCommand(interaction);
+    setting(interaction);
   } else if (commandName == commandNames.ch_manager) {
     const subCommand = options.getSubcommand();
     switch (subCommand) {

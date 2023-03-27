@@ -1,5 +1,24 @@
 // Discord bot implements
 import { ActivityType, Client, GatewayIntentBits, Partials } from "discord.js";
+import { DBCommon } from "../db/db";
+import { FriendCodeService } from "../db/friend_code_service";
+import { MembersService } from "../db/members_service";
+import { RecruitService } from "../db/recruit_service";
+import { TeamDividerService } from "../db/team_divider_service";
+import { log4js_obj } from "../log4js_settings";
+import { updateSchedule } from "./common/apis/splatoon3_ink";
+import { emojiCountUp } from "./event/reaction_count/reactions";
+import { guildMemberAddEvent } from "./event/rookie/set_rookie";
+import * as message_handler from "./handlers/message_handler";
+import * as button_handler from "./handlers/button_handler";
+import * as modal_handler from "./handlers/modal_handler";
+import * as context_handler from "./handlers/context_handler";
+import * as command_handler from "./handlers/command_handler";
+import * as vcState_update_handler from "./handlers/vcState_update_handler";
+import { isNotEmpty } from "./common/others";
+import { editThreadTag } from "./event/support_auto_tag/edit_tag";
+import { sendCloseButton } from "./event/support_auto_tag/send_support_close_button";
+import { registerSlashCommands } from "../register";
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -19,32 +38,12 @@ const client = new Client({
   ],
 });
 
-import DBCommon from "../../db/db";
-import FriendCodeService from "../../db/friend_code_service";
-import MembersService from "../../db/members_service";
-import RecruitService from "../../db/recruit_service";
-import TeamDividerService from "../../db/team_divider_service";
-import { log4js_obj } from "../log4js_settings";
-import registerSlashCommands from "../register";
-import { updateSchedule } from "./common/apis/splatoon3_ink";
-import { isNotEmpty } from "./common/others";
-import emojiCountUp from "./event/reaction_count/reactions";
-import { guildMemberAddEvent } from "./event/rookie/set_rookie";
-import { editThreadTag } from "./event/support_auto_tag/edit_tag";
-import { sendCloseButton } from "./event/support_auto_tag/send_support_close_button";
-import ButtonHandler from "./handlers/button_handler";
-import CommandHandler from "./handlers/command_handler";
-import ContextMenuHandler from "./handlers/context_handler";
-import MessageHandler from "./handlers/message_handler";
-import ModalHandler from "./handlers/modal_handler";
-import VCStateUpdateHandler from "./handlers/vcState_update_handler";
-
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 const logger = log4js_obj.getLogger();
 
 client.on("messageCreate", async (msg: $TSFixMe) => {
-  MessageHandler.call(msg);
+  message_handler.call(msg);
 });
 
 client.on("guildMemberAdd", async (member: $TSFixMe) => {
@@ -60,7 +59,7 @@ client.on("guildMemberAdd", async (member: $TSFixMe) => {
       });
     }
   } catch (error) {
-    const loggerMA = log4js.getLogger("guildMemberAdd");
+    const loggerMA = log4js_obj.getLogger("guildMemberAdd");
     loggerMA.error(error);
   }
 });
@@ -69,7 +68,6 @@ client.on("guildMemberRemove", async (member: $TSFixMe) => {
   try {
     const tag = member.user.tag;
     const period = Math.round((Date.now() - member.joinedAt) / 86400000); // サーバーに居た期間を日数にして計算
-    // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
     const retireLog = member.guild.channels.cache.get(
       process.env.CHANNEL_ID_RETIRE_LOG
     );
@@ -79,7 +77,6 @@ client.on("guildMemberRemove", async (member: $TSFixMe) => {
       );
     }
     const guild = await member.guild.fetch();
-    // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
     if (guild.id === process.env.SERVER_ID) {
       if (client.user == null) {
         throw new Error("client.user is null");
@@ -89,7 +86,7 @@ client.on("guildMemberRemove", async (member: $TSFixMe) => {
       });
     }
   } catch (err) {
-    const loggerMR = log4js.getLogger("guildMemberRemove");
+    const loggerMR = log4js_obj.getLogger("guildMemberRemove");
     loggerMR.error({ err });
   }
 });
@@ -110,8 +107,7 @@ client.on("ready", async () => {
     await RecruitService.createTableIfNotExists();
     await MembersService.createTableIfNotExists();
     await TeamDividerService.createTableIfNotExists();
-    // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-    const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID);
+    const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID || "");
     if (guild == null) {
       throw new Error("guild is null");
     }
@@ -125,7 +121,7 @@ client.on("ready", async () => {
 });
 
 client.on("messageReactionAdd", async (reaction: $TSFixMe, user: $TSFixMe) => {
-  const loggerMRA = log4js.getLogger("messageReactionAdd");
+  const loggerMRA = log4js_obj.getLogger("messageReactionAdd");
   try {
     // When a reaction is received, check if the structure is partial
     if (reaction.partial) {
@@ -154,7 +150,7 @@ client.on(
         /* empty */
       }
     } catch (error) {
-      const loggerMRR = log4js.getLogger("messageReactionRemove");
+      const loggerMRR = log4js_obj.getLogger("messageReactionRemove");
       loggerMRR.error(error);
     }
   }
@@ -167,22 +163,22 @@ client.on(
 async function onInteraction(interaction: $TSFixMe) {
   try {
     if (interaction.isButton()) {
-      ButtonHandler.call(interaction);
+      button_handler.call(interaction);
     }
 
     if (interaction.isModalSubmit()) {
-      ModalHandler.call(interaction);
+      modal_handler.call(interaction);
     }
 
     if (interaction.isMessageContextMenuCommand()) {
-      ContextMenuHandler.call(interaction);
+      context_handler.call(interaction);
     }
 
     if (interaction.isCommand()) {
-      CommandHandler.call(interaction);
+      command_handler.call(interaction);
     }
   } catch (error) {
-    const interactionLogger = log4js.getLogger("interaction");
+    const interactionLogger = log4js_obj.getLogger("interaction");
     const errorDetail = {
       content: `Command failed: ${error}`,
       interaction_replied: interaction.replied,
@@ -197,7 +193,6 @@ client.on("interactionCreate", (interaction: $TSFixMe) =>
 );
 
 client.on("threadCreate", async (thread: $TSFixMe) => {
-  // @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
   if (
     isNotEmpty(thread.parentId) &&
     thread.parentId === process.env.CHANNEL_ID_SUPPORT_CENTER
@@ -208,5 +203,5 @@ client.on("threadCreate", async (thread: $TSFixMe) => {
 });
 
 client.on("voiceStateUpdate", (oldState: $TSFixMe, newState: $TSFixMe) => {
-  VCStateUpdateHandler.call(oldState, newState);
+  vcState_update_handler.call(oldState, newState);
 });

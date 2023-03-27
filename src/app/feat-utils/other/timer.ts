@@ -1,8 +1,6 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'common'.
-const common = require("../../common/others");
+import { isInteger } from "../../common/others";
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = async function handleTimer(interaction: $TSFixMe) {
+export async function handleTimer(interaction: $TSFixMe) {
   if (!interaction.isCommand()) return;
   // 'インタラクションに失敗'が出ないようにするため
   await interaction.deferReply();
@@ -10,7 +8,7 @@ module.exports = async function handleTimer(interaction: $TSFixMe) {
   const { options } = interaction;
   var kazu = options.getInteger("分");
   var count = kazu;
-  if (count <= 10 && count > 0 && common.isInteger(kazu)) {
+  if (count <= 10 && count > 0 && isInteger(kazu)) {
     await interaction.editReply(
       "タイマーを" + count + "分後にセットしたでし！"
     );

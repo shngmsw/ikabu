@@ -1,30 +1,20 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'fetch'.
-const fetch = require("node-fetch");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'searchMemb... Remove this comment to see the full error message
-const { searchMemberById } = require("../../common/manager/member_manager");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'common'.
-const common = require("../../common/others");
+import fetch from "node-fetch";
+import { searchMemberById } from "../../common/manager/member_manager";
+import { randomSelect } from "../../common/others";
 const weaponsUrl = "https://stat.ink/api/v3/weapon";
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'EmbedBuild... Remove this comment to see the full error message
-const { EmbedBuilder } = require("discord.js");
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log4js'.
-import log4js from "log4js";
+import { EmbedBuilder } from "discord.js";
+import { log4js_obj } from "../../../log4js_settings";
 
-// @ts-expect-error TS(2580): Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
-log4js.configure(process.env.LOG4JS_CONFIG_PATH);
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'logger'.
-const logger = log4js.getLogger("interaction");
+const logger = log4js_obj.getLogger("interaction");
 
-// @ts-expect-error TS(2552): Cannot find name 'module'. Did you mean 'mode'?
-module.exports = async function handleBuki(interaction: $TSFixMe) {
+export async function handleBuki(interaction: $TSFixMe) {
   if (!interaction.isCommand()) return;
   // 'インタラクションに失敗'が出ないようにするため
   await interaction.deferReply();
   buki(interaction);
 };
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'buki'.
-async function buki(interaction: $TSFixMe) {
+export async function buki(interaction: $TSFixMe) {
   const { options } = interaction;
   let bukiType = options.getString("ブキ種");
   let amount = options.getInteger("ブキの数");
@@ -71,7 +61,7 @@ async function buki(interaction: $TSFixMe) {
         embeds: embeds,
       });
     } else {
-      var buki = common.random(bukiNames, 1)[0];
+      var buki = randomSelect(bukiNames, 1)[0];
       await interaction.followUp({ embeds: [buki] });
     }
   } catch (error) {

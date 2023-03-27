@@ -59,11 +59,11 @@ export async function createFesModal(
     .setMaxLength(120)
     .setRequired(true);
 
-  const actionRow1 = new ActionRowBuilder().addComponents(recruitNumInput);
-  const actionRow2 = new ActionRowBuilder().addComponents(participantsNumInput);
-  const actionRow3 = new ActionRowBuilder().addComponents(participant1);
-  const actionRow4 = new ActionRowBuilder().addComponents(participant2);
-  const actionRow5 = new ActionRowBuilder().addComponents(conditionInput);
+  const actionRow1 = new ActionRowBuilder<TextInputBuilder>().addComponents(recruitNumInput);
+  const actionRow2 = new ActionRowBuilder<TextInputBuilder>().addComponents(participantsNumInput);
+  const actionRow3 = new ActionRowBuilder<TextInputBuilder>().addComponents(participant1);
+  const actionRow4 = new ActionRowBuilder<TextInputBuilder>().addComponents(participant2);
+  const actionRow5 = new ActionRowBuilder<TextInputBuilder>().addComponents(conditionInput);
 
   modal.addComponents(
     actionRow1,

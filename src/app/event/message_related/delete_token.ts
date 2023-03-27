@@ -1,4 +1,4 @@
-module.exports = async function deleteToken(msg: $TSFixMe) {
+export async function deleteToken(msg: $TSFixMe) {
   if (
     msg.content.match(
       "[a-zA-Z0-9_-]{23,28}\\.[a-zA-Z0-9_-]{6,7}\\.[a-zA-Z0-9_-]{27}"

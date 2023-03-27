@@ -55,19 +55,13 @@ export async function createAnarchyModal(interaction: $TSFixMe) {
     .setMaxLength(120)
     .setRequired(true);
 
-  const actionRow1 = new ActionRowBuilder().addComponents(recruitNumInput);
-  const actionRow2 = new ActionRowBuilder().addComponents(participantsNumInput);
-  const actionRow3 = new ActionRowBuilder().addComponents(participant1);
-  const actionRow4 = new ActionRowBuilder().addComponents(participant2);
-  const actionRow5 = new ActionRowBuilder().addComponents(conditionInput);
+  const row1 = new ActionRowBuilder<TextInputBuilder>().addComponents(recruitNumInput);
+  const row2 = new ActionRowBuilder<TextInputBuilder>().addComponents(participantsNumInput);
+  const row3 = new ActionRowBuilder<TextInputBuilder>().addComponents(participant1);
+  const row4 = new ActionRowBuilder<TextInputBuilder>().addComponents(participant2);
+  const row5 = new ActionRowBuilder<TextInputBuilder>().addComponents(conditionInput);
 
-  modal.addComponents(
-    actionRow1,
-    actionRow2,
-    actionRow3,
-    actionRow4,
-    actionRow5
-  );
+  modal.addComponents(row1, row2, row3, row4, row5);
 
   await interaction.showModal(modal);
 }
