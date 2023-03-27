@@ -116,7 +116,7 @@ export class TeamDividerService {
    */
   static async selectMemberFromDB(
     message_id: string,
-    match_num: string,
+    match_num: number,
     member_id: string
   ) {
     const db = DBCommon.open();

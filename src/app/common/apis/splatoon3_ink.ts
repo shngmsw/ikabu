@@ -8,8 +8,7 @@ const logger = log4js_obj.getLogger();
 
 export async function fetchSchedule() {
   try {
-    // TODO: https://stackoverflow.com/questions/68481686/type-typeof-globalthis-has-no-index-signature
-    const result_data = global.schedule_data;
+    const result_data = (globalThis as any).schedule_data;
 
     if (isEmpty(result_data)) {
       logger.warn("schedule data was not found. (fetch)");
@@ -38,7 +37,7 @@ export async function updateSchedule() {
     const locale = await fetch(locale_url); // 名前解決のためのlocale情報のfetch
     const locale_data = await locale.json();
     const result_data = { schedule: schedule_data, locale: locale_data }; // dataを一つにまとめる
-    global.schedule_data = result_data;
+    (globalThis as any).schedule_data = result_data;
     logger.info("schedule fetched!");
     return result_data;
   } catch (error) {

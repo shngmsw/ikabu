@@ -1,9 +1,9 @@
+import { EmbedBuilder } from "discord.js";
 import fetch from "node-fetch";
+import { log4js_obj } from "../../../log4js_settings";
 import { searchMemberById } from "../../common/manager/member_manager";
 import { randomSelect } from "../../common/others";
 const weaponsUrl = "https://stat.ink/api/v3/weapon";
-import { EmbedBuilder } from "discord.js";
-import { log4js_obj } from "../../../log4js_settings";
 
 const logger = log4js_obj.getLogger("interaction");
 
@@ -25,7 +25,7 @@ export async function buki(interaction: $TSFixMe) {
 
   try {
     const response = await fetch(weaponsUrl);
-    const weapons = await response.json();
+    const weapons = await response.json() as any;
     const guild = await interaction.guild.fetch();
     const member = await searchMemberById(guild, interaction.member.user.id);
     let bukis = weapons.filter(function (value: $TSFixMe) {
