@@ -8,7 +8,7 @@
   "main": "server.js",
   "scripts": {
     "compile": "tsc -p .",
-    "start": "node -r dotenv/config ./build/server.js dotenv_config_path=./.env",
+    "start": "npm run compile && node -r dotenv/config ./build/server.js dotenv_config_path=./.env",
     "register": "node register.js",
     "lint": "run-p -l -c --aggregate-output lint:*",
     "lint:eslint": "eslint .",
