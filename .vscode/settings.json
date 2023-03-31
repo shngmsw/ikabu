@@ -1,5 +1,11 @@
 {
   "git.ignoreLimitWarning": true,
   "files.eol": "\n",
-  "editor.formatOnPaste": false,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    }
+  },
 }
