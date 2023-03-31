@@ -33,7 +33,6 @@ const modeList1: ModeTypes = {
 };
 const pitchList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
 const speedList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
-let context;
 let voiceTextApiKey = null;
 let prefix = "/";
 let autoRestart = true;
@@ -47,7 +46,7 @@ const timeoutOffset = 5;
 
 readConfig();
 let voicePattern1 = voiceType; //初期時のよみあげ音声
-let mode = apiType;
+let mode: number = Number(apiType);
 const voiceText = new VoiceText(voiceTextApiKey); //Voice Text API key
 
 function readConfig() {
@@ -67,7 +66,7 @@ function readConfig() {
 }
 
 export async function mode_api(msg: $TSFixMe) {
-  if (mode === "1") {
+  if (mode === 1) {
     // ユーザーによって音声変える
     let member = await searchMemberById(msg.guild, msg.author.id);
     let displayNameSha256 = SHA256(member.displayName);
