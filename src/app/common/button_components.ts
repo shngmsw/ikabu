@@ -114,6 +114,7 @@ export async function setButtonDisable(
 
       updatedActionRow.addComponents(
         oldActionRow.components.map((buttonComponent: $TSFixMe) => {
+          let newButton;
           if (
             isNotEmpty(interaction) &&
             interaction.component.customId == buttonComponent.customId
@@ -121,16 +122,16 @@ export async function setButtonDisable(
             if (process.env.RECRUIT_LOADING_EMOJI_ID == undefined) {
               throw new Error("RECRUIT_LOADING_EMOJI_ID is undefined");
             }
-            const newButton = new ButtonBuilder();
+            newButton = new ButtonBuilder();
             newButton.setStyle(buttonComponent.style);
             newButton.setCustomId(buttonComponent.customId);
             newButton.setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID);
             newButton.setDisabled(true);
           } else {
-            const newButton = ButtonBuilder.from(buttonComponent);
+            newButton = ButtonBuilder.from(buttonComponent);
             newButton.setDisabled(true);
-            return newButton;
           }
+          return newButton;
         })
       );
       return updatedActionRow;
