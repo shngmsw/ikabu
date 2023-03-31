@@ -32,6 +32,7 @@ jobs:
           script: |
             cd ${{ secrets.SERVER_DEPLOY_DIR }}
             npm install
+            npm run compile
 
       - name: restart-service
         uses: appleboy/ssh-action@master
