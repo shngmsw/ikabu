@@ -1,51 +1,51 @@
-import { EmbedBuilder } from "discord.js";
-import { searchMemberById } from "./manager/member_manager.js";
+import { EmbedBuilder } from 'discord.js';
+import { searchMemberById } from './manager/member_manager.js';
 
 export async function composeEmbed(message: $TSFixMe, url: $TSFixMe) {
-  const embed = new EmbedBuilder();
-  if (isNotEmpty(message.content)) {
-    embed.setDescription(message.content);
-  }
-  embed.setTimestamp(message.createdAt);
-  const member = await searchMemberById(message.guild, message.author.id);
-  if (isNotEmpty(url)) {
-    embed.setTitle("引用元へジャンプ");
-    embed.setURL(url);
-  }
-  if (isNotEmpty(member)) {
-    embed.setAuthor({
-      name: member.displayName,
-      iconURL: member.displayAvatarURL(),
+    const embed = new EmbedBuilder();
+    if (isNotEmpty(message.content)) {
+        embed.setDescription(message.content);
+    }
+    embed.setTimestamp(message.createdAt);
+    const member = await searchMemberById(message.guild, message.author.id);
+    if (isNotEmpty(url)) {
+        embed.setTitle('引用元へジャンプ');
+        embed.setURL(url);
+    }
+    if (isNotEmpty(member)) {
+        embed.setAuthor({
+            name: member.displayName,
+            iconURL: member.displayAvatarURL(),
+        });
+    } else {
+        embed.setAuthor({
+            name: '不明なユーザー',
+            iconURL: 'https://cdn.discordapp.com/embed/avatars/0.png',
+        });
+    }
+    embed.setFooter({
+        text: message.channel.name,
+        iconURL: message.guild.iconURL(),
     });
-  } else {
-    embed.setAuthor({
-      name: "不明なユーザー",
-      iconURL: "https://cdn.discordapp.com/embed/avatars/0.png",
-    });
-  }
-  embed.setFooter({
-    text: message.channel.name,
-    iconURL: message.guild.iconURL(),
-  });
-  if (message.attachments.size > 0) {
-    message.attachments.forEach((Attachment: $TSFixMe) => {
-      embed.setImage(Attachment.proxyURL);
-    });
-  }
-  return embed;
+    if (message.attachments.size > 0) {
+        message.attachments.forEach((Attachment: $TSFixMe) => {
+            embed.setImage(Attachment.proxyURL);
+        });
+    }
+    return embed;
 }
 
 export function rgbToHex(r: $TSFixMe, g: $TSFixMe, b: $TSFixMe) {
-  [r, g, b]
-    .map((x) => {
-      const hex = x.toString(16);
-      return hex.length === 1 ? "0" + hex : hex;
-    })
-    .join("");
+    [r, g, b]
+        .map((x) => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        })
+        .join('');
 }
 
 export function isInteger(x: $TSFixMe) {
-  return Math.round(x) === x;
+    return Math.round(x) === x;
 }
 
 /**
@@ -53,22 +53,22 @@ export function isInteger(x: $TSFixMe) {
  * @param obj {any} - Target Object
  */
 export function isEmpty(obj: $TSFixMe) {
-  if (obj === undefined || obj === null) {
-    return true;
-  } else if (Object.prototype.toString.call(obj).slice(8, -1) === "String") {
-    if (obj === "") {
-      return true;
+    if (obj === undefined || obj === null) {
+        return true;
+    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'String') {
+        if (obj === '') {
+            return true;
+        }
+    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'Array') {
+        if (obj.length === 0) {
+            return true;
+        }
+    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'Object') {
+        if (!Object.keys(obj).length) {
+            return true;
+        }
     }
-  } else if (Object.prototype.toString.call(obj).slice(8, -1) === "Array") {
-    if (obj.length === 0) {
-      return true;
-    }
-  } else if (Object.prototype.toString.call(obj).slice(8, -1) === "Object") {
-    if (!Object.keys(obj).length) {
-      return true;
-    }
-  }
-  return false;
+    return false;
 }
 
 /**
@@ -76,7 +76,7 @@ export function isEmpty(obj: $TSFixMe) {
  * @param obj {any} - Target Object
  */
 export function isNotEmpty(obj: $TSFixMe) {
-  return !isEmpty(obj);
+    return !isEmpty(obj);
 }
 
 /**
@@ -86,33 +86,33 @@ export function isNotEmpty(obj: $TSFixMe) {
  * @returns メンション文字列を格納した配列を返す
  */
 export function getMentionsFromMessage(message: $TSFixMe, id_only = false) {
-  const content = message.content;
-  const matched = content.match(/<@\d{18,19}>/g);
-  let results = [];
-  if (id_only) {
-    for (let mention of matched) {
-      let delete_lead = mention.slice(2); // remove <@
-      let delete_backward = delete_lead.slice(0, -1); // remove >
-      results.push(delete_backward);
+    const content = message.content;
+    const matched = content.match(/<@\d{18,19}>/g);
+    const results = [];
+    if (id_only) {
+        for (const mention of matched) {
+            const delete_lead = mention.slice(2); // remove <@
+            const delete_backward = delete_lead.slice(0, -1); // remove >
+            results.push(delete_backward);
+        }
+        return results;
     }
-    return results;
-  }
-  return matched;
+    return matched;
 }
 
 export function randomSelect(array: $TSFixMe, num: $TSFixMe) {
-  var a = array;
-  var t: $TSFixMe = [];
-  var r = [];
-  var l = a.length;
-  var n = num < l ? num : l;
-  while (n-- > 0) {
-    var i = (Math.random() * l) | 0;
-    r[n] = t[i] || a[i];
-    --l;
-    t[i] = t[l] || a[l];
-  }
-  return r;
+    const a = array;
+    const t: $TSFixMe = [];
+    const r = [];
+    let l = a.length;
+    let n = num < l ? num : l;
+    while (n-- > 0) {
+        const i = (Math.random() * l) | 0;
+        r[n] = t[i] || a[i];
+        --l;
+        t[i] = t[l] || a[l];
+    }
+    return r;
 }
 
 /**
@@ -121,12 +121,12 @@ export function randomSelect(array: $TSFixMe, num: $TSFixMe) {
  * @returns boolean
  */
 export function randomBool(probability: $TSFixMe) {
-  const num = Math.random();
-  if (num < probability) {
-    return true;
-  } else {
-    return false;
-  }
+    const num = Math.random();
+    if (num < probability) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /*
@@ -139,25 +139,25 @@ export function randomBool(probability: $TSFixMe) {
  *
  */
 export function dateAdd(dt: $TSFixMe, dd: $TSFixMe, u: $TSFixMe) {
-  var y = dt.getFullYear();
-  var m = dt.getMonth();
-  var d = dt.getDate();
-  var r = new Date(y, m, d);
-  if (typeof u === "undefined" || u == "D") {
-    r.setDate(d + dd);
-  } else if (u == "M") {
-    m += dd;
-    // @ts-expect-error TS(2345): Argument of type 'number' is not assignable to par... Remove this comment to see the full error message
-    y += parseInt(m / 12);
-    m %= 12;
-    var e = new Date(y, m + 1, 0).getDate();
-    r.setFullYear(y, m, d > e ? e : d);
-  }
-  return r;
+    let y = dt.getFullYear();
+    let m = dt.getMonth();
+    const d = dt.getDate();
+    const r = new Date(y, m, d);
+    if (typeof u === 'undefined' || u == 'D') {
+        r.setDate(d + dd);
+    } else if (u == 'M') {
+        m += dd;
+        // @ts-expect-error TS(2345): Argument of type 'number' is not assignable to par... Remove this comment to see the full error message
+        y += parseInt(m / 12);
+        m %= 12;
+        const e = new Date(y, m + 1, 0).getDate();
+        r.setFullYear(y, m, d > e ? e : d);
+    }
+    return r;
 }
 
 export async function sleep(sec: $TSFixMe) {
-  return new Promise((resolve) => setTimeout(resolve, sec * 1000));
+    return new Promise((resolve) => setTimeout(resolve, sec * 1000));
 }
 
 /*
@@ -175,105 +175,95 @@ export async function sleep(sec: $TSFixMe) {
  *      false: 初日不算入
  *
  */
-export function dateDiff(
-  date1: Date,
-  date2: Date,
-  u: $TSFixMe,
-  f?: $TSFixMe
-) {
-  if (typeof date2 == "undefined") date2 = new Date();
-  if (f) date1 = dateAdd(date1, -1, "D");
-  var y1 = date1.getFullYear();
-  var m1 = date1.getMonth();
-  var y2 = date2.getFullYear();
-  var m2 = date2.getMonth();
-  var dt3,
-    r = 0;
-  if (typeof u === "undefined" || u == "D") {
-    r = Math.floor((Number(date2) - Number(date1)) / (24 * 3600 * 1000));
-  } else if (u == "M") {
-    r = y2 * 12 + m2 - (y1 * 12 + m1);
-    dt3 = dateAdd(date1, r, "M");
-    if (dateDiff(dt3, date2, "D") < 0) --r;
-  } else if (u == "Y") {
-    r = Math.floor(dateDiff(date1, date2, "M") / 12);
-  } else if (u == "YM") {
-    r = dateDiff(date1, date2, "M") % 12;
-  } else if (u == "MD") {
-    r = dateDiff(date1, date2, "M");
-    dt3 = dateAdd(date1, r, "M");
-    r = dateDiff(dt3, date2, "D");
-  } else if (u == "YD") {
-    r = dateDiff(date1, date2, "Y");
-    dt3 = dateAdd(date1, r * 12, "M");
-    r = dateDiff(dt3, date2, "D");
-  }
-  return r;
+export function dateDiff(date1: Date, date2: Date, u: $TSFixMe, f?: $TSFixMe) {
+    if (typeof date2 == 'undefined') date2 = new Date();
+    if (f) date1 = dateAdd(date1, -1, 'D');
+    const y1 = date1.getFullYear();
+    const m1 = date1.getMonth();
+    const y2 = date2.getFullYear();
+    const m2 = date2.getMonth();
+    let dt3,
+        r = 0;
+    if (typeof u === 'undefined' || u == 'D') {
+        r = Math.floor((Number(date2) - Number(date1)) / (24 * 3600 * 1000));
+    } else if (u == 'M') {
+        r = y2 * 12 + m2 - (y1 * 12 + m1);
+        dt3 = dateAdd(date1, r, 'M');
+        if (dateDiff(dt3, date2, 'D') < 0) --r;
+    } else if (u == 'Y') {
+        r = Math.floor(dateDiff(date1, date2, 'M') / 12);
+    } else if (u == 'YM') {
+        r = dateDiff(date1, date2, 'M') % 12;
+    } else if (u == 'MD') {
+        r = dateDiff(date1, date2, 'M');
+        dt3 = dateAdd(date1, r, 'M');
+        r = dateDiff(dt3, date2, 'D');
+    } else if (u == 'YD') {
+        r = dateDiff(date1, date2, 'Y');
+        dt3 = dateAdd(date1, r * 12, 'M');
+        r = dateDiff(dt3, date2, 'D');
+    }
+    return r;
 }
 /*
  *  経過時間（分）の計算
  */
 export function datetimeDiff(date1: $TSFixMe, date2: $TSFixMe) {
-  const diff = date2.getTime() - date1.getTime();
-  const diffMinutes = Math.abs(diff) / (60 * 1000);
-  return diffMinutes;
+    const diff = date2.getTime() - date1.getTime();
+    const diffMinutes = Math.abs(diff) / (60 * 1000);
+    return diffMinutes;
 }
 
 export function getCloseEmbed() {
-  const embed = new EmbedBuilder();
-  embed.setDescription(`↑の募集 〆`);
-  return embed;
+    const embed = new EmbedBuilder();
+    embed.setDescription(`↑の募集 〆`);
+    return embed;
 }
 
 const recruit_command = {
-  プラベ募集: "`/プラベ募集 recruit` or `/プラベ募集 button`",
-  リグマ募集: "`/リグマ募集 now` or `/リグマ募集 next`",
-  ナワバリ募集: "`/ナワバリ募集 now` or `/ナワバリ募集 next`",
-  バンカラ募集: "`/バンカラ募集 now` or `/バンカラ募集 next`",
-  フェス募集: "`/〇〇陣営 now` or `/〇〇陣営 next`",
-  サーモン募集: "`/サーモンラン募集 run`",
-  別ゲー募集:
-    "`/別ゲー募集 apex` or `/別ゲー募集 overwatch` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`",
+    プラベ募集: '`/プラベ募集 recruit` or `/プラベ募集 button`',
+    リグマ募集: '`/リグマ募集 now` or `/リグマ募集 next`',
+    ナワバリ募集: '`/ナワバリ募集 now` or `/ナワバリ募集 next`',
+    バンカラ募集: '`/バンカラ募集 now` or `/バンカラ募集 next`',
+    フェス募集: '`/〇〇陣営 now` or `/〇〇陣営 next`',
+    サーモン募集: '`/サーモンラン募集 run`',
+    別ゲー募集: '`/別ゲー募集 apex` or `/別ゲー募集 overwatch` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`',
 };
 
 export function getCommandHelpEmbed(channelName: $TSFixMe) {
-  let commandMessage;
-  switch (channelName) {
-    case "プラベ募集":
-      commandMessage = recruit_command.プラベ募集;
-      break;
-    case "リグマ募集":
-    case "リグマ募集2":
-    case "🔰リグマ募集":
-      commandMessage = recruit_command.リグマ募集;
-      break;
-    case "ナワバリ募集":
-      commandMessage = recruit_command.ナワバリ募集;
-      break;
-    case "バンカラ募集":
-      commandMessage = recruit_command.バンカラ募集;
-      break;
-    case "フウカ募集":
-    case "ウツホ募集":
-    case "マンタロー募集":
-      commandMessage = recruit_command.フェス募集;
-      break;
-    case "サーモン募集":
-      commandMessage = recruit_command.サーモン募集;
-      break;
-    case "別ゲー募集":
-      commandMessage = recruit_command.別ゲー募集;
-      break;
+    let commandMessage;
+    switch (channelName) {
+        case 'プラベ募集':
+            commandMessage = recruit_command.プラベ募集;
+            break;
+        case 'リグマ募集':
+        case 'リグマ募集2':
+        case '🔰リグマ募集':
+            commandMessage = recruit_command.リグマ募集;
+            break;
+        case 'ナワバリ募集':
+            commandMessage = recruit_command.ナワバリ募集;
+            break;
+        case 'バンカラ募集':
+            commandMessage = recruit_command.バンカラ募集;
+            break;
+        case 'フウカ募集':
+        case 'ウツホ募集':
+        case 'マンタロー募集':
+            commandMessage = recruit_command.フェス募集;
+            break;
+        case 'サーモン募集':
+            commandMessage = recruit_command.サーモン募集;
+            break;
+        case '別ゲー募集':
+            commandMessage = recruit_command.別ゲー募集;
+            break;
 
-    default:
-      break;
-  }
+        default:
+            break;
+    }
 
-  const embed = new EmbedBuilder();
-  embed.setDescription(
-    "募集コマンドは " +
-    `${commandMessage}` +
-    `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`
-  );
-  return embed;
+    const embed = new EmbedBuilder();
+    embed.setDescription('募集コマンドは ' + `${commandMessage}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
+    return embed;
 }

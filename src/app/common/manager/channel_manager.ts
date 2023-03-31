@@ -1,7 +1,6 @@
-import { ChannelType } from "discord.js";
-import { log4js_obj } from "../../../log4js_settings";
+import { log4js_obj } from '../../../log4js_settings';
 
-const logger = log4js_obj.getLogger("ChannelManager");
+const logger = log4js_obj.getLogger('ChannelManager');
 
 /**
  * チャンネルを作成し，作成したチャンネルのIDを返す．
@@ -12,47 +11,30 @@ const logger = log4js_obj.getLogger("ChannelManager");
  * @param {ChannelType} channelType チャンネルタイプ(discord.jsのenumを使用)
  * @returns チャンネルID
  */
-export async function createChannel(
-  guild: $TSFixMe,
-  categoryId: $TSFixMe,
-  channelName: $TSFixMe,
-  channelType: $TSFixMe
-) {
-  try {
-    if (channelName == "") {
-      return null;
-    }
+export async function createChannel(guild: $TSFixMe, categoryId: $TSFixMe, channelName: $TSFixMe, channelType: $TSFixMe) {
+    try {
+        if (channelName == '') {
+            return null;
+        }
 
-    var parentId = categoryId;
-    if (categoryId == "") {
-      parentId = null;
+        let parentId = categoryId;
+        if (categoryId == '') {
+            parentId = null;
+        }
+        let channel;
+        if ((await searchChannelIdByName(guild, channelName, channelType, parentId)) != null) {
+            return await searchChannelIdByName(guild, channelName, channelType, parentId);
+        } else {
+            channel = await guild.channels.create({
+                name: channelName,
+                type: channelType,
+                parent: parentId,
+            });
+            return channel.id;
+        }
+    } catch (error) {
+        logger.error(error);
     }
-    var channel;
-    if (
-      (await searchChannelIdByName(
-        guild,
-        channelName,
-        channelType,
-        parentId
-      )) != null
-    ) {
-      return await searchChannelIdByName(
-        guild,
-        channelName,
-        channelType,
-        parentId
-      );
-    } else {
-      channel = await guild.channels.create({
-        name: channelName,
-        type: channelType,
-        parent: parentId,
-      });
-      return channel.id;
-    }
-  } catch (error) {
-    logger.error(error);
-  }
 }
 
 /**
@@ -63,36 +45,24 @@ export async function createChannel(
  * @param {string} categoryId カテゴリID or null
  * @returns チャンネルID
  */
-export async function searchChannelIdByName(
-  guild: $TSFixMe,
-  channelName: $TSFixMe,
-  channelType: $TSFixMe,
-  categoryId: $TSFixMe
-) {
-  try {
-    var channel;
-    const channels = await guild.channels.fetch();
-    if (categoryId != null) {
-      channel = channels.find(
-        (c: $TSFixMe) =>
-          c.name == channelName &&
-          c.type == channelType &&
-          c.parent == categoryId
-      );
-    } else {
-      channel = channels.find(
-        (c: $TSFixMe) => c.name == channelName && c.type == channelType
-      );
-    }
+export async function searchChannelIdByName(guild: $TSFixMe, channelName: $TSFixMe, channelType: $TSFixMe, categoryId: $TSFixMe) {
+    try {
+        let channel;
+        const channels = await guild.channels.fetch();
+        if (categoryId != null) {
+            channel = channels.find((c: $TSFixMe) => c.name == channelName && c.type == channelType && c.parent == categoryId);
+        } else {
+            channel = channels.find((c: $TSFixMe) => c.name == channelName && c.type == channelType);
+        }
 
-    if (channel != null) {
-      return channel.id;
-    } else {
-      return null;
+        if (channel != null) {
+            return channel.id;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        logger.error(error);
     }
-  } catch (error) {
-    logger.error(error);
-  }
 }
 
 /**
@@ -102,11 +72,11 @@ export async function searchChannelIdByName(
  * @returns チャンネルオブジェクト
  */
 export async function searchChannelById(guild: $TSFixMe, channelId: $TSFixMe) {
-  var channel;
-  try {
-    channel = await guild.channels.fetch(channelId);
-  } catch (error) {
-    logger.warn("channel missing");
-  }
-  return channel;
+    let channel;
+    try {
+        channel = await guild.channels.fetch(channelId);
+    } catch (error) {
+        logger.warn('channel missing');
+    }
+    return channel;
 }

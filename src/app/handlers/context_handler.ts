@@ -1,9 +1,9 @@
-import { buttonEnable } from "../feat-admin/button_enabler/enable_button";
-import { commandNames } from "../../constant";
+import { buttonEnable } from '../feat-admin/button_enabler/enable_button';
+import { commandNames } from '../../constant';
 
 export async function call(interaction: $TSFixMe) {
-  if (interaction.commandName == commandNames.buttonEnabler) {
-    buttonEnable(interaction);
-  }
-  return;
+    if (interaction.commandName == commandNames.buttonEnabler) {
+        buttonEnable(interaction);
+    }
+    return;
 }
