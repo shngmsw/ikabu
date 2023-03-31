@@ -163,8 +163,8 @@ export async function sleep(sec: $TSFixMe) {
 /*
  *  経過年・月・日数の計算
  *
- *  dt1: 開始年月日の Date オブジェクト
- *  dt2: 終了年月日の Date オブジェクト
+ *  date1: 開始年月日の Date オブジェクト
+ *  date2: 終了年月日の Date オブジェクト
  *    u:  'Y': 経過年数を求める
  *        'M': 経過月数を求める
  *        'D': 経過日数を求める
@@ -176,55 +176,45 @@ export async function sleep(sec: $TSFixMe) {
  *
  */
 export function dateDiff(
-  dt1: $TSFixMe,
-  dt2: $TSFixMe,
+  date1: Date,
+  date2: Date,
   u: $TSFixMe,
-  f: $TSFixMe
+  f?: $TSFixMe
 ) {
-  if (typeof dt2 == "undefined") dt2 = new Date();
-  if (f) dt1 = dateAdd(dt1, -1, "D");
-  var y1 = dt1.getFullYear();
-  var m1 = dt1.getMonth();
-  var y2 = dt2.getFullYear();
-  var m2 = dt2.getMonth();
+  if (typeof date2 == "undefined") date2 = new Date();
+  if (f) date1 = dateAdd(date1, -1, "D");
+  var y1 = date1.getFullYear();
+  var m1 = date1.getMonth();
+  var y2 = date2.getFullYear();
+  var m2 = date2.getMonth();
   var dt3,
     r = 0;
   if (typeof u === "undefined" || u == "D") {
-    // @ts-expect-error TS(2345): Argument of type 'number' is not assignable to par... Remove this comment to see the full error message
-    r = parseInt((dt2 - dt1) / (24 * 3600 * 1000));
+    r = Math.floor((Number(date2) - Number(date1)) / (24 * 3600 * 1000));
   } else if (u == "M") {
     r = y2 * 12 + m2 - (y1 * 12 + m1);
-    dt3 = dateAdd(dt1, r, "M");
-    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
-    if (dateDiff(dt3, dt2, "D") < 0) --r;
+    dt3 = dateAdd(date1, r, "M");
+    if (dateDiff(dt3, date2, "D") < 0) --r;
   } else if (u == "Y") {
-    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
-    r = parseInt(dateDiff(dt1, dt2, "M") / 12);
+    r = Math.floor(dateDiff(date1, date2, "M") / 12);
   } else if (u == "YM") {
-    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
-    r = dateDiff(dt1, dt2, "M") % 12;
+    r = dateDiff(date1, date2, "M") % 12;
   } else if (u == "MD") {
-    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
-    r = dateDiff(dt1, dt2, "M");
-    dt3 = dateAdd(dt1, r, "M");
-    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
-    r = dateDiff(dt3, dt2, "D");
+    r = dateDiff(date1, date2, "M");
+    dt3 = dateAdd(date1, r, "M");
+    r = dateDiff(dt3, date2, "D");
   } else if (u == "YD") {
-    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
-    r = dateDiff(dt1, dt2, "Y");
-    dt3 = dateAdd(dt1, r * 12, "M");
-    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
-    r = dateDiff(dt3, dt2, "D");
+    r = dateDiff(date1, date2, "Y");
+    dt3 = dateAdd(date1, r * 12, "M");
+    r = dateDiff(dt3, date2, "D");
   }
   return r;
 }
 /*
  *  経過時間（分）の計算
  */
-export function datetimeDiff(dt1: $TSFixMe, dt2: $TSFixMe) {
-  // @ts-expect-error TS(2304): Cannot find name 'diff'.
-  diff = dt2.getTime() - dt1.getTime();
-  // @ts-expect-error TS(2304): Cannot find name 'diff'.
+export function datetimeDiff(date1: $TSFixMe, date2: $TSFixMe) {
+  const diff = date2.getTime() - date1.getTime();
   const diffMinutes = Math.abs(diff) / (60 * 1000);
   return diffMinutes;
 }
