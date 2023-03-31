@@ -151,7 +151,7 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
             }
         }
     } catch (err) {
-        handleError(err, { interaction });
+        handleError(err);
     }
 }
 
@@ -241,7 +241,7 @@ export async function cancel(interaction: $TSFixMe, params: $TSFixMe) {
             }
         }
     } catch (err) {
-        handleError(err, { interaction });
+        handleError(err);
     }
 }
 
@@ -316,7 +316,7 @@ export async function del(interaction: $TSFixMe, params: $TSFixMe) {
             });
         }
     } catch (err) {
-        handleError(err, { interaction });
+        handleError(err);
     }
 }
 
@@ -414,7 +414,7 @@ export async function close(interaction: $TSFixMe, params: $TSFixMe) {
             });
         }
     } catch (err) {
-        handleError(err, { interaction });
+        handleError(err);
     }
 }
 
@@ -505,7 +505,7 @@ export async function joinNotify(interaction: $TSFixMe, params: $TSFixMe) {
             }
         }
     } catch (err) {
-        handleError(err, { interaction });
+        handleError(err);
     }
 }
 
@@ -561,7 +561,7 @@ export async function cancelNotify(interaction: $TSFixMe, params: $TSFixMe) {
             }
         }
     } catch (err) {
-        handleError(err, { interaction });
+        handleError(err);
     }
 }
 
@@ -628,7 +628,7 @@ export async function closeNotify(interaction: $TSFixMe, params: $TSFixMe) {
             });
         }
     } catch (err) {
-        handleError(err, { interaction });
+        handleError(err);
     }
 }
 
@@ -647,7 +647,7 @@ export async function unlock(interaction: $TSFixMe, params: $TSFixMe) {
             components: [disableUnlockButton()],
         });
     } catch (err) {
-        handleError(err, { interaction });
+        handleError(err);
     }
 }
 
