@@ -1,21 +1,26 @@
 {
-  "plugins": ["prettier"],
-  "rules": {
-    "prettier/prettier": [
-      "error",
-      {
-        "printWidth": 140,
-        "tabWidth": 4,
-        "useTabs": false,
-        "semi": true,
-        "singleQuote": true,
-        "trailingComma": "all",
-        "bracketSpacing": true,
-        "arrowParens": "always"
-      }
-    ]
-  },
-  "parserOptions": {
-    "ecmaVersion": 2018
-  }
+    "env": {
+        "es2021": true,
+        "node": true
+        // "browser": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "prettier",
+        "prettier/@typescript-eslint"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "sourceType": "module",
+        "project": "./tsconfig.json"
+    },
+    "plugins": ["@typescript-eslint"],
+    "rules": {
+        // お好みで設定ください
+        "@typescript-eslint/no-explicit-any": 1,
+        "@typescript-eslint/no-non-null-assertion": 1,
+        "prettier/prettier": "error"
+    },
+    "root": true
 }
