@@ -1,10 +1,8 @@
 node_modules/*
-launch.json
 .env
 local/*
 package-lock.json
 .history/
 ikabu.code-workspace
-.vscode/settings.json
 ikabu.sqlite3
 build/
