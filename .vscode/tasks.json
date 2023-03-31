@@ -8,6 +8,10 @@
         "problemMatcher": [
             "$tsc"
         ],
+        "presentation": {
+            "reveal": "silent",
+            "clear": true
+          }
       }
     ]
 }
