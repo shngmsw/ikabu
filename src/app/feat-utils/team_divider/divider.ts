@@ -304,7 +304,7 @@ export async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
       return;
     }
 
-    const participants = arrayShuffle(memberList);
+    const participants: TeamDivider[] = arrayShuffle(memberList);
 
     for (const member of participants) {
       const teamDivider = new TeamDivider(
@@ -537,8 +537,7 @@ async function matching(
     const lowerHalfParticipants = orderByWinRateArray.slice(
       orderByWinRateArray.length / 2
     );
-    for (const i in upperHalfParticipants) {
-      // @ts-expect-error TS(2362): The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
+    for (let i = 0; i < upperHalfParticipants.length; i++) {
       if (i % 2 == 0) {
         await TeamDividerService.setTeam(
           messageId,
@@ -556,8 +555,7 @@ async function matching(
       }
     }
     // 下位半分は偶数をbravo、奇数をalfa
-    for (const i in lowerHalfParticipants) {
-      // @ts-expect-error TS(2362): The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
+    for (let i = 0; i < lowerHalfParticipants.length; i++) {
       if (i % 2 == 0) {
         await TeamDividerService.setTeam(
           messageId,

@@ -37,14 +37,14 @@ export class TeamDividerService {
     let results = (await db.all(
       `SELECT
           message_id,
-          member_id,t
+          member_id,
           member_name,
           team,
           match_num,
           joined_match_count,
           win,
-          CASE WHEN force_spectate = 1 THEN true ELSE false END,
-          CASE WHEN hide_win = 1 THEN true ELSE false END,
+          CASE WHEN force_spectate = 1 THEN true ELSE false END as force_spectate,
+          CASE WHEN hide_win = 1 THEN true ELSE false END as hide_win,
           0 as win_rate,
           created_at
       FROM
@@ -130,8 +130,8 @@ export class TeamDividerService {
               match_num,
               joined_match_count,
               win,
-              CASE WHEN force_spectate = 1 THEN true ELSE false END,
-              CASE WHEN hide_win = 1 THEN true ELSE false END,
+              CASE WHEN force_spectate = 1 THEN true ELSE false END as force_spectate,
+              CASE WHEN hide_win = 1 THEN true ELSE false END as hide_win,
               0 as win_rate,
               created_at
           FROM
@@ -154,6 +154,7 @@ export class TeamDividerService {
    */
   static async selectAllMemberFromDB(message_id: string, match_num: number) {
     const db = DBCommon.open();
+    db.all = util.promisify(db.all);
     let results = (await db.all(
       `SELECT
             message_id,
@@ -163,8 +164,8 @@ export class TeamDividerService {
             match_num,
             joined_match_count,
             win,
-            CASE WHEN force_spectate = 1 THEN true ELSE false END,
-            CASE WHEN hide_win = 1 THEN true ELSE false END,
+            CASE WHEN force_spectate = 1 THEN true ELSE false END as force_spectate,
+            CASE WHEN hide_win = 1 THEN true ELSE false END as hide_win,
             0 as win_rate,
             created_at
         FROM
@@ -345,8 +346,8 @@ export class TeamDividerService {
           team_divider
       WHERE
           message_id = ${message_id}
-      and team = ${team}
-      and match_num = ${match_num}
+          and team = ${team}
+          and match_num = ${match_num}
       order by
           created_at
         `
@@ -363,8 +364,28 @@ export class TeamDividerService {
    */
   static async getForceSpectate(message_id: string, match_num: number) {
     const db = DBCommon.open();
+    db.all = util.promisify(db.all);
     let results = await db.all(
-      `SELECT * FROM team_divider WHERE message_id = ${message_id} and force_spectate = true and match_num = ${match_num} order by created_at`
+      `SELECT
+            message_id,
+            member_id,
+            member_name,
+            team,
+            joined_match_count,
+            win,
+            force_spectate,
+            hide_win,
+            CASE
+                WHEN joined_match_count = 0 then 0
+                ELSE(win * 1.0) / joined_match_count
+            END as win_rate
+      FROM
+          team_divider
+      WHERE
+          message_id = ${message_id}
+          and force_spectate = true
+          and match_num = ${match_num} 
+      order by created_at`
     );
     DBCommon.close();
     return results;
@@ -383,6 +404,7 @@ export class TeamDividerService {
     team_num: number
   ) {
     const db = DBCommon.open();
+    db.all = util.promisify(db.all);
     let results = await db.all(
       `select
             message_id,
@@ -401,7 +423,7 @@ export class TeamDividerService {
             and match_num = ${match_num}
         order by
             joined_match_count
-        limit ${team_num};`
+        limit ${team_num} * 2;`
     );
     DBCommon.close();
     return results;
@@ -409,6 +431,7 @@ export class TeamDividerService {
 
   static async getRecruitMessageByAuthorId(author_id: string) {
     const db = DBCommon.open();
+    db.all = util.promisify(db.all);
     let results = await db.all(
       `select message_id from recruit where author_id = ${author_id}`
     );
