@@ -2,7 +2,7 @@ name: git-pr-release
 on:
   push:
     branches:
-    - stg
+      - stg
 jobs:
   git-pr-release:
     runs-on: ubuntu-latest

@@ -1,6 +1,11 @@
 {
   "git.ignoreLimitWarning": true,
   "files.eol": "\n",
-  "editor.formatOnPaste": false,
-  "cSpell.words": ["splatoon", "Valorant"]
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  }
 }
