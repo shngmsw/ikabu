@@ -10,5 +10,3 @@ logs
 .DS_Store
 .cz-config.js
 .eslintrc.js
-
-build/
