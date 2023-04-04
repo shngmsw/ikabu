@@ -172,7 +172,7 @@ async function sendRegularMatch(
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
     let channel_name = '🔉 VC指定なし';
-    if (reserve_channel != null) {
+    if (reserve_channel instanceof VoiceChannel) {
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
@@ -206,7 +206,7 @@ async function sendRegularMatch(
         if (recruit_channel === null) {
             throw new Error('recruit_channel is null.');
         }
-        const mention = '@everyone';
+        const mention = `<@&${process.env.ROLE_ID_RECRUIT_REGULAR}>`;
         const image1_message = await interaction.editReply({
             content: txt,
             files: [recruit],

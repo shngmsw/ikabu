@@ -92,14 +92,14 @@ function monsterHunterRise(
     host_member: GuildMember,
     roles: Collection<string, Role>,
 ) {
-    const role_id = roles.find((role: Role) => role.name === 'ハンター');
-    if (role_id === undefined) {
+    const role = roles.find((role: Role) => role.name === 'ハンター');
+    if (role === undefined) {
         sendErrorMessage(recruit_channel);
         return;
     }
     const title = 'MONSTER HUNTER RISE';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
-    const mention = role_id.toString();
+    const mention = role.toString();
     const txt = `<@${host_member.id}>` + '**たんのモンハンライズ募集**\n';
     const color = '#b71008';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak.jpg';
@@ -114,14 +114,14 @@ function apexLegends(
     host_member: GuildMember,
     roles: Collection<string, Role>,
 ) {
-    const role_id = roles.find((role: Role) => role.name === 'レジェンド');
-    if (role_id === undefined) {
+    const role = roles.find((role: Role) => role.name === 'レジェンド');
+    if (role === undefined) {
         sendErrorMessage(recruit_channel);
         return;
     }
     const title = 'Apex Legends';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
-    const mention = role_id.toString();
+    const mention = role.toString();
     const txt = `<@${host_member.id}>` + '**たんのApexLegends募集**\n';
     const color = '#F30100';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends.jpg';
@@ -136,14 +136,14 @@ function overwatch(
     host_member: GuildMember,
     roles: Collection<string, Role>,
 ) {
-    const role_id = roles.find((role: Role) => role.name === 'ヒーロー');
-    if (role_id === undefined) {
+    const role = roles.find((role: Role) => role.name === 'ヒーロー');
+    if (role === undefined) {
         sendErrorMessage(recruit_channel);
         return;
     }
     const title = 'Overwatch2';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
-    const mention = role_id.toString();
+    const mention = role.toString();
     const txt = `<@${host_member.id}>` + '**たんのOverwatch2募集**\n';
     const color = '#ED6516';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch2.png';
@@ -158,14 +158,14 @@ function valorant(
     host_member: GuildMember,
     roles: Collection<string, Role>,
 ) {
-    const role_id = roles.find((role: Role) => role.name === 'エージェント');
-    if (role_id === undefined) {
+    const role = roles.find((role: Role) => role.name === 'エージェント');
+    if (role === undefined) {
         sendErrorMessage(recruit_channel);
         return;
     }
     const title = 'VALORANT';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
-    const mention = role_id.toString();
+    const mention = role.toString();
     const txt = `<@${host_member.id}>` + '**たんのVALORANT募集**\n';
     const color = '#FF4654';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant.jpg';
@@ -174,14 +174,14 @@ function valorant(
 }
 
 function others(interaction: ChatInputCommandInteraction, guild: Guild, recruit_channel: TextBasedChannel, host_member: GuildMember) {
-    const role_id = process.env.ROLE_ID_OTHERGAMES;
+    const role_id = process.env.ROLE_ID_RECRUIT_OTHERGAMES;
     if (role_id === undefined) {
         sendErrorMessage(recruit_channel);
         return;
     }
     const title = interaction.options.getString('ゲームタイトル') ?? 'ERROR';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
-    const mention = role_id.toString();
+    const mention = `<@&${role_id}>`;
     const txt = `<@${host_member.id}>` + `**たんの${title}募集**\n`;
     const color = '#379C30';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others.jpg';
@@ -207,9 +207,6 @@ async function sendOtherGames(
     const condition = options.getString('内容または参加条件');
 
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
-    if (!(reserve_channel instanceof VoiceChannel)) {
-        throw new Error('reserve_channel is not VoiceChannel');
-    }
 
     const embed = new EmbedBuilder()
         .setAuthor({

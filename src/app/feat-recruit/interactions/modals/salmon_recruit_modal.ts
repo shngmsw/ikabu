@@ -60,7 +60,7 @@ export async function sendSalmonRun(
             throw new Error('recruit_channel is null.');
         }
 
-        const mention = '@everyone';
+        const mention = `<@&${process.env.ROLE_ID_RECRUIT_SALMON}>`;
         const image1_message = await interaction.editReply({
             content: txt,
             files: [recruit],

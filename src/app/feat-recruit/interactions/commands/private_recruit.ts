@@ -12,10 +12,8 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction) {
 
     const options = interaction.options;
 
-    // 募集がfollowUpでないとリグマと同じfunctionでeditできないため
-    await interaction.deferReply();
-
     if (options.getSubcommand() === 'recruit') {
+        await interaction.deferReply();
         await sendPrivateRecruit(interaction, options);
     } else if (options.getSubcommand() === 'button') {
         await sendNotification(interaction);
@@ -29,7 +27,7 @@ async function sendPrivateRecruit(
     const start_time = interaction.options.getString('開始時刻') ?? 'ERROR';
     const time = interaction.options.getString('所要時間') ?? 'ERROR';
     const recruitNumText = options.getString('募集人数') ?? 'ERROR';
-    const condition = options.getString('内容または参加条件') ?? 'ERROR';
+    const condition = options.getString('内容または参加条件') ?? 'なし';
     const logo = 'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
 
     const guild = await interaction.guild?.fetch();
@@ -68,7 +66,7 @@ async function sendPrivateRecruit(
             },
             {
                 name: 'プラベ内容または参加条件',
-                value: condition == null ? 'なし' : condition,
+                value: condition,
             },
         ])
         .setColor('#5900b7')
@@ -81,7 +79,7 @@ async function sendPrivateRecruit(
             embeds: [embed],
         });
 
-        const mention = '@everyone';
+        const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
         const sentMessage = await recruit_channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
@@ -113,8 +111,9 @@ async function sendPrivateRecruit(
 }
 
 async function sendNotification(interaction: ChatInputCommandInteraction) {
-    const mention = '@everyone';
+    const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
     const guild = await interaction.guild?.fetch();
+    await interaction.deferReply({ ephemeral: true });
     if (guild === undefined) {
         throw new Error('guild cannot fetch.');
     }
@@ -131,9 +130,8 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
     });
     // ピン留め
     sentMessage.pin();
-    await interaction.followUp({
+    await interaction.editReply({
         content: '募集完了でし！参加者が来るまで気長に待つでし！',
-        ephemeral: true,
     });
     // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
     sentMessage.edit({ components: [notifyActionRow(host_member.id)] });

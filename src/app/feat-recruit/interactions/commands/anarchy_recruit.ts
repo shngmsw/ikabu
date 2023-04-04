@@ -104,7 +104,8 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
 
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
-    let mention = '@everyone';
+
+    let mention = `<@&${process.env.ROLE_ID_RECRUIT_ANARCHY}>`;
     // 募集条件がランクの場合はウデマエロールにメンション
     if (rank !== undefined && rank !== null) {
         const mention_id = await searchRoleIdByName(guild, rank);
@@ -227,7 +228,7 @@ async function sendAnarchyMatch(
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
     let channel_name = '🔉 VC指定なし';
-    if (isNotEmpty(reserve_channel) && reserve_channel instanceof VoiceChannel) {
+    if (reserve_channel instanceof VoiceChannel) {
         channel_name = '🔉 ' + reserve_channel.name;
     }
 

@@ -88,13 +88,14 @@ export async function sendAnarchyMatch(
             throw new Error('recruit_channel is null.');
         }
 
+        const mention = `<@&${process.env.ROLE_ID_RECRUIT_ANARCHY}>`;
         const image1_message = await interaction.editReply({
             content: txt,
             files: [recruit],
         });
         const image2_message = await recruit_channel.send({ files: [rule] });
         const sentMessage = await recruit_channel.send({
-            content: '@everyone ボタンを押して参加表明するでし！',
+            content: mention + ' ボタンを押して参加表明するでし！',
         });
 
         sentMessage.edit({ components: [recruitActionRow(image1_message)] });

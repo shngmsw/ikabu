@@ -44,7 +44,7 @@ export async function sendRegularMatch(
             throw new Error('recruit_channel is null.');
         }
 
-        const mention = '@everyone';
+        const mention = `<@&${process.env.ROLE_ID_RECRUIT_REGULAR}>`;
         const image1_message = await interaction.editReply({
             content: txt,
             files: [recruit],

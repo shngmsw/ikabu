@@ -164,12 +164,9 @@ async function sendFesMatch(
     }
 
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
-    if (!(reserve_channel instanceof VoiceChannel)) {
-        throw new Error('reserve_channel is not VoiceChannel');
-    }
 
     let channel_name = '🔉 VC指定なし';
-    if (reserve_channel != null) {
+    if (reserve_channel instanceof VoiceChannel) {
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
