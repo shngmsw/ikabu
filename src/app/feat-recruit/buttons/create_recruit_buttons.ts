@@ -1,31 +1,31 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message } from 'discord.js';
 import { URLSearchParams } from 'url';
 import { isNotEmpty } from '../../common/others';
 
-export function recruitDeleteButton(msg: $TSFixMe, image1_message: $TSFixMe, image2_message: $TSFixMe) {
+export function recruitDeleteButton(msg: Message, image1_message: Message, image2_message: Message) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
     deleteParams.append('mid', msg.id);
     deleteParams.append('imid1', image1_message.id);
     deleteParams.append('imid2', image2_message.id);
 
-    const button = new ActionRowBuilder();
+    const button = new ActionRowBuilder<ButtonBuilder>();
     button.addComponents([new ButtonBuilder().setCustomId(deleteParams.toString()).setLabel('募集を削除').setStyle(ButtonStyle.Danger)]);
     return button;
 }
 
-export function embedRecruitDeleteButton(msg: $TSFixMe, header: $TSFixMe) {
+export function embedRecruitDeleteButton(msg: Message, header: Message) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
     deleteParams.append('mid', msg.id);
     deleteParams.append('imid1', header.id);
 
-    const button = new ActionRowBuilder();
+    const button = new ActionRowBuilder<ButtonBuilder>();
     button.addComponents([new ButtonBuilder().setCustomId(deleteParams.toString()).setLabel('募集を削除').setStyle(ButtonStyle.Danger)]);
     return button;
 }
 
-export function recruitActionRow(image_message: $TSFixMe, channel_id?: string) {
+export function recruitActionRow(image_message: Message, channel_id?: string) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
     joinParams.append('imid1', image_message.id);
@@ -47,14 +47,14 @@ export function recruitActionRow(image_message: $TSFixMe, channel_id?: string) {
         closeParams.append('vid', channel_id);
     }
 
-    return new ActionRowBuilder().addComponents([
+    return new ActionRowBuilder<ButtonBuilder>().addComponents([
         new ButtonBuilder().setCustomId(joinParams.toString()).setLabel('参加').setStyle(ButtonStyle.Primary),
         new ButtonBuilder().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle(ButtonStyle.Danger),
         new ButtonBuilder().setCustomId(closeParams.toString()).setLabel('〆').setStyle(ButtonStyle.Secondary),
     ]);
 }
 
-export function notifyActionRow(host_id: $TSFixMe) {
+export function notifyActionRow(host_id: string) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'njr');
     joinParams.append('hid', host_id);
@@ -67,31 +67,31 @@ export function notifyActionRow(host_id: $TSFixMe) {
     closeParams.append('d', 'nclose');
     closeParams.append('hid', host_id);
 
-    return new ActionRowBuilder().addComponents([
+    return new ActionRowBuilder<ButtonBuilder>().addComponents([
         new ButtonBuilder().setCustomId(joinParams.toString()).setLabel('参加').setStyle(ButtonStyle.Primary),
         new ButtonBuilder().setCustomId(cancelParams.toString()).setLabel('キャンセル').setStyle(ButtonStyle.Danger),
         new ButtonBuilder().setCustomId(closeParams.toString()).setLabel('〆').setStyle(ButtonStyle.Secondary),
     ]);
 }
 
-export function unlockChannelButton(channel_id: $TSFixMe) {
+export function unlockChannelButton(channel_id: string) {
     const buttonParams = new URLSearchParams();
     buttonParams.append('d', 'unl');
     buttonParams.append('vid', channel_id);
 
-    const button = new ActionRowBuilder().addComponents([
+    const button = new ActionRowBuilder<ButtonBuilder>().addComponents([
         new ButtonBuilder().setCustomId(buttonParams.toString()).setLabel('ボイスチャンネルのロック解除').setStyle(ButtonStyle.Secondary),
     ]);
     return button;
 }
 
-export function createNewRecruitButton(channelName: $TSFixMe) {
+export function createNewRecruitButton(channelName: string) {
     const allowed_channel = ['ナワバリ募集', 'バンカラ募集', 'リグマ募集', 'サーモン募集', 'ウツホ募集', 'フウカ募集', 'マンタロー募集'];
 
     const buttonParams = new URLSearchParams();
     buttonParams.append('d', 'newr');
     buttonParams.append('cn', channelName);
-    const button = new ActionRowBuilder();
+    const button = new ActionRowBuilder<ButtonBuilder>();
     if (allowed_channel.includes(channelName)) {
         button.addComponents([
             new ButtonBuilder()

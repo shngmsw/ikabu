@@ -1,4 +1,4 @@
-import { AttachmentBuilder, PermissionsBitField } from 'discord.js';
+import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, PermissionsBitField, User, VoiceChannel } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, fetchSchedule } from '../../../common/apis/splatoon3_ink';
 import { searchMemberById } from '../../../common/manager/member_manager';
@@ -10,16 +10,22 @@ import { recruitSalmonCanvas, ruleSalmonCanvas } from '../../canvases/salmon_can
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function salmonRecruit(interaction: $TSFixMe) {
+export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
     if (!interaction.isCommand()) return;
 
     const options = interaction.options;
     const channel = interaction.channel;
     const voice_channel = interaction.options.getChannel('使用チャンネル');
-    const recruit_num = options.getInteger('募集人数');
+    const recruit_num = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild.fetch();
-    const host_member = await searchMemberById(guild, interaction.member.user.id);
+    const guild = await interaction.guild?.fetch();
+    if (guild === undefined) {
+        throw new Error('guild cannot fetch.');
+    }
+    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    if (host_member === null) {
+        throw new Error('host_member is null.');
+    }
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // プレイ人数のカウンター
@@ -35,8 +41,8 @@ export async function salmonRecruit(interaction: $TSFixMe) {
     }
 
     // プレイヤー指定があればカウンターを増やす
-    if (user1 != null) member_counter++;
-    if (user2 != null) member_counter++;
+    if (user1 !== null) member_counter++;
+    if (user2 !== null) member_counter++;
 
     if (member_counter > 4) {
         await interaction.reply({
@@ -62,7 +68,7 @@ export async function salmonRecruit(interaction: $TSFixMe) {
         'mike',
     ];
 
-    if (voice_channel != null) {
+    if (voice_channel instanceof VoiceChannel) {
         if (voice_channel.members.size != 0 && !voice_channel.members.has(host_member.user.id)) {
             await interaction.reply({
                 content: 'そのチャンネルは使用中でし！',
@@ -84,11 +90,11 @@ export async function salmonRecruit(interaction: $TSFixMe) {
     try {
         let txt = `<@${host_member.user.id}>` + '**たんのバイト募集**\n';
 
-        if (user1 != null && user2 != null) {
+        if (user1 !== null && user2 !== null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
-        } else if (user1 != null) {
+        } else if (user1 !== null) {
             txt = txt + `<@${user1.id}>` + 'たんの参加が既に決定しているでし！';
-        } else if (user2 != null) {
+        } else if (user2 !== null) {
             txt = txt + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         }
 
@@ -98,34 +104,39 @@ export async function salmonRecruit(interaction: $TSFixMe) {
 
         await sendSalmonRun(interaction, txt, recruit_num, condition, member_counter, host_member, user1, user2);
     } catch (error) {
-        channel.send('なんかエラーでてるわ');
+        if (channel !== null) {
+            channel.send('なんかエラーでてるわ');
+        }
         logger.error(error);
     }
 }
 
 async function sendSalmonRun(
-    interaction: $TSFixMe,
-    txt: $TSFixMe,
-    recruit_num: $TSFixMe,
-    condition: $TSFixMe,
-    count: $TSFixMe,
-    host_member: $TSFixMe,
-    user1: $TSFixMe,
-    user2: $TSFixMe,
+    interaction: ChatInputCommandInteraction,
+    txt: string,
+    recruit_num: number,
+    condition: string,
+    count: number,
+    host_member: GuildMember,
+    user1: User | null,
+    user2: User | null,
 ) {
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
     let channel_name = '🔉 VC指定なし';
-    if (reserve_channel != null) {
+    if (reserve_channel instanceof VoiceChannel) {
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
-    const guild = await interaction.guild.fetch();
+    const guild = await interaction.guild?.fetch();
+    if (guild === undefined) {
+        throw new Error('guild cannot fetch.');
+    }
     // サーバーメンバーとして取得し直し
-    if (user1 != null) {
+    if (user1 !== null) {
         user1 = await searchMemberById(guild, user1.id);
     }
-    if (user2 != null) {
+    if (user2 !== null) {
         user2 = await searchMemberById(guild, user2.id);
     }
 
@@ -157,27 +168,25 @@ async function sendSalmonRun(
     const rule = new AttachmentBuilder(ruleBuffer, { name: 'schedule.png' });
 
     try {
-        const mention = '@everyone';
+        const recruit_channel = interaction.channel;
+        if (recruit_channel === null) {
+            throw new Error('recruit_channel is null.');
+        }
+        const mention = `<@&${process.env.ROLE_ID_RECRUIT_SALMON}>`;
         const image1_message = await interaction.editReply({
             content: txt,
             files: [recruit],
-            ephemeral: false,
         });
-        const image2_message = await interaction.channel.send({ files: [rule] });
-        const sentMessage = await interaction.channel.send({
+        const image2_message = await recruit_channel.send({ files: [rule] });
+        const sentMessage = await recruit_channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
-        let isLock = false;
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        if (reserve_channel != null && interaction.member.voice.channelId != reserve_channel.id) {
-            isLock = true;
-        }
-
-        const deleteButtonMsg = await interaction.channel.send({
+        const deleteButtonMsg = await recruit_channel.send({
             components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
         });
-        if (isLock) {
+        if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
             sentMessage.edit({
                 components: [recruitActionRow(image1_message, reserve_channel.id)],
             });
@@ -213,11 +222,11 @@ async function sendSalmonRun(
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(guild, recruit_channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
-            if (isLock) {
+            if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
                 reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
             }
@@ -228,7 +237,7 @@ async function sendSalmonRun(
         await sleep(7200 - 15);
         // ピン留め解除
         image1_message.unpin();
-        if (isLock) {
+        if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
             reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }

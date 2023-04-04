@@ -1,4 +1,15 @@
-import { EmbedBuilder, PermissionsBitField } from 'discord.js';
+import {
+    ChatInputCommandInteraction,
+    Collection,
+    ColorResolvable,
+    EmbedBuilder,
+    Guild,
+    GuildMember,
+    PermissionsBitField,
+    Role,
+    TextBasedChannel,
+    VoiceChannel,
+} from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
@@ -7,11 +18,19 @@ import { embedRecruitDeleteButton, recruitActionRow, unlockChannelButton } from 
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function otherGameRecruit(interaction: $TSFixMe) {
+export async function otherGameRecruit(interaction: ChatInputCommandInteraction) {
     // subCommands取得
     if (!interaction.isCommand()) return;
 
+    const guild = await interaction.guild?.fetch();
+    if (guild === undefined) {
+        throw new Error('guild cannot fetch.');
+    }
     const options = interaction.options;
+    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    if (host_member === null) {
+        throw new Error('host_member is null.');
+    }
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     const usable_channel = [
         'alfa',
@@ -29,8 +48,8 @@ export async function otherGameRecruit(interaction: $TSFixMe) {
         'mike',
     ];
 
-    if (voice_channel != null) {
-        if (voice_channel.members.size != 0 && !voice_channel.members.has(interaction.member.user.id)) {
+    if (voice_channel instanceof VoiceChannel) {
+        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_member.id)) {
             await interaction.reply({
                 content: 'そのチャンネルは使用中でし！',
                 ephemeral: true,
@@ -47,105 +66,152 @@ export async function otherGameRecruit(interaction: $TSFixMe) {
 
     // 募集がfollowUpでないとリグマと同じfunctionでeditできないため
     await interaction.deferReply();
-    const guild = await interaction.guild.fetch();
     const roles = await guild.roles.fetch();
+    const recruit_channel = interaction.channel;
+    if (recruit_channel === null) {
+        throw new Error('recruit_channel is null');
+    }
 
     if (options.getSubcommand() === 'apex') {
-        apexLegends(interaction, roles);
+        apexLegends(interaction, guild, recruit_channel, host_member, roles);
     } else if (options.getSubcommand() === 'mhr') {
-        monsterHunterRise(interaction, roles);
+        monsterHunterRise(interaction, guild, recruit_channel, host_member, roles);
     } else if (options.getSubcommand() === 'overwatch') {
-        overwatch(interaction, roles);
+        overwatch(interaction, guild, recruit_channel, host_member, roles);
     } else if (options.getSubcommand() === 'valo') {
-        valorant(interaction, roles);
+        valorant(interaction, guild, recruit_channel, host_member, roles);
     } else if (options.getSubcommand() === 'other') {
-        others(interaction, roles);
+        others(interaction, guild, recruit_channel, host_member);
     }
 }
 
-function monsterHunterRise(interaction: $TSFixMe, roles: $TSFixMe) {
-    const role_id = roles.find((role: $TSFixMe) => role.name === 'ハンター');
+function monsterHunterRise(
+    interaction: ChatInputCommandInteraction,
+    guild: Guild,
+    recruit_channel: TextBasedChannel,
+    host_member: GuildMember,
+    roles: Collection<string, Role>,
+) {
+    const role = roles.find((role: Role) => role.name === 'ハンター');
+    if (role === undefined) {
+        sendErrorMessage(recruit_channel);
+        return;
+    }
     const title = 'MONSTER HUNTER RISE';
-    const recruitNumText = interaction.options.getString('募集人数');
-    const mention = role_id.toString();
-    const txt = `<@${interaction.member.id}>` + '**たんのモンハンライズ募集**\n';
+    const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
+    const mention = role.toString();
+    const txt = `<@${host_member.id}>` + '**たんのモンハンライズ募集**\n';
     const color = '#b71008';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak_logo.png';
-    sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
+    sendOtherGames(interaction, guild, recruit_channel, host_member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function apexLegends(interaction: $TSFixMe, roles: $TSFixMe) {
-    const role_id = roles.find((role: $TSFixMe) => role.name === 'レジェンド');
+function apexLegends(
+    interaction: ChatInputCommandInteraction,
+    guild: Guild,
+    recruit_channel: TextBasedChannel,
+    host_member: GuildMember,
+    roles: Collection<string, Role>,
+) {
+    const role = roles.find((role: Role) => role.name === 'レジェンド');
+    if (role === undefined) {
+        sendErrorMessage(recruit_channel);
+        return;
+    }
     const title = 'Apex Legends';
-    const recruitNumText = interaction.options.getString('募集人数');
-    const mention = role_id.toString();
-    const txt = `<@${interaction.member.id}>` + '**たんのApexLegends募集**\n';
+    const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
+    const mention = role.toString();
+    const txt = `<@${host_member.id}>` + '**たんのApexLegends募集**\n';
     const color = '#F30100';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends_logo.png';
-    sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
+    sendOtherGames(interaction, guild, recruit_channel, host_member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function overwatch(interaction: $TSFixMe, roles: $TSFixMe) {
-    const role_id = roles.find((role: $TSFixMe) => role.name === 'ヒーロー');
+function overwatch(
+    interaction: ChatInputCommandInteraction,
+    guild: Guild,
+    recruit_channel: TextBasedChannel,
+    host_member: GuildMember,
+    roles: Collection<string, Role>,
+) {
+    const role = roles.find((role: Role) => role.name === 'ヒーロー');
+    if (role === undefined) {
+        sendErrorMessage(recruit_channel);
+        return;
+    }
     const title = 'Overwatch2';
-    const recruitNumText = interaction.options.getString('募集人数');
-    const mention = role_id.toString();
-    const txt = `<@${interaction.member.id}>` + '**たんのOverwatch2募集**\n';
+    const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
+    const mention = role.toString();
+    const txt = `<@${host_member.id}>` + '**たんのOverwatch2募集**\n';
     const color = '#ED6516';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch2.png';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch_logo.png';
-    sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
+    sendOtherGames(interaction, guild, recruit_channel, host_member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function valorant(interaction: $TSFixMe, roles: $TSFixMe) {
-    const role_id = roles.find((role: $TSFixMe) => role.name === 'エージェント');
+function valorant(
+    interaction: ChatInputCommandInteraction,
+    guild: Guild,
+    recruit_channel: TextBasedChannel,
+    host_member: GuildMember,
+    roles: Collection<string, Role>,
+) {
+    const role = roles.find((role: Role) => role.name === 'エージェント');
+    if (role === undefined) {
+        sendErrorMessage(recruit_channel);
+        return;
+    }
     const title = 'VALORANT';
-    const recruitNumText = interaction.options.getString('募集人数');
-    const mention = role_id.toString();
-    const txt = `<@${interaction.member.id}>` + '**たんのVALORANT募集**\n';
+    const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
+    const mention = role.toString();
+    const txt = `<@${host_member.id}>` + '**たんのVALORANT募集**\n';
     const color = '#FF4654';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant_logo.png';
-    sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
+    sendOtherGames(interaction, guild, recruit_channel, host_member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function others(interaction: $TSFixMe, roles: $TSFixMe) {
-    const role_id = roles.find((role: $TSFixMe) => role.name === '別ゲー');
-    const title = interaction.options.getString('ゲームタイトル');
-    const recruitNumText = interaction.options.getString('募集人数');
-    const mention = role_id.toString();
-    const txt = `<@${interaction.member.id}>` + `**たんの${title}募集**\n`;
+function others(interaction: ChatInputCommandInteraction, guild: Guild, recruit_channel: TextBasedChannel, host_member: GuildMember) {
+    const role_id = process.env.ROLE_ID_RECRUIT_OTHERGAMES;
+    if (role_id === undefined) {
+        sendErrorMessage(recruit_channel);
+        return;
+    }
+    const title = interaction.options.getString('ゲームタイトル') ?? 'ERROR';
+    const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
+    const mention = `<@&${role_id}>`;
+    const txt = `<@${host_member.id}>` + `**たんの${title}募集**\n`;
     const color = '#379C30';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others_logo.png';
-    sendOtherGames(interaction, title, recruitNumText, mention, txt, color, image, logo);
+    sendOtherGames(interaction, guild, recruit_channel, host_member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
 async function sendOtherGames(
-    interaction: $TSFixMe,
-    title: $TSFixMe,
-    recruitNumText: $TSFixMe,
-    mention: $TSFixMe,
-    txt: $TSFixMe,
-    color: $TSFixMe,
-    image: $TSFixMe,
-    logo: $TSFixMe,
+    interaction: ChatInputCommandInteraction,
+    guild: Guild,
+    recruit_channel: TextBasedChannel,
+    host_member: GuildMember,
+    title: string,
+    recruitNumText: string,
+    mention: string,
+    txt: string,
+    color: ColorResolvable,
+    image: string,
+    logo: string,
 ) {
     const options = interaction.options;
 
     const condition = options.getString('内容または参加条件');
 
-    const guild = await interaction.guild.fetch();
-
-    const author = await searchMemberById(guild, interaction.member.user.id);
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
     const embed = new EmbedBuilder()
         .setAuthor({
-            name: author.displayName,
-            iconURL: author.displayAvatarURL(),
+            name: host_member.displayName,
+            iconURL: host_member.displayAvatarURL(),
         })
         .setTitle(title + '募集')
         .setColor(color)
@@ -174,24 +240,17 @@ async function sendOtherGames(
         const header = await interaction.editReply({
             content: txt,
             embeds: [embed],
-            ephemeral: false,
         });
-        const sentMessage = await interaction.channel.send({
+        const sentMessage = await recruit_channel.send({
             content: mention + ' ボタンを押して参加表明するでし',
         });
 
-        let isLock = false;
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        if (reserve_channel != null && interaction.member.voice.channelId != reserve_channel.id) {
-            // vc指定なし
-            isLock = true;
-        }
-
-        const deleteButtonMsg = await interaction.channel.send({
+        const deleteButtonMsg = await recruit_channel.send({
             components: [embedRecruitDeleteButton(sentMessage, header)],
         });
 
-        if (isLock) {
+        if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
             sentMessage.edit({
                 components: [recruitActionRow(header, reserve_channel.id)],
             });
@@ -202,7 +261,7 @@ async function sendOtherGames(
                         deny: [PermissionsBitField.Flags.Connect],
                     },
                     {
-                        id: interaction.member.user.id,
+                        id: host_member.user.id,
                         allow: [PermissionsBitField.Flags.Connect],
                     },
                 ],
@@ -227,24 +286,28 @@ async function sendOtherGames(
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(guild, recruit_channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
-            if (isLock) {
+            if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
                 reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                reserve_channel.permissionOverwrites.delete(interaction.member.user, 'UnLock Voice Channel');
+                reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
             }
             return;
         }
 
         // 2時間後にVCロック解除
         await sleep(7200 - 15);
-        if (isLock) {
+        if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
             reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-            reserve_channel.permissionOverwrites.delete(interaction.member.user, 'UnLock Voice Channel');
+            reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }
     } catch (error) {
         logger.error(error);
     }
+}
+
+async function sendErrorMessage(channel: TextBasedChannel) {
+    await channel.send('設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！');
 }
