@@ -1,4 +1,4 @@
-import { AttachmentBuilder } from 'discord.js';
+import { AttachmentBuilder, GuildMember, ModalSubmitInteraction } from 'discord.js';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { setButtonDisable } from '../../../common/button_components';
@@ -11,18 +11,22 @@ import { getMemberMentions } from '../buttons/recruit_button_events';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function sendRegularMatch(
-    interaction: $TSFixMe,
-    txt: $TSFixMe,
-    recruit_num: $TSFixMe,
-    condition: $TSFixMe,
-    count: $TSFixMe,
-    host_member: $TSFixMe,
-    user1: $TSFixMe,
-    user2: $TSFixMe,
-    user3: $TSFixMe,
+    interaction: ModalSubmitInteraction,
+    txt: string,
+    recruit_num: number,
+    condition: string,
+    count: number,
+    host_member: GuildMember,
+    user1: GuildMember | string | null,
+    user2: GuildMember | string | null,
+    user3: GuildMember | string | null,
     regular_data: $TSFixMe,
 ) {
-    const guild = interaction.guild;
+    const guild = await interaction.guild?.fetch();
+    if (guild === undefined) {
+        throw new Error('guild cannot fetch.');
+    }
+
     const channel_name = '[簡易版募集]';
 
     const recruitBuffer = await recruitRegularCanvas(recruit_num, count, host_member, user1, user2, user3, condition, channel_name);
@@ -35,19 +39,23 @@ export async function sendRegularMatch(
     });
 
     try {
+        const recruit_channel = interaction.channel;
+        if (recruit_channel === null) {
+            throw new Error('recruit_channel is null.');
+        }
+
         const mention = '@everyone';
         const image1_message = await interaction.editReply({
             content: txt,
             files: [recruit],
-            ephemeral: false,
         });
-        const image2_message = await interaction.channel.send({ files: [rule] });
-        const sentMessage = await interaction.channel.send({
+        const image2_message = await recruit_channel.send({ files: [rule] });
+        const sentMessage = await recruit_channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
         sentMessage.edit({ components: [recruitActionRow(image1_message)] });
-        const deleteButtonMsg = await interaction.channel.send({
+        const deleteButtonMsg = await recruit_channel.send({
             components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
         });
         await interaction.followUp({
@@ -61,7 +69,7 @@ export async function sendRegularMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(guild, recruit_channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
@@ -70,7 +78,7 @@ export async function sendRegularMatch(
 
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
-        const checkMessage = await searchMessageById(guild, interaction.channel.id, sentMessage.id);
+        const checkMessage = await searchMessageById(guild, recruit_channel.id, sentMessage.id);
 
         if (isEmpty(checkMessage)) {
             return;

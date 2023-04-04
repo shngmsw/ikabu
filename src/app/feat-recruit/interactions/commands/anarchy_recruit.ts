@@ -1,4 +1,12 @@
-import { AttachmentBuilder, ChannelType, PermissionsBitField } from 'discord.js';
+import {
+    AttachmentBuilder,
+    ChannelType,
+    ChatInputCommandInteraction,
+    GuildMember,
+    PermissionsBitField,
+    User,
+    VoiceChannel,
+} from 'discord.js';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, fetchSchedule, getAnarchyOpenData } from '../../../common/apis/splatoon3_ink';
@@ -14,17 +22,17 @@ import { getMemberMentions } from '../buttons/recruit_button_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function anarchyRecruit(interaction: $TSFixMe) {
+export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
     if (!interaction.isCommand()) return;
 
     const options = interaction.options;
     const channel = interaction.channel;
     const voice_channel = interaction.options.getChannel('使用チャンネル');
     let rank = options.getString('募集ウデマエ');
-    const recruit_num = options.getInteger('募集人数');
+    const recruit_num = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild.fetch();
-    const host_member = await searchMemberById(guild, interaction.member.user.id);
+    const guild = await interaction.guild?.fetch();
+    const host_member = await searchMemberById(guild, interaction.member?.user.id);
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // プレイ人数のカウンター
@@ -34,6 +42,10 @@ export async function anarchyRecruit(interaction: $TSFixMe) {
         type = 0;
     } else if (options.getSubcommand() === 'next') {
         type = 1;
+    }
+
+    if (isEmpty(recruit_num)) {
+        return;
     }
 
     if (recruit_num < 1 || recruit_num > 3) {
@@ -47,8 +59,8 @@ export async function anarchyRecruit(interaction: $TSFixMe) {
     }
 
     // プレイヤー指定があればカウンターを増やす
-    if (user1 != null) member_counter++;
-    if (user2 != null) member_counter++;
+    if (user1 !== null) member_counter++;
+    if (user2 !== null) member_counter++;
 
     if (member_counter > 4) {
         await interaction.reply({
@@ -74,7 +86,7 @@ export async function anarchyRecruit(interaction: $TSFixMe) {
         'mike',
     ];
 
-    if (voice_channel != null) {
+    if (voice_channel instanceof VoiceChannel) {
         if (voice_channel.members.size != 0 && !voice_channel.members.has(host_member.user.id)) {
             await interaction.reply({
                 content: 'そのチャンネルは使用中でし！',
@@ -99,7 +111,6 @@ export async function anarchyRecruit(interaction: $TSFixMe) {
         if (mention_id == null) {
             await interaction.editReply({
                 content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
-                ephemeral: false,
             });
             return;
         }
@@ -114,7 +125,6 @@ export async function anarchyRecruit(interaction: $TSFixMe) {
             const fes_channel_id = await searchChannelIdByName(guild, 'フェス募集', ChannelType.GuildText, null);
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！\nフェス募集をするには<#${fes_channel_id}>のチャンネルを使うでし！`,
-                ephemeral: true,
             });
             return;
         }
@@ -122,11 +132,11 @@ export async function anarchyRecruit(interaction: $TSFixMe) {
         const anarchy_data = await getAnarchyOpenData(data, type);
 
         let txt = `<@${host_member.user.id}>` + '**たんのバンカラ募集**\n';
-        if (user1 != null && user2 != null) {
+        if (user1 !== null && user2 !== null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
-        } else if (user1 != null) {
+        } else if (user1 !== null) {
             txt = txt + `<@${user1.id}>` + 'たんの参加が既に決定しているでし！';
-        } else if (user2 != null) {
+        } else if (user2 !== null) {
             txt = txt + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         }
 
@@ -146,22 +156,24 @@ export async function anarchyRecruit(interaction: $TSFixMe) {
             anarchy_data,
         );
     } catch (error) {
-        channel.send('なんかエラーでてるわ');
+        if (channel !== null) {
+            channel.send('なんかエラーでてるわ');
+        }
         logger.error(error);
     }
 }
 
 async function sendAnarchyMatch(
-    interaction: $TSFixMe,
-    mention: $TSFixMe,
-    txt: $TSFixMe,
-    recruit_num: $TSFixMe,
-    condition: $TSFixMe,
-    count: $TSFixMe,
-    rank: $TSFixMe,
-    host_member: $TSFixMe,
-    user1: $TSFixMe,
-    user2: $TSFixMe,
+    interaction: ChatInputCommandInteraction,
+    mention: string,
+    txt: string,
+    recruit_num: number,
+    condition: string,
+    count: number,
+    rank: string,
+    host_member: GuildMember,
+    user1: User | null,
+    user2: User | null,
     anarchy_data: $TSFixMe,
 ) {
     let thumbnail_url; // ガチルールのアイコン
@@ -208,21 +220,24 @@ async function sendAnarchyMatch(
             break;
     }
 
+    const guild = await interaction.guild?.fetch();
+    if (guild === undefined) {
+        throw new Error('guild cannot fetch');
+    }
     const reserve_channel = interaction.options.getChannel('使用チャンネル');
 
     let channel_name = '🔉 VC指定なし';
-    if (isNotEmpty(reserve_channel)) {
+    if (isNotEmpty(reserve_channel) && reserve_channel instanceof VoiceChannel) {
         channel_name = '🔉 ' + reserve_channel.name;
     }
 
     const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
-    const guild = await interaction.guild.fetch();
     // サーバーメンバーとして取得し直し
-    if (user1 != null) {
+    if (user1 !== null) {
         user1 = await searchMemberById(guild, user1.id);
     }
-    if (user2 != null) {
+    if (user2 !== null) {
         user2 = await searchMemberById(guild, user2.id);
     }
 
@@ -234,30 +249,28 @@ async function sendAnarchyMatch(
     const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchy_data, thumbnail), { name: 'rules.png' });
 
     try {
+        const recruit_channel = interaction.channel;
+
+        if (recruit_channel === null) {
+            throw new Error('recruit_channel is null.');
+        }
         const image1_message = await interaction.editReply({
             content: txt,
             files: [recruit],
-            ephemeral: false,
         });
-        const image2_message = await interaction.channel.send({ files: [rule] });
-        const sentMessage = await interaction.channel.send({
+        const image2_message = await recruit_channel.send({ files: [rule] });
+        const sentMessage = await recruit_channel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
-        let isLock = false;
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        if (reserve_channel != null && interaction.member.voice.channelId != reserve_channel.id) {
-            // vc指定なし
-            isLock = true;
-        }
-
-        const deleteButtonMsg = await interaction.channel.send({
+        const deleteButtonMsg = await recruit_channel.send({
             components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
         });
 
-        if (isLock) {
+        if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
             sentMessage.edit({
-                components: [recruitActionRow(image1_message, reserve_channel.id)],
+                components: [recruitActionRow(image1_message, reserve_channel?.id)],
             });
             reserve_channel.permissionOverwrites.set(
                 [
@@ -291,11 +304,11 @@ async function sendAnarchyMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(guild, recruit_channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
-            if (isLock) {
+            if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
                 reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
             }
@@ -304,7 +317,7 @@ async function sendAnarchyMatch(
 
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
-        const checkMessage = await searchMessageById(guild, interaction.channel.id, sentMessage.id);
+        const checkMessage = await searchMessageById(guild, recruit_channel.id, sentMessage.id);
 
         if (isEmpty(checkMessage)) {
             return;
@@ -324,7 +337,7 @@ async function sendAnarchyMatch(
         });
         // ピン留め解除
         image1_message.unpin();
-        if (isLock) {
+        if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
             reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
         }

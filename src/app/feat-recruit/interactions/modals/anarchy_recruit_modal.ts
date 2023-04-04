@@ -1,4 +1,4 @@
-import { AttachmentBuilder } from 'discord.js';
+import { AttachmentBuilder, GuildMember, ModalSubmitInteraction } from 'discord.js';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { setButtonDisable } from '../../../common/button_components';
@@ -11,15 +11,15 @@ import { getMemberMentions } from '../buttons/recruit_button_events';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function sendAnarchyMatch(
-    interaction: $TSFixMe,
-    txt: $TSFixMe,
-    recruit_num: $TSFixMe,
-    condition: $TSFixMe,
-    count: $TSFixMe,
-    rank: $TSFixMe,
-    host_member: $TSFixMe,
-    user1: $TSFixMe,
-    user2: $TSFixMe,
+    interaction: ModalSubmitInteraction,
+    txt: string,
+    recruit_num: number,
+    condition: string,
+    count: number,
+    rank: string,
+    host_member: GuildMember,
+    user1: GuildMember | string | null,
+    user2: GuildMember | string | null,
     anarchy_data: $TSFixMe,
 ) {
     let thumbnail_url; // ガチルールのアイコン
@@ -70,7 +70,10 @@ export async function sendAnarchyMatch(
 
     const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
-    const guild = await interaction.guild.fetch();
+    const guild = await interaction.guild?.fetch();
+    if (guild === undefined) {
+        throw new Error('guild cannot fetch.');
+    }
 
     const recruitBuffer = await recruitAnarchyCanvas(recruit_num, count, host_member, user1, user2, condition, rank, channel_name);
     const recruit = new AttachmentBuilder(recruitBuffer, {
@@ -80,18 +83,22 @@ export async function sendAnarchyMatch(
     const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchy_data, thumbnail), { name: 'rules.png' });
 
     try {
+        const recruit_channel = interaction.channel;
+        if (recruit_channel === null) {
+            throw new Error('recruit_channel is null.');
+        }
+
         const image1_message = await interaction.editReply({
             content: txt,
             files: [recruit],
-            ephemeral: false,
         });
-        const image2_message = await interaction.channel.send({ files: [rule] });
-        const sentMessage = await interaction.channel.send({
+        const image2_message = await recruit_channel.send({ files: [rule] });
+        const sentMessage = await recruit_channel.send({
             content: '@everyone ボタンを押して参加表明するでし！',
         });
 
         sentMessage.edit({ components: [recruitActionRow(image1_message)] });
-        const deleteButtonMsg = await interaction.channel.send({
+        const deleteButtonMsg = await recruit_channel.send({
             components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
         });
         await interaction.followUp({
@@ -105,7 +112,7 @@ export async function sendAnarchyMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, interaction.channel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(guild, recruit_channel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
@@ -114,7 +121,7 @@ export async function sendAnarchyMatch(
 
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
-        const checkMessage = await searchMessageById(guild, interaction.channel.id, sentMessage.id);
+        const checkMessage = await searchMessageById(guild, recruit_channel.id, sentMessage.id);
 
         if (isEmpty(checkMessage)) {
             return;

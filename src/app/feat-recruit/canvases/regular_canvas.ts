@@ -3,6 +3,7 @@ import path from 'path';
 import { modalRecruit } from '../../../constant.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
+import { GuildMember, User } from 'discord.js';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -19,14 +20,14 @@ Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
  * 募集用のキャンバス(1枚目)を作成する
  */
 export async function recruitRegularCanvas(
-    recruit_num: $TSFixMe,
-    count: $TSFixMe,
-    host_member: $TSFixMe,
-    user1: $TSFixMe,
-    user2: $TSFixMe,
-    user3: $TSFixMe,
-    condition: $TSFixMe,
-    channel_name: $TSFixMe,
+    recruit_num: number,
+    count: number,
+    host_member: GuildMember,
+    user1: User | GuildMember | string | null,
+    user2: User | GuildMember | string | null,
+    user3: User | GuildMember | string | null,
+    condition: string,
+    channel_name: string,
 ) {
     const blank_avatar_url = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
@@ -50,19 +51,19 @@ export async function recruitRegularCanvas(
 
     if (user1 === 'dummy_icon') {
         member_urls.push(modalRecruit.placeHold);
-    } else if (user1 != null) {
+    } else if (user1 instanceof User || user1 instanceof GuildMember) {
         member_urls.push(user1.displayAvatarURL({ extension: 'png' }));
     }
 
     if (user2 === 'dummy_icon') {
         member_urls.push(modalRecruit.placeHold);
-    } else if (user2 != null) {
+    } else if (user2 instanceof User || user2 instanceof GuildMember) {
         member_urls.push(user2.displayAvatarURL({ extension: 'png' }));
     }
 
     if (user3 === 'dummy_icon') {
         member_urls.push(modalRecruit.placeHold);
-    } else if (user3 != null) {
+    } else if (user3 instanceof User || user3 instanceof GuildMember) {
         member_urls.push(user3.displayAvatarURL({ extension: 'png' }));
     }
 
@@ -112,7 +113,7 @@ export async function recruitRegularCanvas(
     const column_num = 3;
     const column = [''];
     let line = 0;
-    condition = condition.replace('{br}', '\n', 'gm');
+    condition = condition.replace('{br}', '\n');
 
     // 幅に合わせて自動改行
     for (let i = 0; i < condition.length; i++) {
