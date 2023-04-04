@@ -44,10 +44,6 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
         type = 1;
     }
 
-    if (isEmpty(recruit_num)) {
-        return;
-    }
-
     if (recruit_num < 1 || recruit_num > 3) {
         await interaction.reply({
             content: '募集人数は1～3までで指定するでし！',
