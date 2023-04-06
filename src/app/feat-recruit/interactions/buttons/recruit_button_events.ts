@@ -3,7 +3,7 @@ import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
-import { searchAPIMemberById } from '../../../common/manager/member_manager.js';
+import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { datetimeDiff, getCommandHelpEmbed, getMentionsFromMessage, isEmpty, isNotEmpty, sleep } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
@@ -49,29 +49,31 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
+
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
-        const member = await searchAPIMemberById(guild, interaction.member.user.id);
+        const member = await searchDBMemberById(guild, interaction.member.user.id);
+
         const image1_msg_id = params.get('imid1');
         const image1_message = await searchMessageById(guild, interaction.channelId, image1_msg_id);
         const participants = getMentionsFromMessage(image1_message, true);
         const pmentions = getMentionsFromMessage(image1_message);
-        let host_id;
+        let hostId;
         if (isNotEmpty(image1_message.interaction)) {
             const host = image1_message.interaction.user;
-            host_id = host.id;
+            hostId = host.id;
         } else {
-            host_id = participants[0];
+            hostId = participants[0];
         }
-        const host_member = await searchAPIMemberById(guild, host_id);
+        const hostMember = await searchDBMemberById(guild, hostId);
         let channelId = params.get('vid');
         if (isEmpty(channelId)) {
             channelId = null;
         }
 
-        sendRecruitButtonLog(interaction, member, host_member, '参加', '#5865f2');
+        sendRecruitButtonLog(interaction, member, hostMember, '参加', '#5865f2');
 
-        // if (member.user.id === host_id) {  // 募集主のみ
-        if (participants.includes(member.user.id)) {
+        // if (member.user.id === hostId) {  // 募集主のみ
+        if (participants.includes(member.user_id)) {
             await interaction.followUp({
                 content: '募集メンバーは参加表明できないでし！',
                 ephemeral: true,
@@ -83,7 +85,7 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
             return;
         } else {
             // 参加済みかチェック
-            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user.id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user_id);
             if (member_data.length > 0) {
                 await interaction.followUp({
                     content: 'すでに参加ボタンを押してるでし！',
@@ -98,16 +100,16 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
 
             const embed = new EmbedBuilder();
             embed.setAuthor({
-                name: `${member.displayName}たんが参加表明したでし！`,
-                iconURL: member.displayAvatarURL(),
+                name: `${member.display_name}たんが参加表明したでし！`,
+                iconURL: member.icon_url,
             });
 
             // recruitテーブルにデータ追加
-            await RecruitService.save(interaction.message.id, host_id, member.user.id);
+            await RecruitService.save(interaction.message.id, hostId, member.user_id);
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
-            const host_guild_member = await searchAPIMemberById(guild, host_id);
+            const host_guild_member = await searchAPIMemberById(guild, hostId);
             try {
                 if (isNotEmpty(host_guild_member.voice.channel) && host_guild_member.voice.channel.type === ChannelType.GuildVoice) {
                     const host_joined_vc = await searchChannelById(guild, host_guild_member.voice.channelId);
@@ -127,13 +129,13 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
 
             if (channelId == null) {
                 await interaction.followUp({
-                    content: `<@${host_id}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
+                    content: `<@${hostId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
                     // components: [channelLinkButtons(interaction.guildId, thread_message.url)], TODO: スレッド内へのリンクボタンを作る
                     ephemeral: true,
                 });
             } else {
                 await interaction.followUp({
-                    content: `<@${host_id}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
+                    content: `<@${hostId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
                     components: [channelLinkButtons(interaction.guildId, channelId)],
                     ephemeral: true,
                 });
@@ -169,20 +171,20 @@ export async function cancel(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
-        const member = await searchAPIMemberById(guild, interaction.member.user.id);
+        const member = await searchDBMemberById(guild, interaction.member.user.id);
         const image1_msg_id = params.get('imid1');
         const image1_message = await searchMessageById(guild, interaction.channelId, image1_msg_id);
         const participants = getMentionsFromMessage(image1_message, true);
         const mentions = getMentionsFromMessage(image1_message);
-        let host_id;
+        let hostId;
         if (isNotEmpty(image1_message.interaction)) {
             const host = image1_message.interaction.user;
-            host_id = host.id;
+            hostId = host.id;
         } else {
-            host_id = participants[0];
+            hostId = participants[0];
         }
-        const host_member = await searchAPIMemberById(guild, host_id);
-        const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
+        const hostMember = await searchDBMemberById(guild, hostId);
+        const embed = new EmbedBuilder().setDescription(`<@${hostId}>たんの募集〆`);
         const helpEmbed = getCommandHelpEmbed(interaction.channel.name);
         const cmd_message = interaction.message;
         let channelId = params.get('vid');
@@ -190,10 +192,10 @@ export async function cancel(interaction: $TSFixMe, params: $TSFixMe) {
             channelId = null;
         }
 
-        sendRecruitButtonLog(interaction, member, host_member, 'キャンセル', '#f04747');
+        sendRecruitButtonLog(interaction, member, hostMember, 'キャンセル', '#f04747');
 
-        // if (member.user.id === host_id) {  // 募集主のみ
-        if (participants.includes(member.user.id)) {
+        // if (member.user.id === hostId) {  // 募集主のみ
+        if (participants.includes(member.user_id)) {
             // ピン留め解除
             image1_message.unpin();
 
@@ -207,7 +209,7 @@ export async function cancel(interaction: $TSFixMe, params: $TSFixMe) {
             }
 
             await cmd_message.edit({
-                content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
+                content: `<@${hostId}>たんの募集はキャンセルされたでし！`,
                 components: await disableThinkingButton(interaction, 'キャンセル'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
@@ -217,7 +219,7 @@ export async function cancel(interaction: $TSFixMe, params: $TSFixMe) {
             });
         } else {
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
-            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user.id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user_id);
             if (member_data.length > 0) {
                 // recruitテーブルから自分のデータのみ削除
                 await RecruitService.deleteByMemberId(interaction.message.id, interaction.member.id);
@@ -254,7 +256,7 @@ export async function del(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
-        const member = await searchAPIMemberById(guild, interaction.member.user.id);
+        const member = await searchDBMemberById(guild, interaction.member.user.id);
         const msg_id = params.get('mid');
         const cmd_message = await searchMessageById(guild, interaction.channelId, msg_id);
         const image1_msg_id = params.get('imid1');
@@ -266,19 +268,19 @@ export async function del(interaction: $TSFixMe, params: $TSFixMe) {
         }
         const participants = getMentionsFromMessage(image1_message, true);
 
-        let host_id;
+        let hostId;
         if (isNotEmpty(image1_message.interaction)) {
             const host = image1_message.interaction.user;
-            host_id = host.id;
+            hostId = host.id;
         } else {
-            host_id = participants[0];
+            hostId = participants[0];
         }
-        const host_member = await searchAPIMemberById(guild, host_id);
+        const hostMember = await searchDBMemberById(guild, hostId);
 
-        sendRecruitButtonLog(interaction, member, host_member, '削除', '#f04747');
+        sendRecruitButtonLog(interaction, member, hostMember, '削除', '#f04747');
 
-        // if (member.user.id === host_id) {  // 募集主のみ
-        if (participants.includes(member.user.id)) {
+        // if (member.user.id === hostId) {  // 募集主のみ
+        if (participants.includes(member.user_id)) {
             try {
                 await interaction.message.delete();
             } catch (error) {
@@ -334,30 +336,30 @@ export async function close(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
-        const member = await searchAPIMemberById(guild, interaction.member.user.id);
+        const member = await searchDBMemberById(guild, interaction.member.user.id);
         const image1_msg_id = params.get('imid1');
         const image1_message = await searchMessageById(guild, interaction.channelId, image1_msg_id);
         const helpEmbed = getCommandHelpEmbed(image1_message.channel.name);
         const participants = getMentionsFromMessage(image1_message, true);
-        let host_id;
+        let hostId;
         if (isNotEmpty(image1_message.interaction)) {
             const host = image1_message.interaction.user;
-            host_id = host.id;
+            hostId = host.id;
         } else {
-            host_id = participants[0];
+            hostId = participants[0];
         }
-        const host_member = await searchAPIMemberById(guild, host_id);
-        const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
+        const hostMember = await searchDBMemberById(guild, hostId);
+        const embed = new EmbedBuilder().setDescription(`<@${hostId}>たんの募集〆`);
         const cmd_message = interaction.message;
         let channelId = params.get('vid');
         if (isEmpty(channelId)) {
             channelId = null;
         }
 
-        sendRecruitButtonLog(interaction, member, host_member, '〆', '#4f545c');
+        sendRecruitButtonLog(interaction, member, hostMember, '〆', '#4f545c');
 
-        // if (member.user.id === host_id) {  // 募集主のみ
-        if (participants.includes(member.user.id)) {
+        // if (member.user.id === hostId) {  // 募集主のみ
+        if (participants.includes(member.user_id)) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             // ピン留め解除
@@ -372,7 +374,7 @@ export async function close(interaction: $TSFixMe, params: $TSFixMe) {
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
             await cmd_message.edit({
-                content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
+                content: `<@${hostId}>たんの募集は〆！\n${member_list}`,
                 components: await disableThinkingButton(interaction, '〆'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
@@ -395,10 +397,10 @@ export async function close(interaction: $TSFixMe, params: $TSFixMe) {
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
             await cmd_message.edit({
-                content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
+                content: `<@${hostId}>たんの募集は〆！\n${member_list}`,
                 components: await disableThinkingButton(interaction, '〆'),
             });
-            const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
+            const embed = new EmbedBuilder().setDescription(`<@${hostId}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({
                 embeds: [helpEmbed],
@@ -427,13 +429,13 @@ export async function joinNotify(interaction: $TSFixMe, params: $TSFixMe) {
 
         const guild = await interaction.guild.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
-        const member = await searchAPIMemberById(guild, interaction.member.user.id);
-        const host_id = params.get('hid');
-        const host_member = await searchAPIMemberById(guild, host_id);
+        const member = await searchDBMemberById(guild, interaction.member.user.id);
+        const hostId = params.get('hid');
+        const hostMember = await searchDBMemberById(guild, hostId);
 
-        sendRecruitButtonLog(interaction, member, host_member, '参加', '#5865f2');
+        sendRecruitButtonLog(interaction, member, hostMember, '参加', '#5865f2');
 
-        if (member.user.id === host_id) {
+        if (member.user_id === hostId) {
             await interaction.followUp({
                 content: '募集主は参加表明できないでし！',
                 ephemeral: true,
@@ -446,7 +448,7 @@ export async function joinNotify(interaction: $TSFixMe, params: $TSFixMe) {
             return;
         } else {
             // 参加済みかチェック
-            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user.id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user_id);
             if (member_data.length > 0) {
                 await interaction.followUp({
                     content: 'すでに参加ボタンを押してるでし！',
@@ -462,15 +464,15 @@ export async function joinNotify(interaction: $TSFixMe, params: $TSFixMe) {
 
             const embed = new EmbedBuilder();
             embed.setAuthor({
-                name: `${member.displayName}たんが参加表明したでし！`,
-                iconURL: member.displayAvatarURL(),
+                name: `${member.display_name}たんが参加表明したでし！`,
+                iconURL: member.icon_url,
             });
             // recruitテーブルにデータ追加
-            await RecruitService.save(interaction.message.id, interaction.member.user.id, member.user.id);
+            await RecruitService.save(interaction.message.id, interaction.member.user.id, member.user_id);
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
-            const host_guild_member = await searchAPIMemberById(guild, host_id);
+            const host_guild_member = await searchAPIMemberById(guild, hostId);
             try {
                 if (isNotEmpty(host_guild_member.voice.channel) && host_guild_member.voice.channel.type === ChannelType.GuildVoice) {
                     const host_joined_vc = await searchChannelById(guild, host_guild_member.voice.channelId);
@@ -484,12 +486,12 @@ export async function joinNotify(interaction: $TSFixMe, params: $TSFixMe) {
                 logger.error(error);
             }
             notify_to_host_message = await interaction.message.reply({
-                content: `<@${host_id}>`,
+                content: `<@${hostId}>`,
                 embeds: [embed],
             });
 
             await interaction.followUp({
-                content: `<@${host_id}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
+                content: `<@${hostId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
                 ephemeral: true,
             });
 
@@ -517,34 +519,34 @@ export async function cancelNotify(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
-        const member = await searchAPIMemberById(guild, interaction.member.user.id);
-        const host_id = params.get('hid');
-        const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
+        const member = await searchDBMemberById(guild, interaction.member.user.id);
+        const hostId = params.get('hid');
+        const embed = new EmbedBuilder().setDescription(`<@${hostId}>たんの募集〆`);
         const cmd_message = interaction.message;
-        const host_member = await searchAPIMemberById(guild, host_id);
+        const hostMember = await searchDBMemberById(guild, hostId);
 
-        sendRecruitButtonLog(interaction, member, host_member, 'キャンセル', '#f04747');
+        sendRecruitButtonLog(interaction, member, hostMember, 'キャンセル', '#f04747');
 
-        if (member.user.id == host_id) {
+        if (member.user_id == hostId) {
             // ピン留め解除
             cmd_message.unpin();
             // recruitテーブルから削除
             await RecruitService.deleteByMessageId(interaction.message.id);
             await cmd_message.edit({
-                content: `<@${host_id}>たんの募集はキャンセルされたでし！`,
+                content: `<@${hostId}>たんの募集はキャンセルされたでし！`,
                 components: await disableThinkingButton(interaction, 'キャンセル'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
         } else {
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
-            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user.id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user_id);
             if (member_data.length > 0) {
                 // recruitテーブルから自分のデータのみ削除
                 await RecruitService.deleteByMemberId(interaction.message.id, interaction.member.id);
 
                 // ホストに通知
                 await interaction.message.reply({
-                    content: `<@${host_id}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
+                    content: `<@${hostId}> <@${interaction.member.id}>たんがキャンセルしたでし！`,
                 });
                 await interaction.editReply({
                     content: await memberListMessage(interaction),
@@ -573,20 +575,20 @@ export async function closeNotify(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
-        const member = await searchAPIMemberById(guild, interaction.member.user.id);
-        const host_id = params.get('hid');
-        const host_member = await searchAPIMemberById(guild, host_id);
-        const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
+        const member = await searchDBMemberById(guild, interaction.member.user.id);
+        const hostId = params.get('hid');
+        const hostMember = await searchDBMemberById(guild, hostId);
+        const embed = new EmbedBuilder().setDescription(`<@${hostId}>たんの募集〆`);
         const helpEmbed = getCommandHelpEmbed(interaction.channel.name);
         const cmd_message = interaction.message;
 
-        sendRecruitButtonLog(interaction, member, host_member, '〆', '#4f545c');
+        sendRecruitButtonLog(interaction, member, hostMember, '〆', '#4f545c');
 
-        if (member.user.id === host_id) {
+        if (member.user_id === hostId) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             await cmd_message.edit({
-                content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
+                content: `<@${hostId}>たんの募集は〆！\n${member_list}`,
                 components: await disableThinkingButton(interaction, '〆'),
             });
             // ピン留め解除
@@ -607,12 +609,12 @@ export async function closeNotify(interaction: $TSFixMe, params: $TSFixMe) {
             cmd_message.unpin();
 
             await cmd_message.edit({
-                content: `<@${host_id}>たんの募集は〆！\n${member_list}`,
+                content: `<@${hostId}>たんの募集は〆！\n${member_list}`,
                 components: await disableThinkingButton(interaction, '〆'),
             });
             // recruitテーブルから削除
             await RecruitService.deleteByMessageId(interaction.message.id);
-            const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
+            const embed = new EmbedBuilder().setDescription(`<@${hostId}>たんの募集〆 \n <@${interaction.member.user.id}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
             await interaction.channel.send({
                 embeds: [helpEmbed],

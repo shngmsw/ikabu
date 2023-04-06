@@ -12,7 +12,7 @@ export class MembersService {
             await DBCommon.run(`CREATE TABLE IF NOT EXISTS members (
                                 guild_id text,
                                 user_id text,
-                                user_name text,
+                                display_name text,
                                 icon_url text,
                                 joined_at text,
                                 primary key(guild_id, user_id)
@@ -23,13 +23,13 @@ export class MembersService {
         }
     }
 
-    static async registerMember(guildId: string, userId: string, userName: string, iconUrl: string, joinedAt: Date) {
+    static async registerMember(guildId: string, userId: string, displayName: string, iconUrl: string, joinedAt: Date) {
         try {
             DBCommon.init();
-            await DBCommon.run(`INSERT INTO members (guild_id, user_id, user_name, icon_url, joined_at)  values ($1, $2, $3, $4 $5)`, [
+            await DBCommon.run(`INSERT INTO members (guild_id, user_id, display_name, icon_url, joined_at)  values ($1, $2, $3, $4 $5)`, [
                 guildId,
                 userId,
-                userName,
+                displayName,
                 iconUrl,
                 joinedAt,
             ]);
@@ -39,11 +39,11 @@ export class MembersService {
         }
     }
 
-    static async updateProfile(guildId: string, userId: string, userName: string, iconUrl: string) {
+    static async updateProfile(guildId: string, userId: string, displayName: string, iconUrl: string) {
         try {
             DBCommon.init();
-            await DBCommon.run(`UPDATE members SET user_name = $1, icon_url = $2 WHERE guild_id = $3 and user_id = $4`, [
-                userName,
+            await DBCommon.run(`UPDATE members SET display_name = $1, icon_url = $2 WHERE guild_id = $3 and user_id = $4`, [
+                displayName,
                 iconUrl,
                 guildId,
                 userId,

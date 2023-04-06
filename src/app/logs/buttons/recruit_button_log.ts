@@ -1,20 +1,23 @@
-import { EmbedBuilder } from 'discord.js';
+import { BaseGuildTextChannel, ButtonInteraction, ColorResolvable, EmbedBuilder } from 'discord.js';
 import { sendEmbedsWebhook } from '../../common/webhook';
+import { Member } from '../../../db/model/member';
 
 export async function sendRecruitButtonLog(
-    interaction: $TSFixMe,
-    member: $TSFixMe,
-    host_member: $TSFixMe,
-    button_name: $TSFixMe,
-    color: $TSFixMe,
+    interaction: ButtonInteraction,
+    member: Member,
+    host_member: Member,
+    button_name: string,
+    color: ColorResolvable,
 ) {
     const embed = new EmbedBuilder();
-    embed.setTitle(interaction.channel.name + 'で' + button_name + 'ボタンが押されたでし！');
+    if (interaction.channel instanceof BaseGuildTextChannel) {
+        embed.setTitle(interaction.channel?.name + 'で' + button_name + 'ボタンが押されたでし！');
+    }
     embed.setAuthor({
-        name: `${member.displayName} [${member.user.id}]`,
-        iconURL: member.displayAvatarURL(),
+        name: `${member.display_name} [${member.user_id}]`,
+        iconURL: member.icon_url,
     });
-    embed.setDescription('**募集主**: ' + host_member.displayName + ' [' + host_member.user.id + ']');
+    embed.setDescription('**募集主**: ' + host_member.display_name + ' [' + host_member.user_id + ']');
     embed.setColor(color);
     embed.setTimestamp(interaction.createdAt);
     await sendEmbedsWebhook(process.env.BUTTON_LOG_WEBHOOK_URL, [embed]);
