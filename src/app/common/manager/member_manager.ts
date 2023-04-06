@@ -45,9 +45,15 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
             throw new Error('joinedAt is null');
         }
 
-        MembersService.registerMember(guild.id, userId, memberRaw.displayName, memberRaw.displayAvatarURL(), memberRaw.joinedAt);
+        MembersService.registerMember(
+            guild.id,
+            userId,
+            memberRaw.displayName,
+            memberRaw.displayAvatarURL({ extension: 'png' }),
+            memberRaw.joinedAt.toString(),
+        );
 
-        return new Member(guild.id, userId, memberRaw.displayName, memberRaw.displayAvatarURL(), memberRaw.joinedAt);
+        return new Member(guild.id, userId, memberRaw.displayName, memberRaw.displayAvatarURL({ extension: 'png' }), memberRaw.joinedAt);
     } else {
         return members[0];
     }

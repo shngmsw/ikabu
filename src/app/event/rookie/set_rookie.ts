@@ -41,12 +41,18 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
                 if (member.joinedAt === null) {
                     throw new Error('joinedAt is null');
                 }
-                MembersService.registerMember(guild.id, userId, member.displayName, member.displayAvatarURL(), member.joinedAt);
+                MembersService.registerMember(
+                    guild.id,
+                    userId,
+                    member.displayName,
+                    member.displayAvatarURL({ extension: 'png' }),
+                    member.joinedAt,
+                );
                 const friendCode = await FriendCodeService.getFriendCodeByUserId(newMember.id);
                 await sleep(600);
                 await setRookieRole(member, beginnerRole, messageCount, friendCode);
             } else {
-                MembersService.updateProfile(guild.id, userId, member.displayName, member.displayAvatarURL());
+                MembersService.updateProfile(guild.id, userId, member.displayName, member.displayAvatarURL({ extension: 'png' }));
             }
             await sentMessage.react('👍');
         }

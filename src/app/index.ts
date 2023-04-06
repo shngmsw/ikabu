@@ -99,9 +99,15 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
         // membersテーブルにレコードがあるか確認
         if ((await MembersService.getMemberByUserId(guildId, userId)).length == 0) {
-            MembersService.registerMember(guildId, userId, member.displayName, member.displayAvatarURL(), member.joinedAt);
+            MembersService.registerMember(
+                guildId,
+                userId,
+                member.displayName,
+                member.displayAvatarURL({ extension: 'png' }),
+                member.joinedAt,
+            );
         } else {
-            MembersService.updateProfile(guildId, userId, member.displayName, member.displayAvatarURL());
+            MembersService.updateProfile(guildId, userId, member.displayName, member.displayAvatarURL({ extension: 'png' }));
         }
     } catch (err) {
         const loggerMU = log4js_obj.getLogger('guildMemberUpdate');

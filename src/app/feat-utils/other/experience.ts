@@ -1,7 +1,8 @@
 import Canvas from 'canvas';
 import path from 'path';
-import Discord from 'discord.js';
+import Discord, { ChatInputCommandInteraction } from 'discord.js';
 import { dateDiff } from '../../common/others';
+import { searchDBMemberById } from '../../common/manager/member_manager';
 const backgroundImgPaths = [
     './images/over4years.jpg',
     './images/4years.jpg',
@@ -12,15 +13,24 @@ const backgroundImgPaths = [
     './images/1month.jpg',
 ];
 const colorCodes = ['#db4240', '#9849c9', '#2eddff', '#5d8e9c', '#f0c46e', '#86828f', '#ad745c'];
-export async function handleIkabuExperience(interaction: $TSFixMe) {
+export async function handleIkabuExperience(interaction: ChatInputCommandInteraction) {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
-    const author = interaction.member;
-    const guild = await interaction.guild.fetch();
-    const member = await guild.members.fetch(author.id);
-    const joinDate = member.joinedAt;
+    const guild = await interaction.guild?.fetch();
+    if (guild === undefined) {
+        throw new Error('guild cannot fetch.');
+    }
+    if (interaction.member === null) {
+        throw new Error('interaction.member is null');
+    }
+    const member = await searchDBMemberById(guild, interaction.member.user.id);
+    const joinDate = new Date(member.joined_at);
     const today = new Date();
+
+    if (joinDate === null) {
+        return await interaction.editReply('エラーでし！入部日のデータが読み取れないでし！');
+    }
 
     const years = dateDiff(joinDate, today, 'Y', true);
     const months = dateDiff(joinDate, today, 'YM', true);
@@ -68,7 +78,7 @@ export async function handleIkabuExperience(interaction: $TSFixMe) {
     context.restore();
 
     // load avatar image
-    const avatar = await Canvas.loadImage(author.displayAvatarURL({ extension: 'png' }));
+    const avatar = await Canvas.loadImage(member.icon_url);
 
     // set path for clip
     context.beginPath();
@@ -84,15 +94,15 @@ export async function handleIkabuExperience(interaction: $TSFixMe) {
     context.lineWidth = 8;
     context.stroke();
 
-    context.font = userText(canvas, member.displayName);
+    context.font = userText(canvas, member.display_name);
     context.fillStyle = colorCodes[experienceRank];
 
-    const userWidth = context.measureText(member.displayName).width;
+    const userWidth = context.measureText(member.display_name).width;
 
-    context.fillText(member.displayName, (400 - userWidth) / 2 + 250, 63);
+    context.fillText(member.display_name, (400 - userWidth) / 2 + 250, 63);
     context.strokeStyle = '#333333';
     context.lineWidth = 1.5;
-    context.strokeText(member.displayName, (400 - userWidth) / 2 + 250, 63);
+    context.strokeText(member.display_name, (400 - userWidth) / 2 + 250, 63);
 
     context.font = '43px "Splatfont"';
     context.fillText('イカ部歴', 240, 130);

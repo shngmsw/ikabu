@@ -23,7 +23,13 @@ export class MembersService {
         }
     }
 
-    static async registerMember(guildId: string, userId: string, displayName: string, iconUrl: string, joinedAt: Date) {
+    static async registerMember(guildId: string, userId: string, displayName: string, iconUrl: string, joinedAt: string | Date) {
+        let joined;
+        if (joinedAt instanceof Date) {
+            joined = joinedAt.toString();
+        } else {
+            joined = joinedAt;
+        }
         try {
             DBCommon.init();
             await DBCommon.run(`INSERT INTO members (guild_id, user_id, display_name, icon_url, joined_at)  values ($1, $2, $3, $4, $5)`, [
@@ -31,7 +37,7 @@ export class MembersService {
                 userId,
                 displayName,
                 iconUrl,
-                joinedAt,
+                joined,
             ]);
             DBCommon.close();
         } catch (err) {
