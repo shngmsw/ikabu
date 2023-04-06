@@ -9,7 +9,7 @@ const logger = log4js_obj.getLogger('MemberManager');
  * @param {string} roleId ユーザーID
  * @returns メンバーオブジェクト
  */
-export async function searchMemberById(guild: $TSFixMe, userId: $TSFixMe) {
+export async function searchAPIMemberById(guild: $TSFixMe, userId: $TSFixMe) {
     try {
         let member;
         try {

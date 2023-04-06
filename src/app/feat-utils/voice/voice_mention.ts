@@ -1,7 +1,7 @@
 import { EmbedBuilder, ChannelType } from 'discord.js';
 import { isNotEmpty, isEmpty } from '../../common/others';
 import { searchChannelById } from '../../common/manager/channel_manager';
-import { searchMemberById, getMemberColor } from '../../common/manager/member_manager';
+import { searchAPIMemberById, getMemberColor } from '../../common/manager/member_manager';
 import { log4js_obj } from '../../../log4js_settings';
 
 export async function voiceMention(interaction: $TSFixMe) {
@@ -23,7 +23,7 @@ export async function voiceMention(interaction: $TSFixMe) {
                 return;
             }
         }
-        const author = await searchMemberById(guild, interaction.member.user.id);
+        const author = await searchAPIMemberById(guild, interaction.member.user.id);
         channel = await searchChannelById(guild, channel.id);
         const members = channel.members;
 

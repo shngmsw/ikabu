@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import { log4js_obj } from '../../../log4js_settings';
-import { searchMemberById } from '../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { randomSelect } from '../../common/others';
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 
@@ -28,7 +28,7 @@ export async function buki(interaction: $TSFixMe) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const weapons = (await response.json()) as any;
         const guild = await interaction.guild.fetch();
-        const member = await searchMemberById(guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
         const bukis = weapons.filter(function (value: $TSFixMe) {
             if (bukiType != null) {
                 // 特定のbukiTypeが指定されているとき

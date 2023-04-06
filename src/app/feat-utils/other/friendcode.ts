@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { FriendCodeService } from '../../../db/friend_code_service.js';
 import { log4js_obj } from '../../../log4js_settings.js';
-import { searchMemberById } from '../../common/manager/member_manager.js';
+import { searchAPIMemberById } from '../../common/manager/member_manager.js';
 const logger = log4js_obj.getLogger();
 
 export async function handleFriendCode(interaction: $TSFixMe) {
@@ -20,7 +20,7 @@ export async function handleFriendCode(interaction: $TSFixMe) {
 
 export async function selectFriendCode(interaction: $TSFixMe) {
     const guild = interaction.guild;
-    const targetUser = await searchMemberById(guild, interaction.member.user.id);
+    const targetUser = await searchAPIMemberById(guild, interaction.member.user.id);
 
     const deleteButton = new ActionRowBuilder();
     deleteButton.addComponents([new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger)]);

@@ -20,7 +20,7 @@ import { isNotEmpty } from './common/others';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
 import { registerSlashCommands } from '../register';
-import { searchMemberById } from './common/manager/member_manager';
+import { searchAPIMemberById } from './common/manager/member_manager';
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -90,7 +90,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
         const userId = newMember.user.id;
         let member = newMember;
         if (typeof newMember.displayAvatarURL() !== 'string' || typeof newMember.displayName !== 'string' || newMember.joinedAt === null) {
-            member = await searchMemberById(guildId, userId);
+            member = await searchAPIMemberById(guildId, userId);
         }
 
         if (member.joinedAt === null) {

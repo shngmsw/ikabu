@@ -4,7 +4,7 @@ import { MembersService } from '../../../db/members_service.js';
 import { MessageCountService } from '../../../db/message_count_service.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
-import { searchMemberById } from '../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { searchRoleById } from '../../common/manager/role_manager';
 import { sleep } from '../../common/others.js';
 import { FriendCode } from '../../../db/model/friend_code.js';
@@ -34,7 +34,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
             );
         } else {
             const messageCount = await getMessageCount(newMember.id);
-            const member = await searchMemberById(guild.id, userId);
+            const member = await searchAPIMemberById(guild.id, userId);
 
             // membersテーブルにレコードがあるか確認
             if ((await MembersService.getMemberByUserId(guild.id, userId)).length == 0) {

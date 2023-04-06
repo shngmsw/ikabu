@@ -3,7 +3,7 @@ import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
-import { searchMemberById } from '../../../common/manager/member_manager.js';
+import { searchAPIMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { datetimeDiff, getCommandHelpEmbed, getMentionsFromMessage, isEmpty, isNotEmpty, sleep } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
@@ -50,7 +50,7 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
 
         const guild = await interaction.guild.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
-        const member = await searchMemberById(guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
         const image1_msg_id = params.get('imid1');
         const image1_message = await searchMessageById(guild, interaction.channelId, image1_msg_id);
         const participants = getMentionsFromMessage(image1_message, true);
@@ -62,7 +62,7 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
         } else {
             host_id = participants[0];
         }
-        const host_member = await searchMemberById(guild, host_id);
+        const host_member = await searchAPIMemberById(guild, host_id);
         let channelId = params.get('vid');
         if (isEmpty(channelId)) {
             channelId = null;
@@ -107,7 +107,7 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
-            const host_guild_member = await searchMemberById(guild, host_id);
+            const host_guild_member = await searchAPIMemberById(guild, host_id);
             try {
                 if (isNotEmpty(host_guild_member.voice.channel) && host_guild_member.voice.channel.type === ChannelType.GuildVoice) {
                     const host_joined_vc = await searchChannelById(guild, host_guild_member.voice.channelId);
@@ -169,7 +169,7 @@ export async function cancel(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
-        const member = await searchMemberById(guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
         const image1_msg_id = params.get('imid1');
         const image1_message = await searchMessageById(guild, interaction.channelId, image1_msg_id);
         const participants = getMentionsFromMessage(image1_message, true);
@@ -181,7 +181,7 @@ export async function cancel(interaction: $TSFixMe, params: $TSFixMe) {
         } else {
             host_id = participants[0];
         }
-        const host_member = await searchMemberById(guild, host_id);
+        const host_member = await searchAPIMemberById(guild, host_id);
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const helpEmbed = getCommandHelpEmbed(interaction.channel.name);
         const cmd_message = interaction.message;
@@ -254,7 +254,7 @@ export async function del(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
-        const member = await searchMemberById(guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
         const msg_id = params.get('mid');
         const cmd_message = await searchMessageById(guild, interaction.channelId, msg_id);
         const image1_msg_id = params.get('imid1');
@@ -273,7 +273,7 @@ export async function del(interaction: $TSFixMe, params: $TSFixMe) {
         } else {
             host_id = participants[0];
         }
-        const host_member = await searchMemberById(guild, host_id);
+        const host_member = await searchAPIMemberById(guild, host_id);
 
         sendRecruitButtonLog(interaction, member, host_member, '削除', '#f04747');
 
@@ -334,7 +334,7 @@ export async function close(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
-        const member = await searchMemberById(guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
         const image1_msg_id = params.get('imid1');
         const image1_message = await searchMessageById(guild, interaction.channelId, image1_msg_id);
         const helpEmbed = getCommandHelpEmbed(image1_message.channel.name);
@@ -346,7 +346,7 @@ export async function close(interaction: $TSFixMe, params: $TSFixMe) {
         } else {
             host_id = participants[0];
         }
-        const host_member = await searchMemberById(guild, host_id);
+        const host_member = await searchAPIMemberById(guild, host_id);
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const cmd_message = interaction.message;
         let channelId = params.get('vid');
@@ -427,9 +427,9 @@ export async function joinNotify(interaction: $TSFixMe, params: $TSFixMe) {
 
         const guild = await interaction.guild.fetch();
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
-        const member = await searchMemberById(guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
-        const host_member = await searchMemberById(guild, host_id);
+        const host_member = await searchAPIMemberById(guild, host_id);
 
         sendRecruitButtonLog(interaction, member, host_member, '参加', '#5865f2');
 
@@ -470,7 +470,7 @@ export async function joinNotify(interaction: $TSFixMe, params: $TSFixMe) {
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
-            const host_guild_member = await searchMemberById(guild, host_id);
+            const host_guild_member = await searchAPIMemberById(guild, host_id);
             try {
                 if (isNotEmpty(host_guild_member.voice.channel) && host_guild_member.voice.channel.type === ChannelType.GuildVoice) {
                     const host_joined_vc = await searchChannelById(guild, host_guild_member.voice.channelId);
@@ -517,11 +517,11 @@ export async function cancelNotify(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
-        const member = await searchMemberById(guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const cmd_message = interaction.message;
-        const host_member = await searchMemberById(guild, host_id);
+        const host_member = await searchAPIMemberById(guild, host_id);
 
         sendRecruitButtonLog(interaction, member, host_member, 'キャンセル', '#f04747');
 
@@ -573,9 +573,9 @@ export async function closeNotify(interaction: $TSFixMe, params: $TSFixMe) {
         });
 
         const guild = await interaction.guild.fetch();
-        const member = await searchMemberById(guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
         const host_id = params.get('hid');
-        const host_member = await searchMemberById(guild, host_id);
+        const host_member = await searchAPIMemberById(guild, host_id);
         const embed = new EmbedBuilder().setDescription(`<@${host_id}>たんの募集〆`);
         const helpEmbed = getCommandHelpEmbed(interaction.channel.name);
         const cmd_message = interaction.message;
