@@ -26,7 +26,7 @@ export class MembersService {
     static async registerMember(guildId: string, userId: string, displayName: string, iconUrl: string, joinedAt: Date) {
         try {
             DBCommon.init();
-            await DBCommon.run(`INSERT INTO members (guild_id, user_id, display_name, icon_url, joined_at)  values ($1, $2, $3, $4 $5)`, [
+            await DBCommon.run(`INSERT INTO members (guild_id, user_id, display_name, icon_url, joined_at)  values ($1, $2, $3, $4, $5)`, [
                 guildId,
                 userId,
                 displayName,
