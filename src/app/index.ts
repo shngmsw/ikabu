@@ -93,11 +93,13 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
             member = await searchMemberById(guildId, userId);
         }
 
+        if (member.joinedAt === null) {
+            throw new Error('joinedAt is null');
+        }
+
+        // membersテーブルにレコードがあるか確認
         if ((await MembersService.getMemberByUserId(guildId, userId)).length == 0) {
-            MembersService.registerMember(guildId, userId, member.displayName, member.displayAvatarURL());
-            if (member.joinedAt !== null) {
-                MembersService.updateJoinDate(guildId, userId, member.joinedAt);
-            }
+            MembersService.registerMember(guildId, userId, member.displayName, member.displayAvatarURL(), member.joinedAt);
         } else {
             MembersService.updateProfile(guildId, userId, member.displayName, member.displayAvatarURL());
         }

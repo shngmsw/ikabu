@@ -38,10 +38,10 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
 
             // membersテーブルにレコードがあるか確認
             if ((await MembersService.getMemberByUserId(guild.id, userId)).length == 0) {
-                MembersService.registerMember(guild.id, userId, member.displayName, member.displayAvatarURL());
-                if (member.joinedAt !== null) {
-                    MembersService.updateJoinDate(guild.id, userId, member.joinedAt);
+                if (member.joinedAt === null) {
+                    throw new Error('joinedAt is null');
                 }
+                MembersService.registerMember(guild.id, userId, member.displayName, member.displayAvatarURL(), member.joinedAt);
                 const friendCode = await FriendCodeService.getFriendCodeByUserId(newMember.id);
                 await sleep(600);
                 await setRookieRole(member, beginnerRole, messageCount, friendCode);
