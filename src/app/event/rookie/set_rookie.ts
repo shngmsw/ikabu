@@ -1,5 +1,5 @@
 import { FriendCodeService } from '../../../db/friend_code_service.js';
-import { MembersService } from '../../../db/members_service.js';
+import { MessageCountService } from '../../../db/message_count_service.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { searchMemberById } from '../../common/manager/member_manager';
@@ -52,9 +52,9 @@ async function setRookieRole(guild: $TSFixMe, member: $TSFixMe, beginnerRole: $T
 }
 
 async function getMessageCount(id: $TSFixMe) {
-    const result = await MembersService.getMemberByUserId(id);
+    const result = await MessageCountService.getMemberByUserId(id);
     if (result[0] != null) {
-        return result[0].message_count;
+        return result[0].count;
     }
     return 0;
 }

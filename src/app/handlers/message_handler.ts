@@ -4,7 +4,7 @@ import { PermissionsBitField, AttachmentBuilder } from 'discord.js';
 import { handleStageInfo } from '../feat-utils/splat3/stageinfo';
 import { randomBool, isNotEmpty } from '../common/others';
 import { removeRookie } from '../event/rookie/remove_rookie';
-import { chatCountUp } from '../event/message_related/members';
+import { chatCountUp } from '../event/message_related/message_count';
 import { deleteToken } from '../event/message_related/delete_token';
 import { sendIntentionConfirmReply } from '../event/rookie/send_questionnaire';
 import { dispand } from '../event/message_related/dispander';

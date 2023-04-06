@@ -2,7 +2,7 @@
 import { ActivityType, Client, GatewayIntentBits, Partials } from 'discord.js';
 import { DBCommon } from '../db/db';
 import { FriendCodeService } from '../db/friend_code_service';
-import { MembersService } from '../db/members_service';
+import { MessageCountService } from '../db/message_count_service';
 import { RecruitService } from '../db/recruit_service';
 import { TeamDividerService } from '../db/team_divider_service';
 import { log4js_obj } from '../log4js_settings';
@@ -96,7 +96,7 @@ client.on('ready', async () => {
         DBCommon.init();
         await FriendCodeService.createTableIfNotExists();
         await RecruitService.createTableIfNotExists();
-        await MembersService.createTableIfNotExists();
+        await MessageCountService.createTableIfNotExists();
         await TeamDividerService.createTableIfNotExists();
         const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID || '');
         if (guild == null) {
