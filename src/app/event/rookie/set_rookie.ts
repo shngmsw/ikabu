@@ -44,7 +44,7 @@ async function setRookieRole(guild: $TSFixMe, member: $TSFixMe, beginnerRole: $T
     if (messageCount == 0 && friendCode.length == 0) {
         const fetch_member = await searchMemberById(guild, member.id);
         if (fetch_member) {
-            fetch_member.roles.set([beginnerRole.id]).catch((error: $TSFixMe) => {
+            fetch_member.roles.add(beginnerRole).catch((error: $TSFixMe) => {
                 logger.error(error);
             });
         }
