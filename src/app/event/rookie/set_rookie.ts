@@ -8,6 +8,7 @@ import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { searchRoleById } from '../../common/manager/role_manager';
 import { sleep } from '../../common/others.js';
 import { FriendCode } from '../../../db/model/friend_code.js';
+import { Member } from '../../../db/model/member.js';
 
 const logger = log4js_obj.getLogger('guildMemberAdd');
 
@@ -36,28 +37,26 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
             const messageCount = await getMessageCount(newMember.id);
             const member = await searchAPIMemberById(guild.id, userId);
 
+            const dbMember = new Member(
+                guild.id,
+                userId,
+                member.displayName,
+                member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+                member.joinedAt,
+            );
+
             // membersテーブルにレコードがあるか確認
             if ((await MembersService.getMemberByUserId(guild.id, userId)).length == 0) {
                 if (member.joinedAt === null) {
                     throw new Error('joinedAt is null');
                 }
-                MembersService.registerMember(
-                    guild.id,
-                    userId,
-                    member.displayName,
-                    member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-                    member.joinedAt,
-                );
+
+                MembersService.registerMember(dbMember);
                 const friendCode = await FriendCodeService.getFriendCodeByUserId(newMember.id);
                 await sleep(600);
                 await setRookieRole(member, beginnerRole, messageCount, friendCode);
             } else {
-                MembersService.updateProfile(
-                    guild.id,
-                    userId,
-                    member.displayName,
-                    member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-                );
+                MembersService.updateMember(dbMember);
             }
             await sentMessage.react('👍');
         }

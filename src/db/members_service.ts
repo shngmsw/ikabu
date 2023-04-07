@@ -23,21 +23,15 @@ export class MembersService {
         }
     }
 
-    static async registerMember(guildId: string, userId: string, displayName: string, iconUrl: string, joinedAt: string | Date) {
-        let joined;
-        if (joinedAt instanceof Date) {
-            joined = joinedAt.toString();
-        } else {
-            joined = joinedAt;
-        }
+    static async registerMember(member: Member) {
         try {
             DBCommon.init();
             await DBCommon.run(`INSERT INTO members (guild_id, user_id, display_name, icon_url, joined_at)  values ($1, $2, $3, $4, $5)`, [
-                guildId,
-                userId,
-                displayName,
-                iconUrl,
-                joined,
+                member.guild_id,
+                member.user_id,
+                member.display_name,
+                member.icon_url,
+                member.joined_at,
             ]);
             DBCommon.close();
         } catch (err) {
@@ -45,28 +39,15 @@ export class MembersService {
         }
     }
 
-    static async updateProfile(guildId: string, userId: string, displayName: string, iconUrl: string) {
+    static async updateMember(member: Member) {
         try {
             DBCommon.init();
-            await DBCommon.run(`UPDATE members SET display_name = $1, icon_url = $2 WHERE guild_id = $3 and user_id = $4`, [
-                displayName,
-                iconUrl,
-                guildId,
-                userId,
-            ]);
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
-        }
-    }
-
-    static async updateJoinDate(guildId: string, userId: string, joinedAt: Date) {
-        try {
-            DBCommon.init();
-            await DBCommon.run(`UPDATE members SET joined_at = $1 WHERE guild_id = $2 and user_id = $3`, [
-                joinedAt.toString(),
-                guildId,
-                userId,
+            await DBCommon.run(`UPDATE members SET display_name = $1, icon_url = $2, joined_at = $3 WHERE guild_id = $4 and user_id = $5`, [
+                member.display_name,
+                member.icon_url,
+                member.joined_at,
+                member.guild_id,
+                member.user_id,
             ]);
             DBCommon.close();
         } catch (err) {

@@ -21,6 +21,7 @@ import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
 import { registerSlashCommands } from '../register';
 import { searchAPIMemberById } from './common/manager/member_manager';
+import { Member } from '../db/model/member';
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -97,22 +98,19 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
             throw new Error('joinedAt is null');
         }
 
+        const updateMember = new Member(
+            guildId,
+            userId,
+            member.displayName,
+            member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+            member.joinedAt,
+        );
+
         // membersテーブルにレコードがあるか確認
         if ((await MembersService.getMemberByUserId(guildId, userId)).length == 0) {
-            MembersService.registerMember(
-                guildId,
-                userId,
-                member.displayName,
-                member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-                member.joinedAt,
-            );
+            MembersService.registerMember(updateMember);
         } else {
-            MembersService.updateProfile(
-                guildId,
-                userId,
-                member.displayName,
-                member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-            );
+            MembersService.updateMember(updateMember);
         }
     } catch (err) {
         const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
