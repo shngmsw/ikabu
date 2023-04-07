@@ -45,14 +45,19 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
                     guild.id,
                     userId,
                     member.displayName,
-                    member.displayAvatarURL({ extension: 'png' }),
+                    member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
                     member.joinedAt,
                 );
                 const friendCode = await FriendCodeService.getFriendCodeByUserId(newMember.id);
                 await sleep(600);
                 await setRookieRole(member, beginnerRole, messageCount, friendCode);
             } else {
-                MembersService.updateProfile(guild.id, userId, member.displayName, member.displayAvatarURL({ extension: 'png' }));
+                MembersService.updateProfile(
+                    guild.id,
+                    userId,
+                    member.displayName,
+                    member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+                );
             }
             await sentMessage.react('👍');
         }

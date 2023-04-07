@@ -103,11 +103,16 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
                 guildId,
                 userId,
                 member.displayName,
-                member.displayAvatarURL({ extension: 'png' }),
+                member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
                 member.joinedAt,
             );
         } else {
-            MembersService.updateProfile(guildId, userId, member.displayName, member.displayAvatarURL({ extension: 'png' }));
+            MembersService.updateProfile(
+                guildId,
+                userId,
+                member.displayName,
+                member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+            );
         }
     } catch (err) {
         const loggerMU = log4js_obj.getLogger('guildMemberUpdate');

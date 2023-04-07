@@ -49,7 +49,7 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
             guild.id,
             userId,
             memberRaw.displayName,
-            memberRaw.displayAvatarURL({ extension: 'png' }),
+            memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
             memberRaw.joinedAt,
         );
 
@@ -57,7 +57,7 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
             guild.id,
             userId,
             memberRaw.displayName,
-            memberRaw.displayAvatarURL({ extension: 'png' }),
+            memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
             memberRaw.joinedAt.toString(),
         );
     } else {
