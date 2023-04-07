@@ -50,10 +50,16 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
             userId,
             memberRaw.displayName,
             memberRaw.displayAvatarURL({ extension: 'png' }),
-            memberRaw.joinedAt.toString(),
+            memberRaw.joinedAt,
         );
 
-        return new Member(guild.id, userId, memberRaw.displayName, memberRaw.displayAvatarURL({ extension: 'png' }), memberRaw.joinedAt);
+        return new Member(
+            guild.id,
+            userId,
+            memberRaw.displayName,
+            memberRaw.displayAvatarURL({ extension: 'png' }),
+            memberRaw.joinedAt.toString(),
+        );
     } else {
         return members[0];
     }
