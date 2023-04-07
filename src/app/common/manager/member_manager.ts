@@ -50,7 +50,7 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
             userId,
             memberRaw.displayName,
             memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-            memberRaw.joinedAt.toString(),
+            memberRaw.joinedAt,
         );
 
         MembersService.registerMember(newMember);

@@ -1,18 +1,19 @@
 export class Member {
-    guild_id: string;
-    user_id: string;
-    display_name: string;
-    icon_url: string;
-    joined_at: string;
+    guildId: string;
+    userId: string;
+    displayName: string;
+    iconUrl: string;
+    joinedAt: Date;
+
     constructor(guildId: string, userId: string, userName: string, iconUrl: string, joinedAt: string | Date) {
-        this.guild_id = guildId;
-        this.user_id = userId;
-        this.display_name = userName;
-        this.icon_url = iconUrl;
+        this.guildId = guildId;
+        this.userId = userId;
+        this.displayName = userName;
+        this.iconUrl = iconUrl;
         if (joinedAt instanceof Date) {
-            this.joined_at = joinedAt.toString();
+            this.joinedAt = joinedAt;
         } else {
-            this.joined_at = joinedAt;
+            this.joinedAt = new Date(joinedAt);
         }
     }
 }

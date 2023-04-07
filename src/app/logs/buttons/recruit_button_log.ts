@@ -14,10 +14,10 @@ export async function sendRecruitButtonLog(
         embed.setTitle(interaction.channel?.name + 'で' + button_name + 'ボタンが押されたでし！');
     }
     embed.setAuthor({
-        name: `${member.display_name} [${member.user_id}]`,
-        iconURL: member.icon_url,
+        name: `${member.displayName} [${member.userId}]`,
+        iconURL: member.iconUrl,
     });
-    embed.setDescription('**募集主**: ' + host_member.display_name + ' [' + host_member.user_id + ']');
+    embed.setDescription('**募集主**: ' + host_member.displayName + ' [' + host_member.userId + ']');
     embed.setColor(color);
     embed.setTimestamp(interaction.createdAt);
     await sendEmbedsWebhook(process.env.BUTTON_LOG_WEBHOOK_URL, [embed]);

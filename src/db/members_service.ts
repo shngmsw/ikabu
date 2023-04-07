@@ -27,11 +27,11 @@ export class MembersService {
         try {
             DBCommon.init();
             await DBCommon.run(`INSERT INTO members (guild_id, user_id, display_name, icon_url, joined_at)  values ($1, $2, $3, $4, $5)`, [
-                member.guild_id,
-                member.user_id,
-                member.display_name,
-                member.icon_url,
-                member.joined_at,
+                member.guildId,
+                member.userId,
+                member.displayName,
+                member.iconUrl,
+                member.joinedAt.toString(),
             ]);
             DBCommon.close();
         } catch (err) {
@@ -43,11 +43,11 @@ export class MembersService {
         try {
             DBCommon.init();
             await DBCommon.run(`UPDATE members SET display_name = $1, icon_url = $2, joined_at = $3 WHERE guild_id = $4 and user_id = $5`, [
-                member.display_name,
-                member.icon_url,
-                member.joined_at,
-                member.guild_id,
-                member.user_id,
+                member.displayName,
+                member.iconUrl,
+                member.joinedAt.toString(),
+                member.guildId,
+                member.userId,
             ]);
             DBCommon.close();
         } catch (err) {
@@ -58,8 +58,14 @@ export class MembersService {
     static async getMemberByUserId(guildId: string, userId: string) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all); // https://stackoverflow.com/questions/56122812/async-await-sqlite-in-javascript
-        const results = (await db.all(`select * from members where guild_id = ${guildId} and user_id = ${userId}`)) as Member[];
+        const results = await db.all(`select * from members where guild_id = ${guildId} and user_id = ${userId}`);
+        const members: Member[] = [];
+        for (let i = 0; i < results.length; i++) {
+            members.push(
+                new Member(results[i].guild_id, results[i].user_id, results[i].display_name, results[i].icon_url, results[i].joined_at),
+            );
+        }
         DBCommon.close();
-        return results;
+        return members;
     }
 }

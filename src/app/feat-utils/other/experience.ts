@@ -25,7 +25,7 @@ export async function handleIkabuExperience(interaction: ChatInputCommandInterac
         throw new Error('interaction.member is null');
     }
     const member = await searchDBMemberById(guild, interaction.member.user.id);
-    const joinDate = new Date(member.joined_at);
+    const joinDate = member.joinedAt;
     const today = new Date();
 
     if (joinDate === null) {
@@ -78,7 +78,7 @@ export async function handleIkabuExperience(interaction: ChatInputCommandInterac
     context.restore();
 
     // load avatar image
-    const avatar = await Canvas.loadImage(member.icon_url);
+    const avatar = await Canvas.loadImage(member.iconUrl);
 
     // set path for clip
     context.beginPath();
@@ -94,15 +94,15 @@ export async function handleIkabuExperience(interaction: ChatInputCommandInterac
     context.lineWidth = 8;
     context.stroke();
 
-    context.font = userText(canvas, member.display_name);
+    context.font = userText(canvas, member.displayName);
     context.fillStyle = colorCodes[experienceRank];
 
-    const userWidth = context.measureText(member.display_name).width;
+    const userWidth = context.measureText(member.displayName).width;
 
-    context.fillText(member.display_name, (400 - userWidth) / 2 + 250, 63);
+    context.fillText(member.displayName, (400 - userWidth) / 2 + 250, 63);
     context.strokeStyle = '#333333';
     context.lineWidth = 1.5;
-    context.strokeText(member.display_name, (400 - userWidth) / 2 + 250, 63);
+    context.strokeText(member.displayName, (400 - userWidth) / 2 + 250, 63);
 
     context.font = '43px "Splatfont"';
     context.fillText('イカ部歴', 240, 130);

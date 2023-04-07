@@ -73,7 +73,7 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
         sendRecruitButtonLog(interaction, member, hostMember, '参加', '#5865f2');
 
         // if (member.user.id === hostId) {  // 募集主のみ
-        if (participants.includes(member.user_id)) {
+        if (participants.includes(member.userId)) {
             await interaction.followUp({
                 content: '募集メンバーは参加表明できないでし！',
                 ephemeral: true,
@@ -85,7 +85,7 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
             return;
         } else {
             // 参加済みかチェック
-            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user_id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.userId);
             if (member_data.length > 0) {
                 await interaction.followUp({
                     content: 'すでに参加ボタンを押してるでし！',
@@ -100,12 +100,12 @@ export async function join(interaction: $TSFixMe, params: $TSFixMe) {
 
             const embed = new EmbedBuilder();
             embed.setAuthor({
-                name: `${member.display_name}たんが参加表明したでし！`,
-                iconURL: member.icon_url,
+                name: `${member.displayName}たんが参加表明したでし！`,
+                iconURL: member.iconUrl,
             });
 
             // recruitテーブルにデータ追加
-            await RecruitService.save(interaction.message.id, hostId, member.user_id);
+            await RecruitService.save(interaction.message.id, hostId, member.userId);
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
@@ -195,7 +195,7 @@ export async function cancel(interaction: $TSFixMe, params: $TSFixMe) {
         sendRecruitButtonLog(interaction, member, hostMember, 'キャンセル', '#f04747');
 
         // if (member.user.id === hostId) {  // 募集主のみ
-        if (participants.includes(member.user_id)) {
+        if (participants.includes(member.userId)) {
             // ピン留め解除
             image1_message.unpin();
 
@@ -219,7 +219,7 @@ export async function cancel(interaction: $TSFixMe, params: $TSFixMe) {
             });
         } else {
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
-            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user_id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.userId);
             if (member_data.length > 0) {
                 // recruitテーブルから自分のデータのみ削除
                 await RecruitService.deleteByMemberId(interaction.message.id, interaction.member.id);
@@ -280,7 +280,7 @@ export async function del(interaction: $TSFixMe, params: $TSFixMe) {
         sendRecruitButtonLog(interaction, member, hostMember, '削除', '#f04747');
 
         // if (member.user.id === hostId) {  // 募集主のみ
-        if (participants.includes(member.user_id)) {
+        if (participants.includes(member.userId)) {
             try {
                 await interaction.message.delete();
             } catch (error) {
@@ -359,7 +359,7 @@ export async function close(interaction: $TSFixMe, params: $TSFixMe) {
         sendRecruitButtonLog(interaction, member, hostMember, '〆', '#4f545c');
 
         // if (member.user.id === hostId) {  // 募集主のみ
-        if (participants.includes(member.user_id)) {
+        if (participants.includes(member.userId)) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             // ピン留め解除
@@ -435,7 +435,7 @@ export async function joinNotify(interaction: $TSFixMe, params: $TSFixMe) {
 
         sendRecruitButtonLog(interaction, member, hostMember, '参加', '#5865f2');
 
-        if (member.user_id === hostId) {
+        if (member.userId === hostId) {
             await interaction.followUp({
                 content: '募集主は参加表明できないでし！',
                 ephemeral: true,
@@ -448,7 +448,7 @@ export async function joinNotify(interaction: $TSFixMe, params: $TSFixMe) {
             return;
         } else {
             // 参加済みかチェック
-            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user_id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.userId);
             if (member_data.length > 0) {
                 await interaction.followUp({
                     content: 'すでに参加ボタンを押してるでし！',
@@ -464,11 +464,11 @@ export async function joinNotify(interaction: $TSFixMe, params: $TSFixMe) {
 
             const embed = new EmbedBuilder();
             embed.setAuthor({
-                name: `${member.display_name}たんが参加表明したでし！`,
-                iconURL: member.icon_url,
+                name: `${member.displayName}たんが参加表明したでし！`,
+                iconURL: member.iconUrl,
             });
             // recruitテーブルにデータ追加
-            await RecruitService.save(interaction.message.id, interaction.member.user.id, member.user_id);
+            await RecruitService.save(interaction.message.id, interaction.member.user.id, member.userId);
 
             // ホストがVCにいるかチェックして、VCにいる場合はtext in voiceにメッセージ送信
             let notify_to_host_message = null;
@@ -527,7 +527,7 @@ export async function cancelNotify(interaction: $TSFixMe, params: $TSFixMe) {
 
         sendRecruitButtonLog(interaction, member, hostMember, 'キャンセル', '#f04747');
 
-        if (member.user_id == hostId) {
+        if (member.userId == hostId) {
             // ピン留め解除
             cmd_message.unpin();
             // recruitテーブルから削除
@@ -539,7 +539,7 @@ export async function cancelNotify(interaction: $TSFixMe, params: $TSFixMe) {
             await interaction.followUp({ embeds: [embed], ephemeral: false });
         } else {
             // NOTE: 参加表明済みかチェックして、参加表明済みならキャンセル可能
-            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.user_id);
+            const member_data = await RecruitService.getRecruitMessageByMemberId(interaction.message.id, member.userId);
             if (member_data.length > 0) {
                 // recruitテーブルから自分のデータのみ削除
                 await RecruitService.deleteByMemberId(interaction.message.id, interaction.member.id);
@@ -584,7 +584,7 @@ export async function closeNotify(interaction: $TSFixMe, params: $TSFixMe) {
 
         sendRecruitButtonLog(interaction, member, hostMember, '〆', '#4f545c');
 
-        if (member.user_id === hostId) {
+        if (member.userId === hostId) {
             const recruit_data = await RecruitService.getRecruitAllByMessageId(interaction.message.id);
             const member_list = getMemberMentions(recruit_data);
             await cmd_message.edit({
