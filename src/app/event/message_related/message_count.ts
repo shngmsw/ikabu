@@ -3,7 +3,7 @@ import { MessageCount } from '../../../db/model/message_count';
 
 export async function chatCountUp(msg: $TSFixMe) {
     const id = msg.author.id;
-    // membersテーブルがなければ作る
+    // message_countsテーブルがなければ作る
     await MessageCountService.createTableIfNotExists();
     const messageCount = await getMessageCount(id);
     await MessageCountService.save(id, messageCount);
