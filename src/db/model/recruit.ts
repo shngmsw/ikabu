@@ -1,12 +1,18 @@
 export class Recruit {
-    user_id: string;
-    author_id: string;
-    member_id: string;
-    created_at: string;
-    constructor(user_id: string, author_id: string, member_id: string, created_at: string) {
-        this.user_id = user_id;
-        this.author_id = author_id;
-        this.member_id = member_id;
-        this.created_at = created_at;
+    messageId: string;
+    authorId: string;
+    recruitNum: number;
+    condition: string;
+    createdAt: Date;
+    constructor(messageId: string, authorId: string, recruitNum: number, condition: string, createdAt: string | Date) {
+        this.messageId = messageId;
+        this.authorId = authorId;
+        this.recruitNum = recruitNum;
+        this.condition = condition;
+        if (createdAt instanceof Date) {
+            this.createdAt = createdAt;
+        } else {
+            this.createdAt = new Date(createdAt);
+        }
     }
 }
