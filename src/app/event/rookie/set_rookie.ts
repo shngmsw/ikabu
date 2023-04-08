@@ -56,7 +56,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
                 await sleep(600);
                 await setRookieRole(member, beginnerRole, messageCount, friendCode);
             } else {
-                MembersService.updateMember(dbMember);
+                MembersService.updateMemberProfile(dbMember);
             }
             await sentMessage.react('👍');
         }

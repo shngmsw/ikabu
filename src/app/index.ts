@@ -110,7 +110,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
         if ((await MembersService.getMemberByUserId(guildId, userId)).length == 0) {
             MembersService.registerMember(updateMember);
         } else {
-            MembersService.updateMember(updateMember);
+            MembersService.updateMemberProfile(updateMember);
         }
     } catch (err) {
         const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
