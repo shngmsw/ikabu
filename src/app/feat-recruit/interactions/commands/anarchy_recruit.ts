@@ -12,7 +12,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, fetchSchedule, getAnarchyOpenData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
-import { searchMemberById } from '../../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleIdByName } from '../../../common/manager/role_manager';
 import { isEmpty, isNotEmpty, sleep } from '../../../common/others';
@@ -32,7 +32,7 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
     const recruit_num = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
     const guild = await interaction.guild?.fetch();
-    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
     let member_counter = recruit_num; // プレイ人数のカウンター
@@ -232,10 +232,10 @@ async function sendAnarchyMatch(
 
     // サーバーメンバーとして取得し直し
     if (user1 !== null) {
-        user1 = await searchMemberById(guild, user1.id);
+        user1 = await searchAPIMemberById(guild, user1.id);
     }
     if (user2 !== null) {
-        user2 = await searchMemberById(guild, user2.id);
+        user2 = await searchAPIMemberById(guild, user2.id);
     }
 
     const recruitBuffer = await recruitAnarchyCanvas(recruit_num, count, host_member, user1, user2, condition, rank, channel_name);

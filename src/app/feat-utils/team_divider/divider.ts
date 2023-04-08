@@ -1,5 +1,5 @@
 import { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, APIEmbedField } from 'discord.js';
-import { searchMemberById } from '../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { isEmpty } from '../../common/others';
 import { setButtonEnable, recoveryThinkingButton, disableThinkingButton, setButtonDisable } from '../../common/button_components';
 import { searchMessageById } from '../../common/manager/message_manager';
@@ -15,7 +15,7 @@ const logger = log4js_obj.getLogger('interaction');
  */
 export async function dividerInitialMessage(interaction: $TSFixMe) {
     try {
-        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const hostId = member.id;
         const teamNum = interaction.options.getInteger('各チームのメンバー数');
         let hideWin = interaction.options.getBoolean('勝利数と勝率を隠す');
@@ -84,10 +84,10 @@ export async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
             components: await setButtonDisable(interaction.message, interaction),
         });
 
-        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const hostId = params.get('hid');
         const hideWin = params.get('hide');
-        const host_member = await searchMemberById(interaction.guild, hostId);
+        const host_member = await searchAPIMemberById(interaction.guild, hostId);
         const messageId = interaction.message.id;
 
         if (member.voice.channelId != host_member.voice.channelId) {
@@ -175,8 +175,8 @@ export async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
         });
         const messageId = interaction.message.id;
         const hostId = params.get('hid');
-        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
-        const host_member = await searchMemberById(interaction.guild, hostId);
+        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
+        const host_member = await searchAPIMemberById(interaction.guild, hostId);
 
         // キャンセルボタンを押した人が参加登録をしている場合
         if ((await TeamDividerService.selectMemberFromDB(messageId, 0, member.id)).length != 0) {
@@ -246,7 +246,7 @@ export async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
         await interaction.update({
             components: await setButtonDisable(interaction.message, interaction),
         });
-        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const messageId = interaction.message.id;
         const hostId = params.get('hid');
         const teamNum = params.get('num');
@@ -390,7 +390,7 @@ async function matching(interaction: $TSFixMe, params: $TSFixMe, winTeam: $TSFix
             components: await setButtonDisable(interaction.message, interaction),
         });
 
-        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const messageId = params.get('mid');
         const hostId = params.get('hid');
         const teamNum = params.get('num');
@@ -500,10 +500,10 @@ export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
             components: await setButtonDisable(interaction.message, interaction),
         });
 
-        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const messageId = params.get('mid');
         const hostId = params.get('hid');
-        const hostMember = await searchMemberById(interaction.guild, hostId);
+        const hostMember = await searchAPIMemberById(interaction.guild, hostId);
         const teamNum = params.get('num');
         const count = params.get('count');
         const fullMembers = await TeamDividerService.selectAllMemberFromDB(messageId, count);
@@ -577,7 +577,7 @@ export async function endButton(interaction: $TSFixMe, params: $TSFixMe) {
             components: await setButtonDisable(interaction.message, interaction),
         });
 
-        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const messageId = params.get('mid');
         const hostId = params.get('hid');
 
@@ -615,7 +615,7 @@ export async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
             components: await setButtonDisable(interaction.message, interaction),
         });
 
-        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const messageId = params.get('mid');
         const preMessageId = params.get('pmid');
         const count = params.get('count');
@@ -667,7 +667,7 @@ export async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
             components: await setButtonDisable(interaction.message, interaction),
         });
 
-        const member = await searchMemberById(interaction.guild, interaction.member.user.id);
+        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const messageId = params.get('mid');
         const hostId = params.get('hid');
         const count = params.get('count');
@@ -683,7 +683,7 @@ export async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
             return;
         }
 
-        const hostMember = await searchMemberById(interaction.guild, hostId);
+        const hostMember = await searchAPIMemberById(interaction.guild, hostId);
 
         const allMembers = await TeamDividerService.selectAllMemberFromDB(messageId, count);
 

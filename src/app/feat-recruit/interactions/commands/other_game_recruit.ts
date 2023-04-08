@@ -11,7 +11,7 @@ import {
     VoiceChannel,
 } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
-import { searchMemberById } from '../../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { isNotEmpty, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, recruitActionRow, unlockChannelButton } from '../../buttons/create_recruit_buttons';
@@ -27,7 +27,7 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction)
         throw new Error('guild cannot fetch.');
     }
     const options = interaction.options;
-    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
     if (host_member === null) {
         throw new Error('host_member is null.');
     }

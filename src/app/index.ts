@@ -1,8 +1,9 @@
 // Discord bot implements
-import { ActivityType, Client, GatewayIntentBits, Partials } from 'discord.js';
+import { ActivityType, Client, GatewayIntentBits, GuildMember, Partials } from 'discord.js';
 import { DBCommon } from '../db/db';
-import { FriendCodeService } from '../db/friend_code_service';
 import { MembersService } from '../db/members_service';
+import { FriendCodeService } from '../db/friend_code_service';
+import { MessageCountService } from '../db/message_count_service';
 import { RecruitService } from '../db/recruit_service';
 import { TeamDividerService } from '../db/team_divider_service';
 import { log4js_obj } from '../log4js_settings';
@@ -19,6 +20,8 @@ import { isNotEmpty } from './common/others';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
 import { registerSlashCommands } from '../register';
+import { searchAPIMemberById } from './common/manager/member_manager';
+import { Member } from '../db/model/member';
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -41,7 +44,7 @@ client.on('messageCreate', async (msg: $TSFixMe) => {
     message_handler.call(msg);
 });
 
-client.on('guildMemberAdd', async (member: $TSFixMe) => {
+client.on('guildMemberAdd', async (member: GuildMember) => {
     try {
         guildMemberAddEvent(member);
         const guild = await member.guild.fetch();
@@ -82,6 +85,39 @@ client.on('guildMemberRemove', async (member: $TSFixMe) => {
     }
 });
 
+client.on('guildMemberUpdate', async (oldMember, newMember) => {
+    try {
+        const guildId = newMember.guild.id;
+        const userId = newMember.user.id;
+        let member = newMember;
+        if (typeof newMember.displayAvatarURL() !== 'string' || typeof newMember.displayName !== 'string' || newMember.joinedAt === null) {
+            member = await searchAPIMemberById(guildId, userId);
+        }
+
+        if (member.joinedAt === null) {
+            throw new Error('joinedAt is null');
+        }
+
+        const updateMember = new Member(
+            guildId,
+            userId,
+            member.displayName,
+            member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+            member.joinedAt,
+        );
+
+        // membersテーブルにレコードがあるか確認
+        if ((await MembersService.getMemberByUserId(guildId, userId)).length == 0) {
+            MembersService.registerMember(updateMember);
+        } else {
+            MembersService.updateMember(updateMember);
+        }
+    } catch (err) {
+        const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
+        loggerMU.error({ err });
+    }
+});
+
 client.on('ready', async () => {
     try {
         if (client.user == null) {
@@ -94,9 +130,10 @@ client.on('ready', async () => {
         // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => logger.error(err)));
         await registerSlashCommands();
         DBCommon.init();
+        await MembersService.createTableIfNotExists();
         await FriendCodeService.createTableIfNotExists();
         await RecruitService.createTableIfNotExists();
-        await MembersService.createTableIfNotExists();
+        await MessageCountService.createTableIfNotExists();
         await TeamDividerService.createTableIfNotExists();
         const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID || '');
         if (guild == null) {

@@ -1,6 +1,6 @@
 import { CacheType, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
-import { searchMemberById } from '../../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { isNotEmpty, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, notifyActionRow, recruitActionRow } from '../../buttons/create_recruit_buttons';
@@ -38,7 +38,7 @@ async function sendPrivateRecruit(
     if (recruit_channel === null) {
         throw new Error('recruit_channel is null.');
     }
-    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
     if (host_member === null) {
         throw new Error('host_member is null.');
     }
@@ -121,7 +121,7 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
     if (recruit_channel === null) {
         throw new Error('recruit_channel is null.');
     }
-    const host_member = await searchMemberById(interaction.guild, interaction.member?.user.id);
+    const host_member = await searchAPIMemberById(interaction.guild, interaction.member?.user.id);
     if (host_member === null) {
         throw new Error('host_member is null.');
     }

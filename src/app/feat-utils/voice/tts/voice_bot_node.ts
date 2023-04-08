@@ -6,7 +6,7 @@
 import { VoiceText } from 'voice-text';
 import { Readable } from 'stream';
 import conf from 'config-reloadable';
-import { searchMemberById } from '../../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { SHA256 } from 'crypto-js';
 
 const config = conf();
@@ -61,7 +61,7 @@ function readConfig() {
 export async function mode_api(msg: $TSFixMe) {
     if (mode === 1) {
         // ユーザーによって音声変える
-        const member = await searchMemberById(msg.guild, msg.author.id);
+        const member = await searchAPIMemberById(msg.guild, msg.author.id);
         const displayNameSha256 = SHA256(member.displayName);
         const numberOnly = displayNameSha256.toString().replace(/[^0-9]/g, '');
 
