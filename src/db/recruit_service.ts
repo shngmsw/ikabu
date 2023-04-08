@@ -13,7 +13,7 @@ export class RecruitService {
                                 author_id text,
                                 recruit_num number,
                                 condition text,
-                                created_at text
+                                created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime')
                     )`);
             DBCommon.close();
         } catch (err) {
@@ -21,13 +21,15 @@ export class RecruitService {
         }
     }
 
-    static async registerRecruit(recruit: Recruit) {
+    static async registerRecruit(messageId: string, authorId: string, recruitNum: string, condition: string) {
         try {
             DBCommon.init();
-            await DBCommon.run(
-                `INSERT INTO recruit (message_id, author_id, recruit_num, condition, created_at) values ($1, $2, $3, $4, $5)`,
-                [recruit.messageId, recruit.authorId, recruit.recruitNum, recruit.condition, recruit.createdAt],
-            );
+            await DBCommon.run(`INSERT INTO recruit (message_id, author_id, recruit_num, condition) values ($1, $2, $3, $4)`, [
+                messageId,
+                authorId,
+                recruitNum,
+                condition,
+            ]);
             DBCommon.close();
         } catch (err) {
             logger.error(err);

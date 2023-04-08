@@ -1,11 +1,13 @@
 export class Participant {
-    messageId: string;
     userId: string;
+    displayName: string;
+    iconUrl: string;
     userType: number;
     joinedAt: Date;
-    constructor(messageId: string, userId: string, userType: number, joinedAt: string | Date) {
-        this.messageId = messageId;
+    constructor(userId: string, displayName: string, iconUrl: string, userType: number, joinedAt: string | Date) {
         this.userId = userId;
+        this.displayName = displayName;
+        this.iconUrl = iconUrl;
         this.userType = userType;
         if (joinedAt instanceof Date) {
             this.joinedAt = joinedAt;
