@@ -39,13 +39,12 @@ export class MembersService {
         }
     }
 
-    static async updateMember(member: Member) {
+    static async updateMemberProfile(member: Member) {
         try {
             DBCommon.init();
-            await DBCommon.run(`UPDATE members SET display_name = $1, icon_url = $2, joined_at = $3 WHERE guild_id = $4 and user_id = $5`, [
+            await DBCommon.run(`UPDATE members SET display_name = $1, icon_url = $2 WHERE guild_id = $3 and user_id = $4`, [
                 member.displayName,
                 member.iconUrl,
-                member.joinedAt.toString(),
                 member.guildId,
                 member.userId,
             ]);
