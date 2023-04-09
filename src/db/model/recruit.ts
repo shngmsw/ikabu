@@ -3,12 +3,24 @@ export class Recruit {
     authorId: string;
     recruitNum: number;
     condition: string;
+    channelName: string | null;
+    recruitType: number;
     createdAt: Date;
-    constructor(messageId: string, authorId: string, recruitNum: number, condition: string, createdAt: string | Date) {
+    constructor(
+        messageId: string,
+        authorId: string,
+        recruitNum: number,
+        condition: string,
+        channelName: string | null,
+        recruitType: number,
+        createdAt: string | Date,
+    ) {
         this.messageId = messageId;
         this.authorId = authorId;
         this.recruitNum = recruitNum;
         this.condition = condition;
+        this.channelName = channelName;
+        this.recruitType = recruitType;
         if (createdAt instanceof Date) {
             this.createdAt = createdAt;
         } else {
@@ -16,3 +28,14 @@ export class Recruit {
         }
     }
 }
+
+export const RecruitType = {
+    ButtonNotify: 0,
+    PrivateRecruit: 1,
+    RegularRecruit: 2,
+    AnarchyRecruit: 3,
+    LeagueRecruit: 4,
+    SalmonRecruit: 5,
+    FestivalRecruit: 6,
+    OtherGameRecruit: 10,
+};

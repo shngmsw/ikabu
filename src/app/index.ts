@@ -22,6 +22,7 @@ import { sendCloseButton } from './event/support_auto_tag/send_support_close_but
 import { registerSlashCommands } from '../register';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { Member } from '../db/model/member';
+import { ParticipantService } from '../db/participants_service';
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -133,6 +134,7 @@ client.on('ready', async () => {
         await MembersService.createTableIfNotExists();
         await FriendCodeService.createTableIfNotExists();
         await RecruitService.createTableIfNotExists();
+        await ParticipantService.createTableIfNotExists();
         await MessageCountService.createTableIfNotExists();
         await TeamDividerService.createTableIfNotExists();
         const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID || '');

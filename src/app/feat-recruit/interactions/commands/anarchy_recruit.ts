@@ -12,13 +12,16 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, fetchSchedule, getAnarchyOpenData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
-import { searchAPIMemberById } from '../../../common/manager/member_manager';
+import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleIdByName } from '../../../common/manager/role_manager';
-import { isEmpty, isNotEmpty, sleep } from '../../../common/others';
+import { isNotEmpty, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
-import { getMemberMentions } from '../buttons/recruit_button_events';
+import { getMemberMentions } from '../buttons/other_events';
+import { Participant } from '../../../../db/model/participant';
+import { ParticipantService } from '../../../../db/participants_service';
+import { RecruitType } from '../../../../db/model/recruit';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -27,15 +30,15 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
 
     const options = interaction.options;
     const channel = interaction.channel;
-    const voice_channel = interaction.options.getChannel('使用チャンネル');
+    const voiceChannel = interaction.options.getChannel('使用チャンネル');
     let rank = options.getString('募集ウデマエ');
-    const recruit_num = options.getInteger('募集人数') ?? -1;
+    const recruitNum = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
     const guild = await interaction.guild?.fetch();
-    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
+    const hostMember = await searchAPIMemberById(guild, interaction.member?.user.id);
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
-    let member_counter = recruit_num; // プレイ人数のカウンター
+    let memberCounter = recruitNum; // プレイ人数のカウンター
     let type;
 
     if (options.getSubcommand() === 'now') {
@@ -44,21 +47,21 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
         type = 1;
     }
 
-    if (recruit_num < 1 || recruit_num > 3) {
+    if (recruitNum < 1 || recruitNum > 3) {
         await interaction.reply({
             content: '募集人数は1～3までで指定するでし！',
             ephemeral: true,
         });
         return;
     } else {
-        member_counter++;
+        memberCounter++;
     }
 
     // プレイヤー指定があればカウンターを増やす
-    if (user1 !== null) member_counter++;
-    if (user2 !== null) member_counter++;
+    if (user1 !== null) memberCounter++;
+    if (user2 !== null) memberCounter++;
 
-    if (member_counter > 4) {
+    if (memberCounter > 4) {
         await interaction.reply({
             content: '募集人数がおかしいでし！',
             ephemeral: true,
@@ -66,7 +69,7 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
         return;
     }
 
-    const usable_channel = [
+    const availableChannel = [
         'alfa',
         'bravo',
         'charlie',
@@ -82,14 +85,14 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
         'mike',
     ];
 
-    if (voice_channel instanceof VoiceChannel) {
-        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_member.user.id)) {
+    if (voiceChannel instanceof VoiceChannel) {
+        if (voiceChannel.members.size != 0 && !voiceChannel.members.has(hostMember.user.id)) {
             await interaction.reply({
                 content: 'そのチャンネルは使用中でし！',
                 ephemeral: true,
             });
             return;
-        } else if (!usable_channel.includes(voice_channel.name)) {
+        } else if (!availableChannel.includes(voiceChannel.name)) {
             await interaction.reply({
                 content: 'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
                 ephemeral: true,
@@ -104,14 +107,14 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
     let mention = `<@&${process.env.ROLE_ID_RECRUIT_ANARCHY}>`;
     // 募集条件がランクの場合はウデマエロールにメンション
     if (rank !== undefined && rank !== null) {
-        const mention_id = await searchRoleIdByName(guild, rank);
-        if (mention_id == null) {
+        const mentionId = await searchRoleIdByName(guild, rank);
+        if (mentionId == null) {
             await interaction.editReply({
                 content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
             });
             return;
         }
-        mention = `<@&${mention_id}>`;
+        mention = `<@&${mentionId}>`;
     } else {
         rank = '指定なし';
     }
@@ -119,16 +122,16 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
         const data = await fetchSchedule();
 
         if (checkFes(data.schedule, type)) {
-            const fes_channel_id = await searchChannelIdByName(guild, 'フェス募集', ChannelType.GuildText, null);
+            const fesChannelId = await searchChannelIdByName(guild, 'フェス募集', ChannelType.GuildText, null);
             await interaction.editReply({
-                content: `募集を建てようとした期間はフェス中でし！\nフェス募集をするには<#${fes_channel_id}>のチャンネルを使うでし！`,
+                content: `募集を建てようとした期間はフェス中でし！\nフェス募集をするには<#${fesChannelId}>のチャンネルを使うでし！`,
             });
             return;
         }
 
-        const anarchy_data = await getAnarchyOpenData(data, type);
+        const anarchyData = await getAnarchyOpenData(data, type);
 
-        let txt = `<@${host_member.user.id}>` + '**たんのバンカラ募集**\n';
+        let txt = `<@${hostMember.user.id}>` + '**たんのバンカラ募集**\n';
         if (user1 !== null && user2 !== null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         } else if (user1 !== null) {
@@ -143,14 +146,14 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
             interaction,
             mention,
             txt,
-            recruit_num,
+            recruitNum,
             condition,
-            member_counter,
+            memberCounter,
             rank,
-            host_member,
+            hostMember,
             user1,
             user2,
-            anarchy_data,
+            anarchyData,
         );
     } catch (error) {
         if (channel !== null) {
@@ -164,51 +167,51 @@ async function sendAnarchyMatch(
     interaction: ChatInputCommandInteraction,
     mention: string,
     txt: string,
-    recruit_num: number,
+    recruitNum: number,
     condition: string,
     count: number,
     rank: string,
-    host_member: GuildMember,
+    hostMember: GuildMember,
     user1: User | null,
     user2: User | null,
-    anarchy_data: $TSFixMe,
+    anarchyData: $TSFixMe,
 ) {
-    let thumbnail_url; // ガチルールのアイコン
+    let thumbnailUrl; // ガチルールのアイコン
     let thumbnailXP; // アイコンx座標
     let thumbnailYP; // アイコンy座標
     let thumbScaleX; // アイコン幅
     let thumbScaleY; // アイコン高さ
-    switch (anarchy_data.rule) {
+    switch (anarchyData.rule) {
         case 'ガチエリア':
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
+            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
             thumbnailXP = 600;
             thumbnailYP = 20;
             thumbScaleX = 90;
             thumbScaleY = 100;
             break;
         case 'ガチヤグラ':
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
+            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
             thumbnailXP = 595;
             thumbnailYP = 20;
             thumbScaleX = 90;
             thumbScaleY = 100;
             break;
         case 'ガチホコバトル':
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
+            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
             thumbnailXP = 585;
             thumbnailYP = 23;
             thumbScaleX = 110;
             thumbScaleY = 90;
             break;
         case 'ガチアサリ':
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
+            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
             thumbnailXP = 570;
             thumbnailYP = 20;
             thumbScaleX = 120;
             thumbScaleY = 100;
             break;
         default:
-            thumbnail_url =
+            thumbnailUrl =
                 'http://placehold.jp/15/4c4d57/ffffff/100x100.png?text=ここに画像を貼りたかったんだが、どうやらエラーみたいだ…。';
             thumbnailXP = 595;
             thumbnailYP = 20;
@@ -221,62 +224,98 @@ async function sendAnarchyMatch(
     if (guild === undefined) {
         throw new Error('guild cannot fetch');
     }
-    const reserve_channel = interaction.options.getChannel('使用チャンネル');
+    const reservedChannel = interaction.options.getChannel('使用チャンネル');
 
-    let channel_name = '🔉 VC指定なし';
-    if (reserve_channel instanceof VoiceChannel) {
-        channel_name = '🔉 ' + reserve_channel.name;
+    let channelName = '🔉 VC指定なし';
+    if (reservedChannel instanceof VoiceChannel) {
+        channelName = '🔉 ' + reservedChannel.name;
     }
 
-    const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
+    const thumbnail = [thumbnailUrl, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
-    // サーバーメンバーとして取得し直し
+    const hostPt = new Participant(hostMember.id, hostMember.displayName, hostMember.displayAvatarURL({ extension: 'png' }), 0, new Date());
+
+    let participant1 = null;
+    let participant2 = null;
+
     if (user1 !== null) {
-        user1 = await searchAPIMemberById(guild, user1.id);
+        const member = await searchDBMemberById(guild, user1.id);
+        participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
     }
     if (user2 !== null) {
-        user2 = await searchAPIMemberById(guild, user2.id);
+        const member = await searchDBMemberById(guild, user2.id);
+        participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
     }
 
-    const recruitBuffer = await recruitAnarchyCanvas(recruit_num, count, host_member, user1, user2, condition, rank, channel_name);
+    const recruitBuffer = await recruitAnarchyCanvas(
+        recruitNum,
+        count,
+        hostPt,
+        participant1,
+        participant2,
+        null,
+        condition,
+        rank,
+        channelName,
+    );
     const recruit = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
 
-    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchy_data, thumbnail), { name: 'rules.png' });
+    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, thumbnail), { name: 'rules.png' });
 
     try {
-        const recruit_channel = interaction.channel;
+        const recruitChannel = interaction.channel;
 
-        if (recruit_channel === null) {
-            throw new Error('recruit_channel is null.');
+        if (recruitChannel === null) {
+            throw new Error('recruitChannel is null.');
         }
-        const image1_message = await interaction.editReply({
+        const image1Message = await interaction.editReply({
             content: txt,
             files: [recruit],
         });
-        const image2_message = await recruit_channel.send({ files: [rule] });
-        const sentMessage = await recruit_channel.send({
+
+        // DBに募集情報を登録
+        await RecruitService.registerRecruit(
+            image1Message.id,
+            hostMember.id,
+            recruitNum,
+            condition,
+            channelName,
+            RecruitType.AnarchyRecruit,
+        );
+
+        // DBに参加者情報を登録
+        await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);
+        if (participant1 !== null) {
+            await ParticipantService.registerParticipantFromObj(image1Message.id, participant1);
+        }
+        if (participant2 !== null) {
+            await ParticipantService.registerParticipantFromObj(image1Message.id, participant2);
+        }
+
+        const image2Message = await recruitChannel.send({ files: [rule] });
+        const sentMessage = await recruitChannel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        const deleteButtonMsg = await recruit_channel.send({
-            components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
+        const deleteButtonMsg = await recruitChannel.send({
+            components: [recruitDeleteButton(sentMessage, image1Message, image2Message)],
         });
 
-        if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
+        if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
             sentMessage.edit({
-                components: [recruitActionRow(image1_message, reserve_channel?.id)],
+                components: [recruitActionRow(image1Message, reservedChannel?.id)],
             });
-            reserve_channel.permissionOverwrites.set(
+            reservedChannel.permissionOverwrites.set(
                 [
                     {
                         id: guild.roles.everyone.id,
                         deny: [PermissionsBitField.Flags.Connect],
                     },
                     {
-                        id: host_member.user.id,
+                        id: hostMember.user.id,
                         allow: [PermissionsBitField.Flags.Connect],
                     },
                 ],
@@ -285,11 +324,11 @@ async function sendAnarchyMatch(
 
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
-                components: [unlockChannelButton(reserve_channel.id)],
+                components: [unlockChannelButton(reservedChannel.id)],
                 ephemeral: true,
             });
         } else {
-            sentMessage.edit({ components: [recruitActionRow(image1_message)] });
+            sentMessage.edit({ components: [recruitActionRow(image1Message)] });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -297,46 +336,40 @@ async function sendAnarchyMatch(
         }
 
         // ピン留め
-        image1_message.pin();
+        image1Message.pin();
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, recruit_channel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
-            if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
-                reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
+            if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
+                reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
             }
             return;
         }
 
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
-        const checkMessage = await searchMessageById(guild, recruit_channel.id, sentMessage.id);
-
-        if (isEmpty(checkMessage)) {
+        const recruitData = await RecruitService.getRecruit(image1Message.id);
+        if (recruitData.length === 0) {
             return;
         }
-        const message_first_row = checkMessage.content.split('\n')[0];
-        if (message_first_row.indexOf('〆') !== -1 || message_first_row.indexOf('キャンセル') !== -1) {
-            return;
-        }
+        const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
+        const memberList = getMemberMentions(recruitData[0], participants);
+        const hostMention = `<@${hostMember.user.id}>`;
 
-        const recruit_data = await RecruitService.getRecruitAllByMessageId(checkMessage.id);
-        const member_list = getMemberMentions(recruit_data);
-        const host_mention = `<@${host_member.user.id}>`;
-
-        checkMessage.edit({
-            content: '`[自動〆]`\n' + `${host_mention}たんの募集は〆！\n${member_list}`,
-            components: await setButtonDisable(checkMessage),
+        sentMessage.edit({
+            content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
+            components: await setButtonDisable(sentMessage),
         });
         // ピン留め解除
-        image1_message.unpin();
-        if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
-            reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-            reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
+        image1Message.unpin();
+        if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
+            reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+            reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
         }
     } catch (error) {
         logger.error(error);

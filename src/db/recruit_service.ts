@@ -5,6 +5,17 @@ import { Recruit } from './model/recruit';
 const logger = log4js_obj.getLogger('database');
 
 export class RecruitService {
+    /**
+     * recruit_type
+     * 0: ボタン通知
+     * 1: プラベ募集
+     * 2: ナワバリ募集
+     * 3: バンカラ募集
+     * 4: リグマ募集
+     * 5: サーモン募集
+     * 6: フェス募集
+     * 10: 別ゲー募集
+     */
     static async createTableIfNotExists() {
         try {
             DBCommon.init();
@@ -13,7 +24,9 @@ export class RecruitService {
                                 author_id text,
                                 recruit_num number,
                                 condition text,
-                                created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime')
+                                channel_name text,
+                                recruit_type number,
+                                created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime'))
                     )`);
             DBCommon.close();
         } catch (err) {
@@ -21,15 +34,20 @@ export class RecruitService {
         }
     }
 
-    static async registerRecruit(messageId: string, authorId: string, recruitNum: string, condition: string) {
+    static async registerRecruit(
+        messageId: string,
+        authorId: string,
+        recruitNum: number,
+        condition: string,
+        channelName: string | null,
+        recruitType: number,
+    ) {
         try {
             DBCommon.init();
-            await DBCommon.run(`INSERT INTO recruit (message_id, author_id, recruit_num, condition) values ($1, $2, $3, $4)`, [
-                messageId,
-                authorId,
-                recruitNum,
-                condition,
-            ]);
+            await DBCommon.run(
+                `INSERT INTO recruit (message_id, author_id, recruit_num, condition, channel_name, recruit_type) values ($1, $2, $3, $4, $5, $6)`,
+                [messageId, authorId, recruitNum, condition, channelName, recruitType],
+            );
             DBCommon.close();
         } catch (err) {
             logger.error(err);
@@ -59,6 +77,8 @@ export class RecruitService {
                     results[i].author_id,
                     results[i].recruit_num,
                     results[i].condition,
+                    results[i].channel_name,
+                    results[i].recruit_type,
                     results[i].created_at,
                 ),
             );

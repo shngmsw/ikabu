@@ -4,7 +4,7 @@ import { DBCommon } from './db.js';
 import { Participant } from './model/participant';
 const logger = log4js_obj.getLogger('database');
 
-export class RecruitService {
+export class ParticipantService {
     static async createTableIfNotExists() {
         try {
             DBCommon.init();
@@ -12,7 +12,7 @@ export class RecruitService {
                                 message_id text,
                                 user_id text,
                                 user_type number,
-                                joined_at text NOT NULL DEFAULT (DATETIME('now', 'localtime'),
+                                joined_at text,
                                 primary key(message_id, user_id)
                     )`);
             DBCommon.close();
@@ -21,13 +21,29 @@ export class RecruitService {
         }
     }
 
-    static async registerParticipant(messageId: string, userId: string, userType: string) {
+    static async registerParticipant(messageId: string, userId: string, userType: number, joinedAt: Date) {
         try {
             DBCommon.init();
-            await DBCommon.run(`INSERT INTO participants (message_id, user_id, user_type) values ($1, $2, $3)`, [
+            await DBCommon.run(`INSERT INTO participants (message_id, user_id, user_type, joined_at) values ($1, $2, $3, $4)`, [
                 messageId,
                 userId,
                 userType,
+                joinedAt.toString(),
+            ]);
+            DBCommon.close();
+        } catch (err) {
+            logger.error(err);
+        }
+    }
+
+    static async registerParticipantFromObj(messageId: string, participant: Participant) {
+        try {
+            DBCommon.init();
+            await DBCommon.run(`INSERT INTO participants (message_id, user_id, user_type, joined_at) values ($1, $2, $3, $4)`, [
+                messageId,
+                participant.userId,
+                participant.userType,
+                participant.joinedAt.toString(),
             ]);
             DBCommon.close();
         } catch (err) {
@@ -45,7 +61,17 @@ export class RecruitService {
         }
     }
 
-    static async getParticipant(messageId: string, userId: string) {
+    static async deleteAllParticipant(messageId: string) {
+        try {
+            DBCommon.init();
+            await DBCommon.run(`DELETE FROM participants WHERE message_id = ${messageId}`);
+            DBCommon.close();
+        } catch (err) {
+            logger.error(err);
+        }
+    }
+
+    static async getParticipant(guildId: string, messageId: string, userId: string) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all);
         const results = await db.all(
@@ -56,10 +82,10 @@ export class RecruitService {
             JOIN
                 members as M
             ON
-                M.guild_id = $1
+                M.guild_id = ${guildId}
             AND
                 M.user_id = P.user_id
-            WHEN
+            WHERE
                 P.message_id = ${messageId}
             AND
                 P.user_id = ${userId}
@@ -83,7 +109,7 @@ export class RecruitService {
         return participants;
     }
 
-    static async getAllParticipants(messageId: string) {
+    static async getAllParticipants(guildId: string, messageId: string) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all);
         const results = await db.all(
@@ -94,10 +120,10 @@ export class RecruitService {
             JOIN
                 members as M
             ON
-                M.guild_id = $1
+                M.guild_id = ${guildId}
             AND
                 M.user_id = P.user_id
-            WHEN
+            WHERE
                 P.message_id = ${messageId}
             ORDER BY
                 P.user_type, P.joined_at
