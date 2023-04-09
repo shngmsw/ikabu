@@ -4,11 +4,9 @@ import { MembersService } from '../../../db/members_service.js';
 import { MessageCountService } from '../../../db/message_count_service.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
-import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { searchRoleById } from '../../common/manager/role_manager';
 import { sleep } from '../../common/others.js';
 import { FriendCode } from '../../../db/model/friend_code.js';
-import { Member } from '../../../db/model/member.js';
 
 const logger = log4js_obj.getLogger('guildMemberAdd');
 
@@ -35,30 +33,14 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
             );
         } else {
             const messageCount = await getMessageCount(newMember.id);
-            const member = await searchAPIMemberById(guild.id, userId);
-
-            const dbMember = new Member(
-                guild.id,
-                userId,
-                member.displayName,
-                member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-                member.joinedAt,
-            );
 
             // membersテーブルにレコードがあるか確認
             if ((await MembersService.getMemberByUserId(guild.id, userId)).length == 0) {
-                if (member.joinedAt === null) {
-                    throw new Error('joinedAt is null');
-                }
-
-                MembersService.registerMember(dbMember);
                 const friendCode = await FriendCodeService.getFriendCodeByUserId(newMember.id);
                 await sleep(600);
-                await setRookieRole(member, beginnerRole, messageCount, friendCode);
-            } else {
-                MembersService.updateMemberProfile(dbMember);
+                await setRookieRole(newMember, beginnerRole, messageCount, friendCode);
+                await sentMessage.react('👍');
             }
-            await sentMessage.react('👍');
         }
     } catch (error) {
         logger.error(error);
