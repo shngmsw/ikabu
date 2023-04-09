@@ -2,7 +2,7 @@ import { ChannelType, GuildMember, ModalSubmitInteraction } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, fetchSchedule, getAnarchyOpenData, getFesData, getRegularData } from '../../../common/apis/splatoon3_ink';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
-import { searchMemberById } from '../../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { isEmpty, isNotEmpty } from '../../../common/others';
 import { sendRecruitModalLog } from '../../../logs/modals/recruit_modal_log';
 import { sendAnarchyMatch } from './anarchy_recruit_modal';
@@ -20,7 +20,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
     const channel = interaction.channel;
     const recruit_num = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
     if (host_member === null) {
         throw new Error('host_member is null.');
     }
@@ -121,7 +121,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
     const channel = interaction.channel;
     const recruit_num = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
     if (host_member === null) {
         throw new Error('host_member is null.');
     }
@@ -248,7 +248,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
     const channel = interaction.channel;
     const recruit_num = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
     if (host_member === null) {
         throw new Error('host_member is null.');
     }
@@ -360,7 +360,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
     const channel = interaction.channel;
     const recruit_num = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
     if (host_member === null) {
         throw new Error('host_member is null.');
     }

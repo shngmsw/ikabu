@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import { searchMemberById } from '../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { sendEmbedsWebhook } from '../../common/webhook';
 
 export async function sendRecruitModalLog(interaction: $TSFixMe) {
@@ -7,7 +7,7 @@ export async function sendRecruitModalLog(interaction: $TSFixMe) {
     const channelName = interaction.channel.name;
     const authorId = interaction.member.user.id;
     // deferしてないけど、呼び出し元でawaitつけないので大丈夫なはず
-    const author = await searchMemberById(guild, authorId);
+    const author = await searchAPIMemberById(guild, authorId);
     const components = interaction.components;
     let commandLog = '';
 

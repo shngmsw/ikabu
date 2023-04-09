@@ -12,7 +12,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, fetchSchedule, getRegularData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
-import { searchMemberById } from '../../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { isEmpty, isNotEmpty, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
@@ -29,7 +29,7 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
     if (guild === undefined) {
         throw new Error('guild cannot fetch.');
     }
-    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
     if (host_member === null) {
         throw new Error('host_member is null.');
     }
@@ -183,13 +183,13 @@ async function sendRegularMatch(
 
     // サーバーメンバーとして取得し直し
     if (user1 !== null) {
-        user1 = await searchMemberById(guild, user1.id);
+        user1 = await searchAPIMemberById(guild, user1.id);
     }
     if (user2 !== null) {
-        user2 = await searchMemberById(guild, user2.id);
+        user2 = await searchAPIMemberById(guild, user2.id);
     }
     if (user3 !== null) {
-        user3 = await searchMemberById(guild, user3.id);
+        user3 = await searchAPIMemberById(guild, user3.id);
     }
 
     const recruitBuffer = await recruitRegularCanvas(recruit_num, count, host_member, user1, user2, user3, condition, channel_name);

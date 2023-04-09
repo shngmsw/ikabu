@@ -1,5 +1,8 @@
+import { Guild, GuildMember } from 'discord.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { isEmpty, isNotEmpty } from '../others';
+import { MembersService } from '../../../db/members_service';
+import { Member } from '../../../db/model/member';
 
 const logger = log4js_obj.getLogger('MemberManager');
 
@@ -9,7 +12,7 @@ const logger = log4js_obj.getLogger('MemberManager');
  * @param {string} roleId ユーザーID
  * @returns メンバーオブジェクト
  */
-export async function searchMemberById(guild: $TSFixMe, userId: $TSFixMe) {
+export async function searchAPIMemberById(guild: $TSFixMe, userId: $TSFixMe) {
     try {
         let member;
         try {
@@ -22,6 +25,39 @@ export async function searchMemberById(guild: $TSFixMe, userId: $TSFixMe) {
         return member;
     } catch (error) {
         logger.error(error);
+    }
+}
+
+/**
+ * DBからMember型のオブジェクトを探してくる、なければAPIから拾ってきて登録し、Member型で返す
+ * @param guild Guildオブジェクト
+ * @param userId ユーザーID
+ * @returns Member型オブジェクト
+ */
+export async function searchDBMemberById(guild: Guild, userId: string): Promise<Member> {
+    const members = await MembersService.getMemberByUserId(guild.id, userId);
+
+    // membersテーブルにレコードがあるか確認
+    if (members.length == 0) {
+        const memberRaw: GuildMember = await searchAPIMemberById(guild, userId);
+
+        if (memberRaw.joinedAt === null) {
+            throw new Error('joinedAt is null');
+        }
+
+        const newMember = new Member(
+            guild.id,
+            userId,
+            memberRaw.displayName,
+            memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+            memberRaw.joinedAt,
+        );
+
+        MembersService.registerMember(newMember);
+
+        return newMember;
+    } else {
+        return members[0];
     }
 }
 

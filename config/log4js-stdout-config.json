@@ -37,6 +37,10 @@
       "appenders": ["not-error", "just-errors"],
       "level": "all"
     },
+    "guildMemberUpdate": {
+      "appenders": ["not-error", "just-errors"],
+      "level": "all"
+    },
     "messageReactionAdd": {
       "appenders": ["not-error", "just-errors"],
       "level": "all"

@@ -1,7 +1,7 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, PermissionsBitField, User, VoiceChannel } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, fetchSchedule } from '../../../common/apis/splatoon3_ink';
-import { searchMemberById } from '../../../common/manager/member_manager';
+import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { isEmpty, isNotEmpty, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
@@ -22,7 +22,7 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
     if (guild === undefined) {
         throw new Error('guild cannot fetch.');
     }
-    const host_member = await searchMemberById(guild, interaction.member?.user.id);
+    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
     if (host_member === null) {
         throw new Error('host_member is null.');
     }
@@ -134,10 +134,10 @@ async function sendSalmonRun(
     }
     // サーバーメンバーとして取得し直し
     if (user1 !== null) {
-        user1 = await searchMemberById(guild, user1.id);
+        user1 = await searchAPIMemberById(guild, user1.id);
     }
     if (user2 !== null) {
-        user2 = await searchMemberById(guild, user2.id);
+        user2 = await searchAPIMemberById(guild, user2.id);
     }
 
     const data = await fetchSchedule();

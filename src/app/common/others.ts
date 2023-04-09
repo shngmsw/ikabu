@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import { searchMemberById } from './manager/member_manager.js';
+import { searchAPIMemberById } from './manager/member_manager.js';
 
 export async function composeEmbed(message: $TSFixMe, url: $TSFixMe) {
     const embed = new EmbedBuilder();
@@ -7,7 +7,7 @@ export async function composeEmbed(message: $TSFixMe, url: $TSFixMe) {
         embed.setDescription(message.content);
     }
     embed.setTimestamp(message.createdAt);
-    const member = await searchMemberById(message.guild, message.author.id);
+    const member = await searchAPIMemberById(message.guild, message.author.id);
     if (isNotEmpty(url)) {
         embed.setTitle('引用元へジャンプ');
         embed.setURL(url);
