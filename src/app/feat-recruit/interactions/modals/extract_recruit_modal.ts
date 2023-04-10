@@ -177,7 +177,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
     let member1Mention = null;
     let member2Mention = null;
 
-    if (user1 !== null) {
+    if (user1 !== null && user1 !== '') {
         // ユーザータグからメンバー取得
         const member = members.find((member: $TSFixMe) => member.user.tag === user1);
         if (member !== undefined) {
@@ -189,7 +189,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
         }
     }
 
-    if (user2 !== null) {
+    if (user2 !== null && user2 !== '') {
         // ユーザータグからメンバー取得
         const member = members.find((member: $TSFixMe) => member.user.tag === user2);
         if (member !== undefined) {
@@ -295,7 +295,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
         let member1Mention = null;
         let member2Mention = null;
 
-        if (user1 !== null) {
+        if (user1 !== null && user1 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user1);
             if (member !== undefined) {
@@ -307,7 +307,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
             }
         }
 
-        if (user2 !== null) {
+        if (user2 !== null && user2 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user2);
             if (member !== undefined) {
@@ -415,7 +415,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
         let member1Mention = null;
         let member2Mention = null;
 
-        if (user1 !== null) {
+        if (user1 !== null && user1 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user1);
             if (member !== undefined) {
@@ -427,7 +427,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
             }
         }
 
-        if (user2 !== null) {
+        if (user2 !== null && user2 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user2);
             if (member !== undefined) {

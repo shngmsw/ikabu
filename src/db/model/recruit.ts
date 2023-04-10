@@ -5,6 +5,7 @@ export class Recruit {
     condition: string;
     channelName: string | null;
     recruitType: number;
+    option: string | null;
     createdAt: Date;
     constructor(
         messageId: string,
@@ -13,6 +14,7 @@ export class Recruit {
         condition: string,
         channelName: string | null,
         recruitType: number,
+        option: string | null,
         createdAt: string | Date,
     ) {
         this.messageId = messageId;
@@ -21,6 +23,7 @@ export class Recruit {
         this.condition = condition;
         this.channelName = channelName;
         this.recruitType = recruitType;
+        this.option = option;
         if (createdAt instanceof Date) {
             this.createdAt = createdAt;
         } else {
@@ -37,5 +40,6 @@ export const RecruitType = {
     LeagueRecruit: 4,
     SalmonRecruit: 5,
     FestivalRecruit: 6,
+    BigRunRecruit: 7,
     OtherGameRecruit: 10,
 };

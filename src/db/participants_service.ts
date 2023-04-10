@@ -24,12 +24,14 @@ export class ParticipantService {
     static async registerParticipant(messageId: string, userId: string, userType: number, joinedAt: Date) {
         try {
             DBCommon.init();
-            await DBCommon.run(`INSERT INTO participants (message_id, user_id, user_type, joined_at) values ($1, $2, $3, $4)`, [
-                messageId,
-                userId,
-                userType,
-                joinedAt.toString(),
-            ]);
+            await DBCommon.run(
+                `INSERT INTO
+                    participants (message_id, user_id, user_type, joined_at) values ($1, $2, $3, $4)
+                ON CONFLICT
+                    (message_id, user_id)
+                DO NOTHING`,
+                [messageId, userId, userType, joinedAt.toString()],
+            );
             DBCommon.close();
         } catch (err) {
             logger.error(err);
@@ -39,12 +41,14 @@ export class ParticipantService {
     static async registerParticipantFromObj(messageId: string, participant: Participant) {
         try {
             DBCommon.init();
-            await DBCommon.run(`INSERT INTO participants (message_id, user_id, user_type, joined_at) values ($1, $2, $3, $4)`, [
-                messageId,
-                participant.userId,
-                participant.userType,
-                participant.joinedAt.toString(),
-            ]);
+            await DBCommon.run(
+                `INSERT INTO
+                    participants (message_id, user_id, user_type, joined_at) values ($1, $2, $3, $4)
+                ON CONFLICT
+                    (message_id, user_id)
+                DO NOTHING`,
+                [messageId, participant.userId, participant.userType, participant.joinedAt.toString()],
+            );
             DBCommon.close();
         } catch (err) {
             logger.error(err);
@@ -79,7 +83,7 @@ export class ParticipantService {
                 P.user_id, M.display_name, M.icon_url,  P.user_type, P.joined_at 
             FROM
                 participants as P
-            JOIN
+            LEFT JOIN
                 members as M
             ON
                 M.guild_id = ${guildId}
@@ -117,7 +121,7 @@ export class ParticipantService {
                 P.user_id, M.display_name, M.icon_url,  P.user_type, P.joined_at 
             FROM
                 participants as P
-            JOIN
+            LEFT JOIN
                 members as M
             ON
                 M.guild_id = ${guildId}

@@ -11,6 +11,7 @@ import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js'
 import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { memberListMessage } from './other_events.js';
+import { RecruitOpCode, regenerateCanvas } from './regenerate_image.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -81,10 +82,16 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
         const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆`);
         const buttonMessage = interaction.message;
         const image1Message = await searchMessageById(guild, interaction.channelId, image1MsgId);
+        const recruitChannel = interaction.channel;
+        if (!(recruitChannel instanceof BaseGuildTextChannel)) {
+            throw new Error('recruitChannel is not BaseGuildTextChannel type.');
+        }
 
         if (confirmedMemberIDList.includes(member.userId)) {
             // ピン留め解除
             image1Message.unpin();
+
+            await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.cancel);
 
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(image1MsgId);
@@ -103,18 +110,19 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
                 components: await disableThinkingButton(interaction, 'キャンセル'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            if (interaction.channel instanceof BaseGuildTextChannel) {
-                const helpEmbed = getCommandHelpEmbed(interaction.channel.name);
-                await interaction.channel.send({
-                    embeds: [helpEmbed],
-                    components: [createNewRecruitButton(interaction.channel.name)],
-                });
-            }
+
+            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
+            await recruitChannel.send({
+                embeds: [helpEmbed],
+                components: [createNewRecruitButton(recruitChannel.name)],
+            });
         } else {
             // 既に参加済みかチェック
             if (applicantIdList.includes(member.userId)) {
                 // participantsテーブルから自分のデータのみ削除
                 await ParticipantService.deleteParticipant(image1MsgId, member.userId);
+
+                await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.open);
 
                 // ホストに通知
                 await interaction.message.reply({

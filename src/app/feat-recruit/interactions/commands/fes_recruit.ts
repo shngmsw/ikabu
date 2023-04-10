@@ -13,6 +13,7 @@ import { getMemberMentions } from '../buttons/other_events';
 import { Participant } from '../../../../db/model/participant';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitType } from '../../../../db/model/recruit';
+import { RecruitOpCode } from '../buttons/regenerate_image';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function fesRecruit(interaction: ChatInputCommandInteraction) {
@@ -167,10 +168,9 @@ async function sendFesMatch(
     }
 
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
-
-    let channelName = '🔉 VC指定なし';
-    if (reservedChannel instanceof VoiceChannel) {
-        channelName = '🔉 ' + reservedChannel.name;
+    let channelName = null;
+    if (reservedChannel !== null) {
+        channelName = reservedChannel.name;
     }
 
     const hostPt = new Participant(hostMember.id, hostMember.displayName, hostMember.displayAvatarURL({ extension: 'png' }), 0, new Date());
@@ -188,6 +188,7 @@ async function sendFesMatch(
     }
 
     const recruitBuffer = await recruitFesCanvas(
+        RecruitOpCode.open,
         recruitNum,
         count,
         hostPt,
@@ -227,6 +228,7 @@ async function sendFesMatch(
             condition,
             channelName,
             RecruitType.FestivalRecruit,
+            team,
         );
 
         // DBに参加者情報を登録
@@ -303,6 +305,10 @@ async function sendFesMatch(
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
         const memberList = getMemberMentions(recruitData[0], participants);
         const hostMention = `<@${hostMember.user.id}>`;
+
+        // DBから募集情報削除
+        await RecruitService.deleteRecruit(image1Message.id);
+        await ParticipantService.deleteAllParticipant(image1Message.id);
 
         sentMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,

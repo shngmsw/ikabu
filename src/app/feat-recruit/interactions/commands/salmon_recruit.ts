@@ -11,6 +11,7 @@ import { Participant } from '../../../../db/model/participant';
 import { RecruitService } from '../../../../db/recruit_service';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitType } from '../../../../db/model/recruit';
+import { RecruitOpCode } from '../buttons/regenerate_image';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -130,10 +131,9 @@ async function sendSalmonRun(
         throw new Error('guild cannot fetch');
     }
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
-
-    let channelName = '🔉 VC指定なし';
-    if (reservedChannel instanceof VoiceChannel) {
-        channelName = '🔉 ' + reservedChannel.name;
+    let channelName = null;
+    if (reservedChannel !== null) {
+        channelName = reservedChannel.name;
     }
 
     const hostPt = new Participant(hostMember.id, hostMember.displayName, hostMember.displayAvatarURL({ extension: 'png' }), 0, new Date());
@@ -154,9 +154,29 @@ async function sendSalmonRun(
 
     let recruitBuffer;
     if (checkBigRun(data.schedule, 0)) {
-        recruitBuffer = await recruitBigRunCanvas(recruitNum, count, hostPt, participant1, participant2, null, condition, channelName);
+        recruitBuffer = await recruitBigRunCanvas(
+            RecruitOpCode.open,
+            recruitNum,
+            count,
+            hostPt,
+            participant1,
+            participant2,
+            null,
+            condition,
+            channelName,
+        );
     } else {
-        recruitBuffer = await recruitSalmonCanvas(recruitNum, count, hostPt, participant1, participant2, null, condition, channelName);
+        recruitBuffer = await recruitSalmonCanvas(
+            RecruitOpCode.open,
+            recruitNum,
+            count,
+            hostPt,
+            participant1,
+            participant2,
+            null,
+            condition,
+            channelName,
+        );
     }
     if (isEmpty(recruitBuffer) || recruitBuffer === undefined) {
         throw new Error('recruitBuffer is empty');

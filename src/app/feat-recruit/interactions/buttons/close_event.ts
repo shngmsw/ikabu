@@ -11,6 +11,7 @@ import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js'
 import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { getMemberMentions } from './other_events.js';
+import { regenerateCanvas, RecruitOpCode } from './regenerate_image.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -82,12 +83,18 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
         const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆`);
         const buttonMessage = interaction.message;
         const image1Message = await searchMessageById(guild, interaction.channelId, image1MsgId);
+        const recruitChannel = interaction.channel;
+        if (!(recruitChannel instanceof BaseGuildTextChannel)) {
+            throw new Error('recruitChannel is not BaseGuildTextChannel type.');
+        }
 
         if (confirmedMemberIDList.includes(member.userId)) {
             const memberList = getMemberMentions(recruitData[0], participantsData);
             // ピン留め解除
             image1Message.unpin();
 
+            await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.close);
+
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(image1MsgId);
 
@@ -99,22 +106,24 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
+
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
                 components: await disableThinkingButton(interaction, '〆'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
-            if (interaction.channel instanceof BaseGuildTextChannel) {
-                const helpEmbed = getCommandHelpEmbed(interaction.channel.name);
-                await interaction.channel.send({
-                    embeds: [helpEmbed],
-                    components: [createNewRecruitButton(interaction.channel.name)],
-                });
-            }
+
+            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
+            await recruitChannel.send({
+                embeds: [helpEmbed],
+                components: [createNewRecruitButton(recruitChannel.name)],
+            });
         } else if (datetimeDiff(new Date(), image1Message.createdAt) > 120) {
             const memberList = getMemberMentions(recruitData[0], participantsData);
 
             image1Message.unpin();
+
+            await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.close);
 
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(image1MsgId);
@@ -127,6 +136,7 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
             }
+
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
                 components: await disableThinkingButton(interaction, '〆'),

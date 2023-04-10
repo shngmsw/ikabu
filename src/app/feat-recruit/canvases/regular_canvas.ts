@@ -4,6 +4,7 @@ import { modalRecruit } from '../../../constant.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { Participant } from '../../../db/model/participant.js';
+import { RecruitOpCode } from '../interactions/buttons/regenerate_image.js';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -20,6 +21,7 @@ Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
  * 募集用のキャンバス(1枚目)を作成する
  */
 export async function recruitRegularCanvas(
+    opCode: number,
     remaining: number,
     count: number,
     host: Participant,
@@ -31,7 +33,7 @@ export async function recruitRegularCanvas(
     user6: Participant | null,
     user7: Participant | null,
     condition: string,
-    channelName: string,
+    channelName: string | null,
 ) {
     const blankAvatarUrl = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
@@ -110,14 +112,33 @@ export async function recruitRegularCanvas(
     const hostIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
     recruitCtx.drawImage(hostIcon, 0, 0, hostIcon.width, hostIcon.height, 75, 155, 75, 75);
 
+    let channelString;
+    if (channelName === null) {
+        channelString = '🔉 VC指定なし';
+    } else if (channelName === '[簡易版募集]') {
+        channelString = channelName;
+    } else {
+        channelString = '🔉 ' + channelName;
+    }
+
     recruitCtx.save();
     recruitCtx.textAlign = 'right';
-    fillTextWithStroke(recruitCtx, channelName, '33px "Splatfont"', '#FFFFFF', '#2D3130', 1, 680, 70);
+    fillTextWithStroke(recruitCtx, channelString, '33px "Splatfont"', '#FFFFFF', '#2D3130', 1, 680, 70);
     recruitCtx.restore();
 
     fillTextWithStroke(recruitCtx, '募集人数', '41px "Splatfont"', '#FFFFFF', '#2D3130', 1, 490, 185);
 
-    fillTextWithStroke(recruitCtx, '@' + remaining, '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 535, 248);
+    let remainingString;
+    if (opCode === RecruitOpCode.open || opCode === RecruitOpCode.cancel) {
+        remainingString = remaining > 0 ? '@' + remaining : '満員';
+    } else if (opCode === RecruitOpCode.close) {
+        remainingString = '受付終了';
+    }
+
+    recruitCtx.save();
+    recruitCtx.textAlign = 'center';
+    fillTextWithStroke(recruitCtx, remainingString, '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 560, 248);
+    recruitCtx.restore();
 
     fillTextWithStroke(recruitCtx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 360);
 
@@ -152,6 +173,22 @@ export async function recruitRegularCanvas(
         if (j < columnNum) {
             recruitCtx.fillText(column[j], 65, 415 + size * j);
         }
+    }
+
+    if (opCode === RecruitOpCode.cancel) {
+        recruitCtx.save();
+        recruitCtx.translate(220, -110);
+        recruitCtx.rotate((25 * Math.PI) / 180);
+        const cancelStamp = await Canvas.loadImage(
+            'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/canceled_stamp.png',
+        );
+        recruitCtx.drawImage(cancelStamp, 0, 0, cancelStamp.width, cancelStamp.height, 0, 0, 600, 600);
+        recruitCtx.restore;
+    } else if (opCode === RecruitOpCode.close) {
+        recruitCtx.save();
+        const cancelStamp = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/closed_stamp.png');
+        recruitCtx.drawImage(cancelStamp, 0, 0, cancelStamp.width, cancelStamp.height, 130, 80, 500, 340);
+        recruitCtx.restore;
     }
 
     const recruit = recruitCanvas.toBuffer();

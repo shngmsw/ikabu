@@ -10,6 +10,7 @@ import { channelLinkButtons, messageLinkButtons } from '../../buttons/create_rec
 import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { memberListMessage } from './other_events.js';
+import { RecruitOpCode, regenerateCanvas } from './regenerate_image.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -131,6 +132,9 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             } catch (error) {
                 logger.error(error);
             }
+
+            await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.open);
+
             notifyMessage = await interaction.message.reply({
                 content: createMentionsFromIdList(confirmedMemberIDList).join(' '),
                 embeds: [embed],

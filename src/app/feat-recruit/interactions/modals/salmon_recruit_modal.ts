@@ -11,6 +11,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { Member } from '../../../../db/model/member';
+import { RecruitOpCode } from '../buttons/regenerate_image';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -47,9 +48,29 @@ export async function sendSalmonRun(
 
     let recruitBuffer;
     if (checkBigRun(data.schedule, 0)) {
-        recruitBuffer = await recruitBigRunCanvas(recruitNum, count, recruiter, attendee1, attendee2, null, condition, channelName);
+        recruitBuffer = await recruitBigRunCanvas(
+            RecruitOpCode.open,
+            recruitNum,
+            count,
+            recruiter,
+            attendee1,
+            attendee2,
+            null,
+            condition,
+            channelName,
+        );
     } else {
-        recruitBuffer = await recruitSalmonCanvas(recruitNum, count, recruiter, attendee1, attendee2, null, condition, channelName);
+        recruitBuffer = await recruitSalmonCanvas(
+            RecruitOpCode.open,
+            recruitNum,
+            count,
+            recruiter,
+            attendee1,
+            attendee2,
+            null,
+            condition,
+            channelName,
+        );
     }
 
     let ruleBuffer;
@@ -90,7 +111,7 @@ export async function sendSalmonRun(
             recruitNum,
             condition,
             channelName,
-            RecruitType.AnarchyRecruit,
+            RecruitType.SalmonRecruit,
         );
 
         // DBに参加者情報を登録

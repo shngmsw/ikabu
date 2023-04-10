@@ -12,6 +12,7 @@ import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { Member } from '../../../../db/model/member';
+import { RecruitOpCode } from '../buttons/regenerate_image';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -56,6 +57,7 @@ export async function sendFesMatch(
     }
 
     const recruitBuffer = await recruitFesCanvas(
+        RecruitOpCode.open,
         recruitNum,
         count,
         recruiter,
@@ -92,7 +94,8 @@ export async function sendFesMatch(
             recruitNum,
             condition,
             channelName,
-            RecruitType.AnarchyRecruit,
+            RecruitType.FestivalRecruit,
+            team,
         );
 
         // DBに参加者情報を登録

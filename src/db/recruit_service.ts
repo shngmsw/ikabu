@@ -26,6 +26,7 @@ export class RecruitService {
                                 condition text,
                                 channel_name text,
                                 recruit_type number,
+                                option text,
                                 created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime'))
                     )`);
             DBCommon.close();
@@ -41,12 +42,13 @@ export class RecruitService {
         condition: string,
         channelName: string | null,
         recruitType: number,
+        option?: string,
     ) {
         try {
             DBCommon.init();
             await DBCommon.run(
-                `INSERT INTO recruit (message_id, author_id, recruit_num, condition, channel_name, recruit_type) values ($1, $2, $3, $4, $5, $6)`,
-                [messageId, authorId, recruitNum, condition, channelName, recruitType],
+                `INSERT INTO recruit (message_id, author_id, recruit_num, condition, channel_name, recruit_type, option) values ($1, $2, $3, $4, $5, $6, $7)`,
+                [messageId, authorId, recruitNum, condition, channelName, recruitType, option],
             );
             DBCommon.close();
         } catch (err) {
@@ -79,6 +81,7 @@ export class RecruitService {
                     results[i].condition,
                     results[i].channel_name,
                     results[i].recruit_type,
+                    results[i].option,
                     results[i].created_at,
                 ),
             );

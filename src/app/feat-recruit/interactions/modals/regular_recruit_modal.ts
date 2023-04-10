@@ -11,6 +11,7 @@ import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { Member } from '../../../../db/model/member';
+import { RecruitOpCode } from '../buttons/regenerate_image';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -51,6 +52,7 @@ export async function sendRegularMatch(
     }
 
     const recruitBuffer = await recruitRegularCanvas(
+        RecruitOpCode.open,
         recruitNum,
         count,
         recruiter,
@@ -91,7 +93,7 @@ export async function sendRegularMatch(
             recruitNum,
             condition,
             channelName,
-            RecruitType.AnarchyRecruit,
+            RecruitType.RegularRecruit,
         );
 
         // DBに参加者情報を登録
