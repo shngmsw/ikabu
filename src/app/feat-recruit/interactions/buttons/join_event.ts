@@ -86,6 +86,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             });
 
             await interaction.editReply({
+                content: await memberListMessage(interaction, image1MsgId),
                 components: await recoveryThinkingButton(interaction, '参加'),
             });
             return;

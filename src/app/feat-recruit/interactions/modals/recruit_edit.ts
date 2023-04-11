@@ -41,6 +41,8 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
 
         if (replyMessage === '') {
             replyMessage = '何も入力されなかったでし！';
+        } else {
+            replyMessage += '\n**メンバーリストを更新するには参加ボタンを押すでし！**';
         }
 
         if (interaction.channelId !== null) {
@@ -101,10 +103,10 @@ async function editRecruitNum(guildId: string, messageId: string, recruitType: n
     let recruitNum;
     if (memberCount > limit) {
         recruitNum = limit - recruitersList.length;
-        replyMessage = '募集人数が多すぎるでし！\n利用可能な最大値に設定したでし！\n';
+        replyMessage = '募集人数が多すぎるでし！\n利用可能な最大値に設定したでし！';
     } else {
         recruitNum = memberCount - recruitersList.length;
-        replyMessage = '募集人数を設定したでし！\n';
+        replyMessage = '募集人数を設定したでし！';
     }
 
     await RecruitService.updateRecruitNum(messageId, recruitNum);
@@ -114,5 +116,5 @@ async function editRecruitNum(guildId: string, messageId: string, recruitType: n
 
 async function editCondition(messageId: string, condition: string) {
     await RecruitService.updateCondition(messageId, condition);
-    return '参加条件を更新したでし！';
+    return '\n参加条件を更新したでし！';
 }

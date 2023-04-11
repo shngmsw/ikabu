@@ -74,6 +74,7 @@ export async function joinNotify(interaction: ButtonInteraction) {
             });
 
             await interaction.editReply({
+                content: await memberListMessage(interaction, embedMessageId),
                 components: await recoveryThinkingButton(interaction, '参加'),
             });
 
