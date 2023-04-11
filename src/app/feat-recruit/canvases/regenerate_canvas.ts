@@ -7,6 +7,9 @@ import { searchMessageById } from '../../common/manager/message_manager';
 import { recruitAnarchyCanvas } from './anarchy_canvas';
 import { recruitSalmonCanvas } from './salmon_canvas';
 import { recruitRegularCanvas } from './regular_canvas';
+import { log4js_obj } from '../../../log4js_settings';
+
+const logger = log4js_obj.getLogger('recruit');
 
 export const RecruitOpCode = {
     open: 0,
@@ -15,25 +18,33 @@ export const RecruitOpCode = {
 };
 
 export async function regenerateCanvas(guild: Guild, channelId: string, messageId: string, opCode: number) {
-    const recruitData = await RecruitService.getRecruit(messageId);
-    const participantsData = await ParticipantService.getAllParticipants(guild.id, messageId);
-    const message = await searchMessageById(guild, channelId, messageId);
-    const applicantList = []; // 参加希望者リスト
-    for (const participant of participantsData) {
-        if (participant.userType === 2) {
-            applicantList.push(participant);
+    try {
+        const recruitData = await RecruitService.getRecruit(messageId);
+        if (recruitData.length === 0) {
+            logger.warn('embed was not regenerated! [recruitData was not found!]');
+            return;
         }
-    }
-    const applicantNum = applicantList.length;
-    switch (recruitData[0].recruitType) {
-        case RecruitType.RegularRecruit:
-            regenRegularCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
-            break;
-        case RecruitType.AnarchyRecruit:
-            regenAnarchyCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
-            break;
-        case RecruitType.SalmonRecruit:
-            regenSalmonCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
+        const participantsData = await ParticipantService.getAllParticipants(guild.id, messageId);
+        const message = await searchMessageById(guild, channelId, messageId);
+        const applicantList = []; // 参加希望者リスト
+        for (const participant of participantsData) {
+            if (participant.userType === 2) {
+                applicantList.push(participant);
+            }
+        }
+        const applicantNum = applicantList.length;
+        switch (recruitData[0].recruitType) {
+            case RecruitType.RegularRecruit:
+                regenRegularCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
+                break;
+            case RecruitType.AnarchyRecruit:
+                regenAnarchyCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
+                break;
+            case RecruitType.SalmonRecruit:
+                regenSalmonCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
+        }
+    } catch (error) {
+        logger.error(error);
     }
 }
 
