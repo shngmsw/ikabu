@@ -8,6 +8,7 @@ import { RecruitService } from '../../../../db/recruit_service';
 import { ParticipantService } from '../../../../db/participants_service';
 import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -121,6 +122,10 @@ async function sendPrivateRecruit(
         // ピン留め
         embedMessage.pin();
 
+        // 募集リスト更新
+        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.PrivateRecruit);
+        await sendStickyMessage(guild, recruitChannel.id, sticky);
+
         // 15秒後に削除ボタンを消す
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
@@ -164,6 +169,11 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
 
     // ピン留め
     sentMessage.pin();
+
+    // 募集リスト更新
+    const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.ButtonNotify);
+    await sendStickyMessage(guild, recruitChannel.id, sticky);
+
     await interaction.editReply({
         content: '募集完了でし！参加者が来るまで気長に待つでし！',
     });

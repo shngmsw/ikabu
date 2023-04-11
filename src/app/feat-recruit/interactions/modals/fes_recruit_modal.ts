@@ -13,6 +13,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { Member } from '../../../../db/model/member';
 import { RecruitOpCode } from '../../canvases/regenerate_canvas';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -127,6 +128,10 @@ export async function sendFesMatch(
 
         // ピン留め
         image1Message.pin();
+
+        // 募集リスト更新
+        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.FestivalRecruit);
+        await sendStickyMessage(guild, recruitChannel.id, sticky);
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
