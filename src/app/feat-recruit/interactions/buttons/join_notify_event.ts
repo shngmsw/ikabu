@@ -32,7 +32,7 @@ export async function joinNotify(interaction: ButtonInteraction) {
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
 
-        const recruitData = await RecruitService.getRecruit(embedMessageId);
+        const recruitData = await RecruitService.getRecruit(guild.id, embedMessageId);
 
         if (recruitData.length === 0) {
             await interaction.editReply({ components: await disableThinkingButton(interaction, '参加') });

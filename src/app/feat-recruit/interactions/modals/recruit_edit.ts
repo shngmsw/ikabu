@@ -22,7 +22,7 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
             throw new Error('guild cannot fetch.');
         }
 
-        const oldRecruitData = await RecruitService.getRecruit(messageId);
+        const oldRecruitData = await RecruitService.getRecruit(guild.id, messageId);
 
         let remaining = interaction.fields.getTextInputValue('remaining');
         remaining = remaining.replace(/\s+/g, '');
@@ -38,7 +38,7 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
         conditionCheck = conditionCheck.replace(/　+/g, '');
 
         if (conditionCheck !== '') {
-            replyMessage += await editCondition(messageId, conditionStr);
+            replyMessage += await editCondition(guild.id, messageId, conditionStr);
         }
 
         if (replyMessage === '') {
@@ -63,7 +63,7 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
             }
         }
 
-        const newRecruitData = await RecruitService.getRecruit(messageId);
+        const newRecruitData = await RecruitService.getRecruit(guild.id, messageId);
         await sendEditRecruitLog(guild, oldRecruitData[0], newRecruitData[0], interaction.createdAt);
 
         await interaction.editReply(replyMessage);
@@ -111,12 +111,12 @@ async function editRecruitNum(guildId: string, messageId: string, recruitType: n
         replyMessage = '募集人数を設定したでし！';
     }
 
-    await RecruitService.updateRecruitNum(messageId, recruitNum);
+    await RecruitService.updateRecruitNum(guildId, messageId, recruitNum);
 
     return replyMessage;
 }
 
-async function editCondition(messageId: string, condition: string) {
-    await RecruitService.updateCondition(messageId, condition);
+async function editCondition(guildId: string, messageId: string, condition: string) {
+    await RecruitService.updateCondition(guildId, messageId, condition);
     return '\n参加条件を更新したでし！';
 }

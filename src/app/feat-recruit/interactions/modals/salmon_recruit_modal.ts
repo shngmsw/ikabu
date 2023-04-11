@@ -106,6 +106,7 @@ export async function sendSalmonRun(
 
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
+            guild.id,
             image1Message.id,
             member.userId,
             recruitNum,

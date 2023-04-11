@@ -29,7 +29,7 @@ export async function cancelNotify(interaction: ButtonInteraction) {
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
 
-        const recruitData = await RecruitService.getRecruit(embedMessageId);
+        const recruitData = await RecruitService.getRecruit(guild.id, embedMessageId);
 
         if (recruitData.length === 0) {
             await interaction.editReply({ components: await disableThinkingButton(interaction, 'キャンセル') });
@@ -79,7 +79,7 @@ export async function cancelNotify(interaction: ButtonInteraction) {
             buttonMessage.unpin();
 
             // recruitテーブルから削除
-            await RecruitService.deleteRecruit(embedMessageId);
+            await RecruitService.deleteRecruit(guild.id, embedMessageId);
 
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(embedMessageId);

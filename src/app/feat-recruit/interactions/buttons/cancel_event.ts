@@ -10,7 +10,7 @@ import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.j
 import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js';
 import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
-import { memberListMessage } from './other_events.js';
+import { availableRecruitString, memberListMessage } from './other_events.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
@@ -37,7 +37,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
 
-        const recruitData = await RecruitService.getRecruit(image1MsgId);
+        const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
         if (recruitData.length === 0) {
             await interaction.editReply({ components: await disableThinkingButton(interaction, 'キャンセル') });
@@ -94,7 +94,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.cancel);
 
             // recruitテーブルから削除
-            await RecruitService.deleteRecruit(image1MsgId);
+            await RecruitService.deleteRecruit(guild.id, image1MsgId);
 
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(image1MsgId);
@@ -116,6 +116,11 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
                 embeds: [helpEmbed],
                 components: [createNewRecruitButton(recruitChannel.name)],
             });
+
+            const availableRecruitsString = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType); // 開催中募集の文字列
+            if (availableRecruitsString !== null) {
+                recruitChannel.send(availableRecruitsString);
+            }
         } else {
             // 既に参加済みかチェック
             if (applicantIdList.includes(member.userId)) {

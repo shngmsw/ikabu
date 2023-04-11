@@ -6,11 +6,15 @@ const logger = log4js_obj.getLogger('interaction');
 
 export async function createRecruitEditor(interaction: MessageContextMenuCommandInteraction) {
     try {
+        const guild = await interaction.guild?.fetch();
+        if (guild === undefined) {
+            throw new Error('guild cannot fetch.');
+        }
         const message = interaction.targetMessage;
         const messageId = message.id;
         const userId = interaction.member?.user.id;
 
-        const recruitData = await RecruitService.getRecruit(messageId);
+        const recruitData = await RecruitService.getRecruit(guild.id, messageId);
 
         if (recruitData.length === 0) {
             await interaction.reply({

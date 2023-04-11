@@ -254,7 +254,15 @@ async function sendOtherGames(
         }
 
         // DBに募集情報を登録
-        await RecruitService.registerRecruit(embedMessage.id, recruiter.userId, recruitNum, condition, null, RecruitType.OtherGameRecruit);
+        await RecruitService.registerRecruit(
+            guild.id,
+            embedMessage.id,
+            recruiter.userId,
+            recruitNum,
+            condition,
+            null,
+            RecruitType.OtherGameRecruit,
+        );
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(

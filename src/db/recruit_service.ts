@@ -20,14 +20,16 @@ export class RecruitService {
         try {
             DBCommon.init();
             await DBCommon.run(`CREATE TABLE IF NOT EXISTS recruit (
-                                message_id text primary key,
+                                guild_id text,
+                                message_id text,
                                 author_id text,
                                 recruit_num number,
                                 condition text,
                                 channel_name text,
                                 recruit_type number,
                                 option text,
-                                created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime'))
+                                created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime')),
+                                primary key(guild_id, message_id)
                     )`);
             DBCommon.close();
         } catch (err) {
@@ -36,6 +38,7 @@ export class RecruitService {
     }
 
     static async registerRecruit(
+        guildId: string,
         messageId: string,
         authorId: string,
         recruitNum: number,
@@ -47,8 +50,8 @@ export class RecruitService {
         try {
             DBCommon.init();
             await DBCommon.run(
-                `INSERT INTO recruit (message_id, author_id, recruit_num, condition, channel_name, recruit_type, option) values ($1, $2, $3, $4, $5, $6, $7)`,
-                [messageId, authorId, recruitNum, condition, channelName, recruitType, option],
+                `INSERT INTO recruit (guild_id, message_id, author_id, recruit_num, condition, channel_name, recruit_type, option) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+                [guildId, messageId, authorId, recruitNum, condition, channelName, recruitType, option],
             );
             DBCommon.close();
         } catch (err) {
@@ -56,45 +59,70 @@ export class RecruitService {
         }
     }
 
-    static async deleteRecruit(messageId: string) {
+    static async deleteRecruit(guildId: string, messageId: string) {
         try {
             DBCommon.init();
-            await DBCommon.run(`DELETE FROM recruit WHERE message_id = ${messageId}`);
+            await DBCommon.run(`DELETE FROM recruit WHERE guild_id = ${guildId} AND message_id = ${messageId}`);
             DBCommon.close();
         } catch (err) {
             logger.error(err);
         }
     }
 
-    static async updateRecruitNum(messageId: string, recruitNum: number) {
+    static async updateRecruitNum(guildId: string, messageId: string, recruitNum: number) {
         try {
             DBCommon.init();
-            await DBCommon.run(`UPDATE recruit SET recruit_num = ${recruitNum} WHERE message_id = ${messageId}`);
+            await DBCommon.run(`UPDATE recruit SET recruit_num = ${recruitNum} WHERE guild_id = ${guildId} AND message_id = ${messageId}`);
             DBCommon.close();
         } catch (err) {
             logger.error(err);
         }
     }
 
-    static async updateCondition(messageId: string, condition: string) {
+    static async updateCondition(guildId: string, messageId: string, condition: string) {
         try {
             DBCommon.init();
-            await DBCommon.run(`UPDATE recruit SET condition = '${condition}' WHERE message_id = ${messageId}`);
+            await DBCommon.run(`UPDATE recruit SET condition = '${condition}' WHERE guild_id = ${guildId} AND message_id = ${messageId}`);
             DBCommon.close();
         } catch (err) {
             logger.error(err);
         }
     }
 
-    static async getRecruit(messageId: string) {
+    static async getRecruit(guildId: string, messageId: string) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all);
-        const results = await db.all(`SELECT * FROM recruit WHERE message_id = ${messageId}`);
+        const results = await db.all(`SELECT * FROM recruit WHERE guild_id = ${guildId} AND message_id = ${messageId}`);
         DBCommon.close();
         const recruits: Recruit[] = [];
         for (let i = 0; i < results.length; i++) {
             recruits.push(
                 new Recruit(
+                    results[i].guild_id,
+                    results[i].message_id,
+                    results[i].author_id,
+                    results[i].recruit_num,
+                    results[i].condition,
+                    results[i].channel_name,
+                    results[i].recruit_type,
+                    results[i].option,
+                    results[i].created_at,
+                ),
+            );
+        }
+        return recruits;
+    }
+
+    static async getRecruitsByRecruitType(guildId: string, recruitType: number) {
+        const db = DBCommon.open();
+        db.all = util.promisify(db.all);
+        const results = await db.all(`SELECT * FROM recruit WHERE guild_id = ${guildId} AND recruit_type = ${recruitType}`);
+        DBCommon.close();
+        const recruits: Recruit[] = [];
+        for (let i = 0; i < results.length; i++) {
+            recruits.push(
+                new Recruit(
+                    results[i].guild_id,
                     results[i].message_id,
                     results[i].author_id,
                     results[i].recruit_num,

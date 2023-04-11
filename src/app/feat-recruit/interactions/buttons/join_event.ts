@@ -37,7 +37,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
 
-        const recruitData = await RecruitService.getRecruit(image1MsgId);
+        const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
         if (recruitData.length === 0) {
             await interaction.editReply({ components: await disableThinkingButton(interaction, '参加') });

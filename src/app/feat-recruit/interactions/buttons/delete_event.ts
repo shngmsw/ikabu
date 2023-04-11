@@ -90,7 +90,7 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
             }
 
             // recruitテーブルから削除
-            await RecruitService.deleteRecruit(image1MsgId);
+            await RecruitService.deleteRecruit(guild.id, image1MsgId);
 
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(image1MsgId);

@@ -11,7 +11,7 @@ export async function regenerateEmbed(guild: Guild, channelId: string, messageId
         const message = await searchMessageById(guild, channelId, messageId);
         const oldEmbed = message.embeds[0];
 
-        const recruitData = await RecruitService.getRecruit(messageId);
+        const recruitData = await RecruitService.getRecruit(guild.id, messageId);
         if (recruitData.length === 0) {
             logger.warn('embed was not regenerated! [recruitData was not found!]');
             return;

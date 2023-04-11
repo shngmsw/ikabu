@@ -19,7 +19,7 @@ export const RecruitOpCode = {
 
 export async function regenerateCanvas(guild: Guild, channelId: string, messageId: string, opCode: number) {
     try {
-        const recruitData = await RecruitService.getRecruit(messageId);
+        const recruitData = await RecruitService.getRecruit(guild.id, messageId);
         if (recruitData.length === 0) {
             logger.warn('canvas was not regenerated! [recruitData was not found!]');
             return;
