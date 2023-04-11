@@ -77,19 +77,19 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction)
     }
 
     if (options.getSubcommand() === 'apex') {
-        apexLegends(interaction, guild, recruitChannel, member, roles);
+        await apexLegends(interaction, guild, recruitChannel, member, roles);
     } else if (options.getSubcommand() === 'mhr') {
-        monsterHunterRise(interaction, guild, recruitChannel, member, roles);
+        await monsterHunterRise(interaction, guild, recruitChannel, member, roles);
     } else if (options.getSubcommand() === 'overwatch') {
-        overwatch(interaction, guild, recruitChannel, member, roles);
+        await overwatch(interaction, guild, recruitChannel, member, roles);
     } else if (options.getSubcommand() === 'valo') {
-        valorant(interaction, guild, recruitChannel, member, roles);
+        await valorant(interaction, guild, recruitChannel, member, roles);
     } else if (options.getSubcommand() === 'other') {
-        others(interaction, guild, recruitChannel, member);
+        await others(interaction, guild, recruitChannel, member);
     }
 }
 
-function monsterHunterRise(
+async function monsterHunterRise(
     interaction: ChatInputCommandInteraction,
     guild: Guild,
     recruitChannel: TextBasedChannel,
@@ -108,10 +108,10 @@ function monsterHunterRise(
     const color = '#b71008';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak_logo.png';
-    sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
+    await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function apexLegends(
+async function apexLegends(
     interaction: ChatInputCommandInteraction,
     guild: Guild,
     recruitChannel: TextBasedChannel,
@@ -130,10 +130,10 @@ function apexLegends(
     const color = '#F30100';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends_logo.png';
-    sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
+    await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function overwatch(
+async function overwatch(
     interaction: ChatInputCommandInteraction,
     guild: Guild,
     recruitChannel: TextBasedChannel,
@@ -152,10 +152,10 @@ function overwatch(
     const color = '#ED6516';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch2.png';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch_logo.png';
-    sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
+    await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function valorant(
+async function valorant(
     interaction: ChatInputCommandInteraction,
     guild: Guild,
     recruitChannel: TextBasedChannel,
@@ -174,10 +174,10 @@ function valorant(
     const color = '#FF4654';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant_logo.png';
-    sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
+    await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-function others(interaction: ChatInputCommandInteraction, guild: Guild, recruitChannel: TextBasedChannel, member: GuildMember) {
+async function others(interaction: ChatInputCommandInteraction, guild: Guild, recruitChannel: TextBasedChannel, member: GuildMember) {
     const roleId = process.env.ROLE_ID_RECRUIT_OTHERGAMES;
     if (roleId === undefined) {
         sendErrorMessage(recruitChannel);
@@ -190,7 +190,7 @@ function others(interaction: ChatInputCommandInteraction, guild: Guild, recruitC
     const color = '#379C30';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others_logo.png';
-    sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
+    await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
 async function sendOtherGames(
