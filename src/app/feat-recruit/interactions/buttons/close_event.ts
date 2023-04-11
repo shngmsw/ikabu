@@ -10,8 +10,9 @@ import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.j
 import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js';
 import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
-import { availableRecruitString, getMemberMentions } from './other_events.js';
+import { getMemberMentions } from './other_events.js';
 import { regenerateCanvas, RecruitOpCode } from '../../canvases/regenerate_canvas.js';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -113,16 +114,13 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
+            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
             const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-            await recruitChannel.send({
+            await sendStickyMessage(guild, recruitChannel.id, {
+                content: content,
                 embeds: [helpEmbed],
                 components: [createNewRecruitButton(recruitChannel.name)],
             });
-
-            const availableRecruitsString = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType); // 開催中募集の文字列
-            if (availableRecruitsString !== null) {
-                recruitChannel.send(availableRecruitsString);
-            }
         } else if (datetimeDiff(new Date(), image1Message.createdAt) > 120) {
             const memberList = getMemberMentions(recruitData[0], participantsData);
 
@@ -149,16 +147,13 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
             const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆 \n <@${member.userId}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
+            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
             const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-            await recruitChannel.send({
+            await sendStickyMessage(guild, recruitChannel.id, {
+                content: content,
                 embeds: [helpEmbed],
                 components: [createNewRecruitButton(recruitChannel.name)],
             });
-
-            const availableRecruitsString = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType); // 開催中募集の文字列
-            if (availableRecruitsString !== null) {
-                recruitChannel.send(availableRecruitsString);
-            }
         } else {
             await interaction.followUp({
                 content: '募集主以外は募集を〆られないでし。',

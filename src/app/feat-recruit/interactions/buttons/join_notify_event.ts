@@ -10,6 +10,7 @@ import { messageLinkButtons } from '../../buttons/create_recruit_buttons';
 import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { memberListMessage } from './other_events.js';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -127,6 +128,9 @@ export async function joinNotify(interaction: ButtonInteraction) {
                 content: `<@${recruiterId}>`,
                 embeds: [embed],
             });
+
+            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+            await sendStickyMessage(guild, recruitChannel.id, content);
 
             await interaction.followUp({
                 content: `<@${recruiterId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,

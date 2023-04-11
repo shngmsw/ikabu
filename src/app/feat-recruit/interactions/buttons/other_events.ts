@@ -1,4 +1,4 @@
-import { ButtonInteraction, Guild } from 'discord.js';
+import { ButtonInteraction } from 'discord.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
@@ -6,7 +6,6 @@ import { disableUnlockButton } from '../../buttons/create_recruit_buttons.js';
 import { Participant } from '../../../../db/model/participant.js';
 import { Recruit } from '../../../../db/model/recruit.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
-import { searchMessageById } from '../../../common/manager/message_manager.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -63,31 +62,4 @@ export async function memberListMessage(interaction: ButtonInteraction, messageI
     const memberList = getMemberMentions(recruit[0], participants);
     const msgFirstRow = interaction.message.content.split('\n')[0];
     return msgFirstRow + '\n' + memberList;
-}
-
-export async function availableRecruitString(guild: Guild, channelId: string, recruitType: number) {
-    const recruitData = await RecruitService.getRecruitsByRecruitType(guild.id, recruitType);
-    let result = '**現在開催中の募集一覧** `[' + recruitData.length + ']`';
-    if (recruitData.length === 0) {
-        result += '\n`現在このチャンネルで開催中の募集はありません。`';
-    }
-    for (const recruit of recruitData) {
-        const participantsData = await ParticipantService.getAllParticipants(guild.id, recruit.messageId);
-        const applicantList = []; // 参加希望者リスト
-        for (const participant of participantsData) {
-            if (participant.userType === 2) {
-                applicantList.push(participant);
-            }
-        }
-        const message = await searchMessageById(guild, channelId, recruit.messageId);
-        const recruiter = participantsData[0];
-        if (message !== null && participantsData.length !== 0) {
-            if (recruit.recruitNum !== -1) {
-                result = result + `\n\`${recruiter.displayName}\`: ${message.url} \`[${applicantList.length}/${recruit.recruitNum}\`]`;
-            } else {
-                result = result + `\n\`${recruiter.displayName}\`: ${message.url} \`[${applicantList.length}\`]`;
-            }
-        }
-    }
-    return result;
 }

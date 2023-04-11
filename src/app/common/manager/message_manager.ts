@@ -19,6 +19,7 @@ export async function searchMessageById(guild: $TSFixMe, channelId: $TSFixMe, me
             // fetch(mid)とすれば、cache見てなければフェッチしてくる
             message = await channel.messages.fetch(messageId);
         } catch (error) {
+            message = null;
             logger.warn('message missing');
         }
     }

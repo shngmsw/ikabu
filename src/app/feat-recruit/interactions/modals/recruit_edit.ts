@@ -6,6 +6,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 import { sendEditRecruitLog } from '../../../logs/modals/recruit_modal_log';
 import { regenerateEmbed } from '../../embeds/regenerate_embed';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -47,24 +48,31 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
             replyMessage += '\n**メンバーリストを更新するには参加ボタンを押すでし！**';
         }
 
-        if (interaction.channelId !== null) {
-            switch (oldRecruitData[0].recruitType) {
-                case RecruitType.RegularRecruit:
-                case RecruitType.AnarchyRecruit:
-                case RecruitType.LeagueRecruit:
-                case RecruitType.SalmonRecruit:
-                case RecruitType.FestivalRecruit:
-                case RecruitType.BigRunRecruit:
-                    await regenerateCanvas(guild, interaction.channelId, messageId, RecruitOpCode.open);
-                    break;
-                case RecruitType.PrivateRecruit:
-                case RecruitType.OtherGameRecruit:
-                    await regenerateEmbed(guild, interaction.channelId, messageId, oldRecruitData[0].recruitType);
-            }
+        if (interaction.channel === null) {
+            return interaction.editReply('エラーでし！');
+        }
+
+        const channelId = interaction.channel.id;
+
+        switch (oldRecruitData[0].recruitType) {
+            case RecruitType.RegularRecruit:
+            case RecruitType.AnarchyRecruit:
+            case RecruitType.LeagueRecruit:
+            case RecruitType.SalmonRecruit:
+            case RecruitType.FestivalRecruit:
+            case RecruitType.BigRunRecruit:
+                await regenerateCanvas(guild, channelId, messageId, RecruitOpCode.open);
+                break;
+            case RecruitType.PrivateRecruit:
+            case RecruitType.OtherGameRecruit:
+                await regenerateEmbed(guild, channelId, messageId, oldRecruitData[0].recruitType);
         }
 
         const newRecruitData = await RecruitService.getRecruit(guild.id, messageId);
         await sendEditRecruitLog(guild, oldRecruitData[0], newRecruitData[0], interaction.createdAt);
+
+        const content = await availableRecruitString(guild, channelId, newRecruitData[0].recruitType);
+        await sendStickyMessage(guild, channelId, content);
 
         await interaction.editReply(replyMessage);
     } catch (error) {
