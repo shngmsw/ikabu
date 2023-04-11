@@ -139,9 +139,13 @@ export async function joinNotify(interaction: ButtonInteraction) {
             });
 
             // 5分後にホストへの通知を削除
-            if (notifyMessage != null) {
+            if (notifyMessage !== null) {
                 await sleep(300);
-                notifyMessage.delete();
+                try {
+                    notifyMessage.delete();
+                } catch (error) {
+                    logger.warn('notify message has been already deleted');
+                }
             }
         }
     } catch (err) {

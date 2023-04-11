@@ -163,7 +163,11 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             // 5分後にホストへの通知を削除
             if (notifyMessage !== null) {
                 await sleep(300);
-                notifyMessage.delete();
+                try {
+                    notifyMessage.delete();
+                } catch (error) {
+                    logger.warn('notify message has been already deleted');
+                }
             }
         }
     } catch (err) {
