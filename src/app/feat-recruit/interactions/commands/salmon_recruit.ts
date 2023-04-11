@@ -1,12 +1,17 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, PermissionsBitField, User, VoiceChannel } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, fetchSchedule } from '../../../common/apis/splatoon3_ink';
-import { searchAPIMemberById } from '../../../common/manager/member_manager';
+import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { isEmpty, isNotEmpty, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_canvas';
 import { recruitSalmonCanvas, ruleSalmonCanvas } from '../../canvases/salmon_canvas';
+import { Participant } from '../../../../db/model/participant';
+import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participants_service';
+import { RecruitType } from '../../../../db/model/recruit';
+import { RecruitOpCode } from '../../canvases/regenerate_canvas';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -15,36 +20,36 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
 
     const options = interaction.options;
     const channel = interaction.channel;
-    const voice_channel = interaction.options.getChannel('使用チャンネル');
-    const recruit_num = options.getInteger('募集人数') ?? -1;
+    const voiceChannel = interaction.options.getChannel('使用チャンネル');
+    const recruitNum = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
     const guild = await interaction.guild?.fetch();
     if (guild === undefined) {
         throw new Error('guild cannot fetch.');
     }
-    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
-    if (host_member === null) {
-        throw new Error('host_member is null.');
+    const hostMember = await searchAPIMemberById(guild, interaction.member?.user.id);
+    if (hostMember === null) {
+        throw new Error('hostMember is null.');
     }
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
-    let member_counter = recruit_num; // プレイ人数のカウンター
+    let memberCounter = recruitNum; // プレイ人数のカウンター
 
-    if (recruit_num < 1 || recruit_num > 3) {
+    if (recruitNum < 1 || recruitNum > 3) {
         await interaction.reply({
             content: '募集人数は1～3までで指定するでし！',
             ephemeral: true,
         });
         return;
     } else {
-        member_counter++;
+        memberCounter++;
     }
 
     // プレイヤー指定があればカウンターを増やす
-    if (user1 !== null) member_counter++;
-    if (user2 !== null) member_counter++;
+    if (user1 !== null) memberCounter++;
+    if (user2 !== null) memberCounter++;
 
-    if (member_counter > 4) {
+    if (memberCounter > 4) {
         await interaction.reply({
             content: '募集人数がおかしいでし！',
             ephemeral: true,
@@ -52,7 +57,7 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
         return;
     }
 
-    const usable_channel = [
+    const availableChannel = [
         'alfa',
         'bravo',
         'charlie',
@@ -68,14 +73,14 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
         'mike',
     ];
 
-    if (voice_channel instanceof VoiceChannel) {
-        if (voice_channel.members.size != 0 && !voice_channel.members.has(host_member.user.id)) {
+    if (voiceChannel instanceof VoiceChannel) {
+        if (voiceChannel.members.size != 0 && !voiceChannel.members.has(hostMember.user.id)) {
             await interaction.reply({
                 content: 'そのチャンネルは使用中でし！',
                 ephemeral: true,
             });
             return;
-        } else if (!usable_channel.includes(voice_channel.name)) {
+        } else if (!availableChannel.includes(voiceChannel.name)) {
             await interaction.reply({
                 content: 'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
                 ephemeral: true,
@@ -88,7 +93,7 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
 
     try {
-        let txt = `<@${host_member.user.id}>` + '**たんのバイト募集**\n';
+        let txt = `<@${hostMember.user.id}>` + '**たんのバイト募集**\n';
 
         if (user1 !== null && user2 !== null) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
@@ -102,7 +107,7 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
 
         if (condition == null) condition = 'なし';
 
-        await sendSalmonRun(interaction, txt, recruit_num, condition, member_counter, host_member, user1, user2);
+        await sendSalmonRun(interaction, txt, recruitNum, condition, memberCounter, hostMember, user1, user2);
     } catch (error) {
         if (channel !== null) {
             channel.send('なんかエラーでてるわ');
@@ -114,39 +119,64 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
 async function sendSalmonRun(
     interaction: ChatInputCommandInteraction,
     txt: string,
-    recruit_num: number,
+    recruitNum: number,
     condition: string,
     count: number,
-    host_member: GuildMember,
+    hostMember: GuildMember,
     user1: User | null,
     user2: User | null,
 ) {
-    const reserve_channel = interaction.options.getChannel('使用チャンネル');
-
-    let channel_name = '🔉 VC指定なし';
-    if (reserve_channel instanceof VoiceChannel) {
-        channel_name = '🔉 ' + reserve_channel.name;
-    }
-
     const guild = await interaction.guild?.fetch();
     if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
+        throw new Error('guild cannot fetch');
     }
-    // サーバーメンバーとして取得し直し
+    const reservedChannel = interaction.options.getChannel('使用チャンネル');
+    let channelName = null;
+    if (reservedChannel !== null) {
+        channelName = reservedChannel.name;
+    }
+
+    const hostPt = new Participant(hostMember.id, hostMember.displayName, hostMember.displayAvatarURL({ extension: 'png' }), 0, new Date());
+
+    let participant1 = null;
+    let participant2 = null;
+
     if (user1 !== null) {
-        user1 = await searchAPIMemberById(guild, user1.id);
+        const member = await searchDBMemberById(guild, user1.id);
+        participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
     }
     if (user2 !== null) {
-        user2 = await searchAPIMemberById(guild, user2.id);
+        const member = await searchDBMemberById(guild, user2.id);
+        participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
     }
 
     const data = await fetchSchedule();
 
     let recruitBuffer;
     if (checkBigRun(data.schedule, 0)) {
-        recruitBuffer = await recruitBigRunCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
+        recruitBuffer = await recruitBigRunCanvas(
+            RecruitOpCode.open,
+            recruitNum,
+            count,
+            hostPt,
+            participant1,
+            participant2,
+            null,
+            condition,
+            channelName,
+        );
     } else {
-        recruitBuffer = await recruitSalmonCanvas(recruit_num, count, host_member, user1, user2, condition, channel_name);
+        recruitBuffer = await recruitSalmonCanvas(
+            RecruitOpCode.open,
+            recruitNum,
+            count,
+            hostPt,
+            participant1,
+            participant2,
+            null,
+            condition,
+            channelName,
+        );
     }
     if (isEmpty(recruitBuffer) || recruitBuffer === undefined) {
         throw new Error('recruitBuffer is empty');
@@ -168,36 +198,56 @@ async function sendSalmonRun(
     const rule = new AttachmentBuilder(ruleBuffer, { name: 'schedule.png' });
 
     try {
-        const recruit_channel = interaction.channel;
-        if (recruit_channel === null) {
-            throw new Error('recruit_channel is null.');
+        const recruitChannel = interaction.channel;
+        if (recruitChannel === null) {
+            throw new Error('recruitChannel is null.');
         }
         const mention = `<@&${process.env.ROLE_ID_RECRUIT_SALMON}>`;
-        const image1_message = await interaction.editReply({
+        const image1Message = await interaction.editReply({
             content: txt,
             files: [recruit],
         });
-        const image2_message = await recruit_channel.send({ files: [rule] });
-        const sentMessage = await recruit_channel.send({
+
+        // DBに募集情報を登録
+        await RecruitService.registerRecruit(
+            image1Message.id,
+            hostMember.id,
+            recruitNum,
+            condition,
+            channelName,
+            RecruitType.SalmonRecruit,
+        );
+
+        // DBに参加者情報を登録
+        await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);
+        if (participant1 !== null) {
+            await ParticipantService.registerParticipantFromObj(image1Message.id, participant1);
+        }
+        if (participant2 !== null) {
+            await ParticipantService.registerParticipantFromObj(image1Message.id, participant2);
+        }
+
+        const image2Message = await recruitChannel.send({ files: [rule] });
+        const sentMessage = await recruitChannel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        const deleteButtonMsg = await recruit_channel.send({
-            components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
+        const deleteButtonMsg = await recruitChannel.send({
+            components: [recruitDeleteButton(sentMessage, image1Message, image2Message)],
         });
-        if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
+        if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
             sentMessage.edit({
-                components: [recruitActionRow(image1_message, reserve_channel.id)],
+                components: [recruitActionRow(image1Message, reservedChannel.id)],
             });
-            reserve_channel.permissionOverwrites.set(
+            reservedChannel.permissionOverwrites.set(
                 [
                     {
                         id: guild.roles.everyone.id,
                         deny: [PermissionsBitField.Flags.Connect],
                     },
                     {
-                        id: host_member.user.id,
+                        id: hostMember.user.id,
                         allow: [PermissionsBitField.Flags.Connect],
                     },
                 ],
@@ -206,11 +256,11 @@ async function sendSalmonRun(
 
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
-                components: [unlockChannelButton(reserve_channel.id)],
+                components: [unlockChannelButton(reservedChannel.id)],
                 ephemeral: true,
             });
         } else {
-            sentMessage.edit({ components: [recruitActionRow(image1_message)] });
+            sentMessage.edit({ components: [recruitActionRow(image1Message)] });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -218,17 +268,17 @@ async function sendSalmonRun(
         }
 
         // ピン留め
-        image1_message.pin();
+        image1Message.pin();
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, recruit_channel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
-            if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
-                reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
+            if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
+                reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
             }
             return;
         }
@@ -236,10 +286,10 @@ async function sendSalmonRun(
         // 2時間後にVCロックを解除する
         await sleep(7200 - 15);
         // ピン留め解除
-        image1_message.unpin();
-        if (reserve_channel instanceof VoiceChannel && host_member.voice.channelId != reserve_channel.id) {
-            reserve_channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-            reserve_channel.permissionOverwrites.delete(host_member.user, 'UnLock Voice Channel');
+        image1Message.unpin();
+        if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
+            reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+            reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
         }
     } catch (error) {
         logger.error(error);

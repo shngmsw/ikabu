@@ -22,6 +22,7 @@ import { sendCloseButton } from './event/support_auto_tag/send_support_close_but
 import { registerSlashCommands } from '../register';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { Member } from '../db/model/member';
+import { ParticipantService } from '../db/participants_service';
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -108,9 +109,9 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
         // membersテーブルにレコードがあるか確認
         if ((await MembersService.getMemberByUserId(guildId, userId)).length == 0) {
-            MembersService.registerMember(updateMember);
+            await MembersService.registerMember(updateMember);
         } else {
-            MembersService.updateMemberProfile(updateMember);
+            await MembersService.updateMemberProfile(updateMember);
         }
     } catch (err) {
         const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
@@ -133,6 +134,7 @@ client.on('ready', async () => {
         await MembersService.createTableIfNotExists();
         await FriendCodeService.createTableIfNotExists();
         await RecruitService.createTableIfNotExists();
+        await ParticipantService.createTableIfNotExists();
         await MessageCountService.createTableIfNotExists();
         await TeamDividerService.createTableIfNotExists();
         const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID || '');
@@ -186,17 +188,11 @@ async function onInteraction(interaction: $TSFixMe) {
     try {
         if (interaction.isButton()) {
             button_handler.call(interaction);
-        }
-
-        if (interaction.isModalSubmit()) {
+        } else if (interaction.isModalSubmit()) {
             modal_handler.call(interaction);
-        }
-
-        if (interaction.isMessageContextMenuCommand()) {
+        } else if (interaction.isMessageContextMenuCommand()) {
             context_handler.call(interaction);
-        }
-
-        if (interaction.isCommand()) {
+        } else if (interaction.isCommand()) {
             command_handler.call(interaction);
         }
     } catch (error) {

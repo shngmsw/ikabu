@@ -6,18 +6,27 @@ import {
     modalSalmonRecruit,
     modalFesRecruit,
 } from '../feat-recruit/interactions/modals/extract_recruit_modal';
+import { recruitEdit } from '../feat-recruit/interactions/modals/recruit_edit';
 
 export async function call(interaction: $TSFixMe) {
     const params = new URLSearchParams(interaction.customId);
     if (isNotEmpty(params.get('recm'))) {
-        const recruitModals = {
-            regrec: modalRegularRecruit,
-            anarec: modalAnarchyRecruit,
-            salrec: modalSalmonRecruit,
-            fesrec: modalFesRecruit,
-        };
-        // @ts-expect-error TS(2538): Type 'null' cannot be used as an index type.
-        await recruitModals[params.get('recm')](interaction, params);
+        switch (params.get('recm')) {
+            case 'regrec':
+                modalRegularRecruit(interaction);
+                break;
+            case 'anarec':
+                modalAnarchyRecruit(interaction);
+                break;
+            case 'salrec':
+                modalSalmonRecruit(interaction);
+                break;
+            case 'fesrec':
+                modalFesRecruit(interaction, params);
+                break;
+            case 'recedit':
+                recruitEdit(interaction, params);
+        }
     }
     return;
 }

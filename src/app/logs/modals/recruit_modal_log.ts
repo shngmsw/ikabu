@@ -1,6 +1,7 @@
-import { EmbedBuilder } from 'discord.js';
-import { searchAPIMemberById } from '../../common/manager/member_manager';
+import { EmbedBuilder, Guild } from 'discord.js';
+import { searchAPIMemberById, searchDBMemberById } from '../../common/manager/member_manager';
 import { sendEmbedsWebhook } from '../../common/webhook';
+import { Recruit } from '../../../db/model/recruit';
 
 export async function sendRecruitModalLog(interaction: $TSFixMe) {
     const guild = interaction.guild;
@@ -35,5 +36,37 @@ export async function sendRecruitModalLog(interaction: $TSFixMe) {
     ]);
     embed.setColor('#56C000');
     embed.setTimestamp(interaction.createdAt);
+    await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
+}
+
+export async function sendEditRecruitLog(guild: Guild, oldRecruitData: Recruit, newRecruitData: Recruit, editedAt: Date) {
+    const recruiterId = newRecruitData.authorId;
+    const recruiter = await searchDBMemberById(guild, recruiterId);
+
+    const embed = new EmbedBuilder();
+    embed.setTitle('募集内容編集ログ');
+    embed.setAuthor({
+        name: `${recruiter.displayName} [${recruiterId}]`,
+        iconURL: recruiter.iconUrl,
+    });
+    embed.addFields([
+        {
+            name: '募集人数',
+            value: oldRecruitData.recruitNum + ' -> ' + newRecruitData.recruitNum,
+            inline: true,
+        },
+        {
+            name: 'FROM',
+            value: oldRecruitData.condition,
+            inline: false,
+        },
+        {
+            name: 'TO',
+            value: newRecruitData.condition,
+            inline: false,
+        },
+    ]);
+    embed.setColor('#0070BB');
+    embed.setTimestamp(editedAt);
     await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
 }

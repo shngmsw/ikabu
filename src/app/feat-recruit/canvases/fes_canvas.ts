@@ -3,7 +3,8 @@ import path from 'path';
 import { modalRecruit } from '../../../constant.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
-import { GuildMember, User } from 'discord.js';
+import { Participant } from '../../../db/model/participant.js';
+import { RecruitOpCode } from './regenerate_canvas.js';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -20,88 +21,100 @@ Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
  * 募集用のキャンバス(1枚目)を作成する
  */
 export async function recruitFesCanvas(
-    recruit_num: number,
+    opCode: number,
+    remaining: number,
     count: number,
-    host_member: GuildMember,
-    user1: User | GuildMember | string | null,
-    user2: User | GuildMember | string | null,
+    host: Participant,
+    user1: Participant | null,
+    user2: Participant | null,
+    user3: Participant | null,
     team: string,
     color: string,
     condition: string,
-    channel_name: string,
+    channelName: string | null,
 ) {
-    const blank_avatar_url = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
+    const blankAvatarUrl = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
-    const recruit_ctx = recruitCanvas.getContext('2d');
+    const recruitCtx = recruitCanvas.getContext('2d');
 
     // 下地
-    createRoundRect(recruit_ctx, 1, 1, 718, 548, 30);
-    recruit_ctx.fillStyle = '#2F3136';
-    recruit_ctx.fill();
-    recruit_ctx.strokeStyle = '#FFFFFF';
-    recruit_ctx.lineWidth = 4;
-    recruit_ctx.stroke();
+    createRoundRect(recruitCtx, 1, 1, 718, 548, 30);
+    recruitCtx.fillStyle = '#2F3136';
+    recruitCtx.fill();
+    recruitCtx.strokeStyle = '#FFFFFF';
+    recruitCtx.lineWidth = 4;
+    recruitCtx.stroke();
 
-    const fes_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png');
-    recruit_ctx.drawImage(fes_icon, 17, 20, 85, 85);
+    const fesIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png');
+    recruitCtx.drawImage(fesIcon, 17, 20, 85, 85);
 
-    fillTextWithStroke(recruit_ctx, 'フェスマッチ', '51px Splatfont', '#000000', color, 3, 115, 80);
+    fillTextWithStroke(recruitCtx, 'フェスマッチ', '51px Splatfont', '#000000', color, 3, 115, 80);
 
-    recruit_ctx.save();
-    recruit_ctx.textAlign = 'right';
-    fillTextWithStroke(recruit_ctx, team, '48px Splatfont', color, '#222222', 1.7, 690, 80);
-    recruit_ctx.restore();
+    recruitCtx.save();
+    recruitCtx.textAlign = 'right';
+    fillTextWithStroke(recruitCtx, team, '48px Splatfont', color, '#222222', 1.7, 690, 80);
+    recruitCtx.restore();
 
     // 募集主の画像
-    const host_img = await Canvas.loadImage(host_member.displayAvatarURL({ extension: 'png' }));
-    recruit_ctx.save();
-    drawArcImage(recruit_ctx, host_img, 40, 120, 50);
-    recruit_ctx.strokeStyle = '#1e1f23';
-    recruit_ctx.lineWidth = 9;
-    recruit_ctx.stroke();
-    recruit_ctx.restore();
+    const hostImage = await Canvas.loadImage(host.iconUrl ?? modalRecruit.placeHold);
+    recruitCtx.save();
+    drawArcImage(recruitCtx, hostImage, 40, 120, 50);
+    recruitCtx.strokeStyle = '#1e1f23';
+    recruitCtx.lineWidth = 9;
+    recruitCtx.stroke();
+    recruitCtx.restore();
 
-    const member_urls = [];
+    const memberIcons = [];
 
-    if (user1 === 'dummy_icon') {
-        member_urls.push(modalRecruit.placeHold);
-    } else if (user1 instanceof User || user1 instanceof GuildMember) {
-        member_urls.push(user1.displayAvatarURL({ extension: 'png' }));
+    if (user1 instanceof Participant) {
+        memberIcons.push(user1.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user2 === 'dummy_icon') {
-        member_urls.push(modalRecruit.placeHold);
-    } else if (user2 instanceof User || user2 instanceof GuildMember) {
-        member_urls.push(user2.displayAvatarURL({ extension: 'png' }));
+    if (user2 instanceof Participant) {
+        memberIcons.push(user2.iconUrl ?? modalRecruit.placeHold);
+    }
+
+    if (user3 instanceof Participant) {
+        memberIcons.push(user3.iconUrl ?? modalRecruit.placeHold);
     }
 
     for (let i = 0; i < 4; i++) {
         if (count >= i + 2) {
-            const user_url = member_urls[i] != null ? member_urls[i] : blank_avatar_url;
-            const user_img = await Canvas.loadImage(user_url);
-            recruit_ctx.save();
-            drawArcImage(recruit_ctx, user_img, i * 118 + 158, 120, 50);
-            recruit_ctx.strokeStyle = '#1e1f23';
-            recruit_ctx.lineWidth = 9;
-            recruit_ctx.stroke();
-            recruit_ctx.restore();
+            const userUrl = memberIcons[i] != null ? memberIcons[i] : blankAvatarUrl;
+            const userImage = await Canvas.loadImage(userUrl);
+            recruitCtx.save();
+            drawArcImage(recruitCtx, userImage, i * 118 + 158, 120, 50);
+            recruitCtx.strokeStyle = '#1e1f23';
+            recruitCtx.lineWidth = 9;
+            recruitCtx.stroke();
+            recruitCtx.restore();
         }
     }
 
-    const host_icon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
-    recruit_ctx.drawImage(host_icon, 0, 0, host_icon.width, host_icon.height, 90, 172, 75, 75);
+    const hostIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
+    recruitCtx.drawImage(hostIcon, 0, 0, hostIcon.width, hostIcon.height, 90, 172, 75, 75);
 
-    fillTextWithStroke(recruit_ctx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
+    fillTextWithStroke(recruitCtx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
 
-    fillTextWithStroke(recruit_ctx, '@' + recruit_num, '42px "Splatfont"', '#FFFFFF', '#2D3130', 1, 580, 218);
+    let remainingString;
+    if (opCode === RecruitOpCode.open || opCode === RecruitOpCode.cancel) {
+        remainingString = remaining > 0 ? '@' + remaining : '満員';
+    } else if (opCode === RecruitOpCode.close) {
+        remainingString = '受付終了';
+    }
 
-    fillTextWithStroke(recruit_ctx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 290);
+    recruitCtx.save();
+    recruitCtx.textAlign = 'center';
+    fillTextWithStroke(recruitCtx, remainingString, '42px "Splatfont"', '#FFFFFF', '#2D3130', 1, 605, 218);
+    recruitCtx.restore();
 
-    recruit_ctx.font = '30px "Genshin", "SEGUI"';
+    fillTextWithStroke(recruitCtx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 290);
+
+    recruitCtx.font = '30px "Genshin", "SEGUI"';
     const width = 600;
     const size = 40;
-    const column_num = 4;
+    const columnNum = 4;
     const column = [''];
     let line = 0;
     condition = condition.replace('{br}', '\n');
@@ -113,7 +126,7 @@ export async function recruitFesCanvas(
         if (char == '\n') {
             line++;
             column[line] = '';
-        } else if (recruit_ctx.measureText(column[line] + char).width > width) {
+        } else if (recruitCtx.measureText(column[line] + char).width > width) {
             line++;
             column[line] = char;
         } else {
@@ -121,17 +134,42 @@ export async function recruitFesCanvas(
         }
     }
 
-    if (column.length > column_num) {
-        column[column_num - 1] += '…';
+    if (column.length > columnNum) {
+        column[columnNum - 1] += '…';
     }
 
     for (let j = 0; j < column.length; j++) {
-        if (j < column_num) {
-            recruit_ctx.fillText(column[j], 65, 345 + size * j);
+        if (j < columnNum) {
+            recruitCtx.fillText(column[j], 65, 345 + size * j);
         }
     }
 
-    fillTextWithStroke(recruit_ctx, channel_name, '37px "Splatfont"', '#FFFFFF', '#2D3130', 1, 30, 520);
+    let channelString;
+    if (channelName === null) {
+        channelString = '🔉 VC指定なし';
+    } else if (channelName === '[簡易版募集]') {
+        channelString = channelName;
+    } else {
+        channelString = '🔉 ' + channelName;
+    }
+
+    fillTextWithStroke(recruitCtx, channelString, '37px "Splatfont"', '#FFFFFF', '#2D3130', 1, 30, 520);
+
+    if (opCode === RecruitOpCode.cancel) {
+        recruitCtx.save();
+        recruitCtx.translate(220, -110);
+        recruitCtx.rotate((25 * Math.PI) / 180);
+        const cancelStamp = await Canvas.loadImage(
+            'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/canceled_stamp.png',
+        );
+        recruitCtx.drawImage(cancelStamp, 0, 0, cancelStamp.width, cancelStamp.height, 0, 0, 600, 600);
+        recruitCtx.restore;
+    } else if (opCode === RecruitOpCode.close) {
+        recruitCtx.save();
+        const cancelStamp = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/closed_stamp.png');
+        recruitCtx.drawImage(cancelStamp, 0, 0, cancelStamp.width, cancelStamp.height, 130, 80, 500, 340);
+        recruitCtx.restore;
+    }
 
     const recruit = recruitCanvas.toBuffer();
     return recruit;
@@ -140,66 +178,66 @@ export async function recruitFesCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleFesCanvas(fes_data: $TSFixMe) {
+export async function ruleFesCanvas(fesData: $TSFixMe) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
 
-    const date = formatDatetime(fes_data.startTime, dateformat.ymdw);
-    const time = formatDatetime(fes_data.startTime, dateformat.hm) + ' - ' + formatDatetime(fes_data.endTime, dateformat.hm);
+    const date = formatDatetime(fesData.startTime, dateformat.ymdw);
+    const time = formatDatetime(fesData.startTime, dateformat.hm) + ' - ' + formatDatetime(fesData.endTime, dateformat.hm);
 
-    const rule_ctx = ruleCanvas.getContext('2d');
+    const ruleCtx = ruleCanvas.getContext('2d');
 
-    createRoundRect(rule_ctx, 1, 1, 718, 548, 30);
-    rule_ctx.fillStyle = '#2F3136';
-    rule_ctx.fill();
-    rule_ctx.strokeStyle = '#FFFFFF';
-    rule_ctx.lineWidth = 4;
-    rule_ctx.stroke();
+    createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
+    ruleCtx.fillStyle = '#2F3136';
+    ruleCtx.fill();
+    ruleCtx.strokeStyle = '#FFFFFF';
+    ruleCtx.lineWidth = 4;
+    ruleCtx.stroke();
 
-    fillTextWithStroke(rule_ctx, 'ルール', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
+    fillTextWithStroke(ruleCtx, 'ルール', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
-    const rule_width = rule_ctx.measureText(fes_data.rule).width;
-    fillTextWithStroke(rule_ctx, fes_data.rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - rule_width) / 2, 145); // 中央寄せ
+    const ruleWidth = ruleCtx.measureText(fesData.rule).width;
+    fillTextWithStroke(ruleCtx, fesData.rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - ruleWidth) / 2, 145); // 中央寄せ
 
-    fillTextWithStroke(rule_ctx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
+    fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
 
-    const date_width = rule_ctx.measureText(date).width;
-    fillTextWithStroke(rule_ctx, date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - date_width) / 2, 270); // 中央寄せ
+    const dateWidth = ruleCtx.measureText(date).width;
+    fillTextWithStroke(ruleCtx, date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - dateWidth) / 2, 270); // 中央寄せ
 
-    const time_width = rule_ctx.measureText(time).width;
-    fillTextWithStroke(rule_ctx, time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - time_width) / 2, 320); // 中央寄せ
+    const timeWidth = ruleCtx.measureText(time).width;
+    fillTextWithStroke(ruleCtx, time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - timeWidth) / 2, 320); // 中央寄せ
 
-    fillTextWithStroke(rule_ctx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
+    fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
 
-    const stage1_width = rule_ctx.measureText(fes_data.stage1).width;
-    fillTextWithStroke(rule_ctx, fes_data.stage1, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage1_width) / 2 + 10, 440); // 中央寄せ
+    const stage1Width = ruleCtx.measureText(fesData.stage1).width;
+    fillTextWithStroke(ruleCtx, fesData.stage1, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage1Width) / 2 + 10, 440); // 中央寄せ
 
-    const stage2_width = rule_ctx.measureText(fes_data.stage2).width;
-    fillTextWithStroke(rule_ctx, fes_data.stage2, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage2_width) / 2 + 10, 490); // 中央寄せ
+    const stage2Width = ruleCtx.measureText(fesData.stage2).width;
+    fillTextWithStroke(ruleCtx, fesData.stage2, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage2Width) / 2 + 10, 490); // 中央寄せ
 
-    const stage1_img = await Canvas.loadImage(fes_data.stageImage1);
-    rule_ctx.save();
-    rule_ctx.beginPath();
-    createRoundRect(rule_ctx, 370, 130, 308, 176, 10);
-    rule_ctx.clip();
-    rule_ctx.drawImage(stage1_img, 370, 130, 308, 176);
-    rule_ctx.strokeStyle = '#FFFFFF';
-    rule_ctx.lineWidth = 6.0;
-    rule_ctx.stroke();
-    rule_ctx.restore();
+    const stage1Image = await Canvas.loadImage(fesData.stageImage1);
+    ruleCtx.save();
+    ruleCtx.beginPath();
+    createRoundRect(ruleCtx, 370, 130, 308, 176, 10);
+    ruleCtx.clip();
+    ruleCtx.drawImage(stage1Image, 370, 130, 308, 176);
+    ruleCtx.strokeStyle = '#FFFFFF';
+    ruleCtx.lineWidth = 6.0;
+    ruleCtx.stroke();
+    ruleCtx.restore();
 
-    const stage2_img = await Canvas.loadImage(fes_data.stageImage2);
-    rule_ctx.save();
-    rule_ctx.beginPath();
-    createRoundRect(rule_ctx, 370, 340, 308, 176, 10);
-    rule_ctx.clip();
-    rule_ctx.drawImage(stage2_img, 370, 340, 308, 176);
-    rule_ctx.strokeStyle = '#FFFFFF';
-    rule_ctx.lineWidth = 6.0;
-    rule_ctx.stroke();
-    rule_ctx.restore();
+    const stage2Image = await Canvas.loadImage(fesData.stageImage2);
+    ruleCtx.save();
+    ruleCtx.beginPath();
+    createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
+    ruleCtx.clip();
+    ruleCtx.drawImage(stage2Image, 370, 340, 308, 176);
+    ruleCtx.strokeStyle = '#FFFFFF';
+    ruleCtx.lineWidth = 6.0;
+    ruleCtx.stroke();
+    ruleCtx.restore();
 
-    createRoundRect(rule_ctx, 1, 1, 718, 548, 30);
-    rule_ctx.clip();
+    createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
+    ruleCtx.clip();
 
     const rule = ruleCanvas.toBuffer();
     return rule;

@@ -2,13 +2,15 @@ import { ChannelType, GuildMember, ModalSubmitInteraction } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, fetchSchedule, getAnarchyOpenData, getFesData, getRegularData } from '../../../common/apis/splatoon3_ink';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
-import { searchAPIMemberById } from '../../../common/manager/member_manager';
+import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { isEmpty, isNotEmpty } from '../../../common/others';
 import { sendRecruitModalLog } from '../../../logs/modals/recruit_modal_log';
 import { sendAnarchyMatch } from './anarchy_recruit_modal';
 import { sendFesMatch } from './fes_recruit_modal';
 import { sendRegularMatch } from './regular_recruit_modal';
 import { sendSalmonRun } from './salmon_recruit_modal';
+import { modalRecruit } from '../../../../constant';
+import { Member } from '../../../../db/model/member';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -18,39 +20,40 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
         throw new Error('guild cannot fetch.');
     }
     const channel = interaction.channel;
-    const recruit_num = Number(interaction.fields.getTextInputValue('rNum'));
+    const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
-    if (host_member === null) {
-        throw new Error('host_member is null.');
+    if (interaction.member === null) {
+        throw new Error('interaction.member is null');
     }
-    const participants_list = interaction.fields.getTextInputValue('pList');
-    const participants_num = Number(interaction.fields.getTextInputValue('pNum'));
-    let member_counter = recruit_num; // プレイ人数のカウンター
+    const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
+
+    const participantsList = interaction.fields.getTextInputValue('pList');
+    const attendeeNum = Number(interaction.fields.getTextInputValue('pNum'));
+    let memberCounter = recruitNum; // プレイ人数のカウンター
     const type = 0; // now
 
-    if (recruit_num < 1 || recruit_num > 7 || isNaN(recruit_num)) {
+    if (recruitNum < 1 || recruitNum > 7 || isNaN(recruitNum)) {
         await interaction.reply({
             content: '募集人数は1～7までで指定するでし！',
             ephemeral: true,
         });
         return;
     } else {
-        member_counter++;
+        memberCounter++;
     }
 
     // プレイヤー指定があればカウンターを増やす
-    if (participants_num < 0 || participants_num > 6 || isNaN(participants_num)) {
+    if (attendeeNum < 0 || attendeeNum > 6 || isNaN(attendeeNum)) {
         await interaction.reply({
             content: '既にいる参加者の数は0～6までで指定するでし！',
             ephemeral: true,
         });
         return;
     } else {
-        member_counter += participants_num;
+        memberCounter += attendeeNum;
     }
 
-    if (member_counter > 8) {
+    if (memberCounter > 8) {
         await interaction.reply({
             content: '募集人数がおかしいでし！',
             ephemeral: true,
@@ -67,44 +70,44 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
         const data = await fetchSchedule();
 
         if (checkFes(data.schedule, type)) {
-            const fes_channel1_id = await searchChannelIdByName(guild, 'フウカ募集', ChannelType.GuildText, null);
-            const fes_channel2_id = await searchChannelIdByName(guild, 'ウツホ募集', ChannelType.GuildText, null);
-            const fes_channel3_id = await searchChannelIdByName(guild, 'マンタロー募集', ChannelType.GuildText, null);
+            const fes1ChannelId = await searchChannelIdByName(guild, 'フウカ募集', ChannelType.GuildText, null);
+            const fes2ChannelId = await searchChannelIdByName(guild, 'ウツホ募集', ChannelType.GuildText, null);
+            const fes3ChannelId = await searchChannelIdByName(guild, 'マンタロー募集', ChannelType.GuildText, null);
             await interaction.editReply({
-                content: `募集を建てようとした期間はフェス中でし！\n<#${fes_channel1_id}>, <#${fes_channel2_id}>, <#${fes_channel3_id}>のチャンネルを使うでし！`,
+                content: `募集を建てようとした期間はフェス中でし！\n<#${fes1ChannelId}>, <#${fes2ChannelId}>, <#${fes3ChannelId}>のチャンネルを使うでし！`,
             });
             return;
         }
 
-        const regular_data = await getRegularData(data, type);
+        const regularData = await getRegularData(data, type);
 
-        let txt = `<@${host_member.user.id}>` + '**たんのナワバリ募集**\n';
+        let txt = `<@${hostMember.userId}>` + '**たんのナワバリ募集**\n';
 
-        if (isNotEmpty(participants_list)) {
-            txt = txt + '`' + participants_list + '`の参加が既に決定しているでし！\n';
+        if (isNotEmpty(participantsList)) {
+            txt = txt + '`' + participantsList + '`の参加が既に決定しているでし！\n';
         }
 
         txt += 'よければ合流しませんか？';
 
         if (isEmpty(condition)) condition = 'なし';
 
-        let user1: string | null = null;
-        let user2: string | null = null;
-        let user3: string | null = null;
+        let member1 = null;
+        let member2 = null;
+        let member3 = null;
 
-        if (participants_num >= 1) {
-            user1 = 'dummy_icon';
+        if (attendeeNum >= 1) {
+            member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
         }
 
-        if (participants_num >= 2) {
-            user2 = 'dummy_icon';
+        if (attendeeNum >= 2) {
+            member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
         }
 
-        if (participants_num >= 3) {
-            user3 = 'dummy_icon';
+        if (attendeeNum >= 3) {
+            member3 = new Member(guild.id, 'attendee3', '参加確定者3', modalRecruit.placeHold, new Date());
         }
 
-        await sendRegularMatch(interaction, txt, recruit_num, condition, member_counter, host_member, user1, user2, user3, regular_data);
+        await sendRegularMatch(interaction, txt, recruitNum, condition, memberCounter, hostMember, member1, member2, member3, regularData);
     } catch (error) {
         if (channel !== null) {
             channel.send('なんかエラーでてるわ');
@@ -119,39 +122,40 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
         throw new Error('guild cannot fetch.');
     }
     const channel = interaction.channel;
-    const recruit_num = Number(interaction.fields.getTextInputValue('rNum'));
+    const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
-    if (host_member === null) {
-        throw new Error('host_member is null.');
+    if (interaction.member === null) {
+        throw new Error('interaction.member is null');
     }
-    let user1: GuildMember | string | null = interaction.fields.getTextInputValue('participant1');
-    let user2: GuildMember | string | null = interaction.fields.getTextInputValue('participant2');
-    const participants_num = Number(interaction.fields.getTextInputValue('pNum'));
-    let member_counter = recruit_num; // プレイ人数のカウンター
+    const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
+
+    const user1: GuildMember | string | null = interaction.fields.getTextInputValue('participant1');
+    const user2: GuildMember | string | null = interaction.fields.getTextInputValue('participant2');
+    const attendeeNum = Number(interaction.fields.getTextInputValue('pNum'));
+    let memberCounter = recruitNum; // プレイ人数のカウンター
     const type = 0; // now
 
-    if (recruit_num < 1 || recruit_num > 3 || isNaN(recruit_num)) {
+    if (recruitNum < 1 || recruitNum > 3 || isNaN(recruitNum)) {
         await interaction.reply({
             content: '募集人数は1～3までで指定するでし！',
             ephemeral: true,
         });
         return;
     } else {
-        member_counter++;
+        memberCounter++;
     }
 
-    if (participants_num < 0 || participants_num > 2 || isNaN(participants_num)) {
+    if (attendeeNum < 0 || attendeeNum > 2 || isNaN(attendeeNum)) {
         await interaction.reply({
             content: '既にいる参加者の数は0～2までで指定するでし！',
             ephemeral: true,
         });
         return;
     } else {
-        member_counter += participants_num;
+        memberCounter += attendeeNum;
     }
 
-    if (member_counter > 4) {
+    if (memberCounter > 4) {
         await interaction.reply({
             content: '募集人数がおかしいでし！',
             ephemeral: true,
@@ -168,70 +172,62 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
 
     const members = await guild.members.fetch();
 
-    let user1_mention;
-    let user2_mention;
+    let member1 = null;
+    let member2 = null;
+    let member1Mention = null;
+    let member2Mention = null;
 
-    if (isNotEmpty(user1)) {
+    if (user1 !== null && user1 !== '') {
         // ユーザータグからメンバー取得
         const member = members.find((member: $TSFixMe) => member.user.tag === user1);
-        if (member != undefined) {
-            user1 = member;
-            user1_mention = `<@${member.user.id}>`;
+        if (member !== undefined) {
+            member1 = await searchDBMemberById(guild, member.user.id);
+            member1Mention = `<@${member1.userId}>`;
         } else {
-            user1_mention = user1;
+            member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
+            member1Mention = user1;
         }
-    } else {
-        user1 = null;
     }
 
-    if (isNotEmpty(user2)) {
+    if (user2 !== null && user2 !== '') {
         // ユーザータグからメンバー取得
         const member = members.find((member: $TSFixMe) => member.user.tag === user2);
-        if (member != undefined) {
-            user2 = member;
-            user2_mention = `<@${member.user.id}>`;
+        if (member !== undefined) {
+            member2 = await searchDBMemberById(guild, member.user.id);
+            member2Mention = `<@${member2.userId}>`;
         } else {
-            user2_mention = user2;
+            member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
+            member2Mention = user2;
         }
-    } else {
-        user2 = null;
     }
 
     try {
         const data = await fetchSchedule();
 
         if (checkFes(data.schedule, type)) {
-            const fes_channel1_id = await searchChannelIdByName(guild, 'フウカ募集', ChannelType.GuildText, null);
-            const fes_channel2_id = await searchChannelIdByName(guild, 'ウツホ募集', ChannelType.GuildText, null);
-            const fes_channel3_id = await searchChannelIdByName(guild, 'マンタロー募集', ChannelType.GuildText, null);
+            const fes1ChannelId = await searchChannelIdByName(guild, 'フウカ募集', ChannelType.GuildText, null);
+            const fes2ChannelId = await searchChannelIdByName(guild, 'ウツホ募集', ChannelType.GuildText, null);
+            const fes3ChannelId = await searchChannelIdByName(guild, 'マンタロー募集', ChannelType.GuildText, null);
             await interaction.editReply({
-                content: `募集を建てようとした期間はフェス中でし！\n<#${fes_channel1_id}>, <#${fes_channel2_id}>, <#${fes_channel3_id}>のチャンネルを使うでし！`,
+                content: `募集を建てようとした期間はフェス中でし！\n<#${fes1ChannelId}>, <#${fes2ChannelId}>, <#${fes3ChannelId}>のチャンネルを使うでし！`,
             });
             return;
         }
 
-        const anarchy_data = await getAnarchyOpenData(data, type);
+        const anarchyData = await getAnarchyOpenData(data, type);
 
-        let txt = `<@${host_member.user.id}>` + '**たんのバンカラ募集**\n';
-        if (user1 !== null && user2 !== null) {
-            txt = txt + user1_mention + 'たんと' + user2_mention + 'たんの参加が既に決定しているでし！';
-        } else if (user1 !== null) {
-            txt = txt + user1_mention + 'たんの参加が既に決定しているでし！';
-        } else if (user2 !== null) {
-            txt = txt + user2_mention + 'たんの参加が既に決定しているでし！';
+        let txt = `<@${hostMember.userId}>` + '**たんのバンカラ募集**\n';
+        if (member1Mention !== null && member2Mention !== null) {
+            txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
+        } else if (member1Mention !== null) {
+            txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
+        } else if (member2Mention !== null) {
+            txt = txt + member2Mention + 'たんの参加が既に決定しているでし！';
         }
 
         if (isEmpty(condition)) condition = 'なし';
 
-        if (user1 === user1_mention && isNotEmpty(user1)) {
-            user1 = 'dummy_icon';
-        }
-
-        if (user2 === user2_mention && isNotEmpty(user2)) {
-            user2 = 'dummy_icon';
-        }
-
-        await sendAnarchyMatch(interaction, txt, recruit_num, condition, member_counter, rank, host_member, user1, user2, anarchy_data);
+        await sendAnarchyMatch(interaction, txt, recruitNum, condition, memberCounter, rank, hostMember, member1, member2, anarchyData);
     } catch (error) {
         if (channel !== null) {
             channel.send('なんかエラーでてるわ');
@@ -246,38 +242,39 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
         throw new Error('guild cannot fetch.');
     }
     const channel = interaction.channel;
-    const recruit_num = Number(interaction.fields.getTextInputValue('rNum'));
+    const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
-    if (host_member === null) {
-        throw new Error('host_member is null.');
+    if (interaction.member === null) {
+        throw new Error('interaction.member is null');
     }
-    let user1: GuildMember | string | null = interaction.fields.getTextInputValue('participant1');
-    let user2: GuildMember | string | null = interaction.fields.getTextInputValue('participant2');
-    const participants_num = Number(interaction.fields.getTextInputValue('pNum'));
-    let member_counter = recruit_num; // プレイ人数のカウンター
+    const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
-    if (recruit_num < 1 || recruit_num > 3 || isNaN(recruit_num)) {
+    const user1 = interaction.fields.getTextInputValue('participant1');
+    const user2 = interaction.fields.getTextInputValue('participant2');
+    const attendeeNum = Number(interaction.fields.getTextInputValue('pNum'));
+    let memberCounter = recruitNum; // プレイ人数のカウンター
+
+    if (recruitNum < 1 || recruitNum > 3 || isNaN(recruitNum)) {
         await interaction.reply({
             content: '募集人数は1～3までで指定するでし！',
             ephemeral: true,
         });
         return;
     } else {
-        member_counter++;
+        memberCounter++;
     }
 
-    if (participants_num < 0 || participants_num > 2 || isNaN(participants_num)) {
+    if (attendeeNum < 0 || attendeeNum > 2 || isNaN(attendeeNum)) {
         await interaction.reply({
             content: '既にいる参加者の数は0～2までで指定するでし！',
             ephemeral: true,
         });
         return;
     } else {
-        member_counter += participants_num;
+        memberCounter += attendeeNum;
     }
 
-    if (member_counter > 4) {
+    if (memberCounter > 4) {
         await interaction.reply({
             content: '募集人数がおかしいでし！',
             ephemeral: true,
@@ -293,57 +290,49 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
     try {
         const members = await guild.members.fetch();
 
-        let user1_mention;
-        let user2_mention;
+        let member1 = null;
+        let member2 = null;
+        let member1Mention = null;
+        let member2Mention = null;
 
-        if (isNotEmpty(user1)) {
+        if (user1 !== null && user1 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user1);
-            if (member != undefined) {
-                user1 = member;
-                user1_mention = `<@${member.user.id}>`;
+            if (member !== undefined) {
+                member1 = await searchDBMemberById(guild, member.user.id);
+                member1Mention = `<@${member1.userId}>`;
             } else {
-                user1_mention = user1;
+                member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
+                member1Mention = user1;
             }
-        } else {
-            user1 = null;
         }
 
-        if (isNotEmpty(user2)) {
+        if (user2 !== null && user2 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user2);
-            if (member != undefined) {
-                user2 = member;
-                user2_mention = `<@${member.user.id}>`;
+            if (member !== undefined) {
+                member2 = await searchDBMemberById(guild, member.user.id);
+                member2Mention = `<@${member2.userId}>`;
             } else {
-                user2_mention = user2;
+                member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
+                member2Mention = user2;
             }
-        } else {
-            user2 = null;
         }
 
-        let txt = `<@${host_member.user.id}>` + '**たんのバイト募集**\n';
-        if (user1 !== null && user2 !== null) {
-            txt = txt + user1_mention + 'たんと' + user2_mention + 'たんの参加が既に決定しているでし！';
-        } else if (user1 !== null) {
-            txt = txt + user1_mention + 'たんの参加が既に決定しているでし！';
-        } else if (user2 !== null) {
-            txt = txt + user2_mention + 'たんの参加が既に決定しているでし！';
+        let txt = `<@${hostMember.userId}>` + '**たんのバイト募集**\n';
+        if (member1Mention !== null && member2Mention !== null) {
+            txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
+        } else if (member1Mention !== null) {
+            txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
+        } else if (member2Mention !== null) {
+            txt = txt + member2Mention + 'たんの参加が既に決定しているでし！';
         }
 
         txt += 'よければ合流しませんか？';
 
         if (isEmpty(condition)) condition = 'なし';
 
-        if (user1 === user1_mention && isNotEmpty(user1)) {
-            user1 = 'dummy_icon';
-        }
-
-        if (user2 === user2_mention && isNotEmpty(user2)) {
-            user2 = 'dummy_icon';
-        }
-
-        await sendSalmonRun(interaction, txt, recruit_num, condition, member_counter, host_member, user1, user2);
+        await sendSalmonRun(interaction, txt, recruitNum, condition, memberCounter, hostMember, member1, member2);
     } catch (error) {
         if (channel !== null) {
             channel.send('なんかエラーでてるわ');
@@ -358,42 +347,43 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
         throw new Error('guild cannot fetch.');
     }
     const channel = interaction.channel;
-    const recruit_num = Number(interaction.fields.getTextInputValue('rNum'));
+    const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    const host_member = await searchAPIMemberById(guild, interaction.member?.user.id);
-    if (host_member === null) {
-        throw new Error('host_member is null.');
+    if (interaction.member === null) {
+        throw new Error('interaction.member is null');
     }
-    let user1: GuildMember | string | null = interaction.fields.getTextInputValue('participant1');
-    let user2: GuildMember | string | null = interaction.fields.getTextInputValue('participant2');
-    const participants_num = Number(interaction.fields.getTextInputValue('pNum'));
-    let member_counter = recruit_num; // プレイ人数のカウンター
-    const type = 0; // now
-    const recruit_channel_name = params.get('cn');
-    const team_charactor_name = recruit_channel_name.slice(0, -2); // チャンネル名から'募集'を削除
-    const team = team_charactor_name + '陣営';
+    const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
-    if (recruit_num < 1 || recruit_num > 3 || isNaN(recruit_num)) {
+    const user1 = interaction.fields.getTextInputValue('participant1');
+    const user2 = interaction.fields.getTextInputValue('participant2');
+    const attendeeNum = Number(interaction.fields.getTextInputValue('pNum'));
+    let memberCounter = recruitNum; // プレイ人数のカウンター
+    const type = 0; // now
+    const recruitChannelName = params.get('cn');
+    const teamCharacterName = recruitChannelName.slice(0, -2); // チャンネル名から'募集'を削除
+    const team = teamCharacterName + '陣営';
+
+    if (recruitNum < 1 || recruitNum > 3 || isNaN(recruitNum)) {
         await interaction.reply({
             content: '募集人数は1～3までで指定するでし！',
             ephemeral: true,
         });
         return;
     } else {
-        member_counter++;
+        memberCounter++;
     }
 
-    if (participants_num < 0 || participants_num > 2 || isNaN(participants_num)) {
+    if (attendeeNum < 0 || attendeeNum > 2 || isNaN(attendeeNum)) {
         await interaction.reply({
             content: '既にいる参加者の数は0～2までで指定するでし！',
             ephemeral: true,
         });
         return;
     } else {
-        member_counter += participants_num;
+        memberCounter += attendeeNum;
     }
 
-    if (member_counter > 4) {
+    if (memberCounter > 4) {
         await interaction.reply({
             content: '募集人数がおかしいでし！',
             ephemeral: true,
@@ -416,59 +406,51 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
             return;
         }
 
-        const fes_data = await getFesData(data, type);
+        const fesData = await getFesData(data, type);
 
         const members = await guild.members.fetch();
 
-        let user1_mention;
-        let user2_mention;
+        let member1 = null;
+        let member2 = null;
+        let member1Mention = null;
+        let member2Mention = null;
 
-        if (isNotEmpty(user1)) {
+        if (user1 !== null && user1 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user1);
-            if (member != undefined) {
-                user1 = member;
-                user1_mention = `<@${member.user.id}>`;
+            if (member !== undefined) {
+                member1 = await searchDBMemberById(guild, member.user.id);
+                member1Mention = `<@${member1.userId}>`;
             } else {
-                user1_mention = user1;
+                member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
+                member1Mention = user1;
             }
-        } else {
-            user1 = null;
         }
 
-        if (isNotEmpty(user2)) {
+        if (user2 !== null && user2 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user2);
-            if (member != undefined) {
-                user2 = member;
-                user2_mention = `<@${member.user.id}>`;
+            if (member !== undefined) {
+                member2 = await searchDBMemberById(guild, member.user.id);
+                member2Mention = `<@${member2.userId}>`;
             } else {
-                user2_mention = user2;
+                member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
+                member2Mention = user2;
             }
-        } else {
-            user2 = null;
         }
 
-        let txt = `<@${host_member.user.id}>` + '**たんのフェスマッチ募集**\n';
-        if (user1 !== null && user2 !== null) {
-            txt = txt + user1_mention + 'たんと' + user2_mention + 'たんの参加が既に決定しているでし！';
-        } else if (user1 !== null) {
-            txt = txt + user1_mention + 'たんの参加が既に決定しているでし！';
-        } else if (user2 !== null) {
-            txt = txt + user2_mention + 'たんの参加が既に決定しているでし！';
+        let txt = `<@${hostMember.userId}>` + '**たんのフェスマッチ募集**\n';
+        if (member1Mention !== null && member2Mention !== null) {
+            txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
+        } else if (member1Mention !== null) {
+            txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
+        } else if (member2Mention !== null) {
+            txt = txt + member2Mention + 'たんの参加が既に決定しているでし！';
         }
 
         if (isEmpty(condition)) condition = 'なし';
 
-        if (user1 === user1_mention && isNotEmpty(user1)) {
-            user1 = 'dummy_icon';
-        }
-
-        if (user2 === user2_mention && isNotEmpty(user2)) {
-            user2 = 'dummy_icon';
-        }
-
-        await sendFesMatch(interaction, team, txt, recruit_num, condition, member_counter, host_member, user1, user2, fes_data);
+        await sendFesMatch(interaction, team, txt, recruitNum, condition, memberCounter, hostMember, member1, member2, fesData);
     } catch (error) {
         if (channel !== null) {
             channel.send('なんかエラーでてるわ');

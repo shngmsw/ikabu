@@ -1,63 +1,68 @@
-import { AttachmentBuilder, GuildMember, ModalSubmitInteraction } from 'discord.js';
+import { AttachmentBuilder, ModalSubmitInteraction } from 'discord.js';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { isEmpty, isNotEmpty, sleep } from '../../../common/others';
+import { isNotEmpty, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
-import { getMemberMentions } from '../buttons/recruit_button_events';
+import { getMemberMentions } from '../buttons/other_events';
+import { Participant } from '../../../../db/model/participant';
+import { RecruitType } from '../../../../db/model/recruit';
+import { ParticipantService } from '../../../../db/participants_service';
+import { Member } from '../../../../db/model/member';
+import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 
 const logger = log4js_obj.getLogger('recruit');
 
 export async function sendAnarchyMatch(
     interaction: ModalSubmitInteraction,
     txt: string,
-    recruit_num: number,
+    recruitNum: number,
     condition: string,
     count: number,
     rank: string,
-    host_member: GuildMember,
-    user1: GuildMember | string | null,
-    user2: GuildMember | string | null,
-    anarchy_data: $TSFixMe,
+    member: Member,
+    user1: Member | null,
+    user2: Member | null,
+    anarchyData: $TSFixMe,
 ) {
-    let thumbnail_url; // ガチルールのアイコン
+    let thumbnailUrl; // ガチルールのアイコン
     let thumbnailXP; // アイコンx座標
     let thumbnailYP; // アイコンy座標
     let thumbScaleX; // アイコン幅
     let thumbScaleY; // アイコン高さ
-    switch (anarchy_data.rule) {
+    switch (anarchyData.rule) {
         case 'ガチエリア':
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
+            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
             thumbnailXP = 600;
             thumbnailYP = 20;
             thumbScaleX = 90;
             thumbScaleY = 100;
             break;
         case 'ガチヤグラ':
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
+            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
             thumbnailXP = 595;
             thumbnailYP = 20;
             thumbScaleX = 90;
             thumbScaleY = 100;
             break;
         case 'ガチホコバトル':
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
+            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
             thumbnailXP = 585;
             thumbnailYP = 23;
             thumbScaleX = 110;
             thumbScaleY = 90;
             break;
         case 'ガチアサリ':
-            thumbnail_url = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
+            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
             thumbnailXP = 570;
             thumbnailYP = 20;
             thumbScaleX = 120;
             thumbScaleY = 100;
             break;
         default:
-            thumbnail_url =
+            thumbnailUrl =
                 'http://placehold.jp/15/4c4d57/ffffff/100x100.png?text=ここに画像を貼りたかったんだが、どうやらエラーみたいだ…。';
             thumbnailXP = 595;
             thumbnailYP = 20;
@@ -66,41 +71,85 @@ export async function sendAnarchyMatch(
             break;
     }
 
-    const channel_name = '[簡易版募集]';
+    const channelName = '[簡易版募集]';
 
-    const thumbnail = [thumbnail_url, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
+    const thumbnail = [thumbnailUrl, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
     const guild = await interaction.guild?.fetch();
     if (guild === undefined) {
         throw new Error('guild cannot fetch.');
     }
 
-    const recruitBuffer = await recruitAnarchyCanvas(recruit_num, count, host_member, user1, user2, condition, rank, channel_name);
+    const recruiter = new Participant(member.userId, member.displayName, member.iconUrl, 0, new Date());
+
+    let attendee1 = null;
+    if (user1 instanceof Member) {
+        attendee1 = new Participant(user1.userId, user1.displayName, user1.iconUrl, 1, new Date());
+    }
+
+    let attendee2 = null;
+    if (user2 instanceof Member) {
+        attendee2 = new Participant(user2.userId, user2.displayName, user2.iconUrl, 1, new Date());
+    }
+
+    const recruitBuffer = await recruitAnarchyCanvas(
+        RecruitOpCode.open,
+        recruitNum,
+        count,
+        recruiter,
+        attendee1,
+        attendee2,
+        null,
+        condition,
+        rank,
+        channelName,
+    );
     const recruit = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
 
-    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchy_data, thumbnail), { name: 'rules.png' });
+    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, thumbnail), { name: 'rules.png' });
 
     try {
-        const recruit_channel = interaction.channel;
-        if (recruit_channel === null) {
-            throw new Error('recruit_channel is null.');
+        const recruitChannel = interaction.channel;
+        if (recruitChannel === null) {
+            throw new Error('recruitChannel is null.');
         }
 
         const mention = `<@&${process.env.ROLE_ID_RECRUIT_ANARCHY}>`;
-        const image1_message = await interaction.editReply({
+        const image1Message = await interaction.editReply({
             content: txt,
             files: [recruit],
         });
-        const image2_message = await recruit_channel.send({ files: [rule] });
-        const sentMessage = await recruit_channel.send({
+
+        // DBに募集情報を登録
+        await RecruitService.registerRecruit(
+            image1Message.id,
+            member.userId,
+            recruitNum,
+            condition,
+            channelName,
+            RecruitType.AnarchyRecruit,
+            rank,
+        );
+
+        // DBに参加者情報を登録
+        await ParticipantService.registerParticipantFromObj(image1Message.id, recruiter);
+        if (attendee1 !== null) {
+            await ParticipantService.registerParticipantFromObj(image1Message.id, attendee1);
+        }
+        if (attendee2 !== null) {
+            await ParticipantService.registerParticipantFromObj(image1Message.id, attendee2);
+        }
+
+        const image2Message = await recruitChannel.send({ files: [rule] });
+        const buttonMessage = await recruitChannel.send({
             content: mention + ' ボタンを押して参加表明するでし！',
         });
 
-        sentMessage.edit({ components: [recruitActionRow(image1_message)] });
-        const deleteButtonMsg = await recruit_channel.send({
-            components: [recruitDeleteButton(sentMessage, image1_message, image2_message)],
+        buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
+        const deleteButtonMsg = await recruitChannel.send({
+            components: [recruitDeleteButton(buttonMessage, image1Message, image2Message)],
         });
         await interaction.followUp({
             content:
@@ -109,11 +158,11 @@ export async function sendAnarchyMatch(
         });
 
         // ピン留め
-        image1_message.pin();
+        image1Message.pin();
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, recruit_channel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (isNotEmpty(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
@@ -122,26 +171,29 @@ export async function sendAnarchyMatch(
 
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
-        const checkMessage = await searchMessageById(guild, recruit_channel.id, sentMessage.id);
-
-        if (isEmpty(checkMessage)) {
-            return;
-        }
-        const message_first_row = checkMessage.content.split('\n')[0];
-        if (message_first_row.indexOf('〆') !== -1 || message_first_row.indexOf('キャンセル') !== -1) {
+        const recruitData = await RecruitService.getRecruit(image1Message.id);
+        if (recruitData.length === 0) {
             return;
         }
 
-        const recruit_data = await RecruitService.getRecruitAllByMessageId(checkMessage.id);
-        const member_list = getMemberMentions(recruit_data);
-        const host_mention = `<@${host_member.user.id}>`;
+        const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
+        const memberList = getMemberMentions(recruitData[0], participants);
+        const hostMention = `<@${member.userId}>`;
 
-        checkMessage.edit({
-            content: '`[自動〆]`\n' + `${host_mention}たんの募集は〆！\n${member_list}`,
-            components: await setButtonDisable(checkMessage),
+        if (interaction.channelId !== null) {
+            await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
+        }
+
+        // DBから募集情報削除
+        await RecruitService.deleteRecruit(image1Message.id);
+        await ParticipantService.deleteAllParticipant(image1Message.id);
+
+        buttonMessage.edit({
+            content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
+            components: await setButtonDisable(buttonMessage),
         });
         // ピン留め解除
-        image1_message.unpin();
+        image1Message.unpin();
     } catch (error) {
         logger.error(error);
     }
