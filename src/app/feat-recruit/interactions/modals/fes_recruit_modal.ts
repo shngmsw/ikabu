@@ -147,6 +147,10 @@ export async function sendFesMatch(
         const memberList = getMemberMentions(recruitData[0], participants);
         const hostMention = `<@${member.userId}>`;
 
+        // DBから募集情報削除
+        await RecruitService.deleteRecruit(image1Message.id);
+        await ParticipantService.deleteAllParticipant(image1Message.id);
+
         buttonMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: await setButtonDisable(buttonMessage),

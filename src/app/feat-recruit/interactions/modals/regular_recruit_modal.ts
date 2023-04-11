@@ -11,7 +11,7 @@ import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { Member } from '../../../../db/model/member';
-import { RecruitOpCode } from '../../canvases/regenerate_canvas';
+import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -145,6 +145,14 @@ export async function sendRegularMatch(
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
         const memberList = getMemberMentions(recruitData[0], participants);
         const hostMention = `<@${member.userId}>`;
+
+        if (interaction.channelId !== null) {
+            await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
+        }
+
+        // DBから募集情報削除
+        await RecruitService.deleteRecruit(image1Message.id);
+        await ParticipantService.deleteAllParticipant(image1Message.id);
 
         buttonMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
