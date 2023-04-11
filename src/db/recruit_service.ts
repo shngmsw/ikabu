@@ -66,6 +66,26 @@ export class RecruitService {
         }
     }
 
+    static async updateRecruitNum(messageId: string, recruitNum: number) {
+        try {
+            DBCommon.init();
+            await DBCommon.run(`UPDATE recruit SET recruit_num = ${recruitNum} WHERE message_id = ${messageId}`);
+            DBCommon.close();
+        } catch (err) {
+            logger.error(err);
+        }
+    }
+
+    static async updateCondition(messageId: string, condition: string) {
+        try {
+            DBCommon.init();
+            await DBCommon.run(`UPDATE recruit SET condition = '${condition}' WHERE message_id = ${messageId}`);
+            DBCommon.close();
+        } catch (err) {
+            logger.error(err);
+        }
+    }
+
     static async getRecruit(messageId: string) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all);

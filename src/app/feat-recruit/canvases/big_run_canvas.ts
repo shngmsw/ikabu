@@ -5,7 +5,7 @@ import { getBigRunData } from '../../common/apis/splatoon3_ink';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { Participant } from '../../../db/model/participant.js';
-import { RecruitOpCode } from '../interactions/buttons/regenerate_image.js';
+import { RecruitOpCode } from './regenerate_canvas.js';
 
 const logger = log4js_obj.getLogger('recruit');
 

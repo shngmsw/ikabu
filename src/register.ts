@@ -712,6 +712,8 @@ const teamDivider = new SlashCommandBuilder()
 
 const buttonEnabler = new ContextMenuCommandBuilder().setName(commandNames.buttonEnabler).setType(ApplicationCommandType.Message);
 
+const recruitEditor = new ContextMenuCommandBuilder().setName(commandNames.recuitEditor).setType(ApplicationCommandType.Message);
+
 const voiceChannelMention = new SlashCommandBuilder()
     .setName(commandNames.voiceChannelMention)
     .setDescription('VCメンバー全員にメンションを送ります。')
@@ -776,6 +778,7 @@ const commands = [
     fesB,
     fesC,
     buttonEnabler,
+    recruitEditor,
     voiceChannelMention,
     variablesSettings,
 ];

@@ -13,7 +13,7 @@ import { getMemberMentions } from '../buttons/other_events';
 import { Participant } from '../../../../db/model/participant';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitType } from '../../../../db/model/recruit';
-import { RecruitOpCode } from '../buttons/regenerate_image';
+import { RecruitOpCode } from '../../canvases/regenerate_canvas';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function fesRecruit(interaction: ChatInputCommandInteraction) {

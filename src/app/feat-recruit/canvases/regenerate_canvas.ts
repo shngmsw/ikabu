@@ -1,12 +1,12 @@
 import { AttachmentBuilder, Guild, Message } from 'discord.js';
-import { Participant } from '../../../../db/model/participant';
-import { Recruit, RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
-import { searchMessageById } from '../../../common/manager/message_manager';
-import { recruitAnarchyCanvas } from '../../canvases/anarchy_canvas';
-import { recruitSalmonCanvas } from '../../canvases/salmon_canvas';
-import { recruitRegularCanvas } from '../../canvases/regular_canvas';
+import { Participant } from '../../../db/model/participant';
+import { Recruit, RecruitType } from '../../../db/model/recruit';
+import { ParticipantService } from '../../../db/participants_service';
+import { RecruitService } from '../../../db/recruit_service';
+import { searchMessageById } from '../../common/manager/message_manager';
+import { recruitAnarchyCanvas } from './anarchy_canvas';
+import { recruitSalmonCanvas } from './salmon_canvas';
+import { recruitRegularCanvas } from './regular_canvas';
 
 export const RecruitOpCode = {
     open: 0,

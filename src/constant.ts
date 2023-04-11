@@ -25,6 +25,7 @@ export const commandNames = {
     fesC: 'ウツホ陣営',
     private: 'プラベ募集',
     buttonEnabler: 'ボタンを有効化する',
+    recuitEditor: '募集を編集',
     voiceChannelMention: 'ボイスメンション',
     variablesSettings: '環境変数設定',
 };

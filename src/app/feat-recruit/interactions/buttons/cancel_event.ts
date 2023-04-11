@@ -11,7 +11,7 @@ import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js'
 import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { memberListMessage } from './other_events.js';
-import { RecruitOpCode, regenerateCanvas } from './regenerate_image.js';
+import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 

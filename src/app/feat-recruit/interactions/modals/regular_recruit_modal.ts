@@ -11,7 +11,7 @@ import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { Member } from '../../../../db/model/member';
-import { RecruitOpCode } from '../buttons/regenerate_image';
+import { RecruitOpCode } from '../../canvases/regenerate_canvas';
 
 const logger = log4js_obj.getLogger('recruit');
 

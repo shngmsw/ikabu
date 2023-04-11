@@ -4,7 +4,7 @@ import { modalRecruit } from '../../../constant';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { Participant } from '../../../db/model/participant';
-import { RecruitOpCode } from '../interactions/buttons/regenerate_image';
+import { RecruitOpCode } from './regenerate_canvas';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
