@@ -24,11 +24,13 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
 
         const oldRecruitData = await RecruitService.getRecruit(messageId);
 
-        const remainingNum = Number(interaction.fields.getTextInputValue('remaining'));
+        let remaining = interaction.fields.getTextInputValue('remaining');
+        remaining = remaining.replace(/\s+/g, '');
+        remaining = remaining.replace(/　+/g, '');
 
         let replyMessage = '';
-        if (!isNaN(remainingNum)) {
-            replyMessage += await editRecruitNum(guild.id, messageId, oldRecruitData[0].recruitType, remainingNum);
+        if (remaining !== '' && !isNaN(Number(remaining))) {
+            replyMessage += await editRecruitNum(guild.id, messageId, oldRecruitData[0].recruitType, Number(remaining));
         }
 
         const conditionStr = interaction.fields.getTextInputValue('condition');
