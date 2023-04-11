@@ -21,7 +21,7 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
     try {
         const recruitData = await RecruitService.getRecruit(messageId);
         if (recruitData.length === 0) {
-            logger.warn('embed was not regenerated! [recruitData was not found!]');
+            logger.warn('canvas was not regenerated! [recruitData was not found!]');
             return;
         }
         const participantsData = await ParticipantService.getAllParticipants(guild.id, messageId);
