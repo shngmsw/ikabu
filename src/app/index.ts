@@ -109,9 +109,9 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
         // membersテーブルにレコードがあるか確認
         if ((await MembersService.getMemberByUserId(guildId, userId)).length == 0) {
-            MembersService.registerMember(updateMember);
+            await MembersService.registerMember(updateMember);
         } else {
-            MembersService.updateMemberProfile(updateMember);
+            await MembersService.updateMemberProfile(updateMember);
         }
     } catch (err) {
         const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
@@ -188,17 +188,11 @@ async function onInteraction(interaction: $TSFixMe) {
     try {
         if (interaction.isButton()) {
             button_handler.call(interaction);
-        }
-
-        if (interaction.isModalSubmit()) {
+        } else if (interaction.isModalSubmit()) {
             modal_handler.call(interaction);
-        }
-
-        if (interaction.isMessageContextMenuCommand()) {
+        } else if (interaction.isMessageContextMenuCommand()) {
             context_handler.call(interaction);
-        }
-
-        if (interaction.isCommand()) {
+        } else if (interaction.isCommand()) {
             command_handler.call(interaction);
         }
     } catch (error) {

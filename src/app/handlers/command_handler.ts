@@ -34,8 +34,6 @@ export async function call(interaction: $TSFixMe) {
     const { commandName } = interaction;
     const { options } = interaction;
 
-    sendCommandLog(interaction); // ログ処理待たせたくないのでawaitなし
-
     if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
         await voiceLocker(interaction);
     } else if (commandName === commandNames.close) {
@@ -70,59 +68,60 @@ export async function call(interaction: $TSFixMe) {
     } else if (commandName === commandNames.friend_code) {
         await handleFriendCode(interaction);
     } else if (commandName === commandNames.experience) {
-        handleIkabuExperience(interaction);
+        await handleIkabuExperience(interaction);
     } else if (commandName === commandNames.voiceChannelMention) {
-        voiceMention(interaction);
+        await voiceMention(interaction);
     } else if (commandName === commandNames.variablesSettings) {
-        variablesHandler(interaction);
+        await variablesHandler(interaction);
     } else if (commandName == commandNames.wiki) {
-        handleWiki(interaction);
+        await handleWiki(interaction);
     } else if (commandName == commandNames.kansen) {
-        handleKansen(interaction);
+        await handleKansen(interaction);
     } else if (commandName == commandNames.timer) {
-        handleTimer(interaction);
+        await handleTimer(interaction);
     } else if (commandName == commandNames.pick) {
-        handlePick(interaction);
+        await handlePick(interaction);
     } else if (commandName == commandNames.voice_pick) {
-        handleVoicePick(interaction);
+        await handleVoicePick(interaction);
     } else if (commandName == commandNames.buki) {
-        handleBuki(interaction);
+        await handleBuki(interaction);
     } else if (commandName == commandNames.show) {
-        handleShow(interaction);
+        await handleShow(interaction);
     } else if (commandName == commandNames.help) {
-        handleHelp(interaction);
+        await handleHelp(interaction);
     } else if (commandName == commandNames.ban) {
-        handleBan(interaction);
+        await handleBan(interaction);
     } else if (commandName === commandNames.voice) {
         // 'インタラクションに失敗'が出ないようにするため
         await interaction.deferReply();
-        handleVoiceCommand(interaction);
-        setting(interaction);
+        await handleVoiceCommand(interaction);
+        await setting(interaction);
     } else if (commandName == commandNames.ch_manager) {
         const subCommand = options.getSubcommand();
         switch (subCommand) {
             case 'チャンネル作成':
-                handleCreateRoom(interaction);
+                await handleCreateRoom(interaction);
                 break;
             case 'ロール作成':
-                handleCreateRole(interaction);
+                await handleCreateRole(interaction);
                 break;
             case 'ロール割当':
-                handleAssignRole(interaction);
+                await handleAssignRole(interaction);
                 break;
             case 'ロール解除':
-                handleUnassignRole(interaction);
+                await handleUnassignRole(interaction);
                 break;
             case 'カテゴリー削除':
-                handleDeleteCategory(interaction);
+                await handleDeleteCategory(interaction);
                 break;
             case 'チャンネル削除':
-                handleDeleteChannel(interaction);
+                await handleDeleteChannel(interaction);
                 break;
             case 'ロール削除':
-                handleDeleteRole(interaction);
+                await handleDeleteRole(interaction);
                 break;
         }
     }
+    await sendCommandLog(interaction); // DB使うものはawait付けないとcloseエラー出る
     return;
 }
