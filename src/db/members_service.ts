@@ -26,13 +26,14 @@ export class MembersService {
     static async registerMember(member: Member) {
         try {
             DBCommon.init();
-            await DBCommon.run(`INSERT INTO members (guild_id, user_id, display_name, icon_url, joined_at)  values ($1, $2, $3, $4, $5)`, [
-                member.guildId,
-                member.userId,
-                member.displayName,
-                member.iconUrl,
-                member.joinedAt.toString(),
-            ]);
+            await DBCommon.run(
+                `INSERT INTO
+                    members (guild_id, user_id, display_name, icon_url, joined_at)  values ($1, $2, $3, $4, $5)
+                ON CONFLICT
+                    (guild_id, user_id)
+                DO UPDATE SET display_name = $3, icon_url = $4`,
+                [member.guildId, member.userId, member.displayName, member.iconUrl, member.joinedAt.toString()],
+            );
             DBCommon.close();
         } catch (err) {
             logger.error(err);
