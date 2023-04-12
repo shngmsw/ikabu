@@ -57,7 +57,23 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
 
         return newMember;
     } else {
-        return members[0];
+        const memberRaw: GuildMember = await searchAPIMemberById(guild, userId);
+
+        if (memberRaw.joinedAt === null) {
+            throw new Error('joinedAt is null');
+        }
+
+        const newMember = new Member(
+            guild.id,
+            userId,
+            memberRaw.displayName,
+            memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+            memberRaw.joinedAt,
+        );
+
+        await MembersService.registerMember(newMember);
+
+        return newMember;
     }
 }
 
