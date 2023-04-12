@@ -59,7 +59,7 @@ export async function availableRecruitString(guild: Guild, channelId: string, re
 
     let result = '**現在参加受付中の募集一覧** `[' + recruitData.length + ']`';
     if (recruitData.length === 0) {
-        result += '\n`現在このチャンネルで開催中の募集はありません。`';
+        result += '\n`現在このチャンネルで参加受付中の募集はありません。`';
     }
     for (const recruit of recruitData) {
         const participantsData = await ParticipantService.getAllParticipants(guild.id, recruit.messageId);
