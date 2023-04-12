@@ -1,4 +1,12 @@
-import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, PermissionsBitField, User, VoiceChannel } from 'discord.js';
+import {
+    AttachmentBuilder,
+    BaseGuildTextChannel,
+    ChatInputCommandInteraction,
+    GuildMember,
+    PermissionsBitField,
+    User,
+    VoiceChannel,
+} from 'discord.js';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, fetchSchedule, getFesData } from '../../../common/apis/splatoon3_ink';
@@ -283,8 +291,10 @@ async function sendFesMatch(
         }
 
         // 募集リスト更新
-        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.FestivalRecruit);
-        await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel instanceof BaseGuildTextChannel) {
+            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.FestivalRecruit);
+            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        }
 
         // 15秒後に削除ボタンを消す
         await sleep(15);

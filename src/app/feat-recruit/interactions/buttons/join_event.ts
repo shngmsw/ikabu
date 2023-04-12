@@ -115,8 +115,8 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             await ParticipantService.registerParticipant(image1MsgId, member.userId, 2, new Date());
 
             const recruitChannel = interaction.channel;
-            if (!(recruitChannel instanceof BaseGuildTextChannel)) {
-                throw new Error('recruitChannel is not BaseGuildTextChannel type.');
+            if (recruitChannel === null) {
+                throw new Error('recruitChannel is null.');
             }
 
             // ホストがVCにいるかチェックして、VCにいる場合はText in Voiceにメッセージ送信
@@ -142,8 +142,10 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
                 embeds: [embed],
             });
 
-            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-            await sendStickyMessage(guild, recruitChannel.id, content);
+            if (recruitChannel instanceof BaseGuildTextChannel) {
+                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+                await sendStickyMessage(guild, recruitChannel.id, content);
+            }
 
             if (channelId === null) {
                 await interaction.followUp({

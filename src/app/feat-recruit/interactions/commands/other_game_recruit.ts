@@ -1,4 +1,5 @@
 import {
+    BaseGuildTextChannel,
     ChatInputCommandInteraction,
     Collection,
     ColorResolvable,
@@ -312,8 +313,10 @@ async function sendOtherGames(
         }
 
         // 募集リスト更新
-        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.OtherGameRecruit);
-        await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel instanceof BaseGuildTextChannel) {
+            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.OtherGameRecruit);
+            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        }
 
         // 15秒後に削除ボタンを消す
         await sleep(15);

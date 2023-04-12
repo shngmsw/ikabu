@@ -1,4 +1,4 @@
-import { CacheType, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder } from 'discord.js';
+import { BaseGuildTextChannel, CacheType, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
@@ -120,8 +120,10 @@ async function sendPrivateRecruit(
         });
 
         // 募集リスト更新
-        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.PrivateRecruit);
-        await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel instanceof BaseGuildTextChannel) {
+            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.PrivateRecruit);
+            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        }
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
@@ -165,8 +167,10 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
     );
 
     // 募集リスト更新
-    const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.ButtonNotify);
-    await sendStickyMessage(guild, recruitChannel.id, sticky);
+    if (recruitChannel instanceof BaseGuildTextChannel) {
+        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.ButtonNotify);
+        await sendStickyMessage(guild, recruitChannel.id, sticky);
+    }
 
     await interaction.editReply({
         content: '募集完了でし！参加者が来るまで気長に待つでし！',

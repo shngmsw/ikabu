@@ -1,4 +1,4 @@
-import { AttachmentBuilder, ModalSubmitInteraction } from 'discord.js';
+import { AttachmentBuilder, BaseGuildTextChannel, ModalSubmitInteraction } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, fetchSchedule } from '../../../common/apis/splatoon3_ink';
 import { searchMessageById } from '../../../common/manager/message_manager';
@@ -141,8 +141,10 @@ export async function sendSalmonRun(
         });
 
         // 募集リスト更新
-        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.SalmonRecruit);
-        await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel instanceof BaseGuildTextChannel) {
+            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.SalmonRecruit);
+            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        }
 
         // 15秒後に削除ボタンを消す
         await sleep(15);

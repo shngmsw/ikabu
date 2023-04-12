@@ -71,8 +71,10 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
         const newRecruitData = await RecruitService.getRecruit(guild.id, messageId);
         await sendEditRecruitLog(guild, oldRecruitData[0], newRecruitData[0], interaction.createdAt);
 
-        const content = await availableRecruitString(guild, channelId, newRecruitData[0].recruitType);
-        await sendStickyMessage(guild, channelId, content);
+        if (interaction.channel instanceof BaseGuildTextChannel) {
+            const content = await availableRecruitString(guild, channelId, newRecruitData[0].recruitType);
+            await sendStickyMessage(guild, channelId, content);
+        }
 
         await interaction.editReply(replyMessage);
     } catch (error) {
