@@ -57,7 +57,7 @@ export async function availableRecruitString(guild: Guild, channelId: string, re
         recruitData = recruitData.concat(buttonRecruitData);
     }
 
-    let result = '**現在開催中の募集一覧** `[' + recruitData.length + ']`';
+    let result = '**現在参加受付中の募集一覧** `[' + recruitData.length + ']`';
     if (recruitData.length === 0) {
         result += '\n`現在このチャンネルで開催中の募集はありません。`';
     }
