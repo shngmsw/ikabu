@@ -120,6 +120,47 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     }
 });
 
+client.on('userUpdate', async (oldUser, newUser) => {
+    try {
+        const guildId = process.env.SERVER_ID;
+        if (guildId === undefined) {
+            throw new Error('process.env.SERVER_ID is undefined.');
+        }
+        const guild = await client.guilds.fetch(guildId);
+        if (guild == null) {
+            throw new Error('guild is null');
+        }
+        const userId = newUser.id;
+
+        let member = await searchAPIMemberById(guild, userId);
+        if (typeof member.displayAvatarURL() !== 'string' || typeof member.displayName !== 'string' || member.joinedAt === null) {
+            member = await searchAPIMemberById(guildId, userId);
+        }
+
+        if (member.joinedAt === null) {
+            throw new Error('joinedAt is null');
+        }
+
+        const updateMember = new Member(
+            guildId,
+            userId,
+            member.displayName,
+            member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+            member.joinedAt,
+        );
+
+        // membersテーブルにレコードがあるか確認
+        if ((await MembersService.getMemberByUserId(guildId, userId)).length == 0) {
+            await MembersService.registerMember(updateMember);
+        } else {
+            await MembersService.updateMemberProfile(updateMember);
+        }
+    } catch (err) {
+        const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
+        loggerMU.error({ err });
+    }
+});
+
 client.on('ready', async () => {
     try {
         if (client.user == null) {
