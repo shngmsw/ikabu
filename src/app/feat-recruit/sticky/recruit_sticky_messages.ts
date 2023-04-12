@@ -16,34 +16,30 @@ export async function stickyChannelCheck(message: Message) {
             throw new Error('guild cannot fetch.');
         }
         const channelId = message.channelId;
+        let content: string;
         if (channelId === process.env.CHANNEL_ID_RECRUIT_PRIVATE) {
-            const content = await availableRecruitString(guild, channelId, RecruitType.PrivateRecruit);
-            await sendStickyMessage(guild, channelId, content);
+            content = await availableRecruitString(guild, channelId, RecruitType.PrivateRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_ANARCHY) {
-            const content = await availableRecruitString(guild, channelId, RecruitType.AnarchyRecruit);
-            await sendStickyMessage(guild, channelId, content);
+            content = await availableRecruitString(guild, channelId, RecruitType.AnarchyRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_REGULAR) {
-            const content = await availableRecruitString(guild, channelId, RecruitType.RegularRecruit);
-            await sendStickyMessage(guild, channelId, content);
+            content = await availableRecruitString(guild, channelId, RecruitType.RegularRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_LEAGUE) {
-            const content = await availableRecruitString(guild, channelId, RecruitType.LeagueRecruit);
-            await sendStickyMessage(guild, channelId, content);
+            content = await availableRecruitString(guild, channelId, RecruitType.LeagueRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_SALMON) {
-            const content = await availableRecruitString(guild, channelId, RecruitType.SalmonRecruit);
-            await sendStickyMessage(guild, channelId, content);
+            content = await availableRecruitString(guild, channelId, RecruitType.SalmonRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_OTHERGAMES) {
-            const content = await availableRecruitString(guild, channelId, RecruitType.OtherGameRecruit);
-            await sendStickyMessage(guild, channelId, content);
+            content = await availableRecruitString(guild, channelId, RecruitType.OtherGameRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_SHIVER) {
-            const content = await availableRecruitString(guild, channelId, RecruitType.FestivalRecruit);
-            await sendStickyMessage(guild, channelId, content);
+            content = await availableRecruitString(guild, channelId, RecruitType.FestivalRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_FRYE) {
-            const content = await availableRecruitString(guild, channelId, RecruitType.FestivalRecruit);
-            await sendStickyMessage(guild, channelId, content);
+            content = await availableRecruitString(guild, channelId, RecruitType.FestivalRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_BIGMAN) {
-            const content = await availableRecruitString(guild, channelId, RecruitType.FestivalRecruit);
-            await sendStickyMessage(guild, channelId, content);
+            content = await availableRecruitString(guild, channelId, RecruitType.FestivalRecruit);
+        } else {
+            return;
         }
+
+        await sendStickyMessage(guild, channelId, content);
     } catch (error) {
         logger.error(error);
     }
@@ -54,9 +50,11 @@ export async function availableRecruitString(guild: Guild, channelId: string, re
 
     // プラベ募集のときだけもう一種類取り直して結合
     if (recruitType === RecruitType.ButtonNotify) {
-        recruitData = recruitData.concat(await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit));
+        const privateRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit);
+        recruitData = recruitData.concat(privateRecruitData);
     } else if (recruitType === RecruitType.PrivateRecruit) {
-        recruitData = recruitData.concat(await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.ButtonNotify));
+        const buttonRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit);
+        recruitData = recruitData.concat(buttonRecruitData);
     }
 
     let result = '**現在開催中の募集一覧** `[' + recruitData.length + ']`';
