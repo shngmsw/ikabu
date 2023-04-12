@@ -1,4 +1,4 @@
-import { ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
+import { BaseGuildTextChannel, ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
@@ -129,8 +129,10 @@ export async function joinNotify(interaction: ButtonInteraction) {
                 embeds: [embed],
             });
 
-            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-            await sendStickyMessage(guild, recruitChannel.id, content);
+            if (recruitChannel instanceof BaseGuildTextChannel) {
+                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+                await sendStickyMessage(guild, recruitChannel.id, content);
+            }
 
             await interaction.followUp({
                 content: `<@${recruiterId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,

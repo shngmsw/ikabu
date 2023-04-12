@@ -1,5 +1,6 @@
 import {
     AttachmentBuilder,
+    BaseGuildTextChannel,
     ChannelType,
     ChatInputCommandInteraction,
     GuildMember,
@@ -340,8 +341,10 @@ async function sendAnarchyMatch(
         }
 
         // 募集リスト更新
-        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.AnarchyRecruit);
-        await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel instanceof BaseGuildTextChannel) {
+            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.AnarchyRecruit);
+            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        }
 
         // 15秒後に削除ボタンを消す
         await sleep(15);

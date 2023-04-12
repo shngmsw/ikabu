@@ -85,8 +85,8 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
         const buttonMessage = interaction.message;
         const image1Message = await searchMessageById(guild, interaction.channelId, image1MsgId);
         const recruitChannel = interaction.channel;
-        if (!(recruitChannel instanceof BaseGuildTextChannel)) {
-            throw new Error('recruitChannel is not BaseGuildTextChannel type.');
+        if (recruitChannel === null) {
+            throw new Error('recruitChannel is null.');
         }
 
         if (confirmedMemberIDList.includes(member.userId)) {
@@ -112,13 +112,15 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
-            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-            await sendStickyMessage(guild, recruitChannel.id, {
-                content: content,
-                embeds: [helpEmbed],
-                components: [createNewRecruitButton(recruitChannel.name)],
-            });
+            if (recruitChannel instanceof BaseGuildTextChannel) {
+                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+                const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
+                await sendStickyMessage(guild, recruitChannel.id, {
+                    content: content,
+                    embeds: [helpEmbed],
+                    components: [createNewRecruitButton(recruitChannel.name)],
+                });
+            }
         } else if (datetimeDiff(new Date(), image1Message.createdAt) > 120) {
             const memberList = getMemberMentions(recruitData[0], participantsData);
 
@@ -143,13 +145,15 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
             const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆 \n <@${member.userId}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
-            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-            await sendStickyMessage(guild, recruitChannel.id, {
-                content: content,
-                embeds: [helpEmbed],
-                components: [createNewRecruitButton(recruitChannel.name)],
-            });
+            if (recruitChannel instanceof BaseGuildTextChannel) {
+                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+                const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
+                await sendStickyMessage(guild, recruitChannel.id, {
+                    content: content,
+                    embeds: [helpEmbed],
+                    components: [createNewRecruitButton(recruitChannel.name)],
+                });
+            }
         } else {
             await interaction.followUp({
                 content: '募集主以外は募集を〆られないでし。',
