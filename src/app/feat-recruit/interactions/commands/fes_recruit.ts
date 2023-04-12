@@ -182,7 +182,8 @@ async function sendFesMatch(
         channelName = reservedChannel.name;
     }
 
-    const hostPt = new Participant(hostMember.id, hostMember.displayName, hostMember.displayAvatarURL({ extension: 'png' }), 0, new Date());
+    const recruiter = await searchDBMemberById(guild, hostMember.id);
+    const hostPt = new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date());
 
     let participant1 = null;
     let participant2 = null;
