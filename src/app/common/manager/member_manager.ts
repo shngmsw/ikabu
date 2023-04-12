@@ -3,6 +3,7 @@ import { log4js_obj } from '../../../log4js_settings';
 import { isEmpty, isNotEmpty } from '../others';
 import { MembersService } from '../../../db/members_service';
 import { Member } from '../../../db/model/member';
+import axios from 'axios';
 
 const logger = log4js_obj.getLogger('MemberManager');
 
@@ -57,23 +58,26 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
 
         return newMember;
     } else {
-        const memberRaw: GuildMember = await searchAPIMemberById(guild, userId);
+        if (await isUrlValid(members[0].iconUrl)) {
+            return members[0];
+        } else {
+            // 画像URLが無効な場合
+            const memberRaw: GuildMember = await searchAPIMemberById(guild, userId);
 
-        if (memberRaw.joinedAt === null) {
-            throw new Error('joinedAt is null');
+            const newMember = new Member(
+                guild.id,
+                userId,
+                memberRaw.displayName,
+                memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+                members[0].joinedAt,
+            );
+
+            await MembersService.updateMemberProfile(newMember);
+
+            logger.warn('member Icon URL is vaild. database was updated.');
+
+            return newMember;
         }
-
-        const newMember = new Member(
-            guild.id,
-            userId,
-            memberRaw.displayName,
-            memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-            memberRaw.joinedAt,
-        );
-
-        await MembersService.updateMemberProfile(newMember);
-
-        return newMember;
     }
 }
 
@@ -98,5 +102,14 @@ export function getMemberColor(member: $TSFixMe) {
         }
     } catch (error) {
         logger.error(error);
+    }
+}
+
+async function isUrlValid(url: string) {
+    try {
+        const response = await axios.head(url);
+        return response.status === 200;
+    } catch (error) {
+        return false;
     }
 }
