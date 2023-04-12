@@ -79,6 +79,14 @@ export function isNotEmpty(obj: $TSFixMe) {
     return !isEmpty(obj);
 }
 
+export function createMentionsFromIdList(idList: string[]) {
+    const mentionList = [];
+    for (const id of idList) {
+        mentionList.push(`<@${id}>`);
+    }
+    return mentionList;
+}
+
 /**
  * メッセージから順番に取得したメンションを配列で返す
  * @param {*} message メッセージ

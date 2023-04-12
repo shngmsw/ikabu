@@ -9,6 +9,7 @@ import { deleteToken } from '../event/message_related/delete_token';
 import { sendIntentionConfirmReply } from '../event/rookie/send_questionnaire';
 import { dispand } from '../event/message_related/dispander';
 import { play } from '../feat-utils/voice/tts/discordjs_voice';
+import { stickyChannelCheck } from '../feat-recruit/sticky/recruit_sticky_messages';
 const logger = log4js_obj.getLogger('message');
 
 export async function call(message: $TSFixMe) {
@@ -60,6 +61,7 @@ export async function call(message: $TSFixMe) {
         dispand(message);
         play(message);
         await chatCountUp(message);
+        await stickyChannelCheck(message);
         removeRookie(message);
     } catch (error) {
         logger.error(error);

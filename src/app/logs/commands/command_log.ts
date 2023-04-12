@@ -1,20 +1,21 @@
-import { EmbedBuilder } from 'discord.js';
-import { searchAPIMemberById } from '../../common/manager/member_manager';
+import { BaseGuildTextChannel, ChatInputCommandInteraction, EmbedBuilder, MessageContextMenuCommandInteraction } from 'discord.js';
+import { searchDBMemberById } from '../../common/manager/member_manager';
 import { sendEmbedsWebhook } from '../../common/webhook';
 
-export async function sendCommandLog(interaction: $TSFixMe) {
+export async function sendCommandLog(interaction: MessageContextMenuCommandInteraction | ChatInputCommandInteraction) {
     const guild = interaction.guild;
-    const channelName = interaction.channel.name;
+    if (guild === null || interaction.member === null || !(interaction.channel instanceof BaseGuildTextChannel)) {
+        return;
+    }
     const authorId = interaction.member.user.id;
-    // deferしてないけど、呼び出し元でawaitつけないので大丈夫なはず
-    const author = await searchAPIMemberById(guild, authorId);
-    const commandName = interaction.toString();
+    const author = await searchDBMemberById(guild, authorId);
+    const commandName = interaction.commandName;
 
     const embed = new EmbedBuilder();
-    embed.setTitle('コマンドログ');
+    embed.setTitle('メニューコマンドログ');
     embed.setAuthor({
-        name: `${author.displayName} [${interaction.member.user.id}]`,
-        iconURL: author.displayAvatarURL(),
+        name: `${author.displayName} [${authorId}]`,
+        iconURL: author.iconUrl,
     });
     embed.addFields([
         {
@@ -24,7 +25,7 @@ export async function sendCommandLog(interaction: $TSFixMe) {
         },
         {
             name: '使用チャンネル',
-            value: channelName,
+            value: interaction.channel.name,
             inline: false,
         },
     ]);

@@ -53,7 +53,7 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
             memberRaw.joinedAt,
         );
 
-        MembersService.registerMember(newMember);
+        await MembersService.registerMember(newMember);
 
         return newMember;
     } else {

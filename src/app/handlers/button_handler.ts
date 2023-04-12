@@ -1,15 +1,13 @@
 import { URLSearchParams } from 'url';
 import { isNotEmpty } from '../common/others';
-import {
-    cancel,
-    cancelNotify,
-    closeNotify,
-    del,
-    join,
-    joinNotify,
-    close,
-    unlock,
-} from '../feat-recruit/interactions/buttons/recruit_button_events.js';
+import { join } from '../feat-recruit/interactions/buttons/join_event';
+import { cancel } from '../feat-recruit/interactions/buttons/cancel_event';
+import { close } from '../feat-recruit/interactions/buttons/close_event';
+import { del } from '../feat-recruit/interactions/buttons/delete_event';
+import { joinNotify } from '../feat-recruit/interactions/buttons/join_notify_event';
+import { cancelNotify } from '../feat-recruit/interactions/buttons/cancel_notify_event';
+import { closeNotify } from '../feat-recruit/interactions/buttons/close_notify_event';
+import { unlock } from '../feat-recruit/interactions/buttons/other_events.js';
 import {
     alfaButton,
     bravoButton,

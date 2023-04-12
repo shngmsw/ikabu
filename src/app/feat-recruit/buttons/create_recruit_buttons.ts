@@ -2,22 +2,22 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message } from 'discord.j
 import { URLSearchParams } from 'url';
 import { isNotEmpty } from '../../common/others';
 
-export function recruitDeleteButton(msg: Message, image1_message: Message, image2_message: Message) {
+export function recruitDeleteButton(message: Message, image1Message: Message, image2Message: Message) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
-    deleteParams.append('mid', msg.id);
-    deleteParams.append('imid1', image1_message.id);
-    deleteParams.append('imid2', image2_message.id);
+    deleteParams.append('mid', message.id);
+    deleteParams.append('imid1', image1Message.id);
+    deleteParams.append('imid2', image2Message.id);
 
     const button = new ActionRowBuilder<ButtonBuilder>();
     button.addComponents([new ButtonBuilder().setCustomId(deleteParams.toString()).setLabel('募集を削除').setStyle(ButtonStyle.Danger)]);
     return button;
 }
 
-export function embedRecruitDeleteButton(msg: Message, header: Message) {
+export function embedRecruitDeleteButton(message: Message, header: Message) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
-    deleteParams.append('mid', msg.id);
+    deleteParams.append('mid', message.id);
     deleteParams.append('imid1', header.id);
 
     const button = new ActionRowBuilder<ButtonBuilder>();
@@ -25,26 +25,26 @@ export function embedRecruitDeleteButton(msg: Message, header: Message) {
     return button;
 }
 
-export function recruitActionRow(image_message: Message, channel_id?: string) {
+export function recruitActionRow(imageMessage: Message, channelId?: string) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
-    joinParams.append('imid1', image_message.id);
-    if (isNotEmpty(channel_id) && channel_id !== undefined) {
-        joinParams.append('vid', channel_id);
+    joinParams.append('imid1', imageMessage.id);
+    if (isNotEmpty(channelId) && channelId !== undefined) {
+        joinParams.append('vid', channelId);
     }
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', 'cr');
-    cancelParams.append('imid1', image_message.id);
-    if (isNotEmpty(channel_id) && channel_id !== undefined) {
-        cancelParams.append('vid', channel_id);
+    cancelParams.append('imid1', imageMessage.id);
+    if (isNotEmpty(channelId) && channelId !== undefined) {
+        cancelParams.append('vid', channelId);
     }
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'close');
-    closeParams.append('imid1', image_message.id);
-    if (isNotEmpty(channel_id) && channel_id !== undefined) {
-        closeParams.append('vid', channel_id);
+    closeParams.append('imid1', imageMessage.id);
+    if (isNotEmpty(channelId) && channelId !== undefined) {
+        closeParams.append('vid', channelId);
     }
 
     return new ActionRowBuilder<ButtonBuilder>().addComponents([
@@ -54,18 +54,15 @@ export function recruitActionRow(image_message: Message, channel_id?: string) {
     ]);
 }
 
-export function notifyActionRow(host_id: string) {
+export function notifyActionRow() {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'njr');
-    joinParams.append('hid', host_id);
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', 'ncr');
-    cancelParams.append('hid', host_id);
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'nclose');
-    closeParams.append('hid', host_id);
 
     return new ActionRowBuilder<ButtonBuilder>().addComponents([
         new ButtonBuilder().setCustomId(joinParams.toString()).setLabel('参加').setStyle(ButtonStyle.Primary),
@@ -74,10 +71,10 @@ export function notifyActionRow(host_id: string) {
     ]);
 }
 
-export function unlockChannelButton(channel_id: string) {
+export function unlockChannelButton(channelId: string) {
     const buttonParams = new URLSearchParams();
     buttonParams.append('d', 'unl');
-    buttonParams.append('vid', channel_id);
+    buttonParams.append('vid', channelId);
 
     const button = new ActionRowBuilder<ButtonBuilder>().addComponents([
         new ButtonBuilder().setCustomId(buttonParams.toString()).setLabel('ボイスチャンネルのロック解除').setStyle(ButtonStyle.Secondary),
@@ -86,13 +83,13 @@ export function unlockChannelButton(channel_id: string) {
 }
 
 export function createNewRecruitButton(channelName: string) {
-    const allowed_channel = ['ナワバリ募集', 'バンカラ募集', 'リグマ募集', 'サーモン募集', 'ウツホ募集', 'フウカ募集', 'マンタロー募集'];
+    const allowedChannel = ['ナワバリ募集', 'バンカラ募集', 'リグマ募集', 'サーモン募集', 'ウツホ募集', 'フウカ募集', 'マンタロー募集'];
 
     const buttonParams = new URLSearchParams();
     buttonParams.append('d', 'newr');
     buttonParams.append('cn', channelName);
     const button = new ActionRowBuilder<ButtonBuilder>();
-    if (allowed_channel.includes(channelName)) {
+    if (allowedChannel.includes(channelName)) {
         button.addComponents([
             new ButtonBuilder()
                 .setCustomId(buttonParams.toString())
@@ -111,4 +108,31 @@ export function createNewRecruitButton(channelName: string) {
     }
 
     return button;
+}
+
+export function disableUnlockButton() {
+    const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
+        new ButtonBuilder().setCustomId('unlocked').setLabel('ロック解除済み').setStyle(ButtonStyle.Secondary).setDisabled(),
+    ]);
+    return buttons;
+}
+
+export function channelLinkButtons(guildId: $TSFixMe, channelId: $TSFixMe) {
+    const channelLink = `https://discord.com/channels/${guildId}/${channelId}`;
+    const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
+        new ButtonBuilder().setLabel('チャンネルに移動').setStyle(ButtonStyle.Link).setURL(channelLink),
+    ]);
+    return buttons;
+}
+
+export function messageLinkButtons(guildId: $TSFixMe, channelId: $TSFixMe, messageId: $TSFixMe, label?: $TSFixMe) {
+    const link = `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
+
+    const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
+        new ButtonBuilder()
+            .setLabel(label != null ? label : 'メッセージを表示')
+            .setStyle(ButtonStyle.Link)
+            .setURL(link),
+    ]);
+    return buttons;
 }

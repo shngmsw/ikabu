@@ -624,7 +624,7 @@ const otherGame = new SlashCommandBuilder()
                 option
                     .setName('募集人数')
                     .setDescription('募集人数')
-                    .setChoices({ name: '@1', value: '@1' }, { name: '@2', value: '@2' })
+                    .setChoices({ name: '@1', value: '1' }, { name: '@2', value: '2' })
                     .setRequired(true),
             )
             .addChannelOption((option: $TSFixMe) =>
@@ -644,7 +644,7 @@ const otherGame = new SlashCommandBuilder()
                 option
                     .setName('募集人数')
                     .setDescription('募集人数')
-                    .setChoices({ name: '@1', value: '@1' }, { name: '@2', value: '@2' }, { name: '@3', value: '@3' })
+                    .setChoices({ name: '@1', value: '1' }, { name: '@2', value: '2' }, { name: '@3', value: '3' })
                     .setRequired(true),
             )
             .addStringOption((option: $TSFixMe) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'))
@@ -712,6 +712,8 @@ const teamDivider = new SlashCommandBuilder()
 
 const buttonEnabler = new ContextMenuCommandBuilder().setName(commandNames.buttonEnabler).setType(ApplicationCommandType.Message);
 
+const recruitEditor = new ContextMenuCommandBuilder().setName(commandNames.recuitEditor).setType(ApplicationCommandType.Message);
+
 const voiceChannelMention = new SlashCommandBuilder()
     .setName(commandNames.voiceChannelMention)
     .setDescription('VCメンバー全員にメンションを送ります。')
@@ -776,6 +778,7 @@ const commands = [
     fesB,
     fesC,
     buttonEnabler,
+    recruitEditor,
     voiceChannelMention,
     variablesSettings,
 ];

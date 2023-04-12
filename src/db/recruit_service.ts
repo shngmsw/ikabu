@@ -1,17 +1,35 @@
 import util from 'node:util';
 import { log4js_obj } from '../log4js_settings';
 import { DBCommon } from './db.js';
+import { Recruit } from './model/recruit';
 const logger = log4js_obj.getLogger('database');
 
 export class RecruitService {
+    /**
+     * recruit_type
+     * 0: ボタン通知
+     * 1: プラベ募集
+     * 2: ナワバリ募集
+     * 3: バンカラ募集
+     * 4: リグマ募集
+     * 5: サーモン募集
+     * 6: フェス募集
+     * 10: 別ゲー募集
+     */
     static async createTableIfNotExists() {
         try {
             DBCommon.init();
             await DBCommon.run(`CREATE TABLE IF NOT EXISTS recruit (
+                                guild_id text,
                                 message_id text,
                                 author_id text,
-                                member_id text,
-                                created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime'))
+                                recruit_num number,
+                                condition text,
+                                channel_name text,
+                                recruit_type number,
+                                option text,
+                                created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime')),
+                                primary key(guild_id, message_id)
                     )`);
             DBCommon.close();
         } catch (err) {
@@ -19,61 +37,103 @@ export class RecruitService {
         }
     }
 
-    static async save(message_id: $TSFixMe, author_id: $TSFixMe, member_id: $TSFixMe) {
+    static async registerRecruit(
+        guildId: string,
+        messageId: string,
+        authorId: string,
+        recruitNum: number,
+        condition: string,
+        channelName: string | null,
+        recruitType: number,
+        option?: string,
+    ) {
         try {
             DBCommon.init();
-            await DBCommon.run(`insert or replace into recruit (message_id, author_id, member_id) values ($1, $2, $3)`, [
-                message_id,
-                author_id,
-                member_id,
-            ]);
+            await DBCommon.run(
+                `INSERT INTO recruit (guild_id, message_id, author_id, recruit_num, condition, channel_name, recruit_type, option) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+                [guildId, messageId, authorId, recruitNum, condition, channelName, recruitType, option],
+            );
             DBCommon.close();
         } catch (err) {
             logger.error(err);
         }
     }
 
-    static async deleteByMessageId(message_id: $TSFixMe) {
+    static async deleteRecruit(guildId: string, messageId: string) {
         try {
             DBCommon.init();
-            await DBCommon.run(`DELETE from recruit where message_id = ${message_id}`);
+            await DBCommon.run(`DELETE FROM recruit WHERE guild_id = ${guildId} AND message_id = ${messageId}`);
             DBCommon.close();
         } catch (err) {
             logger.error(err);
         }
     }
 
-    static async deleteByMemberId(message_id: $TSFixMe, member_id: $TSFixMe) {
+    static async updateRecruitNum(guildId: string, messageId: string, recruitNum: number) {
         try {
             DBCommon.init();
-            await DBCommon.run(`DELETE from recruit where message_id = ${message_id} and member_id = ${member_id}`);
+            await DBCommon.run(`UPDATE recruit SET recruit_num = ${recruitNum} WHERE guild_id = ${guildId} AND message_id = ${messageId}`);
             DBCommon.close();
         } catch (err) {
             logger.error(err);
         }
     }
 
-    static async getRecruitAllByMessageId(message_id: string) {
-        const db = DBCommon.open();
-        db.all = util.promisify(db.all);
-        const results = await db.all(`select * from recruit where message_id = ${message_id} order by created_at`);
-        DBCommon.close();
-        return results;
+    static async updateCondition(guildId: string, messageId: string, condition: string) {
+        try {
+            DBCommon.init();
+            await DBCommon.run(`UPDATE recruit SET condition = '${condition}' WHERE guild_id = ${guildId} AND message_id = ${messageId}`);
+            DBCommon.close();
+        } catch (err) {
+            logger.error(err);
+        }
     }
 
-    static async getRecruitMessageByAuthorId(author_id: string) {
+    static async getRecruit(guildId: string, messageId: string) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all);
-        const results = await db.all(`select message_id from recruit where author_id = ${author_id}`);
+        const results = await db.all(`SELECT * FROM recruit WHERE guild_id = ${guildId} AND message_id = ${messageId}`);
         DBCommon.close();
-        return results;
+        const recruits: Recruit[] = [];
+        for (let i = 0; i < results.length; i++) {
+            recruits.push(
+                new Recruit(
+                    results[i].guild_id,
+                    results[i].message_id,
+                    results[i].author_id,
+                    results[i].recruit_num,
+                    results[i].condition,
+                    results[i].channel_name,
+                    results[i].recruit_type,
+                    results[i].option,
+                    results[i].created_at,
+                ),
+            );
+        }
+        return recruits;
     }
 
-    static async getRecruitMessageByMemberId(message_id: string, member_id: string) {
+    static async getRecruitsByRecruitType(guildId: string, recruitType: number) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all);
-        const results = await db.all(`select message_id from recruit where message_id = ${message_id} and member_id =${member_id}`);
+        const results = await db.all(`SELECT * FROM recruit WHERE guild_id = ${guildId} AND recruit_type = ${recruitType}`);
         DBCommon.close();
-        return results;
+        const recruits: Recruit[] = [];
+        for (let i = 0; i < results.length; i++) {
+            recruits.push(
+                new Recruit(
+                    results[i].guild_id,
+                    results[i].message_id,
+                    results[i].author_id,
+                    results[i].recruit_num,
+                    results[i].condition,
+                    results[i].channel_name,
+                    results[i].recruit_type,
+                    results[i].option,
+                    results[i].created_at,
+                ),
+            );
+        }
+        return recruits;
     }
 }
