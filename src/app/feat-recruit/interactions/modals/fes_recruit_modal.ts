@@ -126,9 +126,6 @@ export async function sendFesMatch(
             ephemeral: true,
         });
 
-        // ピン留め
-        image1Message.pin();
-
         // 募集リスト更新
         const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.FestivalRecruit);
         await sendStickyMessage(guild, recruitChannel.id, sticky);
@@ -161,8 +158,6 @@ export async function sendFesMatch(
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: await setButtonDisable(buttonMessage),
         });
-        // ピン留め解除
-        image1Message.unpin();
     } catch (error) {
         logger.error(error);
     }

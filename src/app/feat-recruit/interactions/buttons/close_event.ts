@@ -91,8 +91,6 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
 
         if (confirmedMemberIDList.includes(member.userId)) {
             const memberList = getMemberMentions(recruitData[0], participantsData);
-            // ピン留め解除
-            image1Message.unpin();
 
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.close);
 
@@ -123,8 +121,6 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
             });
         } else if (datetimeDiff(new Date(), image1Message.createdAt) > 120) {
             const memberList = getMemberMentions(recruitData[0], participantsData);
-
-            image1Message.unpin();
 
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.close);
 

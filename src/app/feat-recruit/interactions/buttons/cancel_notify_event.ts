@@ -82,9 +82,6 @@ export async function cancelNotify(interaction: ButtonInteraction) {
         }
 
         if (member.userId == recruiterId) {
-            // ピン留め解除
-            buttonMessage.unpin();
-
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, embedMessageId);
 

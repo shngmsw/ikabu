@@ -269,9 +269,6 @@ async function sendSalmonRun(
             });
         }
 
-        // ピン留め
-        image1Message.pin();
-
         // 募集リスト更新
         const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.SalmonRecruit);
         await sendStickyMessage(guild, recruitChannel.id, sticky);
@@ -291,8 +288,7 @@ async function sendSalmonRun(
 
         // 2時間後にVCロックを解除する
         await sleep(7200 - 15);
-        // ピン留め解除
-        image1Message.unpin();
+
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
             reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');

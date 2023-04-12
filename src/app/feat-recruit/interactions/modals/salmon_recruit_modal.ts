@@ -140,9 +140,6 @@ export async function sendSalmonRun(
             ephemeral: true,
         });
 
-        // ピン留め
-        image1Message.pin();
-
         // 募集リスト更新
         const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.SalmonRecruit);
         await sendStickyMessage(guild, recruitChannel.id, sticky);

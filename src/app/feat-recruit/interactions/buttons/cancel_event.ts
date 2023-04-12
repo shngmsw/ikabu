@@ -4,7 +4,6 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { createMentionsFromIdList, getCommandHelpEmbed } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js';
@@ -82,16 +81,12 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
 
         const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆`);
         const buttonMessage = interaction.message;
-        const image1Message = await searchMessageById(guild, interaction.channelId, image1MsgId);
         const recruitChannel = interaction.channel;
         if (!(recruitChannel instanceof BaseGuildTextChannel)) {
             throw new Error('recruitChannel is not BaseGuildTextChannel type.');
         }
 
         if (confirmedMemberIDList.includes(member.userId)) {
-            // ピン留め解除
-            image1Message.unpin();
-
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.cancel);
 
             // recruitテーブルから削除

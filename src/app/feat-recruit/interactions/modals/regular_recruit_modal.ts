@@ -125,9 +125,6 @@ export async function sendRegularMatch(
             ephemeral: true,
         });
 
-        // ピン留め
-        image1Message.pin();
-
         // 募集リスト更新
         const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.RegularRecruit);
         await sendStickyMessage(guild, recruitChannel.id, sticky);
@@ -164,8 +161,6 @@ export async function sendRegularMatch(
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: await setButtonDisable(buttonMessage),
         });
-        // ピン留め解除
-        image1Message.unpin();
     } catch (error) {
         logger.error(error);
     }

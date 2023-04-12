@@ -83,8 +83,6 @@ export async function closeNotify(interaction: ButtonInteraction) {
 
         if (member.userId === recruiterId) {
             const memberList = getMemberMentions(recruitData[0], participantsData);
-            // ピン留め解除
-            buttonMessage.unpin();
 
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, embedMessageId);
@@ -110,8 +108,6 @@ export async function closeNotify(interaction: ButtonInteraction) {
             return;
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
             const memberList = getMemberMentions(recruitData[0], participantsData);
-
-            buttonMessage.unpin();
 
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, embedMessageId);

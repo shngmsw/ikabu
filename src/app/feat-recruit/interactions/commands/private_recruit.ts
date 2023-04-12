@@ -119,9 +119,6 @@ async function sendPrivateRecruit(
             ephemeral: true,
         });
 
-        // ピン留め
-        embedMessage.pin();
-
         // 募集リスト更新
         const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.PrivateRecruit);
         await sendStickyMessage(guild, recruitChannel.id, sticky);
@@ -166,9 +163,6 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
         sentMessage.id,
         new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date()),
     );
-
-    // ピン留め
-    sentMessage.pin();
 
     // 募集リスト更新
     const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.ButtonNotify);

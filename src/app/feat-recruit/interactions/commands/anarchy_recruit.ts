@@ -339,9 +339,6 @@ async function sendAnarchyMatch(
             });
         }
 
-        // ピン留め
-        image1Message.pin();
-
         // 募集リスト更新
         const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.AnarchyRecruit);
         await sendStickyMessage(guild, recruitChannel.id, sticky);
@@ -381,8 +378,7 @@ async function sendAnarchyMatch(
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: await setButtonDisable(sentMessage),
         });
-        // ピン留め解除
-        image1Message.unpin();
+
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
             reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');

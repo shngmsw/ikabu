@@ -282,9 +282,6 @@ async function sendFesMatch(
             });
         }
 
-        // ピン留め
-        image1Message.pin();
-
         // 募集リスト更新
         const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.FestivalRecruit);
         await sendStickyMessage(guild, recruitChannel.id, sticky);
@@ -321,8 +318,6 @@ async function sendFesMatch(
             components: await setButtonDisable(sentMessage),
         });
 
-        // ピン留め解除
-        image1Message.unpin();
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
             reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
