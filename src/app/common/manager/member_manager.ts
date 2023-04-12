@@ -71,7 +71,7 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
             memberRaw.joinedAt,
         );
 
-        await MembersService.registerMember(newMember);
+        await MembersService.updateMemberProfile(newMember);
 
         return newMember;
     }
