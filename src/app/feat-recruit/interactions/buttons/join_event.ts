@@ -1,4 +1,4 @@
-import { ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
+import { BaseGuildTextChannel, ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
@@ -11,6 +11,7 @@ import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { memberListMessage } from './other_events.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -37,7 +38,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
 
-        const recruitData = await RecruitService.getRecruit(image1MsgId);
+        const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
         if (recruitData.length === 0) {
             await interaction.editReply({ components: await disableThinkingButton(interaction, '参加') });
@@ -114,8 +115,8 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             await ParticipantService.registerParticipant(image1MsgId, member.userId, 2, new Date());
 
             const recruitChannel = interaction.channel;
-            if (recruitChannel === null) {
-                throw new Error('recruitChannel is null.');
+            if (!(recruitChannel instanceof BaseGuildTextChannel)) {
+                throw new Error('recruitChannel is not BaseGuildTextChannel type.');
             }
 
             // ホストがVCにいるかチェックして、VCにいる場合はText in Voiceにメッセージ送信
@@ -140,6 +141,9 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
                 content: createMentionsFromIdList(confirmedMemberIDList).join(' '),
                 embeds: [embed],
             });
+
+            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+            await sendStickyMessage(guild, recruitChannel.id, content);
 
             if (channelId === null) {
                 await interaction.followUp({

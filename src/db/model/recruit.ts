@@ -1,4 +1,5 @@
 export class Recruit {
+    guildId: string;
     messageId: string;
     authorId: string;
     recruitNum: number;
@@ -8,6 +9,7 @@ export class Recruit {
     option: string | null;
     createdAt: Date;
     constructor(
+        guildId: string,
         messageId: string,
         authorId: string,
         recruitNum: number,
@@ -17,6 +19,7 @@ export class Recruit {
         option: string | null,
         createdAt: string | Date,
     ) {
+        this.guildId = guildId;
         this.messageId = messageId;
         this.authorId = authorId;
         this.recruitNum = recruitNum;

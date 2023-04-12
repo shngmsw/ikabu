@@ -12,6 +12,7 @@ import { RecruitService } from '../../../../db/recruit_service';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitType } from '../../../../db/model/recruit';
 import { RecruitOpCode } from '../../canvases/regenerate_canvas';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -210,6 +211,7 @@ async function sendSalmonRun(
 
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
+            guild.id,
             image1Message.id,
             hostMember.id,
             recruitNum,
@@ -267,8 +269,9 @@ async function sendSalmonRun(
             });
         }
 
-        // ピン留め
-        image1Message.pin();
+        // 募集リスト更新
+        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.SalmonRecruit);
+        await sendStickyMessage(guild, recruitChannel.id, sticky);
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
@@ -285,8 +288,7 @@ async function sendSalmonRun(
 
         // 2時間後にVCロックを解除する
         await sleep(7200 - 15);
-        // ピン留め解除
-        image1Message.unpin();
+
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
             reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');

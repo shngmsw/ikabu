@@ -1,4 +1,4 @@
-import { ButtonInteraction, EmbedBuilder } from 'discord.js';
+import { BaseGuildTextChannel, ButtonInteraction, EmbedBuilder } from 'discord.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
@@ -7,6 +7,9 @@ import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log
 import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { memberListMessage } from './other_events.js';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
+import { getCommandHelpEmbed } from '../../../common/others.js';
+import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -29,7 +32,7 @@ export async function cancelNotify(interaction: ButtonInteraction) {
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
 
-        const recruitData = await RecruitService.getRecruit(embedMessageId);
+        const recruitData = await RecruitService.getRecruit(guild.id, embedMessageId);
 
         if (recruitData.length === 0) {
             await interaction.editReply({ components: await disableThinkingButton(interaction, 'キャンセル') });
@@ -73,13 +76,14 @@ export async function cancelNotify(interaction: ButtonInteraction) {
 
         const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆`);
         const buttonMessage = interaction.message;
+        const recruitChannel = interaction.channel;
+        if (!(recruitChannel instanceof BaseGuildTextChannel)) {
+            throw new Error('recruitChannel is not BaseGuildTextChannel type.');
+        }
 
         if (member.userId == recruiterId) {
-            // ピン留め解除
-            buttonMessage.unpin();
-
             // recruitテーブルから削除
-            await RecruitService.deleteRecruit(embedMessageId);
+            await RecruitService.deleteRecruit(guild.id, embedMessageId);
 
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(embedMessageId);
@@ -89,6 +93,14 @@ export async function cancelNotify(interaction: ButtonInteraction) {
                 components: await disableThinkingButton(interaction, 'キャンセル'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
+
+            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
+            await sendStickyMessage(guild, recruitChannel.id, {
+                content: content,
+                embeds: [helpEmbed],
+                components: [createNewRecruitButton(recruitChannel.name)],
+            });
         } else {
             // 参加済みかチェック
             if (applicantIdList.includes(member.userId)) {
@@ -103,6 +115,9 @@ export async function cancelNotify(interaction: ButtonInteraction) {
                     content: await memberListMessage(interaction, embedMessageId),
                     components: await recoveryThinkingButton(interaction, 'キャンセル'),
                 });
+
+                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+                await sendStickyMessage(guild, recruitChannel.id, content);
             } else {
                 await interaction.followUp({
                     content: '他人の募集は勝手にキャンセルできないでし！！',

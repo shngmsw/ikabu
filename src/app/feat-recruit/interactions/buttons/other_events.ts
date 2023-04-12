@@ -57,7 +57,7 @@ export async function memberListMessage(interaction: ButtonInteraction, messageI
     if (guild === undefined) {
         throw new Error('guild cannot fetch.');
     }
-    const recruit = await RecruitService.getRecruit(messageId);
+    const recruit = await RecruitService.getRecruit(guild.id, messageId);
     const participants = await ParticipantService.getAllParticipants(guild.id, messageId);
     const memberList = getMemberMentions(recruit[0], participants);
     const msgFirstRow = interaction.message.content.split('\n')[0];

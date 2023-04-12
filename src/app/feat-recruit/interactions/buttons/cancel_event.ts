@@ -4,7 +4,6 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { createMentionsFromIdList, getCommandHelpEmbed } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js';
@@ -12,6 +11,7 @@ import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { memberListMessage } from './other_events.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -37,7 +37,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
 
-        const recruitData = await RecruitService.getRecruit(image1MsgId);
+        const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
         if (recruitData.length === 0) {
             await interaction.editReply({ components: await disableThinkingButton(interaction, 'キャンセル') });
@@ -81,20 +81,16 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
 
         const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆`);
         const buttonMessage = interaction.message;
-        const image1Message = await searchMessageById(guild, interaction.channelId, image1MsgId);
         const recruitChannel = interaction.channel;
         if (!(recruitChannel instanceof BaseGuildTextChannel)) {
             throw new Error('recruitChannel is not BaseGuildTextChannel type.');
         }
 
         if (confirmedMemberIDList.includes(member.userId)) {
-            // ピン留め解除
-            image1Message.unpin();
-
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.cancel);
 
             // recruitテーブルから削除
-            await RecruitService.deleteRecruit(image1MsgId);
+            await RecruitService.deleteRecruit(guild.id, image1MsgId);
 
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(image1MsgId);
@@ -111,8 +107,10 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
+            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
             const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-            await recruitChannel.send({
+            await sendStickyMessage(guild, recruitChannel.id, {
+                content: content,
                 embeds: [helpEmbed],
                 components: [createNewRecruitButton(recruitChannel.name)],
             });
@@ -132,6 +130,9 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
                     content: await memberListMessage(interaction, image1MsgId),
                     components: await recoveryThinkingButton(interaction, 'キャンセル'),
                 });
+
+                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+                await sendStickyMessage(guild, recruitChannel.id, content);
             } else {
                 await interaction.followUp({
                     content: '他人の募集は勝手にキャンセルできないでし！！',

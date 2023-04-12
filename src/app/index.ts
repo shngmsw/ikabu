@@ -23,6 +23,7 @@ import { registerSlashCommands } from '../register';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { Member } from '../db/model/member';
 import { ParticipantService } from '../db/participants_service';
+import { StickyService } from '../db/sticky_service';
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -132,6 +133,7 @@ client.on('ready', async () => {
         await registerSlashCommands();
         DBCommon.init();
         await MembersService.createTableIfNotExists();
+        await StickyService.createTableIfNotExists();
         await FriendCodeService.createTableIfNotExists();
         await RecruitService.createTableIfNotExists();
         await ParticipantService.createTableIfNotExists();

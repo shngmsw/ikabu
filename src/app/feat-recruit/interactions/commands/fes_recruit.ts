@@ -14,6 +14,7 @@ import { Participant } from '../../../../db/model/participant';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitType } from '../../../../db/model/recruit';
 import { RecruitOpCode } from '../../canvases/regenerate_canvas';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function fesRecruit(interaction: ChatInputCommandInteraction) {
@@ -222,6 +223,7 @@ async function sendFesMatch(
 
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
+            guild.id,
             image1Message.id,
             hostMember.id,
             recruitNum,
@@ -280,8 +282,9 @@ async function sendFesMatch(
             });
         }
 
-        // ピン留め
-        image1Message.pin();
+        // 募集リスト更新
+        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.FestivalRecruit);
+        await sendStickyMessage(guild, recruitChannel.id, sticky);
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
@@ -298,7 +301,7 @@ async function sendFesMatch(
 
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
-        const recruitData = await RecruitService.getRecruit(image1Message.id);
+        const recruitData = await RecruitService.getRecruit(guild.id, image1Message.id);
         if (recruitData.length === 0) {
             return;
         }
@@ -307,7 +310,7 @@ async function sendFesMatch(
         const hostMention = `<@${hostMember.user.id}>`;
 
         // DBから募集情報削除
-        await RecruitService.deleteRecruit(image1Message.id);
+        await RecruitService.deleteRecruit(guild.id, image1Message.id);
         await ParticipantService.deleteAllParticipant(image1Message.id);
 
         sentMessage.edit({
@@ -315,8 +318,6 @@ async function sendFesMatch(
             components: await setButtonDisable(sentMessage),
         });
 
-        // ピン留め解除
-        image1Message.unpin();
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
             reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');

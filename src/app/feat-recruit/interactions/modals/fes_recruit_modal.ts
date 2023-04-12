@@ -13,6 +13,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { Member } from '../../../../db/model/member';
 import { RecruitOpCode } from '../../canvases/regenerate_canvas';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -89,6 +90,7 @@ export async function sendFesMatch(
 
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
+            guild.id,
             image1Message.id,
             member.userId,
             recruitNum,
@@ -124,8 +126,9 @@ export async function sendFesMatch(
             ephemeral: true,
         });
 
-        // ピン留め
-        image1Message.pin();
+        // 募集リスト更新
+        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.FestivalRecruit);
+        await sendStickyMessage(guild, recruitChannel.id, sticky);
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
@@ -138,7 +141,7 @@ export async function sendFesMatch(
 
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
-        const recruitData = await RecruitService.getRecruit(image1Message.id);
+        const recruitData = await RecruitService.getRecruit(guild.id, image1Message.id);
         if (recruitData.length === 0) {
             return;
         }
@@ -148,15 +151,13 @@ export async function sendFesMatch(
         const hostMention = `<@${member.userId}>`;
 
         // DBから募集情報削除
-        await RecruitService.deleteRecruit(image1Message.id);
+        await RecruitService.deleteRecruit(guild.id, image1Message.id);
         await ParticipantService.deleteAllParticipant(image1Message.id);
 
         buttonMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: await setButtonDisable(buttonMessage),
         });
-        // ピン留め解除
-        image1Message.unpin();
     } catch (error) {
         logger.error(error);
     }

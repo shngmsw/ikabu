@@ -8,6 +8,7 @@ import { RecruitService } from '../../../../db/recruit_service';
 import { ParticipantService } from '../../../../db/participants_service';
 import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
+import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -87,7 +88,15 @@ async function sendPrivateRecruit(
         }
 
         // DBに募集情報を登録
-        await RecruitService.registerRecruit(embedMessage.id, recruiter.userId, recruitNum, condition, null, RecruitType.PrivateRecruit);
+        await RecruitService.registerRecruit(
+            guild.id,
+            embedMessage.id,
+            recruiter.userId,
+            recruitNum,
+            condition,
+            null,
+            RecruitType.PrivateRecruit,
+        );
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(
@@ -110,8 +119,9 @@ async function sendPrivateRecruit(
             ephemeral: true,
         });
 
-        // ピン留め
-        embedMessage.pin();
+        // 募集リスト更新
+        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.PrivateRecruit);
+        await sendStickyMessage(guild, recruitChannel.id, sticky);
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
@@ -146,7 +156,7 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
         content: mention + ' ボタンを押して参加表明するでし！',
     });
     // DBに募集情報を登録
-    await RecruitService.registerRecruit(sentMessage.id, recruiter.userId, -1, 'dummy', null, RecruitType.ButtonNotify);
+    await RecruitService.registerRecruit(guild.id, sentMessage.id, recruiter.userId, -1, 'dummy', null, RecruitType.ButtonNotify);
 
     // DBに参加者情報を登録
     await ParticipantService.registerParticipantFromObj(
@@ -154,8 +164,10 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
         new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date()),
     );
 
-    // ピン留め
-    sentMessage.pin();
+    // 募集リスト更新
+    const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.ButtonNotify);
+    await sendStickyMessage(guild, recruitChannel.id, sticky);
+
     await interaction.editReply({
         content: '募集完了でし！参加者が来るまで気長に待つでし！',
     });
