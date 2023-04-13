@@ -48,7 +48,6 @@ client.on('messageCreate', async (msg: $TSFixMe) => {
 
 client.on('guildMemberAdd', async (member: GuildMember) => {
     try {
-        guildMemberAddEvent(member);
         const guild = await member.guild.fetch();
         if (client.user == null) {
             throw new Error('client.user is null');
@@ -58,6 +57,7 @@ client.on('guildMemberAdd', async (member: GuildMember) => {
                 type: ActivityType.Playing,
             });
         }
+        await guildMemberAddEvent(member); // 10分待つ可能性があるので最後に処理
     } catch (error) {
         const loggerMA = log4js_obj.getLogger('guildMemberAdd');
         loggerMA.error(error);
