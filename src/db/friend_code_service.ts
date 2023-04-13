@@ -23,7 +23,7 @@ export class FriendCodeService {
     static async save(id: $TSFixMe, code: $TSFixMe) {
         try {
             DBCommon.init();
-            DBCommon.run(`insert or replace into friend_code (user_id, code) values ($1, $2)`, [id, code]);
+            await DBCommon.run(`insert or replace into friend_code (user_id, code) values ($1, $2)`, [id, code]);
             DBCommon.close();
         } catch (err) {
             logger.error(err);
