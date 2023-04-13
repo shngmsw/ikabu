@@ -89,19 +89,18 @@ client.on('guildMemberRemove', async (member: $TSFixMe) => {
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
-        const guildId = newMember.guild.id;
+        const guild = await newMember.guild.fetch();
         const userId = newMember.user.id;
         let member = newMember;
-        if (typeof newMember.displayAvatarURL() !== 'string' || typeof newMember.displayName !== 'string' || newMember.joinedAt === null) {
-            member = await searchAPIMemberById(guildId, userId);
-        }
+
+        member = await searchAPIMemberById(guild, userId);
 
         if (member.joinedAt === null) {
             throw new Error('joinedAt is null');
         }
 
         const updateMember = new Member(
-            guildId,
+            guild.id,
             userId,
             member.displayName,
             member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
@@ -109,7 +108,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
         );
 
         // membersテーブルにレコードがあるか確認
-        if ((await MembersService.getMemberByUserId(guildId, userId)).length == 0) {
+        if ((await MembersService.getMemberByUserId(guild.id, userId)).length == 0) {
             await MembersService.registerMember(updateMember);
         } else {
             await MembersService.updateMemberProfile(updateMember);
