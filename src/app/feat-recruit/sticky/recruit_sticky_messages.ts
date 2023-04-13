@@ -57,6 +57,8 @@ export async function availableRecruitString(guild: Guild, channelId: string, re
         recruitData = recruitData.concat(buttonRecruitData);
     }
 
+    recruitData.sort((x, y) => x.createdAt.getTime() - y.createdAt.getTime()); // 作成順でソート
+
     let recruits = '';
     let count = 0; // 募集数カウンタ
     for (const recruit of recruitData) {
