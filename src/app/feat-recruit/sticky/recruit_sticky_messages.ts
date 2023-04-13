@@ -53,14 +53,14 @@ export async function availableRecruitString(guild: Guild, channelId: string, re
         const privateRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit);
         recruitData = recruitData.concat(privateRecruitData);
     } else if (recruitType === RecruitType.PrivateRecruit) {
-        const buttonRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit);
+        const buttonRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.ButtonNotify);
         recruitData = recruitData.concat(buttonRecruitData);
     }
 
-    let result = '**現在参加受付中の募集一覧** `[' + recruitData.length + ']`';
-    if (recruitData.length === 0) {
-        result += '\n`現在このチャンネルで参加受付中の募集はありません。`';
-    }
+    recruitData.sort((x, y) => x.createdAt.getTime() - y.createdAt.getTime()); // 作成順でソート
+
+    let recruits = '';
+    let count = 0; // 募集数カウンタ
     for (const recruit of recruitData) {
         const participantsData = await ParticipantService.getAllParticipants(guild.id, recruit.messageId);
         const applicantList = []; // 参加希望者リスト
@@ -72,13 +72,23 @@ export async function availableRecruitString(guild: Guild, channelId: string, re
         const message = await searchMessageById(guild, channelId, recruit.messageId);
         const recruiter = participantsData[0];
         if (message !== null && participantsData.length !== 0) {
+            // 別チャンネルで同じタイプの募集をしているときmessage = nullになる
             if (recruit.recruitNum !== -1) {
-                result = result + `\n\`${recruiter.displayName}\`: ${message.url} \`[${applicantList.length}/${recruit.recruitNum}\`]`;
+                recruits = recruits + `\n\`${recruiter.displayName}\`: ${message.url} \`[${applicantList.length}/${recruit.recruitNum}\`]`;
             } else {
-                result = result + `\n\`${recruiter.displayName}\`: ${message.url} \`[${applicantList.length}\`]`;
+                recruits = recruits + `\n\`${recruiter.displayName}\`: ${message.url} \`[${applicantList.length}\`]`;
             }
+            count++;
         }
     }
+
+    let result = '**現在参加受付中の募集一覧** `[' + count + ']`';
+    if (count === 0) {
+        result += '\n`現在このチャンネルで参加受付中の募集はありません。`';
+    } else {
+        result += recruits;
+    }
+
     return result;
 }
 
