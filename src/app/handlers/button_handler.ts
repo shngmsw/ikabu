@@ -36,11 +36,11 @@ export async function call(interaction: $TSFixMe) {
     const param_q = params.get('q') || null;
     const voiceLockerIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
     if (voiceLockerIds.includes(interaction.customId)) {
-        voiceLockerUpdate(interaction);
+        await voiceLockerUpdate(interaction);
     } else if (interaction.customId == 'fchide') {
-        deleteFriendCode(interaction);
+        await deleteFriendCode(interaction);
     } else if (interaction.customId == 'support_resolved') {
-        setResolvedTag(interaction);
+        await setResolvedTag(interaction);
     } else if (isNotEmpty(param_d) && param_d != null) {
         // buttonごとに呼び出すファンクション
         const recruitButtons: buttonFunctions = {
