@@ -3,8 +3,8 @@ import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { isNotEmpty, sleep } from '../../../common/others';
-import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
+import { getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
+import { createNewRecruitButton, recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
 import { getMemberMentions } from '../buttons/other_events';
 import { Participant } from '../../../../db/model/participant';
@@ -197,6 +197,16 @@ export async function sendAnarchyMatch(
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: await setButtonDisable(buttonMessage),
         });
+
+        if (recruitChannel instanceof BaseGuildTextChannel) {
+            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
+            await sendStickyMessage(guild, recruitChannel.id, {
+                content: content,
+                embeds: [helpEmbed],
+                components: [createNewRecruitButton(recruitChannel.name)],
+            });
+        }
     } catch (error) {
         logger.error(error);
     }
