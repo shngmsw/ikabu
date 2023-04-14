@@ -16,8 +16,8 @@ import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleIdByName } from '../../../common/manager/role_manager';
-import { isNotEmpty, sleep } from '../../../common/others';
-import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
+import { getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
+import { createNewRecruitButton, recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
 import { getMemberMentions } from '../buttons/other_events';
 import { Participant } from '../../../../db/model/participant';
@@ -386,6 +386,16 @@ async function sendAnarchyMatch(
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
             reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
             reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
+        }
+
+        if (recruitChannel instanceof BaseGuildTextChannel) {
+            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
+            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
+            await sendStickyMessage(guild, recruitChannel.id, {
+                content: content,
+                embeds: [helpEmbed],
+                components: [createNewRecruitButton(recruitChannel.name)],
+            });
         }
     } catch (error) {
         logger.error(error);
