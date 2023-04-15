@@ -20,6 +20,7 @@ export async function searchAPIMemberById(guild: $TSFixMe, userId: $TSFixMe) {
             // fetch(mid)とすれば、cache見てなければフェッチしてくる
             member = await guild.members.fetch(userId);
         } catch (error) {
+            member = null;
             logger.warn('member missing');
         }
 
