@@ -41,7 +41,10 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
                 regenAnarchyCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
                 break;
             case RecruitType.SalmonRecruit:
-                regenSalmonCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
+                regenSalmonCanvas(message, recruitData[0], participantsData, applicantNum, opCode, false);
+                break;
+            case RecruitType.TeamContestRecruit:
+                regenSalmonCanvas(message, recruitData[0], participantsData, applicantNum, opCode, true);
         }
     } catch (error) {
         logger.error(error);
@@ -134,6 +137,7 @@ async function regenSalmonCanvas(
     participantsData: Participant[],
     applicantNum: number,
     opCode: number,
+    isTeamContest: boolean,
 ) {
     const applicantList = []; // 参加希望者リスト
     for (const participant of participantsData) {
@@ -160,6 +164,7 @@ async function regenSalmonCanvas(
         submitMembersList[3],
         condition,
         channelName,
+        isTeamContest ? 'コンテスト' : undefined,
     );
 
     const recruit = new AttachmentBuilder(recruitBuffer, {

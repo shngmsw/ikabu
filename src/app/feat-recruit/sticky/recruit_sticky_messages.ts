@@ -48,13 +48,31 @@ export async function stickyChannelCheck(message: Message) {
 export async function availableRecruitString(guild: Guild, channelId: string, recruitType: number) {
     let recruitData = await RecruitService.getRecruitsByRecruitType(guild.id, recruitType);
 
-    // プラベ募集のときだけもう一種類取り直して結合
+    // プラベ募集のときもう一種類取り直して結合
     if (recruitType === RecruitType.ButtonNotify) {
         const privateRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit);
         recruitData = recruitData.concat(privateRecruitData);
     } else if (recruitType === RecruitType.PrivateRecruit) {
         const buttonRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.ButtonNotify);
         recruitData = recruitData.concat(buttonRecruitData);
+    }
+
+    // サーモン募集のとき複数種別を結合
+    if (recruitType === RecruitType.SalmonRecruit) {
+        const bigRunRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.BigRunRecruit);
+        const teamContestRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.TeamContestRecruit);
+        recruitData = recruitData.concat(bigRunRecruitData);
+        recruitData = recruitData.concat(teamContestRecruitData);
+    } else if (recruitType === RecruitType.BigRunRecruit) {
+        const salmonRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.SalmonRecruit);
+        const teamContestRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.TeamContestRecruit);
+        recruitData = recruitData.concat(salmonRecruitData);
+        recruitData = recruitData.concat(teamContestRecruitData);
+    } else if (recruitType === RecruitType.TeamContestRecruit) {
+        const salmonRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.SalmonRecruit);
+        const bigRunRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.BigRunRecruit);
+        recruitData = recruitData.concat(salmonRecruitData);
+        recruitData = recruitData.concat(bigRunRecruitData);
     }
 
     recruitData.sort((x, y) => x.createdAt.getTime() - y.createdAt.getTime()); // 作成順でソート

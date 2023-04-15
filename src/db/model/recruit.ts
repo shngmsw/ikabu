@@ -44,5 +44,6 @@ export const RecruitType = {
     SalmonRecruit: 5,
     FestivalRecruit: 6,
     BigRunRecruit: 7,
+    TeamContestRecruit: 8,
     OtherGameRecruit: 10,
 };
