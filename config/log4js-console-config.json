@@ -13,6 +13,7 @@
     "guildMemberRemove": { "appenders": ["console"], "level": "all" },
     "guildMemberAdd": { "appenders": ["console"], "level": "all" },
     "guildMemberUpdate": { "appenders": ["console"], "level": "all" },
+    "userUpdate": { "appenders": ["console"], "level": "all" },
     "messageReactionAdd": { "appenders": ["console"], "level": "all" },
     "messageReactionRemove": { "appenders": ["console"], "level": "all" },
     "voiceStateUpdate": { "appenders": ["console"], "level": "all" },
