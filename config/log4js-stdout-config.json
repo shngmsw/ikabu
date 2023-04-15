@@ -41,6 +41,10 @@
       "appenders": ["not-error", "just-errors"],
       "level": "all"
     },
+    "userUpdate": {
+      "appenders": ["not-error", "just-errors"],
+      "level": "all"
+    },
     "messageReactionAdd": {
       "appenders": ["not-error", "just-errors"],
       "level": "all"
