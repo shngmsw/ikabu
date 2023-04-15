@@ -7,6 +7,7 @@ import { searchChannelById } from '../../common/manager/channel_manager';
 import { searchRoleById } from '../../common/manager/role_manager';
 import { sleep } from '../../common/others.js';
 import { FriendCode } from '../../../db/model/friend_code.js';
+import { searchAPIMemberById } from '../../common/manager/member_manager.js';
 
 const logger = log4js_obj.getLogger('guildMemberAdd');
 
@@ -38,7 +39,10 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
             if ((await MembersService.getMemberByUserId(guild.id, userId)).length == 0) {
                 const friendCode = await FriendCodeService.getFriendCodeByUserId(newMember.id);
                 await sleep(600);
-                await setRookieRole(newMember, beginnerRole, messageCount, friendCode);
+                const memberCheck = await searchAPIMemberById(guild, userId);
+                if (memberCheck !== null) {
+                    await setRookieRole(memberCheck, beginnerRole, messageCount, friendCode);
+                }
                 await sentMessage.react('👍');
             }
         }
