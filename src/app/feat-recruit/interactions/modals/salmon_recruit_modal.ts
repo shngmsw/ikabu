@@ -1,6 +1,6 @@
 import { AttachmentBuilder, BaseGuildTextChannel, ModalSubmitInteraction } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkBigRun, fetchSchedule } from '../../../common/apis/splatoon3_ink';
+import { checkBigRun, fetchSchedule, getSalmonData } from '../../../common/apis/splatoon3_ink';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { isEmpty, isNotEmpty, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
@@ -78,7 +78,7 @@ export async function sendSalmonRun(
     if (checkBigRun(data.schedule, 0)) {
         ruleBuffer = await ruleBigRunCanvas(data);
     } else {
-        ruleBuffer = await ruleSalmonCanvas(data);
+        ruleBuffer = await ruleSalmonCanvas(await getSalmonData(data, 0));
     }
     if (isEmpty(recruitBuffer) || recruitBuffer === undefined) {
         throw new Error('recruitBuffer is empty');

@@ -8,7 +8,7 @@ import {
     VoiceChannel,
 } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkBigRun, fetchSchedule } from '../../../common/apis/splatoon3_ink';
+import { checkBigRun, checkTeamContest, fetchSchedule, getSalmonData, getTeamContestData } from '../../../common/apis/splatoon3_ink';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { isEmpty, isNotEmpty, sleep } from '../../../common/others';
@@ -33,6 +33,7 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
     const recruitNum = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
     const guild = await interaction.guild?.fetch();
+    const subcommand = options.getSubcommand() ?? 'run';
     if (guild === undefined) {
         throw new Error('guild cannot fetch.');
     }
@@ -101,6 +102,32 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
+    const data = await fetchSchedule();
+
+    let type = RecruitType.SalmonRecruit;
+    if (subcommand === 'run') {
+        if (checkBigRun(data.schedule, 0)) {
+            return await interaction.editReply(
+                '現在ビッグラン開催中でし！\nビッグランの募集を建てる場合は`/サーモンラン募集 bigrun`を利用するでし！',
+            );
+        }
+        type = RecruitType.SalmonRecruit;
+    } else if (subcommand === 'bigrun') {
+        if (!checkBigRun(data.schedule, 0)) {
+            return await interaction.editReply(
+                '現在ビッグランは行われていないでし！\n通常スケジュールの募集を建てる場合は`/サーモンラン募集 run`を利用するでし！',
+            );
+        }
+        type = RecruitType.BigRunRecruit;
+    } else if (subcommand === 'contest') {
+        if (!checkTeamContest(data.schedule, 0)) {
+            return await interaction.editReply(
+                '現在チームコンテストは行われていないでし！\n通常スケジュールの募集を建てる場合は`/サーモンラン募集 run`を利用するでし！',
+            );
+        }
+        type = RecruitType.TeamContestRecruit;
+    }
+
     try {
         let txt = `<@${hostMember.user.id}>` + '**たんのバイト募集**\n';
 
@@ -116,7 +143,7 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
 
         if (condition == null) condition = 'なし';
 
-        await sendSalmonRun(interaction, txt, recruitNum, condition, memberCounter, hostMember, user1, user2);
+        await sendSalmonRun(interaction, type, data, txt, recruitNum, condition, memberCounter, hostMember, user1, user2);
     } catch (error) {
         if (channel !== null) {
             channel.send('なんかエラーでてるわ');
@@ -127,6 +154,8 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
 
 async function sendSalmonRun(
     interaction: ChatInputCommandInteraction,
+    type: number,
+    data: $TSFixMe,
     txt: string,
     recruitNum: number,
     condition: string,
@@ -160,22 +189,9 @@ async function sendSalmonRun(
         participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
     }
 
-    const data = await fetchSchedule();
-
     let recruitBuffer;
-    if (checkBigRun(data.schedule, 0)) {
-        recruitBuffer = await recruitBigRunCanvas(
-            RecruitOpCode.open,
-            recruitNum,
-            count,
-            hostPt,
-            participant1,
-            participant2,
-            null,
-            condition,
-            channelName,
-        );
-    } else {
+    let ruleBuffer;
+    if (type === RecruitType.SalmonRecruit) {
         recruitBuffer = await recruitSalmonCanvas(
             RecruitOpCode.open,
             recruitNum,
@@ -187,17 +203,40 @@ async function sendSalmonRun(
             condition,
             channelName,
         );
+        ruleBuffer = await ruleSalmonCanvas(await getSalmonData(data, 0));
+    } else if (type === RecruitType.BigRunRecruit) {
+        recruitBuffer = await recruitBigRunCanvas(
+            RecruitOpCode.open,
+            recruitNum,
+            count,
+            hostPt,
+            participant1,
+            participant2,
+            null,
+            condition,
+            channelName,
+        );
+        ruleBuffer = await ruleBigRunCanvas(data);
+    } else if (type === RecruitType.TeamContestRecruit) {
+        recruitBuffer = await recruitSalmonCanvas(
+            RecruitOpCode.open,
+            recruitNum,
+            count,
+            hostPt,
+            participant1,
+            participant2,
+            null,
+            condition,
+            channelName,
+            'コンテスト',
+        );
+        ruleBuffer = await ruleSalmonCanvas(await getTeamContestData(data, 0));
     }
+
     if (isEmpty(recruitBuffer) || recruitBuffer === undefined) {
         throw new Error('recruitBuffer is empty');
     }
 
-    let ruleBuffer;
-    if (checkBigRun(data.schedule, 0)) {
-        ruleBuffer = await ruleBigRunCanvas(data);
-    } else {
-        ruleBuffer = await ruleSalmonCanvas(data);
-    }
     if (isEmpty(ruleBuffer) || ruleBuffer == null) {
         throw new Error('ruleBuffer is empty');
     }
@@ -219,15 +258,7 @@ async function sendSalmonRun(
         });
 
         // DBに募集情報を登録
-        await RecruitService.registerRecruit(
-            guild.id,
-            image1Message.id,
-            hostMember.id,
-            recruitNum,
-            condition,
-            channelName,
-            RecruitType.SalmonRecruit,
-        );
+        await RecruitService.registerRecruit(guild.id, image1Message.id, hostMember.id, recruitNum, condition, channelName, type);
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);

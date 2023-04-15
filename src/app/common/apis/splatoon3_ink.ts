@@ -103,6 +103,41 @@ export function checkBigRun(schedule: $TSFixMe, num: $TSFixMe) {
 }
 
 /**
+ * チームコンテスト中かチェックする
+ * @param {*} schedule スケジュールデータ
+ * @param {Number} num スケジュール番号
+ * @returns チームコンテスト中ならtrueを返す
+ */
+export function checkTeamContest(schedule: $TSFixMe, num: $TSFixMe) {
+    try {
+        const teamContestList = getTeamContestList(schedule);
+
+        if (teamContestList.length == 0) {
+            return false;
+        }
+
+        const t_setting = teamContestList[num].setting;
+
+        if (isEmpty(t_setting)) {
+            return false;
+        }
+
+        const start_datetime = new Date(teamContestList[num].startTime).getTime();
+        const end_datetime = new Date(teamContestList[num].endTime).getTime();
+        const now_datetime = new Date().getTime();
+        if (now_datetime - start_datetime < 0) {
+            return false;
+        } else if (end_datetime - now_datetime < 0) {
+            return false;
+        } else {
+            return true;
+        }
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
  * dataからレギュラー用のリストだけ返す
  * @param {*} schedule スケジュールデータ
  */
@@ -181,6 +216,18 @@ export function getFesList(schedule: $TSFixMe) {
 export function getBigRunList(schedule: $TSFixMe) {
     try {
         return schedule.data.coopGroupingSchedule.bigRunSchedules.nodes;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
+ * dataからチームコンテスト用のリストだけ返す
+ * @param {*} schedule スケジュールデータ
+ */
+export function getTeamContestList(schedule: $TSFixMe) {
+    try {
+        return schedule.data.coopGroupingSchedule.teamContestSchedules.nodes;
     } catch (error) {
         logger.error(error);
     }
@@ -394,6 +441,32 @@ export async function getBigRunData(data: $TSFixMe, num: $TSFixMe) {
         result.weapon3 = b_setting.weapons[2].image.url;
         result.weapon4 = b_setting.weapons[3].image.url;
         result.stageImage = b_setting.coopStage.thumbnailImage.url;
+        return result;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+/**
+ * チームコンテスト募集用データに整形する
+ * @param {*} data フェッチしたデータ
+ * @param {Number} num スケジュール番号
+ * @returns 連想配列で返す
+ */
+export async function getTeamContestData(data: $TSFixMe, num: $TSFixMe) {
+    try {
+        const teamContestList = getTeamContestList(data.schedule);
+        const t_setting = teamContestList[num].setting;
+
+        const result: $TSFixMe = {};
+        result.startTime = teamContestList[num].startTime;
+        result.endTime = teamContestList[num].endTime;
+        result.stage = await stage2txt(data.locale, t_setting.coopStage.id);
+        result.weapon1 = t_setting.weapons[0].image.url;
+        result.weapon2 = t_setting.weapons[1].image.url;
+        result.weapon3 = t_setting.weapons[2].image.url;
+        result.weapon4 = t_setting.weapons[3].image.url;
+        result.stageImage = t_setting.coopStage.thumbnailImage.url;
         return result;
     } catch (error) {
         logger.error(error);

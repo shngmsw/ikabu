@@ -1,7 +1,6 @@
 import Canvas from 'canvas';
 import path from 'path';
 import { modalRecruit } from '../../../constant.js';
-import { getSalmonData } from '../../common/apis/splatoon3_ink';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { Participant } from '../../../db/model/participant.js';
@@ -31,6 +30,7 @@ export async function recruitSalmonCanvas(
     user3: Participant | null,
     condition: string,
     channelName: string | null,
+    subTitle?: string,
 ) {
     const blankAvatarUrl = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
@@ -50,6 +50,10 @@ export async function recruitSalmonCanvas(
 
     fillTextWithStroke(recruitCtx, 'SALMON', '51px Splatfont', '#000000', '#FF9900', 3, 115, 80);
     fillTextWithStroke(recruitCtx, 'RUN', '51px Splatfont', '#000000', '#00FF00DA', 3, 350, 80);
+
+    if (typeof subTitle === 'string') {
+        fillTextWithStroke(recruitCtx, subTitle, '49px Splatfont', '#000000', '#FFD900FB', 3, 510, 80);
+    }
 
     // 募集主の画像
     const hostImage = await Canvas.loadImage(host.iconUrl ?? modalRecruit.placeHold);
@@ -174,9 +178,7 @@ export async function recruitSalmonCanvas(
  * ルール情報のキャンバス(2枚目)を作成する
  */
 export async function ruleSalmonCanvas(data: $TSFixMe) {
-    const salmonData = await getSalmonData(data, 0);
-
-    const datetime = formatDatetime(salmonData.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(salmonData.endTime, dateformat.mdwhm);
+    const datetime = formatDatetime(data.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(data.endTime, dateformat.mdwhm);
 
     const ruleCanvas = Canvas.createCanvas(720, 550);
     const ruleCtx = ruleCanvas.getContext('2d');
@@ -195,24 +197,24 @@ export async function ruleSalmonCanvas(data: $TSFixMe) {
 
     fillTextWithStroke(ruleCtx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 245);
 
-    const weapon1Image = await Canvas.loadImage(salmonData.weapon1);
+    const weapon1Image = await Canvas.loadImage(data.weapon1);
     ruleCtx.drawImage(weapon1Image, 50, 280, 110, 110);
 
-    const weapon2Image = await Canvas.loadImage(salmonData.weapon2);
+    const weapon2Image = await Canvas.loadImage(data.weapon2);
     ruleCtx.drawImage(weapon2Image, 190, 280, 110, 110);
 
-    const weapon3Image = await Canvas.loadImage(salmonData.weapon3);
+    const weapon3Image = await Canvas.loadImage(data.weapon3);
     ruleCtx.drawImage(weapon3Image, 50, 410, 110, 110);
 
-    const weapon4Image = await Canvas.loadImage(salmonData.weapon4);
+    const weapon4Image = await Canvas.loadImage(data.weapon4);
     ruleCtx.drawImage(weapon4Image, 190, 410, 110, 110);
 
     fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 350, 245);
 
-    const stageWidth = ruleCtx.measureText(salmonData.stage).width;
-    fillTextWithStroke(ruleCtx, salmonData.stage, '38px Splatfont', '#FFFFFF', '#2D3130', 1, 150 + (700 - stageWidth) / 2, 300);
+    const stageWidth = ruleCtx.measureText(data.stage).width;
+    fillTextWithStroke(ruleCtx, data.stage, '38px Splatfont', '#FFFFFF', '#2D3130', 1, 150 + (700 - stageWidth) / 2, 300);
 
-    const stageImage = await Canvas.loadImage(salmonData.stageImage);
+    const stageImage = await Canvas.loadImage(data.stageImage);
     ruleCtx.save();
     ruleCtx.beginPath();
     createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
