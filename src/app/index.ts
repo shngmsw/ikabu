@@ -131,10 +131,7 @@ client.on('userUpdate', async (oldUser, newUser) => {
         }
         const userId = newUser.id;
 
-        let member = await searchAPIMemberById(guild, userId);
-        if (typeof member.displayAvatarURL() !== 'string' || typeof member.displayName !== 'string' || member.joinedAt === null) {
-            member = await searchAPIMemberById(guildId, userId);
-        }
+        const member = await searchAPIMemberById(guild, userId);
 
         if (member.joinedAt === null) {
             throw new Error('joinedAt is null');
@@ -155,7 +152,7 @@ client.on('userUpdate', async (oldUser, newUser) => {
             await MembersService.updateMemberProfile(updateMember);
         }
     } catch (err) {
-        const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
+        const loggerMU = log4js_obj.getLogger('userUpdate');
         loggerMU.error({ err });
     }
 });
