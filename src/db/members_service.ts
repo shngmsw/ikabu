@@ -68,4 +68,16 @@ export class MembersService {
         DBCommon.close();
         return members;
     }
+
+    static async getMemberGuildsByUserId(userId: string) {
+        const db = DBCommon.open();
+        db.all = util.promisify(db.all); // https://stackoverflow.com/questions/56122812/async-await-sqlite-in-javascript
+        const results = await db.all(`select * from members where user_id = ${userId}`);
+        const members: string[] = [];
+        for (let i = 0; i < results.length; i++) {
+            members.push(results[i].guild_id);
+        }
+        DBCommon.close();
+        return members;
+    }
 }
