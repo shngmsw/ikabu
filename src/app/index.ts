@@ -89,6 +89,13 @@ client.on('guildMemberRemove', async (member: $TSFixMe) => {
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
+        const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
+        try {
+            loggerMU.debug(`new detail: [ userId: ${newMember.user.id}, avatar: ${newMember.displayAvatarURL()} ]`);
+        } catch (error) {
+            loggerMU.debug('new detail: error');
+        }
+
         const guild = await newMember.guild.fetch();
         const userId = newMember.user.id;
         let member = newMember;
@@ -121,39 +128,43 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
 client.on('userUpdate', async (oldUser, newUser) => {
     try {
-        const guildId = process.env.SERVER_ID;
-        if (guildId === undefined) {
-            throw new Error('process.env.SERVER_ID is undefined.');
+        const loggerUU = log4js_obj.getLogger('userUpdate');
+        try {
+            loggerUU.debug(`new detail: [ userId: ${newUser.id}, avatar: ${newUser.displayAvatarURL()} ]`);
+        } catch (error) {
+            loggerUU.debug('new detail: error');
         }
-        const guild = await client.guilds.fetch(guildId);
-        if (guild == null) {
-            throw new Error('guild is null');
-        }
+
         const userId = newUser.id;
 
-        const member = await searchAPIMemberById(guild, userId);
+        const guildIdList = await MembersService.getMemberGuildsByUserId(userId);
+        for (const guildId of guildIdList) {
+            const guild = await client.guilds.fetch(guildId);
+            if (guild === null) {
+                throw new Error('guild is null');
+            }
 
-        if (member.joinedAt === null) {
-            throw new Error('joinedAt is null');
-        }
+            const member = await searchAPIMemberById(guild, userId);
 
-        const updateMember = new Member(
-            guildId,
-            userId,
-            member.displayName,
-            member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-            member.joinedAt,
-        );
+            if (member === null) {
+                loggerUU.error('member cannot fetch!');
+                continue;
+            }
 
-        // membersテーブルにレコードがあるか確認
-        if ((await MembersService.getMemberByUserId(guildId, userId)).length == 0) {
-            await MembersService.registerMember(updateMember);
-        } else {
+            const updateMember = new Member(
+                guildId,
+                userId,
+                member.displayName,
+                member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+                member.joinedAt,
+            );
+
+            // プロフィールアップデート
             await MembersService.updateMemberProfile(updateMember);
         }
     } catch (err) {
-        const loggerMU = log4js_obj.getLogger('userUpdate');
-        loggerMU.error({ err });
+        const loggerUU = log4js_obj.getLogger('userUpdate');
+        loggerUU.error({ err });
     }
 });
 
