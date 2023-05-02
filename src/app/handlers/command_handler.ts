@@ -34,6 +34,8 @@ export async function call(interaction: $TSFixMe) {
     const { commandName } = interaction;
     const { options } = interaction;
 
+    await sendCommandLog(interaction); // DB使うものはawait付けないとcloseエラー出る
+
     if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
         await voiceLocker(interaction);
     } else if (commandName === commandNames.close) {
@@ -122,6 +124,5 @@ export async function call(interaction: $TSFixMe) {
                 break;
         }
     }
-    await sendCommandLog(interaction); // DB使うものはawait付けないとcloseエラー出る
     return;
 }
