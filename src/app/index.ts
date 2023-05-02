@@ -89,13 +89,6 @@ client.on('guildMemberRemove', async (member: $TSFixMe) => {
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
-        const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
-        try {
-            loggerMU.debug(`new detail: [ userId: ${newMember.user.id}, avatar: ${newMember.displayAvatarURL()} ]`);
-        } catch (error) {
-            loggerMU.debug('new detail: error');
-        }
-
         const guild = await newMember.guild.fetch();
         const userId = newMember.user.id;
         let member = newMember;
@@ -129,11 +122,6 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 client.on('userUpdate', async (oldUser, newUser) => {
     try {
         const loggerUU = log4js_obj.getLogger('userUpdate');
-        try {
-            loggerUU.debug(`new detail: [ userId: ${newUser.id}, avatar: ${newUser.displayAvatarURL()} ]`);
-        } catch (error) {
-            loggerUU.debug('new detail: error');
-        }
 
         const userId = newUser.id;
 
