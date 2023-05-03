@@ -1,5 +1,14 @@
 // Discord bot implements
-import { ActivityType, Client, GatewayIntentBits, GuildMember, Partials } from 'discord.js';
+import {
+    ActivityType,
+    AutocompleteInteraction,
+    CacheType,
+    Client,
+    GatewayIntentBits,
+    GuildMember,
+    Interaction,
+    Partials,
+} from 'discord.js';
 import { DBCommon } from '../db/db';
 import { MembersService } from '../db/members_service';
 import { FriendCodeService } from '../db/friend_code_service';
@@ -218,11 +227,7 @@ client.on('messageReactionRemove', async (reaction: $TSFixMe, user: $TSFixMe) =>
     }
 });
 
-/**
- *
- * @param {Discord.Interaction} interaction
- */
-async function onInteraction(interaction: $TSFixMe) {
+client.on('interactionCreate', (interaction: Interaction<CacheType>) => {
     try {
         if (interaction.isButton()) {
             button_handler.call(interaction);
@@ -230,21 +235,23 @@ async function onInteraction(interaction: $TSFixMe) {
             modal_handler.call(interaction);
         } else if (interaction.isMessageContextMenuCommand()) {
             context_handler.call(interaction);
+        } else if (interaction.isUserContextMenuCommand()) {
+            // interaction.isCommand()はcontextMenu系も含むため条件分岐しておく
         } else if (interaction.isCommand()) {
             command_handler.call(interaction);
         }
     } catch (error) {
         const interactionLogger = log4js_obj.getLogger('interaction');
-        const errorDetail = {
-            content: `Command failed: ${error}`,
-            interaction_replied: interaction.replied,
-            interaction_deferred: interaction.deferred,
-        };
-        interactionLogger.error(errorDetail);
+        if (!(interaction instanceof AutocompleteInteraction)) {
+            const errorDetail = {
+                content: `Command failed: ${error}`,
+                interaction_replied: interaction.replied,
+                interaction_deferred: interaction.deferred,
+            };
+            interactionLogger.error(errorDetail);
+        }
     }
-}
-
-client.on('interactionCreate', (interaction: $TSFixMe) => onInteraction(interaction));
+});
 
 client.on('threadCreate', async (thread: $TSFixMe) => {
     if (isNotEmpty(thread.parentId) && thread.parentId === process.env.CHANNEL_ID_SUPPORT_CENTER) {
