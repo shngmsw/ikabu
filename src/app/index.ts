@@ -44,7 +44,7 @@ const client = new Client({
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.MessageContent,
     ],
-    partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Reaction],
+    partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
