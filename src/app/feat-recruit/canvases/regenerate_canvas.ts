@@ -8,6 +8,8 @@ import { recruitAnarchyCanvas } from './anarchy_canvas';
 import { recruitSalmonCanvas } from './salmon_canvas';
 import { recruitRegularCanvas } from './regular_canvas';
 import { log4js_obj } from '../../../log4js_settings';
+import { searchRoleById, searchRoleIdByName } from '../../common/manager/role_manager';
+import { recruitFesCanvas } from './fes_canvas';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -42,6 +44,9 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
                 break;
             case RecruitType.SalmonRecruit:
                 regenSalmonCanvas(message, recruitData[0], participantsData, applicantNum, opCode, false);
+                break;
+            case RecruitType.FestivalRecruit:
+                regenFesCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
                 break;
             case RecruitType.TeamContestRecruit:
                 regenSalmonCanvas(message, recruitData[0], participantsData, applicantNum, opCode, true);
@@ -167,6 +172,52 @@ async function regenSalmonCanvas(
         isTeamContest ? 'コンテスト' : undefined,
     );
 
+    const recruit = new AttachmentBuilder(recruitBuffer, {
+        name: 'ikabu_recruit.png',
+    });
+
+    message.edit({ files: [recruit] });
+}
+
+async function regenFesCanvas(
+    message: Message,
+    recruitData: Recruit,
+    participantsData: Participant[],
+    applicantNum: number,
+    opCode: number,
+) {
+    const applicantList = []; // 参加希望者リスト
+    for (const participant of participantsData) {
+        if (participant.userType === 2) {
+            applicantList.push(participant);
+        }
+    }
+    const recruitNum = recruitData.recruitNum;
+    const remainingNum = recruitNum - applicantNum;
+    const count = remainingNum + participantsData.length; // 全体の枠数
+    const channelName = recruitData.channelName;
+    const condition = recruitData.condition;
+    const teamName = recruitData.option;
+
+    const mentionId = await searchRoleIdByName(message.guild, teamName);
+    const teamRole = await searchRoleById(message.guild, mentionId);
+
+    const submitMembersList = Array(count).fill(null); // 枠数までnull埋め
+    participantsData.forEach((participant, index) => (submitMembersList[index] = participant));
+
+    const recruitBuffer = await recruitFesCanvas(
+        opCode,
+        remainingNum,
+        count,
+        submitMembersList[0],
+        submitMembersList[1],
+        submitMembersList[2],
+        submitMembersList[3],
+        teamRole.name,
+        teamRole.hexColor,
+        condition,
+        channelName,
+    );
     const recruit = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });

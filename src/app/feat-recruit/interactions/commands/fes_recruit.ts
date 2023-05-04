@@ -1,6 +1,7 @@
 import {
     AttachmentBuilder,
     BaseGuildTextChannel,
+    CacheType,
     ChatInputCommandInteraction,
     GuildMember,
     PermissionsBitField,
@@ -14,27 +15,32 @@ import { setButtonDisable } from '../../../common/button_components';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleById, searchRoleIdByName } from '../../../common/manager/role_manager';
-import { getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitFesCanvas, ruleFesCanvas } from '../../canvases/fes_canvas';
 import { getMemberMentions } from '../buttons/other_events';
 import { Participant } from '../../../../db/model/participant';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitType } from '../../../../db/model/recruit';
-import { RecruitOpCode } from '../../canvases/regenerate_canvas';
+import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
 const logger = log4js_obj.getLogger('recruit');
 
-export async function fesRecruit(interaction: ChatInputCommandInteraction) {
-    if (!interaction.isCommand()) return;
+export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheType>) {
+    if (!interaction.inGuild()) {
+        return;
+    }
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
 
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
     const recruitNum = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild?.fetch();
-    const hostMember = await searchAPIMemberById(guild, interaction.member?.user.id);
+    const guild = await interaction.guild.fetch();
+    const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
     const team = interaction.commandName;
@@ -58,8 +64,8 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction) {
     }
 
     // プレイヤー指定があればカウンターを増やす
-    if (user1 !== null) memberCounter++;
-    if (user2 !== null) memberCounter++;
+    if (exists(user1)) memberCounter++;
+    if (exists(user2)) memberCounter++;
 
     if (memberCounter > 4) {
         await interaction.reply({
@@ -221,9 +227,7 @@ async function sendFesMatch(
     try {
         const recruitChannel = interaction.channel;
 
-        if (recruitChannel === null) {
-            throw new Error('recruitChannel is null.');
-        }
+        assertExistCheck(recruitChannel, 'channel');
 
         const image1Message = await interaction.editReply({
             content: txt,
@@ -319,6 +323,10 @@ async function sendFesMatch(
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
         const memberList = getMemberMentions(recruitData[0], participants);
         const hostMention = `<@${hostMember.user.id}>`;
+
+        if (interaction.channelId !== null) {
+            await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
+        }
 
         // DBから募集情報削除
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
