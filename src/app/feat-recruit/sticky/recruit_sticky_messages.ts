@@ -6,15 +6,15 @@ import { ParticipantService } from '../../../db/participants_service';
 import { RecruitService } from '../../../db/recruit_service';
 import { RecruitType } from '../../../db/model/recruit';
 import { log4js_obj } from '../../../log4js_settings';
+import { assertExistCheck } from '../../common/others';
 
 const logger = log4js_obj.getLogger('message');
 
 export async function stickyChannelCheck(message: Message) {
     try {
-        const guild = await message.guild?.fetch();
-        if (guild === undefined) {
-            throw new Error('guild cannot fetch.');
-        }
+        assertExistCheck(message.guild, 'guild');
+
+        const guild = await message.guild.fetch();
         const channelId = message.channelId;
         let content: string;
         if (channelId === process.env.CHANNEL_ID_RECRUIT_PRIVATE) {

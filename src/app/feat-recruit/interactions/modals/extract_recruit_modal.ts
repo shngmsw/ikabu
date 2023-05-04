@@ -3,7 +3,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, fetchSchedule, getAnarchyOpenData, getFesData, getRegularData } from '../../../common/apis/splatoon3_ink';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
-import { isEmpty, isNotEmpty } from '../../../common/others';
+import { assertExistCheck, isEmpty, isNotEmpty } from '../../../common/others';
 import { sendRecruitModalLog } from '../../../logs/modals/recruit_modal_log';
 import { sendAnarchyMatch } from './anarchy_recruit_modal';
 import { sendFesMatch } from './fes_recruit_modal';
@@ -15,16 +15,15 @@ import { Member } from '../../../../db/model/member';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
+    const guild = await interaction.guild.fetch();
     const channel = interaction.channel;
     const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
     const participantsList = interaction.fields.getTextInputValue('pList');
@@ -117,16 +116,15 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
 }
 
 export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
     const channel = interaction.channel;
     const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
     const user1: GuildMember | string | null = interaction.fields.getTextInputValue('participant1');
@@ -237,16 +235,15 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
 }
 
 export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
     const channel = interaction.channel;
     const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
     const user1 = interaction.fields.getTextInputValue('participant1');
@@ -342,16 +339,15 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
 }
 
 export async function modalFesRecruit(interaction: ModalSubmitInteraction, params: $TSFixMe) {
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
     const channel = interaction.channel;
     const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
     const user1 = interaction.fields.getTextInputValue('participant1');

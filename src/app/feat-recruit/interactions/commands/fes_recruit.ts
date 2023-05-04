@@ -166,10 +166,8 @@ async function sendFesMatch(
     user2: User | null,
     fesData: $TSFixMe,
 ) {
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch');
-    }
+    assertExistCheck(interaction.guild, 'guild');
+    const guild = await interaction.guild.fetch();
     const mentionId = await searchRoleIdByName(guild, team);
     const teamRole = await searchRoleById(guild, mentionId);
 

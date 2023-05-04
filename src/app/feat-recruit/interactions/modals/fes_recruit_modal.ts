@@ -4,7 +4,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleById, searchRoleIdByName } from '../../../common/manager/role_manager';
-import { getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitFesCanvas, ruleFesCanvas } from '../../canvases/fes_canvas';
 import { getMemberMentions } from '../buttons/other_events';
@@ -29,10 +29,10 @@ export async function sendFesMatch(
     user2: Member | null,
     fesData: $TSFixMe,
 ) {
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
     const mentionId = await searchRoleIdByName(guild, team);
     const teamRole = await searchRoleById(guild, mentionId);
 
@@ -80,9 +80,6 @@ export async function sendFesMatch(
 
     try {
         const recruitChannel = interaction.channel;
-        if (recruitChannel === null) {
-            throw new Error('recruitChannel is null.');
-        }
         const image1Message = await interaction.editReply({
             content: txt,
             files: [recruit],

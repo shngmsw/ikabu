@@ -1,7 +1,7 @@
 import Canvas from 'canvas';
 import path from 'path';
 import Discord, { ChatInputCommandInteraction } from 'discord.js';
-import { dateDiff } from '../../common/others';
+import { assertExistCheck, dateDiff } from '../../common/others';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 const backgroundImgPaths = [
     './images/over4years.jpg',
@@ -16,15 +16,13 @@ const colorCodes = ['#db4240', '#9849c9', '#2eddff', '#5d8e9c', '#f0c46e', '#868
 export async function handleIkabuExperience(interaction: ChatInputCommandInteraction) {
     if (!interaction.inGuild()) return;
 
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
+
+    const guild = await interaction.guild.fetch();
     const member = await searchDBMemberById(guild, interaction.member.user.id);
     const joinDate = member.joinedAt;
     const today = new Date();

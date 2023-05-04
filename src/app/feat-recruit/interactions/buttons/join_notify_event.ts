@@ -4,7 +4,7 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { isNotEmpty, sleep } from '../../../common/others.js';
+import { assertExistCheck, isNotEmpty, sleep } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
 import { messageLinkButtons } from '../../buttons/create_recruit_buttons';
 import { Participant } from '../../../../db/model/participant.js';
@@ -15,19 +15,16 @@ import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_
 const logger = log4js_obj.getLogger('recruitButton');
 
 export async function joinNotify(interaction: ButtonInteraction) {
-    /** @type {Discord.Snowflake} */
+    if (!interaction.inGuild()) return;
     try {
         await interaction.update({
             components: await setButtonDisable(interaction.message, interaction),
         });
 
-        const guild = await interaction.guild?.fetch();
-        if (guild === undefined) {
-            throw new Error('guild cannot fetch.');
-        }
-        if (interaction.member === null) {
-            throw new Error('interaction.member is null');
-        }
+        assertExistCheck(interaction.guild, 'guild');
+        assertExistCheck(interaction.channel, 'channel');
+
+        const guild = await interaction.guild.fetch();
         const embedMessageId = interaction.message.id;
 
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
@@ -105,9 +102,6 @@ export async function joinNotify(interaction: ButtonInteraction) {
             await ParticipantService.registerParticipant(embedMessageId, member.userId, 2, new Date());
 
             const recruitChannel = interaction.channel;
-            if (recruitChannel === null) {
-                throw new Error('recruitChannel is null.');
-            }
 
             // ホストがVCにいるかチェックして、VCにいる場合はText in Voiceにメッセージ送信
             let notifyMessage = null;

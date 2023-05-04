@@ -16,7 +16,7 @@ import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleIdByName } from '../../../common/manager/role_manager';
-import { getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
 import { getMemberMentions } from '../buttons/other_events';
@@ -31,14 +31,17 @@ const logger = log4js_obj.getLogger('recruit');
 export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
     if (!interaction.inGuild()) return;
 
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
     let rank = options.getString('募集ウデマエ');
     const recruitNum = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild?.fetch();
-    const hostMember = await searchAPIMemberById(guild, interaction.member?.user.id);
+    const guild = await interaction.guild.fetch();
+    const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
     let memberCounter = recruitNum; // プレイ人数のカウンター
@@ -223,10 +226,10 @@ async function sendAnarchyMatch(
             break;
     }
 
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch');
-    }
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
+    const guild = await interaction.guild.fetch();
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
     let channelName = null;
     if (reservedChannel !== null) {
@@ -270,10 +273,6 @@ async function sendAnarchyMatch(
 
     try {
         const recruitChannel = interaction.channel;
-
-        if (recruitChannel === null) {
-            throw new Error('recruitChannel is null.');
-        }
         const image1Message = await interaction.editReply({
             content: txt,
             files: [recruit],

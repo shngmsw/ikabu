@@ -4,7 +4,7 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
-import { isNotEmpty } from '../../../common/others.js';
+import { assertExistCheck, isNotEmpty } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
 import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
@@ -12,27 +12,22 @@ import { ParticipantService } from '../../../../db/participants_service.js';
 const logger = log4js_obj.getLogger('recruitButton');
 
 export async function del(interaction: ButtonInteraction, params: URLSearchParams) {
-    /** @type {Discord.Snowflake} */
+    if (!interaction.inGuild()) return;
     try {
         // 処理待ち
         await interaction.deferReply({
             ephemeral: true,
         });
 
-        const guild = await interaction.guild?.fetch();
-        if (guild === undefined) {
-            throw new Error('guild cannot fetch.');
-        }
-        if (interaction.member === null) {
-            throw new Error('interaction.member is null');
-        }
+        assertExistCheck(interaction.guild, 'guild');
+        assertExistCheck(interaction.channel, 'channel');
+
+        const guild = await interaction.guild.fetch();
         const member = await searchDBMemberById(guild, interaction.member.user.id);
         const buttonMessageId = params.get('mid');
         const buttonMessage = await searchMessageById(guild, interaction.channelId, buttonMessageId);
         const image1MsgId = params.get('imid1');
-        if (image1MsgId === null) {
-            throw new Error('image1 message id is null.');
-        }
+        assertExistCheck(image1MsgId, "params.get('imid1')");
         const image1Message = await searchMessageById(guild, interaction.channelId, image1MsgId);
         const image2MsgId = params.get('imid2');
         let image2Message;

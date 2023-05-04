@@ -866,28 +866,26 @@ const commands = [
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import { log4js_obj } from './log4js_settings.js';
+import { assertExistCheck } from './app/common/others.js';
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN || '');
 export async function registerSlashCommands() {
     const logger = log4js_obj.getLogger();
-    const bot_id = process.env.DISCORD_BOT_ID;
-    if (bot_id === undefined) {
-        throw new Error('DISCORD_BOT_ID is not defined.');
-    }
-    const server_id = process.env.SERVER_ID;
-    if (server_id === undefined) {
-        throw new Error('SERVER_ID is not defined.');
-    }
+    const botId = process.env.DISCORD_BOT_ID;
+    const serverId = process.env.SERVER_ID;
+
+    assertExistCheck(botId, 'process.env.DISCORD_BOT_ID');
+    assertExistCheck(serverId, 'process.env.SERVER_ID');
 
     const mode = process.env.SLASH_COMMAND_REGISTER_MODE;
     if (mode === 'guild') {
         await rest
-            .put(Routes.applicationCommands(bot_id), { body: [] })
+            .put(Routes.applicationCommands(botId), { body: [] })
             .then(() => logger.info('Successfully deleted application global commands.'))
             .catch((error: $TSFixMe) => {
                 logger.error(error);
             });
         await rest
-            .put(Routes.applicationGuildCommands(bot_id, server_id), {
+            .put(Routes.applicationGuildCommands(botId, serverId), {
                 body: commands,
             })
             .then(() => logger.info('Successfully registered application guild commands.'))
@@ -896,13 +894,13 @@ export async function registerSlashCommands() {
             });
     } else if (mode === 'global') {
         await rest
-            .put(Routes.applicationGuildCommands(bot_id, server_id), { body: [] })
+            .put(Routes.applicationGuildCommands(botId, serverId), { body: [] })
             .then(() => logger.info('Successfully deleted application guild commands.'))
             .catch((error: $TSFixMe) => {
                 logger.error(error);
             });
         await rest
-            .put(Routes.applicationCommands(bot_id), {
+            .put(Routes.applicationCommands(botId), {
                 body: commands,
             })
             .then(() => logger.info('Successfully registered application global commands.'))

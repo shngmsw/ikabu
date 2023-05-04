@@ -1,18 +1,18 @@
 import { ActionRowBuilder, MessageContextMenuCommandInteraction, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 import { log4js_obj } from '../../../../log4js_settings';
 import { RecruitService } from '../../../../db/recruit_service';
+import { assertExistCheck } from '../../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
 export async function createRecruitEditor(interaction: MessageContextMenuCommandInteraction) {
+    if (!interaction.inGuild()) return;
     try {
-        const guild = await interaction.guild?.fetch();
-        if (guild === undefined) {
-            throw new Error('guild cannot fetch.');
-        }
+        assertExistCheck(interaction.guild, 'guild');
+        const guild = await interaction.guild.fetch();
         const message = interaction.targetMessage;
         const messageId = message.id;
-        const userId = interaction.member?.user.id;
+        const userId = interaction.member.user.id;
 
         const recruitData = await RecruitService.getRecruit(guild.id, messageId);
 

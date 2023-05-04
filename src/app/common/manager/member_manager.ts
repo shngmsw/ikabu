@@ -1,6 +1,6 @@
 import { Guild, GuildMember } from 'discord.js';
 import { log4js_obj } from '../../../log4js_settings';
-import { isEmpty, isNotEmpty } from '../others';
+import { assertExistCheck, isEmpty, isNotEmpty } from '../others';
 import { MembersService } from '../../../db/members_service';
 import { Member } from '../../../db/model/member';
 import axios from 'axios';
@@ -43,9 +43,7 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
     if (members.length == 0) {
         const memberRaw: GuildMember = await searchAPIMemberById(guild, userId);
 
-        if (memberRaw.joinedAt === null) {
-            throw new Error('joinedAt is null');
-        }
+        assertExistCheck(memberRaw.joinedAt, 'joinedAt');
 
         const newMember = new Member(
             guild.id,
