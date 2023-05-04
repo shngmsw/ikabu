@@ -85,7 +85,7 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
     } else if (commandName == commandNames.kansen) {
         await handleKansen(interaction);
     } else if (commandName == commandNames.timer) {
-        await handleTimer(interaction); // dm
+        await handleTimer(interaction);
     } else if (commandName == commandNames.pick) {
         await handlePick(interaction); // dm
     } else if (commandName == commandNames.voice_pick) {
