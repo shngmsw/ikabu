@@ -1,6 +1,6 @@
-import { EmbedBuilder } from 'discord.js';
+import { CacheType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
-export async function handleHelp(interaction: $TSFixMe) {
+export async function handleHelp(interaction: ChatInputCommandInteraction<CacheType>) {
     if (!interaction.isCommand()) return;
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
