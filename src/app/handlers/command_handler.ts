@@ -91,7 +91,7 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
     } else if (commandName == commandNames.voice_pick) {
         await handleVoicePick(interaction);
     } else if (commandName == commandNames.buki) {
-        await handleBuki(interaction); // dm
+        await handleBuki(interaction);
     } else if (commandName == commandNames.show) {
         await handleShow(interaction); // dm
     } else if (commandName == commandNames.help) {
