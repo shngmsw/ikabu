@@ -93,7 +93,7 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
     } else if (commandName == commandNames.buki) {
         await handleBuki(interaction);
     } else if (commandName == commandNames.show) {
-        await handleShow(interaction); // dm
+        await handleShow(interaction);
     } else if (commandName == commandNames.help) {
         await handleHelp(interaction); // dm
     } else if (commandName == commandNames.ban) {
