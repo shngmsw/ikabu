@@ -4,8 +4,10 @@ import { searchChannelById } from '../../common/manager/channel_manager';
 import { searchAPIMemberById, getMemberColor } from '../../common/manager/member_manager';
 import { log4js_obj } from '../../../log4js_settings';
 
+const logger = log4js_obj.getLogger('interaction');
+
 export async function voiceMention(interaction: $TSFixMe) {
-    const logger = log4js_obj.getLogger('interaction');
+    if (!interaction.inGuild()) return;
 
     try {
         await interaction.deferReply({ ephemeral: false });

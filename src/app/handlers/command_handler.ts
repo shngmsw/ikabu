@@ -11,7 +11,7 @@ import { handleCreateRole, handleDeleteRole, handleAssignRole, handleUnassignRol
 import { handleDeleteCategory } from '../feat-admin/channel_manager/deleteCategory.js';
 import { handleDeleteChannel } from '../feat-admin/channel_manager/deleteChannel.js';
 import { handleCreateRoom } from '../feat-admin/channel_manager/createRoom.js';
-import { getCloseEmbed, getCommandHelpEmbed } from '../common/others';
+import { assertExistCheck, getCloseEmbed, getCommandHelpEmbed } from '../common/others';
 import { otherGameRecruit } from '../feat-recruit/interactions/commands/other_game_recruit';
 import { regularRecruit } from '../feat-recruit/interactions/commands/regular_recruit';
 import { fesRecruit } from '../feat-recruit/interactions/commands/fes_recruit';
@@ -29,8 +29,9 @@ import { createNewRecruitButton } from '../feat-recruit/buttons/create_recruit_b
 import { commandNames } from '../../constant.js';
 import { setting } from '../feat-utils/voice/tts/voice_bot_node';
 import { handleVoiceCommand } from '../feat-utils/voice/tts/discordjs_voice';
+import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
-export async function call(interaction: $TSFixMe) {
+export async function call(interaction: ChatInputCommandInteraction<CacheType>) {
     const { commandName } = interaction;
     const { options } = interaction;
 
@@ -39,6 +40,10 @@ export async function call(interaction: $TSFixMe) {
     if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
         await voiceLocker(interaction);
     } else if (commandName === commandNames.close) {
+        if (!interaction.inGuild()) {
+            return;
+        }
+        assertExistCheck(interaction.channel, 'channel');
         //serverコマンド
         const embed = getCloseEmbed();
         if (!interaction.replied) {
@@ -68,7 +73,7 @@ export async function call(interaction: $TSFixMe) {
     } else if (commandName === commandNames.salmon) {
         await salmonRecruit(interaction);
     } else if (commandName === commandNames.friend_code) {
-        await handleFriendCode(interaction);
+        await handleFriendCode(interaction); // dm
     } else if (commandName === commandNames.experience) {
         await handleIkabuExperience(interaction);
     } else if (commandName === commandNames.voiceChannelMention) {
@@ -76,24 +81,27 @@ export async function call(interaction: $TSFixMe) {
     } else if (commandName === commandNames.variablesSettings) {
         await variablesHandler(interaction);
     } else if (commandName == commandNames.wiki) {
-        await handleWiki(interaction);
+        await handleWiki(interaction); // dm
     } else if (commandName == commandNames.kansen) {
-        await handleKansen(interaction);
+        await handleKansen(interaction); // dm
     } else if (commandName == commandNames.timer) {
-        await handleTimer(interaction);
+        await handleTimer(interaction); // dm
     } else if (commandName == commandNames.pick) {
-        await handlePick(interaction);
+        await handlePick(interaction); // dm
     } else if (commandName == commandNames.voice_pick) {
         await handleVoicePick(interaction);
     } else if (commandName == commandNames.buki) {
-        await handleBuki(interaction);
+        await handleBuki(interaction); // dm
     } else if (commandName == commandNames.show) {
-        await handleShow(interaction);
+        await handleShow(interaction); // dm
     } else if (commandName == commandNames.help) {
-        await handleHelp(interaction);
+        await handleHelp(interaction); // dm
     } else if (commandName == commandNames.ban) {
         await handleBan(interaction);
     } else if (commandName === commandNames.voice) {
+        if (!interaction.inGuild()) {
+            return;
+        }
         // 'インタラクションに失敗'が出ないようにするため
         await interaction.deferReply();
         await handleVoiceCommand(interaction);

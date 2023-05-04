@@ -7,7 +7,8 @@ import { searchChannelById } from '../../common/manager/channel_manager';
 const logger = log4js_obj.getLogger('ChannelManager');
 
 export async function handleDeleteChannel(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 

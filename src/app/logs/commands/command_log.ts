@@ -3,6 +3,8 @@ import { searchDBMemberById } from '../../common/manager/member_manager';
 import { sendEmbedsWebhook } from '../../common/webhook';
 
 export async function sendCommandLog(interaction: MessageContextMenuCommandInteraction | ChatInputCommandInteraction) {
+    if (!interaction.inGuild()) return;
+
     const guild = interaction.guild;
     if (guild === null || interaction.member === null || !(interaction.channel instanceof BaseGuildTextChannel)) {
         return;

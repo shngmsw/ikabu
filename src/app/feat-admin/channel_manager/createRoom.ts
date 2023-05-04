@@ -20,7 +20,8 @@ const INDEX_MEMBER_ID_START = 8;
 const logger = log4js_obj.getLogger('ChannelManager');
 
 export async function handleCreateRoom(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;

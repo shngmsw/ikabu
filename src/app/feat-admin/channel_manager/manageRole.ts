@@ -8,7 +8,8 @@ import { isEmpty, isNotEmpty } from '../../common/others';
 const logger = log4js_obj.getLogger('RoleManager');
 
 export async function handleCreateRole(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
@@ -54,7 +55,8 @@ export async function handleCreateRole(interaction: $TSFixMe) {
 }
 
 export async function handleDeleteRole(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
@@ -122,7 +124,8 @@ export async function handleDeleteRole(interaction: $TSFixMe) {
 }
 
 export async function handleAssignRole(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
@@ -152,7 +155,8 @@ export async function handleAssignRole(interaction: $TSFixMe) {
 }
 
 export async function handleUnassignRole(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;

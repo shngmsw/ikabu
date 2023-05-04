@@ -27,9 +27,7 @@ import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_
 const logger = log4js_obj.getLogger('recruit');
 
 export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheType>) {
-    if (!interaction.inGuild()) {
-        return;
-    }
+    if (!interaction.inGuild()) return;
 
     assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');

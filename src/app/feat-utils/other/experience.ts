@@ -14,7 +14,8 @@ const backgroundImgPaths = [
 ];
 const colorCodes = ['#db4240', '#9849c9', '#2eddff', '#5d8e9c', '#f0c46e', '#86828f', '#ad745c'];
 export async function handleIkabuExperience(interaction: ChatInputCommandInteraction) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const guild = await interaction.guild?.fetch();

@@ -25,8 +25,7 @@ import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_
 const logger = log4js_obj.getLogger('recruit');
 
 export async function otherGameRecruit(interaction: ChatInputCommandInteraction) {
-    // subCommands取得
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
 
     const guild = await interaction.guild?.fetch();
     if (guild === undefined) {

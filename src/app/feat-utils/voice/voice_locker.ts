@@ -8,6 +8,8 @@ const logger = log4js_obj.getLogger('interaction');
  * スラコマ打たれたときの動作
  */
 export async function voiceLocker(interaction: $TSFixMe) {
+    if (!interaction.inGuild()) return;
+
     const author = interaction.member;
     const channel = interaction.channel;
 

@@ -25,7 +25,7 @@ import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_
 const logger = log4js_obj.getLogger('recruit');
 
 export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
 
     const options = interaction.options;
     const channel = interaction.channel;
