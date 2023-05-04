@@ -93,7 +93,7 @@ export function exists<Type>(value: Type | null | undefined): value is Type {
  * @param value チェックする値
  * @returns 値があれば false, なければ true を返す
  */
-export function notExist<Type>(value: Type | null | undefined): value is null | undefined {
+export function notExists<Type>(value: Type | null | undefined): value is null | undefined {
     return !exists(value);
 }
 
@@ -103,7 +103,7 @@ export function notExist<Type>(value: Type | null | undefined): value is null | 
  * @param target エラーに表示する変数名
  */
 export function assertExistCheck<Type>(value: Type | null | undefined, target = 'value'): asserts value is Type {
-    if (notExist(value)) {
+    if (notExists(value)) {
         throw new Error(`'${target}' should be specified.`);
     }
 }
