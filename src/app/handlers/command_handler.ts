@@ -73,7 +73,7 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
     } else if (commandName === commandNames.salmon) {
         await salmonRecruit(interaction);
     } else if (commandName === commandNames.friend_code) {
-        await handleFriendCode(interaction); // dm
+        await handleFriendCode(interaction);
     } else if (commandName === commandNames.experience) {
         await handleIkabuExperience(interaction);
     } else if (commandName === commandNames.voiceChannelMention) {
