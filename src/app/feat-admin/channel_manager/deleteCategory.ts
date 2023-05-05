@@ -5,11 +5,13 @@ import fs from 'fs';
 import request from 'request';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
+import { exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
 export async function handleDeleteCategory(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
@@ -21,7 +23,7 @@ export async function handleDeleteCategory(interaction: $TSFixMe) {
     const attachment = options.getAttachment('csv');
     const categoryIds = options.getString('カテゴリーid');
     const args = [];
-    if (categoryIds != null) {
+    if (exists(categoryIds)) {
         const strCmd = categoryIds.replace('\x20+', ' ');
         const splits = strCmd.split(' ');
         for (const argument of splits) {
@@ -31,7 +33,7 @@ export async function handleDeleteCategory(interaction: $TSFixMe) {
         }
     }
 
-    if (attachment != null && attachment.size) {
+    if (exists(attachment) && attachment.size) {
         await interaction.editReply('CSVを読み込んで削除中でし！\nちょっと待つでし！');
 
         request(attachment.url).pipe(
@@ -75,7 +77,7 @@ async function deleteCategory(interaction: $TSFixMe, categoryIdList: $TSFixMe) {
             const categoryId = categoryIdList[i];
             let categoryName;
             // if category ID is not found or the ID type is not a category, consider as an error.
-            if ((await searchChannelById(guild, categoryId)) == null) {
+            if (notExists(await searchChannelById(guild, categoryId))) {
                 categoryName = 'NOT_FOUND!';
                 removed.push([categoryId, 'NOT_FOUND!', '', '']);
             } else {
@@ -116,7 +118,7 @@ async function deleteCategory(interaction: $TSFixMe, categoryIdList: $TSFixMe) {
 async function deleteChannelsByCategoryId(guild: $TSFixMe, categoryId: $TSFixMe) {
     const channels = [];
     let channelCollection = await guild.channels.fetch();
-    while (channelCollection.find((c: $TSFixMe) => c.type != ChannelType.GuildCategory && c.parent == categoryId) != null) {
+    while (exists(channelCollection.find((c: $TSFixMe) => c.type != ChannelType.GuildCategory && c.parent == categoryId))) {
         const channel = channelCollection.find((c: $TSFixMe) => c.type != ChannelType.GuildCategory && c.parent == categoryId);
         if (channel.type == ChannelType.GuildText) {
             channels.push([channel.id, '#' + channel.name]);

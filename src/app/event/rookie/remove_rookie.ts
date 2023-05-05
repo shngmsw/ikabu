@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import { MessageCountService } from '../../../db/message_count_service.js';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
-import { isNotEmpty } from '../../common/others';
+import { exists, isNotEmpty } from '../../common/others';
 import { sendIntentionConfirmReply } from './send_questionnaire';
 
 export async function removeRookie(msg: $TSFixMe) {
@@ -31,7 +31,7 @@ export async function removeRookie(msg: $TSFixMe) {
 
 async function getMessageCount(id: $TSFixMe) {
     const result = await MessageCountService.getMemberByUserId(id);
-    if (result[0] != null) {
+    if (exists(result[0])) {
         return result[0].count;
     }
     return 0;

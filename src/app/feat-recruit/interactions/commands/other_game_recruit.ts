@@ -14,7 +14,7 @@ import {
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, recruitActionRow, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { RecruitService } from '../../../../db/recruit_service';
 import { ParticipantService } from '../../../../db/participants_service';
@@ -25,16 +25,12 @@ import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_
 const logger = log4js_obj.getLogger('recruit');
 
 export async function otherGameRecruit(interaction: ChatInputCommandInteraction) {
-    // subCommands取得
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
 
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
+    const guild = await interaction.guild.fetch();
     const options = interaction.options;
     const member = await searchAPIMemberById(guild, interaction.member.user.id);
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
@@ -74,9 +70,6 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction)
     await interaction.deferReply();
     const roles = await guild.roles.fetch();
     const recruitChannel = interaction.channel;
-    if (recruitChannel === null) {
-        throw new Error('recruitChannel is null');
-    }
 
     if (options.getSubcommand() === 'apex') {
         await apexLegends(interaction, guild, recruitChannel, member, roles);
@@ -237,7 +230,7 @@ async function sendOtherGames(
         .setTimestamp()
         .setThumbnail(logo);
 
-    if (reserveChannel != null) {
+    if (exists(reserveChannel)) {
         embed.addFields({
             name: '使用チャンネル',
             value: '🔉 ' + reserveChannel.name,

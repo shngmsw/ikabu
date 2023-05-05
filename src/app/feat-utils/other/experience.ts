@@ -1,7 +1,7 @@
 import Canvas from 'canvas';
 import path from 'path';
 import Discord, { ChatInputCommandInteraction } from 'discord.js';
-import { dateDiff } from '../../common/others';
+import { assertExistCheck, dateDiff, notExists } from '../../common/others';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 const backgroundImgPaths = [
     './images/over4years.jpg',
@@ -14,21 +14,20 @@ const backgroundImgPaths = [
 ];
 const colorCodes = ['#db4240', '#9849c9', '#2eddff', '#5d8e9c', '#f0c46e', '#86828f', '#ad745c'];
 export async function handleIkabuExperience(interaction: ChatInputCommandInteraction) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
+
+    const guild = await interaction.guild.fetch();
     const member = await searchDBMemberById(guild, interaction.member.user.id);
     const joinDate = member.joinedAt;
     const today = new Date();
 
-    if (joinDate === null) {
+    if (notExists(joinDate)) {
         return await interaction.editReply('エラーでし！入部日のデータが読み取れないでし！');
     }
 

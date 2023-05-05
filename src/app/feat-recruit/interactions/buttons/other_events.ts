@@ -6,20 +6,16 @@ import { disableUnlockButton } from '../../buttons/create_recruit_buttons.js';
 import { Participant } from '../../../../db/model/participant.js';
 import { Recruit } from '../../../../db/model/recruit.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
+import { assertExistCheck } from '../../../common/others.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
 export async function unlock(interaction: ButtonInteraction, params: URLSearchParams) {
-    /** @type {Discord.Snowflake} */
-
+    if (!interaction.inGuild()) return;
     try {
-        const guild = await interaction.guild?.fetch();
-        if (guild === undefined) {
-            throw new Error('guild cannot fetch.');
-        }
-        if (interaction.member === null) {
-            throw new Error('interaction.member is null');
-        }
+        assertExistCheck(interaction.guild, 'guild');
+
+        const guild = await interaction.guild.fetch();
         const channelId = params.get('vid');
         const channel = await searchChannelById(guild, channelId);
 
@@ -53,10 +49,8 @@ export function getMemberMentions(recruit: Recruit, participants: Participant[])
 }
 
 export async function memberListMessage(interaction: ButtonInteraction, messageId: string) {
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
+    assertExistCheck(interaction.guild, 'guild');
+    const guild = await interaction.guild.fetch();
     const recruit = await RecruitService.getRecruit(guild.id, messageId);
     const participants = await ParticipantService.getAllParticipants(guild.id, messageId);
     const memberList = getMemberMentions(recruit[0], participants);

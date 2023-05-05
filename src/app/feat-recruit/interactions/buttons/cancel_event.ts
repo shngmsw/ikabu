@@ -4,7 +4,7 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { createMentionsFromIdList, getCommandHelpEmbed } from '../../../common/others.js';
+import { assertExistCheck, createMentionsFromIdList, exists, getCommandHelpEmbed } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js';
 import { Participant } from '../../../../db/model/participant.js';
@@ -16,23 +16,18 @@ import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_
 const logger = log4js_obj.getLogger('recruitButton');
 
 export async function cancel(interaction: ButtonInteraction, params: URLSearchParams) {
-    /** @type {Discord.Snowflake} */
+    if (!interaction.inGuild()) return;
     try {
         await interaction.update({
             components: await setButtonDisable(interaction.message, interaction),
         });
-        const guild = await interaction.guild?.fetch();
-        if (guild === undefined) {
-            throw new Error('guild cannot fetch.');
-        }
-        if (interaction.member === null) {
-            throw new Error('interaction.member is null');
-        }
+
+        assertExistCheck(interaction.guild, 'guild');
+        assertExistCheck(interaction.channel, 'channel');
+        const guild = await interaction.guild.fetch();
         const channelId = params.get('vid');
         const image1MsgId = params.get('imid1');
-        if (image1MsgId === null) {
-            throw new Error('image1 message id is null.');
-        }
+        assertExistCheck(image1MsgId, "params.get('imid1')");
 
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
@@ -82,9 +77,6 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
         const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆`);
         const buttonMessage = interaction.message;
         const recruitChannel = interaction.channel;
-        if (recruitChannel === null) {
-            throw new Error('recruitChannel is null.');
-        }
 
         if (confirmedMemberIDList.includes(member.userId)) {
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.cancel);
@@ -95,7 +87,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(image1MsgId);
 
-            if (channelId != null) {
+            if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');

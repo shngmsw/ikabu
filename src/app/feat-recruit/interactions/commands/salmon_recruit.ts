@@ -11,7 +11,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, checkTeamContest, fetchSchedule, getSalmonData, getTeamContestData } from '../../../common/apis/splatoon3_ink';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { isEmpty, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, isNotEmpty, notExists, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_canvas';
 import { recruitSalmonCanvas, ruleSalmonCanvas } from '../../canvases/salmon_canvas';
@@ -25,22 +25,19 @@ import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_
 const logger = log4js_obj.getLogger('recruit');
 
 export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
 
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
     const recruitNum = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild?.fetch();
+    const guild = await interaction.guild.fetch();
     const subcommand = options.getSubcommand() ?? 'run';
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
-    const hostMember = await searchAPIMemberById(guild, interaction.member?.user.id);
-    if (hostMember === null) {
-        throw new Error('hostMember is null.');
-    }
+    const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
     let memberCounter = recruitNum; // プレイ人数のカウンター
@@ -56,8 +53,8 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
     }
 
     // プレイヤー指定があればカウンターを増やす
-    if (user1 !== null) memberCounter++;
-    if (user2 !== null) memberCounter++;
+    if (exists(user1)) memberCounter++;
+    if (exists(user2)) memberCounter++;
 
     if (memberCounter > 4) {
         await interaction.reply({
@@ -131,21 +128,21 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
     try {
         let txt = `<@${hostMember.user.id}>` + '**たんのバイト募集**\n';
 
-        if (user1 !== null && user2 !== null) {
+        if (exists(user1) && exists(user2)) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
-        } else if (user1 !== null) {
+        } else if (exists(user1)) {
             txt = txt + `<@${user1.id}>` + 'たんの参加が既に決定しているでし！';
-        } else if (user2 !== null) {
+        } else if (exists(user2)) {
             txt = txt + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         }
 
         txt += 'よければ合流しませんか？';
 
-        if (condition == null) condition = 'なし';
+        if (notExists(condition)) condition = 'なし';
 
         await sendSalmonRun(interaction, type, data, txt, recruitNum, condition, memberCounter, hostMember, user1, user2);
     } catch (error) {
-        if (channel !== null) {
+        if (exists(channel)) {
             channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
@@ -164,13 +161,13 @@ async function sendSalmonRun(
     user1: User | null,
     user2: User | null,
 ) {
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch');
-    }
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
+    const guild = await interaction.guild.fetch();
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
     let channelName = null;
-    if (reservedChannel !== null) {
+    if (exists(reservedChannel)) {
         channelName = reservedChannel.name;
     }
 
@@ -180,11 +177,11 @@ async function sendSalmonRun(
     let participant1 = null;
     let participant2 = null;
 
-    if (user1 !== null) {
+    if (exists(user1)) {
         const member = await searchDBMemberById(guild, user1.id);
         participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
     }
-    if (user2 !== null) {
+    if (exists(user2)) {
         const member = await searchDBMemberById(guild, user2.id);
         participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
     }
@@ -233,13 +230,8 @@ async function sendSalmonRun(
         ruleBuffer = await ruleSalmonCanvas(await getTeamContestData(data, 0));
     }
 
-    if (isEmpty(recruitBuffer) || recruitBuffer === undefined) {
-        throw new Error('recruitBuffer is empty');
-    }
-
-    if (isEmpty(ruleBuffer) || ruleBuffer == null) {
-        throw new Error('ruleBuffer is empty');
-    }
+    assertExistCheck(recruitBuffer, 'recruitBuffer');
+    assertExistCheck(ruleBuffer, 'ruleBuffer');
 
     const recruit = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
@@ -248,9 +240,6 @@ async function sendSalmonRun(
 
     try {
         const recruitChannel = interaction.channel;
-        if (recruitChannel === null) {
-            throw new Error('recruitChannel is null.');
-        }
         const mention = `<@&${process.env.ROLE_ID_RECRUIT_SALMON}>`;
         const image1Message = await interaction.editReply({
             content: txt,
@@ -262,10 +251,10 @@ async function sendSalmonRun(
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);
-        if (participant1 !== null) {
+        if (exists(participant1)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, participant1);
         }
-        if (participant2 !== null) {
+        if (exists(participant2)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, participant2);
         }
 

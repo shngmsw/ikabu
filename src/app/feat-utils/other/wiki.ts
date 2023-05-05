@@ -1,16 +1,20 @@
 import wiki from 'wikijs';
-import { EmbedBuilder } from 'discord.js';
+import { CacheType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { log4js_obj } from '../../../log4js_settings';
+import { notExists } from '../../common/others';
 
-export async function handleWiki(interaction: $TSFixMe) {
+export async function handleWiki(interaction: ChatInputCommandInteraction<CacheType>) {
     const logger = log4js_obj.getLogger('interaction');
     try {
-        if (!interaction.isCommand()) return;
-        // 'インタラクションに失敗'が出ないようにするため
-        await interaction.deferReply();
-
         const { options } = interaction;
         const word = options.getString('キーワード');
+
+        if (notExists(word)) {
+            return await interaction.reply({ content: 'キーワードが読み取れなかったでし！', ephemeral: true });
+        }
+
+        // 'インタラクションに失敗'が出ないようにするため
+        await interaction.deferReply({ ephemeral: false });
         const wikipedia = wiki({ apiUrl: 'http://ja.wikipedia.org/w/api.php' });
         const data = await wikipedia.search(word);
         const page = await wikipedia.page(data.results[0]);
@@ -18,11 +22,7 @@ export async function handleWiki(interaction: $TSFixMe) {
         const imageURL = await page.mainImage();
         const url = page.url();
         if (summary === '') {
-            await interaction.followUp({
-                content: '見つからなかったでし！',
-                ephemeral: false,
-            });
-            return;
+            return await interaction.editReply('見つからなかったでし！');
         }
         const embed = new EmbedBuilder()
             .setTitle(page.raw.title)

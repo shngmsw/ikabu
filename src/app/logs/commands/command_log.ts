@@ -1,10 +1,13 @@
 import { BaseGuildTextChannel, ChatInputCommandInteraction, EmbedBuilder, MessageContextMenuCommandInteraction } from 'discord.js';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 import { sendEmbedsWebhook } from '../../common/webhook';
+import { notExists } from '../../common/others';
 
 export async function sendCommandLog(interaction: MessageContextMenuCommandInteraction | ChatInputCommandInteraction) {
+    if (!interaction.inGuild()) return;
+
     const guild = interaction.guild;
-    if (guild === null || interaction.member === null || !(interaction.channel instanceof BaseGuildTextChannel)) {
+    if (notExists(guild) || notExists(interaction.member) || !(interaction.channel instanceof BaseGuildTextChannel)) {
         return;
     }
     const authorId = interaction.member.user.id;

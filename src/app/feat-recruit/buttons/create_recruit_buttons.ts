@@ -130,7 +130,7 @@ export function messageLinkButtons(guildId: $TSFixMe, channelId: $TSFixMe, messa
 
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
         new ButtonBuilder()
-            .setLabel(label != null ? label : 'メッセージを表示')
+            .setLabel(label ?? 'メッセージを表示')
             .setStyle(ButtonStyle.Link)
             .setURL(link),
     ]);

@@ -3,7 +3,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, fetchSchedule, getAnarchyOpenData, getFesData, getRegularData } from '../../../common/apis/splatoon3_ink';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
-import { isEmpty, isNotEmpty } from '../../../common/others';
+import { assertExistCheck, exists, isEmpty, isNotEmpty } from '../../../common/others';
 import { sendRecruitModalLog } from '../../../logs/modals/recruit_modal_log';
 import { sendAnarchyMatch } from './anarchy_recruit_modal';
 import { sendFesMatch } from './fes_recruit_modal';
@@ -15,16 +15,15 @@ import { Member } from '../../../../db/model/member';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
+    const guild = await interaction.guild.fetch();
     const channel = interaction.channel;
     const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
     const participantsList = interaction.fields.getTextInputValue('pList');
@@ -109,7 +108,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
 
         await sendRegularMatch(interaction, txt, recruitNum, condition, memberCounter, hostMember, member1, member2, member3, regularData);
     } catch (error) {
-        if (channel !== null) {
+        if (exists(channel)) {
             channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
@@ -117,16 +116,15 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
 }
 
 export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
     const channel = interaction.channel;
     const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
     const user1: GuildMember | string | null = interaction.fields.getTextInputValue('participant1');
@@ -177,7 +175,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
     let member1Mention = null;
     let member2Mention = null;
 
-    if (user1 !== null && user1 !== '') {
+    if (exists(user1) && user1 !== '') {
         // ユーザータグからメンバー取得
         const member = members.find((member: $TSFixMe) => member.user.tag === user1);
         if (member !== undefined) {
@@ -189,7 +187,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
         }
     }
 
-    if (user2 !== null && user2 !== '') {
+    if (exists(user2) && user2 !== '') {
         // ユーザータグからメンバー取得
         const member = members.find((member: $TSFixMe) => member.user.tag === user2);
         if (member !== undefined) {
@@ -217,11 +215,11 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
         const anarchyData = await getAnarchyOpenData(data, type);
 
         let txt = `<@${hostMember.userId}>` + '**たんのバンカラ募集**\n';
-        if (member1Mention !== null && member2Mention !== null) {
+        if (exists(member1Mention) && exists(member2Mention)) {
             txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
-        } else if (member1Mention !== null) {
+        } else if (exists(member1Mention)) {
             txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
-        } else if (member2Mention !== null) {
+        } else if (exists(member2Mention)) {
             txt = txt + member2Mention + 'たんの参加が既に決定しているでし！';
         }
 
@@ -229,7 +227,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
 
         await sendAnarchyMatch(interaction, txt, recruitNum, condition, memberCounter, rank, hostMember, member1, member2, anarchyData);
     } catch (error) {
-        if (channel !== null) {
+        if (exists(channel)) {
             channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
@@ -237,16 +235,15 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
 }
 
 export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
     const channel = interaction.channel;
     const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
     const user1 = interaction.fields.getTextInputValue('participant1');
@@ -295,7 +292,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
         let member1Mention = null;
         let member2Mention = null;
 
-        if (user1 !== null && user1 !== '') {
+        if (exists(user1) && user1 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user1);
             if (member !== undefined) {
@@ -307,7 +304,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
             }
         }
 
-        if (user2 !== null && user2 !== '') {
+        if (exists(user2) && user2 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user2);
             if (member !== undefined) {
@@ -320,11 +317,11 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
         }
 
         let txt = `<@${hostMember.userId}>` + '**たんのバイト募集**\n';
-        if (member1Mention !== null && member2Mention !== null) {
+        if (exists(member1Mention) && exists(member2Mention)) {
             txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
-        } else if (member1Mention !== null) {
+        } else if (exists(member1Mention)) {
             txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
-        } else if (member2Mention !== null) {
+        } else if (exists(member2Mention)) {
             txt = txt + member2Mention + 'たんの参加が既に決定しているでし！';
         }
 
@@ -334,7 +331,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
 
         await sendSalmonRun(interaction, txt, recruitNum, condition, memberCounter, hostMember, member1, member2);
     } catch (error) {
-        if (channel !== null) {
+        if (exists(channel)) {
             channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
@@ -342,16 +339,15 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
 }
 
 export async function modalFesRecruit(interaction: ModalSubmitInteraction, params: $TSFixMe) {
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
     const channel = interaction.channel;
     const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
     let condition = interaction.fields.getTextInputValue('condition');
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
     const user1 = interaction.fields.getTextInputValue('participant1');
@@ -415,7 +411,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
         let member1Mention = null;
         let member2Mention = null;
 
-        if (user1 !== null && user1 !== '') {
+        if (exists(user1) && user1 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user1);
             if (member !== undefined) {
@@ -427,7 +423,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
             }
         }
 
-        if (user2 !== null && user2 !== '') {
+        if (exists(user2) && user2 !== '') {
             // ユーザータグからメンバー取得
             const member = members.find((member: $TSFixMe) => member.user.tag === user2);
             if (member !== undefined) {
@@ -440,11 +436,11 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
         }
 
         let txt = `<@${hostMember.userId}>` + '**たんのフェスマッチ募集**\n';
-        if (member1Mention !== null && member2Mention !== null) {
+        if (exists(member1Mention) && exists(member2Mention)) {
             txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
-        } else if (member1Mention !== null) {
+        } else if (exists(member1Mention)) {
             txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
-        } else if (member2Mention !== null) {
+        } else if (exists(member2Mention)) {
             txt = txt + member2Mention + 'たんの参加が既に決定しているでし！';
         }
 
@@ -452,7 +448,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
 
         await sendFesMatch(interaction, team, txt, recruitNum, condition, memberCounter, hostMember, member1, member2, fesData);
     } catch (error) {
-        if (channel !== null) {
+        if (exists(channel)) {
             channel.send('なんかエラーでてるわ');
         }
         logger.error(error);

@@ -1,65 +1,64 @@
-import { EmbedBuilder } from 'discord.js';
+import { CacheType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { Combination } from 'js-combinatorics';
 
-export async function handleKansen(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
-    // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply();
-
+export async function handleKansen(interaction: ChatInputCommandInteraction<CacheType>) {
     const { options } = interaction;
-    const how_many_times = options.getInteger('回数');
+    const numOfTimes = options.getInteger('回数') ?? 5;
 
     const resultList = [];
-    const cmb = new Combination(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], 2);
-    let tmp_watching_list = cmb.toArray();
-    if (how_many_times > 20) {
-        await interaction.followUp({
+    const combination = new Combination(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], 2);
+    let tmpSpectatorList = combination.toArray();
+    if (numOfTimes > 20) {
+        await interaction.reply({
             content: '20回以下じゃないとダメでし！',
             ephemeral: true,
         });
         return;
     }
-    if (how_many_times <= 0) {
-        await interaction.followUp({
+    if (numOfTimes <= 0) {
+        await interaction.reply({
             content: '1以上じゃないとダメでし！',
             ephemeral: true,
         });
         return;
     }
 
-    for (let i = 0; i < how_many_times; i++) {
-        // next watchersが一人になったらリストを再生成
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+
+    for (let i = 0; i < numOfTimes; i++) {
+        // next spectatorsが一人になったらリストを再生成
         let baseNum;
-        let choose_comb: string[];
-        if (tmp_watching_list.length <= 1) {
+        let selectedComb: string[];
+        if (tmpSpectatorList.length <= 1) {
             baseNum = 0;
-            choose_comb = tmp_watching_list[baseNum];
-            resultList.push(i + 1 + '回目：' + choose_comb);
-            tmp_watching_list = cmb.toArray();
+            selectedComb = tmpSpectatorList[baseNum];
+            resultList.push(i + 1 + '回目：' + selectedComb);
+            tmpSpectatorList = combination.toArray();
         } else {
-            baseNum = Math.floor(Math.random() * tmp_watching_list.length);
-            choose_comb = tmp_watching_list[baseNum];
+            baseNum = Math.floor(Math.random() * tmpSpectatorList.length);
+            selectedComb = tmpSpectatorList[baseNum];
 
-            resultList.push(i + 1 + '回目：' + choose_comb);
+            resultList.push(i + 1 + '回目：' + selectedComb);
 
-            // now watching usersをnext watchersから取り除く
-            tmp_watching_list = tmp_watching_list.filter(function exclude_previous_watcher(players: $TSFixMe) {
-                if (players[0] != choose_comb[0]) {
+            // now spectators をnext spectatorsから取り除く
+            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(players: string[]) {
+                if (players[0] != selectedComb[0]) {
                     return players;
                 }
             });
-            tmp_watching_list = tmp_watching_list.filter(function exclude_previous_watcher(players: $TSFixMe) {
-                if (players[1] != choose_comb[0]) {
+            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(players: string[]) {
+                if (players[1] != selectedComb[0]) {
                     return players;
                 }
             });
-            tmp_watching_list = tmp_watching_list.filter(function exclude_previous_watcher(players: $TSFixMe) {
-                if (players[0] != choose_comb[1]) {
+            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(players: string[]) {
+                if (players[0] != selectedComb[1]) {
                     return players;
                 }
             });
-            tmp_watching_list = tmp_watching_list.filter(function exclude_previous_watcher(players: $TSFixMe) {
-                if (players[1] != choose_comb[1]) {
+            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(players: string[]) {
+                if (players[1] != selectedComb[1]) {
                     return players;
                 }
             });

@@ -3,7 +3,7 @@ import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { datetimeDiff, getCommandHelpEmbed } from '../../../common/others.js';
+import { assertExistCheck, datetimeDiff, getCommandHelpEmbed } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
 import { createNewRecruitButton } from '../../buttons/create_recruit_buttons';
 import { Participant } from '../../../../db/model/participant.js';
@@ -14,19 +14,16 @@ import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_
 const logger = log4js_obj.getLogger('recruitButton');
 
 export async function closeNotify(interaction: ButtonInteraction) {
-    /** @type {Discord.Snowflake} */
+    if (!interaction.inGuild()) return;
     try {
         await interaction.update({
             components: await setButtonDisable(interaction.message, interaction),
         });
 
-        const guild = await interaction.guild?.fetch();
-        if (guild === undefined) {
-            throw new Error('guild cannot fetch.');
-        }
-        if (interaction.member === null) {
-            throw new Error('interaction.member is null');
-        }
+        assertExistCheck(interaction.guild, 'guild');
+        assertExistCheck(interaction.channel, 'channel');
+
+        const guild = await interaction.guild.fetch();
         const embedMessageId = interaction.message.id;
 
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
@@ -77,9 +74,6 @@ export async function closeNotify(interaction: ButtonInteraction) {
         const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆`);
         const buttonMessage = interaction.message;
         const recruitChannel = interaction.channel;
-        if (recruitChannel === null) {
-            throw new Error('recruitChannel is null.');
-        }
 
         if (member.userId === recruiterId) {
             const memberList = getMemberMentions(recruitData[0], participantsData);

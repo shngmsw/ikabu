@@ -6,6 +6,8 @@ import { setVariables } from './set_variables';
 import { showVariables } from './show_variables';
 
 export async function variablesHandler(interaction: $TSFixMe) {
+    if (!interaction.inGuild()) return;
+
     await interaction.deferReply();
 
     if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {

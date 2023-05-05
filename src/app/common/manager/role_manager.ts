@@ -1,4 +1,5 @@
 import { log4js_obj } from '../../../log4js_settings';
+import { exists, notExists } from '../others';
 const logger = log4js_obj.getLogger('RoleManager');
 
 /**
@@ -13,8 +14,9 @@ export async function createRole(guild: $TSFixMe, roleName: $TSFixMe) {
         return null;
     }
 
-    if ((await searchRoleIdByName(guild, roleName)) != null) {
-        return searchRoleIdByName(guild, roleName);
+    const roleId = await searchRoleIdByName(guild, roleName);
+    if (exists(roleId)) {
+        return roleId;
     } else {
         const role = await guild.roles.create({ name: roleName });
         return role.id;
@@ -31,7 +33,7 @@ export async function searchRoleIdByName(guild: $TSFixMe, roleName: $TSFixMe) {
     const roles = await guild.roles.fetch();
     const role = roles.find((role: $TSFixMe) => role.name === roleName);
 
-    if (role != null) {
+    if (exists(role)) {
         return role.id;
     } else {
         return null;
@@ -67,7 +69,7 @@ export async function searchRoleById(guild: $TSFixMe, roleId: $TSFixMe) {
  * @returns セットしたカラーコード
  */
 export async function setColorToRole(guild: $TSFixMe, role: $TSFixMe, color?: string) {
-    if (color != null) {
+    if (exists(color)) {
         await role.setColor(color);
         await guild.roles.fetch();
         return color;
@@ -113,7 +115,7 @@ export async function setColorToRole(guild: $TSFixMe, role: $TSFixMe, color?: st
  * @returns メンバーID
  */
 export async function setRoleToMember(guild: $TSFixMe, roleId: $TSFixMe, memberId: $TSFixMe) {
-    if (memberId == null || memberId == '') {
+    if (notExists(memberId) || memberId == '') {
         return null;
     } else {
         let member;
@@ -137,7 +139,7 @@ export async function setRoleToMember(guild: $TSFixMe, roleId: $TSFixMe, memberI
             member = members.find((member: $TSFixMe) => member.user.tag === memberId);
         }
 
-        if (member != null) {
+        if (exists(member)) {
             member.roles.add(await guild.roles.fetch(roleId));
             return member.id;
         } else {

@@ -2,17 +2,21 @@ import { log4js_obj } from '../../../log4js_settings';
 
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { setTimeout } from 'timers/promises';
+import { exists, notExists } from '../../common/others';
 const logger = log4js_obj.getLogger('interaction');
 
 /*
  * スラコマ打たれたときの動作
  */
 export async function voiceLocker(interaction: $TSFixMe) {
+    if (!interaction.inGuild()) return;
+
     const author = interaction.member;
     const channel = interaction.channel;
+    const limitNum = interaction.options.getInteger('人数');
 
     // ボイスチャンネル未接続or違うボイスチャンネル接続中だと弾く
-    if (author.voice.channel == null || author.voice.channel.id != channel.id) {
+    if (notExists(author.voice.channel) || author.voice.channel.id != channel.id) {
         await interaction.reply({
             content: '接続中のボイスチャンネルでコマンドを打つでし！',
             ephemeral: true,
@@ -23,8 +27,7 @@ export async function voiceLocker(interaction: $TSFixMe) {
     let channelState;
 
     // optionの判定
-    if (interaction.options.getInteger('人数') != null) {
-        const limitNum = interaction.options.getInteger('人数');
+    if (exists(limitNum)) {
         if (limitNum < 0 || limitNum > 99) {
             await interaction.reply({
                 content: '制限人数は0～99の間で指定するでし！',
@@ -73,7 +76,7 @@ export async function voiceLockerUpdate(interaction: $TSFixMe) {
     const voiceMemberNum = channel.members.size;
 
     // ボイスチャンネル未接続or違うボイスチャンネル接続中だと弾く
-    if (member.voice.channel == null || member.voice.channel.id != channel.id) {
+    if (notExists(member.voice.channel) || member.voice.channel.id != channel.id) {
         await interaction.reply({
             content: '対象のボイスチャンネルに接続する必要があるでし！',
             ephemeral: true,

@@ -7,21 +7,20 @@ import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canva
 import { sendEditRecruitLog } from '../../../logs/modals/recruit_modal_log';
 import { regenerateEmbed } from '../../embeds/regenerate_embed';
 import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { assertExistCheck, notExists } from '../../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
 export async function recruitEdit(interaction: ModalSubmitInteraction, params: URLSearchParams) {
     try {
         const messageId = params.get('mid');
-        if (messageId === null) {
-            throw new Error('messageId from Params is null.');
-        }
+        assertExistCheck(messageId, "params.get('mid')");
 
         interaction.deferReply({ ephemeral: true });
-        const guild = await interaction.guild?.fetch();
-        if (guild === undefined) {
-            throw new Error('guild cannot fetch.');
-        }
+        if (!interaction.inGuild()) return;
+
+        assertExistCheck(interaction.guild, 'guild');
+        const guild = await interaction.guild.fetch();
 
         const oldRecruitData = await RecruitService.getRecruit(guild.id, messageId);
 
@@ -48,7 +47,7 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
             replyMessage += '\n**メンバーリストを更新するには参加ボタンを押すでし！**';
         }
 
-        if (interaction.channel === null) {
+        if (notExists(interaction.channel)) {
             return interaction.editReply('エラーでし！');
         }
 
