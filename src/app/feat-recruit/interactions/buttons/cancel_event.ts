@@ -4,7 +4,7 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, createMentionsFromIdList, getCommandHelpEmbed } from '../../../common/others.js';
+import { assertExistCheck, createMentionsFromIdList, exists, getCommandHelpEmbed } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js';
 import { Participant } from '../../../../db/model/participant.js';
@@ -87,7 +87,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(image1MsgId);
 
-            if (channelId != null) {
+            if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
                 channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
                 channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');

@@ -1,7 +1,7 @@
 import Canvas from 'canvas';
 import path from 'path';
 import Discord, { ChatInputCommandInteraction } from 'discord.js';
-import { assertExistCheck, dateDiff } from '../../common/others';
+import { assertExistCheck, dateDiff, notExists } from '../../common/others';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 const backgroundImgPaths = [
     './images/over4years.jpg',
@@ -27,7 +27,7 @@ export async function handleIkabuExperience(interaction: ChatInputCommandInterac
     const joinDate = member.joinedAt;
     const today = new Date();
 
-    if (joinDate === null) {
+    if (notExists(joinDate)) {
         return await interaction.editReply('エラーでし！入部日のデータが読み取れないでし！');
     }
 

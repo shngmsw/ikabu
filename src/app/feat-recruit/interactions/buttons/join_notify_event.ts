@@ -4,7 +4,7 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, isNotEmpty, sleep } from '../../../common/others.js';
+import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
 import { messageLinkButtons } from '../../buttons/create_recruit_buttons';
 import { Participant } from '../../../../db/model/participant.js';
@@ -139,7 +139,7 @@ export async function joinNotify(interaction: ButtonInteraction) {
             });
 
             // 5分後にホストへの通知を削除
-            if (notifyMessage !== null) {
+            if (exists(notifyMessage)) {
                 await sleep(300);
                 try {
                     notifyMessage.delete();

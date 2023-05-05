@@ -1,6 +1,7 @@
 import { disableLimit } from '../feat-utils/voice/voice_locker';
 import { autokill } from '../feat-utils/voice/tts/discordjs_voice';
 import { log4js_obj } from '../../log4js_settings';
+import { exists, notExists } from '../common/others';
 
 const logger = log4js_obj.getLogger('voiceStateUpdate');
 
@@ -8,10 +9,10 @@ export async function call(oldState: $TSFixMe, newState: $TSFixMe) {
     try {
         if (oldState.channelId === newState.channelId) {
             // ここはミュートなどの動作を行ったときに発火する場所
-        } else if (oldState.channelId === null && newState.channelId != null) {
+        } else if (notExists(oldState.channelId) && exists(newState.channelId)) {
             // ここはconnectしたときに発火する場所
             deleteLimitPermission(newState);
-        } else if (oldState.channelId != null && newState.channelId === null) {
+        } else if (exists(oldState.channelId) && notExists(newState.channelId)) {
             // ここはdisconnectしたときに発火する場所
             disableLimit(oldState);
             autokill(oldState);

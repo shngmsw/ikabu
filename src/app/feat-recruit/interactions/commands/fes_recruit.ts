@@ -15,7 +15,7 @@ import { setButtonDisable } from '../../../common/button_components';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleById, searchRoleIdByName } from '../../../common/manager/role_manager';
-import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, notExists, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitFesCanvas, ruleFesCanvas } from '../../canvases/fes_canvas';
 import { getMemberMentions } from '../buttons/other_events';
@@ -123,10 +123,10 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheT
         let txt = `<@${hostMember.user.id}>` + '**たんのフェスマッチ募集**\n';
         const members = [];
 
-        if (user1 !== null) {
+        if (exists(user1)) {
             members.push(`<@${user1.id}>` + 'たん');
         }
-        if (user2 !== null) {
+        if (exists(user2)) {
             members.push(`<@${user2.id}>` + 'たん');
         }
 
@@ -143,11 +143,11 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheT
 
         txt += 'よければ合流しませんか？';
 
-        if (condition == null) condition = 'なし';
+        if (notExists(condition)) condition = 'なし';
 
         await sendFesMatch(interaction, team, txt, recruitNum, condition, memberCounter, hostMember, user1, user2, fesData);
     } catch (error) {
-        if (channel !== null) {
+        if (exists(channel)) {
             channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
@@ -171,7 +171,7 @@ async function sendFesMatch(
     const mentionId = await searchRoleIdByName(guild, team);
     const teamRole = await searchRoleById(guild, mentionId);
 
-    if (mentionId == null) {
+    if (notExists(mentionId)) {
         await interaction.editReply({
             content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
         });
@@ -180,7 +180,7 @@ async function sendFesMatch(
 
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
     let channelName = null;
-    if (reservedChannel !== null) {
+    if (exists(reservedChannel)) {
         channelName = reservedChannel.name;
     }
 
@@ -190,11 +190,11 @@ async function sendFesMatch(
     let participant1 = null;
     let participant2 = null;
 
-    if (user1 !== null) {
+    if (exists(user1)) {
         const member = await searchDBMemberById(guild, user1.id);
         participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
     }
-    if (user2 !== null) {
+    if (exists(user2)) {
         const member = await searchDBMemberById(guild, user2.id);
         participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
     }
@@ -244,10 +244,10 @@ async function sendFesMatch(
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);
-        if (participant1 !== null) {
+        if (exists(participant1)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, participant1);
         }
-        if (participant2 !== null) {
+        if (exists(participant2)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, participant2);
         }
 
@@ -320,9 +320,7 @@ async function sendFesMatch(
         const memberList = getMemberMentions(recruitData[0], participants);
         const hostMention = `<@${hostMember.user.id}>`;
 
-        if (interaction.channelId !== null) {
-            await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
-        }
+        await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
 
         // DBから募集情報削除
         await RecruitService.deleteRecruit(guild.id, image1Message.id);

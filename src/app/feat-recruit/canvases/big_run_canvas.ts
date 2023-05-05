@@ -6,6 +6,7 @@ import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { Participant } from '../../../db/model/participant.js';
 import { RecruitOpCode } from './regenerate_canvas.js';
+import { notExists } from '../../common/others.js';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -65,7 +66,7 @@ export async function recruitBigRunCanvas(
 
         for (let i = 0; i < 4; i++) {
             if (count >= i + 2) {
-                const userUrl = memberIcons[i] != null ? memberIcons[i] : blankAvatarUrl;
+                const userUrl = memberIcons[i] ?? blankAvatarUrl;
                 const userImage = await Canvas.loadImage(userUrl);
                 recruitCtx.save();
                 drawArcImage(recruitCtx, userImage, i * 118 + 158, 120, 50);
@@ -129,7 +130,7 @@ export async function recruitBigRunCanvas(
         }
 
         let channelString;
-        if (channelName === null) {
+        if (notExists(channelName)) {
             channelString = '🔉 VC指定なし';
         } else if (channelName === '[簡易版募集]') {
             channelString = channelName;
@@ -170,7 +171,7 @@ export async function recruitBigRunCanvas(
 export async function ruleBigRunCanvas(data: $TSFixMe) {
     try {
         const salmonData = await getBigRunData(data, 0);
-        if (salmonData == null) return null;
+        if (notExists(salmonData)) return null;
 
         const datetime =
             formatDatetime(salmonData.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(salmonData.endTime, dateformat.mdwhm);

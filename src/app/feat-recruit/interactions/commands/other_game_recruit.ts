@@ -14,7 +14,7 @@ import {
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, recruitActionRow, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { RecruitService } from '../../../../db/recruit_service';
 import { ParticipantService } from '../../../../db/participants_service';
@@ -230,7 +230,7 @@ async function sendOtherGames(
         .setTimestamp()
         .setThumbnail(logo);
 
-    if (reserveChannel != null) {
+    if (exists(reserveChannel)) {
         embed.addFields({
             name: '使用チャンネル',
             value: '🔉 ' + reserveChannel.name,

@@ -11,7 +11,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, checkTeamContest, fetchSchedule, getSalmonData, getTeamContestData } from '../../../common/apis/splatoon3_ink';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, isNotEmpty, notExists, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_canvas';
 import { recruitSalmonCanvas, ruleSalmonCanvas } from '../../canvases/salmon_canvas';
@@ -53,8 +53,8 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
     }
 
     // プレイヤー指定があればカウンターを増やす
-    if (user1 !== null) memberCounter++;
-    if (user2 !== null) memberCounter++;
+    if (exists(user1)) memberCounter++;
+    if (exists(user2)) memberCounter++;
 
     if (memberCounter > 4) {
         await interaction.reply({
@@ -128,21 +128,21 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
     try {
         let txt = `<@${hostMember.user.id}>` + '**たんのバイト募集**\n';
 
-        if (user1 !== null && user2 !== null) {
+        if (exists(user1) && exists(user2)) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
-        } else if (user1 !== null) {
+        } else if (exists(user1)) {
             txt = txt + `<@${user1.id}>` + 'たんの参加が既に決定しているでし！';
-        } else if (user2 !== null) {
+        } else if (exists(user2)) {
             txt = txt + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         }
 
         txt += 'よければ合流しませんか？';
 
-        if (condition == null) condition = 'なし';
+        if (notExists(condition)) condition = 'なし';
 
         await sendSalmonRun(interaction, type, data, txt, recruitNum, condition, memberCounter, hostMember, user1, user2);
     } catch (error) {
-        if (channel !== null) {
+        if (exists(channel)) {
             channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
@@ -167,7 +167,7 @@ async function sendSalmonRun(
     const guild = await interaction.guild.fetch();
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
     let channelName = null;
-    if (reservedChannel !== null) {
+    if (exists(reservedChannel)) {
         channelName = reservedChannel.name;
     }
 
@@ -177,11 +177,11 @@ async function sendSalmonRun(
     let participant1 = null;
     let participant2 = null;
 
-    if (user1 !== null) {
+    if (exists(user1)) {
         const member = await searchDBMemberById(guild, user1.id);
         participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
     }
-    if (user2 !== null) {
+    if (exists(user2)) {
         const member = await searchDBMemberById(guild, user2.id);
         participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
     }
@@ -251,10 +251,10 @@ async function sendSalmonRun(
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);
-        if (participant1 !== null) {
+        if (exists(participant1)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, participant1);
         }
-        if (participant2 !== null) {
+        if (exists(participant2)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, participant2);
         }
 

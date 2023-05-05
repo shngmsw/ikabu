@@ -4,7 +4,7 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, createMentionsFromIdList, isNotEmpty, sleep } from '../../../common/others.js';
+import { assertExistCheck, createMentionsFromIdList, exists, isNotEmpty, notExists, sleep } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { channelLinkButtons, messageLinkButtons } from '../../buttons/create_recruit_buttons.js';
 import { Participant } from '../../../../db/model/participant.js';
@@ -139,7 +139,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
                 await sendStickyMessage(guild, recruitChannel.id, content);
             }
 
-            if (channelId === null) {
+            if (notExists(channelId)) {
                 await interaction.followUp({
                     content: `<@${recruiterId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
                     // components: [channelLinkButtons(interaction.guildId, thread_message.url)], TODO: スレッド内へのリンクボタンを作る
@@ -159,7 +159,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             });
 
             // 5分後にホストへの通知を削除
-            if (notifyMessage !== null) {
+            if (exists(notifyMessage)) {
                 await sleep(300);
                 try {
                     notifyMessage.delete();

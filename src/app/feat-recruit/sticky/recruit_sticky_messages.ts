@@ -6,7 +6,7 @@ import { ParticipantService } from '../../../db/participants_service';
 import { RecruitService } from '../../../db/recruit_service';
 import { RecruitType } from '../../../db/model/recruit';
 import { log4js_obj } from '../../../log4js_settings';
-import { assertExistCheck } from '../../common/others';
+import { assertExistCheck, exists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('message');
 
@@ -89,7 +89,7 @@ export async function availableRecruitString(guild: Guild, channelId: string, re
         }
         const message = await searchMessageById(guild, channelId, recruit.messageId);
         const recruiter = participantsData[0];
-        if (message !== null && participantsData.length !== 0) {
+        if (exists(message) && participantsData.length !== 0) {
             // 別チャンネルで同じタイプの募集をしているときmessage = nullになる
             if (recruit.recruitNum !== -1) {
                 recruits = recruits + `\n\`${recruiter.displayName}\`: ${message.url} \`[${applicantList.length}/${recruit.recruitNum}\`]`;
@@ -114,7 +114,7 @@ export async function sendStickyMessage(guild: Guild, channelId: string, content
     const lastStickyMsgId = await StickyService.getMessageId(guild.id, channelId);
     if (lastStickyMsgId.length !== 0) {
         const lastStickyMsg = await searchMessageById(guild, channelId, lastStickyMsgId[0]);
-        if (lastStickyMsg !== null) {
+        if (exists(lastStickyMsg)) {
             await lastStickyMsg.delete();
         }
     }

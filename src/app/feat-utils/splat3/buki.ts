@@ -2,7 +2,7 @@ import { CacheType, ChatInputCommandInteraction, EmbedBuilder, User } from 'disc
 import fetch from 'node-fetch';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchDBMemberById } from '../../common/manager/member_manager';
-import { assertExistCheck, randomSelect } from '../../common/others';
+import { assertExistCheck, exists, randomSelect } from '../../common/others';
 import { Member } from '../../../db/model/member';
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 
@@ -34,7 +34,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
         }
 
         const bukis = weapons.filter(function (value: $TSFixMe) {
-            if (bukiType != null) {
+            if (exists(bukiType)) {
                 // 特定のbukiTypeが指定されているとき
                 return bukiType === value.type.key;
             } else if (!~value.name.ja_JP.indexOf('ヒーロー')) {

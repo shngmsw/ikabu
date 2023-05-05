@@ -2,7 +2,7 @@ import { AttachmentBuilder, BaseGuildTextChannel, ModalSubmitInteraction } from 
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, fetchSchedule, getSalmonData } from '../../../common/apis/splatoon3_ink';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_canvas';
 import { recruitSalmonCanvas, ruleSalmonCanvas } from '../../canvases/salmon_canvas';
@@ -110,10 +110,10 @@ export async function sendSalmonRun(
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(image1Message.id, recruiter);
-        if (attendee1 !== null) {
+        if (exists(attendee1)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, attendee1);
         }
-        if (attendee2 !== null) {
+        if (exists(attendee2)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, attendee2);
         }
 

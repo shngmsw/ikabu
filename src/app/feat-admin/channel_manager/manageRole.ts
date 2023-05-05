@@ -3,7 +3,7 @@ import { AttachmentBuilder, PermissionsBitField } from 'discord.js';
 import fs from 'fs';
 import { log4js_obj } from '../../../log4js_settings';
 import { createRole, searchRoleById, searchRoleIdByName, setColorToRole } from '../../common/manager/role_manager';
-import { isEmpty, isNotEmpty } from '../../common/others';
+import { exists, isEmpty, isNotEmpty, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('RoleManager');
 
@@ -69,10 +69,10 @@ export async function handleDeleteRole(interaction: $TSFixMe) {
     const roleId2 = options.getMentionable('ロール名2');
     const roleId3 = options.getMentionable('ロール名3');
     roleIdList.push(roleId1.id);
-    if (roleId2 != null) {
+    if (exists(roleId2)) {
         roleIdList.push(roleId2.id);
     }
-    if (roleId3 != null) {
+    if (exists(roleId3)) {
         roleIdList.push(roleId3.id);
     }
 
@@ -95,7 +95,7 @@ export async function handleDeleteRole(interaction: $TSFixMe) {
             let roleName;
             const role = await searchRoleById(guild, roleIdList[i]);
             // if role ID is not found, consider as an error.
-            if (role == null) {
+            if (notExists(role)) {
                 roleName = 'NOT_FOUND!';
             } else {
                 roleName = role.name;

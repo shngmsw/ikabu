@@ -2,12 +2,16 @@
 import {
     ActivityType,
     AutocompleteInteraction,
+    BaseGuildTextChannel,
     CacheType,
     Client,
     GatewayIntentBits,
     GuildMember,
     Interaction,
+    PartialGuildMember,
+    PartialUser,
     Partials,
+    User,
 } from 'discord.js';
 import { DBCommon } from '../db/db';
 import { MembersService } from '../db/members_service';
@@ -25,7 +29,7 @@ import * as modal_handler from './handlers/modal_handler';
 import * as context_handler from './handlers/context_handler';
 import * as command_handler from './handlers/command_handler';
 import * as vcState_update_handler from './handlers/vcState_update_handler';
-import { isNotEmpty } from './common/others';
+import { assertExistCheck, exists, isNotEmpty, notExists } from './common/others';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
 import { registerSlashCommands } from '../register';
@@ -58,7 +62,7 @@ client.on('messageCreate', async (msg: $TSFixMe) => {
 client.on('guildMemberAdd', async (member: GuildMember) => {
     try {
         const guild = await member.guild.fetch();
-        if (client.user == null) {
+        if (notExists(client.user)) {
             throw new Error('client.user is null');
         }
         if (guild.id === process.env.SERVER_ID) {
@@ -73,19 +77,19 @@ client.on('guildMemberAdd', async (member: GuildMember) => {
     }
 });
 
-client.on('guildMemberRemove', async (member: $TSFixMe) => {
+client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) => {
     try {
         const tag = member.user.tag;
-        const period = Math.round((Date.now() - member.joinedAt) / 86400000); // サーバーに居た期間を日数にして計算
+        assertExistCheck(member.joinedAt, 'joinedAt');
+        const period = Math.round((Date.now() - Number(member.joinedAt)) / 86400000); // サーバーに居た期間を日数にして計算
+        assertExistCheck(process.env.CHANNEL_ID_RETIRE_LOG);
         const retireLog = member.guild.channels.cache.get(process.env.CHANNEL_ID_RETIRE_LOG);
-        if (retireLog != null) {
+        if (retireLog instanceof BaseGuildTextChannel) {
             retireLog.send(`${tag} さんが退部しました。入部日: ${member.joinedAt} 入部期間：${period}日間`);
         }
         const guild = await member.guild.fetch();
         if (guild.id === process.env.SERVER_ID) {
-            if (client.user == null) {
-                throw new Error('client.user is null');
-            }
+            assertExistCheck(client.user, 'client.user');
             client.user.setActivity(`${guild.memberCount}人`, {
                 type: ActivityType.Playing,
             });
@@ -96,17 +100,16 @@ client.on('guildMemberRemove', async (member: $TSFixMe) => {
     }
 });
 
-client.on('guildMemberUpdate', async (oldMember, newMember) => {
+client.on('guildMemberUpdate', async (oldMember: GuildMember | PartialGuildMember, newMember: GuildMember) => {
     try {
         const guild = await newMember.guild.fetch();
         const userId = newMember.user.id;
-        let member = newMember;
+        let member: GuildMember | null = newMember;
 
         member = await searchAPIMemberById(guild, userId);
 
-        if (member.joinedAt === null) {
-            throw new Error('joinedAt is null');
-        }
+        assertExistCheck(member, 'member');
+        assertExistCheck(member.joinedAt, 'joinedAt');
 
         const updateMember = new Member(
             guild.id,
@@ -128,7 +131,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     }
 });
 
-client.on('userUpdate', async (oldUser, newUser) => {
+client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
     try {
         const loggerUU = log4js_obj.getLogger('userUpdate');
 
@@ -137,16 +140,11 @@ client.on('userUpdate', async (oldUser, newUser) => {
         const guildIdList = await MembersService.getMemberGuildsByUserId(userId);
         for (const guildId of guildIdList) {
             const guild = await client.guilds.fetch(guildId);
-            if (guild === null) {
-                throw new Error('guild is null');
-            }
+            assertExistCheck(guild, 'guild');
 
             const member = await searchAPIMemberById(guild, userId);
 
-            if (member === null) {
-                loggerUU.error('member cannot fetch!');
-                continue;
-            }
+            assertExistCheck(member, 'member');
 
             const updateMember = new Member(
                 guildId,
@@ -167,9 +165,7 @@ client.on('userUpdate', async (oldUser, newUser) => {
 
 client.on('ready', async () => {
     try {
-        if (client.user == null) {
-            throw new Error('client.user is null');
-        }
+        assertExistCheck(client.user);
         logger.info(`Logged in as ${client.user.tag}!`);
         // ready後にready以前に実行されたinteractionのinteractionCreateがemitされるが、
         // そのときにはinteractionがtimeoutしておりfollowupで失敗することがよくある。
@@ -185,9 +181,7 @@ client.on('ready', async () => {
         await MessageCountService.createTableIfNotExists();
         await TeamDividerService.createTableIfNotExists();
         const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID || '');
-        if (guild == null) {
-            throw new Error('guild is null');
-        }
+        assertExistCheck(guild);
         client.user.setActivity(`${guild.memberCount}人`, {
             type: ActivityType.Playing,
         });

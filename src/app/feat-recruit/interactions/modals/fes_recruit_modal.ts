@@ -4,7 +4,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleById, searchRoleIdByName } from '../../../common/manager/role_manager';
-import { assertExistCheck, getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, notExists, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitFesCanvas, ruleFesCanvas } from '../../canvases/fes_canvas';
 import { getMemberMentions } from '../buttons/other_events';
@@ -36,7 +36,7 @@ export async function sendFesMatch(
     const mentionId = await searchRoleIdByName(guild, team);
     const teamRole = await searchRoleById(guild, mentionId);
 
-    if (mentionId == null) {
+    if (notExists(mentionId)) {
         await interaction.editReply({
             content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
         });
@@ -99,10 +99,10 @@ export async function sendFesMatch(
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(image1Message.id, recruiter);
-        if (attendee1 !== null) {
+        if (exists(attendee1)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, attendee1);
         }
-        if (attendee2 !== null) {
+        if (exists(attendee2)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, attendee2);
         }
 
@@ -149,9 +149,7 @@ export async function sendFesMatch(
         const memberList = getMemberMentions(recruitData[0], participants);
         const hostMention = `<@${member.userId}>`;
 
-        if (interaction.channelId !== null) {
-            await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
-        }
+        await regenerateCanvas(guild, recruitChannel.id, image1Message.id, RecruitOpCode.close);
 
         // DBから募集情報削除
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
