@@ -7,7 +7,7 @@ import {
     AudioPlayerStatus,
     generateDependencyReport,
 } from '@discordjs/voice';
-import { isNotEmpty } from '../../../common/others';
+import { isNotEmpty, notExists } from '../../../common/others';
 import { log4js_obj } from '../../../../log4js_settings';
 const infoLogger = log4js_obj.getLogger('info');
 const interactionLogger = log4js_obj.getLogger('interaction');
@@ -118,7 +118,7 @@ export async function play(msg: $TSFixMe) {
         if (isNotEmpty(subscription) && channels.get(guildId) === channelId) {
             // メッセージから音声ファイルを取得
             const buffer = await mode_api(msg);
-            if (buffer == null) return;
+            if (notExists(buffer)) return;
             const stream = bufferToStream(buffer);
 
             // ボイスチャットセッションの音声プレイヤーに音声ファイルのURLを指定して再生させます。

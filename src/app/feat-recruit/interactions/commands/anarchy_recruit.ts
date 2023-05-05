@@ -16,7 +16,7 @@ import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleIdByName } from '../../../common/manager/role_manager';
-import { getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, notExists, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
 import { getMemberMentions } from '../buttons/other_events';
@@ -29,7 +29,10 @@ import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_
 const logger = log4js_obj.getLogger('recruit');
 
 export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
 
     const options = interaction.options;
     const channel = interaction.channel;
@@ -37,8 +40,8 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
     let rank = options.getString('募集ウデマエ');
     const recruitNum = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild?.fetch();
-    const hostMember = await searchAPIMemberById(guild, interaction.member?.user.id);
+    const guild = await interaction.guild.fetch();
+    const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
     let memberCounter = recruitNum; // プレイ人数のカウンター
@@ -61,8 +64,8 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
     }
 
     // プレイヤー指定があればカウンターを増やす
-    if (user1 !== null) memberCounter++;
-    if (user2 !== null) memberCounter++;
+    if (exists(user1)) memberCounter++;
+    if (exists(user2)) memberCounter++;
 
     if (memberCounter > 4) {
         await interaction.reply({
@@ -109,9 +112,9 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
 
     let mention = `<@&${process.env.ROLE_ID_RECRUIT_ANARCHY}>`;
     // 募集条件がランクの場合はウデマエロールにメンション
-    if (rank !== undefined && rank !== null) {
+    if (exists(rank)) {
         const mentionId = await searchRoleIdByName(guild, rank);
-        if (mentionId == null) {
+        if (notExists(mentionId)) {
             await interaction.editReply({
                 content: '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
             });
@@ -135,15 +138,15 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
         const anarchyData = await getAnarchyOpenData(data, type);
 
         let txt = `<@${hostMember.user.id}>` + '**たんのバンカラ募集**\n';
-        if (user1 !== null && user2 !== null) {
+        if (exists(user1) && exists(user2)) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
-        } else if (user1 !== null) {
+        } else if (exists(user1)) {
             txt = txt + `<@${user1.id}>` + 'たんの参加が既に決定しているでし！';
-        } else if (user2 !== null) {
+        } else if (exists(user2)) {
             txt = txt + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         }
 
-        if (condition == null) condition = 'なし';
+        if (notExists(condition)) condition = 'なし';
 
         await sendAnarchyMatch(
             interaction,
@@ -159,7 +162,7 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
             anarchyData,
         );
     } catch (error) {
-        if (channel !== null) {
+        if (exists(channel)) {
             channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
@@ -223,13 +226,13 @@ async function sendAnarchyMatch(
             break;
     }
 
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch');
-    }
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
+    const guild = await interaction.guild.fetch();
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
     let channelName = null;
-    if (reservedChannel !== null) {
+    if (exists(reservedChannel)) {
         channelName = reservedChannel.name;
     }
 
@@ -241,11 +244,11 @@ async function sendAnarchyMatch(
     let participant1 = null;
     let participant2 = null;
 
-    if (user1 !== null) {
+    if (exists(user1)) {
         const member = await searchDBMemberById(guild, user1.id);
         participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
     }
-    if (user2 !== null) {
+    if (exists(user2)) {
         const member = await searchDBMemberById(guild, user2.id);
         participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
     }
@@ -270,10 +273,6 @@ async function sendAnarchyMatch(
 
     try {
         const recruitChannel = interaction.channel;
-
-        if (recruitChannel === null) {
-            throw new Error('recruitChannel is null.');
-        }
         const image1Message = await interaction.editReply({
             content: txt,
             files: [recruit],
@@ -293,10 +292,10 @@ async function sendAnarchyMatch(
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);
-        if (participant1 !== null) {
+        if (exists(participant1)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, participant1);
         }
-        if (participant2 !== null) {
+        if (exists(participant2)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, participant2);
         }
 
@@ -370,9 +369,7 @@ async function sendAnarchyMatch(
         const memberList = getMemberMentions(recruitData[0], participants);
         const hostMention = `<@${hostMember.user.id}>`;
 
-        if (interaction.channelId !== null) {
-            await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
-        }
+        await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
 
         // DBから募集情報削除
         await RecruitService.deleteRecruit(guild.id, image1Message.id);

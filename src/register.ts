@@ -12,7 +12,8 @@ const voiceLock = new SlashCommandBuilder()
             .addIntegerOption((option: $TSFixMe) =>
                 option.setName('人数').setDescription('制限人数を指定する場合は1～99で指定してください。').setRequired(false),
             ),
-    );
+    )
+    .setDMPermission(false);
 
 const friendCode = new SlashCommandBuilder()
     .setName(commandNames.friend_code)
@@ -63,7 +64,8 @@ const vpick = new SlashCommandBuilder()
     .setDescription('VCに接続しているメンバーからランダムに抽出します。')
     .addIntegerOption((option: $TSFixMe) =>
         option.setName('ピックする人数').setDescription('2人以上ピックしたい場合は指定してください。').setRequired(false),
-    );
+    )
+    .setDMPermission(false);
 
 const buki = new SlashCommandBuilder()
     .setName(commandNames.buki)
@@ -111,11 +113,12 @@ const ban = new SlashCommandBuilder()
     .setName(commandNames.ban)
     .setDescription('banします。')
     .addUserOption((option: $TSFixMe) => option.setName('ban対象').setDescription('banする人を指定してください。').setRequired(true))
-    .addStringOption((option: $TSFixMe) => option.setName('ban理由').setDescription('ban対象の人にブキチがDMします。').setRequired(true));
+    .addStringOption((option: $TSFixMe) => option.setName('ban理由').setDescription('ban対象の人にブキチがDMします。').setRequired(true))
+    .setDMPermission(false);
 
 const chManager = new SlashCommandBuilder()
     .setName(commandNames.ch_manager)
-    .setDescription('チャンネルを作ったり削除したり')
+    .setDescription('チャンネルを作ったり削除したりできます。')
     .addSubcommand((subcommand: $TSFixMe) =>
         subcommand
             .setName('チャンネル作成')
@@ -190,9 +193,13 @@ const chManager = new SlashCommandBuilder()
             .addStringOption((option: $TSFixMe) =>
                 option.setName('チャンネルid').setDescription('チャンネルIDをを半角スペース区切りで指定').setRequired(true),
             ),
-    );
+    )
+    .setDMPermission(false);
 
-const experience = new SlashCommandBuilder().setName(commandNames.experience).setDescription('イカ部歴を表示します。');
+const experience = new SlashCommandBuilder()
+    .setName(commandNames.experience)
+    .setDescription('イカ部歴を表示します。')
+    .setDMPermission(false);
 
 const voice = new SlashCommandBuilder()
     .setName(commandNames.voice)
@@ -217,11 +224,13 @@ const voice = new SlashCommandBuilder()
                     .setRequired(true),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('kill').setDescription('読み上げを終了'));
+    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('kill').setDescription('読み上げを終了'))
+    .setDMPermission(false);
 
 const closeRecruit = new SlashCommandBuilder()
     .setName(commandNames.close)
-    .setDescription('募集を〆ます。ボタンが使えないときに使ってください。');
+    .setDescription('募集を〆ます。ボタンが使えないときに使ってください。')
+    .setDMPermission(false);
 
 const regularMatch = new SlashCommandBuilder()
     .setName(commandNames.regular)
@@ -292,7 +301,8 @@ const regularMatch = new SlashCommandBuilder()
             .addUserOption((option: $TSFixMe) =>
                 option.setName('参加者3').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
-    );
+    )
+    .setDMPermission(false);
 
 const leagueMatch = new SlashCommandBuilder()
     .setName(commandNames.league)
@@ -341,7 +351,8 @@ const leagueMatch = new SlashCommandBuilder()
             .addUserOption((option: $TSFixMe) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
-    );
+    )
+    .setDMPermission(false);
 
 const anarchyMatch = new SlashCommandBuilder()
     .setName(commandNames.anarchy)
@@ -414,7 +425,8 @@ const anarchyMatch = new SlashCommandBuilder()
             .addUserOption((option: $TSFixMe) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
-    );
+    )
+    .setDMPermission(false);
 
 const salmonRun = new SlashCommandBuilder()
     .setName(commandNames.salmon)
@@ -496,7 +508,8 @@ const salmonRun = new SlashCommandBuilder()
                     .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
             ),
-    );
+    )
+    .setDMPermission(false);
 
 const fesA = new SlashCommandBuilder()
     .setName(commandNames.fesA)
@@ -545,7 +558,8 @@ const fesA = new SlashCommandBuilder()
             .addUserOption((option: $TSFixMe) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
-    );
+    )
+    .setDMPermission(false);
 
 const fesB = new SlashCommandBuilder()
     .setName(commandNames.fesB)
@@ -594,7 +608,8 @@ const fesB = new SlashCommandBuilder()
             .addUserOption((option: $TSFixMe) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
-    );
+    )
+    .setDMPermission(false);
 
 const fesC = new SlashCommandBuilder()
     .setName(commandNames.fesC)
@@ -643,7 +658,8 @@ const fesC = new SlashCommandBuilder()
             .addUserOption((option: $TSFixMe) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
-    );
+    )
+    .setDMPermission(false);
 
 const privateMatch = new SlashCommandBuilder()
     .setName(commandNames.private)
@@ -663,7 +679,8 @@ const privateMatch = new SlashCommandBuilder()
         subcommand
             .setName('button')
             .setDescription('募集条件を通常のチャットで打ち込んだ後に通知と募集用のボタンを出せます。※@everyoneメンションを使用します。'),
-    );
+    )
+    .setDMPermission(false);
 
 const otherGame = new SlashCommandBuilder()
     .setName(commandNames.other_game)
@@ -745,7 +762,8 @@ const otherGame = new SlashCommandBuilder()
             )
             .addStringOption((option: $TSFixMe) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
             .addStringOption((option: $TSFixMe) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
-    );
+    )
+    .setDMPermission(false);
 
 const teamDivider = new SlashCommandBuilder()
     .setName(commandNames.team_divider)
@@ -760,11 +778,18 @@ const teamDivider = new SlashCommandBuilder()
             .addBooleanOption((option: $TSFixMe) =>
                 option.setName('勝利数と勝率を隠す').setDescription('勝利数と勝率を隠すことができます。'),
             ),
-    );
+    )
+    .setDMPermission(false);
 
-const buttonEnabler = new ContextMenuCommandBuilder().setName(commandNames.buttonEnabler).setType(ApplicationCommandType.Message);
+const buttonEnabler = new ContextMenuCommandBuilder()
+    .setName(commandNames.buttonEnabler)
+    .setType(ApplicationCommandType.Message)
+    .setDMPermission(false);
 
-const recruitEditor = new ContextMenuCommandBuilder().setName(commandNames.recuitEditor).setType(ApplicationCommandType.Message);
+const recruitEditor = new ContextMenuCommandBuilder()
+    .setName(commandNames.recuitEditor)
+    .setType(ApplicationCommandType.Message)
+    .setDMPermission(false);
 
 const voiceChannelMention = new SlashCommandBuilder()
     .setName(commandNames.voiceChannelMention)
@@ -783,7 +808,8 @@ const voiceChannelMention = new SlashCommandBuilder()
                     .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
             ),
-    );
+    )
+    .setDMPermission(false);
 
 const variablesSettings = new SlashCommandBuilder()
     .setName(commandNames.variablesSettings)
@@ -801,7 +827,8 @@ const variablesSettings = new SlashCommandBuilder()
             .setName('削除')
             .setDescription('環境変数ファイル(.env)から変数を削除します。')
             .addStringOption((option: $TSFixMe) => option.setName('key').setDescription('変数名を入力').setRequired(true)),
-    );
+    )
+    .setDMPermission(false);
 
 const commands = [
     voiceLock,
@@ -839,28 +866,26 @@ const commands = [
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import { log4js_obj } from './log4js_settings.js';
+import { assertExistCheck } from './app/common/others.js';
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN || '');
 export async function registerSlashCommands() {
     const logger = log4js_obj.getLogger();
-    const bot_id = process.env.DISCORD_BOT_ID;
-    if (bot_id === undefined) {
-        throw new Error('DISCORD_BOT_ID is not defined.');
-    }
-    const server_id = process.env.SERVER_ID;
-    if (server_id === undefined) {
-        throw new Error('SERVER_ID is not defined.');
-    }
+    const botId = process.env.DISCORD_BOT_ID;
+    const serverId = process.env.SERVER_ID;
+
+    assertExistCheck(botId, 'process.env.DISCORD_BOT_ID');
+    assertExistCheck(serverId, 'process.env.SERVER_ID');
 
     const mode = process.env.SLASH_COMMAND_REGISTER_MODE;
     if (mode === 'guild') {
         await rest
-            .put(Routes.applicationCommands(bot_id), { body: [] })
+            .put(Routes.applicationCommands(botId), { body: [] })
             .then(() => logger.info('Successfully deleted application global commands.'))
             .catch((error: $TSFixMe) => {
                 logger.error(error);
             });
         await rest
-            .put(Routes.applicationGuildCommands(bot_id, server_id), {
+            .put(Routes.applicationGuildCommands(botId, serverId), {
                 body: commands,
             })
             .then(() => logger.info('Successfully registered application guild commands.'))
@@ -869,13 +894,13 @@ export async function registerSlashCommands() {
             });
     } else if (mode === 'global') {
         await rest
-            .put(Routes.applicationGuildCommands(bot_id, server_id), { body: [] })
+            .put(Routes.applicationGuildCommands(botId, serverId), { body: [] })
             .then(() => logger.info('Successfully deleted application guild commands.'))
             .catch((error: $TSFixMe) => {
                 logger.error(error);
             });
         await rest
-            .put(Routes.applicationCommands(bot_id), {
+            .put(Routes.applicationCommands(botId), {
                 body: commands,
             })
             .then(() => logger.info('Successfully registered application global commands.'))

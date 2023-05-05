@@ -1,5 +1,6 @@
 import { MessageCountService } from '../../../db/message_count_service';
 import { MessageCount } from '../../../db/model/message_count';
+import { exists } from '../../common/others';
 
 export async function chatCountUp(msg: $TSFixMe) {
     const id = msg.author.id;
@@ -12,7 +13,7 @@ export async function chatCountUp(msg: $TSFixMe) {
 async function getMessageCount(id: $TSFixMe) {
     let messageCount = 0;
     const result: MessageCount[] = await MessageCountService.getMemberByUserId(id);
-    if (result[0] != null) {
+    if (exists(result[0])) {
         messageCount = result[0].count + 1;
     }
     return messageCount;

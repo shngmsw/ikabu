@@ -1,5 +1,5 @@
 import { URLSearchParams } from 'url';
-import { isNotEmpty } from '../common/others';
+import { exists, isNotEmpty } from '../common/others';
 import { join } from '../feat-recruit/interactions/buttons/join_event';
 import { cancel } from '../feat-recruit/interactions/buttons/cancel_event';
 import { close } from '../feat-recruit/interactions/buttons/close_event';
@@ -41,7 +41,7 @@ export async function call(interaction: $TSFixMe) {
         await deleteFriendCode(interaction);
     } else if (interaction.customId == 'support_resolved') {
         await setResolvedTag(interaction);
-    } else if (isNotEmpty(param_d) && param_d != null) {
+    } else if (exists(param_d) && isNotEmpty(param_d)) {
         // buttonごとに呼び出すファンクション
         const recruitButtons: buttonFunctions = {
             jr: join,
@@ -55,7 +55,7 @@ export async function call(interaction: $TSFixMe) {
             newr: handleCreateModal,
         };
         await recruitButtons[param_d](interaction, params);
-    } else if (isNotEmpty(param_t) && param_t != null) {
+    } else if (exists(param_t) && isNotEmpty(param_t)) {
         const dividerButtons: buttonFunctions = {
             join: joinButton,
             register: registerButton,
@@ -68,7 +68,7 @@ export async function call(interaction: $TSFixMe) {
             hide: hideButton,
         };
         await dividerButtons[param_t](interaction, params);
-    } else if (isNotEmpty(param_q) && param_q != null) {
+    } else if (exists(param_q) && isNotEmpty(param_q)) {
         const questionnaireButtons: buttonFunctions = {
             yes: sendQuestionnaireFollowUp,
             no: disableQuestionnaireButtons,

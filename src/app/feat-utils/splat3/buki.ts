@@ -1,36 +1,40 @@
-import { EmbedBuilder } from 'discord.js';
+import { CacheType, ChatInputCommandInteraction, EmbedBuilder, User } from 'discord.js';
 import fetch from 'node-fetch';
 import { log4js_obj } from '../../../log4js_settings';
-import { searchAPIMemberById } from '../../common/manager/member_manager';
-import { randomSelect } from '../../common/others';
+import { searchDBMemberById } from '../../common/manager/member_manager';
+import { assertExistCheck, exists, randomSelect } from '../../common/others';
+import { Member } from '../../../db/model/member';
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function handleBuki(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
-    // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply();
-    buki(interaction);
-}
-
-export async function buki(interaction: $TSFixMe) {
+export async function handleBuki(interaction: ChatInputCommandInteraction<CacheType>) {
     const { options } = interaction;
     const bukiType = options.getString('ブキ種');
-    const amount = options.getInteger('ブキの数');
+    const amount = options.getInteger('ブキの数') ?? 1;
     if (amount > 10) {
-        await interaction.followUp('一度に指定できるのは10個まででし！');
-        return;
+        return await interaction.reply('一度に指定できるのは10個まででし！');
     }
+
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
 
     try {
         const response = await fetch(weaponsUrl);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const weapons = (await response.json()) as any;
-        const guild = await interaction.guild.fetch();
-        const member = await searchAPIMemberById(guild, interaction.member.user.id);
+
+        let member: User | Member;
+        if (interaction.inGuild()) {
+            assertExistCheck(interaction.guild, 'guild');
+            const guild = await interaction.guild.fetch();
+            member = await searchDBMemberById(guild, interaction.member.user.id);
+        } else {
+            member = interaction.user;
+        }
+
         const bukis = weapons.filter(function (value: $TSFixMe) {
-            if (bukiType != null) {
+            if (exists(bukiType)) {
                 // 特定のbukiTypeが指定されているとき
                 return bukiType === value.type.key;
             } else if (!~value.name.ja_JP.indexOf('ヒーロー')) {
@@ -39,16 +43,23 @@ export async function buki(interaction: $TSFixMe) {
         });
         const bukiNames = bukis.map(function (value: $TSFixMe) {
             const embed = new EmbedBuilder()
-                .setAuthor({
-                    name: member.displayName + 'のブキ',
-                    iconURL: member.displayAvatarURL(),
-                })
                 .setColor(0xf02d7d)
                 .setTitle(value.name.ja_JP)
                 .addFields({
                     value: value.name.en_US,
                     name: value.sub.name.ja_JP + ' / ' + value.special.name.ja_JP,
                 });
+            if (member instanceof Member) {
+                embed.setAuthor({
+                    name: member.displayName + 'のブキ',
+                    iconURL: member.iconUrl,
+                });
+            } else if (member instanceof User) {
+                embed.setAuthor({
+                    name: member.username + 'のブキ',
+                    iconURL: member.displayAvatarURL(),
+                });
+            }
             return embed;
         });
 

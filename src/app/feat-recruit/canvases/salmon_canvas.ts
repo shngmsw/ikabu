@@ -5,6 +5,7 @@ import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { Participant } from '../../../db/model/participant.js';
 import { RecruitOpCode } from './regenerate_canvas.js';
+import { notExists } from '../../common/others.js';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -80,7 +81,7 @@ export async function recruitSalmonCanvas(
 
     for (let i = 0; i < 4; i++) {
         if (count >= i + 2) {
-            const userUrl = memberIcons[i] != null ? memberIcons[i] : blankAvatarUrl;
+            const userUrl = memberIcons[i] ?? blankAvatarUrl;
             const userImage = await Canvas.loadImage(userUrl);
             recruitCtx.save();
             drawArcImage(recruitCtx, userImage, i * 118 + 158, 120, 50);
@@ -144,7 +145,7 @@ export async function recruitSalmonCanvas(
     }
 
     let channelString;
-    if (channelName === null) {
+    if (notExists(channelName)) {
         channelString = '🔉 VC指定なし';
     } else if (channelName === '[簡易版募集]') {
         channelString = channelName;

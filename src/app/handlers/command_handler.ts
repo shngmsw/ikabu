@@ -11,7 +11,7 @@ import { handleCreateRole, handleDeleteRole, handleAssignRole, handleUnassignRol
 import { handleDeleteCategory } from '../feat-admin/channel_manager/deleteCategory.js';
 import { handleDeleteChannel } from '../feat-admin/channel_manager/deleteChannel.js';
 import { handleCreateRoom } from '../feat-admin/channel_manager/createRoom.js';
-import { getCloseEmbed, getCommandHelpEmbed } from '../common/others';
+import { assertExistCheck, getCloseEmbed, getCommandHelpEmbed } from '../common/others';
 import { otherGameRecruit } from '../feat-recruit/interactions/commands/other_game_recruit';
 import { regularRecruit } from '../feat-recruit/interactions/commands/regular_recruit';
 import { fesRecruit } from '../feat-recruit/interactions/commands/fes_recruit';
@@ -29,14 +29,21 @@ import { createNewRecruitButton } from '../feat-recruit/buttons/create_recruit_b
 import { commandNames } from '../../constant.js';
 import { setting } from '../feat-utils/voice/tts/voice_bot_node';
 import { handleVoiceCommand } from '../feat-utils/voice/tts/discordjs_voice';
+import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
-export async function call(interaction: $TSFixMe) {
+export async function call(interaction: ChatInputCommandInteraction<CacheType>) {
     const { commandName } = interaction;
     const { options } = interaction;
+
+    await sendCommandLog(interaction); // DB使うものはawait付けないとcloseエラー出る
 
     if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
         await voiceLocker(interaction);
     } else if (commandName === commandNames.close) {
+        if (!interaction.inGuild()) {
+            return;
+        }
+        assertExistCheck(interaction.channel, 'channel');
         //serverコマンド
         const embed = getCloseEmbed();
         if (!interaction.replied) {
@@ -92,6 +99,9 @@ export async function call(interaction: $TSFixMe) {
     } else if (commandName == commandNames.ban) {
         await handleBan(interaction);
     } else if (commandName === commandNames.voice) {
+        if (!interaction.inGuild()) {
+            return;
+        }
         // 'インタラクションに失敗'が出ないようにするため
         await interaction.deferReply();
         await handleVoiceCommand(interaction);
@@ -122,6 +132,5 @@ export async function call(interaction: $TSFixMe) {
                 break;
         }
     }
-    await sendCommandLog(interaction); // DB使うものはawait付けないとcloseエラー出る
     return;
 }

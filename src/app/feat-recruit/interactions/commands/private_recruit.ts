@@ -2,7 +2,7 @@ import { BaseGuildTextChannel, CacheType, ChatInputCommandInteraction, CommandIn
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, isNotEmpty, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, notifyActionRow, recruitActionRow } from '../../buttons/create_recruit_buttons';
 import { RecruitService } from '../../../../db/recruit_service';
 import { ParticipantService } from '../../../../db/participants_service';
@@ -13,8 +13,6 @@ import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_
 const logger = log4js_obj.getLogger('recruit');
 
 export async function privateRecruit(interaction: ChatInputCommandInteraction) {
-    if (!interaction.isCommand()) return;
-
     const options = interaction.options;
 
     if (options.getSubcommand() === 'recruit') {
@@ -29,24 +27,20 @@ async function sendPrivateRecruit(
     interaction: ChatInputCommandInteraction,
     options: Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getFocused'>,
 ) {
+    if (!interaction.inGuild()) return;
+
     const startTime = interaction.options.getString('開始時刻') ?? 'ERROR';
     const time = interaction.options.getString('所要時間') ?? 'ERROR';
     const recruitNumText = options.getString('募集人数') ?? 'ERROR';
     const condition = options.getString('内容または参加条件') ?? 'なし';
     const logo = 'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
 
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
-    const recruitChannel = interaction.channel;
-    if (recruitChannel === null) {
-        throw new Error('recruitChannel is null.');
-    }
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
+    const guild = interaction.guild;
     const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
+    const recruitChannel = interaction.channel;
 
     const embed = new EmbedBuilder()
         .setAuthor({
@@ -139,20 +133,17 @@ async function sendPrivateRecruit(
 }
 
 async function sendNotification(interaction: ChatInputCommandInteraction) {
-    const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
-    const guild = await interaction.guild?.fetch();
-    await interaction.deferReply({ ephemeral: true });
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
-    const recruitChannel = interaction.channel;
-    if (recruitChannel === null) {
-        throw new Error('recruitChannel is null.');
-    }
-    if (interaction.member === null) {
-        throw new Error('interaction.member is null');
-    }
+    if (!interaction.inGuild()) return;
+
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
+    const guild = await interaction.guild.fetch();
     const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
+    const recruitChannel = interaction.channel;
+    const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
+
+    await interaction.deferReply({ ephemeral: true });
 
     const sentMessage = await recruitChannel.send({
         content: mention + ' ボタンを押して参加表明するでし！',

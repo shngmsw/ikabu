@@ -14,6 +14,8 @@ const logger = log4js_obj.getLogger('interaction');
  * @param {*} interaction コマンドのインタラクション
  */
 export async function dividerInitialMessage(interaction: $TSFixMe) {
+    if (!interaction.inGuild()) return;
+
     try {
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const hostId = member.id;

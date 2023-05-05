@@ -3,7 +3,7 @@ import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitRegularCanvas, ruleRegularCanvas } from '../../canvases/regular_canvas';
 import { getMemberMentions } from '../buttons/other_events';
@@ -28,10 +28,10 @@ export async function sendRegularMatch(
     user3: Member | null,
     regularData: $TSFixMe,
 ) {
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
     const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
 
     const channelName = '[簡易版募集]';
 
@@ -77,10 +77,6 @@ export async function sendRegularMatch(
 
     try {
         const recruitChannel = interaction.channel;
-        if (recruitChannel === null) {
-            throw new Error('recruitChannel is null.');
-        }
-
         const mention = `<@&${process.env.ROLE_ID_RECRUIT_REGULAR}>`;
         const image1Message = await interaction.editReply({
             content: txt,
@@ -100,13 +96,13 @@ export async function sendRegularMatch(
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(image1Message.id, recruiter);
-        if (attendee1 !== null) {
+        if (exists(attendee1)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, attendee1);
         }
-        if (attendee2 !== null) {
+        if (exists(attendee2)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, attendee2);
         }
-        if (attendee3 !== null) {
+        if (exists(attendee3)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, attendee3);
         }
 
@@ -151,9 +147,7 @@ export async function sendRegularMatch(
         const memberList = getMemberMentions(recruitData[0], participants);
         const hostMention = `<@${member.userId}>`;
 
-        if (interaction.channelId !== null) {
-            await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
-        }
+        await regenerateCanvas(guild, recruitChannel.id, image1Message.id, RecruitOpCode.close);
 
         // DBから募集情報削除
         await RecruitService.deleteRecruit(guild.id, image1Message.id);

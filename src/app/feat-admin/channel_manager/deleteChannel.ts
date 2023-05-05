@@ -3,11 +3,13 @@ import { AttachmentBuilder, ChannelType, PermissionsBitField } from 'discord.js'
 import fs from 'fs';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
+import { notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
 export async function handleDeleteChannel(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
@@ -49,7 +51,7 @@ export async function handleDeleteChannel(interaction: $TSFixMe) {
             let channelName;
             const channel = await searchChannelById(guild, channelIdList[i]);
             // if channel ID is not found, consider as an error.
-            if (channel == null) {
+            if (notExists(channel)) {
                 channelName = 'NOT_FOUND!';
             } else if (channel.type == ChannelType.GuildCategory) {
                 channelName = 'THIS_IS_CATEGORY';

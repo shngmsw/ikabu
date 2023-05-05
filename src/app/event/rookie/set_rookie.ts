@@ -5,7 +5,7 @@ import { MessageCountService } from '../../../db/message_count_service.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { searchRoleById } from '../../common/manager/role_manager';
-import { sleep } from '../../common/others.js';
+import { exists, sleep } from '../../common/others.js';
 import { FriendCode } from '../../../db/model/friend_code.js';
 import { searchAPIMemberById } from '../../common/manager/member_manager.js';
 
@@ -40,7 +40,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
                 const friendCode = await FriendCodeService.getFriendCodeByUserId(newMember.id);
                 await sleep(600);
                 const memberCheck = await searchAPIMemberById(guild, userId);
-                if (memberCheck !== null) {
+                if (exists(memberCheck)) {
                     await setRookieRole(memberCheck, beginnerRole, messageCount, friendCode);
                 }
                 await sentMessage.react('👍');
@@ -63,7 +63,7 @@ async function setRookieRole(member: GuildMember, beginnerRole: Role, messageCou
 
 async function getMessageCount(id: string) {
     const result = await MessageCountService.getMemberByUserId(id);
-    if (result[0] != null) {
+    if (exists(result[0])) {
         return result[0].count;
     }
     return 0;

@@ -1,4 +1,5 @@
 import { log4js_obj } from '../../../log4js_settings';
+import { exists } from '../others';
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
@@ -21,11 +22,11 @@ export async function createChannel(guild: $TSFixMe, categoryId: $TSFixMe, chann
         if (categoryId == '') {
             parentId = null;
         }
-        let channel;
-        if ((await searchChannelIdByName(guild, channelName, channelType, parentId)) != null) {
-            return await searchChannelIdByName(guild, channelName, channelType, parentId);
+        const channelId = await searchChannelIdByName(guild, channelName, channelType, parentId);
+        if (exists(channelId)) {
+            return channelId;
         } else {
-            channel = await guild.channels.create({
+            const channel = await guild.channels.create({
                 name: channelName,
                 type: channelType,
                 parent: parentId,
@@ -49,13 +50,13 @@ export async function searchChannelIdByName(guild: $TSFixMe, channelName: $TSFix
     try {
         let channel;
         const channels = await guild.channels.fetch();
-        if (categoryId != null) {
+        if (exists(categoryId)) {
             channel = channels.find((c: $TSFixMe) => c.name == channelName && c.type == channelType && c.parent == categoryId);
         } else {
             channel = channels.find((c: $TSFixMe) => c.name == channelName && c.type == channelType);
         }
 
-        if (channel != null) {
+        if (exists(channel)) {
             return channel.id;
         } else {
             return null;

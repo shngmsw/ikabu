@@ -8,6 +8,7 @@ import { Readable } from 'stream';
 import conf from 'config-reloadable';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { SHA256 } from 'crypto-js';
+import { exists } from '../../../common/others';
 
 const config = conf();
 interface VoiceTypes {
@@ -179,7 +180,7 @@ export async function setting(interaction: $TSFixMe) {
     const { options } = interaction;
     const subCommand = options.getSubcommand();
 
-    if (subCommand != null && subCommand === 'type') {
+    if (exists(subCommand) && subCommand === 'type') {
         const type = options.getString('音声の種類');
         voicePattern1 = type;
         const voiceMessage = `読み上げ音声を${voiceLists1[type]}に設定したでし`;

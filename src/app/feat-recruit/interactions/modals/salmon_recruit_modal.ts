@@ -2,7 +2,7 @@ import { AttachmentBuilder, BaseGuildTextChannel, ModalSubmitInteraction } from 
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, fetchSchedule, getSalmonData } from '../../../common/apis/splatoon3_ink';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { isEmpty, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_canvas';
 import { recruitSalmonCanvas, ruleSalmonCanvas } from '../../canvases/salmon_canvas';
@@ -26,10 +26,10 @@ export async function sendSalmonRun(
     user1: Member | null,
     user2: Member | null,
 ) {
-    const guild = await interaction.guild?.fetch();
-    if (guild === undefined) {
-        throw new Error('guild cannot fetch.');
-    }
+    assertExistCheck(interaction.guild, 'guild');
+    assertExistCheck(interaction.channel, 'channel');
+
+    const guild = await interaction.guild.fetch();
 
     const channelName = '[簡易版募集]';
 
@@ -80,25 +80,17 @@ export async function sendSalmonRun(
     } else {
         ruleBuffer = await ruleSalmonCanvas(await getSalmonData(data, 0));
     }
-    if (isEmpty(recruitBuffer) || recruitBuffer === undefined) {
-        throw new Error('recruitBuffer is empty');
-    }
+    assertExistCheck(recruitBuffer, 'recruitBuffer');
 
     const recruit = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
 
-    if (isEmpty(ruleBuffer) || ruleBuffer == null) {
-        throw new Error('recruitBuffer is empty');
-    }
+    assertExistCheck(ruleBuffer, 'ruleBuffer');
     const rule = new AttachmentBuilder(ruleBuffer, { name: 'schedule.png' });
 
     try {
         const recruitChannel = interaction.channel;
-        if (recruitChannel === null) {
-            throw new Error('recruitChannel is null.');
-        }
-
         const mention = `<@&${process.env.ROLE_ID_RECRUIT_SALMON}>`;
         const image1Message = await interaction.editReply({
             content: txt,
@@ -118,10 +110,10 @@ export async function sendSalmonRun(
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(image1Message.id, recruiter);
-        if (attendee1 !== null) {
+        if (exists(attendee1)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, attendee1);
         }
-        if (attendee2 !== null) {
+        if (exists(attendee2)) {
             await ParticipantService.registerParticipantFromObj(image1Message.id, attendee2);
         }
 

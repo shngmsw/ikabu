@@ -6,6 +6,7 @@ import request from 'request';
 import { log4js_obj } from '../../../log4js_settings';
 import { createChannel } from '../../common/manager/channel_manager';
 import { createRole, searchRoleById, setColorToRole, setRoleToMember } from '../../common/manager/role_manager';
+import { exists, notExists } from '../../common/others';
 
 // const INDEX_CATEGORY_ID = 0;
 const INDEX_CATEGORY_NAME = 1;
@@ -20,7 +21,8 @@ const INDEX_MEMBER_ID_START = 8;
 const logger = log4js_obj.getLogger('ChannelManager');
 
 export async function handleCreateRoom(interaction: $TSFixMe) {
-    if (!interaction.isCommand()) return;
+    if (!interaction.inGuild()) return;
+
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
@@ -108,7 +110,7 @@ export async function handleCreateRoom(interaction: $TSFixMe) {
 
                         const roleId = await createRole(guild, roleName);
 
-                        if (roleId != null) {
+                        if (exists(roleId)) {
                             // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
                             await setRoleToChanel(guild, roleId, channelId);
 
@@ -122,7 +124,7 @@ export async function handleCreateRoom(interaction: $TSFixMe) {
 
                         resultData.push([categoryId, categoryName, channelId, channelName, channelType, roleId, roleName, roleColor]);
 
-                        if (roleId != null) {
+                        if (exists(roleId)) {
                             for (let j = INDEX_MEMBER_ID_START; j < data[i].length; j++) {
                                 let memberId = data[i][j].trim();
                                 memberId = await setRoleToMember(guild, roleId, memberId);
@@ -144,7 +146,7 @@ export async function handleCreateRoom(interaction: $TSFixMe) {
 
                 for (const i in resultData) {
                     for (let j = 0; j < maxColumn; j++) {
-                        if (resultData[i][j] == null || resultData[i][j] == undefined) {
+                        if (notExists(resultData[i][j])) {
                             resultData[i][j] = '';
                         }
                     }
@@ -186,7 +188,7 @@ function checkChannelType(channelType: $TSFixMe) {
 
 async function setRoleToChanel(guild: $TSFixMe, roleId: $TSFixMe, channelId: $TSFixMe, channelType: $TSFixMe) {
     // set permission to channel
-    if (channelId != null && channelType != 'ERROR!') {
+    if (exists(channelId) && channelType != 'ERROR!') {
         const channel = await guild.channels.fetch(channelId);
         channel.permissionOverwrites.edit(roleId, {
             ViewChannel: true,

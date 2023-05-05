@@ -1,6 +1,6 @@
 import Canvas from 'canvas';
 import { createRoundRect, fillTextWithStroke } from '../../common/canvas_components';
-import { EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import { EmbedBuilder, AttachmentBuilder, ChatInputCommandInteraction, CacheType } from 'discord.js';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
 import { getUnixTime } from 'date-fns';
 
@@ -18,9 +18,8 @@ import { log4js_obj } from '../../../log4js_settings';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function handleShow(interaction: $TSFixMe) {
+export async function handleShow(interaction: ChatInputCommandInteraction<CacheType>) {
     try {
-        if (!interaction.isCommand()) return;
         // 'インタラクションに失敗'が出ないようにするため
         await interaction.deferReply();
         const { options } = interaction;
@@ -53,7 +52,7 @@ export async function handleShow(interaction: $TSFixMe) {
     }
 }
 
-async function sendStageInfo(interaction: $TSFixMe, data: $TSFixMe, scheduleNum: $TSFixMe) {
+async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe, scheduleNum: $TSFixMe) {
     let title;
     if (scheduleNum == 0) {
         title = '現在';
@@ -137,7 +136,7 @@ async function sendStageInfo(interaction: $TSFixMe, data: $TSFixMe, scheduleNum:
     // });
 }
 
-async function sendRegularInfo(interaction: $TSFixMe, data: $TSFixMe, scheduleNum: $TSFixMe) {
+async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe, scheduleNum: $TSFixMe) {
     const regular_data = await getRegularData(data, scheduleNum);
     const start_date = formatDatetime(regular_data.startTime, dateformat.ymdwhm);
     const end_date = formatDatetime(regular_data.endTime, dateformat.hm);
@@ -166,7 +165,7 @@ async function sendRegularInfo(interaction: $TSFixMe, data: $TSFixMe, scheduleNu
     });
 }
 
-async function sendFesInfo(interaction: $TSFixMe, data: $TSFixMe, scheduleNum: $TSFixMe) {
+async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe, scheduleNum: $TSFixMe) {
     const fes_data = await getFesData(data, scheduleNum);
     const start_date = formatDatetime(fes_data.startTime, dateformat.ymdwhm);
     const end_date = formatDatetime(fes_data.endTime, dateformat.hm);
@@ -195,7 +194,7 @@ async function sendFesInfo(interaction: $TSFixMe, data: $TSFixMe, scheduleNum: $
     });
 }
 
-async function sendRunInfo(interaction: $TSFixMe, data: $TSFixMe) {
+async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe) {
     try {
         for (let i = 0; i < 2; i++) {
             let title = '';
@@ -242,7 +241,7 @@ async function sendRunInfo(interaction: $TSFixMe, data: $TSFixMe) {
                     files: [weaponsImage],
                 });
             } else {
-                await interaction.channel.send({
+                await interaction.followUp({
                     embeds: [salmonEmbed],
                     files: [weaponsImage],
                 });

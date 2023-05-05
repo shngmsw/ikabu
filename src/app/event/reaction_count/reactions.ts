@@ -1,4 +1,4 @@
-import { isEmpty } from '../../common/others';
+import { exists, isEmpty } from '../../common/others';
 
 import { ReactionsService } from '../../../db/reactions_service';
 import { TotalReactionsService } from '../../../db/total_reactions_service';
@@ -22,7 +22,7 @@ export async function emojiCountUp(reaction: $TSFixMe) {
 async function getReactionCount(user_id: $TSFixMe, reaction_seq: $TSFixMe, channel_id: $TSFixMe, year: $TSFixMe) {
     let count = 1;
     const result = await ReactionsService.getReactionCountByPK(user_id, reaction_seq, channel_id, year);
-    if (result[0] != null) {
+    if (exists(result[0])) {
         count = result[0].count + 1;
     }
     return count;

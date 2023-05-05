@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder } from 'discord.js';
-import { isNotEmpty } from './others';
+import { assertExistCheck, isNotEmpty } from './others';
 
 /**
  * 考え中ボタンのラベルを更新してボタンを有効化する
@@ -100,9 +100,7 @@ export async function setButtonDisable(message: $TSFixMe, interaction?: $TSFixMe
             oldActionRow.components.map((buttonComponent: $TSFixMe) => {
                 let newButton;
                 if (isNotEmpty(interaction) && interaction.component.customId == buttonComponent.customId) {
-                    if (process.env.RECRUIT_LOADING_EMOJI_ID == undefined) {
-                        throw new Error('RECRUIT_LOADING_EMOJI_ID is undefined');
-                    }
+                    assertExistCheck(process.env.RECRUIT_LOADING_EMOJI_ID);
                     newButton = new ButtonBuilder();
                     newButton.setStyle(buttonComponent.style);
                     newButton.setCustomId(buttonComponent.customId);
