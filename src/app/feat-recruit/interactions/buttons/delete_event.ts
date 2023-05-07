@@ -37,6 +37,14 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
 
         const participantsData = await ParticipantService.getAllParticipants(guild.id, image1MsgId);
 
+        if (participantsData.length === 0) {
+            await interaction.message.edit({
+                components: await setButtonDisable(interaction.message),
+            });
+            await interaction.editReply({ content: 'この募集はもう削除できないでし！' });
+            return;
+        }
+
         let recruiter = participantsData[0]; // 募集者
         const attendeeList: Participant[] = []; // 募集時参加確定者リスト
         const applicantList: Participant[] = []; // 参加希望者リスト
