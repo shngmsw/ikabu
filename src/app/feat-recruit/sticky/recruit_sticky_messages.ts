@@ -115,7 +115,11 @@ export async function sendStickyMessage(guild: Guild, channelId: string, content
     if (lastStickyMsgId.length !== 0) {
         const lastStickyMsg = await searchMessageById(guild, channelId, lastStickyMsgId[0]);
         if (exists(lastStickyMsg)) {
-            await lastStickyMsg.delete();
+            try {
+                await lastStickyMsg.delete();
+            } catch (error) {
+                logger.warn(`last sticky message not found! [${lastStickyMsgId}]`);
+            }
         }
     }
     const channel = await searchChannelById(guild, channelId);
