@@ -141,7 +141,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
         }
     } catch (err) {
         logger.error(err);
-        await interaction.editReply({
+        await interaction.message.edit({
             components: await disableThinkingButton(interaction, 'キャンセル'),
         });
         interaction.channel?.send('なんかエラー出てるわ');
