@@ -139,7 +139,7 @@ export async function closeNotify(interaction: ButtonInteraction) {
         }
     } catch (err) {
         logger.error(err);
-        await interaction.editReply({
+        await interaction.message.edit({
             components: await disableThinkingButton(interaction, '〆'),
         });
         interaction.channel?.send('なんかエラー出てるわ');

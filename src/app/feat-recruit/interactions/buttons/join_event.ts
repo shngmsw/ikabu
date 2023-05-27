@@ -170,7 +170,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
         }
     } catch (err) {
         logger.error(err);
-        await interaction.editReply({
+        await interaction.message.edit({
             components: await disableThinkingButton(interaction, '参加'),
         });
         interaction.channel?.send('なんかエラー出てるわ');
