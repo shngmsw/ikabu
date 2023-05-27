@@ -163,7 +163,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             const checkNotifyMessage = await searchMessageById(guild, recruitChannel.id, notifyMessage.id);
             if (exists(checkNotifyMessage)) {
                 try {
-                    checkNotifyMessage.delete();
+                    await checkNotifyMessage.delete();
                 } catch (error) {
                     logger.warn('notify message has been already deleted');
                 }
