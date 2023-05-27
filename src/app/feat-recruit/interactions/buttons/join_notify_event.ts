@@ -11,6 +11,7 @@ import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { memberListMessage } from './other_events.js';
 import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
+import { searchMessageById } from '../../../common/manager/message_manager.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -104,7 +105,6 @@ export async function joinNotify(interaction: ButtonInteraction) {
             const recruitChannel = interaction.channel;
 
             // ホストがVCにいるかチェックして、VCにいる場合はText in Voiceにメッセージ送信
-            let notifyMessage = null;
             const recruiterGuildMember = await searchAPIMemberById(guild, recruiterId);
             try {
                 if (isNotEmpty(recruiterGuildMember.voice.channel) && recruiterGuildMember.voice.channel.type === ChannelType.GuildVoice) {
@@ -118,7 +118,7 @@ export async function joinNotify(interaction: ButtonInteraction) {
             } catch (error) {
                 logger.error(error);
             }
-            notifyMessage = await interaction.message.reply({
+            const notifyMessage = await interaction.message.reply({
                 content: `<@${recruiterId}>`,
                 embeds: [embed],
             });
@@ -138,11 +138,12 @@ export async function joinNotify(interaction: ButtonInteraction) {
                 components: await recoveryThinkingButton(interaction, '参加'),
             });
 
+            await sleep(300);
             // 5分後にホストへの通知を削除
-            if (exists(notifyMessage)) {
-                await sleep(300);
+            const checkNotifyMessage = await searchMessageById(guild, recruitChannel.id, notifyMessage.id);
+            if (exists(checkNotifyMessage)) {
                 try {
-                    notifyMessage.delete();
+                    checkNotifyMessage.delete();
                 } catch (error) {
                     logger.warn('notify message has been already deleted');
                 }
