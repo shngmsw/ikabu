@@ -80,13 +80,30 @@ client.on('guildMemberAdd', async (member: GuildMember) => {
 client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) => {
     try {
         const tag = member.user.tag;
-        assertExistCheck(member.joinedAt, 'joinedAt');
-        const period = Math.round((Date.now() - Number(member.joinedAt)) / 86400000); // サーバーに居た期間を日数にして計算
+        let joinedAt = member.joinedAt;
+        // joinedAtがnullだったらDBからとってくる
+        if (notExists(joinedAt)) {
+            const dbMember = await MembersService.getMemberByUserId(member.guild.id, member.user.id);
+            if (dbMember.length !== 0) {
+                joinedAt = dbMember[0].joinedAt;
+            }
+        }
+
+        let text = `\`${tag}\`たんが退部したでし！\n`;
+
+        if (exists(joinedAt)) {
+            const period = Math.round((Date.now() - Number(joinedAt)) / 86400000); // サーバーに居た期間を日数にして計算
+            text += `入部日: <t:${member.joinedAt}:f>【<t:${member.joinedAt}:R>】\n入部期間: \`${period}日間\``;
+        } else {
+            text += '入部日を取得できなかったでし！';
+        }
+
         assertExistCheck(process.env.CHANNEL_ID_RETIRE_LOG);
         const retireLog = member.guild.channels.cache.get(process.env.CHANNEL_ID_RETIRE_LOG);
         if (retireLog instanceof BaseGuildTextChannel) {
-            retireLog.send(`${tag} さんが退部しました。入部日: ${member.joinedAt} 入部期間：${period}日間`);
+            retireLog.send(text);
         }
+
         const guild = await member.guild.fetch();
         if (guild.id === process.env.SERVER_ID) {
             assertExistCheck(client.user, 'client.user');
@@ -133,8 +150,6 @@ client.on('guildMemberUpdate', async (oldMember: GuildMember | PartialGuildMembe
 
 client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
     try {
-        const loggerUU = log4js_obj.getLogger('userUpdate');
-
         const userId = newUser.id;
 
         const guildIdList = await MembersService.getMemberGuildsByUserId(userId);
