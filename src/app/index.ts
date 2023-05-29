@@ -92,8 +92,9 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
         let text = `\`${tag}\`たんが退部したでし！\n`;
 
         if (exists(joinedAt)) {
+            const unixJoinedAt = Math.floor(joinedAt.getTime() / 1000);
             const period = Math.round((Date.now() - Number(joinedAt)) / 86400000); // サーバーに居た期間を日数にして計算
-            text += `入部日: <t:${member.joinedAt}:f>【<t:${member.joinedAt}:R>】\n入部期間: \`${period}日間\``;
+            text += `入部日: <t:${unixJoinedAt}:f>【<t:${unixJoinedAt}:R>】\n入部期間: \`${period}日間\``;
         } else {
             text += '入部日を取得できなかったでし！';
         }
