@@ -117,6 +117,13 @@ export function disableUnlockButton() {
     return buttons;
 }
 
+export function nsoRoomLinkButton(url: string) {
+    const button = new ActionRowBuilder<ButtonBuilder>().addComponents([
+        new ButtonBuilder().setLabel('ヘヤタテ機能を使用して参加').setStyle(ButtonStyle.Link).setURL(url),
+    ]);
+    return button;
+}
+
 export function channelLinkButtons(guildId: $TSFixMe, channelId: $TSFixMe) {
     const channelLink = `https://discord.com/channels/${guildId}/${channelId}`;
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([

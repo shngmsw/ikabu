@@ -45,7 +45,7 @@ export class RecruitService {
         condition: string,
         channelName: string | null,
         recruitType: number,
-        option?: string,
+        option?: string | null,
     ) {
         try {
             DBCommon.init();

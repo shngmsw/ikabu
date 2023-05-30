@@ -44,13 +44,18 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
         userId = interaction.user.id;
     }
 
-    const deleteButton = new ActionRowBuilder<ButtonBuilder>();
-    deleteButton.addComponents([new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger)]);
-    const fc = await FriendCodeService.getFriendCodeByUserId(userId);
-    if (exists(fc[0])) {
+    const fcObj = await FriendCodeService.getFriendCodeObjByUserId(userId);
+
+    if (exists(fcObj[0])) {
+        const fcUrl = fcObj[0].url;
+        const buttons = new ActionRowBuilder<ButtonBuilder>();
+        if (exists(fcUrl)) {
+            buttons.addComponents([new ButtonBuilder().setURL(fcUrl).setLabel('NSOアプリで開く').setStyle(ButtonStyle.Link)]);
+        }
+        buttons.addComponents([new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger)]);
         await interaction.editReply({
-            embeds: [composeEmbed(targetUser, fc[0].code, true)],
-            components: [deleteButton],
+            embeds: [composeEmbed(targetUser, fcObj[0].code, true)],
+            components: [buttons],
         });
         return;
     }
@@ -68,6 +73,9 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
                 return value.content;
             });
 
+            const button = new ActionRowBuilder<ButtonBuilder>();
+            button.addComponents([new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger)]);
+
             if (result.length > 0) {
                 const embeds = [];
                 for (const r of result) {
@@ -75,7 +83,7 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
                 }
                 await interaction.editReply({
                     embeds,
-                    components: [deleteButton],
+                    components: [button],
                 });
             } else {
                 await interaction.followUp({
@@ -126,9 +134,14 @@ async function insertFriendCode(interaction: ChatInputCommandInteraction<CacheTy
         userId = interaction.user.id;
     }
     const options = interaction.options;
-    const code = options.getString('フレンドコード');
+    const code = options.getString('フレンドコード') ?? 'ERROR';
+    const fcUrl = options.getString('フレンドコードurl');
 
-    await FriendCodeService.save(userId, code);
+    if (exists(fcUrl) && !isFcUrl(fcUrl)) {
+        return await interaction.editReply(`\`${fcUrl}\`はフレンドコードのURLではないでし！`);
+    }
+
+    await FriendCodeService.save(userId, code, fcUrl);
     await interaction.editReply({
         content: `\`${code}\`で覚えたでし！変更したい場合はもう一度登録すると上書きされるでし！`,
     });
@@ -136,4 +149,8 @@ async function insertFriendCode(interaction: ChatInputCommandInteraction<CacheTy
 
 export async function deleteFriendCode(interaction: $TSFixMe) {
     await interaction.message.delete();
+}
+
+function isFcUrl(url: string) {
+    return url.match(/https:\/\/lounge.nintendo.com\/friendcode\//g) !== null;
 }

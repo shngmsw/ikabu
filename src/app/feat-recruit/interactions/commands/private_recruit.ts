@@ -2,7 +2,7 @@ import { BaseGuildTextChannel, CacheType, ChatInputCommandInteraction, CommandIn
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, notifyActionRow, recruitActionRow } from '../../buttons/create_recruit_buttons';
 import { RecruitService } from '../../../../db/recruit_service';
 import { ParticipantService } from '../../../../db/participants_service';
@@ -16,7 +16,6 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction) {
     const options = interaction.options;
 
     if (options.getSubcommand() === 'recruit') {
-        await interaction.deferReply();
         await sendPrivateRecruit(interaction, options);
     } else if (options.getSubcommand() === 'button') {
         await sendNotification(interaction);
@@ -33,7 +32,14 @@ async function sendPrivateRecruit(
     const time = interaction.options.getString('所要時間') ?? 'ERROR';
     const recruitNumText = options.getString('募集人数') ?? 'ERROR';
     const condition = options.getString('内容または参加条件') ?? 'なし';
+    const roomUrl = options.getString('ヘヤタテurl');
     const logo = 'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
+
+    if (exists(roomUrl) && !isRoomUrl(roomUrl)) {
+        return await interaction.reply({ content: `\`${roomUrl}\`はヘヤタテURLではないでし！`, ephemeral: true });
+    }
+
+    await interaction.deferReply();
 
     assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
@@ -65,6 +71,10 @@ async function sendPrivateRecruit(
                 name: 'プラベ内容または参加条件',
                 value: condition,
             },
+            {
+                name: 'ヘヤタテURL',
+                value: roomUrl !== null ? 'あり\n`※参加ボタンを押すと参加用URLが表示されます。`' : 'なし',
+            },
         ])
         .setColor('#5900b7')
         .setTimestamp()
@@ -90,6 +100,7 @@ async function sendPrivateRecruit(
             condition,
             null,
             RecruitType.PrivateRecruit,
+            roomUrl,
         );
 
         // DBに参加者情報を登録
@@ -167,4 +178,8 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
         content: '募集完了でし！参加者が来るまで気長に待つでし！',
     });
     sentMessage.edit({ components: [notifyActionRow()] });
+}
+
+function isRoomUrl(url: string) {
+    return url.match(/https:\/\/s.nintendo.com\//g) !== null;
 }

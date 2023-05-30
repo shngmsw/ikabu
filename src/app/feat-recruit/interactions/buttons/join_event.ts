@@ -6,13 +6,14 @@ import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, createMentionsFromIdList, exists, isNotEmpty, notExists, sleep } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
-import { channelLinkButtons, messageLinkButtons } from '../../buttons/create_recruit_buttons.js';
+import { channelLinkButtons, messageLinkButtons, nsoRoomLinkButton } from '../../buttons/create_recruit_buttons.js';
 import { Participant } from '../../../../db/model/participant.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { memberListMessage } from './other_events.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
 import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
+import { RecruitType } from '../../../../db/model/recruit.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -149,6 +150,14 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
                 await interaction.followUp({
                     content: `<@${recruiterId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
                     components: [channelLinkButtons(guild.id, channelId)],
+                    ephemeral: true,
+                });
+            }
+
+            if (recruitData[0].recruitType === RecruitType.PrivateRecruit && exists(recruitData[0].option)) {
+                await interaction.followUp({
+                    content: `ボタンを押すとヘヤタテ機能を使ってプライベートマッチの部屋に参加できるでし！`,
+                    components: [nsoRoomLinkButton(recruitData[0].option)],
                     ephemeral: true,
                 });
             }

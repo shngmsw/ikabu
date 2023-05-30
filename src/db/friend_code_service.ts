@@ -12,7 +12,8 @@ export class FriendCodeService {
             DBCommon.init();
             await DBCommon.run(`CREATE TABLE IF NOT EXISTS friend_code (
                                 user_id text primary key,
-                                code text
+                                code text,
+                                url text
                     )`);
             DBCommon.close();
         } catch (err) {
@@ -20,20 +21,20 @@ export class FriendCodeService {
         }
     }
 
-    static async save(id: $TSFixMe, code: $TSFixMe) {
+    static async save(id: string, code: string, url: string | null) {
         try {
             DBCommon.init();
-            await DBCommon.run(`insert or replace into friend_code (user_id, code) values ($1, $2)`, [id, code]);
+            await DBCommon.run(`insert or replace into friend_code (user_id, code, url) values ($1, $2, $3)`, [id, code, url]);
             DBCommon.close();
         } catch (err) {
             logger.error(err);
         }
     }
 
-    static async getFriendCodeByUserId(user_id: $TSFixMe) {
+    static async getFriendCodeObjByUserId(user_id: string) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all); // https://stackoverflow.com/questions/56122812/async-await-sqlite-in-javascript
-        const results = (await db.all(`select user_id, code from friend_code where user_id = ${user_id}`)) as FriendCode[];
+        const results = (await db.all(`select user_id, code, url from friend_code where user_id = ${user_id}`)) as FriendCode[];
         DBCommon.close();
         return results;
     }
