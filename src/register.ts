@@ -22,8 +22,11 @@ const friendCode = new SlashCommandBuilder()
         subcommand
             .setName('add')
             .setDescription('フレンドコードを登録します。')
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('フレンドコード').setDescription('例：SW-0000-0000-0000').setRequired(true),
+            )
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('フレンドコードurl').setDescription('Nintendo Switch OnlineのフレンドコードURLを登録できます。'),
             ),
     )
     .addSubcommand((subcommand: $TSFixMe) =>

@@ -37,7 +37,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
 
             // membersテーブルにレコードがあるか確認
             if ((await MembersService.getMemberByUserId(guild.id, userId)).length == 0) {
-                const friendCode = await FriendCodeService.getFriendCodeByUserId(newMember.id);
+                const friendCode = await FriendCodeService.getFriendCodeObjByUserId(newMember.id);
                 await sleep(600);
                 const memberCheck = await searchAPIMemberById(guild, userId);
                 if (exists(memberCheck)) {
