@@ -22,8 +22,11 @@ const friendCode = new SlashCommandBuilder()
         subcommand
             .setName('add')
             .setDescription('フレンドコードを登録します。')
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('フレンドコード').setDescription('例：SW-0000-0000-0000').setRequired(true),
+            )
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('フレンドコードurl').setDescription('Nintendo Switch OnlineのフレンドコードURLを登録できます。'),
             ),
     )
     .addSubcommand((subcommand: $TSFixMe) =>
@@ -668,12 +671,21 @@ const privateMatch = new SlashCommandBuilder()
         subcommand
             .setName('recruit')
             .setDescription('開始時刻や人数などを細かく設定できます。通常はこちらを使ってください。')
-            .addStringOption((option: $TSFixMe) => option.setName('開始時刻').setDescription('何時から始める？例：21:00').setRequired(true))
-            .addStringOption((option: $TSFixMe) =>
-                option.setName('所要時間').setDescription('何時間ぐらいやる？例：2時間').setRequired(true),
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('開始時刻').setDescription('何時から始める？例: 21:00').setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
-            .addStringOption((option: $TSFixMe) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('所要時間').setDescription('何時間ぐらいやる？例: 2時間').setRequired(true),
+            )
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true),
+            )
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'),
+            )
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('ヘヤタテurl').setDescription('イカリング3のヘヤタテURLがある場合はこちらに入力してください'),
+            ),
     )
     .addSubcommand((subcommand: $TSFixMe) =>
         subcommand
@@ -867,6 +879,7 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import { log4js_obj } from './log4js_settings.js';
 import { assertExistCheck } from './app/common/others.js';
+import { SlashCommandStringOption } from 'discord.js';
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN || '');
 export async function registerSlashCommands() {
     const logger = log4js_obj.getLogger();
