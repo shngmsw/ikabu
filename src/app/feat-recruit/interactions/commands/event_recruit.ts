@@ -114,7 +114,7 @@ export async function eventRecruit(interaction: ChatInputCommandInteraction) {
         }
 
         let txt = `### <@${hostMember.user.id}>` + 'たんのイベマ募集\n';
-        txt = txt + '```' + `${eventData.regulation.replace(/<br \/>/g, '\n')}` + '```';
+        txt = txt + '```' + `${eventData.regulation.replace(/<br \/>/g, '\n')}` + '```\n';
         if (exists(user1) && exists(user2)) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         } else if (exists(user1)) {
