@@ -13,6 +13,7 @@ import { ParticipantService } from '../../../../db/participants_service';
 import { Member } from '../../../../db/model/member';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { placeHold } from '../../../../constant';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -63,8 +64,7 @@ export async function sendAnarchyMatch(
             thumbScaleY = 100;
             break;
         default:
-            thumbnailUrl =
-                'http://placehold.jp/15/4c4d57/ffffff/100x100.png?text=ここに画像を貼りたかったんだが、どうやらエラーみたいだ…。';
+            thumbnailUrl = placeHold.error100x100;
             thumbnailXP = 595;
             thumbnailYP = 20;
             thumbScaleX = 100;

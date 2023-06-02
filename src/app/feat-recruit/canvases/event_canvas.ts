@@ -1,11 +1,12 @@
 import Canvas from 'canvas';
 import path from 'path';
-import { modalRecruit } from '../../../constant.js';
+import { modalRecruit } from '../../../constant';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
-import { Participant } from '../../../db/model/participant.js';
-import { RecruitOpCode } from './regenerate_canvas.js';
-import { notExists } from '../../common/others.js';
+import { Participant } from '../../../db/model/participant';
+import { RecruitOpCode } from './regenerate_canvas';
+import { notExists } from '../../common/others';
+import { EventMatchInfo } from '../../common/apis/splatoon3_ink';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -21,7 +22,7 @@ Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 /*
  * 募集用のキャンバス(1枚目)を作成する
  */
-export async function recruitRegularCanvas(
+export async function recruitEventCanvas(
     opCode: number,
     remaining: number,
     count: number,
@@ -29,10 +30,6 @@ export async function recruitRegularCanvas(
     user1: Participant | null,
     user2: Participant | null,
     user3: Participant | null,
-    user4: Participant | null,
-    user5: Participant | null,
-    user6: Participant | null,
-    user7: Participant | null,
     condition: string,
     channelName: string | null,
 ) {
@@ -49,15 +46,15 @@ export async function recruitRegularCanvas(
     recruitCtx.lineWidth = 4;
     recruitCtx.stroke();
 
-    const regularIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png');
-    recruitCtx.drawImage(regularIcon, 25, 25, 75, 75);
+    const eventIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/event_icon.png');
+    recruitCtx.drawImage(eventIcon, 19, 19, 77, 77);
 
-    fillTextWithStroke(recruitCtx, 'レギュラーマッチ', '51px Splatfont', '#000000', '#B3FF00', 3, 115, 80);
+    fillTextWithStroke(recruitCtx, 'イベントマッチ', '51px Splatfont', '#000000', '#FF2F82', 3, 112, 80);
 
     // 募集主の画像
     const hostImage = await Canvas.loadImage(host.iconUrl ?? modalRecruit.placeHold);
     recruitCtx.save();
-    drawArcImage(recruitCtx, hostImage, 40, 120, 40);
+    drawArcImage(recruitCtx, hostImage, 40, 120, 50);
     recruitCtx.strokeStyle = '#1e1f23';
     recruitCtx.lineWidth = 9;
     recruitCtx.stroke();
@@ -77,32 +74,12 @@ export async function recruitRegularCanvas(
         memberIcons.push(user3.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user4 instanceof Participant) {
-        memberIcons.push(user4.iconUrl ?? modalRecruit.placeHold);
-    }
-
-    if (user5 instanceof Participant) {
-        memberIcons.push(user5.iconUrl ?? modalRecruit.placeHold);
-    }
-
-    if (user6 instanceof Participant) {
-        memberIcons.push(user6.iconUrl ?? modalRecruit.placeHold);
-    }
-
-    if (user7 instanceof Participant) {
-        memberIcons.push(user7.iconUrl ?? modalRecruit.placeHold);
-    }
-
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 4; i++) {
         if (count >= i + 2) {
             const userUrl = memberIcons[i] ?? blankAvatarUrl;
             const userImage = await Canvas.loadImage(userUrl);
             recruitCtx.save();
-            if (i < 3) {
-                drawArcImage(recruitCtx, userImage, (i + 1) * 100 + 40, 120, 40);
-            } else {
-                drawArcImage(recruitCtx, userImage, (i - 3) * 100 + 40, 220, 40);
-            }
+            drawArcImage(recruitCtx, userImage, i * 118 + 158, 120, 50);
             recruitCtx.strokeStyle = '#1e1f23';
             recruitCtx.lineWidth = 9;
             recruitCtx.stroke();
@@ -111,23 +88,9 @@ export async function recruitRegularCanvas(
     }
 
     const hostIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
-    recruitCtx.drawImage(hostIcon, 0, 0, hostIcon.width, hostIcon.height, 75, 155, 75, 75);
+    recruitCtx.drawImage(hostIcon, 0, 0, hostIcon.width, hostIcon.height, 90, 172, 75, 75);
 
-    let channelString;
-    if (notExists(channelName)) {
-        channelString = '🔉 VC指定なし';
-    } else if (channelName === '[簡易版募集]') {
-        channelString = channelName;
-    } else {
-        channelString = '🔉 ' + channelName;
-    }
-
-    recruitCtx.save();
-    recruitCtx.textAlign = 'right';
-    fillTextWithStroke(recruitCtx, channelString, '33px "Splatfont"', '#FFFFFF', '#2D3130', 1, 680, 70);
-    recruitCtx.restore();
-
-    fillTextWithStroke(recruitCtx, '募集人数', '41px "Splatfont"', '#FFFFFF', '#2D3130', 1, 490, 185);
+    fillTextWithStroke(recruitCtx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
 
     let remainingString;
     if (opCode === RecruitOpCode.open || opCode === RecruitOpCode.cancel) {
@@ -138,15 +101,15 @@ export async function recruitRegularCanvas(
 
     recruitCtx.save();
     recruitCtx.textAlign = 'center';
-    fillTextWithStroke(recruitCtx, remainingString, '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 560, 248);
+    fillTextWithStroke(recruitCtx, remainingString, '42px "Splatfont"', '#FFFFFF', '#2D3130', 1, 605, 218);
     recruitCtx.restore();
 
-    fillTextWithStroke(recruitCtx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 360);
+    fillTextWithStroke(recruitCtx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 290);
 
-    recruitCtx.font = '31px "Genshin", "SEGUI"';
-    const width = 603;
+    recruitCtx.font = '30px "Genshin", "SEGUI"';
+    const width = 600;
     const size = 40;
-    const columnNum = 3;
+    const columnNum = 4;
     const column = [''];
     let line = 0;
     condition = condition.replace('{br}', '\n');
@@ -172,9 +135,20 @@ export async function recruitRegularCanvas(
 
     for (let j = 0; j < column.length; j++) {
         if (j < columnNum) {
-            recruitCtx.fillText(column[j], 65, 415 + size * j);
+            recruitCtx.fillText(column[j], 65, 345 + size * j);
         }
     }
+
+    let channelString;
+    if (notExists(channelName)) {
+        channelString = '🔉 VC指定なし';
+    } else if (channelName === '[簡易版募集]') {
+        channelString = channelName;
+    } else {
+        channelString = '🔉 ' + channelName;
+    }
+
+    fillTextWithStroke(recruitCtx, channelString, '37px "Splatfont"', '#FFFFFF', '#2D3130', 1, 30, 520);
 
     if (opCode === RecruitOpCode.cancel) {
         recruitCtx.save();
@@ -199,11 +173,11 @@ export async function recruitRegularCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleRegularCanvas(regularData: $TSFixMe) {
+export async function ruleEventCanvas(eventData: EventMatchInfo) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
 
-    const date = formatDatetime(regularData.startTime, dateformat.ymdw);
-    const time = formatDatetime(regularData.startTime, dateformat.hm) + ' - ' + formatDatetime(regularData.endTime, dateformat.hm);
+    const date = formatDatetime(eventData.startTime, dateformat.ymdw);
+    const time = formatDatetime(eventData.startTime, dateformat.hm) + ' - ' + formatDatetime(eventData.endTime, dateformat.hm);
 
     const ruleCtx = ruleCanvas.getContext('2d');
 
@@ -214,10 +188,15 @@ export async function ruleRegularCanvas(regularData: $TSFixMe) {
     ruleCtx.lineWidth = 4;
     ruleCtx.stroke();
 
+    ruleCtx.save();
+    ruleCtx.textAlign = 'right';
+    fillTextWithStroke(ruleCtx, eventData.title, '38px Splatfont', '#FFE02EFB', '#2D3130', 1, 690, 65);
+    ruleCtx.restore();
+
     fillTextWithStroke(ruleCtx, 'ルール', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
-    const ruleWidth = ruleCtx.measureText(regularData.rule).width;
-    fillTextWithStroke(ruleCtx, regularData.rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - ruleWidth) / 2, 145); // 中央寄せ
+    const ruleWidth = ruleCtx.measureText(eventData.rule).width;
+    fillTextWithStroke(ruleCtx, eventData.rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - ruleWidth) / 2, 145); // 中央寄せ
 
     fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
 
@@ -231,11 +210,11 @@ export async function ruleRegularCanvas(regularData: $TSFixMe) {
 
     ruleCtx.save();
     ruleCtx.textAlign = 'center';
-    fillTextWithStroke(ruleCtx, regularData.stage1, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
-    fillTextWithStroke(ruleCtx, regularData.stage2, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
+    fillTextWithStroke(ruleCtx, eventData.stage1, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
+    fillTextWithStroke(ruleCtx, eventData.stage2, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
     ruleCtx.restore();
 
-    const stage1Image = await Canvas.loadImage(regularData.stageImage1);
+    const stage1Image = await Canvas.loadImage(eventData.stageImage1);
     ruleCtx.save();
     ruleCtx.beginPath();
     createRoundRect(ruleCtx, 370, 130, 308, 176, 10);
@@ -246,7 +225,7 @@ export async function ruleRegularCanvas(regularData: $TSFixMe) {
     ruleCtx.stroke();
     ruleCtx.restore();
 
-    const stage2Image = await Canvas.loadImage(regularData.stageImage2);
+    const stage2Image = await Canvas.loadImage(eventData.stageImage2);
     ruleCtx.save();
     ruleCtx.beginPath();
     createRoundRect(ruleCtx, 370, 340, 308, 176, 10);

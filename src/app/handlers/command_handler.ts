@@ -30,6 +30,7 @@ import { commandNames } from '../../constant.js';
 import { setting } from '../feat-utils/voice/tts/voice_bot_node';
 import { handleVoiceCommand } from '../feat-utils/voice/tts/discordjs_voice';
 import { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import { eventRecruit } from '../feat-recruit/interactions/commands/event_recruit';
 
 export async function call(interaction: ChatInputCommandInteraction<CacheType>) {
     const { commandName } = interaction;
@@ -62,8 +63,8 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
         await anarchyRecruit(interaction);
     } else if (commandName === commandNames.private) {
         await privateRecruit(interaction);
-    } else if (commandName === commandNames.league) {
-        // await leagueRecruit(interaction);
+    } else if (commandName === commandNames.event) {
+        await eventRecruit(interaction);
     } else if (commandName === commandNames.fesA) {
         await fesRecruit(interaction);
     } else if (commandName === commandNames.fesB) {

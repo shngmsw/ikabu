@@ -208,11 +208,11 @@ export async function ruleAnarchyCanvas(anarchyData: $TSFixMe, thumbnail: $TSFix
 
     fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
 
-    const stage1Width = ruleCtx.measureText(anarchyData.stage1).width;
-    fillTextWithStroke(ruleCtx, anarchyData.stage1, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage1Width) / 2 + 10, 440); // 中央寄せ
-
-    const stage2Width = ruleCtx.measureText(anarchyData.stage2).width;
-    fillTextWithStroke(ruleCtx, anarchyData.stage2, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage2Width) / 2 + 10, 490); // 中央寄せ
+    ruleCtx.save();
+    ruleCtx.textAlign = 'center';
+    fillTextWithStroke(ruleCtx, anarchyData.stage1, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
+    fillTextWithStroke(ruleCtx, anarchyData.stage2, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
+    ruleCtx.restore();
 
     const stage1Image = await Canvas.loadImage(anarchyData.stageImage1);
     ruleCtx.save();
