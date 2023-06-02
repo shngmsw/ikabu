@@ -338,7 +338,7 @@ export async function getEventData(data: $TSFixMe) {
 
         for (const event of eventList) {
             for (const timePeriod of event.timePeriods) {
-                if (isDateWithinRange(new Date('2023-06-03T04:30:00Z'), new Date(timePeriod.startTime), new Date(timePeriod.endTime))) {
+                if (isDateWithinRange(new Date(), new Date(timePeriod.startTime), new Date(timePeriod.endTime))) {
                     targetEvent = event;
                     startTime = timePeriod.startTime as string;
                     endTime = timePeriod.endTime as string;
