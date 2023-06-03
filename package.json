@@ -83,6 +83,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "prettier": "2.8.7",
     "ts-migrate": "^0.1.35",
     "ts-node": "^10.9.1",
