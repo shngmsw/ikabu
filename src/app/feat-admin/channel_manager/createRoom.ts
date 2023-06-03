@@ -93,7 +93,7 @@ export async function handleCreateRoom(interaction: $TSFixMe) {
                         }
 
                         if (categoryName != '') {
-                            categoryId = await createChannel(guild, null, categoryName, ChannelType.GuildCategory);
+                            categoryId = await createChannel(guild, categoryName, ChannelType.GuildCategory);
                         }
 
                         if (channelName != '') {
@@ -101,7 +101,7 @@ export async function handleCreateRoom(interaction: $TSFixMe) {
 
                             if (channelType !== '') {
                                 if (channelType != 'ERROR!') {
-                                    channelId = await createChannel(guild, categoryId, channelName, channelType);
+                                    channelId = await createChannel(guild, channelName, channelType, categoryId);
                                 }
                             }
                         } else {
