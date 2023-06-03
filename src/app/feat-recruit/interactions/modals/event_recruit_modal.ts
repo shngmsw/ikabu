@@ -5,7 +5,6 @@ import { setButtonDisable } from '../../../common/button_components';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
-import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
 import { getMemberMentions } from '../buttons/other_events';
 import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
@@ -13,71 +12,26 @@ import { ParticipantService } from '../../../../db/participants_service';
 import { Member } from '../../../../db/model/member';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
-import { placeHold } from '../../../../constant';
+import { EventMatchInfo } from '../../../common/apis/splatoon3_ink';
+import { recruitEventCanvas, ruleEventCanvas } from '../../canvases/event_canvas';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function sendAnarchyMatch(
+export async function sendEventMatch(
     interaction: ModalSubmitInteraction,
     txt: string,
     recruitNum: number,
     condition: string,
     count: number,
-    rank: string,
     member: Member,
     user1: Member | null,
     user2: Member | null,
-    anarchyData: $TSFixMe,
+    eventData: EventMatchInfo,
 ) {
-    let thumbnailUrl; // ガチルールのアイコン
-    let thumbnailXP; // アイコンx座標
-    let thumbnailYP; // アイコンy座標
-    let thumbScaleX; // アイコン幅
-    let thumbScaleY; // アイコン高さ
-    switch (anarchyData.rule) {
-        case 'ガチエリア':
-            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
-            thumbnailXP = 600;
-            thumbnailYP = 20;
-            thumbScaleX = 90;
-            thumbScaleY = 100;
-            break;
-        case 'ガチヤグラ':
-            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
-            thumbnailXP = 595;
-            thumbnailYP = 20;
-            thumbScaleX = 90;
-            thumbScaleY = 100;
-            break;
-        case 'ガチホコバトル':
-            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
-            thumbnailXP = 585;
-            thumbnailYP = 23;
-            thumbScaleX = 110;
-            thumbScaleY = 90;
-            break;
-        case 'ガチアサリ':
-            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
-            thumbnailXP = 570;
-            thumbnailYP = 20;
-            thumbScaleX = 120;
-            thumbScaleY = 100;
-            break;
-        default:
-            thumbnailUrl = placeHold.error100x100;
-            thumbnailXP = 595;
-            thumbnailYP = 20;
-            thumbScaleX = 100;
-            thumbScaleY = 100;
-            break;
-    }
-
-    const channelName = '[簡易版募集]';
-
-    const thumbnail = [thumbnailUrl, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
-
     assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
+
+    const channelName = '[簡易版募集]';
 
     const guild = await interaction.guild.fetch();
 
@@ -93,7 +47,7 @@ export async function sendAnarchyMatch(
         attendee2 = new Participant(user2.userId, user2.displayName, user2.iconUrl, 1, new Date());
     }
 
-    const recruitBuffer = await recruitAnarchyCanvas(
+    const recruitBuffer = await recruitEventCanvas(
         RecruitOpCode.open,
         recruitNum,
         count,
@@ -102,18 +56,17 @@ export async function sendAnarchyMatch(
         attendee2,
         null,
         condition,
-        rank,
         channelName,
     );
     const recruit = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
 
-    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, thumbnail), { name: 'rules.png' });
+    const rule = new AttachmentBuilder(await ruleEventCanvas(eventData), { name: 'rules.png' });
 
     try {
         const recruitChannel = interaction.channel;
-        const mention = `<@&${process.env.ROLE_ID_RECRUIT_ANARCHY}>`;
+        const mention = `<@&${process.env.ROLE_ID_RECRUIT_EVENT}>`;
         const image1Message = await interaction.editReply({
             content: txt,
             files: [recruit],
@@ -127,8 +80,7 @@ export async function sendAnarchyMatch(
             recruitNum,
             condition,
             channelName,
-            RecruitType.AnarchyRecruit,
-            rank,
+            RecruitType.EventRecruit,
         );
 
         // DBに参加者情報を登録
@@ -151,7 +103,7 @@ export async function sendAnarchyMatch(
         });
         await interaction.followUp({
             content:
-                '募集完了でし！\nこの方法での募集は推奨しないでし！\n次回は`/バンカラ募集 now`を使ってみるでし！\nコマンドを使用すると次のスケジュールの募集を建てたり、素早く募集を建てたりできるでし！',
+                '募集完了でし！\nこの方法での募集は推奨しないでし！\n次回は`/イベマ募集 event`を使ってみるでし！\nコマンドを使用すると次のスケジュールの募集を建てたり、素早く募集を建てたりできるでし！',
             ephemeral: true,
         });
 

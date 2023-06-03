@@ -56,7 +56,7 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
         switch (oldRecruitData[0].recruitType) {
             case RecruitType.RegularRecruit:
             case RecruitType.AnarchyRecruit:
-            case RecruitType.LeagueRecruit:
+            case RecruitType.EventRecruit:
             case RecruitType.SalmonRecruit:
             case RecruitType.FestivalRecruit:
             case RecruitType.BigRunRecruit:
@@ -98,7 +98,7 @@ async function editRecruitNum(guildId: string, messageId: string, recruitType: n
     let limit;
     switch (recruitType) {
         case RecruitType.AnarchyRecruit:
-        case RecruitType.LeagueRecruit:
+        case RecruitType.EventRecruit:
         case RecruitType.SalmonRecruit:
         case RecruitType.FestivalRecruit:
         case RecruitType.BigRunRecruit:

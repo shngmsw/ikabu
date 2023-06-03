@@ -15,6 +15,7 @@ import {
     getXMatchData,
 } from '../../common/apis/splatoon3_ink';
 import { log4js_obj } from '../../../log4js_settings';
+import { placeHold } from '../../../constant';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -299,6 +300,6 @@ function rule2image(rule: $TSFixMe) {
         case 'ガチアサリ':
             return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
         default:
-            return 'http://placehold.jp/15/4c4d57/ffffff/100x100.png?text=ここに画像を貼りたかったんだが、どうやらエラーみたいだ…。';
+            return placeHold.error100x100;
     }
 }

@@ -23,8 +23,8 @@ export async function stickyChannelCheck(message: Message) {
             content = await availableRecruitString(guild, channelId, RecruitType.AnarchyRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_REGULAR) {
             content = await availableRecruitString(guild, channelId, RecruitType.RegularRecruit);
-        } else if (channelId === process.env.CHANNEL_ID_RECRUIT_LEAGUE) {
-            content = await availableRecruitString(guild, channelId, RecruitType.LeagueRecruit);
+        } else if (channelId === process.env.CHANNEL_ID_RECRUIT_EVENT) {
+            content = await availableRecruitString(guild, channelId, RecruitType.EventRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_SALMON) {
             content = await availableRecruitString(guild, channelId, RecruitType.SalmonRecruit);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_OTHERGAMES) {

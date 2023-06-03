@@ -10,6 +10,7 @@ import { recruitRegularCanvas } from './regular_canvas';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchRoleById, searchRoleIdByName } from '../../common/manager/role_manager';
 import { recruitFesCanvas } from './fes_canvas';
+import { recruitEventCanvas } from './event_canvas';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -38,6 +39,9 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
         switch (recruitData[0].recruitType) {
             case RecruitType.RegularRecruit:
                 regenRegularCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
+                break;
+            case RecruitType.EventRecruit:
+                regenEventCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
                 break;
             case RecruitType.AnarchyRecruit:
                 regenAnarchyCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
@@ -84,6 +88,46 @@ async function regenRegularCanvas(
         submitMembersList[5],
         submitMembersList[6],
         submitMembersList[7],
+        condition,
+        channelName,
+    );
+    const recruit = new AttachmentBuilder(recruitBuffer, {
+        name: 'ikabu_recruit.png',
+    });
+
+    message.edit({ files: [recruit] });
+}
+
+async function regenEventCanvas(
+    message: Message,
+    recruitData: Recruit,
+    participantsData: Participant[],
+    applicantNum: number,
+    opCode: number,
+) {
+    const applicantList = []; // 参加希望者リスト
+    for (const participant of participantsData) {
+        if (participant.userType === 2) {
+            applicantList.push(participant);
+        }
+    }
+    const recruitNum = recruitData.recruitNum;
+    const remainingNum = recruitNum - applicantNum;
+    const count = remainingNum + participantsData.length; // 全体の枠数
+    const channelName = recruitData.channelName;
+    const condition = recruitData.condition;
+
+    const submitMembersList = Array(count).fill(null); // 枠数までnull埋め
+    participantsData.forEach((participant, index) => (submitMembersList[index] = participant));
+
+    const recruitBuffer = await recruitEventCanvas(
+        opCode,
+        remainingNum,
+        count,
+        submitMembersList[0],
+        submitMembersList[1],
+        submitMembersList[2],
+        submitMembersList[3],
         condition,
         channelName,
     );

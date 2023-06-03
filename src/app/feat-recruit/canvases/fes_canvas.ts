@@ -118,7 +118,7 @@ export async function recruitFesCanvas(
     const columnNum = 4;
     const column = [''];
     let line = 0;
-    condition = condition.replace('{br}', '\n');
+    condition = condition.replace(/\\n/g, '\n');
 
     // 幅に合わせて自動改行
     for (let i = 0; i < condition.length; i++) {
@@ -209,11 +209,11 @@ export async function ruleFesCanvas(fesData: $TSFixMe) {
 
     fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
 
-    const stage1Width = ruleCtx.measureText(fesData.stage1).width;
-    fillTextWithStroke(ruleCtx, fesData.stage1, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage1Width) / 2 + 10, 440); // 中央寄せ
-
-    const stage2Width = ruleCtx.measureText(fesData.stage2).width;
-    fillTextWithStroke(ruleCtx, fesData.stage2, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - stage2Width) / 2 + 10, 490); // 中央寄せ
+    ruleCtx.save();
+    ruleCtx.textAlign = 'center';
+    fillTextWithStroke(ruleCtx, fesData.stage1, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
+    fillTextWithStroke(ruleCtx, fesData.stage2, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
+    ruleCtx.restore();
 
     const stage1Image = await Canvas.loadImage(fesData.stageImage1);
     ruleCtx.save();

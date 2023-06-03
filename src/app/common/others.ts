@@ -259,7 +259,7 @@ export function getCloseEmbed() {
 
 const recruit_command = {
     プラベ募集: '`/プラベ募集 recruit` or `/プラベ募集 button`',
-    リグマ募集: '`/リグマ募集 now` or `/リグマ募集 next`',
+    イベマ募集: '`/イベマ募集 event`',
     ナワバリ募集: '`/ナワバリ募集 now` or `/ナワバリ募集 next`',
     バンカラ募集: '`/バンカラ募集 now` or `/バンカラ募集 next`',
     フェス募集: '`/〇〇陣営 now` or `/〇〇陣営 next`',
@@ -273,10 +273,8 @@ export function getCommandHelpEmbed(channelName: $TSFixMe) {
         case 'プラベ募集':
             commandMessage = recruit_command.プラベ募集;
             break;
-        case 'リグマ募集':
-        case 'リグマ募集2':
-        case '🔰リグマ募集':
-            commandMessage = recruit_command.リグマ募集;
+        case 'イベマ募集':
+            commandMessage = recruit_command.イベマ募集;
             break;
         case 'ナワバリ募集':
             commandMessage = recruit_command.ナワバリ募集;
