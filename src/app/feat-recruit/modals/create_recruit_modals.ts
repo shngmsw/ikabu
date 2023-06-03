@@ -1,4 +1,5 @@
 import { createAnarchyModal } from './create_anarchy_modal';
+import { createEventModal } from './create_event_modal';
 import { createFesModal } from './create_fes_modal';
 import { createRegularModal } from './create_regular_modal';
 import { createSalmonModal } from './create_salmon_modal';
@@ -6,10 +7,8 @@ import { createSalmonModal } from './create_salmon_modal';
 export async function handleCreateModal(interaction: $TSFixMe, params: $TSFixMe) {
     const channelName = params.get('cn');
     switch (channelName) {
-        case 'リグマ募集':
-        case 'リグマ募集2':
-        case '🔰リグマ募集':
-            // リグマ実装時に作る
+        case 'イベマ募集':
+            await createEventModal(interaction);
             break;
         case 'ナワバリ募集':
             await createRegularModal(interaction);

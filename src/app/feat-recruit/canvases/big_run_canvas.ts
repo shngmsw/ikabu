@@ -102,7 +102,7 @@ export async function recruitBigRunCanvas(
         const columnNum = 4;
         const column = [''];
         let line = 0;
-        condition = condition.replace('{br}', '\n');
+        condition = condition.replace(/\\n/g, '\n');
 
         // 幅に合わせて自動改行
         for (let i = 0; i < condition.length; i++) {

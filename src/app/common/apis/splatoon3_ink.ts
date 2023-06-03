@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { log4js_obj } from '../../../log4js_settings';
-import { isEmpty } from '../others';
+import { assertExistCheck, exists, isEmpty, notExists } from '../others';
+import { isDateWithinRange } from '../datetime';
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const locale_url = 'https://splatoon3.ink/data/locale/ja-JP.json';
 
@@ -87,16 +88,10 @@ export function checkBigRun(schedule: $TSFixMe, num: $TSFixMe) {
             return false;
         }
 
-        const start_datetime = new Date(big_run_list[num].startTime).getTime();
-        const end_datetime = new Date(big_run_list[num].endTime).getTime();
-        const now_datetime = new Date().getTime();
-        if (now_datetime - start_datetime < 0) {
-            return false;
-        } else if (end_datetime - now_datetime < 0) {
-            return false;
-        } else {
-            return true;
-        }
+        const start_datetime = new Date(big_run_list[num].startTime);
+        const end_datetime = new Date(big_run_list[num].endTime);
+        const now_datetime = new Date();
+        return isDateWithinRange(now_datetime, start_datetime, end_datetime);
     } catch (error) {
         logger.error(error);
     }
@@ -165,9 +160,9 @@ export function getAnarchyList(schedule: $TSFixMe) {
  * dataからリグマ用のリストだけ返す
  * @param {*} schedule スケジュールデータ
  */
-export function getLeagueList(schedule: $TSFixMe) {
+export function getEventList(schedule: $TSFixMe) {
     try {
-        return schedule.data.leagueSchedules.nodes;
+        return schedule.data.eventSchedules.nodes;
     } catch (error) {
         logger.error(error);
     }
@@ -248,9 +243,9 @@ export async function getRegularData(data: $TSFixMe, num: $TSFixMe) {
         result.startTime = regular_list[num].startTime;
         result.endTime = regular_list[num].endTime;
         if (!checkFes(data.schedule, num)) {
-            result.rule = await rule2txt(data.locale, r_setting.vsRule.id);
-            result.stage1 = await stage2txt(data.locale, r_setting.vsStages[0].id);
-            result.stage2 = await stage2txt(data.locale, r_setting.vsStages[1].id);
+            result.rule = rule2txt(data.locale, r_setting.vsRule.id);
+            result.stage1 = stage2txt(data.locale, r_setting.vsStages[0].id);
+            result.stage2 = stage2txt(data.locale, r_setting.vsStages[1].id);
             result.stageImage1 = r_setting.vsStages[0].image.url;
             result.stageImage2 = r_setting.vsStages[1].image.url;
         }
@@ -275,9 +270,9 @@ export async function getAnarchyChallengeData(data: $TSFixMe, num: $TSFixMe) {
         result.startTime = anarchy_list[num].startTime;
         result.endTime = anarchy_list[num].endTime;
         if (!checkFes(data.schedule, num)) {
-            result.rule = await rule2txt(data.locale, a_settings[0].vsRule.id);
-            result.stage1 = await stage2txt(data.locale, a_settings[0].vsStages[0].id);
-            result.stage2 = await stage2txt(data.locale, a_settings[0].vsStages[1].id);
+            result.rule = rule2txt(data.locale, a_settings[0].vsRule.id);
+            result.stage1 = stage2txt(data.locale, a_settings[0].vsStages[0].id);
+            result.stage2 = stage2txt(data.locale, a_settings[0].vsStages[1].id);
             result.stageImage1 = a_settings[0].vsStages[0].image.url;
             result.stageImage2 = a_settings[0].vsStages[1].image.url;
         }
@@ -302,9 +297,9 @@ export async function getAnarchyOpenData(data: $TSFixMe, num: $TSFixMe) {
         result.startTime = anarchy_list[num].startTime;
         result.endTime = anarchy_list[num].endTime;
         if (!checkFes(data.schedule, num)) {
-            result.rule = await rule2txt(data.locale, a_settings[1].vsRule.id);
-            result.stage1 = await stage2txt(data.locale, a_settings[1].vsStages[0].id);
-            result.stage2 = await stage2txt(data.locale, a_settings[1].vsStages[1].id);
+            result.rule = rule2txt(data.locale, a_settings[1].vsRule.id);
+            result.stage1 = stage2txt(data.locale, a_settings[1].vsStages[0].id);
+            result.stage2 = stage2txt(data.locale, a_settings[1].vsStages[1].id);
             result.stageImage1 = a_settings[1].vsStages[0].image.url;
             result.stageImage2 = a_settings[1].vsStages[1].image.url;
         }
@@ -314,27 +309,68 @@ export async function getAnarchyOpenData(data: $TSFixMe, num: $TSFixMe) {
     }
 }
 
+export type EventMatchInfo = {
+    title: string;
+    description: string;
+    regulation: string;
+    startTime: string;
+    endTime: string;
+    rule: string;
+    stage1: string;
+    stage2: string;
+    stageImage1: string;
+    stageImage2: string;
+};
+
 /**
- * リグマ募集用データに整形する
+ * イベントマッチ募集用データに整形する
  * @param {*} data フェッチしたデータ
  * @param {Number} num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getLeagueData(data: $TSFixMe, num: $TSFixMe) {
+export async function getEventData(data: $TSFixMe) {
     try {
-        const league_list = getLeagueList(data.schedule);
-        const l_settings = league_list[num].leagueMatchSetting;
+        const eventList = getEventList(data.schedule);
 
-        const result: $TSFixMe = {};
-        result.startTime = league_list[num].startTime;
-        result.endTime = league_list[num].endTime;
-        if (!checkFes(data.schedule, num)) {
-            result.rule = await rule2txt(data.locale, l_settings.vsRule.id);
-            result.stage1 = await stage2txt(data.locale, l_settings.vsStages[0].id);
-            result.stage2 = await stage2txt(data.locale, l_settings.vsStages[1].id);
-            result.stageImage1 = l_settings.vsStages[0].image.url;
-            result.stageImage2 = l_settings.vsStages[1].image.url;
+        let targetEvent = null;
+        let startTime = null;
+        let endTime = null;
+
+        for (const event of eventList) {
+            for (const timePeriod of event.timePeriods) {
+                if (isDateWithinRange(new Date(), new Date(timePeriod.startTime), new Date(timePeriod.endTime))) {
+                    targetEvent = event;
+                    startTime = timePeriod.startTime as string;
+                    endTime = timePeriod.endTime as string;
+                }
+            }
         }
+
+        if (notExists(targetEvent)) {
+            return null;
+        }
+
+        assertExistCheck(startTime, 'eventMatchStartTime');
+        assertExistCheck(endTime, 'eventMatchEndTime');
+
+        const eventSetting = targetEvent.leagueMatchSetting;
+
+        const eventTexts = event2txt(data.locale, eventSetting.leagueMatchEvent.id);
+        assertExistCheck(eventTexts);
+
+        const result: EventMatchInfo = {
+            title: eventTexts.title,
+            description: eventTexts.description,
+            regulation: eventTexts.regulation,
+            startTime: startTime,
+            endTime: endTime,
+            rule: rule2txt(data.locale, eventSetting.vsRule.id) as string,
+            stage1: stage2txt(data.locale, eventSetting.vsStages[0].id) as string,
+            stage2: stage2txt(data.locale, eventSetting.vsStages[1].id) as string,
+            stageImage1: eventSetting.vsStages[0].image.url as string,
+            stageImage2: eventSetting.vsStages[1].image.url as string,
+        };
+
         return result;
     } catch (error) {
         logger.error(error);
@@ -355,7 +391,7 @@ export async function getSalmonData(data: $TSFixMe, num: $TSFixMe) {
         const result: $TSFixMe = {};
         result.startTime = salmon_list[num].startTime;
         result.endTime = salmon_list[num].endTime;
-        result.stage = await stage2txt(data.locale, s_setting.coopStage.id);
+        result.stage = stage2txt(data.locale, s_setting.coopStage.id);
         result.weapon1 = s_setting.weapons[0].image.url;
         result.weapon2 = s_setting.weapons[1].image.url;
         result.weapon3 = s_setting.weapons[2].image.url;
@@ -382,9 +418,9 @@ export async function getXMatchData(data: $TSFixMe, num: $TSFixMe) {
         result.startTime = x_list[num].startTime;
         result.endTime = x_list[num].endTime;
         if (!checkFes(data.schedule, num)) {
-            result.rule = await rule2txt(data.locale, x_settings.vsRule.id);
-            result.stage1 = await stage2txt(data.locale, x_settings.vsStages[0].id);
-            result.stage2 = await stage2txt(data.locale, x_settings.vsStages[1].id);
+            result.rule = rule2txt(data.locale, x_settings.vsRule.id);
+            result.stage1 = stage2txt(data.locale, x_settings.vsStages[0].id);
+            result.stage2 = stage2txt(data.locale, x_settings.vsStages[1].id);
             result.stageImage1 = x_settings.vsStages[0].image.url;
             result.stageImage2 = x_settings.vsStages[1].image.url;
         }
@@ -409,9 +445,9 @@ export async function getFesData(data: $TSFixMe, num: $TSFixMe) {
         result.startTime = fes_list[num].startTime;
         result.endTime = fes_list[num].endTime;
         if (checkFes(data.schedule, num)) {
-            result.rule = await rule2txt(data.locale, f_setting.vsRule.id);
-            result.stage1 = await stage2txt(data.locale, f_setting.vsStages[0].id);
-            result.stage2 = await stage2txt(data.locale, f_setting.vsStages[1].id);
+            result.rule = rule2txt(data.locale, f_setting.vsRule.id);
+            result.stage1 = stage2txt(data.locale, f_setting.vsStages[0].id);
+            result.stage2 = stage2txt(data.locale, f_setting.vsStages[1].id);
             result.stageImage1 = f_setting.vsStages[0].image.url;
             result.stageImage2 = f_setting.vsStages[1].image.url;
         }
@@ -435,7 +471,7 @@ export async function getBigRunData(data: $TSFixMe, num: $TSFixMe) {
         const result: $TSFixMe = {};
         result.startTime = big_run_list[num].startTime;
         result.endTime = big_run_list[num].endTime;
-        result.stage = await stage2txt(data.locale, b_setting.coopStage.id);
+        result.stage = stage2txt(data.locale, b_setting.coopStage.id);
         result.weapon1 = b_setting.weapons[0].image.url;
         result.weapon2 = b_setting.weapons[1].image.url;
         result.weapon3 = b_setting.weapons[2].image.url;
@@ -461,7 +497,7 @@ export async function getTeamContestData(data: $TSFixMe, num: $TSFixMe) {
         const result: $TSFixMe = {};
         result.startTime = teamContestList[num].startTime;
         result.endTime = teamContestList[num].endTime;
-        result.stage = await stage2txt(data.locale, t_setting.coopStage.id);
+        result.stage = stage2txt(data.locale, t_setting.coopStage.id);
         result.weapon1 = t_setting.weapons[0].image.url;
         result.weapon2 = t_setting.weapons[1].image.url;
         result.weapon3 = t_setting.weapons[2].image.url;
@@ -479,13 +515,13 @@ export async function getTeamContestData(data: $TSFixMe, num: $TSFixMe) {
  * @param {*} id 変換するID
  * @returns ステージ名
  */
-export async function stage2txt(locale: $TSFixMe, id: $TSFixMe) {
+export function stage2txt(locale: $TSFixMe, id: $TSFixMe) {
     try {
         const stages = locale.stages;
         if (isEmpty(stages[id])) {
             return 'そーりー・あんでふぁいんど';
         } else {
-            return stages[id].name;
+            return stages[id].name as string;
         }
     } catch (error) {
         logger.error(error);
@@ -498,14 +534,33 @@ export async function stage2txt(locale: $TSFixMe, id: $TSFixMe) {
  * @param {*} id 変換するID
  * @returns ルール名
  */
-export async function rule2txt(locale: $TSFixMe, id: $TSFixMe) {
+export function rule2txt(locale: $TSFixMe, id: string) {
     try {
         const rules = locale.rules;
         if (isEmpty(rules[id])) {
             return 'そーりー・あんでふぁいんど';
         } else {
-            return rules[id].name;
+            return rules[id].name as string;
         }
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+function event2txt(locale: $TSFixMe, id: string) {
+    try {
+        const events = locale.events;
+        const result = {
+            title: 'そーりー・あんでふぁいんど',
+            description: 'そーりー・あんでふぁいんど',
+            regulation: 'そーりー・あんでふぁいんど',
+        };
+        if (exists(events[id])) {
+            (result.title = events[id].name as string),
+                (result.description = events[id].desc as string),
+                (result.regulation = events[id].regulation as string);
+        }
+        return result;
     } catch (error) {
         logger.error(error);
     }

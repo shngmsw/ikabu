@@ -40,7 +40,7 @@ export const RecruitType = {
     PrivateRecruit: 1,
     RegularRecruit: 2,
     AnarchyRecruit: 3,
-    LeagueRecruit: 4,
+    EventRecruit: 4,
     SalmonRecruit: 5,
     FestivalRecruit: 6,
     BigRunRecruit: 7,

@@ -83,7 +83,7 @@ export function unlockChannelButton(channelId: string) {
 }
 
 export function createNewRecruitButton(channelName: string) {
-    const allowedChannel = ['ナワバリ募集', 'バンカラ募集', 'リグマ募集', 'サーモン募集', 'ウツホ募集', 'フウカ募集', 'マンタロー募集'];
+    const allowedChannel = ['ナワバリ募集', 'バンカラ募集', 'イベマ募集', 'サーモン募集', 'ウツホ募集', 'フウカ募集', 'マンタロー募集'];
 
     const buttonParams = new URLSearchParams();
     buttonParams.append('d', 'newr');
