@@ -227,7 +227,7 @@ async function regenSalmonCanvas(
 }
 
 async function regenFesCanvas(
-    message: Message,
+    message: Message<true>,
     recruitData: Recruit,
     participantsData: Participant[],
     applicantNum: number,
@@ -245,9 +245,12 @@ async function regenFesCanvas(
     const channelName = recruitData.channelName;
     const condition = recruitData.condition;
     const teamName = recruitData.option;
+    assertExistCheck(teamName, 'teamName');
 
     const mentionId = await searchRoleIdByName(message.guild, teamName);
+    assertExistCheck(mentionId);
     const teamRole = await searchRoleById(message.guild, mentionId);
+    assertExistCheck(teamRole, 'teamRole');
 
     const submitMembersList = Array(count).fill(null); // 枠数までnull埋め
     participantsData.forEach((participant, index) => (submitMembersList[index] = participant));

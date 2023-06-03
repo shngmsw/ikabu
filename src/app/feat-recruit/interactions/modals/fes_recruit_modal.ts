@@ -35,7 +35,9 @@ export async function sendFesMatch(
 
     const guild = await interaction.guild?.fetch();
     const mentionId = await searchRoleIdByName(guild, team);
+    assertExistCheck(mentionId);
     const teamRole = await searchRoleById(guild, mentionId);
+    assertExistCheck(teamRole, 'teamRole');
 
     if (notExists(mentionId)) {
         await interaction.editReply({

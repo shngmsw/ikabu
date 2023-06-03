@@ -8,7 +8,7 @@ import request from 'request';
 import { log4js_obj } from '../../../log4js_settings';
 import { createChannel } from '../../common/manager/channel_manager';
 import { createRole, searchRoleById, setColorToRole, setRoleToMember } from '../../common/manager/role_manager';
-import { exists, notExists } from '../../common/others';
+import { assertExistCheck, exists, notExists } from '../../common/others';
 
 // const INDEX_CATEGORY_ID = 0;
 const INDEX_CATEGORY_NAME = 1;
@@ -117,6 +117,7 @@ export async function handleCreateRoom(interaction: $TSFixMe) {
                             await setRoleToChanel(guild, roleId, channelId);
 
                             const role = await searchRoleById(guild, roleId);
+                            assertExistCheck(role);
 
                             // the role will be displayed separately from other members
                             role.setHoist(true);

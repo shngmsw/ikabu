@@ -5,7 +5,7 @@ import { AttachmentBuilder, PermissionsBitField } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { createRole, searchRoleById, searchRoleIdByName, setColorToRole } from '../../common/manager/role_manager';
-import { exists, isEmpty, isNotEmpty, notExists } from '../../common/others';
+import { assertExistCheck, exists, isEmpty, isNotEmpty, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('RoleManager');
 
@@ -44,6 +44,7 @@ export async function handleCreateRole(interaction: $TSFixMe) {
         await guild.roles.fetch();
 
         const role = await searchRoleById(guild, roleId);
+        assertExistCheck(role);
         const colorCode = await setColorToRole(guild, role, colorInput);
         role.setHoist(true);
 
@@ -142,6 +143,7 @@ export async function handleAssignRole(interaction: $TSFixMe) {
         const assignRoleId = assignRole.id;
 
         const targetRole = await searchRoleById(interaction.guild, targetRoleId);
+        assertExistCheck(targetRole, 'targetRole');
 
         const targets = targetRole.members;
 
@@ -173,7 +175,7 @@ export async function handleUnassignRole(interaction: $TSFixMe) {
         const unAssignRoleId = unAssignRole.id;
 
         const targetRole = await searchRoleById(interaction.guild, targetRoleId);
-
+        assertExistCheck(targetRole, 'targetRole');
         const targets = targetRole.members;
 
         for (const target of targets) {

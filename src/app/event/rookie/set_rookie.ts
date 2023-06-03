@@ -19,6 +19,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
             return;
         }
         assertExistCheck(process.env.CHANNEL_ID_ROBBY, 'CHANNEL_ID_ROBBY');
+        assertExistCheck(process.env.ROOKIE_ROLE_ID, 'ROOKIE_ROLE_ID');
         const lobbyChannel = await searchChannelById(guild, process.env.CHANNEL_ID_ROBBY);
         const beginnerRole = await searchRoleById(guild, process.env.ROOKIE_ROLE_ID);
         const userId = newMember.user.id;
