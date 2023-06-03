@@ -11,7 +11,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, checkTeamContest, fetchSchedule, getSalmonData, getTeamContestData } from '../../../common/apis/splatoon3_ink';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, isNotEmpty, notExists, sleep } from '../../../common/others';
+import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_canvas';
 import { recruitSalmonCanvas, ruleSalmonCanvas } from '../../canvases/salmon_canvas';
@@ -79,6 +79,8 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
         'lima',
         'mike',
     ];
+
+    assertExistCheck(hostMember);
 
     if (voiceChannel instanceof VoiceChannel) {
         if (voiceChannel.members.size != 0 && !voiceChannel.members.has(hostMember.user.id)) {
@@ -172,6 +174,8 @@ async function sendSalmonRun(
     }
 
     const recruiter = await searchDBMemberById(guild, hostMember.id);
+    assertExistCheck(recruiter, 'recruiter');
+
     const hostPt = new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date());
 
     let participant1 = null;
@@ -179,10 +183,12 @@ async function sendSalmonRun(
 
     if (exists(user1)) {
         const member = await searchDBMemberById(guild, user1.id);
+        assertExistCheck(member, 'member1');
         participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
     }
     if (exists(user2)) {
         const member = await searchDBMemberById(guild, user2.id);
+        assertExistCheck(member, 'member2');
         participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
     }
 
@@ -307,7 +313,7 @@ async function sendSalmonRun(
         // 15秒後に削除ボタンを消す
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
-        if (isNotEmpty(deleteButtonCheck)) {
+        if (exists(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
             if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {

@@ -11,6 +11,7 @@ import { log4js_obj } from '../../../log4js_settings';
 import { searchRoleById, searchRoleIdByName } from '../../common/manager/role_manager';
 import { recruitFesCanvas } from './fes_canvas';
 import { recruitEventCanvas } from './event_canvas';
+import { assertExistCheck } from '../../common/others';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -29,6 +30,7 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
         }
         const participantsData = await ParticipantService.getAllParticipants(guild.id, messageId);
         const message = await searchMessageById(guild, channelId, messageId);
+        assertExistCheck(message, 'message');
         const applicantList = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 2) {

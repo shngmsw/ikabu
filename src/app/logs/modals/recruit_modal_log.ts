@@ -1,14 +1,17 @@
 import { EmbedBuilder, Guild } from 'discord.js';
-import { searchAPIMemberById, searchDBMemberById } from '../../common/manager/member_manager';
+import { searchDBMemberById } from '../../common/manager/member_manager';
 import { sendEmbedsWebhook } from '../../common/webhook';
 import { Recruit } from '../../../db/model/recruit';
+import { exists } from '../../common/others';
+import { log4js_obj } from '../../../log4js_settings';
+
+const logger = log4js_obj.getLogger('interaction');
 
 export async function sendRecruitModalLog(interaction: $TSFixMe) {
     const guild = interaction.guild;
     const channelName = interaction.channel.name;
     const authorId = interaction.member.user.id;
-    // deferしてないけど、呼び出し元でawaitつけないので大丈夫なはず
-    const author = await searchAPIMemberById(guild, authorId);
+    const author = await searchDBMemberById(guild, authorId);
     const components = interaction.components;
     let commandLog = '';
 
@@ -18,10 +21,14 @@ export async function sendRecruitModalLog(interaction: $TSFixMe) {
 
     const embed = new EmbedBuilder();
     embed.setTitle('モーダルログ');
-    embed.setAuthor({
-        name: `${author.displayName} [${interaction.member.user.id}]`,
-        iconURL: author.displayAvatarURL(),
-    });
+    if (exists(author)) {
+        embed.setAuthor({
+            name: `${author.displayName} [${interaction.member.user.id}]`,
+            iconURL: author.iconUrl,
+        });
+    } else {
+        logger.warn('No log generated due to missing author information');
+    }
     embed.addFields([
         {
             name: '募集パラメータ',
@@ -45,10 +52,14 @@ export async function sendEditRecruitLog(guild: Guild, oldRecruitData: Recruit, 
 
     const embed = new EmbedBuilder();
     embed.setTitle('募集内容編集ログ');
-    embed.setAuthor({
-        name: `${recruiter.displayName} [${recruiterId}]`,
-        iconURL: recruiter.iconUrl,
-    });
+    if (exists(recruiter)) {
+        embed.setAuthor({
+            name: `${recruiter.displayName} [${recruiterId}]`,
+            iconURL: recruiter.iconUrl,
+        });
+    } else {
+        logger.warn('No log generated due to missing author information');
+    }
     embed.addFields([
         {
             name: '募集人数',

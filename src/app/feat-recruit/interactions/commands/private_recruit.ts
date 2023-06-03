@@ -2,7 +2,7 @@ import { BaseGuildTextChannel, CacheType, ChatInputCommandInteraction, CommandIn
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, notifyActionRow, recruitActionRow } from '../../buttons/create_recruit_buttons';
 import { RecruitService } from '../../../../db/recruit_service';
 import { ParticipantService } from '../../../../db/participants_service';
@@ -47,6 +47,8 @@ async function sendPrivateRecruit(
     const guild = interaction.guild;
     const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
     const recruitChannel = interaction.channel;
+
+    assertExistCheck(recruiter, 'recruiter');
 
     const embed = new EmbedBuilder()
         .setAuthor({
@@ -133,7 +135,7 @@ async function sendPrivateRecruit(
         // 15秒後に削除ボタンを消す
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
-        if (isNotEmpty(deleteButtonCheck)) {
+        if (exists(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
             return;
@@ -153,6 +155,8 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
     const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
     const recruitChannel = interaction.channel;
     const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
+
+    assertExistCheck(recruiter, 'recruiter');
 
     await interaction.deferReply({ ephemeral: true });
 

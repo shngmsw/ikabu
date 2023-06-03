@@ -17,7 +17,7 @@ export async function cancelNotify(interaction: ButtonInteraction) {
     if (!interaction.inGuild()) return;
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         assertExistCheck(interaction.guild, 'guild');
@@ -29,11 +29,12 @@ export async function cancelNotify(interaction: ButtonInteraction) {
 
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
+        assertExistCheck(member, 'member');
 
         const recruitData = await RecruitService.getRecruit(guild.id, embedMessageId);
 
         if (recruitData.length === 0) {
-            await interaction.editReply({ components: await disableThinkingButton(interaction, 'キャンセル') });
+            await interaction.editReply({ components: disableThinkingButton(interaction, 'キャンセル') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
                 ephemeral: false,
@@ -85,7 +86,7 @@ export async function cancelNotify(interaction: ButtonInteraction) {
 
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集はキャンセルされたでし！`,
-                components: await disableThinkingButton(interaction, 'キャンセル'),
+                components: disableThinkingButton(interaction, 'キャンセル'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
@@ -110,7 +111,7 @@ export async function cancelNotify(interaction: ButtonInteraction) {
                 });
                 await interaction.editReply({
                     content: await memberListMessage(interaction, embedMessageId),
-                    components: await recoveryThinkingButton(interaction, 'キャンセル'),
+                    components: recoveryThinkingButton(interaction, 'キャンセル'),
                 });
 
                 if (recruitChannel instanceof BaseGuildTextChannel) {
@@ -123,14 +124,14 @@ export async function cancelNotify(interaction: ButtonInteraction) {
                     ephemeral: true,
                 });
                 await interaction.editReply({
-                    components: await recoveryThinkingButton(interaction, 'キャンセル'),
+                    components: recoveryThinkingButton(interaction, 'キャンセル'),
                 });
             }
         }
     } catch (err) {
         logger.error(err);
         await interaction.message.edit({
-            components: await disableThinkingButton(interaction, 'キャンセル'),
+            components: disableThinkingButton(interaction, 'キャンセル'),
         });
         interaction.channel?.send('なんかエラー出てるわ');
     }

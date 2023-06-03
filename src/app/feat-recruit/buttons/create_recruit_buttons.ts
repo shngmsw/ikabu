@@ -110,13 +110,6 @@ export function createNewRecruitButton(channelName: string) {
     return button;
 }
 
-export function disableUnlockButton() {
-    const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
-        new ButtonBuilder().setCustomId('unlocked').setLabel('ロック解除済み').setStyle(ButtonStyle.Secondary).setDisabled(),
-    ]);
-    return buttons;
-}
-
 export function nsoRoomLinkButton(url: string) {
     const button = new ActionRowBuilder<ButtonBuilder>().addComponents([
         new ButtonBuilder().setLabel('ヘヤタテ機能を使用して参加').setStyle(ButtonStyle.Link).setURL(url),

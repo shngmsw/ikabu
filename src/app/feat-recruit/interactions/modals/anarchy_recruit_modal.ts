@@ -3,7 +3,7 @@ import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, getCommandHelpEmbed, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
 import { getMemberMentions } from '../buttons/other_events';
@@ -164,7 +164,7 @@ export async function sendAnarchyMatch(
         // 15秒後に削除ボタンを消す
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
-        if (isNotEmpty(deleteButtonCheck)) {
+        if (exists(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
             return;
@@ -189,7 +189,7 @@ export async function sendAnarchyMatch(
 
         buttonMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
-            components: await setButtonDisable(buttonMessage),
+            components: setButtonDisable(buttonMessage),
         });
 
         if (recruitChannel instanceof BaseGuildTextChannel) {

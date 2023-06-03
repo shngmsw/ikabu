@@ -27,6 +27,8 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
     let condition = interaction.fields.getTextInputValue('condition');
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
+    assertExistCheck(hostMember, 'hostMember');
+
     const participantsList = interaction.fields.getTextInputValue('pList');
     const attendeeNum = Number(interaction.fields.getTextInputValue('pNum'));
     let memberCounter = recruitNum; // プレイ人数のカウンター
@@ -64,7 +66,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    sendRecruitModalLog(interaction);
+    await sendRecruitModalLog(interaction);
 
     try {
         const data = await fetchSchedule();
@@ -128,6 +130,8 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction) {
     let condition = interaction.fields.getTextInputValue('condition');
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
+    assertExistCheck(hostMember, 'hostMember');
+
     const user1: GuildMember | string | null = interaction.fields.getTextInputValue('participant1');
     const user2: GuildMember | string | null = interaction.fields.getTextInputValue('participant2');
     const attendeeNum = Number(interaction.fields.getTextInputValue('pNum'));
@@ -164,7 +168,7 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    sendRecruitModalLog(interaction);
+    await sendRecruitModalLog(interaction);
 
     const members = await guild.members.fetch();
 
@@ -178,6 +182,7 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction) {
         const member = members.find((member: $TSFixMe) => member.user.tag === user1);
         if (member !== undefined) {
             member1 = await searchDBMemberById(guild, member.user.id);
+            assertExistCheck(member1, 'member1');
             member1Mention = `<@${member1.userId}>`;
         } else {
             member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
@@ -190,6 +195,7 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction) {
         const member = members.find((member: $TSFixMe) => member.user.tag === user2);
         if (member !== undefined) {
             member2 = await searchDBMemberById(guild, member.user.id);
+            assertExistCheck(member2, 'member2');
             member2Mention = `<@${member2.userId}>`;
         } else {
             member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
@@ -243,6 +249,8 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
     let condition = interaction.fields.getTextInputValue('condition');
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
+    assertExistCheck(hostMember, 'hostMember');
+
     const user1: GuildMember | string | null = interaction.fields.getTextInputValue('participant1');
     const user2: GuildMember | string | null = interaction.fields.getTextInputValue('participant2');
     const attendeeNum = Number(interaction.fields.getTextInputValue('pNum'));
@@ -280,7 +288,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    sendRecruitModalLog(interaction);
+    await sendRecruitModalLog(interaction);
 
     const rank = '指定なし';
 
@@ -296,6 +304,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
         const member = members.find((member: $TSFixMe) => member.user.tag === user1);
         if (member !== undefined) {
             member1 = await searchDBMemberById(guild, member.user.id);
+            assertExistCheck(member1, 'member1');
             member1Mention = `<@${member1.userId}>`;
         } else {
             member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
@@ -308,6 +317,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
         const member = members.find((member: $TSFixMe) => member.user.tag === user2);
         if (member !== undefined) {
             member2 = await searchDBMemberById(guild, member.user.id);
+            assertExistCheck(member2, 'member2');
             member2Mention = `<@${member2.userId}>`;
         } else {
             member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
@@ -362,6 +372,8 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
     let condition = interaction.fields.getTextInputValue('condition');
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
+    assertExistCheck(hostMember, 'hostMember');
+
     const user1 = interaction.fields.getTextInputValue('participant1');
     const user2 = interaction.fields.getTextInputValue('participant2');
     const attendeeNum = Number(interaction.fields.getTextInputValue('pNum'));
@@ -398,7 +410,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    sendRecruitModalLog(interaction);
+    await sendRecruitModalLog(interaction);
 
     try {
         const members = await guild.members.fetch();
@@ -413,6 +425,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
             const member = members.find((member: $TSFixMe) => member.user.tag === user1);
             if (member !== undefined) {
                 member1 = await searchDBMemberById(guild, member.user.id);
+                assertExistCheck(member1, 'member1');
                 member1Mention = `<@${member1.userId}>`;
             } else {
                 member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
@@ -425,6 +438,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
             const member = members.find((member: $TSFixMe) => member.user.tag === user2);
             if (member !== undefined) {
                 member2 = await searchDBMemberById(guild, member.user.id);
+                assertExistCheck(member2, 'member2');
                 member2Mention = `<@${member2.userId}>`;
             } else {
                 member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
@@ -466,6 +480,8 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
     let condition = interaction.fields.getTextInputValue('condition');
     const hostMember = await searchDBMemberById(guild, interaction.member.user.id);
 
+    assertExistCheck(hostMember, 'hostMember');
+
     const user1 = interaction.fields.getTextInputValue('participant1');
     const user2 = interaction.fields.getTextInputValue('participant2');
     const attendeeNum = Number(interaction.fields.getTextInputValue('pNum'));
@@ -506,7 +522,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    sendRecruitModalLog(interaction);
+    await sendRecruitModalLog(interaction);
 
     try {
         const data = await fetchSchedule();
@@ -532,6 +548,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
             const member = members.find((member: $TSFixMe) => member.user.tag === user1);
             if (member !== undefined) {
                 member1 = await searchDBMemberById(guild, member.user.id);
+                assertExistCheck(member1, 'member1');
                 member1Mention = `<@${member1.userId}>`;
             } else {
                 member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
@@ -544,6 +561,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
             const member = members.find((member: $TSFixMe) => member.user.tag === user2);
             if (member !== undefined) {
                 member2 = await searchDBMemberById(guild, member.user.id);
+                assertExistCheck(member2, 'member2');
                 member2Mention = `<@${member2.userId}>`;
             } else {
                 member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());

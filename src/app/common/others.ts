@@ -3,16 +3,16 @@ import { searchAPIMemberById } from './manager/member_manager.js';
 
 export async function composeEmbed(message: $TSFixMe, url: $TSFixMe) {
     const embed = new EmbedBuilder();
-    if (isNotEmpty(message.content)) {
+    if (exists(message.content)) {
         embed.setDescription(message.content);
     }
     embed.setTimestamp(message.createdAt);
     const member = await searchAPIMemberById(message.guild, message.author.id);
-    if (isNotEmpty(url)) {
+    if (exists(url)) {
         embed.setTitle('引用元へジャンプ');
         embed.setURL(url);
     }
-    if (isNotEmpty(member)) {
+    if (exists(member)) {
         embed.setAuthor({
             name: member.displayName,
             iconURL: member.displayAvatarURL(),

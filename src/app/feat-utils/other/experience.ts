@@ -24,6 +24,7 @@ export async function handleIkabuExperience(interaction: ChatInputCommandInterac
 
     const guild = await interaction.guild.fetch();
     const member = await searchDBMemberById(guild, interaction.member.user.id);
+    assertExistCheck(member, 'member');
     const joinDate = member.joinedAt;
     const today = new Date();
 

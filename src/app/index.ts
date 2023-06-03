@@ -172,7 +172,7 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
                 userId,
                 member.displayName,
                 member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-                member.joinedAt,
+                member.joinedAt ?? 'dummy', // 読めなくても更新されないのでnullならダミー文字列を突っ込む
             );
 
             // プロフィールアップデート

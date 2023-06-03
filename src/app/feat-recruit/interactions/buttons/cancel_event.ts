@@ -3,7 +3,7 @@ import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
-import { searchDBMemberById } from '../../../common/manager/member_manager.js';
+import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, createMentionsFromIdList, exists, getCommandHelpEmbed } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { createNewRecruitButton } from '../../buttons/create_recruit_buttons.js';
@@ -19,7 +19,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
     if (!interaction.inGuild()) return;
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         assertExistCheck(interaction.guild, 'guild');
@@ -32,10 +32,12 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
 
+        assertExistCheck(member, 'member');
+
         const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
         if (recruitData.length === 0) {
-            await interaction.editReply({ components: await disableThinkingButton(interaction, 'キャンセル') });
+            await interaction.editReply({ components: disableThinkingButton(interaction, 'キャンセル') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
                 ephemeral: false,
@@ -89,13 +91,16 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
 
             if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
-                channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
+                const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
+                if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
+                    channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                    channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
+                }
             }
 
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集はキャンセルされたでし！`,
-                components: await disableThinkingButton(interaction, 'キャンセル'),
+                components: disableThinkingButton(interaction, 'キャンセル'),
             });
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
@@ -122,7 +127,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
                 });
                 await interaction.editReply({
                     content: await memberListMessage(interaction, image1MsgId),
-                    components: await recoveryThinkingButton(interaction, 'キャンセル'),
+                    components: recoveryThinkingButton(interaction, 'キャンセル'),
                 });
 
                 if (recruitChannel instanceof BaseGuildTextChannel) {
@@ -135,14 +140,14 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
                     ephemeral: true,
                 });
                 await interaction.editReply({
-                    components: await recoveryThinkingButton(interaction, 'キャンセル'),
+                    components: recoveryThinkingButton(interaction, 'キャンセル'),
                 });
             }
         }
     } catch (err) {
         logger.error(err);
         await interaction.message.edit({
-            components: await disableThinkingButton(interaction, 'キャンセル'),
+            components: disableThinkingButton(interaction, 'キャンセル'),
         });
         interaction.channel?.send('なんかエラー出てるわ');
     }

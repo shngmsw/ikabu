@@ -123,6 +123,8 @@ export async function sendStickyMessage(guild: Guild, channelId: string, content
         }
     }
     const channel = await searchChannelById(guild, channelId);
-    const stickyMessage = await channel.send(content);
-    await StickyService.registerMessageId(guild.id, channelId, stickyMessage.id);
+    if (exists(channel) && channel.isTextBased()) {
+        const stickyMessage = await channel.send(content);
+        await StickyService.registerMessageId(guild.id, channelId, stickyMessage.id);
+    }
 }

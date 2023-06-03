@@ -24,7 +24,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const weapons = (await response.json()) as any;
 
-        let member: User | Member;
+        let member: User | Member | null;
         if (interaction.inGuild()) {
             assertExistCheck(interaction.guild, 'guild');
             const guild = await interaction.guild.fetch();

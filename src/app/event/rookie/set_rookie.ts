@@ -5,7 +5,7 @@ import { MessageCountService } from '../../../db/message_count_service.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { searchRoleById } from '../../common/manager/role_manager';
-import { exists, sleep } from '../../common/others.js';
+import { assertExistCheck, exists, notExists, sleep } from '../../common/others.js';
 import { FriendCode } from '../../../db/model/friend_code.js';
 import { searchAPIMemberById } from '../../common/manager/member_manager.js';
 
@@ -17,11 +17,17 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
         if (guild.id != process.env.SERVER_ID) {
             return;
         }
-        const lobby_channel = await searchChannelById(guild, process.env.CHANNEL_ID_ROBBY);
+        assertExistCheck(process.env.CHANNEL_ID_ROBBY, 'CHANNEL_ID_ROBBY');
+        const lobbyChannel = await searchChannelById(guild, process.env.CHANNEL_ID_ROBBY);
         const beginnerRole = await searchRoleById(guild, process.env.ROOKIE_ROLE_ID);
         const userId = newMember.user.id;
 
-        const sentMessage = await lobby_channel.send(
+        if (notExists(lobbyChannel) || !lobbyChannel.isTextBased()) {
+            logger.error('lobby channel not found!');
+            return;
+        }
+
+        const sentMessage = await lobbyChannel.send(
             `<@!${userId}> たん、よろしくお願いします！\n` +
                 `最初の10分間は閲覧しかできません、その間に <#${process.env.CHANNEL_ID_RULE}> と <#${process.env.CHANNEL_ID_DESCRIPTION}> をよく読んでくださいね\n` +
                 `10分経ったら、書き込めるようになります。 <#${process.env.CHANNEL_ID_INTRODUCTION}> で自己紹介も兼ねて自分のフレコを貼ってください\n\n` +
@@ -29,7 +35,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
         );
 
         if (!(beginnerRole instanceof Role)) {
-            lobby_channel.send(
+            lobbyChannel.send(
                 '「新入部員ロールのIDが設定されていないでし！\n気付いた方はサポートセンターまでお問合わせお願いします。」とのことでし！',
             );
         } else {

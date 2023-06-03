@@ -14,7 +14,7 @@ import {
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, recruitActionRow, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { RecruitService } from '../../../../db/recruit_service';
 import { ParticipantService } from '../../../../db/participants_service';
@@ -33,6 +33,9 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction)
     const guild = await interaction.guild.fetch();
     const options = interaction.options;
     const member = await searchAPIMemberById(guild, interaction.member.user.id);
+
+    assertExistCheck(member, 'member');
+
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
     const availableChannel = [
         'alfa',
@@ -209,6 +212,8 @@ async function sendOtherGames(
 
     const recruiter = await searchDBMemberById(guild, member.user.id);
 
+    assertExistCheck(recruiter, 'recruiter');
+
     const embed = new EmbedBuilder()
         .setAuthor({
             name: recruiter.displayName,
@@ -314,7 +319,7 @@ async function sendOtherGames(
         // 15秒後に削除ボタンを消す
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
-        if (isNotEmpty(deleteButtonCheck)) {
+        if (exists(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
             if (reserveChannel instanceof VoiceChannel && member.voice.channelId != reserveChannel.id) {

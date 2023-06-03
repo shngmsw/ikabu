@@ -4,7 +4,7 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others.js';
+import { assertExistCheck, exists, sleep } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
 import { messageLinkButtons } from '../../buttons/create_recruit_buttons';
 import { Participant } from '../../../../db/model/participant.js';
@@ -19,7 +19,7 @@ export async function joinNotify(interaction: ButtonInteraction) {
     if (!interaction.inGuild()) return;
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         assertExistCheck(interaction.guild, 'guild');
@@ -30,11 +30,12 @@ export async function joinNotify(interaction: ButtonInteraction) {
 
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
+        assertExistCheck(member, 'member');
 
         const recruitData = await RecruitService.getRecruit(guild.id, embedMessageId);
 
         if (recruitData.length === 0) {
-            await interaction.editReply({ components: await disableThinkingButton(interaction, '参加') });
+            await interaction.editReply({ components: disableThinkingButton(interaction, '参加') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
                 ephemeral: false,
@@ -74,7 +75,7 @@ export async function joinNotify(interaction: ButtonInteraction) {
 
             await interaction.editReply({
                 content: await memberListMessage(interaction, embedMessageId),
-                components: await recoveryThinkingButton(interaction, '参加'),
+                components: recoveryThinkingButton(interaction, '参加'),
             });
 
             return;
@@ -87,7 +88,7 @@ export async function joinNotify(interaction: ButtonInteraction) {
                 });
 
                 await interaction.editReply({
-                    components: await recoveryThinkingButton(interaction, '参加'),
+                    components: recoveryThinkingButton(interaction, '参加'),
                 });
 
                 return;
@@ -107,17 +108,24 @@ export async function joinNotify(interaction: ButtonInteraction) {
             // ホストがVCにいるかチェックして、VCにいる場合はText in Voiceにメッセージ送信
             const recruiterGuildMember = await searchAPIMemberById(guild, recruiterId);
             try {
-                if (isNotEmpty(recruiterGuildMember.voice.channel) && recruiterGuildMember.voice.channel.type === ChannelType.GuildVoice) {
-                    const hostJoinedVC = await searchChannelById(guild, recruiterGuildMember.voice.channelId);
+                if (
+                    exists(recruiterGuildMember) &&
+                    exists(recruiterGuildMember.voice.channel) &&
+                    recruiterGuildMember.voice.channel.type === ChannelType.GuildVoice
+                ) {
+                    const hostJoinedVC = await searchChannelById(guild, recruiterGuildMember.voice.channel.id);
 
-                    await hostJoinedVC.send({
-                        embeds: [embed],
-                        components: [messageLinkButtons(interaction.guildId, recruitChannel.id, interaction.message.id)],
-                    });
+                    if (exists(hostJoinedVC) && hostJoinedVC.isTextBased()) {
+                        await hostJoinedVC.send({
+                            embeds: [embed],
+                            components: [messageLinkButtons(interaction.guildId, recruitChannel.id, interaction.message.id)],
+                        });
+                    }
                 }
             } catch (error) {
                 logger.error(error);
             }
+
             const notifyMessage = await interaction.message.reply({
                 content: `<@${recruiterId}>`,
                 embeds: [embed],
@@ -135,7 +143,7 @@ export async function joinNotify(interaction: ButtonInteraction) {
 
             await interaction.editReply({
                 content: await memberListMessage(interaction, embedMessageId),
-                components: await recoveryThinkingButton(interaction, '参加'),
+                components: recoveryThinkingButton(interaction, '参加'),
             });
 
             await sleep(300);
@@ -152,7 +160,7 @@ export async function joinNotify(interaction: ButtonInteraction) {
     } catch (err) {
         logger.error(err);
         await interaction.message.edit({
-            components: await disableThinkingButton(interaction, '参加'),
+            components: disableThinkingButton(interaction, '参加'),
         });
         interaction.channel?.send('なんかエラー出てるわ');
     }

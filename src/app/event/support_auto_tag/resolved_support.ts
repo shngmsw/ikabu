@@ -21,7 +21,7 @@ export async function setResolvedTag(interaction: $TSFixMe) {
         }
 
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         if (thread.archived) {
@@ -36,7 +36,7 @@ export async function setResolvedTag(interaction: $TSFixMe) {
         await thread.setArchived(true);
 
         await interaction.editReply({
-            components: await recoveryThinkingButton(interaction, 'クローズ済'),
+            components: recoveryThinkingButton(interaction, 'クローズ済'),
         });
     } catch (error) {
         logger.error(error);

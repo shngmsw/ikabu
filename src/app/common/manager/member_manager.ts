@@ -1,33 +1,29 @@
+import axios from 'axios';
 import { Guild, GuildMember } from 'discord.js';
-import { log4js_obj } from '../../../log4js_settings';
-import { assertExistCheck, isEmpty, isNotEmpty } from '../others';
 import { MembersService } from '../../../db/members_service';
 import { Member } from '../../../db/model/member';
-import axios from 'axios';
+import { log4js_obj } from '../../../log4js_settings';
+import { assertExistCheck, notExists } from '../others';
 
 const logger = log4js_obj.getLogger('MemberManager');
 
 /**
  * ユーザーIDからメンバーを検索する．ない場合はnullを返す．
- * @param {Guild} guild Guildオブジェクト
- * @param {string} roleId ユーザーID
+ * @param guild Guildオブジェクト
+ * @param roleId ユーザーID
  * @returns メンバーオブジェクト
  */
-export async function searchAPIMemberById(guild: $TSFixMe, userId: $TSFixMe) {
+export async function searchAPIMemberById(guild: Guild, userId: string) {
+    let member;
     try {
-        let member;
-        try {
-            // fetch(mid)とすれば、cache見てなければフェッチしてくる
-            member = await guild.members.fetch(userId);
-        } catch (error) {
-            member = null;
-            logger.warn('member missing');
-        }
-
-        return member;
+        // fetch(mid)とすれば、cache見てなければフェッチしてくる
+        member = await guild.members.fetch(userId);
     } catch (error) {
-        logger.error(error);
+        member = null;
+        logger.warn('member missing (Discord API)');
     }
+
+    return member;
 }
 
 /**
@@ -36,13 +32,17 @@ export async function searchAPIMemberById(guild: $TSFixMe, userId: $TSFixMe) {
  * @param userId ユーザーID
  * @returns Member型オブジェクト
  */
-export async function searchDBMemberById(guild: Guild, userId: string): Promise<Member> {
+export async function searchDBMemberById(guild: Guild, userId: string): Promise<Member | null> {
     const members = await MembersService.getMemberByUserId(guild.id, userId);
 
     // membersテーブルにレコードがあるか確認
     if (members.length == 0) {
-        const memberRaw: GuildMember = await searchAPIMemberById(guild, userId);
+        const memberRaw = await searchAPIMemberById(guild, userId);
 
+        if (notExists(memberRaw)) {
+            logger.warn('member missing (ikabu DB) => member missing (Discord API)');
+            return null;
+        }
         assertExistCheck(memberRaw.joinedAt, 'joinedAt');
 
         const newMember = new Member(
@@ -61,7 +61,12 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
             return members[0];
         } else {
             // 画像URLが無効な場合
-            const memberRaw: GuildMember = await searchAPIMemberById(guild, userId);
+            const memberRaw = await searchAPIMemberById(guild, userId);
+
+            if (notExists(memberRaw)) {
+                logger.warn('member Icon invalid => member missing (Discord API)');
+                return null;
+            }
 
             const newMember = new Member(
                 guild.id,
@@ -73,7 +78,7 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
 
             await MembersService.updateMemberProfile(newMember);
 
-            logger.warn('member Icon URL is vaild. database was updated.');
+            logger.warn('member Icon invalid => Icon URL was updated successfully.');
 
             return newMember;
         }
@@ -82,25 +87,22 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
 
 /**
  * メンバーのカラー(名前の色)を返す
- * @param {*} member 対象メンバー
- * @returns {String} HEX COLOR CODE
+ * @param member 対象メンバー
+ * @returns HEX COLOR CODE
  */
-export function getMemberColor(member: $TSFixMe) {
+export function getMemberColor(member: GuildMember) {
     /* member.displayColorでもとれるけど、@everyoneが#000000(BLACK)になるので
        ロール有無チェックしてなければ#FFFFFF(WHITE)を返す */
     try {
-        if (isNotEmpty(member)) {
-            const role = member.roles.color;
-            if (isEmpty(role)) {
-                return '#FFFFFF';
-            } else {
-                return role.hexColor;
-            }
-        } else {
+        const role = member.roles.color;
+        if (notExists(role)) {
             return '#FFFFFF';
+        } else {
+            return role.hexColor;
         }
     } catch (error) {
         logger.error(error);
+        return '#FFFFFF';
     }
 }
 

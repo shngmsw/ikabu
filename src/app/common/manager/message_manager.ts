@@ -1,4 +1,5 @@
 import { log4js_obj } from '../../../log4js_settings';
+import { exists } from '../others';
 
 import { searchChannelById } from './channel_manager';
 
@@ -13,15 +14,17 @@ const logger = log4js_obj.getLogger('MessageManager');
  */
 export async function searchMessageById(guild: $TSFixMe, channelId: $TSFixMe, messageId: $TSFixMe) {
     const channel = await searchChannelById(guild, channelId);
-    let message;
-    if (channel) {
+    let message = null;
+    if (exists(channel) && channel.isTextBased()) {
         try {
             // fetch(mid)とすれば、cache見てなければフェッチしてくる
             message = await channel.messages.fetch(messageId);
         } catch (error) {
-            message = null;
             logger.warn('message missing');
         }
+        return message;
+    } else {
+        logger.warn('message missing');
+        return null;
     }
-    return message;
 }

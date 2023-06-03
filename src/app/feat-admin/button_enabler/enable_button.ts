@@ -25,7 +25,7 @@ export async function buttonEnable(interaction: $TSFixMe) {
             return;
         }
 
-        await message.edit({ components: await setButtonEnable(message) });
+        await message.edit({ components: setButtonEnable(message) });
 
         await interaction.editReply({
             content: 'ボタンを有効化したでし！\n最後に押されたボタンが考え中になっていても通常の処理は行われるはずでし！',

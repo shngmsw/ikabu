@@ -17,7 +17,7 @@ import { assertExistCheck, exists } from './others';
  * @param {*} label 押されたボタンに割り当て直すラベル
  * @returns 新しいActionRowオブジェクト
  */
-export async function recoveryThinkingButton(interaction: ButtonInteraction<CacheType>, label: string) {
+export function recoveryThinkingButton(interaction: ButtonInteraction<CacheType>, label: string) {
     const message = interaction.message;
     const newActionRow = message.components.map((oldActionRow: ActionRow<MessageActionRowComponent>) => {
         const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
@@ -51,7 +51,7 @@ export async function recoveryThinkingButton(interaction: ButtonInteraction<Cach
  * @param {*} label 押されたボタンに割り当て直すラベル
  * @returns 新しいActionRowオブジェクト
  */
-export async function disableThinkingButton(interaction: ButtonInteraction<CacheType>, label: string) {
+export function disableThinkingButton(interaction: ButtonInteraction<CacheType>, label: string) {
     const message = interaction.message;
     const newActionRow = message.components.map((oldActionRow: ActionRow<MessageActionRowComponent>) => {
         const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
@@ -84,7 +84,7 @@ export async function disableThinkingButton(interaction: ButtonInteraction<Cache
  * @param {*} message ボタンが含まれるmessageオブジェクト
  * @returns 新しいActionRowオブジェクト
  */
-export async function setButtonEnable(message: Message) {
+export function setButtonEnable(message: Message) {
     const newActionRow = message.components.map((oldActionRow: ActionRow<MessageActionRowComponent>) => {
         const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
@@ -108,7 +108,7 @@ export async function setButtonEnable(message: Message) {
  * @param {*} interaction 考え中にする場合押されたボタンのインタラクション
  * @returns 新しいActionRowオブジェクト
  */
-export async function setButtonDisable(message: Message, interaction?: ButtonInteraction<CacheType>) {
+export function setButtonDisable(message: Message, interaction?: ButtonInteraction<CacheType>) {
     const newActionRow = message.components.map((oldActionRow: ActionRow<MessageActionRowComponent>) => {
         const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
