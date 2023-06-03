@@ -126,7 +126,7 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
     }
 
     try {
-        let txt = `<@${hostMember.user.id}>` + '**たんのバイト募集**\n';
+        let txt = `### <@${hostMember.user.id}>` + 'たんのバイト募集\n';
 
         if (exists(user1) && exists(user2)) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';

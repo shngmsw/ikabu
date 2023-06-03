@@ -122,7 +122,7 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
 
         const regularData = await getRegularData(data, type);
 
-        let txt = `<@${hostMember.user.id}>` + '**たんのナワバリ募集**\n';
+        let txt = `### <@${hostMember.user.id}>` + 'たんのナワバリ募集\n';
         const members = [];
 
         if (exists(user1)) {

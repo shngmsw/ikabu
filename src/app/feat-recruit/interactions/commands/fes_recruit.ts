@@ -120,7 +120,7 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheT
 
         const fesData = await getFesData(data, type);
 
-        let txt = `<@${hostMember.user.id}>` + '**たんのフェスマッチ募集**\n';
+        let txt = `### <@${hostMember.user.id}>` + 'たんのフェスマッチ募集\n';
         const members = [];
 
         if (exists(user1)) {

@@ -81,7 +81,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
 
         const regularData = await getRegularData(data, type);
 
-        let txt = `<@${hostMember.userId}>` + '**たんのナワバリ募集**\n';
+        let txt = `### <@${hostMember.userId}>` + 'たんのナワバリ募集\n';
 
         if (isNotEmpty(participantsList)) {
             txt = txt + '`' + participantsList + '`の参加が既に決定しているでし！\n';
@@ -330,7 +330,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
 
         const anarchyData = await getAnarchyOpenData(data, type);
 
-        let txt = `<@${hostMember.userId}>` + '**たんのバンカラ募集**\n';
+        let txt = `### <@${hostMember.userId}>` + 'たんのバンカラ募集\n';
         if (exists(member1Mention) && exists(member2Mention)) {
             txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
         } else if (exists(member1Mention)) {
@@ -432,7 +432,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction) {
             }
         }
 
-        let txt = `<@${hostMember.userId}>` + '**たんのバイト募集**\n';
+        let txt = `### <@${hostMember.userId}>` + 'たんのバイト募集\n';
         if (exists(member1Mention) && exists(member2Mention)) {
             txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
         } else if (exists(member1Mention)) {
@@ -551,7 +551,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
             }
         }
 
-        let txt = `<@${hostMember.userId}>` + '**たんのフェスマッチ募集**\n';
+        let txt = `### <@${hostMember.userId}>` + 'たんのフェスマッチ募集\n';
         if (exists(member1Mention) && exists(member2Mention)) {
             txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
         } else if (exists(member1Mention)) {

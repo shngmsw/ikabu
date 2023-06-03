@@ -138,7 +138,7 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
 
         const anarchyData = await getAnarchyOpenData(data, type);
 
-        let txt = `<@${hostMember.user.id}>` + '**たんのバンカラ募集**\n';
+        let txt = `### <@${hostMember.user.id}>` + 'たんのバンカラ募集\n';
         if (exists(user1) && exists(user2)) {
             txt = txt + `<@${user1.id}>` + 'たんと' + `<@${user2.id}>` + 'たんの参加が既に決定しているでし！';
         } else if (exists(user1)) {

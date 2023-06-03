@@ -99,7 +99,7 @@ async function monsterHunterRise(
     const title = 'MONSTER HUNTER RISE';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
     const mention = role.toString();
-    const txt = `<@${member.user.id}>` + '**たんのモンハンライズ募集**\n';
+    const txt = `### <@${member.user.id}>` + 'たんのモンハンライズ募集\n';
     const color = '#b71008';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak_logo.png';
@@ -121,7 +121,7 @@ async function apexLegends(
     const title = 'Apex Legends';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
     const mention = role.toString();
-    const txt = `<@${member.user.id}>` + '**たんのApexLegends募集**\n';
+    const txt = `### <@${member.user.id}>` + 'たんのApexLegends募集\n';
     const color = '#F30100';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends_logo.png';
@@ -143,7 +143,7 @@ async function overwatch(
     const title = 'Overwatch2';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
     const mention = role.toString();
-    const txt = `<@${member.user.id}>` + '**たんのOverwatch2募集**\n';
+    const txt = `### <@${member.user.id}>` + 'たんのOverwatch2募集\n';
     const color = '#ED6516';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch2.png';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch_logo.png';
@@ -165,7 +165,7 @@ async function valorant(
     const title = 'VALORANT';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
     const mention = role.toString();
-    const txt = `<@${member.user.id}>` + '**たんのVALORANT募集**\n';
+    const txt = `### <@${member.user.id}>` + 'たんのVALORANT募集\n';
     const color = '#FF4654';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant_logo.png';
@@ -181,7 +181,7 @@ async function others(interaction: ChatInputCommandInteraction, guild: Guild, re
     const title = interaction.options.getString('ゲームタイトル') ?? 'ERROR';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
     const mention = `<@&${roleId}>`;
-    const txt = `<@${member.user.id}>` + `**たんの${title}募集**\n`;
+    const txt = `### <@${member.user.id}>` + `たんの${title}募集\n`;
     const color = '#379C30';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others_logo.png';

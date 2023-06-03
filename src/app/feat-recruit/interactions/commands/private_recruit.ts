@@ -82,7 +82,7 @@ async function sendPrivateRecruit(
 
     try {
         const embedMessage = await interaction.editReply({
-            content: `<@${recruiter.userId}>**たんのプライベートマッチ募集**`,
+            content: `### <@${recruiter.userId}>**たんのプライベート募集**`,
             embeds: [embed],
         });
 
