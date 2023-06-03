@@ -1,5 +1,6 @@
-import wiki from 'wikijs';
 import { CacheType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import wiki from 'wikijs';
+
 import { log4js_obj } from '../../../log4js_settings';
 import { notExists } from '../../common/others';
 

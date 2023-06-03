@@ -8,12 +8,13 @@ import {
     Message,
     User,
 } from 'discord.js';
+
 import { FriendCodeService } from '../../../db/friend_code_service.js';
+import { Member } from '../../../db/model/member.js';
 import { log4js_obj } from '../../../log4js_settings.js';
+import { searchChannelById } from '../../common/manager/channel_manager.js';
 import { searchDBMemberById } from '../../common/manager/member_manager.js';
 import { assertExistCheck, exists } from '../../common/others.js';
-import { Member } from '../../../db/model/member.js';
-import { searchChannelById } from '../../common/manager/channel_manager.js';
 const logger = log4js_obj.getLogger();
 
 export async function handleFriendCode(interaction: ChatInputCommandInteraction<CacheType>) {

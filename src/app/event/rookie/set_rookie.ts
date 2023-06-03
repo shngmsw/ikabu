@@ -1,13 +1,14 @@
 import { GuildMember, Role } from 'discord.js';
+
 import { FriendCodeService } from '../../../db/friend_code_service.js';
 import { MembersService } from '../../../db/members_service.js';
 import { MessageCountService } from '../../../db/message_count_service.js';
+import { FriendCode } from '../../../db/model/friend_code.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager.js';
 import { searchRoleById } from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../common/others.js';
-import { FriendCode } from '../../../db/model/friend_code.js';
-import { searchAPIMemberById } from '../../common/manager/member_manager.js';
 
 const logger = log4js_obj.getLogger('guildMemberAdd');
 

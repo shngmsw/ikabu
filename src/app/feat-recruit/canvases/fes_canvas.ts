@@ -1,10 +1,12 @@
-import Canvas from 'canvas';
 import path from 'path';
+
+import Canvas from 'canvas';
+
+import { RecruitOpCode } from './regenerate_canvas.js';
 import { modalRecruit } from '../../../constant.js';
+import { Participant } from '../../../db/model/participant.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
-import { Participant } from '../../../db/model/participant.js';
-import { RecruitOpCode } from './regenerate_canvas.js';
 import { notExists } from '../../common/others.js';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {

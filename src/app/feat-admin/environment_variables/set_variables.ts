@@ -1,6 +1,9 @@
-import { AttachmentBuilder } from 'discord.js';
 import path from 'path';
+
+import { AttachmentBuilder } from 'discord.js';
+
 import { log4js_obj } from '../../../log4js_settings';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs').promises;
 

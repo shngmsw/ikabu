@@ -1,4 +1,5 @@
 import { EmbedBuilder, Guild } from 'discord.js';
+
 import { RecruitType } from '../../../db/model/recruit';
 import { RecruitService } from '../../../db/recruit_service';
 import { log4js_obj } from '../../../log4js_settings';

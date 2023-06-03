@@ -18,30 +18,31 @@ import {
     User,
     VoiceState,
 } from 'discord.js';
-import { DBCommon } from '../db/db';
-import { MembersService } from '../db/members_service';
-import { FriendCodeService } from '../db/friend_code_service';
-import { MessageCountService } from '../db/message_count_service';
-import { RecruitService } from '../db/recruit_service';
-import { TeamDividerService } from '../db/team_divider_service';
-import { log4js_obj } from '../log4js_settings';
+
 import { updateSchedule } from './common/apis/splatoon3_ink';
+import { searchAPIMemberById } from './common/manager/member_manager';
+import { assertExistCheck, exists, isNotEmpty, notExists } from './common/others';
 import { emojiCountUp } from './event/reaction_count/reactions';
 import { guildMemberAddEvent } from './event/rookie/set_rookie';
-import * as message_handler from './handlers/message_handler';
-import * as button_handler from './handlers/button_handler';
-import * as modal_handler from './handlers/modal_handler';
-import * as context_handler from './handlers/context_handler';
-import * as command_handler from './handlers/command_handler';
-import * as vcState_update_handler from './handlers/vcState_update_handler';
-import { assertExistCheck, exists, isNotEmpty, notExists } from './common/others';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
-import { registerSlashCommands } from '../register';
-import { searchAPIMemberById } from './common/manager/member_manager';
+import * as button_handler from './handlers/button_handler';
+import * as command_handler from './handlers/command_handler';
+import * as context_handler from './handlers/context_handler';
+import * as message_handler from './handlers/message_handler';
+import * as modal_handler from './handlers/modal_handler';
+import * as vcState_update_handler from './handlers/vcState_update_handler';
+import { DBCommon } from '../db/db';
+import { FriendCodeService } from '../db/friend_code_service';
+import { MembersService } from '../db/members_service';
+import { MessageCountService } from '../db/message_count_service';
 import { Member } from '../db/model/member';
 import { ParticipantService } from '../db/participants_service';
+import { RecruitService } from '../db/recruit_service';
 import { StickyService } from '../db/sticky_service';
+import { TeamDividerService } from '../db/team_divider_service';
+import { log4js_obj } from '../log4js_settings';
+import { registerSlashCommands } from '../register';
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,

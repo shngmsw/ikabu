@@ -1,7 +1,8 @@
-import { log4js_obj } from '../log4js_settings';
+import util from 'node:util';
+
 import { DBCommon } from './db.js';
 import { FriendCode } from './model/friend_code';
-import util from 'node:util';
+import { log4js_obj } from '../log4js_settings';
 
 const logger = log4js_obj.getLogger('database');
 

@@ -7,8 +7,9 @@ import {
     AudioPlayerStatus,
     generateDependencyReport,
 } from '@discordjs/voice';
-import { isNotEmpty, notExists } from '../../../common/others';
+
 import { log4js_obj } from '../../../../log4js_settings';
+import { isNotEmpty, notExists } from '../../../common/others';
 const infoLogger = log4js_obj.getLogger('info');
 const interactionLogger = log4js_obj.getLogger('interaction');
 const logger = log4js_obj.getLogger('voice');

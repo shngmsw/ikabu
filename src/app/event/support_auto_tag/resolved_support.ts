@@ -1,8 +1,9 @@
 import { PermissionsBitField } from 'discord.js';
+
+import { tagIdsEmbed } from './tag_ids_embed';
 import { log4js_obj } from '../../../log4js_settings';
 import { recoveryThinkingButton, setButtonDisable } from '../../common/button_components';
 import { isEmpty } from '../../common/others';
-import { tagIdsEmbed } from './tag_ids_embed';
 
 const logger = log4js_obj.getLogger('interaction');
 

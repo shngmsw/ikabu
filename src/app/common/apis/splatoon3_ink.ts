@@ -1,7 +1,8 @@
 import fetch from 'node-fetch';
+
 import { log4js_obj } from '../../../log4js_settings';
-import { assertExistCheck, exists, isEmpty, notExists } from '../others';
 import { isDateWithinRange } from '../datetime';
+import { assertExistCheck, exists, isEmpty, notExists } from '../others';
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const locale_url = 'https://splatoon3.ink/data/locale/ja-JP.json';
 

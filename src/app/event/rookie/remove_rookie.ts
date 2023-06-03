@@ -1,8 +1,9 @@
 import Discord from 'discord.js';
+
+import { sendIntentionConfirmReply } from './send_questionnaire';
 import { MessageCountService } from '../../../db/message_count_service.js';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, exists } from '../../common/others';
-import { sendIntentionConfirmReply } from './send_questionnaire';
 
 export async function removeRookie(msg: $TSFixMe) {
     const dt = new Date();

@@ -1,4 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
+
 import { searchAPIMemberById } from './manager/member_manager.js';
 
 export async function composeEmbed(message: $TSFixMe, url: $TSFixMe) {

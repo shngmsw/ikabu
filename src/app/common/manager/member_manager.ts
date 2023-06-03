@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Guild, GuildMember } from 'discord.js';
+
 import { MembersService } from '../../../db/members_service';
 import { Member } from '../../../db/model/member';
 import { log4js_obj } from '../../../log4js_settings';

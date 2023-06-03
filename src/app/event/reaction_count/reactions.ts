@@ -1,7 +1,6 @@
-import { exists, isEmpty } from '../../common/others';
-
 import { ReactionsService } from '../../../db/reactions_service';
 import { TotalReactionsService } from '../../../db/total_reactions_service';
+import { exists, isEmpty } from '../../common/others';
 
 export async function emojiCountUp(reaction: $TSFixMe) {
     const user_id = reaction.message.author.id;

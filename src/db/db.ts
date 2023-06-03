@@ -1,4 +1,5 @@
 import sqlite3 from 'sqlite3';
+
 import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 

@@ -1,9 +1,10 @@
 import { CacheType, ChatInputCommandInteraction, EmbedBuilder, User } from 'discord.js';
 import fetch from 'node-fetch';
+
+import { Member } from '../../../db/model/member';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, exists, randomSelect } from '../../common/others';
-import { Member } from '../../../db/model/member';
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 
 const logger = log4js_obj.getLogger('interaction');

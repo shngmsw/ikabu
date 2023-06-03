@@ -3,11 +3,13 @@
  * Copyright (c) 2020 noriokun4649
  */
 
-import { VoiceText } from 'voice-text';
 import { Readable } from 'stream';
+
 import conf from 'config-reloadable';
-import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { SHA256 } from 'crypto-js';
+import { VoiceText } from 'voice-text';
+
+import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { exists } from '../../../common/others';
 
 const config = conf();
