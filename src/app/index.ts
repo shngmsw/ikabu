@@ -1,6 +1,7 @@
 // Discord bot implements
 import {
     ActivityType,
+    AnyThreadChannel,
     AutocompleteInteraction,
     BaseGuildTextChannel,
     CacheType,
@@ -8,10 +9,14 @@ import {
     GatewayIntentBits,
     GuildMember,
     Interaction,
+    Message,
+    MessageReaction,
     PartialGuildMember,
+    PartialMessageReaction,
     PartialUser,
     Partials,
     User,
+    VoiceState,
 } from 'discord.js';
 import { DBCommon } from '../db/db';
 import { MembersService } from '../db/members_service';
@@ -55,8 +60,8 @@ client.login(process.env.DISCORD_BOT_TOKEN);
 
 const logger = log4js_obj.getLogger();
 
-client.on('messageCreate', async (msg: $TSFixMe) => {
-    message_handler.call(msg);
+client.on('messageCreate', async (message: Message<boolean>) => {
+    message_handler.call(message);
 });
 
 client.on('guildMemberAdd', async (member: GuildMember) => {
@@ -207,7 +212,7 @@ client.on('ready', async () => {
     }
 });
 
-client.on('messageReactionAdd', async (reaction: $TSFixMe) => {
+client.on('messageReactionAdd', async (reaction: MessageReaction | PartialMessageReaction) => {
     const loggerMRA = log4js_obj.getLogger('messageReactionAdd');
     try {
         // When a reaction is received, check if the structure is partial
@@ -226,7 +231,7 @@ client.on('messageReactionAdd', async (reaction: $TSFixMe) => {
     }
 });
 
-client.on('messageReactionRemove', async (reaction: $TSFixMe, user: $TSFixMe) => {
+client.on('messageReactionRemove', async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
     try {
         if (!user.bot) {
             /* empty */
@@ -263,13 +268,13 @@ client.on('interactionCreate', (interaction: Interaction<CacheType>) => {
     }
 });
 
-client.on('threadCreate', async (thread: $TSFixMe) => {
+client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
     if (isNotEmpty(thread.parentId) && thread.parentId === process.env.CHANNEL_ID_SUPPORT_CENTER) {
         editThreadTag(thread);
         sendCloseButton(thread);
     }
 });
 
-client.on('voiceStateUpdate', (oldState: $TSFixMe, newState: $TSFixMe) => {
+client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
     vcState_update_handler.call(oldState, newState);
 });

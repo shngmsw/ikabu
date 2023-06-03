@@ -1,7 +1,7 @@
 // Response for Uptime Robot
 import http from 'http';
 http.createServer(function (
-    _request: $TSFixMe,
+    _request: http.IncomingMessage,
     response: {
         writeHead: (arg0: number, arg1: { 'Content-Type': string }) => void;
         end: (arg0: string) => void;

@@ -87,6 +87,8 @@ export async function recruitBigRunCanvas(
             remainingString = remaining > 0 ? '@' + remaining : '満員';
         } else if (opCode === RecruitOpCode.close) {
             remainingString = '受付終了';
+        } else {
+            remainingString = 'ERROR!';
         }
 
         recruitCtx.save();

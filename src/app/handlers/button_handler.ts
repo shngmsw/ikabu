@@ -24,12 +24,13 @@ import { voiceLockerUpdate } from '../feat-utils/voice/voice_locker';
 import { deleteFriendCode } from '../feat-utils/other/friendcode';
 import { handleCreateModal } from '../feat-recruit/modals/create_recruit_modals';
 import { setResolvedTag } from '../event/support_auto_tag/resolved_support';
+import { ButtonInteraction, CacheType } from 'discord.js';
 
 interface buttonFunctions {
-    [key: string]: (interaction: $TSFixMe, params: $TSFixMe) => Promise<void>;
+    [key: string]: (interaction: ButtonInteraction<CacheType>, params: URLSearchParams) => Promise<void>;
 }
 
-export async function call(interaction: $TSFixMe) {
+export async function call(interaction: ButtonInteraction<CacheType>) {
     const params = new URLSearchParams(interaction.customId);
     const param_d = params.get('d') || null;
     const param_t = params.get('t') || null;

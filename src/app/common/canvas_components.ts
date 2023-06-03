@@ -1,23 +1,25 @@
+import { CanvasRenderingContext2D, Canvas, Image } from 'canvas';
+
 /**
  *
- * @param {Canvas.CanvasRenderingContext2D} ctx Canvas Context
- * @param {String} text テキスト
- * @param {String} font_style フォントスタイル
- * @param {String} fill_color 塗りつぶしの色
- * @param {String} stroke_color フチの色
- * @param {float} strokeWidth フチの太さ
- * @param {float} x x座標
- * @param {float} y y座標
+ * @param ctx Canvas Context
+ * @param text テキスト
+ * @param font_style フォントスタイル
+ * @param fill_color 塗りつぶしの色
+ * @param stroke_color フチの色
+ * @param strokeWidth フチの太さ
+ * @param x x座標
+ * @param y y座標
  */
 export function fillTextWithStroke(
-    ctx: $TSFixMe,
-    text: $TSFixMe,
-    font_style: $TSFixMe,
-    fill_color: $TSFixMe,
-    stroke_color: $TSFixMe,
-    strokeWidth: $TSFixMe,
-    x: $TSFixMe,
-    y: $TSFixMe,
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    font_style: string,
+    fill_color: string,
+    stroke_color: string,
+    strokeWidth: number,
+    x: number,
+    y: number,
 ) {
     ctx.font = font_style;
     ctx.fillStyle = fill_color;
@@ -28,14 +30,14 @@ export function fillTextWithStroke(
 }
 /**
  * 角が丸い四角形を作成
- * @param {Canvas.CanvasRenderingContext2D} ctx Canvas Context
- * @param {*} x x座標
- * @param {*} y y座標
- * @param {*} width 幅
- * @param {*} height 高さ
- * @param {*} radius 角の半径サイズ
+ * @param ctx Canvas Context
+ * @param x x座標
+ * @param y y座標
+ * @param width 幅
+ * @param height 高さ
+ * @param radius 角の半径サイズ
  */
-export function createRoundRect(ctx: $TSFixMe, x: $TSFixMe, y: $TSFixMe, width: $TSFixMe, height: $TSFixMe, radius: $TSFixMe) {
+export function createRoundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width - radius, y);
     ctx.arcTo(x + width, y, x + width, y + radius, radius);
@@ -50,13 +52,13 @@ export function createRoundRect(ctx: $TSFixMe, x: $TSFixMe, y: $TSFixMe, width: 
 
 /**
  * 座標の位置に円形にクリップされた画像を表示
- * @param {Canvas.CanvasRenderingContext2D} ctx Canvas Context
- * @param {*} img 描写する画像
- * @param {*} xPosition x座標
- * @param {*} yPosition y座標
- * @param {*} radius 半径
+ * @param ctx Canvas Context
+ * @param img 描写する画像
+ * @param xPosition x座標
+ * @param yPosition y座標
+ * @param radius 半径
  */
-export function drawArcImage(ctx: $TSFixMe, img: $TSFixMe, xPosition: $TSFixMe, yPosition: $TSFixMe, radius: $TSFixMe) {
+export function drawArcImage(ctx: CanvasRenderingContext2D, img: Canvas | Image, xPosition: number, yPosition: number, radius: number) {
     ctx.beginPath();
     ctx.arc(xPosition + radius, yPosition + radius, radius, 0, Math.PI * 2, true);
     ctx.closePath();
