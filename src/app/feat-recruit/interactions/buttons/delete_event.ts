@@ -27,6 +27,7 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
         const member = await searchDBMemberById(guild, interaction.member.user.id);
         assertExistCheck(member, 'member');
         const buttonMessageId = params.get('mid');
+        assertExistCheck(buttonMessageId, "params.get('mid')");
         const buttonMessage = await searchMessageById(guild, interaction.channelId, buttonMessageId);
         const image1MsgId = params.get('imid1');
         assertExistCheck(image1MsgId, "params.get('imid1')");

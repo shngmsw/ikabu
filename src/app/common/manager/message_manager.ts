@@ -1,3 +1,5 @@
+import { Guild } from 'discord.js';
+
 import { searchChannelById } from './channel_manager';
 import { log4js_obj } from '../../../log4js_settings';
 import { exists } from '../others';
@@ -11,7 +13,7 @@ const logger = log4js_obj.getLogger('MessageManager');
  * @param {string} messageId メッセージID
  * @returns メッセージオブジェクト
  */
-export async function searchMessageById(guild: $TSFixMe, channelId: $TSFixMe, messageId: $TSFixMe) {
+export async function searchMessageById(guild: Guild, channelId: string, messageId: string) {
     const channel = await searchChannelById(guild, channelId);
     let message = null;
     if (exists(channel) && channel.isTextBased()) {
