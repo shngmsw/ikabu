@@ -62,7 +62,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
                 });
             }
             return embed;
-        });
+        }) as EmbedBuilder[];
 
         if (amount) {
             const length = bukiNames.length;

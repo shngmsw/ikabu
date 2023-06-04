@@ -8,7 +8,7 @@ export const dateformat = {
     hm: 'H:mm',
 };
 
-export function formatDatetime(datetime: $TSFixMe, formatString: $TSFixMe) {
+export function formatDatetime(datetime: string | number | Date, formatString: string) {
     const timezone = formatInTimeZone(datetime, 'Asia/Tokyo', dateformat.ymdwhm);
     const locale = format(new Date(timezone), formatString, { locale: ja });
     return locale;
