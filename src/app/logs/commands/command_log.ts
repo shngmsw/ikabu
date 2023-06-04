@@ -2,7 +2,7 @@ import { BaseGuildTextChannel, ChatInputCommandInteraction, EmbedBuilder, Messag
 
 import { log4js_obj } from '../../../log4js_settings';
 import { searchDBMemberById } from '../../common/manager/member_manager';
-import { exists, notExists } from '../../common/others';
+import { assertExistCheck, exists, notExists } from '../../common/others';
 import { sendEmbedsWebhook } from '../../common/webhook';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -51,5 +51,6 @@ export async function sendCommandLog(interaction: MessageContextMenuCommandInter
     ]);
     embed.setColor('#CFCFCF');
     embed.setTimestamp(interaction.createdAt);
+    assertExistCheck(process.env.COMMAND_LOG_WEBHOOK_URL, 'COMMAND_LOG_WEBHOOK_URL');
     await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
 }

@@ -2,6 +2,7 @@ import { BaseGuildTextChannel, ButtonInteraction, ColorResolvable, EmbedBuilder 
 
 import { Member } from '../../../db/model/member';
 import { Participant } from '../../../db/model/participant';
+import { assertExistCheck } from '../../common/others';
 import { sendEmbedsWebhook } from '../../common/webhook';
 
 export async function sendRecruitButtonLog(
@@ -22,5 +23,6 @@ export async function sendRecruitButtonLog(
     embed.setDescription('**募集主**: ' + hostMember.displayName + ' [' + hostMember.userId + ']');
     embed.setColor(color);
     embed.setTimestamp(interaction.createdAt);
+    assertExistCheck(process.env.BUTTON_LOG_WEBHOOK_URL, 'BUTTON_LOG_WEBHOOK_URL');
     await sendEmbedsWebhook(process.env.BUTTON_LOG_WEBHOOK_URL, [embed]);
 }

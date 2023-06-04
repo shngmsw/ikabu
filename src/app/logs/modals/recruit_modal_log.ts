@@ -3,7 +3,7 @@ import { EmbedBuilder, Guild } from 'discord.js';
 import { Recruit } from '../../../db/model/recruit';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchDBMemberById } from '../../common/manager/member_manager';
-import { exists } from '../../common/others';
+import { assertExistCheck, exists } from '../../common/others';
 import { sendEmbedsWebhook } from '../../common/webhook';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -44,6 +44,7 @@ export async function sendRecruitModalLog(interaction: $TSFixMe) {
     ]);
     embed.setColor('#56C000');
     embed.setTimestamp(interaction.createdAt);
+    assertExistCheck(process.env.COMMAND_LOG_WEBHOOK_URL, 'COMMAND_LOG_WEBHOOK_URL');
     await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
 }
 
@@ -80,5 +81,6 @@ export async function sendEditRecruitLog(guild: Guild, oldRecruitData: Recruit, 
     ]);
     embed.setColor('#0070BB');
     embed.setTimestamp(editedAt);
+    assertExistCheck(process.env.COMMAND_LOG_WEBHOOK_URL, 'COMMAND_LOG_WEBHOOK_URL');
     await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
 }
