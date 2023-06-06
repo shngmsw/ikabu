@@ -68,7 +68,7 @@ export async function updateSchedule() {
 
         storageCache.set('sp3_schedule', schduleData.data);
         logger.info('schedule fetched!');
-        return schduleData;
+        return schduleData.data;
     } catch (error) {
         logger.error(error);
     }
