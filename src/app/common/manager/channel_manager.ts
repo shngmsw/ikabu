@@ -16,19 +16,27 @@ const logger = log4js_obj.getLogger('ChannelManager');
  */
 export async function createChannel(guild: Guild, channelName: string, channelType: ChannelType, categoryId: string | null = null) {
     try {
+        // channelNameがおかしいときは作成せずnullを返す
+        // TODO: 正規表現でチェックをかける
         if (channelName === '') {
             return null;
         }
 
+        // カテゴリ指定があるかチェック
         let parentId = null;
         if (exists(categoryId) && categoryId !== '') {
             parentId = categoryId;
         }
+
+        // チャンネルID検索
         const channelId = await searchChannelIdByName(guild, channelName, channelType, parentId);
         if (exists(channelId)) {
+            // チャンネルが見つかったらそのチャンネルIDを返す
             return channelId;
         } else {
+            // チャンネルIDが見つからなかった時
             if (channelType === ChannelType.GuildCategory) {
+                // ChannelTypeがカテゴリを表す場合、カテゴリ作成
                 const channel = await guild.channels.create({
                     name: channelName,
                     type: channelType,
@@ -42,6 +50,7 @@ export async function createChannel(guild: Guild, channelName: string, channelTy
                 channelType === ChannelType.GuildText ||
                 channelType === ChannelType.GuildVoice
             ) {
+                // channelTypeがカテゴリ以外で、サーバ内で作成可能なTypeの場合、チャンネル作成
                 const channel = await guild.channels.create({
                     name: channelName,
                     type: channelType,
@@ -49,6 +58,7 @@ export async function createChannel(guild: Guild, channelName: string, channelTy
                 });
                 return channel.id;
             } else {
+                //channelTypeがDMなど、チャンネル作成不可能な場合、nullを返す
                 return null;
             }
         }
