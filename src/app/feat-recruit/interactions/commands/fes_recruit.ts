@@ -14,7 +14,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, fetchSchedule, getFesData } from '../../../common/apis/splatoon3_ink';
+import { checkFes, getSchedule, getFesData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
@@ -45,7 +45,7 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheT
     const user2 = options.getUser('参加者2');
     const team = interaction.commandName;
     let memberCounter = recruitNum; // プレイ人数のカウンター
-    let type;
+    let type = 0;
 
     if (options.getSubcommand() === 'now') {
         type = 0;
@@ -111,16 +111,16 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheT
     await interaction.deferReply();
 
     try {
-        const data = await fetchSchedule();
+        const schedule = await getSchedule();
 
-        if (!checkFes(data.schedule, type)) {
+        if (!checkFes(schedule, type)) {
             await interaction.editReply({
                 content: '募集を建てようとした期間はフェスが行われていないでし！',
             });
             return;
         }
 
-        const fesData = await getFesData(data, type);
+        const fesData = await getFesData(schedule, type);
 
         let txt = `### <@${hostMember.user.id}>` + 'たんのフェスマッチ募集\n';
         const members = [];

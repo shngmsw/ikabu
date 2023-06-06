@@ -6,7 +6,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkBigRun, fetchSchedule, getSalmonData } from '../../../common/apis/splatoon3_ink';
+import { checkBigRun, getSchedule, getSalmonData } from '../../../common/apis/splatoon3_ink';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
@@ -46,10 +46,10 @@ export async function sendSalmonRun(
         attendee2 = new Participant(user2.userId, user2.displayName, user2.iconUrl, 1, new Date());
     }
 
-    const data = await fetchSchedule();
+    const schedule = await getSchedule();
 
     let recruitBuffer;
-    if (checkBigRun(data.schedule, 0)) {
+    if (checkBigRun(schedule, 0)) {
         recruitBuffer = await recruitBigRunCanvas(
             RecruitOpCode.open,
             recruitNum,
@@ -76,10 +76,10 @@ export async function sendSalmonRun(
     }
 
     let ruleBuffer;
-    if (checkBigRun(data.schedule, 0)) {
-        ruleBuffer = await ruleBigRunCanvas(data);
+    if (checkBigRun(schedule, 0)) {
+        ruleBuffer = await ruleBigRunCanvas(schedule);
     } else {
-        ruleBuffer = await ruleSalmonCanvas(await getSalmonData(data, 0));
+        ruleBuffer = await ruleSalmonCanvas(await getSalmonData(schedule, 0));
     }
     assertExistCheck(recruitBuffer, 'recruitBuffer');
 

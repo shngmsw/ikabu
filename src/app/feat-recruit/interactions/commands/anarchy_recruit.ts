@@ -15,7 +15,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, fetchSchedule, getAnarchyOpenData } from '../../../common/apis/splatoon3_ink';
+import { checkFes, getSchedule, getAnarchyOpenData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
@@ -48,7 +48,7 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
     let memberCounter = recruitNum; // プレイ人数のカウンター
-    let type;
+    let type = 0;
 
     if (options.getSubcommand() === 'now') {
         type = 0;
@@ -128,9 +128,9 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
         rank = '指定なし';
     }
     try {
-        const data = await fetchSchedule();
+        const schedule = await getSchedule();
 
-        if (checkFes(data.schedule, type)) {
+        if (checkFes(schedule, type)) {
             const fesChannelId = await searchChannelIdByName(guild, 'フェス募集', ChannelType.GuildText, null);
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！\nフェス募集をするには<#${fesChannelId}>のチャンネルを使うでし！`,
@@ -138,7 +138,7 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
             return;
         }
 
-        const anarchyData = await getAnarchyOpenData(data, type);
+        const anarchyData = await getAnarchyOpenData(schedule, type);
 
         let txt = `### <@${hostMember.user.id}>` + 'たんのバンカラ募集\n';
         if (exists(user1) && exists(user2)) {

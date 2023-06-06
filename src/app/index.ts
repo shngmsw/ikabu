@@ -19,7 +19,7 @@ import {
     VoiceState,
 } from 'discord.js';
 
-import { updateSchedule } from './common/apis/splatoon3_ink';
+import { updateLocale, updateSchedule } from './common/apis/splatoon3_ink';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { assertExistCheck, exists, isNotEmpty, notExists } from './common/others';
 import { emojiCountUp } from './event/reaction_count/reactions';
@@ -207,7 +207,8 @@ client.on('ready', async () => {
         client.user.setActivity(`${guild.memberCount}人`, {
             type: ActivityType.Playing,
         });
-        updateSchedule();
+        await updateSchedule();
+        await updateLocale();
     } catch (error) {
         logger.error(error);
     }

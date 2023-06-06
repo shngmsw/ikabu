@@ -14,7 +14,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, fetchSchedule, getRegularData } from '../../../common/apis/splatoon3_ink';
+import { checkFes, getSchedule, getRegularData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
@@ -46,7 +46,7 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
     const user2 = options.getUser('参加者2');
     const user3 = options.getUser('参加者3');
     let memberCounter = recruitNum; // プレイ人数のカウンター
-    let type;
+    let type = 0;
 
     if (options.getSubcommand() === 'now') {
         type = 0;
@@ -113,8 +113,8 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
 
     try {
-        const data = await fetchSchedule();
-        if (checkFes(data.schedule, type)) {
+        const schedule = await getSchedule();
+        if (checkFes(schedule, type)) {
             const fesChannelId = await searchChannelIdByName(guild, 'フェス募集', ChannelType.GuildText, null);
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！<#${fesChannelId}>のチャンネルを使うでし！`,
@@ -122,7 +122,7 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
             return;
         }
 
-        const regularData = await getRegularData(data, type);
+        const regularData = await getRegularData(schedule, type);
 
         let txt = `### <@${hostMember.user.id}>` + 'たんのナワバリ募集\n';
         const members = [];

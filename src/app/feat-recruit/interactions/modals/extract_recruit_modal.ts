@@ -8,7 +8,7 @@ import { sendSalmonRun } from './salmon_recruit_modal';
 import { modalRecruit } from '../../../../constant';
 import { Member } from '../../../../db/model/member';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, fetchSchedule, getAnarchyOpenData, getEventData, getFesData, getRegularData } from '../../../common/apis/splatoon3_ink';
+import { checkFes, getSchedule, getAnarchyOpenData, getEventData, getFesData, getRegularData } from '../../../common/apis/splatoon3_ink';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, isEmpty, isNotEmpty, notExists } from '../../../common/others';
@@ -70,9 +70,9 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
     await sendRecruitModalLog(interaction);
 
     try {
-        const data = await fetchSchedule();
+        const schedule = await getSchedule();
 
-        if (checkFes(data.schedule, type)) {
+        if (checkFes(schedule, type)) {
             const fes1ChannelId = await searchChannelIdByName(guild, 'フウカ募集', ChannelType.GuildText, null);
             const fes2ChannelId = await searchChannelIdByName(guild, 'ウツホ募集', ChannelType.GuildText, null);
             const fes3ChannelId = await searchChannelIdByName(guild, 'マンタロー募集', ChannelType.GuildText, null);
@@ -82,7 +82,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction) {
             return;
         }
 
-        const regularData = await getRegularData(data, type);
+        const regularData = await getRegularData(schedule, type);
 
         let txt = `### <@${hostMember.userId}>` + 'たんのナワバリ募集\n';
 
@@ -205,9 +205,8 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction) {
     }
 
     try {
-        const data = await fetchSchedule();
-
-        const eventData = await getEventData(data);
+        const schedule = await getSchedule();
+        const eventData = await getEventData(schedule);
 
         if (notExists(eventData)) {
             await interaction.deleteReply();
@@ -327,9 +326,9 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
     }
 
     try {
-        const data = await fetchSchedule();
+        const schedule = await getSchedule();
 
-        if (checkFes(data.schedule, type)) {
+        if (checkFes(schedule, type)) {
             const fes1ChannelId = await searchChannelIdByName(guild, 'フウカ募集', ChannelType.GuildText, null);
             const fes2ChannelId = await searchChannelIdByName(guild, 'ウツホ募集', ChannelType.GuildText, null);
             const fes3ChannelId = await searchChannelIdByName(guild, 'マンタロー募集', ChannelType.GuildText, null);
@@ -339,7 +338,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction) {
             return;
         }
 
-        const anarchyData = await getAnarchyOpenData(data, type);
+        const anarchyData = await getAnarchyOpenData(schedule, type);
 
         let txt = `### <@${hostMember.userId}>` + 'たんのバンカラ募集\n';
         if (exists(member1Mention) && exists(member2Mention)) {
@@ -526,16 +525,16 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction, param
     await sendRecruitModalLog(interaction);
 
     try {
-        const data = await fetchSchedule();
+        const schedule = await getSchedule();
 
-        if (!checkFes(data.schedule, type)) {
+        if (!checkFes(schedule, type)) {
             await interaction.editReply({
                 content: '募集を建てようとした期間はフェスが行われていないでし！',
             });
             return;
         }
 
-        const fesData = await getFesData(data, type);
+        const fesData = await getFesData(schedule, type);
 
         const members = await guild.members.fetch();
 

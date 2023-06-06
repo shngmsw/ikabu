@@ -13,7 +13,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { EventMatchInfo, fetchSchedule, getEventData } from '../../../common/apis/splatoon3_ink';
+import { EventMatchInfo, getSchedule, getEventData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
@@ -104,8 +104,8 @@ export async function eventRecruit(interaction: ChatInputCommandInteraction) {
     const mention = `<@&${process.env.ROLE_ID_RECRUIT_EVENT}>`;
 
     try {
-        const data = await fetchSchedule();
-        const eventData = await getEventData(data);
+        const schedule = await getSchedule();
+        const eventData = await getEventData(schedule);
 
         if (notExists(eventData)) {
             await interaction.deleteReply();
