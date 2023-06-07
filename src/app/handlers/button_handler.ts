@@ -1,13 +1,20 @@
 import { URLSearchParams } from 'url';
+
+import { ButtonInteraction, CacheType } from 'discord.js';
+
 import { exists, isNotEmpty } from '../common/others';
-import { join } from '../feat-recruit/interactions/buttons/join_event';
+import { sendQuestionnaireFollowUp, disableQuestionnaireButtons } from '../event/rookie/send_questionnaire';
+import { setResolvedTag } from '../event/support_auto_tag/resolved_support';
 import { cancel } from '../feat-recruit/interactions/buttons/cancel_event';
-import { close } from '../feat-recruit/interactions/buttons/close_event';
-import { del } from '../feat-recruit/interactions/buttons/delete_event';
-import { joinNotify } from '../feat-recruit/interactions/buttons/join_notify_event';
 import { cancelNotify } from '../feat-recruit/interactions/buttons/cancel_notify_event';
+import { close } from '../feat-recruit/interactions/buttons/close_event';
 import { closeNotify } from '../feat-recruit/interactions/buttons/close_notify_event';
+import { del } from '../feat-recruit/interactions/buttons/delete_event';
+import { join } from '../feat-recruit/interactions/buttons/join_event';
+import { joinNotify } from '../feat-recruit/interactions/buttons/join_notify_event';
 import { unlock } from '../feat-recruit/interactions/buttons/other_events.js';
+import { handleCreateModal } from '../feat-recruit/modals/create_recruit_modals';
+import { deleteFriendCode } from '../feat-utils/other/friendcode';
 import {
     alfaButton,
     bravoButton,
@@ -19,17 +26,13 @@ import {
     registerButton,
     spectateButton,
 } from '../feat-utils/team_divider/divider';
-import { sendQuestionnaireFollowUp, disableQuestionnaireButtons } from '../event/rookie/send_questionnaire';
 import { voiceLockerUpdate } from '../feat-utils/voice/voice_locker';
-import { deleteFriendCode } from '../feat-utils/other/friendcode';
-import { handleCreateModal } from '../feat-recruit/modals/create_recruit_modals';
-import { setResolvedTag } from '../event/support_auto_tag/resolved_support';
 
 interface buttonFunctions {
-    [key: string]: (interaction: $TSFixMe, params: $TSFixMe) => Promise<void>;
+    [key: string]: (interaction: ButtonInteraction<CacheType>, params: URLSearchParams) => Promise<void>;
 }
 
-export async function call(interaction: $TSFixMe) {
+export async function call(interaction: ButtonInteraction<CacheType>) {
     const params = new URLSearchParams(interaction.customId);
     const param_d = params.get('d') || null;
     const param_t = params.get('t') || null;

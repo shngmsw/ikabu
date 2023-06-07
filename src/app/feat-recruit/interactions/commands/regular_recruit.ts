@@ -8,22 +8,23 @@ import {
     User,
     VoiceChannel,
 } from 'discord.js';
+
+import { Participant } from '../../../../db/model/participant';
+import { RecruitType } from '../../../../db/model/recruit';
+import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, fetchSchedule, getRegularData } from '../../../common/apis/splatoon3_ink';
+import { checkFes, getSchedule, getRegularData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, notExists, sleep } from '../../../common/others';
+import { assertExistCheck, exists, getCommandHelpEmbed, notExists, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
-import { recruitRegularCanvas, ruleRegularCanvas } from '../../canvases/regular_canvas';
-import { getMemberMentions } from '../buttons/other_events';
-import { Participant } from '../../../../db/model/participant';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitType } from '../../../../db/model/recruit';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
+import { recruitRegularCanvas, ruleRegularCanvas } from '../../canvases/regular_canvas';
 import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -36,6 +37,7 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
     const options = interaction.options;
     const guild = await interaction.guild.fetch();
     const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
+    assertExistCheck(hostMember, 'hostMember');
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
     const recruitNum = options.getInteger('募集人数') ?? -1;
@@ -44,7 +46,7 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
     const user2 = options.getUser('参加者2');
     const user3 = options.getUser('参加者3');
     let memberCounter = recruitNum; // プレイ人数のカウンター
-    let type;
+    let type = 0;
 
     if (options.getSubcommand() === 'now') {
         type = 0;
@@ -111,8 +113,8 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
 
     try {
-        const data = await fetchSchedule();
-        if (checkFes(data.schedule, type)) {
+        const schedule = await getSchedule();
+        if (checkFes(schedule, type)) {
             const fesChannelId = await searchChannelIdByName(guild, 'フェス募集', ChannelType.GuildText, null);
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！<#${fesChannelId}>のチャンネルを使うでし！`,
@@ -120,9 +122,9 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
             return;
         }
 
-        const regularData = await getRegularData(data, type);
+        const regularData = await getRegularData(schedule, type);
 
-        let txt = `<@${hostMember.user.id}>` + '**たんのナワバリ募集**\n';
+        let txt = `### <@${hostMember.user.id}>` + 'たんのナワバリ募集\n';
         const members = [];
 
         if (exists(user1)) {
@@ -184,6 +186,7 @@ async function sendRegularMatch(
     const guild = await interaction.guild.fetch();
 
     const recruiter = await searchDBMemberById(guild, hostMember.id);
+    assertExistCheck(recruiter, 'recruiter');
     const hostPt = new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date());
 
     let participant1 = null;
@@ -192,14 +195,17 @@ async function sendRegularMatch(
 
     if (exists(user1)) {
         const member = await searchDBMemberById(guild, user1.id);
+        assertExistCheck(member, 'member1');
         participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
     }
     if (exists(user2)) {
         const member = await searchDBMemberById(guild, user2.id);
+        assertExistCheck(member, 'member2');
         participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
     }
     if (exists(user3)) {
         const member = await searchDBMemberById(guild, user3.id);
+        assertExistCheck(member, 'member3');
         participant3 = new Participant(user3.id, member.displayName, member.iconUrl, 1, new Date());
     }
 
@@ -307,7 +313,7 @@ async function sendRegularMatch(
         // 15秒後に削除ボタンを消す
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
-        if (isNotEmpty(deleteButtonCheck)) {
+        if (exists(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
             if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
@@ -335,7 +341,7 @@ async function sendRegularMatch(
 
         sentMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
-            components: await setButtonDisable(sentMessage),
+            components: setButtonDisable(sentMessage),
         });
 
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {

@@ -1,7 +1,11 @@
 import { BaseGuildTextChannel, ChatInputCommandInteraction, EmbedBuilder, MessageContextMenuCommandInteraction } from 'discord.js';
+
+import { log4js_obj } from '../../../log4js_settings';
 import { searchDBMemberById } from '../../common/manager/member_manager';
+import { assertExistCheck, exists, notExists } from '../../common/others';
 import { sendEmbedsWebhook } from '../../common/webhook';
-import { notExists } from '../../common/others';
+
+const logger = log4js_obj.getLogger('interaction');
 
 export async function sendCommandLog(interaction: MessageContextMenuCommandInteraction | ChatInputCommandInteraction) {
     if (!interaction.inGuild()) return;
@@ -25,10 +29,14 @@ export async function sendCommandLog(interaction: MessageContextMenuCommandInter
 
     const embed = new EmbedBuilder();
     embed.setTitle(title);
-    embed.setAuthor({
-        name: `${author.displayName} [${authorId}]`,
-        iconURL: author.iconUrl,
-    });
+    if (exists(author)) {
+        embed.setAuthor({
+            name: `${author.displayName} [${authorId}]`,
+            iconURL: author.iconUrl,
+        });
+    } else {
+        logger.warn('No log generated due to missing author information');
+    }
     embed.addFields([
         {
             name: '使用コマンド',
@@ -43,5 +51,6 @@ export async function sendCommandLog(interaction: MessageContextMenuCommandInter
     ]);
     embed.setColor('#CFCFCF');
     embed.setTimestamp(interaction.createdAt);
+    assertExistCheck(process.env.COMMAND_LOG_WEBHOOK_URL, 'COMMAND_LOG_WEBHOOK_URL');
     await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
 }

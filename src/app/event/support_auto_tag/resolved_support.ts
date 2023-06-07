@@ -1,8 +1,9 @@
 import { PermissionsBitField } from 'discord.js';
+
+import { tagIdsEmbed } from './tag_ids_embed';
 import { log4js_obj } from '../../../log4js_settings';
 import { recoveryThinkingButton, setButtonDisable } from '../../common/button_components';
 import { isEmpty } from '../../common/others';
-import { tagIdsEmbed } from './tag_ids_embed';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -21,7 +22,7 @@ export async function setResolvedTag(interaction: $TSFixMe) {
         }
 
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         if (thread.archived) {
@@ -36,7 +37,7 @@ export async function setResolvedTag(interaction: $TSFixMe) {
         await thread.setArchived(true);
 
         await interaction.editReply({
-            components: await recoveryThinkingButton(interaction, 'クローズ済'),
+            components: recoveryThinkingButton(interaction, 'クローズ済'),
         });
     } catch (error) {
         logger.error(error);

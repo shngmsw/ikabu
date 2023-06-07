@@ -1,11 +1,11 @@
 import Canvas from 'canvas';
-import { createRoundRect, fillTextWithStroke } from '../../common/canvas_components';
-import { EmbedBuilder, AttachmentBuilder, ChatInputCommandInteraction, CacheType } from 'discord.js';
-import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
 import { getUnixTime } from 'date-fns';
+import { EmbedBuilder, AttachmentBuilder, ChatInputCommandInteraction, CacheType } from 'discord.js';
 
+import { placeHold } from '../../../constant';
+import { log4js_obj } from '../../../log4js_settings';
 import {
-    fetchSchedule,
+    getSchedule,
     checkFes,
     getFesData,
     getRegularData,
@@ -14,8 +14,10 @@ import {
     getAnarchyOpenData,
     getXMatchData,
 } from '../../common/apis/splatoon3_ink';
-import { log4js_obj } from '../../../log4js_settings';
-import { placeHold } from '../../../constant';
+import { sp3Schedule } from '../../common/apis/types/schedule';
+import { createRoundRect, fillTextWithStroke } from '../../common/canvas_components';
+import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
+import { assertExistCheck, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -25,27 +27,27 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
         await interaction.deferReply();
         const { options } = interaction;
         const subCommand = options.getSubcommand();
-        const data = await fetchSchedule();
+        const schedule = await getSchedule();
         if (subCommand === `now`) {
-            if (checkFes(data.schedule, 0)) {
-                await sendFesInfo(interaction, data, 0);
+            if (checkFes(schedule, 0)) {
+                await sendFesInfo(interaction, schedule, 0);
             } else {
-                await sendStageInfo(interaction, data, 0);
+                await sendStageInfo(interaction, schedule, 0);
             }
         } else if (subCommand === 'next') {
-            if (checkFes(data.schedule, 1)) {
-                await sendFesInfo(interaction, data, 1);
+            if (checkFes(schedule, 1)) {
+                await sendFesInfo(interaction, schedule, 1);
             } else {
-                await sendStageInfo(interaction, data, 1);
+                await sendStageInfo(interaction, schedule, 1);
             }
         } else if (subCommand === 'nawabari') {
-            if (checkFes(data.schedule, 1)) {
-                await sendFesInfo(interaction, data, 0);
+            if (checkFes(schedule.schedule, 1)) {
+                await sendFesInfo(interaction, schedule, 0);
             } else {
-                await sendRegularInfo(interaction, data, 0);
+                await sendRegularInfo(interaction, schedule, 0);
             }
         } else if (subCommand === 'run') {
-            await sendRunInfo(interaction, data);
+            await sendRunInfo(interaction, schedule);
         }
     } catch (error) {
         await interaction.followUp('なんかエラーでてるわ');
@@ -53,7 +55,7 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
     }
 }
 
-async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe, scheduleNum: $TSFixMe) {
+async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>, schedule: sp3Schedule, scheduleNum: $TSFixMe) {
     let title;
     if (scheduleNum == 0) {
         title = '現在';
@@ -61,32 +63,21 @@ async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>
         title = '次';
     }
 
-    // const league_data = await getLeagueData(data, scheduleNum);
-    const challenge_data = await getAnarchyChallengeData(data, scheduleNum);
-    const open_data = await getAnarchyOpenData(data, scheduleNum);
-    const X_data = await getXMatchData(data, scheduleNum);
+    // const leagueData = await getLeagueData(data, scheduleNum);
+    const challengeData = await getAnarchyChallengeData(schedule, scheduleNum);
+    const openData = await getAnarchyOpenData(schedule, scheduleNum);
+    const xData = await getXMatchData(schedule, scheduleNum);
+    assertExistCheck(challengeData, 'challengeData');
+    assertExistCheck(openData, 'openData');
+    assertExistCheck(xData, 'xData');
 
-    // const l_thumbnail = rule2image(league_data.rule);
-    const c_thumbnail = rule2image(challenge_data.rule);
-    const o_thumbnail = rule2image(open_data.rule);
-    const x_thumbnail = rule2image(X_data.rule);
+    // const lThumbnail = rule2image(leagueData.rule);
+    const cThumbnail = rule2image(challengeData.rule);
+    const oThumbnail = rule2image(openData.rule);
+    const xThumbnail = rule2image(xData.rule);
 
-    // const league_start_date = formatDatetime(league_data.startTime, dateformat.ymdwhm);
-    // const league_end_date = formatDatetime(league_data.endTime, dateformat.hm);
-    // const leagueEmbed = new EmbedBuilder()
-    //     .setAuthor({
-    //         name: title + 'のリーグマッチ',
-    //         iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/league_icon.png',
-    //     })
-    //     .setColor('#ED2D7C')
-    //     .addFields({
-    //         name: league_start_date + '-' + league_end_date,
-    //         value: league_data.stage1 + '／' + league_data.stage2,
-    //     })
-    //     .setThumbnail(l_thumbnail);
-
-    const challenge_start_date = formatDatetime(challenge_data.startTime, dateformat.ymdwhm);
-    const challenge_end_date = formatDatetime(challenge_data.endTime, dateformat.hm);
+    const challengeStartDate = formatDatetime(challengeData.startTime, dateformat.ymdwhm);
+    const challengeEndDate = formatDatetime(challengeData.endTime, dateformat.hm);
     const challengeEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のバンカラマッチ (チャレンジ)',
@@ -94,13 +85,13 @@ async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>
         })
         .setColor('#F54910')
         .addFields({
-            name: challenge_start_date + '-' + challenge_end_date,
-            value: challenge_data.stage1 + '／' + challenge_data.stage2,
+            name: challengeStartDate + '-' + challengeEndDate,
+            value: challengeData.stage1 + '／' + challengeData.stage2,
         })
-        .setThumbnail(c_thumbnail);
+        .setThumbnail(cThumbnail);
 
-    const open_start_date = formatDatetime(open_data.startTime, dateformat.ymdwhm);
-    const open_end_date = formatDatetime(open_data.endTime, dateformat.hm);
+    const openStartDate = formatDatetime(openData.startTime, dateformat.ymdwhm);
+    const openEndDate = formatDatetime(openData.endTime, dateformat.hm);
     const openEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のバンカラマッチ (オープン)',
@@ -108,13 +99,13 @@ async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>
         })
         .setColor('#F54910')
         .addFields({
-            name: open_start_date + '-' + open_end_date,
-            value: open_data.stage1 + '／' + open_data.stage2,
+            name: openStartDate + '-' + openEndDate,
+            value: openData.stage1 + '／' + openData.stage2,
         })
-        .setThumbnail(o_thumbnail);
+        .setThumbnail(oThumbnail);
 
-    const x_start_date = formatDatetime(X_data.startTime, dateformat.ymdwhm);
-    const x_end_date = formatDatetime(X_data.endTime, dateformat.hm);
+    const xStartDate = formatDatetime(xData.startTime, dateformat.ymdwhm);
+    const xEndDate = formatDatetime(xData.endTime, dateformat.hm);
     const xMatchEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のXマッチ',
@@ -123,24 +114,21 @@ async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>
         })
         .setColor('#0edb9b')
         .addFields({
-            name: x_start_date + '-' + x_end_date,
-            value: X_data.stage1 + '／' + X_data.stage2,
+            name: xStartDate + '-' + xEndDate,
+            value: xData.stage1 + '／' + xData.stage2,
         })
-        .setThumbnail(x_thumbnail);
+        .setThumbnail(xThumbnail);
 
     await interaction.editReply({
         embeds: [xMatchEmbed, challengeEmbed, openEmbed],
     });
-    // TODO: リーグマッチはゲーム内で実装後に表示
-    // await interaction.editReply({
-    //     embeds: [leagueEmbed, openEmbed, challengeEmbed, xMatchEmbed],
-    // });
 }
 
 async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe, scheduleNum: $TSFixMe) {
-    const regular_data = await getRegularData(data, scheduleNum);
-    const start_date = formatDatetime(regular_data.startTime, dateformat.ymdwhm);
-    const end_date = formatDatetime(regular_data.endTime, dateformat.hm);
+    const regularData = await getRegularData(data, scheduleNum);
+    assertExistCheck(regularData, 'regularData');
+    const startDate = formatDatetime(regularData.startTime, dateformat.ymdwhm);
+    const endDate = formatDatetime(regularData.endTime, dateformat.hm);
 
     let title = '';
     if (scheduleNum == 0) {
@@ -156,8 +144,8 @@ async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheTyp
         })
         .setColor('#B3FF00')
         .addFields({
-            name: start_date + '-' + end_date,
-            value: regular_data.stage1 + '／' + regular_data.stage2,
+            name: startDate + '-' + endDate,
+            value: regularData.stage1 + '／' + regularData.stage2,
         })
         .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png');
 
@@ -167,9 +155,10 @@ async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheTyp
 }
 
 async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe, scheduleNum: $TSFixMe) {
-    const fes_data = await getFesData(data, scheduleNum);
-    const start_date = formatDatetime(fes_data.startTime, dateformat.ymdwhm);
-    const end_date = formatDatetime(fes_data.endTime, dateformat.hm);
+    const festData = await getFesData(data, scheduleNum);
+    assertExistCheck(festData, 'festData');
+    const startDate = formatDatetime(festData.startTime, dateformat.ymdwhm);
+    const endDate = formatDatetime(festData.endTime, dateformat.hm);
 
     let title = '';
     if (scheduleNum == 0) {
@@ -185,8 +174,8 @@ async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, 
         })
         .setColor('#ead147')
         .addFields({
-            name: start_date + '-' + end_date,
-            value: fes_data.stage1 + '／' + fes_data.stage2,
+            name: startDate + '-' + endDate,
+            value: festData.stage1 + '／' + festData.stage2,
         })
         .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png');
 
@@ -195,7 +184,7 @@ async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, 
     });
 }
 
-async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe) {
+async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, schedule: sp3Schedule) {
     try {
         for (let i = 0; i < 2; i++) {
             let title = '';
@@ -204,12 +193,13 @@ async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, 
             } else if (i == 1) {
                 title = '次';
             }
-            const salmon_data = await getSalmonData(data, i);
-            const start_date = formatDatetime(salmon_data.startTime, dateformat.ymdwhm);
-            const end_date = formatDatetime(salmon_data.endTime, dateformat.ymdwhm);
+            const salmonData = await getSalmonData(schedule, i);
+            assertExistCheck(salmonData, 'salmonData');
+            const startDate = formatDatetime(salmonData.startTime, dateformat.ymdwhm);
+            const endDate = formatDatetime(salmonData.endTime, dateformat.ymdwhm);
 
             const weaponsImage = new AttachmentBuilder(
-                await salmonWeaponCanvas(salmon_data.weapon1, salmon_data.weapon2, salmon_data.weapon3, salmon_data.weapon4),
+                await salmonWeaponCanvas(salmonData.weapon1, salmonData.weapon2, salmonData.weapon3, salmonData.weapon4),
                 {
                     name: 'weapons.png',
                     description: '',
@@ -221,16 +211,16 @@ async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, 
                     name: title + 'のSALMON RUN',
                     iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
                 })
-                .setTitle(salmon_data.stage)
+                .setTitle(salmonData.stage)
                 .setColor('#FC892C')
                 .addFields(
                     {
                         name: '開始日時',
-                        value: start_date + '【' + `<t:${getUnixTime(new Date(salmon_data.startTime))}:R>` + '】',
+                        value: startDate + '【' + `<t:${getUnixTime(new Date(salmonData.startTime))}:R>` + '】',
                     },
                     {
                         name: '終了日時',
-                        value: end_date + '【' + `<t:${getUnixTime(new Date(salmon_data.endTime))}:R>` + '】',
+                        value: endDate + '【' + `<t:${getUnixTime(new Date(salmonData.endTime))}:R>` + '】',
                     },
                 )
                 .setImage('attachment://weapons.png')
@@ -257,7 +247,7 @@ async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, 
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-async function salmonWeaponCanvas(weapon1: $TSFixMe, weapon2: $TSFixMe, weapon3: $TSFixMe, weapon4: $TSFixMe) {
+async function salmonWeaponCanvas(weapon1: string, weapon2: string, weapon3: string, weapon4: string) {
     const canvas_width = 650;
     const canvas_height = 220;
     const weaponCanvas = Canvas.createCanvas(canvas_width, canvas_height);
@@ -289,7 +279,10 @@ async function salmonWeaponCanvas(weapon1: $TSFixMe, weapon2: $TSFixMe, weapon3:
     return weaponCanvas.toBuffer();
 }
 
-function rule2image(rule: $TSFixMe) {
+function rule2image(rule: string | undefined | null) {
+    if (notExists(rule)) {
+        return placeHold.error100x100;
+    }
     switch (rule) {
         case 'ガチエリア':
             return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';

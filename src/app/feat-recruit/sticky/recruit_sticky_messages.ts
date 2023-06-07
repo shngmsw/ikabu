@@ -1,11 +1,12 @@
 import { Guild, Message, MessageCreateOptions, MessagePayload } from 'discord.js';
-import { searchMessageById } from '../../common/manager/message_manager';
-import { searchChannelById } from '../../common/manager/channel_manager';
-import { StickyService } from '../../../db/sticky_service';
+
+import { RecruitType } from '../../../db/model/recruit';
 import { ParticipantService } from '../../../db/participants_service';
 import { RecruitService } from '../../../db/recruit_service';
-import { RecruitType } from '../../../db/model/recruit';
+import { StickyService } from '../../../db/sticky_service';
 import { log4js_obj } from '../../../log4js_settings';
+import { searchChannelById } from '../../common/manager/channel_manager';
+import { searchMessageById } from '../../common/manager/message_manager';
 import { assertExistCheck, exists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('message');
@@ -123,6 +124,8 @@ export async function sendStickyMessage(guild: Guild, channelId: string, content
         }
     }
     const channel = await searchChannelById(guild, channelId);
-    const stickyMessage = await channel.send(content);
-    await StickyService.registerMessageId(guild.id, channelId, stickyMessage.id);
+    if (exists(channel) && channel.isTextBased()) {
+        const stickyMessage = await channel.send(content);
+        await StickyService.registerMessageId(guild.id, channelId, stickyMessage.id);
+    }
 }

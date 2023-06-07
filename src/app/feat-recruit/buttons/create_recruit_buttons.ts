@@ -1,5 +1,7 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message } from 'discord.js';
 import { URLSearchParams } from 'url';
+
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message } from 'discord.js';
+
 import { isNotEmpty } from '../../common/others';
 
 export function recruitDeleteButton(message: Message, image1Message: Message, image2Message: Message) {
@@ -108,13 +110,6 @@ export function createNewRecruitButton(channelName: string) {
     }
 
     return button;
-}
-
-export function disableUnlockButton() {
-    const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
-        new ButtonBuilder().setCustomId('unlocked').setLabel('ロック解除済み').setStyle(ButtonStyle.Secondary).setDisabled(),
-    ]);
-    return buttons;
 }
 
 export function nsoRoomLinkButton(url: string) {

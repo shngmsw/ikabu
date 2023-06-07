@@ -1,13 +1,14 @@
 import { ButtonInteraction } from 'discord.js';
+
+import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
+import { Participant } from '../../../../db/model/participant.js';
+import { ParticipantService } from '../../../../db/participants_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
-import { assertExistCheck, isNotEmpty } from '../../../common/others.js';
-import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
-import { Participant } from '../../../../db/model/participant.js';
-import { ParticipantService } from '../../../../db/participants_service.js';
+import { assertExistCheck, exists } from '../../../common/others.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -24,14 +25,16 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
 
         const guild = await interaction.guild.fetch();
         const member = await searchDBMemberById(guild, interaction.member.user.id);
+        assertExistCheck(member, 'member');
         const buttonMessageId = params.get('mid');
+        assertExistCheck(buttonMessageId, "params.get('mid')");
         const buttonMessage = await searchMessageById(guild, interaction.channelId, buttonMessageId);
         const image1MsgId = params.get('imid1');
         assertExistCheck(image1MsgId, "params.get('imid1')");
         const image1Message = await searchMessageById(guild, interaction.channelId, image1MsgId);
         const image2MsgId = params.get('imid2');
         let image2Message;
-        if (isNotEmpty(image2MsgId)) {
+        if (exists(image2MsgId)) {
             image2Message = await searchMessageById(guild, interaction.channelId, image2MsgId);
         }
 
@@ -39,7 +42,7 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
 
         if (participantsData.length === 0) {
             await interaction.message.edit({
-                components: await setButtonDisable(interaction.message),
+                components: setButtonDisable(interaction.message),
             });
             await interaction.editReply({ content: 'この募集はもう削除できないでし！' });
             return;
@@ -74,22 +77,28 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
                 logger.warn('recruit delete button has already been deleted');
             }
 
-            try {
-                await image1Message.delete();
-            } catch (error) {
-                logger.warn('recruit message or recruit image has already been deleted');
+            if (exists(image1Message)) {
+                try {
+                    await image1Message.delete();
+                } catch (error) {
+                    logger.warn('recruit message or recruit image has already been deleted');
+                }
             }
 
-            try {
-                await image2Message.delete();
-            } catch (error) {
-                logger.warn('rule image is either not set or has already been deleted.');
+            if (exists(image2Message)) {
+                try {
+                    await image2Message.delete();
+                } catch (error) {
+                    logger.warn('rule image has already been deleted.');
+                }
             }
 
-            try {
-                await buttonMessage.delete();
-            } catch (error) {
-                logger.warn('recruit components has already been deleted');
+            if (exists(buttonMessage)) {
+                try {
+                    await buttonMessage.delete();
+                } catch (error) {
+                    logger.warn('recruit components has already been deleted');
+                }
             }
 
             // recruitテーブルから削除
@@ -109,7 +118,7 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
     } catch (err) {
         logger.error(err);
         interaction.message.edit({
-            components: await setButtonDisable(interaction.message),
+            components: setButtonDisable(interaction.message),
         });
         interaction.channel?.send('なんかエラー出てるわ');
     }

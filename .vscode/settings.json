@@ -5,6 +5,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false,
     "editor.codeActionsOnSave": {
+      "source.addMissingImports": true,
       "source.fixAll.eslint": true
     }
   }

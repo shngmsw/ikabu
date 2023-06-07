@@ -1,6 +1,7 @@
 import { ActionRowBuilder, MessageContextMenuCommandInteraction, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
-import { log4js_obj } from '../../../../log4js_settings';
+
 import { RecruitService } from '../../../../db/recruit_service';
+import { log4js_obj } from '../../../../log4js_settings';
 import { assertExistCheck } from '../../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');

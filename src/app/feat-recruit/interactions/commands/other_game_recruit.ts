@@ -11,15 +11,16 @@ import {
     TextBasedChannel,
     VoiceChannel,
 } from 'discord.js';
+
+import { Participant } from '../../../../db/model/participant';
+import { RecruitType } from '../../../../db/model/recruit';
+import { ParticipantService } from '../../../../db/participants_service';
+import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, recruitActionRow, unlockChannelButton } from '../../buttons/create_recruit_buttons';
-import { RecruitService } from '../../../../db/recruit_service';
-import { ParticipantService } from '../../../../db/participants_service';
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
 import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
@@ -33,6 +34,9 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction)
     const guild = await interaction.guild.fetch();
     const options = interaction.options;
     const member = await searchAPIMemberById(guild, interaction.member.user.id);
+
+    assertExistCheck(member, 'member');
+
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
     const availableChannel = [
         'alfa',
@@ -99,7 +103,7 @@ async function monsterHunterRise(
     const title = 'MONSTER HUNTER RISE';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
     const mention = role.toString();
-    const txt = `<@${member.user.id}>` + '**たんのモンハンライズ募集**\n';
+    const txt = `### <@${member.user.id}>` + 'たんのモンハンライズ募集\n';
     const color = '#b71008';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak_logo.png';
@@ -121,7 +125,7 @@ async function apexLegends(
     const title = 'Apex Legends';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
     const mention = role.toString();
-    const txt = `<@${member.user.id}>` + '**たんのApexLegends募集**\n';
+    const txt = `### <@${member.user.id}>` + 'たんのApexLegends募集\n';
     const color = '#F30100';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends_logo.png';
@@ -143,7 +147,7 @@ async function overwatch(
     const title = 'Overwatch2';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
     const mention = role.toString();
-    const txt = `<@${member.user.id}>` + '**たんのOverwatch2募集**\n';
+    const txt = `### <@${member.user.id}>` + 'たんのOverwatch2募集\n';
     const color = '#ED6516';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch2.png';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch_logo.png';
@@ -165,7 +169,7 @@ async function valorant(
     const title = 'VALORANT';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
     const mention = role.toString();
-    const txt = `<@${member.user.id}>` + '**たんのVALORANT募集**\n';
+    const txt = `### <@${member.user.id}>` + 'たんのVALORANT募集\n';
     const color = '#FF4654';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant_logo.png';
@@ -181,7 +185,7 @@ async function others(interaction: ChatInputCommandInteraction, guild: Guild, re
     const title = interaction.options.getString('ゲームタイトル') ?? 'ERROR';
     const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
     const mention = `<@&${roleId}>`;
-    const txt = `<@${member.user.id}>` + `**たんの${title}募集**\n`;
+    const txt = `### <@${member.user.id}>` + `たんの${title}募集\n`;
     const color = '#379C30';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others_logo.png';
@@ -208,6 +212,8 @@ async function sendOtherGames(
     const reserveChannel = interaction.options.getChannel('使用チャンネル');
 
     const recruiter = await searchDBMemberById(guild, member.user.id);
+
+    assertExistCheck(recruiter, 'recruiter');
 
     const embed = new EmbedBuilder()
         .setAuthor({
@@ -314,7 +320,7 @@ async function sendOtherGames(
         // 15秒後に削除ボタンを消す
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
-        if (isNotEmpty(deleteButtonCheck)) {
+        if (exists(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
             if (reserveChannel instanceof VoiceChannel && member.voice.channelId != reserveChannel.id) {

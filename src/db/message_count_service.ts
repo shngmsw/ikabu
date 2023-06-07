@@ -1,8 +1,8 @@
-import { log4js_obj } from '../log4js_settings';
-
 import util from 'node:util';
+
 import { DBCommon } from './db';
 import { MessageCount } from './model/message_count';
+import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
 export class MessageCountService {

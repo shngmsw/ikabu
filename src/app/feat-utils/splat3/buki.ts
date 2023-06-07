@@ -1,9 +1,10 @@
 import { CacheType, ChatInputCommandInteraction, EmbedBuilder, User } from 'discord.js';
 import fetch from 'node-fetch';
+
+import { Member } from '../../../db/model/member';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, exists, randomSelect } from '../../common/others';
-import { Member } from '../../../db/model/member';
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -24,7 +25,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const weapons = (await response.json()) as any;
 
-        let member: User | Member;
+        let member: User | Member | null;
         if (interaction.inGuild()) {
             assertExistCheck(interaction.guild, 'guild');
             const guild = await interaction.guild.fetch();
@@ -61,7 +62,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
                 });
             }
             return embed;
-        });
+        }) as EmbedBuilder[];
 
         if (amount) {
             const length = bukiNames.length;

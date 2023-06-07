@@ -1,15 +1,29 @@
-import { SlashCommandBuilder, ContextMenuCommandBuilder } from '@discordjs/builders';
-import { ChannelType, ApplicationCommandType } from 'discord-api-types/v10';
+import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
+import { REST } from '@discordjs/rest';
+import { ApplicationCommandType, ChannelType, Routes } from 'discord-api-types/v10';
+import {
+    SlashCommandAttachmentOption,
+    SlashCommandBooleanOption,
+    SlashCommandChannelOption,
+    SlashCommandIntegerOption,
+    SlashCommandMentionableOption,
+    SlashCommandStringOption,
+    SlashCommandSubcommandBuilder,
+    SlashCommandUserOption,
+} from 'discord.js';
+
+import { assertExistCheck } from './app/common/others.js';
 import { commandNames } from './constant.js';
+import { log4js_obj } from './log4js_settings.js';
 
 const voiceLock = new SlashCommandBuilder()
     .setName(commandNames.vclock)
     .setDescription('ボイスチャンネルに人数制限を設定します。')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('vclock')
             .setDescription('このボイスチャンネルに人数制限をかけます')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option.setName('人数').setDescription('制限人数を指定する場合は1～99で指定してください。').setRequired(false),
             ),
     )
@@ -18,7 +32,7 @@ const voiceLock = new SlashCommandBuilder()
 const friendCode = new SlashCommandBuilder()
     .setName(commandNames.friend_code)
     .setDescription('フレンドコードの登録・表示')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('add')
             .setDescription('フレンドコードを登録します。')
@@ -29,43 +43,45 @@ const friendCode = new SlashCommandBuilder()
                 option.setName('フレンドコードurl').setDescription('Nintendo Switch OnlineのフレンドコードURLを登録できます。'),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand.setName('show').setDescription('登録したフレンドコードを表示します。未登録の場合は自己紹介から引用します。'),
     );
 
 const wiki = new SlashCommandBuilder()
     .setName(commandNames.wiki)
     .setDescription('wikipediaで調べる')
-    .addStringOption((option: $TSFixMe) => option.setName('キーワード').setDescription('調べたいキーワードを入力').setRequired(true));
+    .addStringOption((option: SlashCommandStringOption) =>
+        option.setName('キーワード').setDescription('調べたいキーワードを入力').setRequired(true),
+    );
 
 const kansen = new SlashCommandBuilder()
     .setName(commandNames.kansen)
     .setDescription('プラベの観戦する人をランダムな組み合わせで抽出します。')
-    .addIntegerOption((option: $TSFixMe) =>
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
         option.setName('回数').setDescription('何回分の組み合わせを抽出するかを指定します。5回がおすすめ').setRequired(true),
     );
 
 const minutesTimer = new SlashCommandBuilder()
     .setName(commandNames.timer)
     .setDescription('分タイマー')
-    .addIntegerOption((option: $TSFixMe) =>
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
         option.setName('分').setDescription('〇〇分後まで1分ごとにカウントダウンします。').setRequired(true),
     );
 
 const pick = new SlashCommandBuilder()
     .setName(commandNames.pick)
     .setDescription('選択肢の中からランダムに抽出します。')
-    .addStringOption((option: $TSFixMe) =>
+    .addStringOption((option: SlashCommandStringOption) =>
         option.setName('選択肢').setDescription('半角スペースで区切って入力してください。').setRequired(true),
     )
-    .addIntegerOption((option: $TSFixMe) =>
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
         option.setName('ピックする数').setDescription('2つ以上ピックしたい場合は指定してください。').setRequired(false),
     );
 
 const vpick = new SlashCommandBuilder()
     .setName(commandNames.voice_pick)
     .setDescription('VCに接続しているメンバーからランダムに抽出します。')
-    .addIntegerOption((option: $TSFixMe) =>
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
         option.setName('ピックする人数').setDescription('2人以上ピックしたい場合は指定してください。').setRequired(false),
     )
     .setDMPermission(false);
@@ -73,10 +89,10 @@ const vpick = new SlashCommandBuilder()
 const buki = new SlashCommandBuilder()
     .setName(commandNames.buki)
     .setDescription('ブキをランダムに抽出します。')
-    .addIntegerOption((option: $TSFixMe) =>
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
         option.setName('ブキの数').setDescription('指定するとn個のブキをランダムに選びます。').setRequired(false),
     )
-    .addStringOption((option: $TSFixMe) =>
+    .addStringOption((option: SlashCommandStringOption) =>
         option
             .setName('ブキ種')
             .setDescription('ブキ種を指定したい場合は指定できます。')
@@ -100,100 +116,114 @@ const buki = new SlashCommandBuilder()
 const show = new SlashCommandBuilder()
     .setName(commandNames.show)
     .setDescription('ステージ情報を表示')
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('now').setDescription('現在のX,バンカラマッチのステージ情報を表示'))
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('next').setDescription('次のX,バンカラマッチのステージ情報を表示'))
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('nawabari').setDescription('現在のナワバリのステージ情報を表示'))
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('run').setDescription('2つ先までのシフトを表示'));
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand.setName('now').setDescription('現在のX,バンカラマッチのステージ情報を表示'),
+    )
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand.setName('next').setDescription('次のX,バンカラマッチのステージ情報を表示'),
+    )
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand.setName('nawabari').setDescription('現在のナワバリのステージ情報を表示'),
+    )
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) => subcommand.setName('run').setDescription('2つ先までのシフトを表示'));
 
 const help = new SlashCommandBuilder()
     .setName(commandNames.help)
     .setDescription('ヘルプを表示します。')
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('recruit').setDescription('募集コマンドの使い方を表示'))
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('voice').setDescription('読み上げ機能のヘルプを表示'))
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('other').setDescription('募集コマンド以外の使い方を表示'));
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand.setName('recruit').setDescription('募集コマンドの使い方を表示'),
+    )
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) => subcommand.setName('voice').setDescription('読み上げ機能のヘルプを表示'))
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand.setName('other').setDescription('募集コマンド以外の使い方を表示'),
+    );
 
 const ban = new SlashCommandBuilder()
     .setName(commandNames.ban)
     .setDescription('banします。')
-    .addUserOption((option: $TSFixMe) => option.setName('ban対象').setDescription('banする人を指定してください。').setRequired(true))
-    .addStringOption((option: $TSFixMe) => option.setName('ban理由').setDescription('ban対象の人にブキチがDMします。').setRequired(true))
+    .addUserOption((option: SlashCommandUserOption) =>
+        option.setName('ban対象').setDescription('banする人を指定してください。').setRequired(true),
+    )
+    .addStringOption((option: SlashCommandStringOption) =>
+        option.setName('ban理由').setDescription('ban対象の人にブキチがDMします。').setRequired(true),
+    )
     .setDMPermission(false);
 
 const chManager = new SlashCommandBuilder()
     .setName(commandNames.ch_manager)
     .setDescription('チャンネルを作ったり削除したりできます。')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('チャンネル作成')
             .setDescription('チャンネル一括作成')
-            .addAttachmentOption((option: $TSFixMe) =>
+            .addAttachmentOption((option: SlashCommandAttachmentOption) =>
                 option
                     .setName('csv')
                     .setDescription('CSV（ヘッダー有り）:catID,catName,chID,chName,chType,roleID,roleName,roleColor,member1,member2,member')
                     .setRequired(true),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('ロール作成')
             .setDescription('ロール作成')
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('ロール名').setDescription('ロール名を指定してください。').setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('ロールカラー').setDescription('カラーコードをhexで入力してください。').setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('ロール割当')
             .setDescription('ロール割当')
-            .addMentionableOption((option: $TSFixMe) =>
+            .addMentionableOption((option: SlashCommandMentionableOption) =>
                 option.setName('ターゲットロール').setDescription('どのロールにつけますか？').setRequired(true),
             )
-            .addMentionableOption((option: $TSFixMe) =>
+            .addMentionableOption((option: SlashCommandMentionableOption) =>
                 option.setName('割当ロール').setDescription('どのロールをつけますか？').setRequired(true),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('ロール解除')
             .setDescription('ロール解除')
-            .addMentionableOption((option: $TSFixMe) =>
+            .addMentionableOption((option: SlashCommandMentionableOption) =>
                 option.setName('ターゲットロール').setDescription('どのロールから外しますか？').setRequired(true),
             )
-            .addMentionableOption((option: $TSFixMe) =>
+            .addMentionableOption((option: SlashCommandMentionableOption) =>
                 option.setName('解除ロール').setDescription('どのロールを外しますか？').setRequired(true),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('ロール削除')
             .setDescription('ロール削除')
-            .addMentionableOption((option: $TSFixMe) =>
+            .addMentionableOption((option: SlashCommandMentionableOption) =>
                 option.setName('ロール名1').setDescription('ロール名を指定してください。').setRequired(true),
             )
-            .addMentionableOption((option: $TSFixMe) =>
+            .addMentionableOption((option: SlashCommandMentionableOption) =>
                 option.setName('ロール名2').setDescription('ロール名を指定してください。').setRequired(false),
             )
-            .addMentionableOption((option: $TSFixMe) =>
+            .addMentionableOption((option: SlashCommandMentionableOption) =>
                 option.setName('ロール名3').setDescription('ロール名を指定してください。').setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('カテゴリー削除')
             .setDescription('カテゴリー削除')
-            .addAttachmentOption((option: $TSFixMe) => option.setName('csv').setDescription('csv').setRequired(false))
-            .addStringOption((option: $TSFixMe) =>
+            .addAttachmentOption((option: SlashCommandAttachmentOption) => option.setName('csv').setDescription('csv').setRequired(false))
+            .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('カテゴリーid').setDescription('カテゴリーIDを半角スペース区切りで指定').setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('チャンネル削除')
             .setDescription('チャンネル削除')
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('チャンネルid').setDescription('チャンネルIDをを半角スペース区切りで指定').setRequired(true),
             ),
     )
@@ -207,12 +237,12 @@ const experience = new SlashCommandBuilder()
 const voice = new SlashCommandBuilder()
     .setName(commandNames.voice)
     .setDescription('テキストチャットの読み上げコマンド')
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('join').setDescription('読み上げを開始'))
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) => subcommand.setName('join').setDescription('読み上げを開始'))
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('type')
             .setDescription('読み上げボイスの種類を変更します。')
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option
                     .setName('音声の種類')
                     .setDescription('声の種類を選択してください。')
@@ -227,7 +257,7 @@ const voice = new SlashCommandBuilder()
                     .setRequired(true),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('kill').setDescription('読み上げを終了'))
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) => subcommand.setName('kill').setDescription('読み上げを終了'))
     .setDMPermission(false);
 
 const closeRecruit = new SlashCommandBuilder()
@@ -238,11 +268,11 @@ const closeRecruit = new SlashCommandBuilder()
 const regularMatch = new SlashCommandBuilder()
     .setName(commandNames.regular)
     .setDescription('ナワバリ募集コマンド')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('now')
             .setDescription('現在のナワバリバトルの募集をたてます。')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
@@ -257,29 +287,31 @@ const regularMatch = new SlashCommandBuilder()
                     )
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addChannelOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
                     .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者3').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('next')
             .setDescription('次のナワバリバトルの募集をたてます。')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
@@ -294,14 +326,16 @@ const regularMatch = new SlashCommandBuilder()
                     )
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者3').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
     )
@@ -310,25 +344,27 @@ const regularMatch = new SlashCommandBuilder()
 const eventMatch = new SlashCommandBuilder()
     .setName(commandNames.event)
     .setDescription('イベントマッチ募集コマンド')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('event')
             .setDescription('現在開催中のイベントマッチの募集をたてます。')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addChannelOption((option: $TSFixMe) =>
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
@@ -341,18 +377,18 @@ const eventMatch = new SlashCommandBuilder()
 const anarchyMatch = new SlashCommandBuilder()
     .setName(commandNames.anarchy)
     .setDescription('バンカラマッチ募集コマンド')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('now')
             .setDescription('現在のバンカラマッチの募集をたてます。')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option
                     .setName('募集ウデマエ')
                     .setDescription('募集するウデマエを選択してください')
@@ -364,14 +400,16 @@ const anarchyMatch = new SlashCommandBuilder()
                         { name: 'S+', value: 'S+' },
                     ),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addChannelOption((option: $TSFixMe) =>
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
@@ -379,18 +417,18 @@ const anarchyMatch = new SlashCommandBuilder()
                     .setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('next')
             .setDescription('次のバンカラマッチの募集をたてます。')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option
                     .setName('募集ウデマエ')
                     .setDescription('募集するウデマエを選択してください')
@@ -402,11 +440,13 @@ const anarchyMatch = new SlashCommandBuilder()
                         { name: 'S+', value: 'S+' },
                     ),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
     )
@@ -415,25 +455,27 @@ const anarchyMatch = new SlashCommandBuilder()
 const salmonRun = new SlashCommandBuilder()
     .setName(commandNames.salmon)
     .setDescription('サーモンラン募集コマンド')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('run')
             .setDescription('サーモンランの募集をたてます。')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addChannelOption((option: $TSFixMe) =>
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
@@ -441,25 +483,27 @@ const salmonRun = new SlashCommandBuilder()
                     .setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('bigrun')
             .setDescription('ビッグランの募集をたてます。')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addChannelOption((option: $TSFixMe) =>
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
@@ -467,25 +511,27 @@ const salmonRun = new SlashCommandBuilder()
                     .setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('contest')
             .setDescription('バイトチームコンテストの募集をたてます。')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addChannelOption((option: $TSFixMe) =>
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
@@ -498,25 +544,27 @@ const salmonRun = new SlashCommandBuilder()
 const fesA = new SlashCommandBuilder()
     .setName(commandNames.fesA)
     .setDescription('フェス(フウカ陣営) 募集コマンド')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('now')
             .setDescription('現在のフェスマッチの募集をたてます。(フウカ陣営)')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addChannelOption((option: $TSFixMe) =>
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
@@ -524,22 +572,24 @@ const fesA = new SlashCommandBuilder()
                     .setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('next')
             .setDescription('次のフェスマッチの募集をたてます。(フウカ陣営)')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
     )
@@ -548,25 +598,27 @@ const fesA = new SlashCommandBuilder()
 const fesB = new SlashCommandBuilder()
     .setName(commandNames.fesB)
     .setDescription('フェス(マンタロー陣営) 募集コマンド')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('now')
             .setDescription('現在のフェスマッチの募集をたてます。(マンタロー陣営)')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addChannelOption((option: $TSFixMe) =>
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
@@ -574,22 +626,24 @@ const fesB = new SlashCommandBuilder()
                     .setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('next')
             .setDescription('次のフェスマッチの募集をたてます。(マンタロー陣営)')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
     )
@@ -598,25 +652,27 @@ const fesB = new SlashCommandBuilder()
 const fesC = new SlashCommandBuilder()
     .setName(commandNames.fesC)
     .setDescription('フェス(ウツホ陣営) 募集コマンド')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('now')
             .setDescription('現在のフェスマッチの募集をたてます。(ウツホ陣営)')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addChannelOption((option: $TSFixMe) =>
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
@@ -624,22 +680,24 @@ const fesC = new SlashCommandBuilder()
                     .setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('next')
             .setDescription('次のフェスマッチの募集をたてます。(ウツホ陣営)')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
                     .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false))
-            .addUserOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+            )
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             )
-            .addUserOption((option: $TSFixMe) =>
+            .addUserOption((option: SlashCommandUserOption) =>
                 option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
             ),
     )
@@ -648,7 +706,7 @@ const fesC = new SlashCommandBuilder()
 const privateMatch = new SlashCommandBuilder()
     .setName(commandNames.private)
     .setDescription('プラベ募集コマンド')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('recruit')
             .setDescription('開始時刻や人数などを細かく設定できます。通常はこちらを使ってください。')
@@ -668,7 +726,7 @@ const privateMatch = new SlashCommandBuilder()
                 option.setName('ヘヤタテurl').setDescription('イカリング3のヘヤタテURLがある場合はこちらに入力してください'),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('button')
             .setDescription('募集条件を通常のチャットで打ち込んだ後に通知と募集用のボタンを出せます。※@everyoneメンションを使用します。'),
@@ -678,39 +736,43 @@ const privateMatch = new SlashCommandBuilder()
 const otherGame = new SlashCommandBuilder()
     .setName(commandNames.other_game)
     .setDescription('スプラ以外のゲーム募集コマンド')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('apex')
             .setDescription('ApexLegendsの募集')
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数')
                     .setChoices({ name: '@1', value: '1' }, { name: '@2', value: '2' })
                     .setRequired(true),
             )
-            .addChannelOption((option: $TSFixMe) =>
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
                     .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'),
+            ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('mhr')
             .setDescription('モンスターハンターライズ:サンブレイクの募集')
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option
                     .setName('募集人数')
                     .setDescription('募集人数')
                     .setChoices({ name: '@1', value: '1' }, { name: '@2', value: '2' }, { name: '@3', value: '3' })
                     .setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'))
-            .addChannelOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'),
+            )
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
@@ -718,57 +780,69 @@ const otherGame = new SlashCommandBuilder()
                     .setRequired(false),
             ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('valo')
             .setDescription('Valorantの募集')
-            .addStringOption((option: $TSFixMe) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
-            .addChannelOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true),
+            )
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
                     .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'),
+            ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('overwatch')
             .setDescription('Overwatch2の募集')
-            .addStringOption((option: $TSFixMe) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
-            .addChannelOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true),
+            )
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('使用チャンネル')
                     .setDescription('使用するボイスチャンネルを指定できます。')
                     .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'),
+            ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('other')
             .setDescription('その他別ゲーの募集')
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('ゲームタイトル').setDescription('ゲームタイトルを入力してください。').setRequired(true),
             )
-            .addStringOption((option: $TSFixMe) => option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true))
-            .addStringOption((option: $TSFixMe) => option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など')),
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true),
+            )
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'),
+            ),
     )
     .setDMPermission(false);
 
 const teamDivider = new SlashCommandBuilder()
     .setName(commandNames.team_divider)
     .setDescription('チーム分けを行います。')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('team')
             .setDescription('勝率に応じてチーム分けを行うことができます。')
-            .addIntegerOption((option: $TSFixMe) =>
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option.setName('各チームのメンバー数').setDescription('それぞれのチームメンバー数(ex: スプラ=4, valo=5)').setRequired(true),
             )
-            .addBooleanOption((option: $TSFixMe) =>
+            .addBooleanOption((option: SlashCommandBooleanOption) =>
                 option.setName('勝利数と勝率を隠す').setDescription('勝利数と勝率を隠すことができます。'),
             ),
     )
@@ -787,14 +861,14 @@ const recruitEditor = new ContextMenuCommandBuilder()
 const voiceChannelMention = new SlashCommandBuilder()
     .setName(commandNames.voiceChannelMention)
     .setDescription('VCメンバー全員にメンションを送ります。')
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('vcmention')
             .setDescription('このチャンネルに、指定したVCにいるメンバー全員へのメンションを送ります。')
-            .addStringOption((option: $TSFixMe) =>
+            .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('メッセージ').setDescription('メンションと一緒に送るメッセージを入力します。').setRequired(true),
             )
-            .addChannelOption((option: $TSFixMe) =>
+            .addChannelOption((option: SlashCommandChannelOption) =>
                 option
                     .setName('チャンネル')
                     .setDescription('メンションを送りたいメンバーがいるVCを指定します。')
@@ -807,19 +881,23 @@ const voiceChannelMention = new SlashCommandBuilder()
 const variablesSettings = new SlashCommandBuilder()
     .setName(commandNames.variablesSettings)
     .setDescription('環境変数の設定・表示ができます。')
-    .addSubcommand((subcommand: $TSFixMe) => subcommand.setName('表示').setDescription('環境変数ファイル(.env)の設定内容を表示します。'))
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand.setName('表示').setDescription('環境変数ファイル(.env)の設定内容を表示します。'),
+    )
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('登録更新')
             .setDescription('環境変数ファイル(.env)を上書きします。')
-            .addStringOption((option: $TSFixMe) => option.setName('key').setDescription('変数名を入力').setRequired(true))
-            .addStringOption((option: $TSFixMe) => option.setName('value').setDescription('登録する値を入力').setRequired(true)),
+            .addStringOption((option: SlashCommandStringOption) => option.setName('key').setDescription('変数名を入力').setRequired(true))
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('value').setDescription('登録する値を入力').setRequired(true),
+            ),
     )
-    .addSubcommand((subcommand: $TSFixMe) =>
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('削除')
             .setDescription('環境変数ファイル(.env)から変数を削除します。')
-            .addStringOption((option: $TSFixMe) => option.setName('key').setDescription('変数名を入力').setRequired(true)),
+            .addStringOption((option: SlashCommandStringOption) => option.setName('key').setDescription('変数名を入力').setRequired(true)),
     )
     .setDMPermission(false);
 
@@ -856,11 +934,6 @@ const commands = [
 ];
 
 // 登録用関数
-import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/v10';
-import { log4js_obj } from './log4js_settings.js';
-import { assertExistCheck } from './app/common/others.js';
-import { SlashCommandStringOption } from 'discord.js';
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN || '');
 export async function registerSlashCommands() {
     const logger = log4js_obj.getLogger();
@@ -875,7 +948,7 @@ export async function registerSlashCommands() {
         await rest
             .put(Routes.applicationCommands(botId), { body: [] })
             .then(() => logger.info('Successfully deleted application global commands.'))
-            .catch((error: $TSFixMe) => {
+            .catch((error) => {
                 logger.error(error);
             });
         await rest
@@ -883,14 +956,14 @@ export async function registerSlashCommands() {
                 body: commands,
             })
             .then(() => logger.info('Successfully registered application guild commands.'))
-            .catch((error: $TSFixMe) => {
+            .catch((error) => {
                 logger.error(error);
             });
     } else if (mode === 'global') {
         await rest
             .put(Routes.applicationGuildCommands(botId, serverId), { body: [] })
             .then(() => logger.info('Successfully deleted application guild commands.'))
-            .catch((error: $TSFixMe) => {
+            .catch((error) => {
                 logger.error(error);
             });
         await rest
@@ -898,7 +971,7 @@ export async function registerSlashCommands() {
                 body: commands,
             })
             .then(() => logger.info('Successfully registered application global commands.'))
-            .catch((error: $TSFixMe) => {
+            .catch((error) => {
                 logger.error(error);
             });
     }

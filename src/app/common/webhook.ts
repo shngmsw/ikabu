@@ -1,13 +1,14 @@
 import axios from 'axios';
+import { EmbedBuilder } from 'discord.js';
 
-export async function sendContentWebhook(url: $TSFixMe, content: $TSFixMe) {
-    await axios.post(
-        url,
-        { content: content }, // このオブジェクトがJSONとして送信される
-    );
-}
+// export async function sendContentWebhook(url, content) {
+//     await axios.post(
+//         url,
+//         { content: content }, // このオブジェクトがJSONとして送信される
+//     );
+// }
 
-export async function sendEmbedsWebhook(url: $TSFixMe, embeds: $TSFixMe) {
+export async function sendEmbedsWebhook(url: string, embeds: EmbedBuilder[]) {
     await axios.post(
         url,
         { embeds: embeds }, // このオブジェクトがJSONとして送信される

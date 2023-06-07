@@ -1,7 +1,8 @@
 import util from 'node:util';
-import { log4js_obj } from '../log4js_settings';
+
 import { DBCommon } from './db.js';
 import { Participant } from './model/participant';
+import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
 export class ParticipantService {

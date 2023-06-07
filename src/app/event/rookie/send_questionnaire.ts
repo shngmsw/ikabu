@@ -1,8 +1,9 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import log4js from 'log4js';
+
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../common/button_components';
 import { searchMessageById } from '../../common/manager/message_manager';
-import { isNotEmpty, sleep } from '../../common/others';
+import { exists, sleep } from '../../common/others';
 
 /**
  * アンケートに答えるか選択してもらうためのリプライを送信
@@ -24,7 +25,7 @@ export async function sendIntentionConfirmReply(message: $TSFixMe, member: $TSFi
         await sleep(60 * 60 * 2);
         // リプライが残っているか確認 (手動以外で消えることはないはずだけど一応)
         const buttonCheck = await searchMessageById(message.guild, sentReply.channel.id, sentReply.id);
-        if (isNotEmpty(buttonCheck)) {
+        if (exists(buttonCheck)) {
             buttonCheck.delete();
         } else {
             return;
@@ -64,7 +65,7 @@ export async function sendQuestionnaireFollowUp(interaction: $TSFixMe, params: $
     const logger = log4js.getLogger('interaction');
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         if (interaction.member.user.id !== params.get('uid')) {
@@ -73,7 +74,7 @@ export async function sendQuestionnaireFollowUp(interaction: $TSFixMe, params: $
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, '答える'),
+                components: recoveryThinkingButton(interaction, '答える'),
             });
             return;
         }
@@ -96,7 +97,7 @@ export async function sendQuestionnaireFollowUp(interaction: $TSFixMe, params: $
         });
 
         await interaction.message.edit({
-            components: await disableThinkingButton(interaction, '答える'),
+            components: disableThinkingButton(interaction, '答える'),
         });
     } catch (error) {
         logger.error(error);
@@ -107,7 +108,7 @@ export async function disableQuestionnaireButtons(interaction: $TSFixMe, params:
     const logger = log4js.getLogger('interaction');
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         if (interaction.member.user.id !== params.get('uid')) {
@@ -116,12 +117,12 @@ export async function disableQuestionnaireButtons(interaction: $TSFixMe, params:
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, '答えない'),
+                components: recoveryThinkingButton(interaction, '答えない'),
             });
             return;
         }
         await interaction.message.edit({
-            components: await disableThinkingButton(interaction, '答えない'),
+            components: disableThinkingButton(interaction, '答えない'),
         });
     } catch (error) {
         logger.error(error);

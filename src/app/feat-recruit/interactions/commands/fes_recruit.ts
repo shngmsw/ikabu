@@ -8,22 +8,23 @@ import {
     User,
     VoiceChannel,
 } from 'discord.js';
+
+import { Participant } from '../../../../db/model/participant';
+import { RecruitType } from '../../../../db/model/recruit';
+import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, fetchSchedule, getFesData } from '../../../common/apis/splatoon3_ink';
+import { checkFes, getSchedule, getFesData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleById, searchRoleIdByName } from '../../../common/manager/role_manager';
-import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, notExists, sleep } from '../../../common/others';
+import { assertExistCheck, exists, getCommandHelpEmbed, notExists, sleep } from '../../../common/others';
 import { createNewRecruitButton, recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitFesCanvas, ruleFesCanvas } from '../../canvases/fes_canvas';
-import { getMemberMentions } from '../buttons/other_events';
-import { Participant } from '../../../../db/model/participant';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitType } from '../../../../db/model/recruit';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { getMemberMentions } from '../buttons/other_events';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheType>) {
@@ -39,11 +40,12 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheT
     let condition = options.getString('参加条件');
     const guild = await interaction.guild.fetch();
     const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
+    assertExistCheck(hostMember, 'hostMember');
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
     const team = interaction.commandName;
     let memberCounter = recruitNum; // プレイ人数のカウンター
-    let type;
+    let type = 0;
 
     if (options.getSubcommand() === 'now') {
         type = 0;
@@ -109,18 +111,18 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheT
     await interaction.deferReply();
 
     try {
-        const data = await fetchSchedule();
+        const schedule = await getSchedule();
 
-        if (!checkFes(data.schedule, type)) {
+        if (!checkFes(schedule, type)) {
             await interaction.editReply({
                 content: '募集を建てようとした期間はフェスが行われていないでし！',
             });
             return;
         }
 
-        const fesData = await getFesData(data, type);
+        const fesData = await getFesData(schedule, type);
 
-        let txt = `<@${hostMember.user.id}>` + '**たんのフェスマッチ募集**\n';
+        let txt = `### <@${hostMember.user.id}>` + 'たんのフェスマッチ募集\n';
         const members = [];
 
         if (exists(user1)) {
@@ -169,7 +171,9 @@ async function sendFesMatch(
     assertExistCheck(interaction.guild, 'guild');
     const guild = await interaction.guild.fetch();
     const mentionId = await searchRoleIdByName(guild, team);
+    assertExistCheck(mentionId);
     const teamRole = await searchRoleById(guild, mentionId);
+    assertExistCheck(teamRole, 'teamRole');
 
     if (notExists(mentionId)) {
         await interaction.editReply({
@@ -185,6 +189,7 @@ async function sendFesMatch(
     }
 
     const recruiter = await searchDBMemberById(guild, hostMember.id);
+    assertExistCheck(recruiter, 'recruiter');
     const hostPt = new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date());
 
     let participant1 = null;
@@ -192,10 +197,12 @@ async function sendFesMatch(
 
     if (exists(user1)) {
         const member = await searchDBMemberById(guild, user1.id);
+        assertExistCheck(member, 'member1');
         participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
     }
     if (exists(user2)) {
         const member = await searchDBMemberById(guild, user2.id);
+        assertExistCheck(member, 'member2');
         participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
     }
 
@@ -300,7 +307,7 @@ async function sendFesMatch(
         // 15秒後に削除ボタンを消す
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
-        if (isNotEmpty(deleteButtonCheck)) {
+        if (exists(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
             if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
@@ -328,7 +335,7 @@ async function sendFesMatch(
 
         sentMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
-            components: await setButtonDisable(sentMessage),
+            components: setButtonDisable(sentMessage),
         });
 
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {

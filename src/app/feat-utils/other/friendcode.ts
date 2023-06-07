@@ -8,12 +8,13 @@ import {
     Message,
     User,
 } from 'discord.js';
+
 import { FriendCodeService } from '../../../db/friend_code_service.js';
+import { Member } from '../../../db/model/member.js';
 import { log4js_obj } from '../../../log4js_settings.js';
+import { searchChannelById } from '../../common/manager/channel_manager.js';
 import { searchDBMemberById } from '../../common/manager/member_manager.js';
 import { assertExistCheck, exists } from '../../common/others.js';
-import { Member } from '../../../db/model/member.js';
-import { searchChannelById } from '../../common/manager/channel_manager.js';
 const logger = log4js_obj.getLogger();
 
 export async function handleFriendCode(interaction: ChatInputCommandInteraction<CacheType>) {
@@ -32,7 +33,7 @@ export async function handleFriendCode(interaction: ChatInputCommandInteraction<
 export async function selectFriendCode(interaction: ChatInputCommandInteraction<CacheType>) {
     await interaction.deferReply({ ephemeral: false });
 
-    let targetUser: Member | User;
+    let targetUser: Member | User | null;
     let userId: string;
     if (interaction.inGuild()) {
         assertExistCheck(interaction.guild, 'guild');
@@ -45,6 +46,8 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
     }
 
     const fcObj = await FriendCodeService.getFriendCodeObjByUserId(userId);
+
+    assertExistCheck(targetUser, 'member');
 
     if (exists(fcObj[0])) {
         const fcUrl = fcObj[0].url;
@@ -61,22 +64,26 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
     }
 
     if (interaction.inGuild()) {
+        assertExistCheck(process.env.CHANNEL_ID_INTRODUCTION, 'CHANNEL_ID_INTRODUCTION');
         assertExistCheck(interaction.guild, 'guild');
         const guild = await interaction.guild.fetch();
         const channel = await searchChannelById(guild, process.env.CHANNEL_ID_INTRODUCTION);
-        if (exists(channel)) {
-            const messages = await channel.messages.fetch({ limit: 100 }).catch((error: $TSFixMe) => {
+        if (exists(channel) && channel.isTextBased()) {
+            let result = null;
+            try {
+                const messages = await channel.messages.fetch({ limit: 100 });
+                const list = messages.filter((message: Message<true>) => userId === message.author.id && !message.author.bot);
+                result = list.map(function (value: Message<true>) {
+                    return value.content;
+                });
+            } catch (error) {
                 logger.error(error);
-            });
-            const list = await messages.filter((message: Message) => userId === message.author.id && !message.author.bot);
-            const result = list.map(function (value: $TSFixMe) {
-                return value.content;
-            });
+            }
 
             const button = new ActionRowBuilder<ButtonBuilder>();
             button.addComponents([new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger)]);
 
-            if (result.length > 0) {
+            if (exists(result) && result.length > 0) {
                 const embeds = [];
                 for (const r of result) {
                     embeds.push(composeEmbed(targetUser, r, false));

@@ -1,13 +1,14 @@
 import { BaseGuildTextChannel, CacheType, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder } from 'discord.js';
+
+import { Participant } from '../../../../db/model/participant';
+import { RecruitType } from '../../../../db/model/recruit';
+import { ParticipantService } from '../../../../db/participants_service';
+import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, isNotEmpty, sleep } from '../../../common/others';
+import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, notifyActionRow, recruitActionRow } from '../../buttons/create_recruit_buttons';
-import { RecruitService } from '../../../../db/recruit_service';
-import { ParticipantService } from '../../../../db/participants_service';
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
 import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
@@ -48,6 +49,8 @@ async function sendPrivateRecruit(
     const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
     const recruitChannel = interaction.channel;
 
+    assertExistCheck(recruiter, 'recruiter');
+
     const embed = new EmbedBuilder()
         .setAuthor({
             name: recruiter.displayName,
@@ -82,7 +85,7 @@ async function sendPrivateRecruit(
 
     try {
         const embedMessage = await interaction.editReply({
-            content: `<@${recruiter.userId}>**たんのプライベートマッチ募集**`,
+            content: `### <@${recruiter.userId}>**たんのプライベート募集**`,
             embeds: [embed],
         });
 
@@ -133,7 +136,7 @@ async function sendPrivateRecruit(
         // 15秒後に削除ボタンを消す
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
-        if (isNotEmpty(deleteButtonCheck)) {
+        if (exists(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
             return;
@@ -153,6 +156,8 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
     const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
     const recruitChannel = interaction.channel;
     const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
+
+    assertExistCheck(recruiter, 'recruiter');
 
     await interaction.deferReply({ ephemeral: true });
 

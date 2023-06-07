@@ -1,12 +1,14 @@
 import { ButtonInteraction } from 'discord.js';
-import { RecruitService } from '../../../../db/recruit_service.js';
-import { log4js_obj } from '../../../../log4js_settings.js';
-import { searchChannelById } from '../../../common/manager/channel_manager.js';
-import { disableUnlockButton } from '../../buttons/create_recruit_buttons.js';
+
 import { Participant } from '../../../../db/model/participant.js';
 import { Recruit } from '../../../../db/model/recruit.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
-import { assertExistCheck } from '../../../common/others.js';
+import { RecruitService } from '../../../../db/recruit_service.js';
+import { log4js_obj } from '../../../../log4js_settings.js';
+import { disableThinkingButton } from '../../../common/button_components.js';
+import { searchChannelById } from '../../../common/manager/channel_manager.js';
+import { searchAPIMemberById } from '../../../common/manager/member_manager.js';
+import { assertExistCheck, exists } from '../../../common/others.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -14,16 +16,18 @@ export async function unlock(interaction: ButtonInteraction, params: URLSearchPa
     if (!interaction.inGuild()) return;
     try {
         assertExistCheck(interaction.guild, 'guild');
-
         const guild = await interaction.guild.fetch();
         const channelId = params.get('vid');
+        assertExistCheck(channelId, 'channelId');
         const channel = await searchChannelById(guild, channelId);
-
-        channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-        channel.permissionOverwrites.delete(interaction.member, 'UnLock Voice Channel');
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
+        if (exists(member) && exists(channel) && channel.isVoiceBased()) {
+            channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+            channel.permissionOverwrites.delete(member, 'UnLock Voice Channel');
+        }
 
         await interaction.update({
-            components: [disableUnlockButton()],
+            components: disableThinkingButton(interaction, 'ロック解除済み'),
         });
     } catch (err) {
         logger.error(err);
