@@ -141,4 +141,29 @@ export class RecruitService {
         }
         return recruits;
     }
+
+    static async getRecruitsByChannelId(guildId: string, channelId: string) {
+        const db = DBCommon.open();
+        db.all = util.promisify(db.all);
+        const results = await db.all(`SELECT * FROM recruit WHERE guild_id = ${guildId} AND channel_id = ${channelId}`);
+        DBCommon.close();
+        const recruits: Recruit[] = [];
+        for (let i = 0; i < results.length; i++) {
+            recruits.push(
+                new Recruit(
+                    results[i].guild_id,
+                    results[i].channel_id,
+                    results[i].message_id,
+                    results[i].author_id,
+                    results[i].recruit_num,
+                    results[i].condition,
+                    results[i].vc_name,
+                    results[i].recruit_type,
+                    results[i].option,
+                    results[i].created_at,
+                ),
+            );
+        }
+        return recruits;
+    }
 }

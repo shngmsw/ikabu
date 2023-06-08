@@ -1,6 +1,5 @@
 import {
     AttachmentBuilder,
-    BaseGuildTextChannel,
     CacheType,
     ChatInputCommandInteraction,
     GuildMember,
@@ -19,11 +18,11 @@ import { setButtonDisable } from '../../../common/button_components';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleById, searchRoleIdByName } from '../../../common/manager/role_manager';
-import { assertExistCheck, exists, getCommandHelpEmbed, notExists, sleep } from '../../../common/others';
-import { createNewRecruitButton, recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
+import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
+import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitFesCanvas, ruleFesCanvas } from '../../canvases/fes_canvas';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
 const logger = log4js_obj.getLogger('recruit');
 
@@ -300,9 +299,8 @@ async function sendFesMatch(
         }
 
         // 募集リスト更新
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.FestivalRecruit);
-            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel.isTextBased()) {
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: recruitChannel.id } });
         }
 
         // 15秒後に削除ボタンを消す
@@ -344,15 +342,7 @@ async function sendFesMatch(
             reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
         }
 
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-            await sendStickyMessage(guild, recruitChannel.id, {
-                content: content,
-                embeds: [helpEmbed],
-                components: [createNewRecruitButton(recruitChannel.name)],
-            });
-        }
+        await sendCloseEmbedSticky(guild, recruitChannel);
     } catch (error) {
         logger.error(error);
     }

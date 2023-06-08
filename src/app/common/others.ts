@@ -114,6 +114,12 @@ export function createMentionsFromIdList(idList: string[]) {
     return mentionList;
 }
 
+// オブジェクト型でどれか一つのプロパティを必須にする
+export type RequireOne<T, K extends keyof T = keyof T> = K extends keyof T ? PartialRequire<T, K> : never;
+type PartialRequire<O, K extends keyof O> = {
+    [P in K]-?: O[P];
+} & O;
+
 /**
  * メッセージから順番に取得したメンションを配列で返す
  * @param message メッセージ

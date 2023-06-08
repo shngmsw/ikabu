@@ -1,12 +1,4 @@
-import {
-    AttachmentBuilder,
-    BaseGuildTextChannel,
-    ChatInputCommandInteraction,
-    GuildMember,
-    PermissionsBitField,
-    User,
-    VoiceChannel,
-} from 'discord.js';
+import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, PermissionsBitField, User, VoiceChannel } from 'discord.js';
 
 import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
@@ -22,7 +14,7 @@ import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../.
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_canvas';
 import { RecruitOpCode } from '../../canvases/regenerate_canvas';
 import { recruitSalmonCanvas, ruleSalmonCanvas } from '../../canvases/salmon_canvas';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -316,9 +308,8 @@ async function sendSalmonRun(
         }
 
         // 募集リスト更新
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.SalmonRecruit);
-            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel.isTextBased()) {
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: recruitChannel.id } });
         }
 
         // 15秒後に削除ボタンを消す

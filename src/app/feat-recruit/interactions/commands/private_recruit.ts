@@ -1,5 +1,6 @@
-import { BaseGuildTextChannel, CacheType, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder } from 'discord.js';
+import { CacheType, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder } from 'discord.js';
 
+import { sendNotification } from './button_recruit';
 import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
@@ -8,8 +9,8 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
-import { embedRecruitDeleteButton, notifyActionRow, recruitActionRow } from '../../buttons/create_recruit_buttons';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { embedRecruitDeleteButton, recruitActionRow } from '../../buttons/create_recruit_buttons';
+import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -129,9 +130,8 @@ async function sendPrivateRecruit(
         });
 
         // 募集リスト更新
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.PrivateRecruit);
-            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel.isTextBased()) {
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: recruitChannel.id } });
         }
 
         // 15秒後に削除ボタンを消す
@@ -145,54 +145,6 @@ async function sendPrivateRecruit(
     } catch (error) {
         logger.error(error);
     }
-}
-
-async function sendNotification(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inGuild()) return;
-
-    assertExistCheck(interaction.guild, 'guild');
-    assertExistCheck(interaction.channel, 'channel');
-
-    const guild = await interaction.guild.fetch();
-    const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
-    const recruitChannel = interaction.channel;
-    const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
-
-    assertExistCheck(recruiter, 'recruiter');
-
-    await interaction.deferReply({ ephemeral: true });
-
-    const sentMessage = await recruitChannel.send({
-        content: mention + ' ボタンを押して参加表明するでし！',
-    });
-    // DBに募集情報を登録
-    await RecruitService.registerRecruit(
-        guild.id,
-        recruitChannel.id,
-        sentMessage.id,
-        recruiter.userId,
-        -1,
-        'dummy',
-        null,
-        RecruitType.ButtonNotify,
-    );
-
-    // DBに参加者情報を登録
-    await ParticipantService.registerParticipantFromObj(
-        sentMessage.id,
-        new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date()),
-    );
-
-    // 募集リスト更新
-    if (recruitChannel instanceof BaseGuildTextChannel) {
-        const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.ButtonNotify);
-        await sendStickyMessage(guild, recruitChannel.id, sticky);
-    }
-
-    await interaction.editReply({
-        content: '募集完了でし！参加者が来るまで気長に待つでし！',
-    });
-    sentMessage.edit({ components: [notifyActionRow()] });
 }
 
 function isRoomUrl(url: string) {

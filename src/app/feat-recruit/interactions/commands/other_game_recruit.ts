@@ -1,5 +1,4 @@
 import {
-    BaseGuildTextChannel,
     ChatInputCommandInteraction,
     Collection,
     ColorResolvable,
@@ -21,7 +20,7 @@ import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, recruitActionRow, unlockChannelButton } from '../../buttons/create_recruit_buttons';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -313,9 +312,8 @@ async function sendOtherGames(
         }
 
         // 募集リスト更新
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.OtherGameRecruit);
-            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel.isTextBased()) {
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: recruitChannel.id } });
         }
 
         // 15秒後に削除ボタンを消す

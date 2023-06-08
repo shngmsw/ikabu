@@ -9,6 +9,7 @@ import { setButtonDisable } from '../../../common/button_components';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, exists } from '../../../common/others.js';
+import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -101,6 +102,8 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
                 }
             }
 
+            const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
+
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, image1MsgId);
 
@@ -110,6 +113,10 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
             await interaction.editReply({
                 content: '募集を削除したでし！\n次回は内容をしっかり確認してから送信するでし！',
             });
+
+            // テキストの募集チャンネルにSticky Messageを送信
+            const stickyChannelId = getStickyChannelId(recruitData[0]) ?? interaction.channel.id;
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
         } else {
             await interaction.editReply({
                 content: '他人の募集は消せる訳無いでし！！！',
