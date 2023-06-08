@@ -97,6 +97,7 @@ async function sendPrivateRecruit(
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
+            recruitChannel.id,
             embedMessage.id,
             recruiter.userId,
             recruitNum,
@@ -165,7 +166,16 @@ async function sendNotification(interaction: ChatInputCommandInteraction) {
         content: mention + ' ボタンを押して参加表明するでし！',
     });
     // DBに募集情報を登録
-    await RecruitService.registerRecruit(guild.id, sentMessage.id, recruiter.userId, -1, 'dummy', null, RecruitType.ButtonNotify);
+    await RecruitService.registerRecruit(
+        guild.id,
+        recruitChannel.id,
+        sentMessage.id,
+        recruiter.userId,
+        -1,
+        'dummy',
+        null,
+        RecruitType.ButtonNotify,
+    );
 
     // DBに参加者情報を登録
     await ParticipantService.registerParticipantFromObj(

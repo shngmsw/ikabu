@@ -1,5 +1,6 @@
 export class Recruit {
     guildId: string;
+    channelId: string;
     messageId: string;
     authorId: string;
     recruitNum: number;
@@ -10,6 +11,7 @@ export class Recruit {
     createdAt: Date;
     constructor(
         guildId: string,
+        channelId: string,
         messageId: string,
         authorId: string,
         recruitNum: number,
@@ -20,6 +22,7 @@ export class Recruit {
         createdAt: string | Date,
     ) {
         this.guildId = guildId;
+        this.channelId = channelId;
         this.messageId = messageId;
         this.authorId = authorId;
         this.recruitNum = recruitNum;

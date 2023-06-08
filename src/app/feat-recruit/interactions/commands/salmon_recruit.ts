@@ -255,7 +255,16 @@ async function sendSalmonRun(
         });
 
         // DBに募集情報を登録
-        await RecruitService.registerRecruit(guild.id, image1Message.id, hostMember.id, recruitNum, condition, channelName, type);
+        await RecruitService.registerRecruit(
+            guild.id,
+            recruitChannel.id,
+            image1Message.id,
+            hostMember.id,
+            recruitNum,
+            condition,
+            channelName,
+            type,
+        );
 
         // DBに参加者情報を登録
         await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);

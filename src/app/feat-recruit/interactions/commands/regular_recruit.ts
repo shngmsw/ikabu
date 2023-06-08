@@ -243,6 +243,7 @@ async function sendRegularMatch(
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
+            recruitChannel.id,
             image1Message.id,
             hostMember.id,
             recruitNum,

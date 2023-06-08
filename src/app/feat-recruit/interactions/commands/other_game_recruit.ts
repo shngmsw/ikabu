@@ -257,6 +257,7 @@ async function sendOtherGames(
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
+            recruitChannel.id,
             embedMessage.id,
             recruiter.userId,
             recruitNum,
