@@ -1,6 +1,5 @@
-import { CacheType, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder } from 'discord.js';
+import { CacheType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
-import { sendNotification } from './button_recruit';
 import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
@@ -11,27 +10,16 @@ import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { embedRecruitDeleteButton, recruitActionRow } from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
+import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function privateRecruit(interaction: ChatInputCommandInteraction) {
-    const options = interaction.options;
-
-    if (options.getSubcommand() === 'recruit') {
-        await sendPrivateRecruit(interaction, options);
-    } else if (options.getSubcommand() === 'button') {
-        await sendNotification(interaction);
-    }
-}
-
-async function sendPrivateRecruit(
-    interaction: ChatInputCommandInteraction,
-    options: Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getFocused'>,
-) {
+export async function privateRecruit(interaction: ChatInputCommandInteraction<CacheType>) {
     if (!interaction.inGuild()) return;
 
-    const startTime = interaction.options.getString('開始時刻') ?? 'ERROR';
-    const time = interaction.options.getString('所要時間') ?? 'ERROR';
+    const options = interaction.options;
+    const startTime = options.getString('開始時刻') ?? 'ERROR';
+    const time = options.getString('所要時間') ?? 'ERROR';
     const recruitNumText = options.getString('募集人数') ?? 'ERROR';
     const condition = options.getString('内容または参加条件') ?? 'なし';
     const roomUrl = options.getString('ヘヤタテurl');
@@ -116,7 +104,7 @@ async function sendPrivateRecruit(
 
         const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
         const sentMessage = await recruitChannel.send({
-            content: mention + ' ボタンを押して参加表明するでし！',
+            content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         sentMessage.edit({ components: [recruitActionRow(embedMessage)] });

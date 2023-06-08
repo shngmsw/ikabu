@@ -39,7 +39,7 @@ export class Recruit {
 }
 
 export const RecruitType = {
-    ButtonNotify: 0,
+    None: 0,
     PrivateRecruit: 1,
     RegularRecruit: 2,
     AnarchyRecruit: 3,

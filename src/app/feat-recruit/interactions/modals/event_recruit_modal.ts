@@ -96,7 +96,7 @@ export async function sendEventMatch(
 
         const image2Message = await recruitChannel.send({ files: [rule] });
         const buttonMessage = await recruitChannel.send({
-            content: mention + ' ボタンを押して参加表明するでし！',
+            content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
         buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
@@ -131,7 +131,7 @@ export async function sendEventMatch(
         }
 
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
-        const memberList = getMemberMentions(recruitData[0], participants);
+        const memberList = getMemberMentions(recruitData[0].recruitNum, participants);
         const hostMention = `<@${member.userId}>`;
 
         await regenerateCanvas(guild, recruitChannel.id, image1Message.id, RecruitOpCode.close);

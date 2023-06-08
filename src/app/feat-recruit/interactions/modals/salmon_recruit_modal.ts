@@ -14,6 +14,7 @@ import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_ca
 import { RecruitOpCode } from '../../canvases/regenerate_canvas';
 import { recruitSalmonCanvas, ruleSalmonCanvas } from '../../canvases/salmon_canvas';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
+import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -121,7 +122,7 @@ export async function sendSalmonRun(
 
         const image2Message = await recruitChannel.send({ files: [rule] });
         const buttonMessage = await recruitChannel.send({
-            content: mention + ' ボタンを押して参加表明するでし！',
+            content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
         buttonMessage.edit({ components: [recruitActionRow(image1Message)] });

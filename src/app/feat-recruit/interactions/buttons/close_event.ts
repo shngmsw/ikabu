@@ -84,7 +84,7 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
         const recruitChannel = interaction.channel;
 
         if (confirmedMemberIDList.includes(member.userId)) {
-            const memberList = getMemberMentions(recruitData[0], participantsData);
+            const memberList = getMemberMentions(recruitData[0].recruitNum, participantsData);
 
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.close);
 
@@ -119,7 +119,7 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
                 await sendCloseEmbedSticky(guild, recruitChannel);
             }
         } else if (datetimeDiff(new Date(), image1Message.createdAt) > 120) {
-            const memberList = getMemberMentions(recruitData[0], participantsData);
+            const memberList = getMemberMentions(recruitData[0].recruitNum, participantsData);
 
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.close);
 

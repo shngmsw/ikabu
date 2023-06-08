@@ -77,7 +77,7 @@ export async function closeNotify(interaction: ButtonInteraction) {
         const recruitChannel = interaction.channel;
 
         if (member.userId === recruiterId) {
-            const memberList = getMemberMentions(recruitData[0], participantsData);
+            const memberList = getMemberMentions(recruitData[0].recruitNum, participantsData);
 
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, embedMessageId);
@@ -102,7 +102,7 @@ export async function closeNotify(interaction: ButtonInteraction) {
                 await sendCloseEmbedSticky(guild, recruitChannel);
             }
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
-            const memberList = getMemberMentions(recruitData[0], participantsData);
+            const memberList = getMemberMentions(recruitData[0].recruitNum, participantsData);
 
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, embedMessageId);

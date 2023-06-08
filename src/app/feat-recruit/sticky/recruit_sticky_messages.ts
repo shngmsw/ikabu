@@ -81,18 +81,12 @@ export async function sendCloseEmbedSticky(guild: Guild, channel: Channel) {
 export async function availableRecruitString(guild: Guild, channelId: string) {
     let recruitData = await RecruitService.getRecruitsByChannelId(guild.id, channelId);
 
-    // チャンネルIDがプラベ募集チャンネルの場合は、フォーラムでのコマンド募集も含める
     if (channelId === process.env.CHANNEL_ID_RECRUIT_PRIVATE) {
-        const privateRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit);
-        const buttonRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.ButtonNotify);
-        recruitData = privateRecruitData;
-        recruitData = recruitData.concat(buttonRecruitData);
-    }
-
-    // チャンネルIDが別ゲー募集チャンネルの場合は、フォーラムでの別ゲー募集も含める
-    if (channelId === process.env.CHANNEL_ID_RECRUIT_OTHERGAMES) {
-        const otherGameRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.OtherGameRecruit);
-        recruitData = otherGameRecruitData;
+        // チャンネルIDがプラベ募集チャンネルの場合は、フォーラムでのコマンド募集も含める
+        recruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit);
+    } else if (channelId === process.env.CHANNEL_ID_RECRUIT_OTHERGAMES) {
+        // チャンネルIDが別ゲー募集チャンネルの場合は、フォーラムでの別ゲー募集も含める
+        recruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.OtherGameRecruit);
     }
 
     recruitData.sort((x, y) => x.createdAt.getTime() - y.createdAt.getTime()); // 作成順でソート

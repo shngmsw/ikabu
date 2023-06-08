@@ -260,7 +260,7 @@ async function sendFesMatch(
 
         const image2Message = await recruitChannel.send({ files: [rule] });
         const sentMessage = await recruitChannel.send({
-            content: `<@&${mentionId}>` + ' ボタンを押して参加表明するでし！',
+            content: `<@&${mentionId}>` + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
@@ -323,7 +323,7 @@ async function sendFesMatch(
             return;
         }
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
-        const memberList = getMemberMentions(recruitData[0], participants);
+        const memberList = getMemberMentions(recruitData[0].recruitNum, participants);
         const hostMention = `<@${hostMember.user.id}>`;
 
         await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
