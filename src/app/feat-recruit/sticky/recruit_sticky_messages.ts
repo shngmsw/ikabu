@@ -113,6 +113,7 @@ export async function availableRecruitString(guild: Guild, channelId: string) {
             count++;
         } else {
             await RecruitService.deleteRecruit(guild.id, recruit.messageId);
+            await ParticipantService.deleteAllParticipant(recruit.messageId);
             logger.warn(`recruit message is not found. record deleted. \n[guildId: ${guild.id}, messageId: ${recruit.messageId}]`);
         }
     }
