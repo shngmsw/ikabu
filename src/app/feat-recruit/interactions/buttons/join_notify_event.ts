@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
+import { ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
 
 import { memberListMessage } from './other_events.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
@@ -12,7 +12,7 @@ import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, exists, sleep } from '../../../common/others.js';
 import { messageLinkButtons } from '../../buttons/create_recruit_buttons';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
+import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -132,10 +132,9 @@ export async function joinNotify(interaction: ButtonInteraction) {
                 embeds: [embed],
             });
 
-            if (recruitChannel instanceof BaseGuildTextChannel) {
-                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-                await sendStickyMessage(guild, recruitChannel.id, content);
-            }
+            // テキストの募集チャンネルにSticky Messageを送信
+            const stickyChannelId = getStickyChannelId(recruitData[0]) ?? recruitChannel.id;
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
 
             await interaction.followUp({
                 content: `<@${recruiterId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,

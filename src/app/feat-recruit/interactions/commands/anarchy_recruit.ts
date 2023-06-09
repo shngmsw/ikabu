@@ -1,6 +1,5 @@
 import {
     AttachmentBuilder,
-    BaseGuildTextChannel,
     ChannelType,
     ChatInputCommandInteraction,
     GuildMember,
@@ -21,11 +20,11 @@ import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleIdByName } from '../../../common/manager/role_manager';
-import { assertExistCheck, exists, getCommandHelpEmbed, notExists, sleep } from '../../../common/others';
-import { createNewRecruitButton, recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
+import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
+import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
@@ -286,6 +285,7 @@ async function sendAnarchyMatch(
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
+            recruitChannel.id,
             image1Message.id,
             hostMember.id,
             recruitNum,
@@ -306,7 +306,7 @@ async function sendAnarchyMatch(
 
         const image2Message = await recruitChannel.send({ files: [rule] });
         const sentMessage = await recruitChannel.send({
-            content: mention + ' ボタンを押して参加表明するでし！',
+            content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
@@ -346,9 +346,8 @@ async function sendAnarchyMatch(
         }
 
         // 募集リスト更新
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.AnarchyRecruit);
-            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel.isTextBased()) {
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: recruitChannel.id } });
         }
 
         // 15秒後に削除ボタンを消す
@@ -371,7 +370,7 @@ async function sendAnarchyMatch(
             return;
         }
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
-        const memberList = getMemberMentions(recruitData[0], participants);
+        const memberList = getMemberMentions(recruitData[0].recruitNum, participants);
         const hostMention = `<@${hostMember.user.id}>`;
 
         await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
@@ -390,15 +389,7 @@ async function sendAnarchyMatch(
             reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
         }
 
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-            await sendStickyMessage(guild, recruitChannel.id, {
-                content: content,
-                embeds: [helpEmbed],
-                components: [createNewRecruitButton(recruitChannel.name)],
-            });
-        }
+        await sendCloseEmbedSticky(guild, recruitChannel);
     } catch (error) {
         logger.error(error);
     }

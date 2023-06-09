@@ -24,6 +24,7 @@ export const commandNames = {
     fesB: 'マンタロー陣営',
     fesC: 'ウツホ陣営',
     private: 'プラベ募集',
+    buttonRecruit: '募集ボタン',
     buttonEnabler: 'ボタンを有効化する',
     recuitEditor: '募集を編集',
     voiceChannelMention: 'ボイスメンション',

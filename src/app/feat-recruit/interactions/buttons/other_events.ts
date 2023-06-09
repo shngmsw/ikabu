@@ -1,7 +1,6 @@
 import { ButtonInteraction } from 'discord.js';
 
 import { Participant } from '../../../../db/model/participant.js';
-import { Recruit } from '../../../../db/model/recruit.js';
 import { ParticipantService } from '../../../../db/participants_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
@@ -34,7 +33,7 @@ export async function unlock(interaction: ButtonInteraction, params: URLSearchPa
     }
 }
 
-export function getMemberMentions(recruit: Recruit, participants: Participant[]) {
+export function getMemberMentions(recruitNum: number, participants: Participant[]) {
     const applicantList = []; // 参加希望者リスト
     for (const participant of participants) {
         if (participant.userType === 2) {
@@ -42,8 +41,8 @@ export function getMemberMentions(recruit: Recruit, participants: Participant[])
         }
     }
     let counter = `\`[${applicantList.length}]\``;
-    if (recruit.recruitNum !== -1) {
-        counter = `\`[${applicantList.length}/${recruit.recruitNum}]\``;
+    if (recruitNum !== -1) {
+        counter = `\`[${applicantList.length}/${recruitNum}]\``;
     }
     let mentionString = '**【参加表明一覧】**' + counter;
     for (const applicant of applicantList) {
@@ -57,7 +56,7 @@ export async function memberListMessage(interaction: ButtonInteraction, messageI
     const guild = await interaction.guild.fetch();
     const recruit = await RecruitService.getRecruit(guild.id, messageId);
     const participants = await ParticipantService.getAllParticipants(guild.id, messageId);
-    const memberList = getMemberMentions(recruit[0], participants);
+    const memberList = getMemberMentions(recruit[0].recruitNum, participants);
     const msgFirstRow = interaction.message.content.split('\n')[0];
     return msgFirstRow + '\n' + memberList;
 }

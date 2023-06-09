@@ -1,12 +1,4 @@
-import {
-    AttachmentBuilder,
-    BaseGuildTextChannel,
-    ChatInputCommandInteraction,
-    GuildMember,
-    PermissionsBitField,
-    User,
-    VoiceChannel,
-} from 'discord.js';
+import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, PermissionsBitField, User, VoiceChannel } from 'discord.js';
 
 import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
@@ -17,11 +9,11 @@ import { EventMatchInfo, getSchedule, getEventData } from '../../../common/apis/
 import { setButtonDisable } from '../../../common/button_components';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, getCommandHelpEmbed, notExists, sleep } from '../../../common/others';
-import { createNewRecruitButton, recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
+import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
+import { recruitActionRow, recruitDeleteButton, unlockChannelButton } from '../../buttons/create_recruit_buttons';
 import { recruitEventCanvas, ruleEventCanvas } from '../../canvases/event_canvas';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
@@ -203,6 +195,7 @@ async function sendEventMatch(
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
+            recruitChannel.id,
             image1Message.id,
             hostMember.id,
             recruitNum,
@@ -223,7 +216,7 @@ async function sendEventMatch(
 
         const image2Message = await recruitChannel.send({ files: [rule] });
         const sentMessage = await recruitChannel.send({
-            content: mention + ' ボタンを押して参加表明するでし！',
+            content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
@@ -263,9 +256,8 @@ async function sendEventMatch(
         }
 
         // 募集リスト更新
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.EventRecruit);
-            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel.isTextBased()) {
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: recruitChannel.id } });
         }
 
         // 15秒後に削除ボタンを消す
@@ -288,7 +280,7 @@ async function sendEventMatch(
             return;
         }
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
-        const memberList = getMemberMentions(recruitData[0], participants);
+        const memberList = getMemberMentions(recruitData[0].recruitNum, participants);
         const hostMention = `<@${hostMember.user.id}>`;
 
         await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
@@ -307,15 +299,7 @@ async function sendEventMatch(
             reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
         }
 
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-            await sendStickyMessage(guild, recruitChannel.id, {
-                content: content,
-                embeds: [helpEmbed],
-                components: [createNewRecruitButton(recruitChannel.name)],
-            });
-        }
+        await sendCloseEmbedSticky(guild, recruitChannel);
     } catch (error) {
         logger.error(error);
     }

@@ -1,41 +1,61 @@
-import { Guild, Message, MessageCreateOptions, MessagePayload } from 'discord.js';
+import { Channel, Guild, Message } from 'discord.js';
 
-import { RecruitType } from '../../../db/model/recruit';
+import { Recruit, RecruitType } from '../../../db/model/recruit';
 import { ParticipantService } from '../../../db/participants_service';
 import { RecruitService } from '../../../db/recruit_service';
-import { StickyService } from '../../../db/sticky_service';
 import { log4js_obj } from '../../../log4js_settings';
-import { searchChannelById } from '../../common/manager/channel_manager';
 import { searchMessageById } from '../../common/manager/message_manager';
-import { assertExistCheck, exists } from '../../common/others';
+import { RequireOne, assertExistCheck, exists, getCommandHelpEmbed } from '../../common/others';
+import { sendStickyMessage } from '../../common/sticky_message';
+import { createNewRecruitButton } from '../buttons/create_recruit_buttons';
 
 const logger = log4js_obj.getLogger('message');
 
-export async function stickyChannelCheck(message: Message) {
-    try {
-        assertExistCheck(message.guild, 'guild');
+export type StickyOptions = RequireOne<{
+    message?: Message<true>;
+    channelOpt?: {
+        guild: Guild;
+        channelId: string;
+    };
+}>;
 
-        const guild = await message.guild.fetch();
-        const channelId = message.channelId;
+/**
+ * 募集用のSticky Messageを送信する
+ * @param {StickyOptions} stickyOptions StickyOptions
+ */
+export async function sendRecruitSticky(stickyOptions: StickyOptions) {
+    try {
+        let guild: Guild;
+        let channelId: string;
+        if (exists(stickyOptions.message)) {
+            guild = await stickyOptions.message.guild.fetch();
+            channelId = stickyOptions.message.channelId;
+        } else if (exists(stickyOptions.channelOpt)) {
+            guild = stickyOptions.channelOpt.guild;
+            channelId = stickyOptions.channelOpt.channelId;
+        } else {
+            throw new Error('Invalid sticky options');
+        }
+
         let content: string;
         if (channelId === process.env.CHANNEL_ID_RECRUIT_PRIVATE) {
-            content = await availableRecruitString(guild, channelId, RecruitType.PrivateRecruit);
+            content = await availableRecruitString(guild, channelId);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_ANARCHY) {
-            content = await availableRecruitString(guild, channelId, RecruitType.AnarchyRecruit);
+            content = await availableRecruitString(guild, channelId);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_REGULAR) {
-            content = await availableRecruitString(guild, channelId, RecruitType.RegularRecruit);
+            content = await availableRecruitString(guild, channelId);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_EVENT) {
-            content = await availableRecruitString(guild, channelId, RecruitType.EventRecruit);
+            content = await availableRecruitString(guild, channelId);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_SALMON) {
-            content = await availableRecruitString(guild, channelId, RecruitType.SalmonRecruit);
+            content = await availableRecruitString(guild, channelId);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_OTHERGAMES) {
-            content = await availableRecruitString(guild, channelId, RecruitType.OtherGameRecruit);
+            content = await availableRecruitString(guild, channelId);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_SHIVER) {
-            content = await availableRecruitString(guild, channelId, RecruitType.FestivalRecruit);
+            content = await availableRecruitString(guild, channelId);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_FRYE) {
-            content = await availableRecruitString(guild, channelId, RecruitType.FestivalRecruit);
+            content = await availableRecruitString(guild, channelId);
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_BIGMAN) {
-            content = await availableRecruitString(guild, channelId, RecruitType.FestivalRecruit);
+            content = await availableRecruitString(guild, channelId);
         } else {
             return;
         }
@@ -46,34 +66,27 @@ export async function stickyChannelCheck(message: Message) {
     }
 }
 
-export async function availableRecruitString(guild: Guild, channelId: string, recruitType: number) {
-    let recruitData = await RecruitService.getRecruitsByRecruitType(guild.id, recruitType);
-
-    // プラベ募集のときもう一種類取り直して結合
-    if (recruitType === RecruitType.ButtonNotify) {
-        const privateRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit);
-        recruitData = recruitData.concat(privateRecruitData);
-    } else if (recruitType === RecruitType.PrivateRecruit) {
-        const buttonRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.ButtonNotify);
-        recruitData = recruitData.concat(buttonRecruitData);
+export async function sendCloseEmbedSticky(guild: Guild, channel: Channel) {
+    if (channel.isTextBased() && !channel.isDMBased() && !channel.isThread() && !channel.isVoiceBased()) {
+        const content = await availableRecruitString(guild, channel.id);
+        const helpEmbed = getCommandHelpEmbed(channel.name);
+        await sendStickyMessage(guild, channel.id, {
+            content: content,
+            embeds: [helpEmbed],
+            components: [createNewRecruitButton(channel.name)],
+        });
     }
+}
 
-    // サーモン募集のとき複数種別を結合
-    if (recruitType === RecruitType.SalmonRecruit) {
-        const bigRunRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.BigRunRecruit);
-        const teamContestRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.TeamContestRecruit);
-        recruitData = recruitData.concat(bigRunRecruitData);
-        recruitData = recruitData.concat(teamContestRecruitData);
-    } else if (recruitType === RecruitType.BigRunRecruit) {
-        const salmonRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.SalmonRecruit);
-        const teamContestRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.TeamContestRecruit);
-        recruitData = recruitData.concat(salmonRecruitData);
-        recruitData = recruitData.concat(teamContestRecruitData);
-    } else if (recruitType === RecruitType.TeamContestRecruit) {
-        const salmonRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.SalmonRecruit);
-        const bigRunRecruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.BigRunRecruit);
-        recruitData = recruitData.concat(salmonRecruitData);
-        recruitData = recruitData.concat(bigRunRecruitData);
+export async function availableRecruitString(guild: Guild, channelId: string) {
+    let recruitData = await RecruitService.getRecruitsByChannelId(guild.id, channelId);
+
+    if (channelId === process.env.CHANNEL_ID_RECRUIT_PRIVATE) {
+        // チャンネルIDがプラベ募集チャンネルの場合は、フォーラムでのコマンド募集も含める
+        recruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit);
+    } else if (channelId === process.env.CHANNEL_ID_RECRUIT_OTHERGAMES) {
+        // チャンネルIDが別ゲー募集チャンネルの場合は、フォーラムでの別ゲー募集も含める
+        recruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.OtherGameRecruit);
     }
 
     recruitData.sort((x, y) => x.createdAt.getTime() - y.createdAt.getTime()); // 作成順でソート
@@ -88,7 +101,7 @@ export async function availableRecruitString(guild: Guild, channelId: string, re
                 applicantList.push(participant);
             }
         }
-        const message = await searchMessageById(guild, channelId, recruit.messageId);
+        const message = await searchMessageById(guild, recruit.channelId, recruit.messageId);
         const recruiter = participantsData[0];
         if (exists(message) && participantsData.length !== 0) {
             // 別チャンネルで同じタイプの募集をしているときmessage = nullになる
@@ -98,6 +111,9 @@ export async function availableRecruitString(guild: Guild, channelId: string, re
                 recruits = recruits + `\n\`${recruiter.displayName}\`: ${message.url} \`[${applicantList.length}\`]`;
             }
             count++;
+        } else {
+            await RecruitService.deleteRecruit(guild.id, recruit.messageId);
+            logger.warn(`recruit message is not found. record deleted. \n[guildId: ${guild.id}, messageId: ${recruit.messageId}]`);
         }
     }
 
@@ -111,21 +127,12 @@ export async function availableRecruitString(guild: Guild, channelId: string, re
     return result;
 }
 
-export async function sendStickyMessage(guild: Guild, channelId: string, content: string | MessagePayload | MessageCreateOptions) {
-    const lastStickyMsgId = await StickyService.getMessageId(guild.id, channelId);
-    if (lastStickyMsgId.length !== 0) {
-        const lastStickyMsg = await searchMessageById(guild, channelId, lastStickyMsgId[0]);
-        if (exists(lastStickyMsg)) {
-            try {
-                await lastStickyMsg.delete();
-            } catch (error) {
-                logger.warn(`last sticky message not found! [${lastStickyMsgId}]`);
-            }
-        }
-    }
-    const channel = await searchChannelById(guild, channelId);
-    if (exists(channel) && channel.isTextBased()) {
-        const stickyMessage = await channel.send(content);
-        await StickyService.registerMessageId(guild.id, channelId, stickyMessage.id);
+export function getStickyChannelId(recruit: Recruit) {
+    assertExistCheck(process.env.CHANNEL_ID_RECRUIT_PRIVATE, 'CHANNEL_ID_RECRUIT_PRIVATE');
+    assertExistCheck(process.env.CHANNEL_ID_RECRUIT_OTHERGAMES, 'CHANNEL_ID_RECRUIT_OTHERGAMES');
+    if (recruit.recruitType === RecruitType.PrivateRecruit) {
+        return process.env.CHANNEL_ID_RECRUIT_PRIVATE;
+    } else if (recruit.recruitType === RecruitType.OtherGameRecruit) {
+        return process.env.CHANNEL_ID_RECRUIT_OTHERGAMES;
     }
 }

@@ -22,11 +22,12 @@ export class RecruitService {
             DBCommon.init();
             await DBCommon.run(`CREATE TABLE IF NOT EXISTS recruit (
                                 guild_id text,
+                                channel_id text,
                                 message_id text,
                                 author_id text,
                                 recruit_num number,
                                 condition text,
-                                channel_name text,
+                                vc_name text,
                                 recruit_type number,
                                 option text,
                                 created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime')),
@@ -40,19 +41,20 @@ export class RecruitService {
 
     static async registerRecruit(
         guildId: string,
+        channelId: string,
         messageId: string,
         authorId: string,
         recruitNum: number,
         condition: string,
-        channelName: string | null,
+        vcName: string | null,
         recruitType: number,
         option?: string | null,
     ) {
         try {
             DBCommon.init();
             await DBCommon.run(
-                `INSERT INTO recruit (guild_id, message_id, author_id, recruit_num, condition, channel_name, recruit_type, option) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
-                [guildId, messageId, authorId, recruitNum, condition, channelName, recruitType, option],
+                `INSERT INTO recruit (guild_id, channel_id, message_id, author_id, recruit_num, condition, vc_name, recruit_type, option) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+                [guildId, channelId, messageId, authorId, recruitNum, condition, vcName, recruitType, option],
             );
             DBCommon.close();
         } catch (err) {
@@ -100,11 +102,12 @@ export class RecruitService {
             recruits.push(
                 new Recruit(
                     results[i].guild_id,
+                    results[i].channel_id,
                     results[i].message_id,
                     results[i].author_id,
                     results[i].recruit_num,
                     results[i].condition,
-                    results[i].channel_name,
+                    results[i].vc_name,
                     results[i].recruit_type,
                     results[i].option,
                     results[i].created_at,
@@ -124,11 +127,37 @@ export class RecruitService {
             recruits.push(
                 new Recruit(
                     results[i].guild_id,
+                    results[i].channel_id,
                     results[i].message_id,
                     results[i].author_id,
                     results[i].recruit_num,
                     results[i].condition,
-                    results[i].channel_name,
+                    results[i].vc_name,
+                    results[i].recruit_type,
+                    results[i].option,
+                    results[i].created_at,
+                ),
+            );
+        }
+        return recruits;
+    }
+
+    static async getRecruitsByChannelId(guildId: string, channelId: string) {
+        const db = DBCommon.open();
+        db.all = util.promisify(db.all);
+        const results = await db.all(`SELECT * FROM recruit WHERE guild_id = ${guildId} AND channel_id = ${channelId}`);
+        DBCommon.close();
+        const recruits: Recruit[] = [];
+        for (let i = 0; i < results.length; i++) {
+            recruits.push(
+                new Recruit(
+                    results[i].guild_id,
+                    results[i].channel_id,
+                    results[i].message_id,
+                    results[i].author_id,
+                    results[i].recruit_num,
+                    results[i].condition,
+                    results[i].vc_name,
                     results[i].recruit_type,
                     results[i].option,
                     results[i].created_at,

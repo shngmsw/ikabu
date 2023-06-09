@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
+import { ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
 
 import { memberListMessage } from './other_events.js';
 import { Participant } from '../../../../db/model/participant.js';
@@ -14,7 +14,7 @@ import { assertExistCheck, createMentionsFromIdList, exists, notExists, sleep } 
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { channelLinkButtons, messageLinkButtons, nsoRoomLinkButton } from '../../buttons/create_recruit_buttons.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
+import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -143,10 +143,9 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
                 embeds: [embed],
             });
 
-            if (recruitChannel instanceof BaseGuildTextChannel) {
-                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-                await sendStickyMessage(guild, recruitChannel.id, content);
-            }
+            // テキストの募集チャンネルにSticky Messageを送信
+            const stickyChannelId = getStickyChannelId(recruitData[0]) ?? recruitChannel.id;
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
 
             if (notExists(channelId)) {
                 await interaction.followUp({

@@ -10,6 +10,7 @@ import { handleCreateRole, handleDeleteRole, handleAssignRole, handleUnassignRol
 import { variablesHandler } from '../feat-admin/environment_variables/variables_handler';
 import { createNewRecruitButton } from '../feat-recruit/buttons/create_recruit_buttons';
 import { anarchyRecruit } from '../feat-recruit/interactions/commands/anarchy_recruit';
+import { buttonRecruit } from '../feat-recruit/interactions/commands/button_recruit.js';
 import { eventRecruit } from '../feat-recruit/interactions/commands/event_recruit';
 import { fesRecruit } from '../feat-recruit/interactions/commands/fes_recruit';
 import { otherGameRecruit } from '../feat-recruit/interactions/commands/other_game_recruit';
@@ -60,6 +61,8 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
         await regularRecruit(interaction);
     } else if (commandName === commandNames.other_game) {
         await otherGameRecruit(interaction);
+    } else if (commandName === commandNames.buttonRecruit) {
+        await buttonRecruit(interaction);
     } else if (commandName === commandNames.anarchy) {
         await anarchyRecruit(interaction);
     } else if (commandName === commandNames.private) {

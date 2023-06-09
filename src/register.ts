@@ -708,7 +708,7 @@ const privateMatch = new SlashCommandBuilder()
     .setDescription('プラベ募集コマンド')
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
-            .setName('recruit')
+            .setName('private')
             .setDescription('開始時刻や人数などを細かく設定できます。通常はこちらを使ってください。')
             .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('開始時刻').setDescription('何時から始める？例: 21:00').setRequired(true),
@@ -725,11 +725,6 @@ const privateMatch = new SlashCommandBuilder()
             .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('ヘヤタテurl').setDescription('イカリング3のヘヤタテURLがある場合はこちらに入力してください'),
             ),
-    )
-    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
-        subcommand
-            .setName('button')
-            .setDescription('募集条件を通常のチャットで打ち込んだ後に通知と募集用のボタンを出せます。※@everyoneメンションを使用します。'),
     )
     .setDMPermission(false);
 
@@ -832,6 +827,19 @@ const otherGame = new SlashCommandBuilder()
     )
     .setDMPermission(false);
 
+const buttonRecruit = new SlashCommandBuilder()
+    .setName(commandNames.buttonRecruit)
+    .setDescription('募集ボタンを使って募集を建てます。')
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand
+            .setName('button')
+            .setDescription('募集条件を通常のチャットで打ち込んだ後に通知と募集用のボタンを出せます。')
+            .addIntegerOption((option: SlashCommandIntegerOption) =>
+                option.setName('募集人数').setDescription('募集人数を入力してください。').setRequired(false),
+            ),
+    )
+    .setDMPermission(false);
+
 const teamDivider = new SlashCommandBuilder()
     .setName(commandNames.team_divider)
     .setDescription('チーム分けを行います。')
@@ -919,6 +927,7 @@ const commands = [
     voice,
     closeRecruit,
     otherGame,
+    buttonRecruit,
     privateMatch,
     regularMatch,
     eventMatch,
