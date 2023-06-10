@@ -82,5 +82,5 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<Cac
     await interaction.editReply({
         content: '募集完了でし！参加者が来るまで気長に待つでし！',
     });
-    sentMessage.edit({ components: [notifyActionRow()] });
+    await sentMessage.edit({ components: [notifyActionRow()] });
 }

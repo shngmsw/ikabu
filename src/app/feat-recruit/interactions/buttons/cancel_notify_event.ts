@@ -139,6 +139,6 @@ export async function cancelNotify(interaction: ButtonInteraction) {
         await interaction.message.edit({
             components: disableThinkingButton(interaction, 'キャンセル'),
         });
-        interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send('なんかエラー出てるわ');
     }
 }

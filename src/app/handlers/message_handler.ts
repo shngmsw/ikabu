@@ -18,7 +18,7 @@ export async function call(message: Message<boolean>) {
             if (message.content.startsWith('/poll')) {
                 if (message.author.username === 'ブキチ') {
                     logger.info(message.author.username);
-                    message.delete();
+                    await message.delete();
                 }
             }
             // ステージ情報
@@ -39,12 +39,12 @@ export async function call(message: Message<boolean>) {
 
             if (isNotEmpty(process.env.QUESTIONNAIRE_URL)) {
                 if (message.channel.id != process.env.CHANNEL_ID_BOT_CMD && randomBool(0.00025)) {
-                    sendIntentionConfirmReply(message, message.author, 'QUESTIONNAIRE_URL');
+                    await sendIntentionConfirmReply(message, message.author, 'QUESTIONNAIRE_URL');
                 }
             }
         }
         if (message.content.match('ボーリング')) {
-            message.reply(
+            await message.reply(
                 '```「ボウリング」とは、前方に正三角形に並べられた10本のピンと呼ばれる棒をめがけボールを転がし、倒れたピンの数によって得られる得点を競うスポーツでし。' +
                     '専用施設のボウリング場に設置された細長いレーンの上で行われる屋内競技で、レーンの長さが約23m、ピンまでの距離は約18mで行われるのが一般的でし。' +
                     '英語では “bowling” と書き、球を意味する “ball” ではなく、ラテン語で「泡」や「こぶ」を意味する “bowl” が語源とされているでし。' +
@@ -53,7 +53,7 @@ export async function call(message: Message<boolean>) {
         }
         if (message.content.match('お前を消す方法')) {
             const Kairu = new AttachmentBuilder('./images/Kairu.png');
-            message.reply({ files: [Kairu] });
+            await message.reply({ files: [Kairu] });
         }
 
         await deleteToken(message);

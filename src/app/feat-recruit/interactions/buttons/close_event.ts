@@ -98,8 +98,8 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
                 const channel = await searchChannelById(guild, channelId);
                 const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
                 if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
-                    channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                    channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
+                    await channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                    await channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
                 }
             }
 
@@ -133,8 +133,8 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
                 const channel = await searchChannelById(guild, channelId);
                 const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
                 if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
-                    channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                    channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
+                    await channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                    await channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
                 }
             }
 
@@ -168,6 +168,6 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '〆'),
         });
-        interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send('なんかエラー出てるわ');
     }
 }

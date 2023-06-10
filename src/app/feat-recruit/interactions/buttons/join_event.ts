@@ -190,6 +190,6 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '参加'),
         });
-        interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send('なんかエラー出てるわ');
     }
 }

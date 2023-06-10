@@ -124,9 +124,9 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
         }
     } catch (err) {
         logger.error(err);
-        interaction.message.edit({
+        await interaction.message.edit({
             components: setButtonDisable(interaction.message),
         });
-        interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send('なんかエラー出てるわ');
     }
 }
