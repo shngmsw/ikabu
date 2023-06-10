@@ -69,7 +69,7 @@ export async function del(interaction: ButtonInteraction, params: URLSearchParam
             confirmedMemberIDList.push(attendee.userId);
         }
 
-        sendRecruitButtonLog(interaction, member, recruiter, '削除', '#f04747');
+        await sendRecruitButtonLog(interaction, member, recruiter, '削除', '#f04747');
 
         if (confirmedMemberIDList.includes(member.userId)) {
             try {

@@ -66,7 +66,7 @@ export async function joinNotify(interaction: ButtonInteraction) {
             applicantIdList.push(applicant.userId);
         }
 
-        sendRecruitButtonLog(interaction, member, recruiter, '参加', '#5865f2');
+        await sendRecruitButtonLog(interaction, member, recruiter, '参加', '#5865f2');
 
         if (member.userId === recruiterId) {
             await interaction.followUp({
