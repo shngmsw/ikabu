@@ -77,7 +77,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             applicantIdList.push(applicant.userId);
         }
 
-        sendRecruitButtonLog(interaction, member, recruiter, '参加', '#5865f2');
+        await sendRecruitButtonLog(interaction, member, recruiter, '参加', '#5865f2');
 
         if (confirmedMemberIDList.includes(member.userId)) {
             await interaction.followUp({

@@ -77,7 +77,7 @@ export async function cancelNotify(interaction: ButtonInteraction) {
             applicantIdList.push(applicant.userId);
         }
 
-        sendRecruitButtonLog(interaction, member, recruiter, 'キャンセル', '#f04747');
+        await sendRecruitButtonLog(interaction, member, recruiter, 'キャンセル', '#f04747');
 
         const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆`);
         const buttonMessage = interaction.message;
