@@ -1,7 +1,8 @@
 import util from 'node:util';
-import { log4js_obj } from '../log4js_settings';
+
 import { DBCommon } from './db.js';
 import { Participant } from './model/participant';
+import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
 export class ParticipantService {
@@ -69,6 +70,16 @@ export class ParticipantService {
         try {
             DBCommon.init();
             await DBCommon.run(`DELETE FROM participants WHERE message_id = ${messageId}`);
+            DBCommon.close();
+        } catch (err) {
+            logger.error(err);
+        }
+    }
+
+    static async deleteUnuseParticipant() {
+        try {
+            DBCommon.init();
+            await DBCommon.run(`DELETE FROM participants WHERE message_id NOT IN (SELECT message_id FROM recruit)`);
             DBCommon.close();
         } catch (err) {
             logger.error(err);

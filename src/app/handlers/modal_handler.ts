@@ -1,5 +1,7 @@
-import { ModalSubmitInteraction } from 'discord.js';
 import { URLSearchParams } from 'url';
+
+import { ModalSubmitInteraction } from 'discord.js';
+
 import { isNotEmpty } from '../common/others';
 import {
     modalAnarchyRecruit,

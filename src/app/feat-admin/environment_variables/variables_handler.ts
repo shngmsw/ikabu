@@ -1,9 +1,10 @@
 import { PermissionsBitField } from 'discord.js';
-import { searchChannelById } from '../../common/manager/channel_manager';
-import { isEmpty } from '../../common/others';
+
 import { deleteVariables } from './delete_variables';
 import { setVariables } from './set_variables';
 import { showVariables } from './show_variables';
+import { searchChannelById } from '../../common/manager/channel_manager';
+import { notExists } from '../../common/others';
 
 export async function variablesHandler(interaction: $TSFixMe) {
     if (!interaction.inGuild()) return;
@@ -35,8 +36,8 @@ export async function variablesHandler(interaction: $TSFixMe) {
 }
 
 async function sendChannelError(interaction: $TSFixMe) {
-    const env_channel_id = process.env.CATEGORY_PARENT_ID_ADMIN_ONLY;
-    if (isEmpty(env_channel_id)) {
+    const envChannelId = process.env.CATEGORY_PARENT_ID_ADMIN_ONLY;
+    if (notExists(envChannelId)) {
         // .envに記載がない場合
         await interaction.editReply({
             content: '`CATEGORY_PARENT_ID_ADMIN_ONLY`が正しく設定されているか確認するでし！',
@@ -44,8 +45,8 @@ async function sendChannelError(interaction: $TSFixMe) {
         });
     } else {
         // .envに記載がある場合
-        const env_channel = await searchChannelById(interaction.guild, env_channel_id);
-        if (isEmpty(env_channel)) {
+        const envChannel = await searchChannelById(interaction.guild, envChannelId);
+        if (notExists(envChannel)) {
             // .envのカテゴリIDが間違っている場合
             await interaction.editReply({
                 content: '`CATEGORY_PARENT_ID_ADMIN_ONLY`が正しく設定されているか確認するでし！',

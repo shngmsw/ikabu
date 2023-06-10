@@ -3,11 +3,13 @@
  * Copyright (c) 2020 noriokun4649
  */
 
-import { VoiceText } from 'voice-text';
 import { Readable } from 'stream';
+
 import conf from 'config-reloadable';
-import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { SHA256 } from 'crypto-js';
+import { VoiceText } from 'voice-text';
+
+import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { exists } from '../../../common/others';
 
 const config = conf();
@@ -62,8 +64,8 @@ function readConfig() {
 export async function mode_api(msg: $TSFixMe) {
     if (mode === 1) {
         // ユーザーによって音声変える
-        const member = await searchAPIMemberById(msg.guild, msg.author.id);
-        const displayNameSha256 = SHA256(member.displayName);
+        const member = await searchDBMemberById(msg.guild, msg.author.id);
+        const displayNameSha256 = exists(member) ? SHA256(member.displayName) : SHA256('default');
         const numberOnly = displayNameSha256.toString().replace(/[^0-9]/g, '');
 
         const selectPitch = Number(numberOnly.substr(1, 1));

@@ -1,13 +1,15 @@
-import { log4js_obj } from '../../../../log4js_settings';
-import { RecruitService } from '../../../../db/recruit_service';
 import { BaseGuildTextChannel, ModalSubmitInteraction } from 'discord.js';
-import { ParticipantService } from '../../../../db/participants_service';
+
 import { RecruitType } from '../../../../db/model/recruit';
-import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
-import { sendEditRecruitLog } from '../../../logs/modals/recruit_modal_log';
-import { regenerateEmbed } from '../../embeds/regenerate_embed';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { ParticipantService } from '../../../../db/participants_service';
+import { RecruitService } from '../../../../db/recruit_service';
+import { log4js_obj } from '../../../../log4js_settings';
 import { assertExistCheck, notExists } from '../../../common/others';
+import { sendStickyMessage } from '../../../common/sticky_message';
+import { sendEditRecruitLog } from '../../../logs/modals/recruit_modal_log';
+import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
+import { regenerateEmbed } from '../../embeds/regenerate_embed';
+import { availableRecruitString } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -71,7 +73,7 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
         await sendEditRecruitLog(guild, oldRecruitData[0], newRecruitData[0], interaction.createdAt);
 
         if (interaction.channel instanceof BaseGuildTextChannel) {
-            const content = await availableRecruitString(guild, channelId, newRecruitData[0].recruitType);
+            const content = await availableRecruitString(guild, interaction.channel.id);
             await sendStickyMessage(guild, channelId, content);
         }
 

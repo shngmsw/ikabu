@@ -1,6 +1,7 @@
 // Discord bot implements
 import {
     ActivityType,
+    AnyThreadChannel,
     AutocompleteInteraction,
     BaseGuildTextChannel,
     CacheType,
@@ -8,35 +9,40 @@ import {
     GatewayIntentBits,
     GuildMember,
     Interaction,
+    Message,
+    MessageReaction,
     PartialGuildMember,
+    PartialMessageReaction,
     PartialUser,
     Partials,
     User,
+    VoiceState,
 } from 'discord.js';
-import { DBCommon } from '../db/db';
-import { MembersService } from '../db/members_service';
-import { FriendCodeService } from '../db/friend_code_service';
-import { MessageCountService } from '../db/message_count_service';
-import { RecruitService } from '../db/recruit_service';
-import { TeamDividerService } from '../db/team_divider_service';
-import { log4js_obj } from '../log4js_settings';
-import { updateSchedule } from './common/apis/splatoon3_ink';
+
+import { updateLocale, updateSchedule } from './common/apis/splatoon3_ink';
+import { searchAPIMemberById } from './common/manager/member_manager';
+import { assertExistCheck, exists, isNotEmpty, notExists } from './common/others';
 import { emojiCountUp } from './event/reaction_count/reactions';
 import { guildMemberAddEvent } from './event/rookie/set_rookie';
-import * as message_handler from './handlers/message_handler';
-import * as button_handler from './handlers/button_handler';
-import * as modal_handler from './handlers/modal_handler';
-import * as context_handler from './handlers/context_handler';
-import * as command_handler from './handlers/command_handler';
-import * as vcState_update_handler from './handlers/vcState_update_handler';
-import { assertExistCheck, exists, isNotEmpty, notExists } from './common/others';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
-import { registerSlashCommands } from '../register';
-import { searchAPIMemberById } from './common/manager/member_manager';
+import * as button_handler from './handlers/button_handler';
+import * as command_handler from './handlers/command_handler';
+import * as context_handler from './handlers/context_handler';
+import * as message_handler from './handlers/message_handler';
+import * as modal_handler from './handlers/modal_handler';
+import * as vcState_update_handler from './handlers/vcState_update_handler';
+import { DBCommon } from '../db/db';
+import { FriendCodeService } from '../db/friend_code_service';
+import { MembersService } from '../db/members_service';
+import { MessageCountService } from '../db/message_count_service';
 import { Member } from '../db/model/member';
 import { ParticipantService } from '../db/participants_service';
+import { RecruitService } from '../db/recruit_service';
 import { StickyService } from '../db/sticky_service';
+import { TeamDividerService } from '../db/team_divider_service';
+import { log4js_obj } from '../log4js_settings';
+import { registerSlashCommands } from '../register';
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -55,8 +61,8 @@ client.login(process.env.DISCORD_BOT_TOKEN);
 
 const logger = log4js_obj.getLogger();
 
-client.on('messageCreate', async (msg: $TSFixMe) => {
-    message_handler.call(msg);
+client.on('messageCreate', async (message: Message<boolean>) => {
+    message_handler.call(message);
 });
 
 client.on('guildMemberAdd', async (member: GuildMember) => {
@@ -167,7 +173,7 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
                 userId,
                 member.displayName,
                 member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-                member.joinedAt,
+                member.joinedAt ?? 'dummy', // 読めなくても更新されないのでnullならダミー文字列を突っ込む
             );
 
             // プロフィールアップデート
@@ -201,13 +207,15 @@ client.on('ready', async () => {
         client.user.setActivity(`${guild.memberCount}人`, {
             type: ActivityType.Playing,
         });
-        updateSchedule();
+        await updateSchedule();
+        await updateLocale();
+        await ParticipantService.deleteUnuseParticipant();
     } catch (error) {
         logger.error(error);
     }
 });
 
-client.on('messageReactionAdd', async (reaction: $TSFixMe) => {
+client.on('messageReactionAdd', async (reaction: MessageReaction | PartialMessageReaction) => {
     const loggerMRA = log4js_obj.getLogger('messageReactionAdd');
     try {
         // When a reaction is received, check if the structure is partial
@@ -226,7 +234,7 @@ client.on('messageReactionAdd', async (reaction: $TSFixMe) => {
     }
 });
 
-client.on('messageReactionRemove', async (reaction: $TSFixMe, user: $TSFixMe) => {
+client.on('messageReactionRemove', async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
     try {
         if (!user.bot) {
             /* empty */
@@ -263,13 +271,13 @@ client.on('interactionCreate', (interaction: Interaction<CacheType>) => {
     }
 });
 
-client.on('threadCreate', async (thread: $TSFixMe) => {
+client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
     if (isNotEmpty(thread.parentId) && thread.parentId === process.env.CHANNEL_ID_SUPPORT_CENTER) {
         editThreadTag(thread);
         sendCloseButton(thread);
     }
 });
 
-client.on('voiceStateUpdate', (oldState: $TSFixMe, newState: $TSFixMe) => {
+client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
     vcState_update_handler.call(oldState, newState);
 });

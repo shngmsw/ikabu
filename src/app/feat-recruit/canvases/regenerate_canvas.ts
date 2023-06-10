@@ -1,16 +1,19 @@
 import { AttachmentBuilder, Guild, Message } from 'discord.js';
+
+import { recruitAnarchyCanvas } from './anarchy_canvas';
+import { recruitBigRunCanvas } from './big_run_canvas';
+import { recruitEventCanvas } from './event_canvas';
+import { recruitFesCanvas } from './fes_canvas';
+import { recruitRegularCanvas } from './regular_canvas';
+import { recruitSalmonCanvas } from './salmon_canvas';
 import { Participant } from '../../../db/model/participant';
 import { Recruit, RecruitType } from '../../../db/model/recruit';
 import { ParticipantService } from '../../../db/participants_service';
 import { RecruitService } from '../../../db/recruit_service';
-import { searchMessageById } from '../../common/manager/message_manager';
-import { recruitAnarchyCanvas } from './anarchy_canvas';
-import { recruitSalmonCanvas } from './salmon_canvas';
-import { recruitRegularCanvas } from './regular_canvas';
 import { log4js_obj } from '../../../log4js_settings';
+import { searchMessageById } from '../../common/manager/message_manager';
 import { searchRoleById, searchRoleIdByName } from '../../common/manager/role_manager';
-import { recruitFesCanvas } from './fes_canvas';
-import { recruitEventCanvas } from './event_canvas';
+import { assertExistCheck } from '../../common/others';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -29,6 +32,7 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
         }
         const participantsData = await ParticipantService.getAllParticipants(guild.id, messageId);
         const message = await searchMessageById(guild, channelId, messageId);
+        assertExistCheck(message, 'message');
         const applicantList = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 2) {
@@ -52,8 +56,12 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
             case RecruitType.FestivalRecruit:
                 regenFesCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
                 break;
+            case RecruitType.BigRunRecruit:
+                regenBigRunCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
+                break;
             case RecruitType.TeamContestRecruit:
                 regenSalmonCanvas(message, recruitData[0], participantsData, applicantNum, opCode, true);
+                break;
         }
     } catch (error) {
         logger.error(error);
@@ -224,7 +232,7 @@ async function regenSalmonCanvas(
 }
 
 async function regenFesCanvas(
-    message: Message,
+    message: Message<true>,
     recruitData: Recruit,
     participantsData: Participant[],
     applicantNum: number,
@@ -242,9 +250,12 @@ async function regenFesCanvas(
     const channelName = recruitData.channelName;
     const condition = recruitData.condition;
     const teamName = recruitData.option;
+    assertExistCheck(teamName, 'teamName');
 
     const mentionId = await searchRoleIdByName(message.guild, teamName);
+    assertExistCheck(mentionId);
     const teamRole = await searchRoleById(message.guild, mentionId);
+    assertExistCheck(teamRole, 'teamRole');
 
     const submitMembersList = Array(count).fill(null); // 枠数までnull埋め
     participantsData.forEach((participant, index) => (submitMembersList[index] = participant));
@@ -262,6 +273,46 @@ async function regenFesCanvas(
         condition,
         channelName,
     );
+    const recruit = new AttachmentBuilder(recruitBuffer, {
+        name: 'ikabu_recruit.png',
+    });
+
+    message.edit({ files: [recruit] });
+}
+async function regenBigRunCanvas(
+    message: Message,
+    recruitData: Recruit,
+    participantsData: Participant[],
+    applicantNum: number,
+    opCode: number,
+) {
+    const applicantList = []; // 参加希望者リスト
+    for (const participant of participantsData) {
+        if (participant.userType === 2) {
+            applicantList.push(participant);
+        }
+    }
+    const recruitNum = recruitData.recruitNum;
+    const remainingNum = recruitNum - applicantNum;
+    const count = remainingNum + participantsData.length; // 全体の枠数
+    const channelName = recruitData.channelName;
+    const condition = recruitData.condition;
+
+    const submitMembersList = Array(count).fill(null); // 枠数までnull埋め
+    participantsData.forEach((participant, index) => (submitMembersList[index] = participant));
+
+    const recruitBuffer = await recruitBigRunCanvas(
+        opCode,
+        remainingNum,
+        count,
+        submitMembersList[0],
+        submitMembersList[1],
+        submitMembersList[2],
+        submitMembersList[3],
+        condition,
+        channelName,
+    );
+
     const recruit = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });

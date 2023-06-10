@@ -1,48 +1,74 @@
+import NodeCache from 'node-cache';
 import fetch from 'node-fetch';
+
+import { sp3Locale } from './types/locale';
+import { sp3Schedule } from './types/schedule';
 import { log4js_obj } from '../../../log4js_settings';
-import { assertExistCheck, exists, isEmpty, notExists } from '../others';
 import { isDateWithinRange } from '../datetime';
+import { assertExistCheck, exists, isEmpty, notExists } from '../others';
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const locale_url = 'https://splatoon3.ink/data/locale/ja-JP.json';
 
 const logger = log4js_obj.getLogger();
 
-export async function fetchSchedule() {
-    try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result_data = (globalThis as any).schedule_data;
+const storageCache = new NodeCache();
 
-        if (isEmpty(result_data)) {
+export async function getSchedule() {
+    try {
+        const schedule = storageCache.get('sp3_schedule') as sp3Schedule;
+
+        if (notExists(schedule)) {
             logger.warn('schedule data was not found. (fetch)');
             return await updateSchedule();
         }
 
-        const regular_list = getRegularList(result_data.schedule); // レギュラーの1つ目の時間でフェッチするか決定
-        const end_datetime = new Date(regular_list[0].endTime).getTime();
-        const now_datetime = new Date().getTime();
+        const regularList = getRegularList(schedule); // レギュラーの1つ目の時間でフェッチするか決定
+        assertExistCheck(regularList, 'regularSchedule');
+        const endDatetime = new Date(regularList[0].endTime).getTime();
+        const nowDatetime = new Date().getTime();
 
         // スケジュールデータの終了時間よりも現在の時間が遅い場合
-        if (end_datetime - now_datetime < 0) {
+        if (endDatetime - nowDatetime < 0) {
             return await updateSchedule();
         } else {
-            return result_data;
+            return schedule;
         }
     } catch (error) {
         logger.error(error);
     }
 }
 
+export async function getLocale() {
+    try {
+        const locale = storageCache.get('sp3_locale');
+
+        if (notExists(locale)) {
+            logger.warn('locale data was not found. (fetch)');
+            return await updateLocale();
+        }
+        return locale;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+export async function updateLocale() {
+    const locale = await fetch(locale_url);
+    const localeData = await locale.json();
+
+    storageCache.set('sp3_locale', localeData);
+    logger.info('locale fetched!');
+    return localeData;
+}
+
 export async function updateSchedule() {
     try {
         const schedule = await fetch(schedule_url); // スケジュール情報のfetch
-        const schedule_data = await schedule.json();
-        const locale = await fetch(locale_url); // 名前解決のためのlocale情報のfetch
-        const locale_data = await locale.json();
-        const result_data = { schedule: schedule_data, locale: locale_data }; // dataを一つにまとめる
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (globalThis as any).schedule_data = result_data;
+        const schduleData = await schedule.json();
+
+        storageCache.set('sp3_schedule', schduleData.data);
         logger.info('schedule fetched!');
-        return result_data;
+        return schduleData.data;
     } catch (error) {
         logger.error(error);
     }
@@ -50,19 +76,15 @@ export async function updateSchedule() {
 
 /**
  * フェス中かチェックする
- * @param {*} schedule スケジュールデータ
- * @param {Number} num スケジュール番号
+ * @param schedule スケジュールデータ
+ * @param num スケジュール番号
  * @returns フェス中ならtrueを返す
  */
-export function checkFes(schedule: $TSFixMe, num: $TSFixMe) {
+export function checkFes(schedule: sp3Schedule, num: number) {
     try {
-        const fest_list = getFesList(schedule);
-        const f_setting = fest_list[num].festMatchSetting;
-        if (isEmpty(f_setting)) {
-            return false;
-        } else {
-            return true;
-        }
+        const festList = getFesList(schedule);
+        const festSetting = festList[num].festMatchSetting;
+        return exists(festSetting);
     } catch (error) {
         logger.error(error);
     }
@@ -70,28 +92,28 @@ export function checkFes(schedule: $TSFixMe, num: $TSFixMe) {
 
 /**
  * ビッグラン中かチェックする
- * @param {*} schedule スケジュールデータ
- * @param {Number} num スケジュール番号
+ * @param schedule スケジュールデータ
+ * @param num スケジュール番号
  * @returns ビッグラン中ならtrueを返す
  */
-export function checkBigRun(schedule: $TSFixMe, num: $TSFixMe) {
+export function checkBigRun(schedule: sp3Schedule, num: number) {
     try {
-        const big_run_list = getBigRunList(schedule);
+        const bigRunList = getBigRunList(schedule);
 
-        if (big_run_list.length == 0) {
+        if (bigRunList.length === 0) {
             return false;
         }
 
-        const b_setting = big_run_list[num].setting;
+        const bigRunSetting = bigRunList[num].setting;
 
-        if (isEmpty(b_setting)) {
+        if (isEmpty(bigRunSetting)) {
             return false;
         }
 
-        const start_datetime = new Date(big_run_list[num].startTime);
-        const end_datetime = new Date(big_run_list[num].endTime);
-        const now_datetime = new Date();
-        return isDateWithinRange(now_datetime, start_datetime, end_datetime);
+        const startDatetime = new Date(bigRunList[num].startTime);
+        const endDatetime = new Date(bigRunList[num].endTime);
+        const nowDatetime = new Date();
+        return isDateWithinRange(nowDatetime, startDatetime, endDatetime);
     } catch (error) {
         logger.error(error);
     }
@@ -99,30 +121,30 @@ export function checkBigRun(schedule: $TSFixMe, num: $TSFixMe) {
 
 /**
  * チームコンテスト中かチェックする
- * @param {*} schedule スケジュールデータ
- * @param {Number} num スケジュール番号
+ * @param schedule スケジュールデータ
+ * @param num スケジュール番号
  * @returns チームコンテスト中ならtrueを返す
  */
-export function checkTeamContest(schedule: $TSFixMe, num: $TSFixMe) {
+export function checkTeamContest(schedule: sp3Schedule, num: number) {
     try {
         const teamContestList = getTeamContestList(schedule);
 
-        if (teamContestList.length == 0) {
+        if (teamContestList.length === 0) {
             return false;
         }
 
-        const t_setting = teamContestList[num].setting;
+        const teamContestSetting = teamContestList[num].setting;
 
-        if (isEmpty(t_setting)) {
+        if (isEmpty(teamContestSetting)) {
             return false;
         }
 
-        const start_datetime = new Date(teamContestList[num].startTime).getTime();
-        const end_datetime = new Date(teamContestList[num].endTime).getTime();
-        const now_datetime = new Date().getTime();
-        if (now_datetime - start_datetime < 0) {
+        const startDatetime = new Date(teamContestList[num].startTime).getTime();
+        const endDatetime = new Date(teamContestList[num].endTime).getTime();
+        const nowDatetime = new Date().getTime();
+        if (nowDatetime - startDatetime < 0) {
             return false;
-        } else if (end_datetime - now_datetime < 0) {
+        } else if (endDatetime - nowDatetime < 0) {
             return false;
         } else {
             return true;
@@ -134,120 +156,141 @@ export function checkTeamContest(schedule: $TSFixMe, num: $TSFixMe) {
 
 /**
  * dataからレギュラー用のリストだけ返す
- * @param {*} schedule スケジュールデータ
+ * @param schedule スケジュールデータ
  */
-export function getRegularList(schedule: $TSFixMe) {
+export function getRegularList(schedule: sp3Schedule) {
     try {
-        return schedule.data.regularSchedules.nodes;
+        return schedule.regularSchedules.nodes;
     } catch (error) {
         logger.error(error);
+        return [];
     }
 }
 
 /**
  * dataからバンカラ用のリストだけ返す
- * @param {*} schedule スケジュールデータ
+ * @param schedule スケジュールデータ
  */
-export function getAnarchyList(schedule: $TSFixMe) {
+export function getAnarchyList(schedule: sp3Schedule) {
     try {
-        return schedule.data.bankaraSchedules.nodes;
+        return schedule.bankaraSchedules.nodes;
     } catch (error) {
         logger.error(error);
+        return [];
     }
 }
 
 /**
  * dataからリグマ用のリストだけ返す
- * @param {*} schedule スケジュールデータ
+ * @param schedule スケジュールデータ
  */
-export function getEventList(schedule: $TSFixMe) {
+export function getEventList(schedule: sp3Schedule) {
     try {
-        return schedule.data.eventSchedules.nodes;
+        return schedule.eventSchedules.nodes;
     } catch (error) {
         logger.error(error);
+        return [];
     }
 }
 
 /**
  * dataからサーモン用のリストだけ返す
- * @param {*} schedule スケジュールデータ
+ * @param schedule スケジュールデータ
  */
-export function getSalmonList(schedule: $TSFixMe) {
+export function getSalmonList(schedule: sp3Schedule) {
     try {
-        return schedule.data.coopGroupingSchedule.regularSchedules.nodes;
+        return schedule.coopGroupingSchedule.regularSchedules.nodes;
     } catch (error) {
         logger.error(error);
+        return [];
     }
 }
 
 /**
  * dataからXマッチ用のリストだけ返す
- * @param {*} schedule スケジュールデータ
+ * @param schedule スケジュールデータ
  */
-export function getXMatchList(schedule: $TSFixMe) {
+export function getXMatchList(schedule: sp3Schedule) {
     try {
-        return schedule.data.xSchedules.nodes;
+        return schedule.xSchedules.nodes;
     } catch (error) {
         logger.error(error);
+        return [];
     }
 }
 
 /**
  * dataからフェス用のリストだけ返す
- * @param {*} schedule スケジュールデータ
+ * @param schedule スケジュールデータ
  */
-export function getFesList(schedule: $TSFixMe) {
+export function getFesList(schedule: sp3Schedule) {
     try {
-        return schedule.data.festSchedules.nodes;
+        return schedule.festSchedules.nodes;
     } catch (error) {
         logger.error(error);
+        return [];
     }
 }
 
 /**
  * dataからビッグラン用のリストだけ返す
- * @param {*} schedule スケジュールデータ
+ * @param schedule スケジュールデータ
  */
-export function getBigRunList(schedule: $TSFixMe) {
+export function getBigRunList(schedule: sp3Schedule) {
     try {
-        return schedule.data.coopGroupingSchedule.bigRunSchedules.nodes;
+        return schedule.coopGroupingSchedule.bigRunSchedules.nodes;
     } catch (error) {
         logger.error(error);
+        return [];
     }
 }
 
 /**
  * dataからチームコンテスト用のリストだけ返す
- * @param {*} schedule スケジュールデータ
+ * @param schedule スケジュールデータ
  */
-export function getTeamContestList(schedule: $TSFixMe) {
+export function getTeamContestList(schedule: sp3Schedule) {
     try {
-        return schedule.data.coopGroupingSchedule.teamContestSchedules.nodes;
+        return schedule.coopGroupingSchedule.teamContestSchedules.nodes;
     } catch (error) {
         logger.error(error);
+        return [];
     }
 }
 
+export type MatchInfo = {
+    startTime: string;
+    endTime: string;
+    rule?: string;
+    stage1?: string;
+    stage2?: string;
+    stageImage1?: string;
+    stageImage2?: string;
+};
+
 /**
  * レギュラー募集用データに整形する
- * @param {*} data フェッチしたデータ
- * @param {Number} num スケジュール番号
+ * @param schedule フェッチしたデータ
+ * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getRegularData(data: $TSFixMe, num: $TSFixMe) {
+export async function getRegularData(schedule: sp3Schedule, num: number) {
     try {
-        const regular_list = getRegularList(data.schedule);
-        const r_setting = regular_list[num].regularMatchSetting;
+        const regularList = getRegularList(schedule);
+        const regularSetting = regularList[num].regularMatchSetting;
 
-        const result: $TSFixMe = {};
-        result.startTime = regular_list[num].startTime;
-        result.endTime = regular_list[num].endTime;
-        if (!checkFes(data.schedule, num)) {
-            result.rule = rule2txt(data.locale, r_setting.vsRule.id);
-            result.stage1 = stage2txt(data.locale, r_setting.vsStages[0].id);
-            result.stage2 = stage2txt(data.locale, r_setting.vsStages[1].id);
-            result.stageImage1 = r_setting.vsStages[0].image.url;
-            result.stageImage2 = r_setting.vsStages[1].image.url;
+        const result: MatchInfo = {
+            startTime: regularList[num].startTime,
+            endTime: regularList[num].endTime,
+        };
+
+        const locale = await getLocale();
+        if (!checkFes(schedule, num) && exists(regularSetting)) {
+            result.rule = await rule2txt(locale, regularSetting.vsRule.id);
+            result.stage1 = await stage2txt(locale, regularSetting.vsStages[0].id);
+            result.stage2 = await stage2txt(locale, regularSetting.vsStages[1].id);
+            result.stageImage1 = regularSetting.vsStages[0].image.url;
+            result.stageImage2 = regularSetting.vsStages[1].image.url;
         }
         return result;
     } catch (error) {
@@ -257,24 +300,27 @@ export async function getRegularData(data: $TSFixMe, num: $TSFixMe) {
 
 /**
  * バンカラ(チャレンジ)用データに整形する
- * @param {*} data フェッチしたデータ
- * @param {Number} num スケジュール番号
+ * @param schedule フェッチしたデータ
+ * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getAnarchyChallengeData(data: $TSFixMe, num: $TSFixMe) {
+export async function getAnarchyChallengeData(schedule: sp3Schedule, num: number) {
     try {
-        const anarchy_list = getAnarchyList(data.schedule);
-        const a_settings = anarchy_list[num].bankaraMatchSettings; // a_settings[0]: Challenge
+        const anarchyList = getAnarchyList(schedule);
+        const anarchySettings = anarchyList[num].bankaraMatchSettings; // aSettings[0]: Challenge
 
-        const result: $TSFixMe = {};
-        result.startTime = anarchy_list[num].startTime;
-        result.endTime = anarchy_list[num].endTime;
-        if (!checkFes(data.schedule, num)) {
-            result.rule = rule2txt(data.locale, a_settings[0].vsRule.id);
-            result.stage1 = stage2txt(data.locale, a_settings[0].vsStages[0].id);
-            result.stage2 = stage2txt(data.locale, a_settings[0].vsStages[1].id);
-            result.stageImage1 = a_settings[0].vsStages[0].image.url;
-            result.stageImage2 = a_settings[0].vsStages[1].image.url;
+        const result: MatchInfo = {
+            startTime: anarchyList[num].startTime,
+            endTime: anarchyList[num].endTime,
+        };
+
+        const locale = await getLocale();
+        if (!checkFes(schedule, num) && exists(anarchySettings)) {
+            result.rule = await rule2txt(locale, anarchySettings[0].vsRule.id);
+            result.stage1 = await stage2txt(locale, anarchySettings[0].vsStages[0].id);
+            result.stage2 = await stage2txt(locale, anarchySettings[0].vsStages[1].id);
+            result.stageImage1 = anarchySettings[0].vsStages[0].image.url;
+            result.stageImage2 = anarchySettings[0].vsStages[1].image.url;
         }
         return result;
     } catch (error) {
@@ -284,24 +330,27 @@ export async function getAnarchyChallengeData(data: $TSFixMe, num: $TSFixMe) {
 
 /**
  * バンカラ募集用データに整形する
- * @param {*} data フェッチしたデータ
- * @param {Number} num スケジュール番号
+ * @param schedule フェッチしたデータ
+ * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getAnarchyOpenData(data: $TSFixMe, num: $TSFixMe) {
+export async function getAnarchyOpenData(schedule: sp3Schedule, num: number) {
     try {
-        const anarchy_list = getAnarchyList(data.schedule);
-        const a_settings = anarchy_list[num].bankaraMatchSettings; // a_settings[1]: Open
+        const anarchyList = getAnarchyList(schedule);
+        const anarchySettings = anarchyList[num].bankaraMatchSettings; // aSettings[1]: Open
 
-        const result: $TSFixMe = {};
-        result.startTime = anarchy_list[num].startTime;
-        result.endTime = anarchy_list[num].endTime;
-        if (!checkFes(data.schedule, num)) {
-            result.rule = rule2txt(data.locale, a_settings[1].vsRule.id);
-            result.stage1 = stage2txt(data.locale, a_settings[1].vsStages[0].id);
-            result.stage2 = stage2txt(data.locale, a_settings[1].vsStages[1].id);
-            result.stageImage1 = a_settings[1].vsStages[0].image.url;
-            result.stageImage2 = a_settings[1].vsStages[1].image.url;
+        const result: MatchInfo = {
+            startTime: anarchyList[num].startTime,
+            endTime: anarchyList[num].endTime,
+        };
+
+        const locale = await getLocale();
+        if (!checkFes(schedule, num) && exists(anarchySettings)) {
+            result.rule = await rule2txt(locale, anarchySettings[1].vsRule.id);
+            result.stage1 = await stage2txt(locale, anarchySettings[1].vsStages[0].id);
+            result.stage2 = await stage2txt(locale, anarchySettings[1].vsStages[1].id);
+            result.stageImage1 = anarchySettings[1].vsStages[0].image.url;
+            result.stageImage2 = anarchySettings[1].vsStages[1].image.url;
         }
         return result;
     } catch (error) {
@@ -324,13 +373,13 @@ export type EventMatchInfo = {
 
 /**
  * イベントマッチ募集用データに整形する
- * @param {*} data フェッチしたデータ
- * @param {Number} num スケジュール番号
+ * @param schedule フェッチしたデータ
+ * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getEventData(data: $TSFixMe) {
+export async function getEventData(schedule: sp3Schedule) {
     try {
-        const eventList = getEventList(data.schedule);
+        const eventList = getEventList(schedule);
 
         let targetEvent = null;
         let startTime = null;
@@ -340,8 +389,8 @@ export async function getEventData(data: $TSFixMe) {
             for (const timePeriod of event.timePeriods) {
                 if (isDateWithinRange(new Date(), new Date(timePeriod.startTime), new Date(timePeriod.endTime))) {
                     targetEvent = event;
-                    startTime = timePeriod.startTime as string;
-                    endTime = timePeriod.endTime as string;
+                    startTime = timePeriod.startTime;
+                    endTime = timePeriod.endTime;
                 }
             }
         }
@@ -355,7 +404,9 @@ export async function getEventData(data: $TSFixMe) {
 
         const eventSetting = targetEvent.leagueMatchSetting;
 
-        const eventTexts = event2txt(data.locale, eventSetting.leagueMatchEvent.id);
+        const locale = await getLocale();
+
+        const eventTexts = await event2txt(locale, eventSetting.leagueMatchEvent.id);
         assertExistCheck(eventTexts);
 
         const result: EventMatchInfo = {
@@ -364,11 +415,51 @@ export async function getEventData(data: $TSFixMe) {
             regulation: eventTexts.regulation,
             startTime: startTime,
             endTime: endTime,
-            rule: rule2txt(data.locale, eventSetting.vsRule.id) as string,
-            stage1: stage2txt(data.locale, eventSetting.vsStages[0].id) as string,
-            stage2: stage2txt(data.locale, eventSetting.vsStages[1].id) as string,
-            stageImage1: eventSetting.vsStages[0].image.url as string,
-            stageImage2: eventSetting.vsStages[1].image.url as string,
+            rule: await rule2txt(locale, eventSetting.vsRule.id),
+            stage1: await stage2txt(locale, eventSetting.vsStages[0].id),
+            stage2: await stage2txt(locale, eventSetting.vsStages[1].id),
+            stageImage1: eventSetting.vsStages[0].image.url,
+            stageImage2: eventSetting.vsStages[1].image.url,
+        };
+
+        return result;
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
+export type SalmonInfo = {
+    startTime: string;
+    endTime: string;
+    stage: string;
+    weapon1: string;
+    weapon2: string;
+    weapon3: string;
+    weapon4: string;
+    stageImage: string;
+};
+
+/**
+ * サーモン募集用データに整形する
+ * @param schedule フェッチしたデータ
+ * @param num スケジュール番号
+ * @returns 連想配列で返す
+ */
+export async function getSalmonData(schedule: sp3Schedule, num: number) {
+    try {
+        const salmonList = getSalmonList(schedule);
+        const salmonSetting = salmonList[num].setting;
+
+        const locale = await getLocale();
+        const result = {
+            startTime: salmonList[num].startTime,
+            endTime: salmonList[num].endTime,
+            stage: await stage2txt(locale, salmonSetting.coopStage.id),
+            weapon1: salmonSetting.weapons[0].image.url,
+            weapon2: salmonSetting.weapons[1].image.url,
+            weapon3: salmonSetting.weapons[2].image.url,
+            weapon4: salmonSetting.weapons[3].image.url,
+            stageImage: salmonSetting.coopStage.thumbnailImage.url,
         };
 
         return result;
@@ -378,51 +469,28 @@ export async function getEventData(data: $TSFixMe) {
 }
 
 /**
- * サーモン募集用データに整形する
- * @param {*} data フェッチしたデータ
- * @param {Number} num スケジュール番号
- * @returns 連想配列で返す
- */
-export async function getSalmonData(data: $TSFixMe, num: $TSFixMe) {
-    try {
-        const salmon_list = getSalmonList(data.schedule);
-        const s_setting = salmon_list[num].setting;
-
-        const result: $TSFixMe = {};
-        result.startTime = salmon_list[num].startTime;
-        result.endTime = salmon_list[num].endTime;
-        result.stage = stage2txt(data.locale, s_setting.coopStage.id);
-        result.weapon1 = s_setting.weapons[0].image.url;
-        result.weapon2 = s_setting.weapons[1].image.url;
-        result.weapon3 = s_setting.weapons[2].image.url;
-        result.weapon4 = s_setting.weapons[3].image.url;
-        result.stageImage = s_setting.coopStage.thumbnailImage.url;
-        return result;
-    } catch (error) {
-        logger.error(error);
-    }
-}
-
-/**
  * Xマッチ用データに整形する
- * @param {*} data フェッチしたデータ
- * @param {Number} num スケジュール番号
+ * @param schedule フェッチしたデータ
+ * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getXMatchData(data: $TSFixMe, num: $TSFixMe) {
+export async function getXMatchData(schedule: sp3Schedule, num: number) {
     try {
-        const x_list = getXMatchList(data.schedule);
-        const x_settings = x_list[num].xMatchSetting;
+        const xMatchList = getXMatchList(schedule);
+        const xMatchSettings = xMatchList[num].xMatchSetting;
 
-        const result: $TSFixMe = {};
-        result.startTime = x_list[num].startTime;
-        result.endTime = x_list[num].endTime;
-        if (!checkFes(data.schedule, num)) {
-            result.rule = rule2txt(data.locale, x_settings.vsRule.id);
-            result.stage1 = stage2txt(data.locale, x_settings.vsStages[0].id);
-            result.stage2 = stage2txt(data.locale, x_settings.vsStages[1].id);
-            result.stageImage1 = x_settings.vsStages[0].image.url;
-            result.stageImage2 = x_settings.vsStages[1].image.url;
+        const result: MatchInfo = {
+            startTime: xMatchList[num].startTime,
+            endTime: xMatchList[num].endTime,
+        };
+
+        const locale = await getLocale();
+        if (!checkFes(schedule, num) && exists(xMatchSettings)) {
+            result.rule = await rule2txt(locale, xMatchSettings.vsRule.id);
+            result.stage1 = await stage2txt(locale, xMatchSettings.vsStages[0].id);
+            result.stage2 = await stage2txt(locale, xMatchSettings.vsStages[1].id);
+            result.stageImage1 = xMatchSettings.vsStages[0].image.url;
+            result.stageImage2 = xMatchSettings.vsStages[1].image.url;
         }
         return result;
     } catch (error) {
@@ -432,24 +500,27 @@ export async function getXMatchData(data: $TSFixMe, num: $TSFixMe) {
 
 /**
  * フェス募集用データに整形する
- * @param {*} data フェッチしたデータ
- * @param {Number} num スケジュール番号
+ * @param schedule フェッチしたデータ
+ * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getFesData(data: $TSFixMe, num: $TSFixMe) {
+export async function getFesData(schedule: sp3Schedule, num: number) {
     try {
-        const fes_list = getFesList(data.schedule);
-        const f_setting = fes_list[num].festMatchSetting;
+        const festList = getFesList(schedule);
+        const festSetting = festList[num].festMatchSetting;
 
-        const result: $TSFixMe = {};
-        result.startTime = fes_list[num].startTime;
-        result.endTime = fes_list[num].endTime;
-        if (checkFes(data.schedule, num)) {
-            result.rule = rule2txt(data.locale, f_setting.vsRule.id);
-            result.stage1 = stage2txt(data.locale, f_setting.vsStages[0].id);
-            result.stage2 = stage2txt(data.locale, f_setting.vsStages[1].id);
-            result.stageImage1 = f_setting.vsStages[0].image.url;
-            result.stageImage2 = f_setting.vsStages[1].image.url;
+        const result: MatchInfo = {
+            startTime: festList[num].startTime,
+            endTime: festList[num].endTime,
+        };
+
+        const locale = await getLocale();
+        if (checkFes(schedule, num) && exists(festSetting)) {
+            result.rule = await rule2txt(locale, festSetting.vsRule.id);
+            result.stage1 = await stage2txt(locale, festSetting.vsStages[0].id);
+            result.stage2 = await stage2txt(locale, festSetting.vsStages[1].id);
+            result.stageImage1 = festSetting.vsStages[0].image.url;
+            result.stageImage2 = festSetting.vsStages[1].image.url;
         }
         return result;
     } catch (error) {
@@ -459,24 +530,26 @@ export async function getFesData(data: $TSFixMe, num: $TSFixMe) {
 
 /**
  * ビッグラン募集用データに整形する
- * @param {*} data フェッチしたデータ
- * @param {Number} num スケジュール番号
+ * @param schedule フェッチしたデータ
+ * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getBigRunData(data: $TSFixMe, num: $TSFixMe) {
+export async function getBigRunData(schedule: sp3Schedule, num: number) {
     try {
-        const big_run_list = getBigRunList(data.schedule);
-        const b_setting = big_run_list[num].setting;
+        const bigRunList = getBigRunList(schedule);
+        const bigRunSetting = bigRunList[num].setting;
 
-        const result: $TSFixMe = {};
-        result.startTime = big_run_list[num].startTime;
-        result.endTime = big_run_list[num].endTime;
-        result.stage = stage2txt(data.locale, b_setting.coopStage.id);
-        result.weapon1 = b_setting.weapons[0].image.url;
-        result.weapon2 = b_setting.weapons[1].image.url;
-        result.weapon3 = b_setting.weapons[2].image.url;
-        result.weapon4 = b_setting.weapons[3].image.url;
-        result.stageImage = b_setting.coopStage.thumbnailImage.url;
+        const locale = await getLocale();
+        const result: SalmonInfo = {
+            startTime: bigRunList[num].startTime,
+            endTime: bigRunList[num].endTime,
+            stage: await stage2txt(locale, bigRunSetting.coopStage.id),
+            weapon1: bigRunSetting.weapons[0].image.url,
+            weapon2: bigRunSetting.weapons[1].image.url,
+            weapon3: bigRunSetting.weapons[2].image.url,
+            weapon4: bigRunSetting.weapons[3].image.url,
+            stageImage: bigRunSetting.coopStage.thumbnailImage.url,
+        };
         return result;
     } catch (error) {
         logger.error(error);
@@ -485,24 +558,26 @@ export async function getBigRunData(data: $TSFixMe, num: $TSFixMe) {
 
 /**
  * チームコンテスト募集用データに整形する
- * @param {*} data フェッチしたデータ
- * @param {Number} num スケジュール番号
+ * @param schedule フェッチしたデータ
+ * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getTeamContestData(data: $TSFixMe, num: $TSFixMe) {
+export async function getTeamContestData(schedule: sp3Schedule, num: number) {
     try {
-        const teamContestList = getTeamContestList(data.schedule);
-        const t_setting = teamContestList[num].setting;
+        const teamContestList = getTeamContestList(schedule);
+        const teamContestSetting = teamContestList[num].setting;
 
-        const result: $TSFixMe = {};
-        result.startTime = teamContestList[num].startTime;
-        result.endTime = teamContestList[num].endTime;
-        result.stage = stage2txt(data.locale, t_setting.coopStage.id);
-        result.weapon1 = t_setting.weapons[0].image.url;
-        result.weapon2 = t_setting.weapons[1].image.url;
-        result.weapon3 = t_setting.weapons[2].image.url;
-        result.weapon4 = t_setting.weapons[3].image.url;
-        result.stageImage = t_setting.coopStage.thumbnailImage.url;
+        const locale = await getLocale();
+        const result: SalmonInfo = {
+            startTime: teamContestList[num].startTime,
+            endTime: teamContestList[num].endTime,
+            stage: await stage2txt(locale, teamContestSetting.coopStage.id),
+            weapon1: teamContestSetting.weapons[0].image.url,
+            weapon2: teamContestSetting.weapons[1].image.url,
+            weapon3: teamContestSetting.weapons[2].image.url,
+            weapon4: teamContestSetting.weapons[3].image.url,
+            stageImage: teamContestSetting.coopStage.thumbnailImage.url,
+        };
         return result;
     } catch (error) {
         logger.error(error);
@@ -511,57 +586,83 @@ export async function getTeamContestData(data: $TSFixMe, num: $TSFixMe) {
 
 /**
  * localeをもとにIDをステージ名に変換
- * @param {*} locale ロケールデータ
- * @param {*} id 変換するID
+ * @param locale ロケールデータ
+ * @param id 変換するID
  * @returns ステージ名
  */
-export function stage2txt(locale: $TSFixMe, id: $TSFixMe) {
+export async function stage2txt(locale: sp3Locale, id: string, fetch = true): Promise<string> {
     try {
         const stages = locale.stages;
-        if (isEmpty(stages[id])) {
-            return 'そーりー・あんでふぁいんど';
+        if (notExists(stages[id])) {
+            if (fetch) {
+                const fetchedLocale = await updateLocale();
+                return await stage2txt(fetchedLocale, id, false);
+            } else {
+                return 'そーりー・あんでふぁいんど';
+            }
         } else {
-            return stages[id].name as string;
+            return stages[id].name;
         }
     } catch (error) {
         logger.error(error);
+        return 'そーりー・あんでふぁいんど';
     }
 }
 
 /**
  * localeをもとにIDをルール名に変換
- * @param {*} locale ロケールデータ
- * @param {*} id 変換するID
+ * @param locale ロケールデータ
+ * @param id 変換するID
  * @returns ルール名
  */
-export function rule2txt(locale: $TSFixMe, id: string) {
+export async function rule2txt(locale: sp3Locale, id: string, fetch = true): Promise<string> {
     try {
         const rules = locale.rules;
-        if (isEmpty(rules[id])) {
-            return 'そーりー・あんでふぁいんど';
+        if (notExists(rules[id])) {
+            if (fetch) {
+                const fetchedLocale = await updateLocale();
+                return await rule2txt(fetchedLocale, id, false);
+            } else {
+                return 'そーりー・あんでふぁいんど';
+            }
         } else {
-            return rules[id].name as string;
+            return rules[id].name;
         }
     } catch (error) {
         logger.error(error);
+        return 'そーりー・あんでふぁいんど';
     }
 }
 
-function event2txt(locale: $TSFixMe, id: string) {
+async function event2txt(locale: sp3Locale, id: string, fetch = true): Promise<{ title: string; description: string; regulation: string }> {
     try {
-        const events = locale.events;
         const result = {
             title: 'そーりー・あんでふぁいんど',
             description: 'そーりー・あんでふぁいんど',
             regulation: 'そーりー・あんでふぁいんど',
         };
-        if (exists(events[id])) {
-            (result.title = events[id].name as string),
-                (result.description = events[id].desc as string),
-                (result.regulation = events[id].regulation as string);
+
+        const events = locale.events;
+
+        if (notExists(events[id])) {
+            if (fetch) {
+                const fetchedLocale = await updateLocale();
+                return await event2txt(fetchedLocale, id, false);
+            } else {
+                return result;
+            }
+        } else {
+            result.title = events[id].name;
+            result.description = events[id].desc;
+            result.regulation = events[id].regulation;
+            return result;
         }
-        return result;
     } catch (error) {
         logger.error(error);
+        return {
+            title: 'そーりー・あんでふぁいんど',
+            description: 'そーりー・あんでふぁいんど',
+            regulation: 'そーりー・あんでふぁいんど',
+        };
     }
 }

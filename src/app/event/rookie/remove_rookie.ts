@@ -1,14 +1,16 @@
 import Discord from 'discord.js';
+
+import { sendIntentionConfirmReply } from './send_questionnaire';
 import { MessageCountService } from '../../../db/message_count_service.js';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
-import { exists, isNotEmpty } from '../../common/others';
-import { sendIntentionConfirmReply } from './send_questionnaire';
+import { assertExistCheck, exists } from '../../common/others';
 
 export async function removeRookie(msg: $TSFixMe) {
     const dt = new Date();
     const guild = msg.guild;
     const lastMonth = dt.setMonth(dt.getMonth() - 1);
     const member = await searchAPIMemberById(guild, msg.author.id);
+    assertExistCheck(member, 'member');
     const beginnerRoleId = process.env.ROOKIE_ROLE_ID;
     const messageCount = await getMessageCount(msg.member.id);
     if (msg.member.joinedTimestamp < lastMonth || messageCount > 99) {
@@ -22,7 +24,7 @@ export async function removeRookie(msg: $TSFixMe) {
                 iconURL: member.displayAvatarURL(),
             });
             await msg.channel.send({ embeds: [embed] }).catch();
-            if (isNotEmpty(process.env.QUESTIONNAIRE_ROOKIE_URL)) {
+            if (exists(process.env.QUESTIONNAIRE_ROOKIE_URL)) {
                 sendIntentionConfirmReply(msg, member, 'QUESTIONNAIRE_ROOKIE_URL');
             }
         }

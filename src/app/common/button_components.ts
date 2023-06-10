@@ -1,5 +1,16 @@
-import { ActionRowBuilder, ButtonBuilder } from 'discord.js';
-import { assertExistCheck, isNotEmpty } from './others';
+import {
+    ActionRow,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonComponent,
+    ButtonInteraction,
+    CacheType,
+    ComponentType,
+    Message,
+    MessageActionRowComponent,
+} from 'discord.js';
+
+import { assertExistCheck, exists } from './others';
 
 /**
  * 考え中ボタンのラベルを更新してボタンを有効化する
@@ -7,26 +18,28 @@ import { assertExistCheck, isNotEmpty } from './others';
  * @param {*} label 押されたボタンに割り当て直すラベル
  * @returns 新しいActionRowオブジェクト
  */
-export async function recoveryThinkingButton(interaction: $TSFixMe, label: $TSFixMe) {
+export function recoveryThinkingButton(interaction: ButtonInteraction<CacheType>, label: string) {
     const message = interaction.message;
-    const newActionRow = await message.components.map((oldActionRow: $TSFixMe) => {
-        const updatedActionRow = new ActionRowBuilder();
+    const newActionRow = message.components.map((oldActionRow: ActionRow<MessageActionRowComponent>) => {
+        const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
         updatedActionRow.addComponents(
-            oldActionRow.components.map((buttonComponent: $TSFixMe) => {
-                if (interaction.component.customId == buttonComponent.customId) {
-                    const newButton = new ButtonBuilder();
-                    newButton.setLabel(label);
-                    newButton.setCustomId(buttonComponent.customId);
-                    newButton.setStyle(buttonComponent.style);
-                    newButton.setDisabled(false);
-                    return newButton;
-                } else {
-                    const newButton = ButtonBuilder.from(buttonComponent);
-                    newButton.setDisabled(false);
-                    return newButton;
-                }
-            }),
+            oldActionRow.components
+                .filter<ButtonComponent>((value): value is ButtonComponent => value.type === ComponentType.Button)
+                .map((buttonComponent: ButtonComponent) => {
+                    if (interaction.customId === buttonComponent.customId) {
+                        const newButton = new ButtonBuilder();
+                        newButton.setLabel(label);
+                        newButton.setCustomId(buttonComponent.customId);
+                        newButton.setStyle(buttonComponent.style);
+                        newButton.setDisabled(false);
+                        return newButton;
+                    } else {
+                        const newButton = ButtonBuilder.from(buttonComponent);
+                        newButton.setDisabled(false);
+                        return newButton;
+                    }
+                }),
         );
         return updatedActionRow;
     });
@@ -39,26 +52,28 @@ export async function recoveryThinkingButton(interaction: $TSFixMe, label: $TSFi
  * @param {*} label 押されたボタンに割り当て直すラベル
  * @returns 新しいActionRowオブジェクト
  */
-export async function disableThinkingButton(interaction: $TSFixMe, label: $TSFixMe) {
+export function disableThinkingButton(interaction: ButtonInteraction<CacheType>, label: string) {
     const message = interaction.message;
-    const newActionRow = await message.components.map((oldActionRow: $TSFixMe) => {
-        const updatedActionRow = new ActionRowBuilder();
+    const newActionRow = message.components.map((oldActionRow: ActionRow<MessageActionRowComponent>) => {
+        const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
         updatedActionRow.addComponents(
-            oldActionRow.components.map((buttonComponent: $TSFixMe) => {
-                if (interaction.component.customId == buttonComponent.customId) {
-                    const newButton = new ButtonBuilder();
-                    newButton.setLabel(label);
-                    newButton.setCustomId(buttonComponent.customId);
-                    newButton.setStyle(buttonComponent.style);
-                    newButton.setDisabled(true);
-                    return newButton;
-                } else {
-                    const newButton = ButtonBuilder.from(buttonComponent);
-                    newButton.setDisabled(true);
-                    return newButton;
-                }
-            }),
+            oldActionRow.components
+                .filter<ButtonComponent>((value): value is ButtonComponent => value.type === ComponentType.Button)
+                .map((buttonComponent: ButtonComponent) => {
+                    if (interaction.customId === buttonComponent.customId) {
+                        const newButton = new ButtonBuilder();
+                        newButton.setLabel(label);
+                        newButton.setCustomId(buttonComponent.customId);
+                        newButton.setStyle(buttonComponent.style);
+                        newButton.setDisabled(true);
+                        return newButton;
+                    } else {
+                        const newButton = ButtonBuilder.from(buttonComponent);
+                        newButton.setDisabled(true);
+                        return newButton;
+                    }
+                }),
         );
         return updatedActionRow;
     });
@@ -70,16 +85,18 @@ export async function disableThinkingButton(interaction: $TSFixMe, label: $TSFix
  * @param {*} message ボタンが含まれるmessageオブジェクト
  * @returns 新しいActionRowオブジェクト
  */
-export async function setButtonEnable(message: $TSFixMe) {
-    const newActionRow = await message.components.map((oldActionRow: $TSFixMe) => {
-        const updatedActionRow = new ActionRowBuilder();
+export function setButtonEnable(message: Message) {
+    const newActionRow = message.components.map((oldActionRow: ActionRow<MessageActionRowComponent>) => {
+        const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
         updatedActionRow.addComponents(
-            oldActionRow.components.map((buttonComponent: $TSFixMe) => {
-                const newButton = ButtonBuilder.from(buttonComponent);
-                newButton.setDisabled(false);
-                return newButton;
-            }),
+            oldActionRow.components
+                .filter<ButtonComponent>((value): value is ButtonComponent => value.type === ComponentType.Button)
+                .map((buttonComponent: ButtonComponent) => {
+                    const newButton = ButtonBuilder.from(buttonComponent);
+                    newButton.setDisabled(false);
+                    return newButton;
+                }),
         );
         return updatedActionRow;
     });
@@ -92,26 +109,28 @@ export async function setButtonEnable(message: $TSFixMe) {
  * @param {*} interaction 考え中にする場合押されたボタンのインタラクション
  * @returns 新しいActionRowオブジェクト
  */
-export async function setButtonDisable(message: $TSFixMe, interaction?: $TSFixMe) {
-    const newActionRow = await message.components.map((oldActionRow: $TSFixMe) => {
-        const updatedActionRow = new ActionRowBuilder();
+export function setButtonDisable(message: Message, interaction?: ButtonInteraction<CacheType>) {
+    const newActionRow = message.components.map((oldActionRow: ActionRow<MessageActionRowComponent>) => {
+        const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
         updatedActionRow.addComponents(
-            oldActionRow.components.map((buttonComponent: $TSFixMe) => {
-                let newButton;
-                if (isNotEmpty(interaction) && interaction.component.customId == buttonComponent.customId) {
-                    assertExistCheck(process.env.RECRUIT_LOADING_EMOJI_ID);
-                    newButton = new ButtonBuilder();
-                    newButton.setStyle(buttonComponent.style);
-                    newButton.setCustomId(buttonComponent.customId);
-                    newButton.setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID);
-                    newButton.setDisabled(true);
-                } else {
-                    newButton = ButtonBuilder.from(buttonComponent);
-                    newButton.setDisabled(true);
-                }
-                return newButton;
-            }),
+            oldActionRow.components
+                .filter<ButtonComponent>((value): value is ButtonComponent => value.type === ComponentType.Button)
+                .map((buttonComponent: ButtonComponent) => {
+                    let newButton;
+                    if (exists(interaction) && interaction.customId === buttonComponent.customId) {
+                        assertExistCheck(process.env.RECRUIT_LOADING_EMOJI_ID);
+                        newButton = new ButtonBuilder();
+                        newButton.setStyle(buttonComponent.style);
+                        newButton.setCustomId(buttonComponent.customId);
+                        newButton.setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID);
+                        newButton.setDisabled(true);
+                    } else {
+                        newButton = ButtonBuilder.from(buttonComponent);
+                        newButton.setDisabled(true);
+                    }
+                    return newButton;
+                }),
         );
         return updatedActionRow;
     });

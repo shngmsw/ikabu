@@ -1,19 +1,20 @@
-import { BaseGuildTextChannel, ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
+import { ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
+
+import { memberListMessage } from './other_events.js';
+import { Participant } from '../../../../db/model/participant.js';
+import { RecruitType } from '../../../../db/model/recruit.js';
+import { ParticipantService } from '../../../../db/participants_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, createMentionsFromIdList, exists, isNotEmpty, notExists, sleep } from '../../../common/others.js';
+import { searchMessageById } from '../../../common/manager/message_manager.js';
+import { assertExistCheck, createMentionsFromIdList, exists, notExists, sleep } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { channelLinkButtons, messageLinkButtons, nsoRoomLinkButton } from '../../buttons/create_recruit_buttons.js';
-import { Participant } from '../../../../db/model/participant.js';
-import { ParticipantService } from '../../../../db/participants_service.js';
-import { memberListMessage } from './other_events.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
-import { searchMessageById } from '../../../common/manager/message_manager.js';
-import { RecruitType } from '../../../../db/model/recruit.js';
+import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -21,7 +22,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
     if (!interaction.inGuild()) return;
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         assertExistCheck(interaction.guild, 'guild');
@@ -34,11 +35,12 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
 
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
+        assertExistCheck(member, 'member');
 
         const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
         if (recruitData.length === 0) {
-            await interaction.editReply({ components: await disableThinkingButton(interaction, '参加') });
+            await interaction.editReply({ components: disableThinkingButton(interaction, '参加') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
                 ephemeral: false,
@@ -85,7 +87,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
 
             await interaction.editReply({
                 content: await memberListMessage(interaction, image1MsgId),
-                components: await recoveryThinkingButton(interaction, '参加'),
+                components: recoveryThinkingButton(interaction, '参加'),
             });
             return;
         } else {
@@ -97,7 +99,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
                 });
 
                 await interaction.editReply({
-                    components: await recoveryThinkingButton(interaction, '参加'),
+                    components: recoveryThinkingButton(interaction, '参加'),
                 });
                 return;
             }
@@ -116,13 +118,19 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             // ホストがVCにいるかチェックして、VCにいる場合はText in Voiceにメッセージ送信
             const recruiterGuildMember = await searchAPIMemberById(guild, recruiterId);
             try {
-                if (isNotEmpty(recruiterGuildMember.voice.channel) && recruiterGuildMember.voice.channel.type === ChannelType.GuildVoice) {
-                    const hostJoinedVC = await searchChannelById(guild, recruiterGuildMember.voice.channelId);
+                if (
+                    exists(recruiterGuildMember) &&
+                    exists(recruiterGuildMember.voice.channel) &&
+                    recruiterGuildMember.voice.channel.type === ChannelType.GuildVoice
+                ) {
+                    const hostJoinedVC = await searchChannelById(guild, recruiterGuildMember.voice.channel.id);
 
-                    await hostJoinedVC.send({
-                        embeds: [embed],
-                        components: [messageLinkButtons(interaction.guildId, recruitChannel.id, interaction.message.id)],
-                    });
+                    if (exists(hostJoinedVC) && hostJoinedVC.isTextBased()) {
+                        await hostJoinedVC.send({
+                            embeds: [embed],
+                            components: [messageLinkButtons(interaction.guildId, recruitChannel.id, interaction.message.id)],
+                        });
+                    }
                 }
             } catch (error) {
                 logger.error(error);
@@ -135,10 +143,9 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
                 embeds: [embed],
             });
 
-            if (recruitChannel instanceof BaseGuildTextChannel) {
-                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-                await sendStickyMessage(guild, recruitChannel.id, content);
-            }
+            // テキストの募集チャンネルにSticky Messageを送信
+            const stickyChannelId = getStickyChannelId(recruitData[0]) ?? recruitChannel.id;
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
 
             if (notExists(channelId)) {
                 await interaction.followUp({
@@ -164,7 +171,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
 
             await interaction.editReply({
                 content: await memberListMessage(interaction, image1MsgId),
-                components: await recoveryThinkingButton(interaction, '参加'),
+                components: recoveryThinkingButton(interaction, '参加'),
             });
 
             await sleep(300);
@@ -181,7 +188,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
     } catch (err) {
         logger.error(err);
         await interaction.message.edit({
-            components: await disableThinkingButton(interaction, '参加'),
+            components: disableThinkingButton(interaction, '参加'),
         });
         interaction.channel?.send('なんかエラー出てるわ');
     }

@@ -1,19 +1,20 @@
-import { AttachmentBuilder, BaseGuildTextChannel, ModalSubmitInteraction } from 'discord.js';
-import { RecruitService } from '../../../../db/recruit_service';
-import { log4js_obj } from '../../../../log4js_settings';
-import { setButtonDisable } from '../../../common/button_components';
-import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, getCommandHelpEmbed, isNotEmpty, sleep } from '../../../common/others';
-import { createNewRecruitButton, recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
-import { getMemberMentions } from '../buttons/other_events';
+import { AttachmentBuilder, ModalSubmitInteraction } from 'discord.js';
+
+import { Member } from '../../../../db/model/member';
 import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
-import { Member } from '../../../../db/model/member';
-import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages';
+import { RecruitService } from '../../../../db/recruit_service';
+import { log4js_obj } from '../../../../log4js_settings';
 import { EventMatchInfo } from '../../../common/apis/splatoon3_ink';
+import { setButtonDisable } from '../../../common/button_components';
+import { searchMessageById } from '../../../common/manager/message_manager';
+import { assertExistCheck, exists, sleep } from '../../../common/others';
+import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitEventCanvas, ruleEventCanvas } from '../../canvases/event_canvas';
+import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
+import { sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
+import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -75,6 +76,7 @@ export async function sendEventMatch(
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
+            recruitChannel.id,
             image1Message.id,
             member.userId,
             recruitNum,
@@ -94,7 +96,7 @@ export async function sendEventMatch(
 
         const image2Message = await recruitChannel.send({ files: [rule] });
         const buttonMessage = await recruitChannel.send({
-            content: mention + ' ボタンを押して参加表明するでし！',
+            content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
         buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
@@ -108,15 +110,14 @@ export async function sendEventMatch(
         });
 
         // 募集リスト更新
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const sticky = await availableRecruitString(guild, recruitChannel.id, RecruitType.AnarchyRecruit);
-            await sendStickyMessage(guild, recruitChannel.id, sticky);
+        if (recruitChannel.isTextBased()) {
+            await sendRecruitSticky({ channelOpt: { guild: guild, channelId: recruitChannel.id } });
         }
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
-        if (isNotEmpty(deleteButtonCheck)) {
+        if (exists(deleteButtonCheck)) {
             deleteButtonCheck.delete();
         } else {
             return;
@@ -130,7 +131,7 @@ export async function sendEventMatch(
         }
 
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
-        const memberList = getMemberMentions(recruitData[0], participants);
+        const memberList = getMemberMentions(recruitData[0].recruitNum, participants);
         const hostMention = `<@${member.userId}>`;
 
         await regenerateCanvas(guild, recruitChannel.id, image1Message.id, RecruitOpCode.close);
@@ -141,18 +142,10 @@ export async function sendEventMatch(
 
         buttonMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
-            components: await setButtonDisable(buttonMessage),
+            components: setButtonDisable(buttonMessage),
         });
 
-        if (recruitChannel instanceof BaseGuildTextChannel) {
-            const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-            const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-            await sendStickyMessage(guild, recruitChannel.id, {
-                content: content,
-                embeds: [helpEmbed],
-                components: [createNewRecruitButton(recruitChannel.name)],
-            });
-        }
+        await sendCloseEmbedSticky(guild, recruitChannel);
     } catch (error) {
         logger.error(error);
     }

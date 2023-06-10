@@ -1,10 +1,12 @@
-import Canvas from 'canvas';
 import path from 'path';
+
+import Canvas from 'canvas';
+
+import { RecruitOpCode } from './regenerate_canvas';
 import { modalRecruit } from '../../../constant';
+import { Participant } from '../../../db/model/participant';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
-import { Participant } from '../../../db/model/participant';
-import { RecruitOpCode } from './regenerate_canvas';
 import { notExists } from '../../common/others';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
@@ -97,6 +99,8 @@ export async function recruitAnarchyCanvas(
         remainingString = remaining > 0 ? '@' + remaining : '満員';
     } else if (opCode === RecruitOpCode.close) {
         remainingString = '受付終了';
+    } else {
+        remainingString = 'ERROR!';
     }
 
     recruitCtx.save();

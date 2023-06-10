@@ -16,10 +16,31 @@ module.exports = {
     project: "./tsconfig.json",
     sourceType: "module",
   },
-  plugins: ["@typescript-eslint", "prettier"],
+  plugins: ["@typescript-eslint", "prettier", "import", "unused-imports"],
   root: true,
   rules: {
     "no-irregular-whitespace": "off",
+    "unused-imports/no-unused-imports": "warn",
+    "import/order": [
+      "warn",
+      {
+        groups: [
+          "builtin", // 組み込みモジュール
+          "external", // npmでインストールした外部ライブラリ
+          "internal", // 自作モジュール
+          ["parent", "sibling"],
+          "object",
+          "type",
+          "index",
+        ],
+        "newlines-between": "always", // グループ毎にで改行を入れる
+        pathGroupsExcludedImportTypes: ["builtin"],
+        alphabetize: {
+          order: "asc", // 昇順にソート
+          caseInsensitive: true, // 小文字大文字を区別する
+        },
+      },
+    ],
     // prettier/prettier
     "prettier/prettier": [
       "warn",

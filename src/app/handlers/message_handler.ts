@@ -1,18 +1,18 @@
-import { log4js_obj } from '../../log4js_settings';
+import { PermissionsBitField, AttachmentBuilder, Message } from 'discord.js';
 
-import { PermissionsBitField, AttachmentBuilder } from 'discord.js';
-import { handleStageInfo } from '../feat-utils/splat3/stageinfo';
+import { log4js_obj } from '../../log4js_settings';
 import { randomBool, isNotEmpty } from '../common/others';
-import { removeRookie } from '../event/rookie/remove_rookie';
-import { chatCountUp } from '../event/message_related/message_count';
 import { deleteToken } from '../event/message_related/delete_token';
-import { sendIntentionConfirmReply } from '../event/rookie/send_questionnaire';
 import { dispand } from '../event/message_related/dispander';
+import { chatCountUp } from '../event/message_related/message_count';
+import { removeRookie } from '../event/rookie/remove_rookie';
+import { sendIntentionConfirmReply } from '../event/rookie/send_questionnaire';
+import { sendRecruitSticky } from '../feat-recruit/sticky/recruit_sticky_messages';
+import { handleStageInfo } from '../feat-utils/splat3/stageinfo';
 import { play } from '../feat-utils/voice/tts/discordjs_voice';
-import { stickyChannelCheck } from '../feat-recruit/sticky/recruit_sticky_messages';
 const logger = log4js_obj.getLogger('message');
 
-export async function call(message: $TSFixMe) {
+export async function call(message: Message<boolean>) {
     try {
         if (message.author.bot) {
             if (message.content.startsWith('/poll')) {
@@ -27,12 +27,11 @@ export async function call(message: $TSFixMe) {
             }
             return;
         } else {
+            if (!message.inGuild()) return;
             // ステージ情報デバッグ用
             if (message.content === 'stageinfo') {
                 const guild = await message.guild.fetch();
-                const member = await guild.members.fetch(message.author.id, {
-                    force: true, // intentsによってはGuildMemberUpdateが配信されないため
-                });
+                const member = await guild.members.fetch(message.author.id);
                 if (member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
                     handleStageInfo(message);
                 }
@@ -58,11 +57,11 @@ export async function call(message: $TSFixMe) {
         }
 
         await deleteToken(message);
-        dispand(message);
-        play(message);
+        await dispand(message);
+        await play(message);
         await chatCountUp(message);
-        await stickyChannelCheck(message);
-        removeRookie(message);
+        await sendRecruitSticky({ message: message });
+        await removeRookie(message);
     } catch (error) {
         logger.error(error);
     }

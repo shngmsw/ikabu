@@ -1,18 +1,20 @@
-import { EmbedBuilder } from 'discord.js';
-import { searchAPIMemberById } from './manager/member_manager.js';
+import { Attachment, EmbedBuilder, Message } from 'discord.js';
 
-export async function composeEmbed(message: $TSFixMe, url: $TSFixMe) {
+import { searchAPIMemberById } from './manager/member_manager.js';
+import { placeHold } from '../../constant.js';
+
+export async function composeEmbed(message: Message<true>, url: string) {
     const embed = new EmbedBuilder();
-    if (isNotEmpty(message.content)) {
+    if (exists(message.content)) {
         embed.setDescription(message.content);
     }
     embed.setTimestamp(message.createdAt);
     const member = await searchAPIMemberById(message.guild, message.author.id);
-    if (isNotEmpty(url)) {
+    if (exists(url)) {
         embed.setTitle('引用元へジャンプ');
         embed.setURL(url);
     }
-    if (isNotEmpty(member)) {
+    if (exists(member)) {
         embed.setAuthor({
             name: member.displayName,
             iconURL: member.displayAvatarURL(),
@@ -25,27 +27,23 @@ export async function composeEmbed(message: $TSFixMe, url: $TSFixMe) {
     }
     embed.setFooter({
         text: message.channel.name,
-        iconURL: message.guild.iconURL(),
+        iconURL: message.guild.iconURL() ?? placeHold.error100x100,
     });
     if (message.attachments.size > 0) {
-        message.attachments.forEach((Attachment: $TSFixMe) => {
-            embed.setImage(Attachment.proxyURL);
+        message.attachments.forEach((attachment: Attachment) => {
+            embed.setImage(attachment.proxyURL);
         });
     }
     return embed;
 }
 
-export function rgbToHex(r: $TSFixMe, g: $TSFixMe, b: $TSFixMe) {
-    [r, g, b]
+export function rgbToHex(r: number, g: number, b: number) {
+    return [r, g, b]
         .map((x) => {
             const hex = x.toString(16);
             return hex.length === 1 ? '0' + hex : hex;
         })
         .join('');
-}
-
-export function isInteger(x: $TSFixMe) {
-    return Math.round(x) === x;
 }
 
 /**
@@ -116,17 +114,23 @@ export function createMentionsFromIdList(idList: string[]) {
     return mentionList;
 }
 
+// オブジェクト型でどれか一つのプロパティを必須にする
+export type RequireOne<T, K extends keyof T = keyof T> = K extends keyof T ? PartialRequire<T, K> : never;
+type PartialRequire<O, K extends keyof O> = {
+    [P in K]-?: O[P];
+} & O;
+
 /**
  * メッセージから順番に取得したメンションを配列で返す
- * @param {*} message メッセージ
- * @param {boolean} id_only 取得したメンションをIDで返す場合はtrue
+ * @param message メッセージ
+ * @param idOnly 取得したメンションをIDで返す場合はtrue
  * @returns メンション文字列を格納した配列を返す
  */
-export function getMentionsFromMessage(message: $TSFixMe, id_only = false) {
+export function getMentionsFromMessage(message: Message, idOnly = false) {
     const content = message.content;
     const matched = content.match(/<@\d{18,19}>/g);
     const results = [];
-    if (id_only) {
+    if (exists(idOnly) && exists(matched)) {
         for (const mention of matched) {
             const delete_lead = mention.slice(2); // remove <@
             const delete_backward = delete_lead.slice(0, -1); // remove >
@@ -137,10 +141,10 @@ export function getMentionsFromMessage(message: $TSFixMe, id_only = false) {
     return matched;
 }
 
-export function randomSelect(array: $TSFixMe, num: $TSFixMe) {
+export function randomSelect<T>(array: T[], num: number) {
     const a = array;
-    const t: $TSFixMe = [];
-    const r = [];
+    const t: (T | undefined)[] = [];
+    const r: T[] = [];
     let l = a.length;
     let n = num < l ? num : l;
     while (n-- > 0) {
@@ -154,10 +158,10 @@ export function randomSelect(array: $TSFixMe, num: $TSFixMe) {
 
 /**
  * 指定した確率でtrueを返し、それ以外はfalseを返す
- * @param {*} probability 確率(割合)
+ * @param probability 確率(割合)
  * @returns boolean
  */
-export function randomBool(probability: $TSFixMe) {
+export function randomBool(probability: number) {
     const num = Math.random();
     if (num < probability) {
         return true;
@@ -175,14 +179,14 @@ export function randomBool(probability: $TSFixMe) {
  *      'M': dd は月数
  *
  */
-export function dateAdd(dt: $TSFixMe, dd: $TSFixMe, u: $TSFixMe) {
+export function dateAdd(dt: Date, dd: number, u?: 'D' | 'M') {
     let y = dt.getFullYear();
     let m = dt.getMonth();
     const d = dt.getDate();
     const r = new Date(y, m, d);
-    if (typeof u === 'undefined' || u == 'D') {
+    if (notExists(u) || u === 'D') {
         r.setDate(d + dd);
-    } else if (u == 'M') {
+    } else if (u === 'M') {
         m += dd;
         // @ts-expect-error TS(2345): Argument of type 'number' is not assignable to par... Remove this comment to see the full error message
         y += parseInt(m / 12);
@@ -193,7 +197,7 @@ export function dateAdd(dt: $TSFixMe, dd: $TSFixMe, u: $TSFixMe) {
     return r;
 }
 
-export async function sleep(sec: $TSFixMe) {
+export async function sleep(sec: number) {
     return new Promise((resolve) => setTimeout(resolve, sec * 1000));
 }
 
@@ -212,30 +216,30 @@ export async function sleep(sec: $TSFixMe) {
  *      false: 初日不算入
  *
  */
-export function dateDiff(date1: Date, date2: Date, u: $TSFixMe, f?: $TSFixMe) {
-    if (typeof date2 == 'undefined') date2 = new Date();
-    if (f) date1 = dateAdd(date1, -1, 'D');
+export function dateDiff(date1: Date, date2?: Date, u?: 'Y' | 'M' | 'D' | 'YM' | 'MD' | 'YD', f?: boolean) {
+    if (notExists(date2)) date2 = new Date();
+    if (exists(f)) date1 = dateAdd(date1, -1, 'D');
     const y1 = date1.getFullYear();
     const m1 = date1.getMonth();
     const y2 = date2.getFullYear();
     const m2 = date2.getMonth();
     let dt3,
         r = 0;
-    if (typeof u === 'undefined' || u == 'D') {
+    if (notExists(u) || u == 'D') {
         r = Math.floor((Number(date2) - Number(date1)) / (24 * 3600 * 1000));
-    } else if (u == 'M') {
+    } else if (u === 'M') {
         r = y2 * 12 + m2 - (y1 * 12 + m1);
         dt3 = dateAdd(date1, r, 'M');
         if (dateDiff(dt3, date2, 'D') < 0) --r;
-    } else if (u == 'Y') {
+    } else if (u === 'Y') {
         r = Math.floor(dateDiff(date1, date2, 'M') / 12);
-    } else if (u == 'YM') {
+    } else if (u === 'YM') {
         r = dateDiff(date1, date2, 'M') % 12;
-    } else if (u == 'MD') {
+    } else if (u === 'MD') {
         r = dateDiff(date1, date2, 'M');
         dt3 = dateAdd(date1, r, 'M');
         r = dateDiff(dt3, date2, 'D');
-    } else if (u == 'YD') {
+    } else if (u === 'YD') {
         r = dateDiff(date1, date2, 'Y');
         dt3 = dateAdd(date1, r * 12, 'M');
         r = dateDiff(dt3, date2, 'D');
@@ -245,7 +249,7 @@ export function dateDiff(date1: Date, date2: Date, u: $TSFixMe, f?: $TSFixMe) {
 /*
  *  経過時間（分）の計算
  */
-export function datetimeDiff(date1: $TSFixMe, date2: $TSFixMe) {
+export function datetimeDiff(date1: Date, date2: Date) {
     const diff = date2.getTime() - date1.getTime();
     const diffMinutes = Math.abs(diff) / (60 * 1000);
     return diffMinutes;
@@ -267,7 +271,7 @@ const recruit_command = {
     別ゲー募集: '`/別ゲー募集 apex` or `/別ゲー募集 overwatch` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`',
 };
 
-export function getCommandHelpEmbed(channelName: $TSFixMe) {
+export function getCommandHelpEmbed(channelName: string) {
     let commandMessage;
     switch (channelName) {
         case 'プラベ募集':

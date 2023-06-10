@@ -1,3 +1,5 @@
+import { Guild, Role } from 'discord.js';
+
 import { log4js_obj } from '../../../log4js_settings';
 import { exists, notExists } from '../others';
 const logger = log4js_obj.getLogger('RoleManager');
@@ -29,9 +31,9 @@ export async function createRole(guild: $TSFixMe, roleName: $TSFixMe) {
  * @param {string} roleName ロール名
  * @returns ロールID
  */
-export async function searchRoleIdByName(guild: $TSFixMe, roleName: $TSFixMe) {
+export async function searchRoleIdByName(guild: Guild, roleName: string) {
     const roles = await guild.roles.fetch();
-    const role = roles.find((role: $TSFixMe) => role.name === roleName);
+    const role = roles.find((role: Role) => role.name === roleName);
 
     if (exists(role)) {
         return role.id;
@@ -46,20 +48,16 @@ export async function searchRoleIdByName(guild: $TSFixMe, roleName: $TSFixMe) {
  * @param {string} roleId ロールID
  * @returns ロールオブジェクト
  */
-export async function searchRoleById(guild: $TSFixMe, roleId: $TSFixMe) {
+export async function searchRoleById(guild: Guild, roleId: string) {
+    let role = null;
     try {
-        let role;
-        try {
-            // fetch(mid)とすれば、cache見てなければフェッチしてくる
-            role = await guild.roles.fetch(roleId);
-        } catch (error) {
-            logger.warn('role missing');
-        }
-
-        return role;
+        // fetch(mid)とすれば、cache見てなければフェッチしてくる
+        role = await guild.roles.fetch(roleId);
     } catch (error) {
-        logger.error(error);
+        logger.warn('role missing');
     }
+
+    return role;
 }
 
 /**

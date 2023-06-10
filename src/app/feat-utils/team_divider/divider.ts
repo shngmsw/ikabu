@@ -1,11 +1,12 @@
 import { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, APIEmbedField } from 'discord.js';
-import { searchAPIMemberById } from '../../common/manager/member_manager';
-import { isEmpty } from '../../common/others';
-import { setButtonEnable, recoveryThinkingButton, disableThinkingButton, setButtonDisable } from '../../common/button_components';
-import { searchMessageById } from '../../common/manager/message_manager';
-import { TeamDividerService } from '../../../db/team_divider_service';
+
 import { TeamDivider } from '../../../db/model/team_divider';
+import { TeamDividerService } from '../../../db/team_divider_service';
 import { log4js_obj } from '../../../log4js_settings';
+import { setButtonEnable, recoveryThinkingButton, disableThinkingButton, setButtonDisable } from '../../common/button_components';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
+import { searchMessageById } from '../../common/manager/message_manager';
+import { assertExistCheck, isEmpty } from '../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -18,6 +19,7 @@ export async function dividerInitialMessage(interaction: $TSFixMe) {
 
     try {
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
+        assertExistCheck(member, 'member');
         const hostId = member.id;
         const teamNum = interaction.options.getInteger('各チームのメンバー数');
         let hideWin = interaction.options.getBoolean('勝利数と勝率を隠す');
@@ -83,22 +85,25 @@ export async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
     /** @type {Discord.Snowflake} */
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const hostId = params.get('hid');
         const hideWin = params.get('hide');
-        const host_member = await searchAPIMemberById(interaction.guild, hostId);
+        const hostMember = await searchAPIMemberById(interaction.guild, hostId);
         const messageId = interaction.message.id;
 
-        if (member.voice.channelId != host_member.voice.channelId) {
+        assertExistCheck(hostMember, 'hostMember');
+        assertExistCheck(member, 'member');
+
+        if (member.voice.channelId != hostMember.voice.channelId) {
             await interaction.followUp({
                 content: 'ホストと同じVC参加者のみ参加できるでし！',
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, '参加'),
+                components: recoveryThinkingButton(interaction, '参加'),
             });
             return;
         }
@@ -109,7 +114,7 @@ export async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, '参加'),
+                components: recoveryThinkingButton(interaction, '参加'),
             });
             return;
         }
@@ -142,7 +147,7 @@ export async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
         const fields: APIEmbedField[] = [
             {
                 name: '参加登録をするには参加ボタンを押すでし！',
-                value: `全員の登録が完了したら、${host_member.displayName}たんは登録完了ボタンを押すでし！`,
+                value: `全員の登録が完了したら、${hostMember.displayName}たんは登録完了ボタンを押すでし！`,
                 inline: true,
             },
             {
@@ -155,7 +160,7 @@ export async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
 
         await interaction.message.edit({
             embeds: [embed],
-            components: await recoveryThinkingButton(interaction, '参加'),
+            components: recoveryThinkingButton(interaction, '参加'),
         });
         await interaction.followUp({ content: '登録したでし！', ephemeral: true });
     } catch (err) {
@@ -173,12 +178,15 @@ export async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
     /** @type {Discord.Snowflake} */
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
         const messageId = interaction.message.id;
         const hostId = params.get('hid');
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
-        const host_member = await searchAPIMemberById(interaction.guild, hostId);
+        const hostMember = await searchAPIMemberById(interaction.guild, hostId);
+
+        assertExistCheck(hostMember, 'hostMember');
+        assertExistCheck(member, 'member');
 
         // キャンセルボタンを押した人が参加登録をしている場合
         if ((await TeamDividerService.selectMemberFromDB(messageId, 0, member.id)).length != 0) {
@@ -196,7 +204,7 @@ export async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
             const fields: APIEmbedField[] = [
                 {
                     name: '参加登録をするには参加ボタンを押すでし！',
-                    value: `全員の登録が完了したら、${host_member.displayName}たんは登録完了ボタンを押すでし！`,
+                    value: `全員の登録が完了したら、${hostMember.displayName}たんは登録完了ボタンを押すでし！`,
                     inline: true,
                 },
                 {
@@ -209,7 +217,7 @@ export async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
 
             await interaction.message.edit({
                 embeds: [embed],
-                components: await recoveryThinkingButton(interaction, 'キャンセル'),
+                components: recoveryThinkingButton(interaction, 'キャンセル'),
             });
             await interaction.followUp({
                 content: '参加をキャンセルしたでし！',
@@ -228,7 +236,7 @@ export async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, 'キャンセル'),
+                components: recoveryThinkingButton(interaction, 'キャンセル'),
             });
         }
     } catch (err) {
@@ -246,7 +254,7 @@ export async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
     /** @type {Discord.Snowflake} */
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const messageId = interaction.message.id;
@@ -254,13 +262,15 @@ export async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
         const teamNum = params.get('num');
         const count = 1;
 
+        assertExistCheck(member, 'member');
+
         if (hostId != member.id) {
             await interaction.followUp({
                 content: '登録完了ボタンはコマンドを使用したユーザーしか使えないでし！',
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, '登録完了'),
+                components: recoveryThinkingButton(interaction, '登録完了'),
             });
             return;
         }
@@ -273,7 +283,7 @@ export async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, '登録完了'),
+                components: recoveryThinkingButton(interaction, '登録完了'),
             });
             return;
         }
@@ -322,7 +332,7 @@ export async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
                     ephemeral: true,
                 });
                 await interaction.message.edit({
-                    components: await recoveryThinkingButton(interaction, '登録完了'),
+                    components: recoveryThinkingButton(interaction, '登録完了'),
                 });
                 return;
             }
@@ -337,7 +347,7 @@ export async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
             components: [buttons, correctButton],
         });
         await interaction.message.edit({
-            components: await disableThinkingButton(interaction, '登録完了'),
+            components: disableThinkingButton(interaction, '登録完了'),
         });
         await interaction.followUp({
             content: 'チームを更新したでし！',
@@ -389,7 +399,7 @@ async function matching(interaction: $TSFixMe, params: $TSFixMe, winTeam: $TSFix
         }
 
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
@@ -398,13 +408,15 @@ async function matching(interaction: $TSFixMe, params: $TSFixMe, winTeam: $TSFix
         const teamNum = params.get('num');
         const count = params.get('count');
 
+        assertExistCheck(member, 'member');
+
         if (member.id != hostId) {
             await interaction.followUp({
                 content: 'このボタンはコマンドを使用したユーザーしか使えないでし！',
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, winTeamName),
+                components: recoveryThinkingButton(interaction, winTeamName),
             });
             return;
         }
@@ -478,7 +490,7 @@ async function matching(interaction: $TSFixMe, params: $TSFixMe, winTeam: $TSFix
         }
 
         await interaction.message.edit({
-            components: await disableThinkingButton(interaction, winTeamName),
+            components: disableThinkingButton(interaction, winTeamName),
         });
         await interaction.message.reply({
             content: `\`【${count - 1}回戦: ${winTeamName}チーム勝利】\`\nチームを更新したでし！`,
@@ -499,7 +511,7 @@ async function matching(interaction: $TSFixMe, params: $TSFixMe, winTeam: $TSFix
 export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
@@ -512,13 +524,16 @@ export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
 
         const fullIdList = fullMembers.map((member: $TSFixMe) => member.member_id);
 
+        assertExistCheck(hostMember, 'hostMember');
+        assertExistCheck(member, 'member');
+
         if (!fullIdList.includes(member.id)) {
             await interaction.followUp({
                 content: 'このチーム分けに参加してないでし！',
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, '観戦希望'),
+                components: recoveryThinkingButton(interaction, '観戦希望'),
             });
             return;
         }
@@ -531,7 +546,7 @@ export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
             const embed = await loadTeamEmbed(messageId, count, member);
             await interaction.message.edit({
                 embeds: [embed],
-                components: await recoveryThinkingButton(interaction, '観戦希望'),
+                components: recoveryThinkingButton(interaction, '観戦希望'),
             });
 
             await interaction.followUp({
@@ -545,7 +560,7 @@ export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
                     ephemeral: true,
                 });
                 await interaction.message.edit({
-                    components: await recoveryThinkingButton(interaction, '観戦希望'),
+                    components: recoveryThinkingButton(interaction, '観戦希望'),
                 });
                 return;
             }
@@ -554,7 +569,7 @@ export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
             const embed = await loadTeamEmbed(messageId, count, hostMember);
             await interaction.message.edit({
                 embeds: [embed],
-                components: await recoveryThinkingButton(interaction, '観戦希望'),
+                components: recoveryThinkingButton(interaction, '観戦希望'),
             });
 
             await interaction.followUp({
@@ -576,12 +591,14 @@ export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
 export async function endButton(interaction: $TSFixMe, params: $TSFixMe) {
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
         const messageId = params.get('mid');
         const hostId = params.get('hid');
+
+        assertExistCheck(member, 'member');
 
         if (member.id != hostId) {
             await interaction.followUp({
@@ -589,17 +606,16 @@ export async function endButton(interaction: $TSFixMe, params: $TSFixMe) {
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, '終了'),
+                components: recoveryThinkingButton(interaction, '終了'),
             });
             return;
         }
 
-        interaction.message.edit({
-            components: await disableThinkingButton(interaction, '終了'),
+        await interaction.message.edit({
+            components: disableThinkingButton(interaction, '終了'),
         });
         await TeamDividerService.deleteAllMemberFromDB(messageId);
-        const message = await searchMessageById(interaction.guild, interaction.channel.id, interaction.message.id);
-        message.reply({ content: 'チーム分けを終了したでし！' });
+        await interaction.message.reply({ content: 'チーム分けを終了したでし！' });
     } catch (err) {
         logger.error(err);
         await interaction.channel.send('なんかエラー出てるわ');
@@ -614,7 +630,7 @@ export async function endButton(interaction: $TSFixMe, params: $TSFixMe) {
 export async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
@@ -624,7 +640,10 @@ export async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
         const guild = interaction.guild;
         const channelId = interaction.channel.id;
         const message = await searchMessageById(guild, channelId, messageId);
-        const hostId = message.interaction.user.id;
+        assertExistCheck(message, 'message');
+        const hostId = message.interaction?.user.id;
+
+        assertExistCheck(member, 'member');
 
         if (member.id != hostId) {
             await interaction.followUp({
@@ -632,7 +651,7 @@ export async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, '直前訂正'),
+                components: recoveryThinkingButton(interaction, '直前訂正'),
             });
             return;
         }
@@ -642,8 +661,8 @@ export async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
         await TeamDividerService.deleteMatchingResult(messageId, count);
 
         const preMessage = await searchMessageById(guild, channelId, preMessageId);
-
-        await preMessage.edit({ components: await setButtonEnable(preMessage) });
+        assertExistCheck(preMessage, 'preMessage');
+        await preMessage.edit({ components: setButtonEnable(preMessage) });
 
         await interaction.followUp({
             content: '最新のチーム分けを削除したでし！\nもう一度同じ操作をしても違うチーム分けになる場合があるでし！',
@@ -666,7 +685,7 @@ export async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
 export async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
@@ -674,13 +693,15 @@ export async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
         const hostId = params.get('hid');
         const count = params.get('count');
 
+        assertExistCheck(member, 'member');
+
         if (member.id != hostId) {
             await interaction.followUp({
                 content: 'このボタンはコマンドを使用したユーザーしか使えないでし！',
                 ephemeral: true,
             });
             await interaction.message.edit({
-                components: await recoveryThinkingButton(interaction, '戦績表示切替'),
+                components: recoveryThinkingButton(interaction, '戦績表示切替'),
             });
             return;
         }
@@ -707,7 +728,7 @@ export async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
         const embed = await loadTeamEmbed(messageId, count, hostMember);
         await interaction.message.edit({
             embeds: [embed],
-            components: await recoveryThinkingButton(interaction, '戦績表示切替'),
+            components: recoveryThinkingButton(interaction, '戦績表示切替'),
         });
     } catch (err) {
         logger.error(err);

@@ -1,15 +1,15 @@
-import { BaseGuildTextChannel, ButtonInteraction, EmbedBuilder } from 'discord.js';
+import { ButtonInteraction, EmbedBuilder } from 'discord.js';
+
+import { getMemberMentions } from './other_events.js';
+import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
+import { Participant } from '../../../../db/model/participant.js';
+import { ParticipantService } from '../../../../db/participants_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, datetimeDiff, getCommandHelpEmbed } from '../../../common/others.js';
-import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
-import { createNewRecruitButton } from '../../buttons/create_recruit_buttons';
-import { Participant } from '../../../../db/model/participant.js';
-import { ParticipantService } from '../../../../db/participants_service.js';
-import { getMemberMentions } from './other_events.js';
-import { availableRecruitString, sendStickyMessage } from '../../sticky/recruit_sticky_messages.js';
+import { assertExistCheck, datetimeDiff, exists } from '../../../common/others.js';
+import { getStickyChannelId, sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -17,7 +17,7 @@ export async function closeNotify(interaction: ButtonInteraction) {
     if (!interaction.inGuild()) return;
     try {
         await interaction.update({
-            components: await setButtonDisable(interaction.message, interaction),
+            components: setButtonDisable(interaction.message, interaction),
         });
 
         assertExistCheck(interaction.guild, 'guild');
@@ -28,11 +28,12 @@ export async function closeNotify(interaction: ButtonInteraction) {
 
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
         const member = await searchDBMemberById(guild, interaction.member.user.id);
+        assertExistCheck(member, 'member');
 
         const recruitData = await RecruitService.getRecruit(guild.id, embedMessageId);
 
         if (recruitData.length === 0) {
-            await interaction.editReply({ components: await disableThinkingButton(interaction, '〆') });
+            await interaction.editReply({ components: disableThinkingButton(interaction, '〆') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
                 ephemeral: false,
@@ -76,7 +77,7 @@ export async function closeNotify(interaction: ButtonInteraction) {
         const recruitChannel = interaction.channel;
 
         if (member.userId === recruiterId) {
-            const memberList = getMemberMentions(recruitData[0], participantsData);
+            const memberList = getMemberMentions(recruitData[0].recruitNum, participantsData);
 
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, embedMessageId);
@@ -86,24 +87,22 @@ export async function closeNotify(interaction: ButtonInteraction) {
 
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
-                components: await disableThinkingButton(interaction, '〆'),
+                components: disableThinkingButton(interaction, '〆'),
             });
 
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
-            if (recruitChannel instanceof BaseGuildTextChannel) {
-                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-                const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-                await sendStickyMessage(guild, recruitChannel.id, {
-                    content: content,
-                    embeds: [helpEmbed],
-                    components: [createNewRecruitButton(recruitChannel.name)],
-                });
+            if (recruitChannel.isThread()) {
+                // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
+                const stickyChannelId = getStickyChannelId(recruitData[0]);
+                if (exists(stickyChannelId)) {
+                    await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
+                }
+            } else {
+                await sendCloseEmbedSticky(guild, recruitChannel);
             }
-
-            return;
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
-            const memberList = getMemberMentions(recruitData[0], participantsData);
+            const memberList = getMemberMentions(recruitData[0].recruitNum, participantsData);
 
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, embedMessageId);
@@ -113,20 +112,20 @@ export async function closeNotify(interaction: ButtonInteraction) {
 
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
-                components: await disableThinkingButton(interaction, '〆'),
+                components: disableThinkingButton(interaction, '〆'),
             });
 
             const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆 \n <@${member.userId}>たんが代理〆`);
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
-            if (recruitChannel instanceof BaseGuildTextChannel) {
-                const content = await availableRecruitString(guild, recruitChannel.id, recruitData[0].recruitType);
-                const helpEmbed = getCommandHelpEmbed(recruitChannel.name);
-                await sendStickyMessage(guild, recruitChannel.id, {
-                    content: content,
-                    embeds: [helpEmbed],
-                    components: [createNewRecruitButton(recruitChannel.name)],
-                });
+            if (recruitChannel.isThread()) {
+                // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
+                const stickyChannelId = getStickyChannelId(recruitData[0]);
+                if (exists(stickyChannelId)) {
+                    await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
+                }
+            } else {
+                await sendCloseEmbedSticky(guild, recruitChannel);
             }
         } else {
             await interaction.followUp({
@@ -134,13 +133,13 @@ export async function closeNotify(interaction: ButtonInteraction) {
                 ephemeral: true,
             });
             await interaction.editReply({
-                components: await recoveryThinkingButton(interaction, '〆'),
+                components: recoveryThinkingButton(interaction, '〆'),
             });
         }
     } catch (err) {
         logger.error(err);
         await interaction.message.edit({
-            components: await disableThinkingButton(interaction, '〆'),
+            components: disableThinkingButton(interaction, '〆'),
         });
         interaction.channel?.send('なんかエラー出てるわ');
     }
