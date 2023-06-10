@@ -75,7 +75,7 @@ export async function close(interaction: ButtonInteraction, params: URLSearchPar
             applicantIdList.push(applicant.userId);
         }
 
-        sendRecruitButtonLog(interaction, member, recruiter, '〆', '#4f545c');
+        await sendRecruitButtonLog(interaction, member, recruiter, '〆', '#4f545c');
 
         const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆`);
         const buttonMessage = interaction.message;
