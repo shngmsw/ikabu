@@ -1,6 +1,7 @@
 import { AttachmentBuilder, Guild, Message } from 'discord.js';
 
 import { recruitAnarchyCanvas } from './anarchy_canvas';
+import { recruitBigRunCanvas } from './big_run_canvas';
 import { recruitEventCanvas } from './event_canvas';
 import { recruitFesCanvas } from './fes_canvas';
 import { recruitRegularCanvas } from './regular_canvas';
@@ -55,8 +56,12 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
             case RecruitType.FestivalRecruit:
                 regenFesCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
                 break;
+            case RecruitType.BigRunRecruit:
+                regenBigRunCanvas(message, recruitData[0], participantsData, applicantNum, opCode);
+                break;
             case RecruitType.TeamContestRecruit:
                 regenSalmonCanvas(message, recruitData[0], participantsData, applicantNum, opCode, true);
+                break;
         }
     } catch (error) {
         logger.error(error);
@@ -268,6 +273,46 @@ async function regenFesCanvas(
         condition,
         channelName,
     );
+    const recruit = new AttachmentBuilder(recruitBuffer, {
+        name: 'ikabu_recruit.png',
+    });
+
+    message.edit({ files: [recruit] });
+}
+async function regenBigRunCanvas(
+    message: Message,
+    recruitData: Recruit,
+    participantsData: Participant[],
+    applicantNum: number,
+    opCode: number,
+) {
+    const applicantList = []; // 参加希望者リスト
+    for (const participant of participantsData) {
+        if (participant.userType === 2) {
+            applicantList.push(participant);
+        }
+    }
+    const recruitNum = recruitData.recruitNum;
+    const remainingNum = recruitNum - applicantNum;
+    const count = remainingNum + participantsData.length; // 全体の枠数
+    const channelName = recruitData.channelName;
+    const condition = recruitData.condition;
+
+    const submitMembersList = Array(count).fill(null); // 枠数までnull埋め
+    participantsData.forEach((participant, index) => (submitMembersList[index] = participant));
+
+    const recruitBuffer = await recruitBigRunCanvas(
+        opCode,
+        remainingNum,
+        count,
+        submitMembersList[0],
+        submitMembersList[1],
+        submitMembersList[2],
+        submitMembersList[3],
+        condition,
+        channelName,
+    );
+
     const recruit = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
