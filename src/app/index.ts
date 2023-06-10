@@ -209,6 +209,7 @@ client.on('ready', async () => {
         });
         await updateSchedule();
         await updateLocale();
+        await ParticipantService.deleteUnuseParticipant();
     } catch (error) {
         logger.error(error);
     }

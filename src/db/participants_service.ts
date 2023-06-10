@@ -76,6 +76,16 @@ export class ParticipantService {
         }
     }
 
+    static async deleteUnuseParticipant() {
+        try {
+            DBCommon.init();
+            await DBCommon.run(`DELETE FROM participants WHERE message_id NOT IN (SELECT message_id FROM recruit)`);
+            DBCommon.close();
+        } catch (err) {
+            logger.error(err);
+        }
+    }
+
     static async getParticipant(guildId: string, messageId: string, userId: string) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all);
