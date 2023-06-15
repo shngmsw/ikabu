@@ -189,42 +189,50 @@ async function sendAnarchyMatch(
     let thumbnailYP; // アイコンy座標
     let thumbScaleX; // アイコン幅
     let thumbScaleY; // アイコン高さ
-    switch (anarchyData.rule) {
-        case 'ガチエリア':
-            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
-            thumbnailXP = 600;
-            thumbnailYP = 20;
-            thumbScaleX = 90;
-            thumbScaleY = 100;
-            break;
-        case 'ガチヤグラ':
-            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
-            thumbnailXP = 595;
-            thumbnailYP = 20;
-            thumbScaleX = 90;
-            thumbScaleY = 100;
-            break;
-        case 'ガチホコバトル':
-            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
-            thumbnailXP = 585;
-            thumbnailYP = 23;
-            thumbScaleX = 110;
-            thumbScaleY = 90;
-            break;
-        case 'ガチアサリ':
-            thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
-            thumbnailXP = 570;
-            thumbnailYP = 20;
-            thumbScaleX = 120;
-            thumbScaleY = 100;
-            break;
-        default:
-            thumbnailUrl = placeHold.error100x100;
-            thumbnailXP = 595;
-            thumbnailYP = 20;
-            thumbScaleX = 100;
-            thumbScaleY = 100;
-            break;
+    if (exists(anarchyData && anarchyData.rule)) {
+        switch (anarchyData.rule) {
+            case 'ガチエリア':
+                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
+                thumbnailXP = 600;
+                thumbnailYP = 20;
+                thumbScaleX = 90;
+                thumbScaleY = 100;
+                break;
+            case 'ガチヤグラ':
+                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
+                thumbnailXP = 595;
+                thumbnailYP = 20;
+                thumbScaleX = 90;
+                thumbScaleY = 100;
+                break;
+            case 'ガチホコバトル':
+                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
+                thumbnailXP = 585;
+                thumbnailYP = 23;
+                thumbScaleX = 110;
+                thumbScaleY = 90;
+                break;
+            case 'ガチアサリ':
+                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
+                thumbnailXP = 570;
+                thumbnailYP = 20;
+                thumbScaleX = 120;
+                thumbScaleY = 100;
+                break;
+            default:
+                thumbnailUrl = placeHold.error100x100;
+                thumbnailXP = 595;
+                thumbnailYP = 20;
+                thumbScaleX = 100;
+                thumbScaleY = 100;
+                break;
+        }
+    } else {
+        thumbnailUrl = placeHold.error100x100;
+        thumbnailXP = 595;
+        thumbnailYP = 20;
+        thumbScaleX = 100;
+        thumbScaleY = 100;
     }
 
     assertExistCheck(interaction.guild, 'guild');

@@ -3,11 +3,11 @@ import path from 'path';
 import Canvas from 'canvas';
 
 import { RecruitOpCode } from './regenerate_canvas.js';
-import { modalRecruit } from '../../../constant.js';
+import { modalRecruit, placeHold } from '../../../constant.js';
 import { Participant } from '../../../db/model/participant.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
-import { notExists } from '../../common/others.js';
+import { exists, notExists } from '../../common/others.js';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -183,8 +183,6 @@ export async function recruitSalmonCanvas(
  * ルール情報のキャンバス(2枚目)を作成する
  */
 export async function ruleSalmonCanvas(data: $TSFixMe) {
-    const datetime = formatDatetime(data.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(data.endTime, dateformat.mdwhm);
-
     const ruleCanvas = Canvas.createCanvas(720, 550);
     const ruleCtx = ruleCanvas.getContext('2d');
 
@@ -197,38 +195,79 @@ export async function ruleSalmonCanvas(data: $TSFixMe) {
 
     fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
-    const dateWidth = ruleCtx.measureText(datetime).width;
-    fillTextWithStroke(ruleCtx, datetime, '37px Splatfont', '#FFFFFF', '#2D3130', 1, (650 - dateWidth) / 2, 145);
+    if (exists(data) && exists(data.startTime) && exists(data.endTime)) {
+        const datetime = formatDatetime(data.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(data.endTime, dateformat.mdwhm);
+        const dateWidth = ruleCtx.measureText(datetime).width;
+        fillTextWithStroke(ruleCtx, datetime, '37px Splatfont', '#FFFFFF', '#2D3130', 1, (650 - dateWidth) / 2, 145);
+    } else {
+        const datetime = 'えらー';
+        const dateWidth = ruleCtx.measureText(datetime).width;
+        fillTextWithStroke(ruleCtx, datetime, '37px Splatfont', '#FFFFFF', '#2D3130', 1, (650 - dateWidth) / 2, 145);
+    }
 
     fillTextWithStroke(ruleCtx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 245);
 
-    const weapon1Image = await Canvas.loadImage(data.weapon1);
-    ruleCtx.drawImage(weapon1Image, 50, 280, 110, 110);
+    const errorWeaponImage = await Canvas.loadImage(placeHold.error100x100);
+    if (exists(data) && exists(data.weapon1)) {
+        const weapon1Image = await Canvas.loadImage(data.weapon1);
+        ruleCtx.drawImage(weapon1Image, 50, 280, 110, 110);
+    } else {
+        ruleCtx.drawImage(errorWeaponImage, 50, 280, 110, 110);
+    }
 
-    const weapon2Image = await Canvas.loadImage(data.weapon2);
-    ruleCtx.drawImage(weapon2Image, 190, 280, 110, 110);
+    if (exists(data) && exists(data.weapon2)) {
+        const weapon2Image = await Canvas.loadImage(data.weapon2);
+        ruleCtx.drawImage(weapon2Image, 190, 280, 110, 110);
+    } else {
+        ruleCtx.drawImage(errorWeaponImage, 190, 280, 110, 110);
+    }
 
-    const weapon3Image = await Canvas.loadImage(data.weapon3);
-    ruleCtx.drawImage(weapon3Image, 50, 410, 110, 110);
+    if (exists(data) && exists(data.weapon3)) {
+        const weapon3Image = await Canvas.loadImage(data.weapon3);
+        ruleCtx.drawImage(weapon3Image, 50, 410, 110, 110);
+    } else {
+        ruleCtx.drawImage(errorWeaponImage, 50, 410, 110, 110);
+    }
 
-    const weapon4Image = await Canvas.loadImage(data.weapon4);
-    ruleCtx.drawImage(weapon4Image, 190, 410, 110, 110);
+    if (exists(data) && exists(data.weapon4)) {
+        const weapon4Image = await Canvas.loadImage(data.weapon4);
+        ruleCtx.drawImage(weapon4Image, 190, 410, 110, 110);
+    } else {
+        ruleCtx.drawImage(errorWeaponImage, 190, 410, 110, 110);
+    }
 
     fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 350, 245);
 
-    const stageWidth = ruleCtx.measureText(data.stage).width;
-    fillTextWithStroke(ruleCtx, data.stage, '38px Splatfont', '#FFFFFF', '#2D3130', 1, 150 + (700 - stageWidth) / 2, 300);
+    if (exists(data) && exists(data.stage)) {
+        const stageWidth = ruleCtx.measureText(data.stage).width;
+        fillTextWithStroke(ruleCtx, data.stage, '38px Splatfont', '#FFFFFF', '#2D3130', 1, 150 + (700 - stageWidth) / 2, 300);
+    } else {
+        const stageWidth = ruleCtx.measureText('えらー').width;
+        fillTextWithStroke(ruleCtx, 'えらー', '38px Splatfont', '#FFFFFF', '#2D3130', 1, 150 + (700 - stageWidth) / 2, 300);
+    }
 
-    const stageImage = await Canvas.loadImage(data.stageImage);
-    ruleCtx.save();
-    ruleCtx.beginPath();
-    createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
-    ruleCtx.clip();
-    ruleCtx.drawImage(stageImage, 370, 340, 308, 176);
-    ruleCtx.strokeStyle = '#FFFFFF';
-    ruleCtx.lineWidth = 6.0;
-    ruleCtx.stroke();
-    ruleCtx.restore();
+    if (exists(data) && exists(data.stageImage)) {
+        const stageImage = await Canvas.loadImage(data.stageImage);
+        ruleCtx.save();
+        ruleCtx.beginPath();
+        createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
+        ruleCtx.clip();
+        ruleCtx.drawImage(stageImage, 370, 340, 308, 176);
+        ruleCtx.strokeStyle = '#FFFFFF';
+        ruleCtx.lineWidth = 6.0;
+        ruleCtx.stroke();
+        ruleCtx.restore();
+    } else {
+        ruleCtx.save();
+        ruleCtx.beginPath();
+        createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
+        ruleCtx.fillStyle = '#000000';
+        ruleCtx.fill();
+        ruleCtx.strokeStyle = '#FFFFFF';
+        ruleCtx.lineWidth = 6.0;
+        ruleCtx.stroke();
+        ruleCtx.restore();
+    }
 
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
     ruleCtx.clip();
