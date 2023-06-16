@@ -7,7 +7,7 @@ import { modalRecruit } from '../../../constant.js';
 import { Participant } from '../../../db/model/participant.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
-import { notExists } from '../../common/others.js';
+import { exists, notExists } from '../../common/others.js';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -186,9 +186,6 @@ export async function recruitFesCanvas(
 export async function ruleFesCanvas(fesData: $TSFixMe) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
 
-    const date = formatDatetime(fesData.startTime, dateformat.ymdw);
-    const time = formatDatetime(fesData.startTime, dateformat.hm) + ' - ' + formatDatetime(fesData.endTime, dateformat.hm);
-
     const ruleCtx = ruleCanvas.getContext('2d');
 
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
@@ -200,46 +197,86 @@ export async function ruleFesCanvas(fesData: $TSFixMe) {
 
     fillTextWithStroke(ruleCtx, 'ルール', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
-    const ruleWidth = ruleCtx.measureText(fesData.rule).width;
-    fillTextWithStroke(ruleCtx, fesData.rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - ruleWidth) / 2, 145); // 中央寄せ
+    if (exists(fesData) && exists(fesData.rule)) {
+        const ruleWidth = ruleCtx.measureText(fesData.rule).width;
+        fillTextWithStroke(ruleCtx, fesData.rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - ruleWidth) / 2, 145); // 中央寄せ
+    } else {
+        const ruleWidth = ruleCtx.measureText('えらー').width;
+        fillTextWithStroke(ruleCtx, 'えらー', '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - ruleWidth) / 2, 145); // 中央寄せ
+    }
 
     fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
+    if (exists(fesData) && exists(fesData.startTime) && exists(fesData.endTime)) {
+        const date = formatDatetime(fesData.startTime, dateformat.ymdw);
+        const time = formatDatetime(fesData.startTime, dateformat.hm) + ' - ' + formatDatetime(fesData.endTime, dateformat.hm);
 
-    const dateWidth = ruleCtx.measureText(date).width;
-    fillTextWithStroke(ruleCtx, date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - dateWidth) / 2, 270); // 中央寄せ
+        const dateWidth = ruleCtx.measureText(date).width;
+        fillTextWithStroke(ruleCtx, date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - dateWidth) / 2, 270); // 中央寄せ
 
-    const timeWidth = ruleCtx.measureText(time).width;
-    fillTextWithStroke(ruleCtx, time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - timeWidth) / 2, 320); // 中央寄せ
+        const timeWidth = ruleCtx.measureText(time).width;
+        fillTextWithStroke(ruleCtx, time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - timeWidth) / 2, 320); // 中央寄せ
+    } else {
+        const dateWidth = ruleCtx.measureText('えらー').width;
+        fillTextWithStroke(ruleCtx, 'えらー', '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - dateWidth) / 2, 270); // 中央寄せ
+        const timeWidth = ruleCtx.measureText('えらー').width;
+        fillTextWithStroke(ruleCtx, 'えらー', '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - timeWidth) / 2, 320); // 中央寄せ
+    }
 
     fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
-
     ruleCtx.save();
     ruleCtx.textAlign = 'center';
-    fillTextWithStroke(ruleCtx, fesData.stage1, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
-    fillTextWithStroke(ruleCtx, fesData.stage2, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
+    if (exists(fesData) && exists(fesData.stage1) && exists(fesData.stage2)) {
+        fillTextWithStroke(ruleCtx, fesData.stage1, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
+        fillTextWithStroke(ruleCtx, fesData.stage2, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
+    } else {
+        fillTextWithStroke(ruleCtx, 'えらー', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
+        fillTextWithStroke(ruleCtx, 'えらー', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
+    }
     ruleCtx.restore();
 
-    const stage1Image = await Canvas.loadImage(fesData.stageImage1);
-    ruleCtx.save();
-    ruleCtx.beginPath();
-    createRoundRect(ruleCtx, 370, 130, 308, 176, 10);
-    ruleCtx.clip();
-    ruleCtx.drawImage(stage1Image, 370, 130, 308, 176);
-    ruleCtx.strokeStyle = '#FFFFFF';
-    ruleCtx.lineWidth = 6.0;
-    ruleCtx.stroke();
-    ruleCtx.restore();
+    if (exists(fesData) && exists(fesData.stageImage1) && exists(fesData.stageImage2)) {
+        const stage1Image = await Canvas.loadImage(fesData.stageImage1);
+        ruleCtx.save();
+        ruleCtx.beginPath();
+        createRoundRect(ruleCtx, 370, 130, 308, 176, 10);
+        ruleCtx.clip();
+        ruleCtx.drawImage(stage1Image, 370, 130, 308, 176);
+        ruleCtx.strokeStyle = '#FFFFFF';
+        ruleCtx.lineWidth = 6.0;
+        ruleCtx.stroke();
+        ruleCtx.restore();
 
-    const stage2Image = await Canvas.loadImage(fesData.stageImage2);
-    ruleCtx.save();
-    ruleCtx.beginPath();
-    createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
-    ruleCtx.clip();
-    ruleCtx.drawImage(stage2Image, 370, 340, 308, 176);
-    ruleCtx.strokeStyle = '#FFFFFF';
-    ruleCtx.lineWidth = 6.0;
-    ruleCtx.stroke();
-    ruleCtx.restore();
+        const stage2Image = await Canvas.loadImage(fesData.stageImage2);
+        ruleCtx.save();
+        ruleCtx.beginPath();
+        createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
+        ruleCtx.clip();
+        ruleCtx.drawImage(stage2Image, 370, 340, 308, 176);
+        ruleCtx.strokeStyle = '#FFFFFF';
+        ruleCtx.lineWidth = 6.0;
+        ruleCtx.stroke();
+        ruleCtx.restore();
+    } else {
+        ruleCtx.save();
+        ruleCtx.beginPath();
+        createRoundRect(ruleCtx, 370, 130, 308, 176, 10);
+        ruleCtx.fillStyle = '#000000';
+        ruleCtx.fill();
+        ruleCtx.strokeStyle = '#FFFFFF';
+        ruleCtx.lineWidth = 6.0;
+        ruleCtx.stroke();
+        ruleCtx.restore();
+
+        ruleCtx.save();
+        ruleCtx.beginPath();
+        createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
+        ruleCtx.fillStyle = '#000000';
+        ruleCtx.fill();
+        ruleCtx.strokeStyle = '#FFFFFF';
+        ruleCtx.lineWidth = 6.0;
+        ruleCtx.stroke();
+        ruleCtx.restore();
+    }
 
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
     ruleCtx.clip();
