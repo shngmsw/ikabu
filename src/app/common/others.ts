@@ -5,7 +5,7 @@ import { placeHold } from '../../constant.js';
 
 export async function composeEmbed(message: Message<true>, url: string) {
     const embed = new EmbedBuilder();
-    if (exists(message.content)) {
+    if (exists(message.content) && isNotEmpty(message.content)) {
         embed.setDescription(message.content);
     }
     embed.setTimestamp(message.createdAt);

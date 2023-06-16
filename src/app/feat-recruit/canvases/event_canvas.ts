@@ -180,9 +180,6 @@ export async function recruitEventCanvas(
 export async function ruleEventCanvas(eventData: EventMatchInfo) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
 
-    const date = formatDatetime(eventData.startTime, dateformat.ymdw);
-    const time = formatDatetime(eventData.startTime, dateformat.hm) + ' - ' + formatDatetime(eventData.endTime, dateformat.hm);
-
     const ruleCtx = ruleCanvas.getContext('2d');
 
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
@@ -203,6 +200,9 @@ export async function ruleEventCanvas(eventData: EventMatchInfo) {
     fillTextWithStroke(ruleCtx, eventData.rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - ruleWidth) / 2, 145); // 中央寄せ
 
     fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
+
+    const date = formatDatetime(eventData.startTime, dateformat.ymdw);
+    const time = formatDatetime(eventData.startTime, dateformat.hm) + ' - ' + formatDatetime(eventData.endTime, dateformat.hm);
 
     const dateWidth = ruleCtx.measureText(date).width;
     fillTextWithStroke(ruleCtx, date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - dateWidth) / 2, 270); // 中央寄せ
