@@ -170,9 +170,6 @@ export async function ruleBigRunCanvas(data: $TSFixMe) {
         const salmonData = await getBigRunData(data, 0);
         if (notExists(salmonData)) return null;
 
-        const datetime =
-            formatDatetime(salmonData.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(salmonData.endTime, dateformat.mdwhm);
-
         const ruleCanvas = Canvas.createCanvas(720, 550);
         const ruleCtx = ruleCanvas.getContext('2d');
 
@@ -184,6 +181,9 @@ export async function ruleBigRunCanvas(data: $TSFixMe) {
         ruleCtx.stroke();
 
         fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 60);
+
+        const datetime =
+            formatDatetime(salmonData.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(salmonData.endTime, dateformat.mdwhm);
 
         const dateWidth = ruleCtx.measureText(datetime).width;
         fillTextWithStroke(ruleCtx, datetime, '37px Splatfont', '#FFFFFF', '#2D3130', 1, (650 - dateWidth) / 2, 120);

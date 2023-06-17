@@ -160,7 +160,16 @@ export function checkTeamContest(schedule: sp3Schedule, num: number) {
  */
 export function getRegularList(schedule: sp3Schedule) {
     try {
-        return schedule.regularSchedules.nodes;
+        const nodes = schedule.regularSchedules.nodes;
+        const result = [];
+        const nowDatetime = new Date().getTime();
+        for (const node of nodes) {
+            const endTime = new Date(node.endTime).getTime();
+            if (endTime - nowDatetime > 0) {
+                result.push(node);
+            }
+        }
+        return result;
     } catch (error) {
         logger.error(error);
         return [];
@@ -173,7 +182,16 @@ export function getRegularList(schedule: sp3Schedule) {
  */
 export function getAnarchyList(schedule: sp3Schedule) {
     try {
-        return schedule.bankaraSchedules.nodes;
+        const nodes = schedule.bankaraSchedules.nodes;
+        const result = [];
+        const nowDatetime = new Date().getTime();
+        for (const node of nodes) {
+            const endTime = new Date(node.endTime).getTime();
+            if (endTime - nowDatetime > 0) {
+                result.push(node);
+            }
+        }
+        return result;
     } catch (error) {
         logger.error(error);
         return [];
@@ -199,7 +217,16 @@ export function getEventList(schedule: sp3Schedule) {
  */
 export function getSalmonList(schedule: sp3Schedule) {
     try {
-        return schedule.coopGroupingSchedule.regularSchedules.nodes;
+        const nodes = schedule.coopGroupingSchedule.regularSchedules.nodes;
+        const result = [];
+        const nowDatetime = new Date().getTime();
+        for (const node of nodes) {
+            const endTime = new Date(node.endTime).getTime();
+            if (endTime - nowDatetime > 0) {
+                result.push(node);
+            }
+        }
+        return result;
     } catch (error) {
         logger.error(error);
         return [];
@@ -212,7 +239,16 @@ export function getSalmonList(schedule: sp3Schedule) {
  */
 export function getXMatchList(schedule: sp3Schedule) {
     try {
-        return schedule.xSchedules.nodes;
+        const nodes = schedule.xSchedules.nodes;
+        const result = [];
+        const nowDatetime = new Date().getTime();
+        for (const node of nodes) {
+            const endTime = new Date(node.endTime).getTime();
+            if (endTime - nowDatetime > 0) {
+                result.push(node);
+            }
+        }
+        return result;
     } catch (error) {
         logger.error(error);
         return [];
@@ -225,7 +261,16 @@ export function getXMatchList(schedule: sp3Schedule) {
  */
 export function getFesList(schedule: sp3Schedule) {
     try {
-        return schedule.festSchedules.nodes;
+        const nodes = schedule.festSchedules.nodes;
+        const result = [];
+        const nowDatetime = new Date().getTime();
+        for (const node of nodes) {
+            const endTime = new Date(node.endTime).getTime();
+            if (endTime - nowDatetime > 0) {
+                result.push(node);
+            }
+        }
+        return result;
     } catch (error) {
         logger.error(error);
         return [];
@@ -277,6 +322,11 @@ export type MatchInfo = {
 export async function getRegularData(schedule: sp3Schedule, num: number) {
     try {
         const regularList = getRegularList(schedule);
+
+        if (regularList.length - 1 < num) {
+            return null;
+        }
+
         const regularSetting = regularList[num].regularMatchSetting;
 
         const result: MatchInfo = {
@@ -295,6 +345,7 @@ export async function getRegularData(schedule: sp3Schedule, num: number) {
         return result;
     } catch (error) {
         logger.error(error);
+        return null;
     }
 }
 
@@ -307,6 +358,11 @@ export async function getRegularData(schedule: sp3Schedule, num: number) {
 export async function getAnarchyChallengeData(schedule: sp3Schedule, num: number) {
     try {
         const anarchyList = getAnarchyList(schedule);
+
+        if (anarchyList.length - 1 < num) {
+            return null;
+        }
+
         const anarchySettings = anarchyList[num].bankaraMatchSettings; // aSettings[0]: Challenge
 
         const result: MatchInfo = {
@@ -325,6 +381,7 @@ export async function getAnarchyChallengeData(schedule: sp3Schedule, num: number
         return result;
     } catch (error) {
         logger.error(error);
+        return null;
     }
 }
 
@@ -337,6 +394,11 @@ export async function getAnarchyChallengeData(schedule: sp3Schedule, num: number
 export async function getAnarchyOpenData(schedule: sp3Schedule, num: number) {
     try {
         const anarchyList = getAnarchyList(schedule);
+
+        if (anarchyList.length - 1 < num) {
+            return null;
+        }
+
         const anarchySettings = anarchyList[num].bankaraMatchSettings; // aSettings[1]: Open
 
         const result: MatchInfo = {
@@ -355,6 +417,7 @@ export async function getAnarchyOpenData(schedule: sp3Schedule, num: number) {
         return result;
     } catch (error) {
         logger.error(error);
+        return null;
     }
 }
 
@@ -448,6 +511,11 @@ export type SalmonInfo = {
 export async function getSalmonData(schedule: sp3Schedule, num: number) {
     try {
         const salmonList = getSalmonList(schedule);
+
+        if (salmonList.length - 1 < num) {
+            return null;
+        }
+
         const salmonSetting = salmonList[num].setting;
 
         const locale = await getLocale();
@@ -465,6 +533,7 @@ export async function getSalmonData(schedule: sp3Schedule, num: number) {
         return result;
     } catch (error) {
         logger.error(error);
+        return null;
     }
 }
 
@@ -477,6 +546,11 @@ export async function getSalmonData(schedule: sp3Schedule, num: number) {
 export async function getXMatchData(schedule: sp3Schedule, num: number) {
     try {
         const xMatchList = getXMatchList(schedule);
+
+        if (xMatchList.length - 1 < num) {
+            return null;
+        }
+
         const xMatchSettings = xMatchList[num].xMatchSetting;
 
         const result: MatchInfo = {
@@ -495,6 +569,7 @@ export async function getXMatchData(schedule: sp3Schedule, num: number) {
         return result;
     } catch (error) {
         logger.error(error);
+        return null;
     }
 }
 
@@ -507,6 +582,11 @@ export async function getXMatchData(schedule: sp3Schedule, num: number) {
 export async function getFesData(schedule: sp3Schedule, num: number) {
     try {
         const festList = getFesList(schedule);
+
+        if (festList.length - 1 < num) {
+            return null;
+        }
+
         const festSetting = festList[num].festMatchSetting;
 
         const result: MatchInfo = {
@@ -525,6 +605,7 @@ export async function getFesData(schedule: sp3Schedule, num: number) {
         return result;
     } catch (error) {
         logger.error(error);
+        return null;
     }
 }
 

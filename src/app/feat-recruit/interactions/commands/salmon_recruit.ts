@@ -5,7 +5,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkBigRun, checkTeamContest, getSchedule, getSalmonData, getTeamContestData } from '../../../common/apis/splatoon3_ink';
+import { checkBigRun, checkTeamContest, getSalmonData, getSchedule, getTeamContestData } from '../../../common/apis/splatoon3_ink';
 import { sp3Schedule } from '../../../common/apis/types/schedule';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
