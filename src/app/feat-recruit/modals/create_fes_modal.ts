@@ -1,6 +1,6 @@
-import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
+import { ActionRowBuilder, ButtonInteraction, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 
-export async function createFesModal(interaction: $TSFixMe, channelName: $TSFixMe) {
+export async function createFesModal(interaction: ButtonInteraction<'cached' | 'raw'>, channelName: string) {
     const modalParams = new URLSearchParams();
     modalParams.append('recm', 'fesrec');
     modalParams.append('cn', channelName);

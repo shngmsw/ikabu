@@ -1,4 +1,4 @@
-import { ButtonInteraction, CacheType } from 'discord.js';
+import { ButtonInteraction } from 'discord.js';
 
 import { createAnarchyModal } from './create_anarchy_modal';
 import { createEventModal } from './create_event_modal';
@@ -6,7 +6,7 @@ import { createFesModal } from './create_fes_modal';
 import { createRegularModal } from './create_regular_modal';
 import { createSalmonModal } from './create_salmon_modal';
 
-export async function handleCreateModal(interaction: ButtonInteraction<CacheType>, params: URLSearchParams) {
+export async function handleCreateModal(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
     const channelName = params.get('cn');
     switch (channelName) {
         case 'イベマ募集':
