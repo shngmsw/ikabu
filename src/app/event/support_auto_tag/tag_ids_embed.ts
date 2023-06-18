@@ -5,7 +5,7 @@ import { assertExistCheck } from '../../common/others';
 
 const logger = log4js_obj.getLogger('default');
 
-export function tagIdsEmbed(thread: AnyThreadChannel<true>) {
+export function tagIdsEmbed(thread: AnyThreadChannel<boolean>) {
     try {
         let description = '管理者は環境変数に対応中タグのIDと回答済みタグのIDを設定するでし！\n';
 
