@@ -48,34 +48,19 @@ export function rgbToHex(r: number, g: number, b: number) {
 }
 
 /**
- * IsEmpty
- * @param obj {any} - Target Object
+ * 空文字チェック
+ * @param str 文字列
  */
-export function isEmpty(obj: $TSFixMe) {
-    if (obj === undefined || obj === null) {
-        return true;
-    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'String') {
-        if (obj === '') {
-            return true;
-        }
-    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'Array') {
-        if (obj.length === 0) {
-            return true;
-        }
-    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'Object') {
-        if (!Object.keys(obj).length) {
-            return true;
-        }
-    }
-    return false;
+export function isEmpty(str: string) {
+    return str === '';
 }
 
 /**
- * IsNotEmpty
- * @param obj {any} - Target Object
+ * 空文字でないことをチェック
+ * @param str 文字列
  */
-export function isNotEmpty(obj: $TSFixMe) {
-    return !isEmpty(obj);
+export function isNotEmpty(str: string) {
+    return !isEmpty(str);
 }
 
 /**

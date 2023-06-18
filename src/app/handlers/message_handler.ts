@@ -1,7 +1,7 @@
 import { PermissionsBitField, AttachmentBuilder, Message } from 'discord.js';
 
 import { log4js_obj } from '../../log4js_settings';
-import { randomBool, isNotEmpty } from '../common/others';
+import { randomBool, exists } from '../common/others';
 import { deleteToken } from '../event/message_related/delete_token';
 import { dispand } from '../event/message_related/dispander';
 import { chatCountUp } from '../event/message_related/message_count';
@@ -36,7 +36,7 @@ export async function call(message: Message<true>) {
                 }
             }
 
-            if (isNotEmpty(process.env.QUESTIONNAIRE_URL)) {
+            if (exists(process.env.QUESTIONNAIRE_URL)) {
                 if (message.channel.id != process.env.CHANNEL_ID_BOT_CMD && randomBool(0.00025)) {
                     await sendIntentionConfirmReply(message, message.author.id, 'QUESTIONNAIRE_URL');
                 }

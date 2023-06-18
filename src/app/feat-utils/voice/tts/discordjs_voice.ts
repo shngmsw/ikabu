@@ -122,7 +122,7 @@ export async function play(msg: Message<true>) {
     try {
         const { guildId, channelId } = msg;
         const subscription = subscriptions.get(guildId);
-        if (isNotEmpty(subscription) && channels.get(guildId) === channelId) {
+        if (exists(subscription) && isNotEmpty(subscription) && channels.get(guildId) === channelId) {
             // メッセージから音声ファイルを取得
             const buffer = await mode_api(msg);
             if (notExists(buffer)) return;

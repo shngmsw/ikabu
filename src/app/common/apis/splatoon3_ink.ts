@@ -5,7 +5,7 @@ import { sp3Locale } from './types/locale';
 import { sp3Schedule } from './types/schedule';
 import { log4js_obj } from '../../../log4js_settings';
 import { isDateWithinRange } from '../datetime';
-import { assertExistCheck, exists, isEmpty, notExists } from '../others';
+import { assertExistCheck, exists, notExists } from '../others';
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const locale_url = 'https://splatoon3.ink/data/locale/ja-JP.json';
 
@@ -106,7 +106,7 @@ export function checkBigRun(schedule: sp3Schedule, num: number) {
 
         const bigRunSetting = bigRunList[num].setting;
 
-        if (isEmpty(bigRunSetting)) {
+        if (notExists(bigRunSetting)) {
             return false;
         }
 
@@ -135,7 +135,7 @@ export function checkTeamContest(schedule: sp3Schedule, num: number) {
 
         const teamContestSetting = teamContestList[num].setting;
 
-        if (isEmpty(teamContestSetting)) {
+        if (notExists(teamContestSetting)) {
             return false;
         }
 

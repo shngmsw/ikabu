@@ -2,7 +2,7 @@ import { URLSearchParams } from 'url';
 
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message } from 'discord.js';
 
-import { isNotEmpty } from '../../common/others';
+import { exists } from '../../common/others';
 
 export function recruitDeleteButton(message: Message<true>, image1Message: Message<true>, image2Message: Message<true>) {
     const deleteParams = new URLSearchParams();
@@ -31,21 +31,21 @@ export function recruitActionRow(imageMessage: Message<true>, channelId?: string
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
     joinParams.append('imid1', imageMessage.id);
-    if (isNotEmpty(channelId) && channelId !== undefined) {
+    if (exists(channelId)) {
         joinParams.append('vid', channelId);
     }
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', 'cr');
     cancelParams.append('imid1', imageMessage.id);
-    if (isNotEmpty(channelId) && channelId !== undefined) {
+    if (exists(channelId)) {
         cancelParams.append('vid', channelId);
     }
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'close');
     closeParams.append('imid1', imageMessage.id);
-    if (isNotEmpty(channelId) && channelId !== undefined) {
+    if (exists(channelId)) {
         closeParams.append('vid', channelId);
     }
 
@@ -99,7 +99,7 @@ export function createNewRecruitButton(channelName: string) {
                 .setStyle(ButtonStyle.Success),
         ]);
     }
-    if (isNotEmpty(process.env.HOW_TO_RECRUIT_URL) && process.env.HOW_TO_RECRUIT_URL !== undefined) {
+    if (exists(process.env.HOW_TO_RECRUIT_URL)) {
         button.addComponents([
             new ButtonBuilder().setURL(process.env.HOW_TO_RECRUIT_URL).setLabel('募集方法を確認').setStyle(ButtonStyle.Link),
         ]);

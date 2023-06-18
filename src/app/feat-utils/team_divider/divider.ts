@@ -16,7 +16,7 @@ import { setButtonEnable, recoveryThinkingButton, disableThinkingButton, setButt
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { searchMessageById } from '../../common/manager/message_manager';
-import { assertExistCheck, exists, isEmpty, notExists } from '../../common/others';
+import { assertExistCheck, exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -45,7 +45,7 @@ export async function dividerInitialMessage(interaction: ChatInputCommandInterac
             return;
         }
 
-        if (isEmpty(member.voice.channelId)) {
+        if (notExists(member.voice.channelId)) {
             await interaction.reply({
                 content: 'このコマンドはVC参加中しか使えないでし！',
                 ephemeral: true,
