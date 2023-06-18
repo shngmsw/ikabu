@@ -10,6 +10,41 @@ const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 
 const logger = log4js_obj.getLogger('interaction');
 
+type Weapon = {
+    key: string;
+    aliases: string[];
+    type: {
+        key: string;
+        aliases: [];
+        name: {
+            en_US: string;
+            ja_JP: string;
+        };
+    };
+    name: {
+        en_US: string;
+        ja_JP: string;
+    };
+    main: string;
+    sub: {
+        key: string;
+        aliases: [];
+        name: {
+            en_US: string;
+            ja_JP: string;
+        };
+    };
+    special: {
+        key: string;
+        aliases: [];
+        name: {
+            en_US: string;
+            ja_JP: string;
+        };
+    };
+    reskin_of: string;
+};
+
 export async function handleBuki(interaction: ChatInputCommandInteraction<CacheType>) {
     const { options } = interaction;
     const bukiType = options.getString('ブキ種');
@@ -23,8 +58,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
 
     try {
         const response = await fetch(weaponsUrl);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const weapons = (await response.json()) as any;
+        const weapons = (await response.json()) as Weapon[];
 
         let member: User | Member | null;
         if (interaction.inGuild()) {
@@ -34,7 +68,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
             member = interaction.user;
         }
 
-        const bukis = weapons.filter(function (value: $TSFixMe) {
+        const bukis = weapons.filter(function (value: Weapon) {
             if (exists(bukiType)) {
                 // 特定のbukiTypeが指定されているとき
                 return bukiType === value.type.key;
@@ -42,7 +76,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
                 return true;
             }
         });
-        const bukiNames = bukis.map(function (value: $TSFixMe) {
+        const bukiNames = bukis.map(function (value: Weapon) {
             const embed = new EmbedBuilder()
                 .setColor(0xf02d7d)
                 .setTitle(value.name.ja_JP)
