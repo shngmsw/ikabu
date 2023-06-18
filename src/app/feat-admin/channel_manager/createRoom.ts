@@ -28,7 +28,7 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
-    const attachment = options.getAttachment('csv');
+    const attachment = options.getAttachment('csv', true);
     const guild = await getGuildByInteraction(interaction);
     const member = await searchAPIMemberById(guild, interaction.member.user.id);
     assertExistCheck(member, 'member');
@@ -40,7 +40,7 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
-    if (!member.size) {
+    if (!attachment.size) {
         return await interaction.editReply('CSVファイルを添付するでし！');
     }
 

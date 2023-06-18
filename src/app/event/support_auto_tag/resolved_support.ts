@@ -1,40 +1,56 @@
-import { ButtonInteraction, CacheType, PermissionsBitField } from 'discord.js';
+import { ButtonInteraction, PermissionsBitField } from 'discord.js';
 
 import { tagIdsEmbed } from './tag_ids_embed';
 import { log4js_obj } from '../../../log4js_settings';
 import { recoveryThinkingButton, setButtonDisable } from '../../common/button_components';
-import { isEmpty } from '../../common/others';
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
+import { assertExistCheck, exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function setResolvedTag(interaction: ButtonInteraction<CacheType>) {
+export async function setResolvedTag(interaction: ButtonInteraction<'cached' | 'raw'>) {
     try {
-        const thread = interaction.channel;
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageThreads)) {
+        const guild = await getGuildByInteraction(interaction);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
+        assertExistCheck(member, 'member');
+        const channel = interaction.channel;
+
+        if (notExists(channel) || !channel.isThread()) return;
+
+        if (!member.permissions.has(PermissionsBitField.Flags.ManageThreads)) {
             return await interaction.reply({
                 content: '権限がないでし！',
                 ephemeral: true,
             });
         }
 
-        if (isEmpty(process.env.TAG_ID_SUPPORT_PROGRESS) || isEmpty(process.env.TAG_ID_SUPPORT_RESOLVED)) {
-            return await interaction.reply({ embeds: [tagIdsEmbed(thread)] });
+        if (notExists(process.env.TAG_ID_SUPPORT_PROGRESS) || notExists(process.env.TAG_ID_SUPPORT_RESOLVED)) {
+            const embed = tagIdsEmbed(channel);
+            if (exists(embed)) {
+                return await interaction.reply({ embeds: [embed] });
+            } else {
+                return await interaction.reply({
+                    content: '想定されていないチャンネルでし！',
+                    ephemeral: true,
+                });
+            }
         }
 
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
         });
 
-        if (thread.archived) {
-            await thread.setArchived(false); // スレッドがアーカイブされてるとタグ変更とロックが行えないため
+        if (channel.archived) {
+            await channel.setArchived(false); // スレッドがアーカイブされてるとタグ変更とロックが行えないため
         }
 
-        const appliedTags = thread.appliedTags;
+        const appliedTags = channel.appliedTags;
         const replace_index = appliedTags.indexOf(process.env.TAG_ID_SUPPORT_PROGRESS);
         appliedTags.splice(replace_index, 1, process.env.TAG_ID_SUPPORT_RESOLVED);
-        await thread.setAppliedTags(appliedTags, '質問対応終了');
-        await thread.setLocked(true);
-        await thread.setArchived(true);
+        await channel.setAppliedTags(appliedTags, '質問対応終了');
+        await channel.setLocked(true);
+        await channel.setArchived(true);
 
         await interaction.editReply({
             components: recoveryThinkingButton(interaction, 'クローズ済'),

@@ -1,14 +1,14 @@
 import path from 'path';
 
+import { Member } from '@prisma/client';
 import Canvas from 'canvas';
 
 import { RecruitOpCode } from './regenerate_canvas';
 import { modalRecruit } from '../../../constant';
-import { Participant } from '../../../db/model/participant';
 import { EventMatchInfo } from '../../common/apis/splatoon3_ink';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
-import { notExists } from '../../common/others';
+import { exists, notExists } from '../../common/others';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -28,10 +28,10 @@ export async function recruitEventCanvas(
     opCode: number,
     remaining: number,
     count: number,
-    host: Participant,
-    user1: Participant | null,
-    user2: Participant | null,
-    user3: Participant | null,
+    host: Member,
+    user1: Member | null,
+    user2: Member | null,
+    user3: Member | null,
     condition: string,
     channelName: string | null,
 ) {
@@ -64,15 +64,15 @@ export async function recruitEventCanvas(
 
     const memberIcons = [];
 
-    if (user1 instanceof Participant) {
+    if (exists(user1)) {
         memberIcons.push(user1.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user2 instanceof Participant) {
+    if (exists(user2)) {
         memberIcons.push(user2.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user3 instanceof Participant) {
+    if (exists(user3)) {
         memberIcons.push(user3.iconUrl ?? modalRecruit.placeHold);
     }
 

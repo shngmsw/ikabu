@@ -1,15 +1,14 @@
 import { ButtonInteraction } from 'discord.js';
 
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
-import { Participant } from '../../../../db/model/participant.js';
-import { ParticipantService } from '../../../../db/participants_service.js';
+import { ParticipantService, participantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { setButtonDisable } from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
-import { assertExistCheck, exists } from '../../../common/others.js';
+import { assertExistCheck, exists, notExists } from '../../../common/others.js';
 import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruitButton');
@@ -50,8 +49,8 @@ export async function del(interaction: ButtonInteraction<'cached' | 'raw'>, para
         }
 
         let recruiter = participantsData[0]; // 募集者
-        const attendeeList: Participant[] = []; // 募集時参加確定者リスト
-        const applicantList: Participant[] = []; // 参加希望者リスト
+        const attendeeList: participantMember[] = []; // 募集時参加確定者リスト
+        const applicantList: participantMember[] = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 0) {
                 recruiter = participant;
@@ -104,18 +103,24 @@ export async function del(interaction: ButtonInteraction<'cached' | 'raw'>, para
 
             const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
+            if (notExists(recruitData)) {
+                return await interaction.editReply({
+                    content: '募集データが存在しないでし！',
+                });
+            }
+
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, image1MsgId);
 
             // participantsテーブルから該当募集のメンバー全員削除
-            await ParticipantService.deleteAllParticipant(image1MsgId);
+            await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
             await interaction.editReply({
                 content: '募集を削除したでし！\n次回は内容をしっかり確認してから送信するでし！',
             });
 
             // テキストの募集チャンネルにSticky Messageを送信
-            const stickyChannelId = getStickyChannelId(recruitData[0]) ?? interaction.channel.id;
+            const stickyChannelId = getStickyChannelId(recruitData) ?? interaction.channel.id;
             await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
         } else {
             await interaction.editReply({

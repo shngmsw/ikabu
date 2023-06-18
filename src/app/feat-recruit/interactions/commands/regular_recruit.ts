@@ -8,10 +8,8 @@ import {
     VoiceChannel,
 } from 'discord.js';
 
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, getSchedule, getRegularData, MatchInfo } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
@@ -189,36 +187,32 @@ async function sendRegularMatch(
 
     const recruiter = await searchDBMemberById(guild, hostMember.id);
     assertExistCheck(recruiter, 'recruiter');
-    const hostPt = new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date());
 
-    let participant1 = null;
-    let participant2 = null;
-    let participant3 = null;
+    let attendee1 = null;
+    let attendee2 = null;
+    let attendee3 = null;
 
     if (exists(user1)) {
-        const member = await searchDBMemberById(guild, user1.id);
-        assertExistCheck(member, 'member1');
-        participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
+        attendee1 = await searchDBMemberById(guild, user1.id);
+        assertExistCheck(attendee1, 'member1');
     }
     if (exists(user2)) {
-        const member = await searchDBMemberById(guild, user2.id);
-        assertExistCheck(member, 'member2');
-        participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
+        attendee2 = await searchDBMemberById(guild, user2.id);
+        assertExistCheck(attendee2, 'member2');
     }
     if (exists(user3)) {
-        const member = await searchDBMemberById(guild, user3.id);
-        assertExistCheck(member, 'member3');
-        participant3 = new Participant(user3.id, member.displayName, member.iconUrl, 1, new Date());
+        attendee3 = await searchDBMemberById(guild, user3.id);
+        assertExistCheck(attendee3, 'member3');
     }
 
     const recruitBuffer = await recruitRegularCanvas(
         RecruitOpCode.open,
         recruitNum,
         count,
-        hostPt,
-        participant1,
-        participant2,
-        participant3,
+        recruiter,
+        attendee1,
+        attendee2,
+        attendee3,
         null,
         null,
         null,
@@ -242,6 +236,8 @@ async function sendRegularMatch(
             files: [recruit],
         });
 
+        if (!image1Message.inGuild()) return;
+
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
@@ -255,15 +251,15 @@ async function sendRegularMatch(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);
-        if (exists(participant1)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, participant1);
+        await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, recruiter, 0);
+        if (exists(attendee1)) {
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee1, 1);
         }
-        if (exists(participant2)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, participant2);
+        if (exists(attendee2)) {
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee2, 1);
         }
-        if (exists(participant3)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, participant3);
+        if (exists(attendee3)) {
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee3, 1);
         }
 
         const image2Message = await recruitChannel.send({ files: [rule] });
@@ -328,18 +324,18 @@ async function sendRegularMatch(
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
         const recruitData = await RecruitService.getRecruit(guild.id, image1Message.id);
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             return;
         }
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
-        const memberList = getMemberMentions(recruitData[0].recruitNum, participants);
+        const memberList = getMemberMentions(recruitData.recruitNum, participants);
         const hostMention = `<@${hostMember.user.id}>`;
 
         await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
 
         // DBから募集情報削除
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
-        await ParticipantService.deleteAllParticipant(image1Message.id);
+        await ParticipantService.deleteAllParticipant(guild.id, image1Message.id);
 
         await sentMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,

@@ -1,10 +1,8 @@
 import { ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
 
 import { memberListMessage } from './other_events.js';
-import { Participant } from '../../../../db/model/participant.js';
-import { RecruitType } from '../../../../db/model/recruit.js';
-import { ParticipantService } from '../../../../db/participants_service.js';
-import { RecruitService } from '../../../../db/recruit_service.js';
+import { ParticipantService, participantMember } from '../../../../db/participant_service.js';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
@@ -39,7 +37,7 @@ export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, par
 
         const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             await interaction.editReply({ components: disableThinkingButton(interaction, '参加') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
@@ -51,9 +49,9 @@ export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, par
         const participantsData = await ParticipantService.getAllParticipants(guild.id, image1MsgId);
 
         let recruiter = participantsData[0]; // 募集者
-        const recruiterId = recruitData[0].authorId;
-        const attendeeList: Participant[] = []; // 募集時参加確定者リスト
-        const applicantList: Participant[] = []; // 参加希望者リスト
+        const recruiterId = recruitData.authorId;
+        const attendeeList: participantMember[] = []; // 募集時参加確定者リスト
+        const applicantList: participantMember[] = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 0) {
                 recruiter = participant;
@@ -111,7 +109,7 @@ export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, par
             });
 
             // recruitテーブルにデータ追加
-            await ParticipantService.registerParticipant(image1MsgId, member.userId, 2, new Date());
+            await ParticipantService.registerParticipant(guild.id, image1MsgId, member.userId, 2, new Date());
 
             const recruitChannel = interaction.channel;
 
@@ -144,7 +142,7 @@ export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, par
             });
 
             // テキストの募集チャンネルにSticky Messageを送信
-            const stickyChannelId = getStickyChannelId(recruitData[0]) ?? recruitChannel.id;
+            const stickyChannelId = getStickyChannelId(recruitData) ?? recruitChannel.id;
             await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
 
             if (notExists(channelId)) {
@@ -161,10 +159,10 @@ export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, par
                 });
             }
 
-            if (recruitData[0].recruitType === RecruitType.PrivateRecruit && exists(recruitData[0].option)) {
+            if (recruitData.recruitType === RecruitType.PrivateRecruit && exists(recruitData.option)) {
                 await interaction.followUp({
                     content: `ボタンを押すとヘヤタテ機能を使ってプライベートマッチの部屋に参加できるでし！`,
-                    components: [nsoRoomLinkButton(recruitData[0].option)],
+                    components: [nsoRoomLinkButton(recruitData.option)],
                     ephemeral: true,
                 });
             }

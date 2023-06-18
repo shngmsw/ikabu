@@ -12,10 +12,8 @@ import {
     VoiceChannel,
 } from 'discord.js';
 
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
@@ -270,10 +268,7 @@ async function sendOtherGames(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(
-            embedMessage.id,
-            new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date()),
-        );
+        await ParticipantService.registerParticipantFromMember(guild.id, embedMessage.id, recruiter, 0);
 
         const sentMessage = await recruitChannel.send({
             content: mention + ' ボタンを押して参加表明するでし',

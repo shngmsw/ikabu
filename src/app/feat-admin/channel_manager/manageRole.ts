@@ -1,9 +1,11 @@
 import fs from 'fs';
 
 import { stringify } from 'csv-stringify/sync';
-import { AttachmentBuilder, ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
+import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, PermissionsBitField, Role, User } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { createRole, searchRoleById, searchRoleIdByName, setColorToRole } from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
 
@@ -14,11 +16,13 @@ export async function handleCreateRole(interaction: ChatInputCommandInteraction<
     await interaction.deferReply();
     const { options } = interaction;
 
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
+    const guild = await getGuildByInteraction(interaction);
+    const member = await searchAPIMemberById(guild, interaction.member.user.id);
+    assertExistCheck(member, 'member');
+
+    if (!member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
-
-    const guild = await interaction.guild.fetch();
 
     try {
         const roleName = options.getString('ロール名', true);
@@ -59,25 +63,33 @@ export async function handleDeleteRole(interaction: ChatInputCommandInteraction<
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
+
+    const guild = await getGuildByInteraction(interaction);
+    const member = await searchAPIMemberById(guild, interaction.member.user.id);
+    assertExistCheck(member, 'member');
+
+    if (!member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
     let roleIdList = [];
-    const roleId1 = options.getMentionable('ロール名1', true);
-    const roleId2 = options.getMentionable('ロール名2');
-    const roleId3 = options.getMentionable('ロール名3');
-    roleIdList.push(roleId1.id);
-    if (exists(roleId2)) {
-        roleIdList.push(roleId2.id);
+    const role1 = options.getMentionable('ロール名1', true);
+    const role2 = options.getMentionable('ロール名2');
+    const role3 = options.getMentionable('ロール名3');
+
+    if (!(role1 instanceof GuildMember) && !(role1 instanceof Role) && !(role1 instanceof User)) return;
+    roleIdList.push(role1.id);
+    if (exists(role2)) {
+        if (!(role2 instanceof GuildMember) && !(role2 instanceof Role) && !(role2 instanceof User)) return;
+        roleIdList.push(role2.id);
     }
-    if (exists(roleId3)) {
-        roleIdList.push(roleId3.id);
+    if (exists(role3)) {
+        if (!(role3 instanceof GuildMember) && !(role3 instanceof Role) && !(role3 instanceof User)) return;
+        roleIdList.push(role3.id);
     }
 
     await interaction.editReply('指定されたIDのロールを削除中でし！\nちょっと待つでし！');
 
-    const guild = await interaction.guild.fetch();
     const removed = [];
 
     removed.push(['ロールID', 'ロール名']);
@@ -127,17 +139,25 @@ export async function handleAssignRole(interaction: ChatInputCommandInteraction<
     await interaction.deferReply();
     const { options } = interaction;
 
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
+    const guild = await getGuildByInteraction(interaction);
+    const member = await searchAPIMemberById(guild, interaction.member.user.id);
+    assertExistCheck(member, 'member');
+
+    if (!member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
     try {
-        const targetRoleId = options.getMentionable('ターゲットロール', true).id;
+        const targetRole = options.getMentionable('ターゲットロール', true);
         const assignRole = options.getMentionable('割当ロール', true);
-        const assignRoleId = assignRole.id;
+        if (!(targetRole instanceof Role)) {
+            return await interaction.editReply('ロールを指定するでし！');
+        }
 
-        const targetRole = await searchRoleById(interaction.guild, targetRoleId);
-        assertExistCheck(targetRole, 'targetRole');
+        if (!(assignRole instanceof Role)) {
+            return await interaction.editReply('割当ロールが見つからないでし！');
+        }
+        const assignRoleId = assignRole.id;
 
         const targets = targetRole.members;
 
@@ -157,17 +177,27 @@ export async function handleUnassignRole(interaction: ChatInputCommandInteractio
     await interaction.deferReply();
     const { options } = interaction;
 
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
+    const guild = await getGuildByInteraction(interaction);
+    const member = await searchAPIMemberById(guild, interaction.member.user.id);
+    assertExistCheck(member, 'member');
+
+    if (!member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
     try {
-        const targetRoleId = options.getMentionable('ターゲットロール').id;
-        const unAssignRole = options.getMentionable('解除ロール');
+        const targetRole = options.getMentionable('ターゲットロール', true);
+        const unAssignRole = options.getMentionable('解除ロール', true);
+
+        if (!(targetRole instanceof Role)) {
+            return await interaction.editReply('ロールを指定するでし！');
+        }
+
+        if (!(unAssignRole instanceof Role)) {
+            return await interaction.editReply('割当ロールが見つからないでし！');
+        }
         const unAssignRoleId = unAssignRole.id;
 
-        const targetRole = await searchRoleById(interaction.guild, targetRoleId);
-        assertExistCheck(targetRole, 'targetRole');
         const targets = targetRole.members;
 
         for (const target of targets) {

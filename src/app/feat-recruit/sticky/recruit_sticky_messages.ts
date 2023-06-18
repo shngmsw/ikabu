@@ -1,8 +1,8 @@
+import { Recruit } from '@prisma/client';
 import { Channel, Guild, Message } from 'discord.js';
 
-import { Recruit, RecruitType } from '../../../db/model/recruit';
-import { ParticipantService } from '../../../db/participants_service';
-import { RecruitService } from '../../../db/recruit_service';
+import { ParticipantService } from '../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../db/recruit_service';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchMessageById } from '../../common/manager/message_manager';
 import { RequireOne, assertExistCheck, exists, getCommandHelpEmbed } from '../../common/others';
@@ -106,14 +106,15 @@ export async function availableRecruitString(guild: Guild, channelId: string) {
         if (exists(message) && participantsData.length !== 0) {
             // 別チャンネルで同じタイプの募集をしているときmessage = nullになる
             if (recruit.recruitNum !== -1) {
-                recruits = recruits + `\n\`${recruiter.displayName}\`: ${message.url} \`[${applicantList.length}/${recruit.recruitNum}\`]`;
+                recruits =
+                    recruits + `\n\`${recruiter.member.displayName}\`: ${message.url} \`[${applicantList.length}/${recruit.recruitNum}\`]`;
             } else {
-                recruits = recruits + `\n\`${recruiter.displayName}\`: ${message.url} \`[${applicantList.length}\`]`;
+                recruits = recruits + `\n\`${recruiter.member.displayName}\`: ${message.url} \`[${applicantList.length}\`]`;
             }
             count++;
         } else {
             await RecruitService.deleteRecruit(guild.id, recruit.messageId);
-            await ParticipantService.deleteAllParticipant(recruit.messageId);
+            await ParticipantService.deleteAllParticipant(guild.id, recruit.messageId);
             logger.warn(`recruit message is not found. record deleted. \n[guildId: ${guild.id}, messageId: ${recruit.messageId}]`);
         }
     }

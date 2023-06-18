@@ -1,9 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
@@ -76,6 +74,8 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
             embeds: [embed],
         });
 
+        if (!embedMessage.inGuild()) return;
+
         let recruitNum = Number(recruitNumText);
         if (isNaN(recruitNum)) {
             recruitNum = -1;
@@ -95,10 +95,7 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(
-            embedMessage.id,
-            new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date()),
-        );
+        await ParticipantService.registerParticipantFromMember(guild.id, embedMessage.id, recruiter, 0);
 
         const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
         const sentMessage = await recruitChannel.send({

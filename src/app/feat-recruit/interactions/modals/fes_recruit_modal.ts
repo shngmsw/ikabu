@@ -1,10 +1,8 @@
+import { Member } from '@prisma/client';
 import { AttachmentBuilder, ModalSubmitInteraction } from 'discord.js';
 
-import { Member } from '../../../../db/model/member';
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { MatchInfo } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
@@ -27,9 +25,9 @@ export async function sendFesMatch(
     recruitNum: number,
     condition: string,
     count: number,
-    member: Member,
-    user1: Member | null,
-    user2: Member | null,
+    recruiter: Member,
+    attendee1: Member | null,
+    attendee2: Member | null,
     fesData: MatchInfo,
 ) {
     assertExistCheck(interaction.channel, 'channel');
@@ -48,18 +46,6 @@ export async function sendFesMatch(
     }
 
     const channelName = '[簡易版募集]';
-
-    const recruiter = new Participant(member.userId, member.displayName, member.iconUrl, 0, new Date());
-
-    let attendee1 = null;
-    if (user1 instanceof Member) {
-        attendee1 = new Participant(user1.userId, user1.displayName, user1.iconUrl, 1, new Date());
-    }
-
-    let attendee2 = null;
-    if (user2 instanceof Member) {
-        attendee2 = new Participant(user2.userId, user2.displayName, user2.iconUrl, 1, new Date());
-    }
 
     const recruitBuffer = await recruitFesCanvas(
         RecruitOpCode.open,
@@ -96,7 +82,7 @@ export async function sendFesMatch(
             guild.id,
             recruitChannel.id,
             image1Message.id,
-            member.userId,
+            recruiter.userId,
             recruitNum,
             condition,
             channelName,
@@ -105,12 +91,12 @@ export async function sendFesMatch(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(image1Message.id, recruiter);
+        await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, recruiter, 0);
         if (exists(attendee1)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, attendee1);
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee1, 1);
         }
         if (exists(attendee2)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, attendee2);
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee2, 1);
         }
 
         const image2Message = await recruitChannel.send({ files: [rule] });
@@ -147,19 +133,19 @@ export async function sendFesMatch(
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
         const recruitData = await RecruitService.getRecruit(guild.id, image1Message.id);
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             return;
         }
 
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
-        const memberList = getMemberMentions(recruitData[0].recruitNum, participants);
-        const hostMention = `<@${member.userId}>`;
+        const memberList = getMemberMentions(recruitData.recruitNum, participants);
+        const hostMention = `<@${recruiter.userId}>`;
 
         await regenerateCanvas(guild, recruitChannel.id, image1Message.id, RecruitOpCode.close);
 
         // DBから募集情報削除
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
-        await ParticipantService.deleteAllParticipant(image1Message.id);
+        await ParticipantService.deleteAllParticipant(guild.id, image1Message.id);
 
         await buttonMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,

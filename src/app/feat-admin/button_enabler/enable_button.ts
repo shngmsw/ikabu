@@ -2,12 +2,17 @@ import { MessageContextMenuCommandInteraction, PermissionsBitField } from 'disco
 
 import { log4js_obj } from '../../../log4js_settings';
 import { setButtonEnable } from '../../common/button_components';
-import { isEmpty } from '../../common/others';
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
+import { assertExistCheck, exists, notExists } from '../../common/others';
 
-export async function buttonEnable(interaction: MessageContextMenuCommandInteraction<CacheType>) {
-    const logger = log4js_obj.getLogger('interaction');
+const logger = log4js_obj.getLogger('interaction');
 
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
+export async function buttonEnable(interaction: MessageContextMenuCommandInteraction<'cached' | 'raw'>) {
+    const guild = await getGuildByInteraction(interaction);
+    const member = await searchAPIMemberById(guild, interaction.member.user.id);
+    assertExistCheck(member, 'member');
+    if (!member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
         return await interaction.reply({
             content: '操作を実行する権限がないでし！',
             ephemeral: true,
@@ -19,7 +24,7 @@ export async function buttonEnable(interaction: MessageContextMenuCommandInterac
 
         const message = interaction.targetMessage;
 
-        if (isEmpty(message)) {
+        if (notExists(message)) {
             await interaction.editReply({
                 content: '該当メッセージが見つからなかったでし！',
             });
@@ -33,6 +38,8 @@ export async function buttonEnable(interaction: MessageContextMenuCommandInterac
         });
     } catch (error) {
         logger.error(error);
-        interaction.channel.send('なんかエラー出てるわ');
+        if (exists(interaction.channel)) {
+            await interaction.channel.send('なんかエラー出てるわ');
+        }
     }
 }

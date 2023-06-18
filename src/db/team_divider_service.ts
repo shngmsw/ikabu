@@ -1,424 +1,454 @@
-import util from 'node:util';
+import { PrismaClient, TeamDivider } from '@prisma/client';
 
-import { DBCommon } from './db';
-import { TeamDivider } from './model/team_divider';
 import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
+export type TeamMember = {
+    messageId: string;
+    memberId: string;
+    memberName: string;
+    team: number;
+    joinedMatchCount: number;
+    win: number;
+    forceSpectate: boolean;
+    hideWin: boolean;
+    winRate: number;
+};
+
 export class TeamDividerService {
-    static async createTableIfNotExists() {
+    /**
+     * DBにメンバーを登録・試合回数更新時にも使用
+     * @param teamDivider TeamDividerオブジェクト
+     */
+    static async registerMemberToDB(
+        messageId: string,
+        memberId: string,
+        memberName: string,
+        team: number,
+        matchNum: number,
+        joinedMatchCount: number,
+        win: number,
+        forceSpectate: boolean,
+        hideWin: boolean,
+    ) {
         try {
-            DBCommon.init();
-            await DBCommon.run(`CREATE TABLE IF NOT EXISTS team_divider (
-                        message_id text,
-                        member_id text,
-                        member_name text,
-                        team integer,
-                        match_num integer,
-                        joined_match_count integer,
-                        win integer,
-                        force_spectate integer,
-                        hide_win integer,
-                        created_at text NOT NULL DEFAULT (DATETIME('now', 'localtime'))
-                    )`);
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
+            const client = new PrismaClient();
+
+            await client.teamDivider.create({
+                data: {
+                    messageId: messageId,
+                    memberId: memberId,
+                    memberName: memberName,
+                    team: team,
+                    matchNum: matchNum,
+                    joinedMatchCount: joinedMatchCount,
+                    win: win,
+                    forceSpectate: forceSpectate,
+                    hideWin: hideWin,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
+        }
+    }
+
+    static async deleteMemberFromDB(messageId: string, memberId: string) {
+        try {
+            const client = new PrismaClient();
+
+            await client.teamDivider.deleteMany({
+                where: {
+                    messageId: messageId,
+                    memberId: memberId,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
         }
     }
 
     /**
      * 0回戦(参加者登録時)の表示を行う
-     * @param {*} messageId 登録メッセージID
+     * @param messageId 登録メッセージID
      * @returns 表示用メッセージ
      */
-    static async registeredMembersStrings(message_id: string) {
-        const db = DBCommon.open();
-        db.all = util.promisify(db.all);
-        const results = (await db.all(
-            `SELECT
-          message_id,
-          member_id,
-          member_name,
-          team,
-          match_num,
-          joined_match_count,
-          win,
-          CASE WHEN force_spectate = 1 THEN true ELSE false END as force_spectate,
-          CASE WHEN hide_win = 1 THEN true ELSE false END as hide_win,
-          0 as win_rate,
-          created_at
-      FROM
-          team_divider
-      WHERE
-          message_id = ${message_id}
-          AND match_num = 0
-      ORDER BY
-          created_at
-      `,
-        )) as TeamDivider[];
-        DBCommon.close();
-        let usersString = '';
-        for (let i = 0; i < results.length; i++) {
-            const member = results[i];
-            usersString = usersString + `\n${member.member_name}`;
-        }
-        return [usersString, results.length];
-    }
-
-    static async deleteMemberFromDB(message_id: string, member_id: string) {
+    static async registeredMembersStrings(messageId: string) {
         try {
-            DBCommon.init();
+            const client = new PrismaClient();
 
-            await DBCommon.run(`DELETE from team_divider where message_id = $1 and member_id = $2 and match_num = 0`, [
-                message_id,
-                member_id,
-            ]);
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
-        }
-    }
+            const members = await client.teamDivider.findMany({
+                where: {
+                    messageId: messageId,
+                    matchNum: 0,
+                },
+                orderBy: {
+                    createdAt: 'asc',
+                },
+            });
 
-    /**
-     * DBにメンバーを登録・試合回数更新時にも使用
-     * @param {*} TeamDivider
-     */
-    static async registerMemberToDB(teamDivider: TeamDivider) {
-        try {
-            DBCommon.init();
-
-            await DBCommon.run(
-                `insert or replace into team_divider (message_id, member_id, member_name, team, match_num, joined_match_count, win, force_spectate, hide_win) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-                [
-                    teamDivider.message_id,
-                    teamDivider.member_id,
-                    teamDivider.member_name,
-                    teamDivider.team,
-                    teamDivider.match_num,
-                    teamDivider.joined_match_count,
-                    teamDivider.win,
-                    teamDivider.force_spectate ? 1 : 0,
-                    teamDivider.hide_win ? 1 : 0,
-                ],
-            );
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
+            let usersString = '';
+            for (const member of members) {
+                usersString = usersString + `\n${member.memberName}`;
+            }
+            return { text: usersString, memberCount: members.length };
+        } catch (error) {
+            logger.error(error);
+            return { text: '', memberCount: 0 };
         }
     }
 
     /**
      * 特定の試合数で特定メンバーを取得
-     * @param {*} messageId 登録メッセージID
-     * @param {*} matchNum 該当試合数
-     * @param {*} memberId 該当メンバーID
+     * @param messageId 登録メッセージID
+     * @param matchNum 該当試合数
+     * @param memberId 該当メンバーID
      * @returns 取得結果
      */
-    static async selectMemberFromDB(message_id: string, match_num: number, member_id: string) {
-        const db = DBCommon.open();
-        db.all = util.promisify(db.all);
-        const results = (await db.all(
-            `SELECT
-              message_id,
-              member_id,
-              member_name,
-              team,
-              match_num,
-              joined_match_count,
-              win,
-              CASE WHEN force_spectate = 1 THEN true ELSE false END as force_spectate,
-              CASE WHEN hide_win = 1 THEN true ELSE false END as hide_win,
-              0 as win_rate,
-              created_at
-          FROM
-              team_divider
-          WHERE
-              message_id = ${message_id}
-              AND member_id = ${member_id}
-              AND match_num = ${match_num}
-      `,
-        )) as TeamDivider[];
-        DBCommon.close();
-        return results;
+    static async selectMemberFromDB(messageId: string, matchNum: number, memberId: string) {
+        try {
+            const client = new PrismaClient();
+
+            const member = await client.teamDivider.findUnique({
+                where: {
+                    messageId_memberId_matchNum: {
+                        messageId: messageId,
+                        memberId: memberId,
+                        matchNum: matchNum,
+                    },
+                },
+            });
+            return member;
+        } catch (error) {
+            logger.error(error);
+            return null;
+        }
     }
 
     /**
      * 特定の試合数で全メンバーを取得
-     * @param {*} messageId 登録メッセージID
-     * @param {*} matchNum 該当試合数
+     * @param messageId 登録メッセージID
+     * @param matchNum 該当試合数
      * @returns 取得結果
      */
-    static async selectAllMemberFromDB(message_id: string, match_num: number) {
-        const db = DBCommon.open();
-        db.all = util.promisify(db.all);
-        const results = (await db.all(
-            `SELECT
-            message_id,
-            member_id,
-            member_name,
-            team,
-            match_num,
-            joined_match_count,
-            win,
-            CASE WHEN force_spectate = 1 THEN true ELSE false END as force_spectate,
-            CASE WHEN hide_win = 1 THEN true ELSE false END as hide_win,
-            0 as win_rate,
-            created_at
-        FROM
-            team_divider
-        WHERE
-            message_id = ${message_id}
-            AND match_num = ${match_num}
-    `,
-        )) as TeamDivider[];
-        DBCommon.close();
-        return results;
+    static async selectAllMemberFromDB(messageId: string, matchNum: number) {
+        try {
+            const client = new PrismaClient();
+
+            const members = await client.teamDivider.findMany({
+                where: {
+                    messageId: messageId,
+                    matchNum: matchNum,
+                },
+            });
+            return members;
+        } catch (error) {
+            logger.error(error);
+            return [];
+        }
     }
 
     /**
      * テーブルから該当のチーム分け情報を削除
-     * @param {*} messageId 登録メッセージID
+     * @param messageId 登録メッセージID
      */
-    static async deleteAllMemberFromDB(message_id: string) {
+    static async deleteAllMemberFromDB(messageId: string) {
         try {
-            DBCommon.init();
-            await DBCommon.run(`DELETE from team_divider where message_id = ?`, [message_id]);
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
+            const client = new PrismaClient();
+
+            await client.teamDivider.deleteMany({
+                where: {
+                    messageId: messageId,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
         }
     }
 
     /**
      * 特定の試合数のチームを登録
-     * @param {*} messageId 登録メッセージID
-     * @param {*} memberId 該当メンバーID
-     * @param {*} matchNum 該当試合数
-     * @param {*} team 該当チーム(alfa=0, bravo=1, 観戦=2)
+     * @param messageId 登録メッセージID
+     * @param memberId 該当メンバーID
+     * @param matchNum 該当試合数
+     * @param team 該当チーム(alfa=0, bravo=1, 観戦=2)
      */
-    static async setTeam(message_id: string, member_id: string, match_num: number, team: number) {
+    static async setTeam(messageId: string, memberId: string, matchNum: number, team: number) {
         try {
-            DBCommon.init();
-            await DBCommon.run(`UPDATE team_divider SET team = $1 WHERE message_id = $2 and member_id = $3 and match_num = $4`, [
-                team,
-                message_id,
-                member_id,
-                match_num,
-            ]);
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
+            const client = new PrismaClient();
+
+            await client.teamDivider.updateMany({
+                where: {
+                    messageId: messageId,
+                    memberId: memberId,
+                    matchNum: matchNum,
+                },
+                data: {
+                    team: team,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
         }
     }
 
     /**
      * 特定の試合数の試合参加回数を登録
-     * @param {*} messageId 登録メッセージID
-     * @param {*} memberId 該当メンバーID
-     * @param {*} matchNum 該当試合数
-     * @param {*} count 試合参加回数
+     * @param messageId 登録メッセージID
+     * @param memberId 該当メンバーID
+     * @param matchNum 該当試合数
+     * @param count 試合参加回数
      */
-    static async setCount(message_id: string, member_id: string, match_num: number, count: number) {
+    static async setCount(messageId: string, memberId: string, matchNum: number, count: number) {
         try {
-            DBCommon.init();
+            const client = new PrismaClient();
 
-            await DBCommon.run(
-                `UPDATE team_divider SET joined_match_count = $1 WHERE message_id = $2 and member_id = $3 and match_num = $4`,
-                [count, message_id, member_id, match_num],
-            );
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
+            await client.teamDivider.updateMany({
+                where: {
+                    messageId: messageId,
+                    memberId: memberId,
+                    matchNum: matchNum,
+                },
+                data: {
+                    joinedMatchCount: count,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
         }
     }
 
     /**
      * 特定の試合数の勝利数を登録
-     * @param {*} messageId 登録メッセージID
-     * @param {*} memberId 該当メンバーID
-     * @param {*} matchNum 該当試合数
-     * @param {*} winCount 勝利数
+     * @param messageId 登録メッセージID
+     * @param memberId 該当メンバーID
+     * @param matchNum 該当試合数
+     * @param winCount 勝利数
      */
-    static async setWin(message_id: string, member_id: string, match_num: number, win_count: number) {
+    static async setWin(messageId: string, memberId: string, matchNum: number, winCount: number) {
         try {
-            DBCommon.init();
-            await DBCommon.run(`UPDATE team_divider SET win = $1 WHERE message_id = $2 and member_id = $3 and match_num = $4`, [
-                win_count,
-                message_id,
-                member_id,
-                match_num,
-            ]);
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
+            const client = new PrismaClient();
+
+            await client.teamDivider.updateMany({
+                where: {
+                    messageId: messageId,
+                    memberId: memberId,
+                    matchNum: matchNum,
+                },
+                data: {
+                    win: winCount,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
         }
     }
 
     /**
      * 戦績表示の設定
-     * @param {*} messageId 登録メッセージID
-     * @param {*} flag true=隠す or false=表示
+     * @param messageId 登録メッセージID
+     * @param flag true=隠す or false=表示
      */
-    static async setHideWin(message_id: string, flag: boolean) {
+    static async setHideWin(messageId: string, flag: boolean) {
         try {
-            DBCommon.init();
-            await DBCommon.run(`UPDATE team_divider SET hide_win = $1 WHERE message_id = $2`, [flag ? 1 : 0, message_id]);
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
+            const client = new PrismaClient();
+
+            await client.teamDivider.updateMany({
+                where: {
+                    messageId: messageId,
+                },
+                data: {
+                    hideWin: flag,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
         }
     }
 
     /**
      * 特定の試合数の観戦希望者を登録
-     * @param {*} messageId 登録メッセージID
-     * @param {*} memberId 該当メンバーID
-     * @param {*} matchNum 該当試合数
-     * @param {*} flag true or false
+     * @param messageId 登録メッセージID
+     * @param memberId 該当メンバーID
+     * @param matchNum 該当試合数
+     * @param flag true or false
      */
-    static async setForceSpectate(message_id: string, member_id: string, match_num: number, flag: boolean) {
+    static async setForceSpectate(messageId: string, memberId: string, matchNum: number, flag: boolean) {
         try {
-            DBCommon.init();
-            await DBCommon.run(`UPDATE team_divider SET force_spectate = $1 WHERE message_id = $2 and member_id = $3 and match_num = $4`, [
-                flag ? 1 : 0,
-                message_id,
-                member_id,
-                match_num,
-            ]);
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
+            const client = new PrismaClient();
+
+            await client.teamDivider.updateMany({
+                where: {
+                    messageId: messageId,
+                    memberId: memberId,
+                    matchNum: matchNum,
+                },
+                data: {
+                    forceSpectate: flag,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
         }
     }
 
     /**
      * 特定の試合数のチームメンバーを取得
-     * @param {*} messageId 登録メッセージID
-     * @param {*} matchNum 該当試合数
-     * @param {*} teamNum 該当チーム(alfa=0, bravo=1, 観戦=2)
+     * @param messageId 登録メッセージID
+     * @param matchNum 該当試合数
+     * @param teamNum 該当チーム(alfa=0, bravo=1, 観戦=2)
      * @returns 取得結果
      */
-    static async getTeamMember(message_id: string, match_num: number, team: number) {
-        const db = DBCommon.open();
-        db.all = util.promisify(db.all);
-        const results = await db.all(
-            `SELECT
-            message_id,
-            member_id,
-            member_name,
-            team,
-            joined_match_count,
-            win,
-            force_spectate,
-            hide_win,
-            CASE
-                WHEN joined_match_count = 0 then 0
-                ELSE(win * 1.0) / joined_match_count
-            END as win_rate
-      FROM
-          team_divider
-      WHERE
-          message_id = ${message_id}
-          and team = ${team}
-          and match_num = ${match_num}
-      order by
-          created_at
-        `,
-        );
-        DBCommon.close();
-        return results;
+    static async getTeamMembers(messageId: string, matchNum: number, team: number): Promise<TeamMember[]> {
+        let members: TeamDivider[] = [];
+        try {
+            const client = new PrismaClient();
+
+            members = await client.teamDivider.findMany({
+                where: {
+                    messageId: messageId,
+                    matchNum: matchNum,
+                    team: team,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
+        }
+
+        const result = members.map((member) => {
+            let winRate = 0;
+            if (member.joinedMatchCount === 0) {
+                winRate = 0;
+            } else {
+                winRate = member.win / member.joinedMatchCount;
+            }
+            return {
+                messageId: member.messageId,
+                memberId: member.memberId,
+                memberName: member.memberName,
+                team: member.team,
+                joinedMatchCount: member.joinedMatchCount,
+                win: member.win,
+                forceSpectate: member.forceSpectate,
+                hideWin: member.hideWin,
+                winRate: winRate,
+            };
+        });
+
+        return result;
     }
 
     /**
      * 特定の試合数の観戦希望者を取得
-     * @param {*} messageId 登録メッセージID
-     * @param {*} matchNum 該当試合数
+     * @param messageId 登録メッセージID
+     * @param matchNum 該当試合数
      * @returns 取得結果
      */
-    static async getForceSpectate(message_id: string, match_num: number) {
-        const db = DBCommon.open();
-        db.all = util.promisify(db.all);
-        const results = await db.all(
-            `SELECT
-            message_id,
-            member_id,
-            member_name,
-            team,
-            joined_match_count,
-            win,
-            force_spectate,
-            hide_win,
-            CASE
-                WHEN joined_match_count = 0 then 0
-                ELSE(win * 1.0) / joined_match_count
-            END as win_rate
-      FROM
-          team_divider
-      WHERE
-          message_id = ${message_id}
-          and force_spectate = true
-          and match_num = ${match_num} 
-      order by created_at`,
-        );
-        DBCommon.close();
-        return results;
+    static async getForceSpectate(messageId: string, matchNum: number): Promise<TeamMember[]> {
+        let members: TeamDivider[] = [];
+        try {
+            const client = new PrismaClient();
+
+            members = await client.teamDivider.findMany({
+                where: {
+                    messageId: messageId,
+                    matchNum: matchNum,
+                    forceSpectate: true,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
+        }
+
+        const result = members.map((member) => {
+            let winRate = 0;
+            if (member.joinedMatchCount === 0) {
+                winRate = 0;
+            } else {
+                winRate = member.win / member.joinedMatchCount;
+            }
+            return {
+                messageId: member.messageId,
+                memberId: member.memberId,
+                memberName: member.memberName,
+                team: member.team,
+                joinedMatchCount: member.joinedMatchCount,
+                win: member.win,
+                forceSpectate: member.forceSpectate,
+                hideWin: member.hideWin,
+                winRate: winRate,
+            };
+        });
+
+        return result;
     }
 
     /**
      * 特定の試合数の勝率順に並べた試合参加者を取得
-     * @param {*} messageId 登録メッセージID
-     * @param {*} matchNum 該当試合数
-     * @param {*} teamNum 1チームのメンバー数
+     * @param messageId 登録メッセージID
+     * @param matchNum 該当試合数
+     * @param teamNum 1チームのメンバー数
      * @returns 取得結果
      */
-    static async getParticipants(message_id: string, match_num: number, team_num: number) {
-        const db = DBCommon.open();
-        db.all = util.promisify(db.all);
-        const results = await db.all(
-            `select
-            message_id,
-            member_id,
-            joined_match_count,
-            hide_win,
-            CASE
-                WHEN joined_match_count = 0 then 0
-                ELSE (win * 1.0) / joined_match_count
-            END as win_rate
-        from
-            team_divider
-        where
-            force_spectate = false
-            and message_id = ${message_id}
-            and match_num = ${match_num}
-        order by
-            joined_match_count
-        limit ${team_num} * 2;`,
-        );
-        DBCommon.close();
-        return results;
-    }
+    static async getParticipants(messageId: string, matchNum: number, teamNum: number): Promise<TeamMember[]> {
+        let members: TeamDivider[] = [];
+        try {
+            const client = new PrismaClient();
 
-    static async getRecruitMessageByAuthorId(author_id: string) {
-        const db = DBCommon.open();
-        db.all = util.promisify(db.all);
-        const results = await db.all(`select message_id from recruit where author_id = ${author_id}`);
-        DBCommon.close();
-        return results;
+            members = await client.teamDivider.findMany({
+                where: {
+                    messageId: messageId,
+                    matchNum: matchNum,
+                    forceSpectate: false,
+                },
+                orderBy: {
+                    joinedMatchCount: 'asc',
+                },
+                take: teamNum * 2,
+            });
+        } catch (error) {
+            logger.error(error);
+        }
+
+        const result = members.map((member) => {
+            let winRate = 0;
+            if (member.joinedMatchCount === 0) {
+                winRate = 0;
+            } else {
+                winRate = member.win / member.joinedMatchCount;
+            }
+            return {
+                messageId: member.messageId,
+                memberId: member.memberId,
+                memberName: member.memberName,
+                team: member.team,
+                joinedMatchCount: member.joinedMatchCount,
+                win: member.win,
+                forceSpectate: member.forceSpectate,
+                hideWin: member.hideWin,
+                winRate: winRate,
+            };
+        });
+
+        return result;
     }
 
     /**
      * 特定の試合数のデータを削除する
-     * @param {*} messageId 登録メッセージID
-     * @param {*} matchNum 該当試合数
+     * @param messageId 登録メッセージID
+     * @param matchNum 該当試合数
      */
-    static async deleteMatchingResult(message_id: string, match_num: number) {
+    static async deleteMatchingResult(messageId: string, matchNum: number) {
         try {
-            DBCommon.init();
-            await DBCommon.run(`DELETE from team_divider where message_id = $1 and match_num = $2`, [message_id, match_num]);
-            DBCommon.close();
-        } catch (err) {
-            logger.error(err);
+            const client = new PrismaClient();
+
+            await client.teamDivider.deleteMany({
+                where: {
+                    messageId: messageId,
+                    matchNum: matchNum,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
         }
     }
 }

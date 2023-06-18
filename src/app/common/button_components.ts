@@ -85,7 +85,7 @@ export function disableThinkingButton(interaction: ButtonInteraction<CacheType>,
  * @param {*} message ボタンが含まれるmessageオブジェクト
  * @returns 新しいActionRowオブジェクト
  */
-export function setButtonEnable(message: Message<true>) {
+export function setButtonEnable(message: Message<boolean>) {
     const newActionRow = message.components.map((oldActionRow: ActionRow<MessageActionRowComponent>) => {
         const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
@@ -109,7 +109,7 @@ export function setButtonEnable(message: Message<true>) {
  * @param {*} interaction 考え中にする場合押されたボタンのインタラクション
  * @returns 新しいActionRowオブジェクト
  */
-export function setButtonDisable(message: Message<true>, interaction?: ButtonInteraction<CacheType>) {
+export function setButtonDisable(message: Message<boolean>, interaction?: ButtonInteraction<CacheType>) {
     const newActionRow = message.components.map((oldActionRow: ActionRow<MessageActionRowComponent>) => {
         const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 

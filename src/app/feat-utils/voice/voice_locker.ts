@@ -119,17 +119,19 @@ export async function voiceLockerUpdate(interaction: ButtonInteraction<'cached' 
 
     const channelState = await getVoiceChannelState(channel);
 
-    let limit = Number(channelState.limit);
+    if (notExists(channelState)) return;
+
+    let limit = channelState.limit;
 
     // 'LOCK'ボタンor'UNLOCK'ボタンを押したとき
     if (interaction.customId == 'voiceLockOrUnlock') {
         const label = interaction.component.label; // ボタンのラベルから設定する状態を取得
         if (label === 'LOCK') {
-            await interaction.channel.setUserLimit(voiceMemberNum);
+            await channel.setUserLimit(voiceMemberNum);
             channelState.isLock = true;
             channelState.limit = voiceMemberNum;
         } else if (label === 'UNLOCK') {
-            await interaction.channel.setUserLimit(0);
+            await channel.setUserLimit(0);
             channelState.isLock = false;
             channelState.limit = 0;
         }
@@ -142,14 +144,14 @@ export async function voiceLockerUpdate(interaction: ButtonInteraction<'cached' 
             if (limit != 99) {
                 limit += 1;
                 channelState.limit = limit;
-                await interaction.channel.setUserLimit(limit);
+                await channel.setUserLimit(limit);
             }
         } else if (interaction.customId === 'voiceLock_dec') {
             // 1人で押されたときは何もしない
             if (limit != 1) {
                 limit -= 1;
                 channelState.limit = limit;
-                await interaction.channel.setUserLimit(limit);
+                await channel.setUserLimit(limit);
             }
         }
     } else {
@@ -180,6 +182,8 @@ export async function voiceLockerUpdate(interaction: ButtonInteraction<'cached' 
 }
 
 export async function disableLimit(oldState: VoiceState) {
+    const oldChannel = oldState.channel;
+    if (notExists(oldChannel)) return;
     const usable_channel = [
         'alfa',
         'bravo',
@@ -195,14 +199,14 @@ export async function disableLimit(oldState: VoiceState) {
         'lima',
         'mike',
     ];
-    const oldChannel = await oldState.guild.channels.fetch(oldState.channelId);
+
     // 使用可能VCかチェック
     if (!usable_channel.includes(oldChannel.name)) {
         return;
     }
 
     if (oldChannel.members.size == 0) {
-        oldChannel.setUserLimit(0);
+        await oldChannel.setUserLimit(0);
     }
 }
 

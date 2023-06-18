@@ -28,55 +28,103 @@ import {
 } from '../feat-utils/team_divider/divider';
 import { voiceLockerUpdate } from '../feat-utils/voice/voice_locker';
 
-interface buttonFunctions {
-    [key: string]: (interaction: ButtonInteraction<CacheType>, params: URLSearchParams) => Promise<void>;
-}
-
 export async function call(interaction: ButtonInteraction<CacheType>) {
-    const params = new URLSearchParams(interaction.customId);
-    const param_d = params.get('d') || null;
-    const param_t = params.get('t') || null;
-    const param_q = params.get('q') || null;
-    const voiceLockerIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
-    if (voiceLockerIds.includes(interaction.customId)) {
-        await voiceLockerUpdate(interaction);
-    } else if (interaction.customId == 'fchide') {
+    // サーバとDM両方で動くボタン
+
+    if (interaction.customId == 'fchide') {
         await deleteFriendCode(interaction);
-    } else if (interaction.customId == 'support_resolved') {
-        await setResolvedTag(interaction);
-    } else if (exists(param_d) && exists(param_d)) {
-        // buttonごとに呼び出すファンクション
-        const recruitButtons: buttonFunctions = {
-            jr: join,
-            cr: cancel,
-            del: del,
-            close: close,
-            unl: unlock,
-            njr: joinNotify,
-            ncr: cancelNotify,
-            nclose: closeNotify,
-            newr: handleCreateModal,
-        };
-        await recruitButtons[param_d](interaction, params);
-    } else if (exists(param_t) && exists(param_t)) {
-        const dividerButtons: buttonFunctions = {
-            join: joinButton,
-            register: registerButton,
-            cancel: cancelButton,
-            alfa: alfaButton,
-            bravo: bravoButton,
-            spectate: spectateButton,
-            end: endButton,
-            correct: correctButton,
-            hide: hideButton,
-        };
-        await dividerButtons[param_t](interaction, params);
-    } else if (exists(param_q) && exists(param_q)) {
-        const questionnaireButtons: buttonFunctions = {
-            yes: sendQuestionnaireFollowUp,
-            no: disableQuestionnaireButtons,
-        };
-        await questionnaireButtons[param_q](interaction, params);
     }
+
+    if (interaction.inGuild()) {
+        // サーバ内のみで動くボタン
+        const params = new URLSearchParams(interaction.customId);
+        const param_q = params.get('q') || null;
+        const param_d = params.get('d') || null;
+        const param_t = params.get('t') || null;
+        const voiceLockerIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
+        if (voiceLockerIds.includes(interaction.customId)) {
+            await voiceLockerUpdate(interaction);
+        } else if (interaction.customId == 'support_resolved') {
+            await setResolvedTag(interaction);
+        } else if (exists(param_d) && exists(param_d)) {
+            switch (param_d) {
+                case 'jr':
+                    await join(interaction, params);
+                    break;
+                case 'cr':
+                    await cancel(interaction, params);
+                    break;
+                case 'del':
+                    await del(interaction, params);
+                    break;
+                case 'close':
+                    await close(interaction, params);
+                    break;
+                case 'unl':
+                    await unlock(interaction, params);
+                    break;
+                case 'njr':
+                    await joinNotify(interaction);
+                    break;
+                case 'ncr':
+                    await cancelNotify(interaction);
+                    break;
+                case 'nclose':
+                    await closeNotify(interaction);
+                    break;
+                case 'newr':
+                    await handleCreateModal(interaction, params);
+                    break;
+                default:
+                    break;
+            }
+        } else if (exists(param_t) && exists(param_t)) {
+            switch (param_t) {
+                case 'join':
+                    await joinButton(interaction, params);
+                    break;
+                case 'register':
+                    await registerButton(interaction, params);
+                    break;
+                case 'cancel':
+                    await cancelButton(interaction, params);
+                    break;
+                case 'alfa':
+                    await alfaButton(interaction, params);
+                    break;
+                case 'bravo':
+                    await bravoButton(interaction, params);
+                    break;
+                case 'spectate':
+                    await spectateButton(interaction, params);
+                    break;
+                case 'end':
+                    await endButton(interaction, params);
+                    break;
+                case 'correct':
+                    await correctButton(interaction, params);
+                    break;
+                case 'hide':
+                    await hideButton(interaction, params);
+                    break;
+                default:
+                    break;
+            }
+        } else if (exists(param_q) && exists(param_q)) {
+            switch (param_q) {
+                case 'yes':
+                    await sendQuestionnaireFollowUp(interaction, params);
+                    break;
+                case 'no':
+                    await disableQuestionnaireButtons(interaction, params);
+                    break;
+                default:
+                    break;
+            }
+        }
+    } else {
+        // DMのみで動くボタン
+    }
+
     return;
 }

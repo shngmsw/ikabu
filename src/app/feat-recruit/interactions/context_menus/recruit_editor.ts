@@ -3,6 +3,7 @@ import { ActionRowBuilder, MessageContextMenuCommandInteraction, ModalBuilder, T
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
+import { notExists } from '../../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -15,7 +16,7 @@ export async function createRecruitEditor(interaction: MessageContextMenuCommand
 
         const recruitData = await RecruitService.getRecruit(guild.id, messageId);
 
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             await interaction.reply({
                 content: '該当の募集が見つからなかったでし！\n参加条件が表示されている画像のメッセージに対して使用するでし！',
                 ephemeral: true,
@@ -23,7 +24,7 @@ export async function createRecruitEditor(interaction: MessageContextMenuCommand
             return;
         }
 
-        if (recruitData[0].authorId !== userId) {
+        if (recruitData.authorId !== userId) {
             await interaction.reply({ content: '他人の募集は編集できないでし！', ephemeral: true });
             return;
         }

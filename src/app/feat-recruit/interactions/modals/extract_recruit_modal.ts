@@ -1,3 +1,4 @@
+import { Member } from '@prisma/client';
 import { ChannelType, GuildMember, ModalSubmitInteraction } from 'discord.js';
 
 import { sendAnarchyMatch } from './anarchy_recruit_modal';
@@ -6,7 +7,6 @@ import { sendFesMatch } from './fes_recruit_modal';
 import { sendRegularMatch } from './regular_recruit_modal';
 import { sendSalmonRun } from './salmon_recruit_modal';
 import { modalRecruit } from '../../../../constant';
-import { Member } from '../../../../db/model/member';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkFes, getSchedule, getAnarchyOpenData, getEventData, getFesData, getRegularData } from '../../../common/apis/splatoon3_ink';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
@@ -92,20 +92,38 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
 
         if (isEmpty(condition)) condition = 'なし';
 
-        let member1 = null;
-        let member2 = null;
-        let member3 = null;
+        let member1: Member | null = null;
+        let member2: Member | null = null;
+        let member3: Member | null = null;
 
         if (attendeeNum >= 1) {
-            member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
+            member1 = {
+                guildId: guild.id,
+                userId: 'attendee1',
+                displayName: '参加確定者1',
+                iconUrl: modalRecruit.placeHold,
+                joinedAt: new Date(),
+            };
         }
 
         if (attendeeNum >= 2) {
-            member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
+            member2 = {
+                guildId: guild.id,
+                userId: 'attendee2',
+                displayName: '参加確定者2',
+                iconUrl: modalRecruit.placeHold,
+                joinedAt: new Date(),
+            };
         }
 
         if (attendeeNum >= 3) {
-            member3 = new Member(guild.id, 'attendee3', '参加確定者3', modalRecruit.placeHold, new Date());
+            member3 = {
+                guildId: guild.id,
+                userId: 'attendee3',
+                displayName: '参加確定者3',
+                iconUrl: modalRecruit.placeHold,
+                joinedAt: new Date(),
+            };
         }
 
         if (notExists(regularData)) {
@@ -175,8 +193,8 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
 
     const members = await guild.members.fetch();
 
-    let member1 = null;
-    let member2 = null;
+    let member1: Member | null = null;
+    let member2: Member | null = null;
     let member1Mention = null;
     let member2Mention = null;
 
@@ -188,7 +206,13 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
             assertExistCheck(member1, 'member1');
             member1Mention = `<@${member1.userId}>`;
         } else {
-            member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
+            member1 = {
+                guildId: guild.id,
+                userId: 'attendee1',
+                displayName: '参加確定者1',
+                iconUrl: modalRecruit.placeHold,
+                joinedAt: new Date(),
+            };
             member1Mention = user1;
         }
     }
@@ -201,7 +225,13 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
             assertExistCheck(member2, 'member2');
             member2Mention = `<@${member2.userId}>`;
         } else {
-            member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
+            member2 = {
+                guildId: guild.id,
+                userId: 'attendee2',
+                displayName: '参加確定者2',
+                iconUrl: modalRecruit.placeHold,
+                joinedAt: new Date(),
+            };
             member2Mention = user2;
         }
     }
@@ -300,8 +330,8 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
 
     const members = await guild.members.fetch();
 
-    let member1 = null;
-    let member2 = null;
+    let member1: Member | null = null;
+    let member2: Member | null = null;
     let member1Mention = null;
     let member2Mention = null;
 
@@ -313,7 +343,13 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
             assertExistCheck(member1, 'member1');
             member1Mention = `<@${member1.userId}>`;
         } else {
-            member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
+            member1 = {
+                guildId: guild.id,
+                userId: 'attendee1',
+                displayName: '参加確定者1',
+                iconUrl: modalRecruit.placeHold,
+                joinedAt: new Date(),
+            };
             member1Mention = user1;
         }
     }
@@ -326,7 +362,13 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
             assertExistCheck(member2, 'member2');
             member2Mention = `<@${member2.userId}>`;
         } else {
-            member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
+            member2 = {
+                guildId: guild.id,
+                userId: 'attendee2',
+                displayName: '参加確定者2',
+                iconUrl: modalRecruit.placeHold,
+                joinedAt: new Date(),
+            };
             member2Mention = user2;
         }
     }
@@ -425,8 +467,8 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
     try {
         const members = await guild.members.fetch();
 
-        let member1 = null;
-        let member2 = null;
+        let member1: Member | null = null;
+        let member2: Member | null = null;
         let member1Mention = null;
         let member2Mention = null;
 
@@ -438,7 +480,13 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
                 assertExistCheck(member1, 'member1');
                 member1Mention = `<@${member1.userId}>`;
             } else {
-                member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
+                member1 = {
+                    guildId: guild.id,
+                    userId: 'attendee1',
+                    displayName: '参加確定者1',
+                    iconUrl: modalRecruit.placeHold,
+                    joinedAt: new Date(),
+                };
                 member1Mention = user1;
             }
         }
@@ -451,7 +499,13 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
                 assertExistCheck(member2, 'member2');
                 member2Mention = `<@${member2.userId}>`;
             } else {
-                member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
+                member2 = {
+                    guildId: guild.id,
+                    userId: 'attendee2',
+                    displayName: '参加確定者2',
+                    iconUrl: modalRecruit.placeHold,
+                    joinedAt: new Date(),
+                };
                 member2Mention = user2;
             }
         }
@@ -546,8 +600,8 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction<'cache
 
         const members = await guild.members.fetch();
 
-        let member1 = null;
-        let member2 = null;
+        let member1: Member | null = null;
+        let member2: Member | null = null;
         let member1Mention = null;
         let member2Mention = null;
 
@@ -559,7 +613,13 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction<'cache
                 assertExistCheck(member1, 'member1');
                 member1Mention = `<@${member1.userId}>`;
             } else {
-                member1 = new Member(guild.id, 'attendee1', '参加確定者1', modalRecruit.placeHold, new Date());
+                member1 = {
+                    guildId: guild.id,
+                    userId: 'attendee1',
+                    displayName: '参加確定者1',
+                    iconUrl: modalRecruit.placeHold,
+                    joinedAt: new Date(),
+                };
                 member1Mention = user1;
             }
         }
@@ -572,7 +632,13 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction<'cache
                 assertExistCheck(member2, 'member2');
                 member2Mention = `<@${member2.userId}>`;
             } else {
-                member2 = new Member(guild.id, 'attendee2', '参加確定者2', modalRecruit.placeHold, new Date());
+                member2 = {
+                    guildId: guild.id,
+                    userId: 'attendee2',
+                    displayName: '参加確定者2',
+                    iconUrl: modalRecruit.placeHold,
+                    joinedAt: new Date(),
+                };
                 member2Mention = user2;
             }
         }

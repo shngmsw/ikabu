@@ -1,8 +1,7 @@
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
 import { getMemberMentions } from './other_events.js';
-import { Participant } from '../../../../db/model/participant.js';
-import { ParticipantService } from '../../../../db/participants_service.js';
+import { ParticipantService, participantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
@@ -10,7 +9,7 @@ import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
-import { assertExistCheck, datetimeDiff, exists } from '../../../common/others.js';
+import { assertExistCheck, datetimeDiff, exists, notExists } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { regenerateCanvas, RecruitOpCode } from '../../canvases/regenerate_canvas.js';
 import { getStickyChannelId, sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
@@ -37,7 +36,7 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
 
         const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             await interaction.editReply({ components: disableThinkingButton(interaction, '〆') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
@@ -49,9 +48,9 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
         const participantsData = await ParticipantService.getAllParticipants(guild.id, image1MsgId);
 
         let recruiter = participantsData[0]; // 募集者
-        const recruiterId = recruitData[0].authorId;
-        const attendeeList: Participant[] = []; // 募集時参加確定者リスト
-        const applicantList: Participant[] = []; // 参加希望者リスト
+        const recruiterId = recruitData.authorId;
+        const attendeeList: participantMember[] = []; // 募集時参加確定者リスト
+        const applicantList: participantMember[] = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 0) {
                 recruiter = participant;
@@ -84,7 +83,7 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
         const recruitChannel = interaction.channel;
 
         if (confirmedMemberIDList.includes(member.userId)) {
-            const memberList = getMemberMentions(recruitData[0].recruitNum, participantsData);
+            const memberList = getMemberMentions(recruitData.recruitNum, participantsData);
 
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.close);
 
@@ -92,7 +91,7 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
             await RecruitService.deleteRecruit(guild.id, image1MsgId);
 
             // participantsテーブルから該当募集のメンバー全員削除
-            await ParticipantService.deleteAllParticipant(image1MsgId);
+            await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
             if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
@@ -111,7 +110,7 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
 
             if (recruitChannel.isThread()) {
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
-                const stickyChannelId = getStickyChannelId(recruitData[0]);
+                const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
                     await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
                 }
@@ -119,7 +118,7 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
                 await sendCloseEmbedSticky(guild, recruitChannel);
             }
         } else if (datetimeDiff(new Date(), image1Message.createdAt) > 120) {
-            const memberList = getMemberMentions(recruitData[0].recruitNum, participantsData);
+            const memberList = getMemberMentions(recruitData.recruitNum, participantsData);
 
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.close);
 
@@ -127,7 +126,7 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
             await RecruitService.deleteRecruit(guild.id, image1MsgId);
 
             // participantsテーブルから該当募集のメンバー全員削除
-            await ParticipantService.deleteAllParticipant(image1MsgId);
+            await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
             if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
@@ -147,7 +146,7 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
 
             if (recruitChannel.isThread()) {
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
-                const stickyChannelId = getStickyChannelId(recruitData[0]);
+                const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
                     await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
                 }

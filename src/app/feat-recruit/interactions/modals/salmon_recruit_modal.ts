@@ -1,10 +1,8 @@
+import { Member } from '@prisma/client';
 import { AttachmentBuilder, ModalSubmitInteraction } from 'discord.js';
 
-import { Member } from '../../../../db/model/member';
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, getSchedule, getSalmonData } from '../../../common/apis/splatoon3_ink';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
@@ -25,27 +23,15 @@ export async function sendSalmonRun(
     recruitNum: number,
     condition: string,
     count: number,
-    member: Member,
-    user1: Member | null,
-    user2: Member | null,
+    recruiter: Member,
+    attendee1: Member | null,
+    attendee2: Member | null,
 ) {
     assertExistCheck(interaction.channel, 'channel');
 
     const guild = await getGuildByInteraction(interaction);
 
     const channelName = '[簡易版募集]';
-
-    const recruiter = new Participant(member.userId, member.displayName, member.iconUrl, 0, new Date());
-
-    let attendee1 = null;
-    if (user1 instanceof Member) {
-        attendee1 = new Participant(user1.userId, user1.displayName, user1.iconUrl, 1, new Date());
-    }
-
-    let attendee2 = null;
-    if (user2 instanceof Member) {
-        attendee2 = new Participant(user2.userId, user2.displayName, user2.iconUrl, 1, new Date());
-    }
 
     const schedule = await getSchedule();
 
@@ -108,7 +94,7 @@ export async function sendSalmonRun(
             guild.id,
             recruitChannel.id,
             image1Message.id,
-            member.userId,
+            recruiter.userId,
             recruitNum,
             condition,
             channelName,
@@ -116,12 +102,12 @@ export async function sendSalmonRun(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(image1Message.id, recruiter);
+        await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, recruiter, 0);
         if (exists(attendee1)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, attendee1);
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee1, 1);
         }
         if (exists(attendee2)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, attendee2);
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee2, 1);
         }
 
         const image2Message = await recruitChannel.send({ files: [rule] });

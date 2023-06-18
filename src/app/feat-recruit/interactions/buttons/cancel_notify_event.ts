@@ -2,14 +2,13 @@ import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
 import { memberListMessage } from './other_events.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
-import { Participant } from '../../../../db/model/participant.js';
-import { ParticipantService } from '../../../../db/participants_service.js';
+import { ParticipantService, participantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, exists } from '../../../common/others.js';
+import { assertExistCheck, exists, notExists } from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
 import {
     availableRecruitString,
@@ -38,7 +37,7 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
 
         const recruitData = await RecruitService.getRecruit(guild.id, embedMessageId);
 
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             await interaction.editReply({ components: disableThinkingButton(interaction, 'キャンセル') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
@@ -50,9 +49,9 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
         const participantsData = await ParticipantService.getAllParticipants(guild.id, embedMessageId);
 
         let recruiter = participantsData[0]; // 募集者
-        const recruiterId = recruitData[0].authorId;
-        const attendeeList: Participant[] = []; // 募集時参加確定者リスト
-        const applicantList: Participant[] = []; // 参加希望者リスト
+        const recruiterId = recruitData.authorId;
+        const attendeeList: participantMember[] = []; // 募集時参加確定者リスト
+        const applicantList: participantMember[] = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 0) {
                 recruiter = participant;
@@ -87,7 +86,7 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
             await RecruitService.deleteRecruit(guild.id, embedMessageId);
 
             // participantsテーブルから該当募集のメンバー全員削除
-            await ParticipantService.deleteAllParticipant(embedMessageId);
+            await ParticipantService.deleteAllParticipant(guild.id, embedMessageId);
 
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集はキャンセルされたでし！`,
@@ -97,7 +96,7 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
 
             if (recruitChannel.isThread()) {
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
-                const stickyChannelId = getStickyChannelId(recruitData[0]);
+                const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
                     await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
                 }
@@ -108,7 +107,7 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
             // 参加済みかチェック
             if (applicantIdList.includes(member.userId)) {
                 // participantsテーブルから自分のデータのみ削除
-                await ParticipantService.deleteParticipant(embedMessageId, member.userId);
+                await ParticipantService.deleteParticipant(guild.id, embedMessageId, member.userId);
 
                 // ホストに通知
                 await interaction.message.reply({

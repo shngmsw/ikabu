@@ -1,8 +1,8 @@
+import { Member } from '@prisma/client';
 import axios from 'axios';
 import { Guild, GuildMember, Message } from 'discord.js';
 
-import { MembersService } from '../../../db/members_service';
-import { Member } from '../../../db/model/member';
+import { MemberService } from '../../../db/member_service';
 import { log4js_obj } from '../../../log4js_settings';
 import { assertExistCheck, notExists } from '../others';
 
@@ -44,10 +44,10 @@ export async function getAPIMemberByMessage(message: Message<true>) {
  * @returns Member型オブジェクト
  */
 export async function searchDBMemberById(guild: Guild, userId: string): Promise<Member | null> {
-    const members = await MembersService.getMemberByUserId(guild.id, userId);
+    const member = await MemberService.getMemberByUserId(guild.id, userId);
 
     // membersテーブルにレコードがあるか確認
-    if (members.length == 0) {
+    if (notExists(member)) {
         const memberRaw = await searchAPIMemberById(guild, userId);
 
         if (notExists(memberRaw)) {
@@ -56,20 +56,20 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
         }
         assertExistCheck(memberRaw.joinedAt, 'joinedAt');
 
-        const newMember = new Member(
-            guild.id,
-            userId,
-            memberRaw.displayName,
-            memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-            memberRaw.joinedAt,
-        );
+        const newMember: Member = {
+            guildId: guild.id,
+            userId: userId,
+            displayName: memberRaw.displayName,
+            iconUrl: memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+            joinedAt: memberRaw.joinedAt,
+        };
 
-        await MembersService.registerMember(newMember);
+        await MemberService.registerMember(newMember);
 
         return newMember;
     } else {
-        if (await isUrlValid(members[0].iconUrl)) {
-            return members[0];
+        if (await isUrlValid(member.iconUrl)) {
+            return member;
         } else {
             // 画像URLが無効な場合
             const memberRaw = await searchAPIMemberById(guild, userId);
@@ -79,15 +79,15 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
                 return null;
             }
 
-            const newMember = new Member(
-                guild.id,
-                userId,
-                memberRaw.displayName,
-                memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-                members[0].joinedAt,
-            );
+            const newMember: Member = {
+                guildId: guild.id,
+                userId: userId,
+                displayName: memberRaw.displayName,
+                iconUrl: memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+                joinedAt: member.joinedAt,
+            };
 
-            await MembersService.updateMemberProfile(newMember);
+            await MemberService.updateMemberProfile(newMember);
 
             logger.warn('member Icon invalid => Icon URL was updated successfully.');
 

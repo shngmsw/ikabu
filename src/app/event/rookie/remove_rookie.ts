@@ -1,14 +1,12 @@
-import Discord, { Message } from 'discord.js';
+import Discord, { Message, Role } from 'discord.js';
 
 import { sendIntentionConfirmReply } from './send_questionnaire';
 import { MessageCountService } from '../../../db/message_count_service.js';
 import { getAPIMemberByMessage } from '../../common/manager/member_manager';
-import { searchRoleById } from '../../common/manager/role_manager';
 import { assertExistCheck, exists } from '../../common/others';
 
 export async function removeRookie(msg: Message<true>) {
     const dt = new Date();
-    const guild = msg.guild;
     const lastMonth = dt.setMonth(dt.getMonth() - 1);
     const authorId = msg.author.id;
     const member = await getAPIMemberByMessage(msg);
@@ -16,7 +14,7 @@ export async function removeRookie(msg: Message<true>) {
     const beginnerRoleId = process.env.ROOKIE_ROLE_ID;
     const messageCount = await getMessageCount(authorId);
     if ((exists(member.joinedTimestamp) && member.joinedTimestamp < lastMonth) || messageCount > 99) {
-        const hasBeginnerRole = await searchRoleById(guild, beginnerRoleId);
+        const hasBeginnerRole = member.roles.cache.find((role: Role) => role.id === beginnerRoleId);
         if (hasBeginnerRole) {
             await member.roles.remove([beginnerRoleId]);
             const embed = new Discord.EmbedBuilder();
@@ -33,10 +31,10 @@ export async function removeRookie(msg: Message<true>) {
     }
 }
 
-async function getMessageCount(id: string) {
-    const result = await MessageCountService.getMemberByUserId(id);
-    if (exists(result[0])) {
-        return result[0].count;
+async function getMessageCount(userId: string) {
+    const result = await MessageCountService.getMemberByUserId(userId);
+    if (exists(result)) {
+        return result.count;
     }
     return 0;
 }

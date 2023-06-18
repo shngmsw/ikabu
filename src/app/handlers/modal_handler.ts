@@ -2,7 +2,8 @@ import { URLSearchParams } from 'url';
 
 import { CacheType, ModalSubmitInteraction } from 'discord.js';
 
-import { isNotEmpty } from '../common/others';
+import { MemberService } from '../../db/member_service';
+import { exists } from '../common/others';
 import {
     modalAnarchyRecruit,
     modalEventRecruit,
@@ -13,26 +14,30 @@ import {
 import { recruitEdit } from '../feat-recruit/interactions/modals/recruit_edit';
 
 export async function call(interaction: ModalSubmitInteraction<CacheType>) {
-    const params = new URLSearchParams(interaction.customId);
-    if (isNotEmpty(params.get('recm'))) {
-        switch (params.get('recm')) {
-            case 'regrec':
-                modalRegularRecruit(interaction);
-                break;
-            case 'everec':
-                modalEventRecruit(interaction);
-                break;
-            case 'anarec':
-                modalAnarchyRecruit(interaction);
-                break;
-            case 'salrec':
-                modalSalmonRecruit(interaction);
-                break;
-            case 'fesrec':
-                modalFesRecruit(interaction, params);
-                break;
-            case 'recedit':
-                recruitEdit(interaction, params);
+    if (interaction.inGuild()) {
+        const params = new URLSearchParams(interaction.customId);
+        if (exists(params.get('recm'))) {
+            await MemberService.createDummyUser(interaction.guildId);
+
+            switch (params.get('recm')) {
+                case 'regrec':
+                    await modalRegularRecruit(interaction);
+                    break;
+                case 'everec':
+                    await modalEventRecruit(interaction);
+                    break;
+                case 'anarec':
+                    await modalAnarchyRecruit(interaction);
+                    break;
+                case 'salrec':
+                    await modalSalmonRecruit(interaction);
+                    break;
+                case 'fesrec':
+                    await modalFesRecruit(interaction, params);
+                    break;
+                case 'recedit':
+                    await recruitEdit(interaction, params);
+            }
         }
     }
     return;

@@ -1,9 +1,9 @@
+import { FriendCode } from '@prisma/client';
 import { GuildMember, Role } from 'discord.js';
 
 import { FriendCodeService } from '../../../db/friend_code_service.js';
-import { MembersService } from '../../../db/members_service.js';
+import { MemberService } from '../../../db/member_service.js';
 import { MessageCountService } from '../../../db/message_count_service.js';
-import { FriendCode } from '../../../db/model/friend_code.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager.js';
@@ -44,7 +44,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
             const messageCount = await getMessageCount(newMember.id);
 
             // membersテーブルにレコードがあるか確認
-            if ((await MembersService.getMemberByUserId(guild.id, userId)).length == 0) {
+            if (notExists(await MemberService.getMemberByUserId(guild.id, userId))) {
                 const friendCode = await FriendCodeService.getFriendCodeObjByUserId(newMember.id);
                 await sleep(600);
                 const memberCheck = await searchAPIMemberById(guild, userId);
@@ -59,8 +59,8 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
     }
 }
 
-async function setRookieRole(member: GuildMember, beginnerRole: Role, messageCount: number, friendCode: FriendCode[]) {
-    if (messageCount == 0 && friendCode.length == 0) {
+async function setRookieRole(member: GuildMember, beginnerRole: Role, messageCount: number, friendCode: FriendCode | null) {
+    if (messageCount == 0 && exists(friendCode)) {
         if (member) {
             member.roles.add(beginnerRole).catch((error) => {
                 logger.error(error);
@@ -69,10 +69,10 @@ async function setRookieRole(member: GuildMember, beginnerRole: Role, messageCou
     }
 }
 
-async function getMessageCount(id: string) {
-    const result = await MessageCountService.getMemberByUserId(id);
-    if (exists(result[0])) {
-        return result[0].count;
+async function getMessageCount(userId: string) {
+    const result = await MessageCountService.getMemberByUserId(userId);
+    if (exists(result)) {
+        return result.count;
     }
     return 0;
 }

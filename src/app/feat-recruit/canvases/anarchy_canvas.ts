@@ -1,10 +1,10 @@
 import path from 'path';
 
+import { Member } from '@prisma/client';
 import Canvas from 'canvas';
 
 import { RecruitOpCode } from './regenerate_canvas';
 import { modalRecruit } from '../../../constant';
-import { Participant } from '../../../db/model/participant';
 import { MatchInfo } from '../../common/apis/splatoon3_ink';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
@@ -29,10 +29,10 @@ export async function recruitAnarchyCanvas(
     opCode: number,
     remaining: number,
     count: number,
-    host: Participant,
-    user1: Participant | null,
-    user2: Participant | null,
-    user3: Participant | null,
+    host: Member,
+    user1: Member | null,
+    user2: Member | null,
+    user3: Member | null,
     condition: string,
     rank: string | null,
     channelName: string | null,
@@ -66,15 +66,15 @@ export async function recruitAnarchyCanvas(
 
     const memberIcons = [];
 
-    if (user1 instanceof Participant) {
+    if (exists(user1)) {
         memberIcons.push(user1.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user2 instanceof Participant) {
+    if (exists(user2)) {
         memberIcons.push(user2.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user3 instanceof Participant) {
+    if (exists(user3)) {
         memberIcons.push(user3.iconUrl ?? modalRecruit.placeHold);
     }
 
@@ -184,7 +184,7 @@ export async function recruitAnarchyCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleAnarchyCanvas(anarchyData: MatchInfo, ruleIcon: RuleIcon) {
+export async function ruleAnarchyCanvas(anarchyData: MatchInfo | null, ruleIcon: RuleIcon) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
 
     const ruleCtx = ruleCanvas.getContext('2d');

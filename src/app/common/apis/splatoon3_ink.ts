@@ -488,6 +488,7 @@ export async function getEventData(schedule: sp3Schedule) {
         return result;
     } catch (error) {
         logger.error(error);
+        return null;
     }
 }
 
@@ -634,6 +635,7 @@ export async function getBigRunData(schedule: sp3Schedule, num: number) {
         return result;
     } catch (error) {
         logger.error(error);
+        return null;
     }
 }
 
@@ -662,6 +664,7 @@ export async function getTeamContestData(schedule: sp3Schedule, num: number) {
         return result;
     } catch (error) {
         logger.error(error);
+        return null;
     }
 }
 

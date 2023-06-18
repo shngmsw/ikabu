@@ -1,9 +1,7 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, PermissionsBitField, User, VoiceChannel } from 'discord.js';
 
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { EventMatchInfo, getSchedule, getEventData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
@@ -149,29 +147,26 @@ async function sendEventMatch(
 
     const recruiter = await searchDBMemberById(guild, hostMember.id);
     assertExistCheck(recruiter, 'recruiter');
-    const hostPt = new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date());
 
-    let participant1 = null;
-    let participant2 = null;
+    let attendee1 = null;
+    let attendee2 = null;
 
     if (exists(user1)) {
-        const member = await searchDBMemberById(guild, user1.id);
-        assertExistCheck(member, 'member1');
-        participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
+        attendee1 = await searchDBMemberById(guild, user1.id);
+        assertExistCheck(attendee1, 'member1');
     }
     if (exists(user2)) {
-        const member = await searchDBMemberById(guild, user2.id);
-        assertExistCheck(member, 'member2');
-        participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
+        attendee2 = await searchDBMemberById(guild, user2.id);
+        assertExistCheck(attendee2, 'member2');
     }
 
     const recruitBuffer = await recruitEventCanvas(
         RecruitOpCode.open,
         recruitNum,
         count,
-        hostPt,
-        participant1,
-        participant2,
+        recruiter,
+        attendee1,
+        attendee2,
         null,
         condition,
         channelName,
@@ -188,6 +183,7 @@ async function sendEventMatch(
             content: txt,
             files: [recruit],
         });
+        if (!image1Message.inGuild()) return;
 
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
@@ -203,12 +199,12 @@ async function sendEventMatch(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);
-        if (exists(participant1)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, participant1);
+        await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, recruiter, 0);
+        if (exists(attendee1)) {
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee1, 1);
         }
-        if (exists(participant2)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, participant2);
+        if (exists(attendee2)) {
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee2, 1);
         }
 
         const image2Message = await recruitChannel.send({ files: [rule] });
@@ -245,7 +241,7 @@ async function sendEventMatch(
                 ephemeral: true,
             });
         } else {
-            sentMessage.edit({ components: [recruitActionRow(image1Message)] });
+            await sentMessage.edit({ components: [recruitActionRow(image1Message)] });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -261,11 +257,11 @@ async function sendEventMatch(
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (exists(deleteButtonCheck)) {
-            deleteButtonCheck.delete();
+            await deleteButtonCheck.delete();
         } else {
             if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-                reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
+                await reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                await reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
             }
             return;
         }
@@ -273,27 +269,27 @@ async function sendEventMatch(
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
         const recruitData = await RecruitService.getRecruit(guild.id, image1Message.id);
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             return;
         }
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
-        const memberList = getMemberMentions(recruitData[0].recruitNum, participants);
+        const memberList = getMemberMentions(recruitData.recruitNum, participants);
         const hostMention = `<@${hostMember.user.id}>`;
 
         await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
 
         // DBから募集情報削除
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
-        await ParticipantService.deleteAllParticipant(image1Message.id);
+        await ParticipantService.deleteAllParticipant(guild.id, image1Message.id);
 
-        sentMessage.edit({
+        await sentMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: setButtonDisable(sentMessage),
         });
 
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-            reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-            reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
+            await reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+            await reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
         }
 
         await sendCloseEmbedSticky(guild, recruitChannel);

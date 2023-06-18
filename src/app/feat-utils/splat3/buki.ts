@@ -1,7 +1,7 @@
+import { Member } from '@prisma/client';
 import { CacheType, ChatInputCommandInteraction, EmbedBuilder, User } from 'discord.js';
 import fetch from 'node-fetch';
 
-import { Member } from '../../../db/model/member';
 import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../common/manager/member_manager';
@@ -50,15 +50,15 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
                     value: value.name.en_US,
                     name: value.sub.name.ja_JP + ' / ' + value.special.name.ja_JP,
                 });
-            if (member instanceof Member) {
-                embed.setAuthor({
-                    name: member.displayName + 'のブキ',
-                    iconURL: member.iconUrl,
-                });
-            } else if (member instanceof User) {
+            if (member instanceof User) {
                 embed.setAuthor({
                     name: member.username + 'のブキ',
                     iconURL: member.displayAvatarURL(),
+                });
+            } else if (exists(member) && exists(member.displayName) && exists(member.iconUrl)) {
+                embed.setAuthor({
+                    name: member.displayName + 'のブキ',
+                    iconURL: member.iconUrl,
                 });
             }
             return embed;

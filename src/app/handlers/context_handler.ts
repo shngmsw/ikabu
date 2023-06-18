@@ -7,11 +7,12 @@ import { sendCommandLog } from '../logs/commands/command_log';
 
 export async function call(interaction: MessageContextMenuCommandInteraction<CacheType>) {
     await sendCommandLog(interaction); // DB使うものはawait付けないとcloseエラー出る
-
-    if (interaction.commandName === commandNames.buttonEnabler) {
-        await buttonEnable(interaction);
-    } else if (interaction.commandName === commandNames.recuitEditor) {
-        await createRecruitEditor(interaction);
+    if (interaction.inGuild()) {
+        if (interaction.commandName === commandNames.buttonEnabler) {
+            await buttonEnable(interaction);
+        } else if (interaction.commandName === commandNames.recuitEditor) {
+            await createRecruitEditor(interaction);
+        }
     }
     return;
 }

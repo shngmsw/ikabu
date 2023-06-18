@@ -13,7 +13,7 @@ const logger = log4js_obj.getLogger('RoleManager');
  */
 export async function createRole(guild: Guild, roleName: string) {
     if (roleName === '') {
-        return null;
+        roleName = '新規ロール';
     }
 
     const roleId = await searchRoleIdByName(guild, roleName);

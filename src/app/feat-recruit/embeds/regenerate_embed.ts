@@ -1,10 +1,9 @@
 import { EmbedBuilder, Guild } from 'discord.js';
 
-import { RecruitType } from '../../../db/model/recruit';
-import { RecruitService } from '../../../db/recruit_service';
+import { RecruitService, RecruitType } from '../../../db/recruit_service';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchMessageById } from '../../common/manager/message_manager';
-import { assertExistCheck } from '../../common/others';
+import { assertExistCheck, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -15,13 +14,13 @@ export async function regenerateEmbed(guild: Guild, channelId: string, messageId
         const oldEmbed = message.embeds[0];
 
         const recruitData = await RecruitService.getRecruit(guild.id, messageId);
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             logger.warn('embed was not regenerated! [recruitData was not found!]');
             return;
         }
 
-        const condition = recruitData[0].condition;
-        const recruitNum = recruitData[0].recruitNum;
+        const condition = recruitData.condition;
+        const recruitNum = recruitData.recruitNum;
 
         let conditionTitle;
         if (recruitType === RecruitType.PrivateRecruit) {
