@@ -64,7 +64,7 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
                     return await interaction.followUp('CSVファイルがおかしいでし！\n要素数が全ての行で同じになっているか確認するでし！');
                 }
 
-                const resultData = [];
+                const resultData: string[][] = [];
 
                 const guild = await getGuildByInteraction(interaction);
 
@@ -179,7 +179,7 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
     }
 }
 
-function checkChannelType(channelType: $TSFixMe) {
+function checkChannelType(channelType: 'txt' | 'TEXT' | 'GUILD_TEXT' | 'vc' | 'VOICE' | 'GUILD_VOICE' | '') {
     if (channelType == 'txt' || channelType == 'TEXT' || channelType == 'GUILD_TEXT') {
         return ChannelType.GuildText;
     } else if (channelType == 'vc' || channelType == 'VOICE' || channelType == 'GUILD_VOICE') {
@@ -249,7 +249,7 @@ async function setRoleColor(guild: Guild, role: Role, roleColor: string, index: 
     return color;
 }
 
-function setDeleteCommandsText(resultData: $TSFixMe) {
+function setDeleteCommandsText(resultData: string[][]) {
     let resultCategoryIdList = [];
     let resultChannelIdList = [];
     let resultRoleIdList = [];

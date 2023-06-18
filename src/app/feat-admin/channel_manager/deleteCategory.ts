@@ -43,7 +43,7 @@ export async function handleDeleteCategory(interaction: ChatInputCommandInteract
         await interaction.editReply('CSVを読み込んで削除中でし！\nちょっと待つでし！');
 
         request(attachment.url).pipe(
-            parse(async function (err: $TSFixMe, data: $TSFixMe) {
+            parse(async function (err, data) {
                 let categoryIdList = [];
                 try {
                     for (const i in data) {
