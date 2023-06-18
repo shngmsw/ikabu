@@ -5,6 +5,7 @@ import Canvas from 'canvas';
 import { RecruitOpCode } from './regenerate_canvas.js';
 import { modalRecruit, placeHold } from '../../../constant.js';
 import { Participant } from '../../../db/model/participant.js';
+import { SalmonInfo } from '../../common/apis/splatoon3_ink.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { exists, notExists } from '../../common/others.js';
@@ -182,7 +183,9 @@ export async function recruitSalmonCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleSalmonCanvas(data: $TSFixMe) {
+export async function ruleSalmonCanvas(data: SalmonInfo) {
+    const datetime = formatDatetime(data.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(data.endTime, dateformat.mdwhm);
+
     const ruleCanvas = Canvas.createCanvas(720, 550);
     const ruleCtx = ruleCanvas.getContext('2d');
 

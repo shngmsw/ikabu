@@ -5,8 +5,10 @@ import Canvas from 'canvas';
 import { RecruitOpCode } from './regenerate_canvas.js';
 import { modalRecruit } from '../../../constant.js';
 import { Participant } from '../../../db/model/participant.js';
+import { MatchInfo } from '../../common/apis/splatoon3_ink.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
+import { exists, notExists } from '../../common/others.js';
 import { exists, notExists } from '../../common/others.js';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
@@ -183,7 +185,7 @@ export async function recruitFesCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleFesCanvas(fesData: $TSFixMe) {
+export async function ruleFesCanvas(fesData: MatchInfo) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
 
     const ruleCtx = ruleCanvas.getContext('2d');

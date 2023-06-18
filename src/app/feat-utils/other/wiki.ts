@@ -36,7 +36,7 @@ export async function handleWiki(interaction: ChatInputCommandInteraction<CacheT
             .setImage(decodeURI(imageURL));
 
         await interaction.editReply({ embeds: [embed] });
-    } catch (err: $TSFixMe) {
-        logger.error(err.name + ': ' + err.message);
+    } catch (error) {
+        logger.error(error);
     }
 }

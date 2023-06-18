@@ -6,7 +6,9 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
+import { MatchInfo } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleById, searchRoleIdByName } from '../../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
@@ -19,7 +21,7 @@ import { getMemberMentions } from '../buttons/other_events';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function sendFesMatch(
-    interaction: ModalSubmitInteraction,
+    interaction: ModalSubmitInteraction<'cached' | 'raw'>,
     team: string,
     txt: string,
     recruitNum: number,
@@ -28,12 +30,11 @@ export async function sendFesMatch(
     member: Member,
     user1: Member | null,
     user2: Member | null,
-    fesData: $TSFixMe,
+    fesData: MatchInfo,
 ) {
-    assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await interaction.guild?.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const mentionId = await searchRoleIdByName(guild, team);
     assertExistCheck(mentionId);
     const teamRole = await searchRoleById(guild, mentionId);
@@ -88,6 +89,8 @@ export async function sendFesMatch(
             files: [recruit],
         });
 
+        if (!image1Message.inGuild()) return;
+
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
@@ -115,7 +118,7 @@ export async function sendFesMatch(
             content: `<@&${mentionId}>` + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
-        buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
+        await buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
         const deleteButtonMsg = await recruitChannel.send({
             components: [recruitDeleteButton(buttonMessage, image1Message, image2Message)],
         });
@@ -136,7 +139,7 @@ export async function sendFesMatch(
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (exists(deleteButtonCheck)) {
-            deleteButtonCheck.delete();
+            await deleteButtonCheck.delete();
         } else {
             return;
         }
@@ -158,7 +161,7 @@ export async function sendFesMatch(
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
         await ParticipantService.deleteAllParticipant(image1Message.id);
 
-        buttonMessage.edit({
+        await buttonMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: setButtonDisable(buttonMessage),
         });

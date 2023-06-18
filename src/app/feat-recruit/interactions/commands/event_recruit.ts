@@ -7,6 +7,7 @@ import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { EventMatchInfo, getSchedule, getEventData } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
@@ -18,18 +19,15 @@ import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function eventRecruit(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inGuild()) return;
-
-    assertExistCheck(interaction.guild, 'guild');
+export async function eventRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
-    const recruitNum = options.getInteger('募集人数') ?? -1;
+    const recruitNum = options.getInteger('募集人数', true);
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
     assertExistCheck(hostMember, 'hostMember');
     const user1 = options.getUser('参加者1');
@@ -122,14 +120,14 @@ export async function eventRecruit(interaction: ChatInputCommandInteraction) {
         await sendEventMatch(interaction, mention, txt, recruitNum, condition, memberCounter, hostMember, user1, user2, eventData);
     } catch (error) {
         if (exists(channel)) {
-            channel.send('なんかエラーでてるわ');
+            await channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
     }
 }
 
 async function sendEventMatch(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
     mention: string,
     txt: string,
     recruitNum: number,
@@ -140,10 +138,9 @@ async function sendEventMatch(
     user2: User | null,
     eventData: EventMatchInfo,
 ) {
-    assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
     let channelName = null;
     if (exists(reservedChannel)) {
@@ -225,10 +222,10 @@ async function sendEventMatch(
         });
 
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-            sentMessage.edit({
+            await sentMessage.edit({
                 components: [recruitActionRow(image1Message, reservedChannel?.id)],
             });
-            reservedChannel.permissionOverwrites.set(
+            await reservedChannel.permissionOverwrites.set(
                 [
                     {
                         id: guild.roles.everyone.id,

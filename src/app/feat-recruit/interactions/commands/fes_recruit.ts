@@ -1,20 +1,13 @@
-import {
-    AttachmentBuilder,
-    CacheType,
-    ChatInputCommandInteraction,
-    GuildMember,
-    PermissionsBitField,
-    User,
-    VoiceChannel,
-} from 'discord.js';
+import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, PermissionsBitField, User, VoiceChannel } from 'discord.js';
 
 import { Participant } from '../../../../db/model/participant';
 import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, getSchedule, getFesData } from '../../../common/apis/splatoon3_ink';
+import { checkFes, getSchedule, getFesData, MatchInfo } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleById, searchRoleIdByName } from '../../../common/manager/role_manager';
@@ -26,10 +19,7 @@ import { sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_st
 import { getMemberMentions } from '../buttons/other_events';
 const logger = log4js_obj.getLogger('recruit');
 
-export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheType>) {
-    if (!interaction.inGuild()) return;
-
-    assertExistCheck(interaction.guild, 'guild');
+export async function fesRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
     const options = interaction.options;
@@ -37,7 +27,7 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheT
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
     const recruitNum = options.getInteger('募集人数') ?? -1;
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
     assertExistCheck(hostMember, 'hostMember');
     const user1 = options.getUser('参加者1');
@@ -146,17 +136,24 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<CacheT
 
         if (notExists(condition)) condition = 'なし';
 
+        if (notExists(fesData)) {
+            await interaction.editReply({
+                content: 'フェスマッチの情報が取得できなかったでし！',
+            });
+            return;
+        }
+
         await sendFesMatch(interaction, team, txt, recruitNum, condition, memberCounter, hostMember, user1, user2, fesData);
     } catch (error) {
         if (exists(channel)) {
-            channel.send('なんかエラーでてるわ');
+            await channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
     }
 }
 
 async function sendFesMatch(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
     team: string,
     txt: string,
     recruitNum: number,
@@ -165,10 +162,9 @@ async function sendFesMatch(
     hostMember: GuildMember,
     user1: User | null,
     user2: User | null,
-    fesData: $TSFixMe,
+    fesData: MatchInfo,
 ) {
-    assertExistCheck(interaction.guild, 'guild');
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const mentionId = await searchRoleIdByName(guild, team);
     assertExistCheck(mentionId);
     const teamRole = await searchRoleById(guild, mentionId);
@@ -268,10 +264,10 @@ async function sendFesMatch(
             components: [recruitDeleteButton(sentMessage, image1Message, image2Message)],
         });
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-            sentMessage.edit({
+            await sentMessage.edit({
                 components: [recruitActionRow(image1Message, reservedChannel.id)],
             });
-            reservedChannel.permissionOverwrites.set(
+            await reservedChannel.permissionOverwrites.set(
                 [
                     {
                         id: guild.roles.everyone.id,
@@ -291,7 +287,7 @@ async function sendFesMatch(
                 ephemeral: true,
             });
         } else {
-            sentMessage.edit({ components: [recruitActionRow(image1Message)] });
+            await sentMessage.edit({ components: [recruitActionRow(image1Message)] });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -307,11 +303,11 @@ async function sendFesMatch(
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (exists(deleteButtonCheck)) {
-            deleteButtonCheck.delete();
+            await deleteButtonCheck.delete();
         } else {
             if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-                reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
+                await reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                await reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
             }
             return;
         }
@@ -332,14 +328,14 @@ async function sendFesMatch(
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
         await ParticipantService.deleteAllParticipant(image1Message.id);
 
-        sentMessage.edit({
+        await sentMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: setButtonDisable(sentMessage),
         });
 
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-            reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-            reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
+            await reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+            await reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
         }
 
         await sendCloseEmbedSticky(guild, recruitChannel);

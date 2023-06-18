@@ -12,7 +12,7 @@ import { handleStageInfo } from '../feat-utils/splat3/stageinfo';
 import { play } from '../feat-utils/voice/tts/discordjs_voice';
 const logger = log4js_obj.getLogger('message');
 
-export async function call(message: Message<boolean>) {
+export async function call(message: Message<true>) {
     try {
         if (message.author.bot) {
             if (message.content.startsWith('/poll')) {
@@ -23,23 +23,22 @@ export async function call(message: Message<boolean>) {
             }
             // ステージ情報
             if (message.content === 'stageinfo') {
-                handleStageInfo(message);
+                await handleStageInfo(message);
             }
             return;
         } else {
-            if (!message.inGuild()) return;
             // ステージ情報デバッグ用
             if (message.content === 'stageinfo') {
                 const guild = await message.guild.fetch();
                 const member = await guild.members.fetch(message.author.id);
                 if (member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
-                    handleStageInfo(message);
+                    await handleStageInfo(message);
                 }
             }
 
             if (isNotEmpty(process.env.QUESTIONNAIRE_URL)) {
                 if (message.channel.id != process.env.CHANNEL_ID_BOT_CMD && randomBool(0.00025)) {
-                    await sendIntentionConfirmReply(message, message.author, 'QUESTIONNAIRE_URL');
+                    await sendIntentionConfirmReply(message, message.author.id, 'QUESTIONNAIRE_URL');
                 }
             }
         }

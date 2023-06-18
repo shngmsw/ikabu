@@ -1,9 +1,9 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DiscordAPIError, Message } from 'discord.js';
 import log4js from 'log4js';
 
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../common/button_components';
 import { searchMessageById } from '../../common/manager/message_manager';
-import { exists, sleep } from '../../common/others';
+import { assertExistCheck, exists, notExists, sleep } from '../../common/others';
 
 /**
  * アンケートに答えるか選択してもらうためのリプライを送信
@@ -11,10 +11,11 @@ import { exists, sleep } from '../../common/others';
  * @param {*} member 答えるメンバー
  * @param {*} url_key アンケートURLを格納している環境変数のキー名
  */
-export async function sendIntentionConfirmReply(message: $TSFixMe, member: $TSFixMe, url_key: $TSFixMe) {
+export async function sendIntentionConfirmReply(message: Message<true>, userId: string, urlKey: string) {
     const logger = log4js.getLogger('message');
     try {
-        const buttons = questionnaireButton(member.id, url_key);
+        const buttons = questionnaireButton(userId, urlKey);
+        assertExistCheck(buttons, 'questionnaire buttons');
         const sentReply = await message.reply({
             content:
                 'よりよい環境づくりのために良ければアンケート調査に協力してほしいでし！\n' +
@@ -26,12 +27,12 @@ export async function sendIntentionConfirmReply(message: $TSFixMe, member: $TSFi
         // リプライが残っているか確認 (手動以外で消えることはないはずだけど一応)
         const buttonCheck = await searchMessageById(message.guild, sentReply.channel.id, sentReply.id);
         if (exists(buttonCheck)) {
-            buttonCheck.delete();
+            await buttonCheck.delete();
         } else {
             return;
         }
-    } catch (error: $TSFixMe) {
-        if (error.code === 50035) {
+    } catch (error) {
+        if (error instanceof DiscordAPIError && error.code === 50035) {
             // チャットがすぐに消されて処理が間に合わなかった時にエラーでると面倒なので警告のみ
             logger.warn('questionnaire was not sent. [ message missing! ]');
         } else {
@@ -40,19 +41,19 @@ export async function sendIntentionConfirmReply(message: $TSFixMe, member: $TSFi
     }
 }
 
-function questionnaireButton(user_id: $TSFixMe, url_key: $TSFixMe) {
+function questionnaireButton(userId: string, urlKey: string) {
     const logger = log4js.getLogger();
     try {
         const yesParams = new URLSearchParams();
         yesParams.append('q', 'yes');
-        yesParams.append('uid', user_id);
-        yesParams.append('type', url_key); // 直接URLだと文字数が多すぎる可能性があるため
+        yesParams.append('uid', userId);
+        yesParams.append('type', urlKey); // 直接URLだと文字数が多すぎる可能性があるため
 
         const noParams = new URLSearchParams();
         noParams.append('q', 'no');
-        noParams.append('uid', user_id);
+        noParams.append('uid', userId);
 
-        const buttons = new ActionRowBuilder();
+        const buttons = new ActionRowBuilder<ButtonBuilder>();
         buttons.addComponents([new ButtonBuilder().setCustomId(yesParams.toString()).setLabel('答える').setStyle(ButtonStyle.Danger)]);
         buttons.addComponents([new ButtonBuilder().setCustomId(noParams.toString()).setLabel('答えない').setStyle(ButtonStyle.Primary)]);
         return buttons;
@@ -61,8 +62,9 @@ function questionnaireButton(user_id: $TSFixMe, url_key: $TSFixMe) {
     }
 }
 
-export async function sendQuestionnaireFollowUp(interaction: $TSFixMe, params: $TSFixMe) {
+export async function sendQuestionnaireFollowUp(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
     const logger = log4js.getLogger('interaction');
+    if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
@@ -79,20 +81,22 @@ export async function sendQuestionnaireFollowUp(interaction: $TSFixMe, params: $
             return;
         }
 
-        const q_url = process.env[params.get('type')];
-        if (q_url === undefined) {
+        const urlKey = params.get('type') ?? '';
+
+        const url = process.env[urlKey];
+        if (notExists(url)) {
             throw new Error('アンケートURLが設定されていません');
         }
 
-        const q_url_button = new ActionRowBuilder();
-        q_url_button.addComponents([new ButtonBuilder().setURL(q_url).setLabel('回答画面へ行く').setStyle(ButtonStyle.Link)]);
+        const urlButton = new ActionRowBuilder<ButtonBuilder>();
+        urlButton.addComponents([new ButtonBuilder().setURL(url).setLabel('回答画面へ行く').setStyle(ButtonStyle.Link)]);
 
-        interaction.followUp({
+        await interaction.followUp({
             content:
                 '協力ありがとうでし！\n' +
                 'このメッセージはDiscordの再起動や画面遷移等によって消える場合があるでし！\n' +
                 'すぐに答えない場合は先に回答画面に飛んでおくことをおすすめするでし！',
-            components: [q_url_button],
+            components: [urlButton],
             ephemeral: true,
         });
 
@@ -104,8 +108,9 @@ export async function sendQuestionnaireFollowUp(interaction: $TSFixMe, params: $
     }
 }
 
-export async function disableQuestionnaireButtons(interaction: $TSFixMe, params: $TSFixMe) {
+export async function disableQuestionnaireButtons(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
     const logger = log4js.getLogger('interaction');
+    if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),

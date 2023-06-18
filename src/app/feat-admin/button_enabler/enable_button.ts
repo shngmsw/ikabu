@@ -1,10 +1,10 @@
-import { PermissionsBitField } from 'discord.js';
+import { MessageContextMenuCommandInteraction, PermissionsBitField } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { setButtonEnable } from '../../common/button_components';
 import { isEmpty } from '../../common/others';
 
-export async function buttonEnable(interaction: $TSFixMe) {
+export async function buttonEnable(interaction: MessageContextMenuCommandInteraction<CacheType>) {
     const logger = log4js_obj.getLogger('interaction');
 
     if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {

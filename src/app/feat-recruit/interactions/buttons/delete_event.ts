@@ -6,6 +6,7 @@ import { ParticipantService } from '../../../../db/participants_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { setButtonDisable } from '../../../common/button_components';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, exists } from '../../../common/others.js';
@@ -13,18 +14,17 @@ import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_stic
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function del(interaction: ButtonInteraction, params: URLSearchParams) {
-    if (!interaction.inGuild()) return;
+export async function del(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+    if (!interaction.message.inGuild()) return;
     try {
         // 処理待ち
         await interaction.deferReply({
             ephemeral: true,
         });
 
-        assertExistCheck(interaction.guild, 'guild');
         assertExistCheck(interaction.channel, 'channel');
 
-        const guild = await interaction.guild.fetch();
+        const guild = await getGuildByInteraction(interaction);
         const member = await searchDBMemberById(guild, interaction.member.user.id);
         assertExistCheck(member, 'member');
         const buttonMessageId = params.get('mid');

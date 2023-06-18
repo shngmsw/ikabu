@@ -14,9 +14,10 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, getSchedule, getAnarchyOpenData } from '../../../common/apis/splatoon3_ink';
+import { checkFes, getSchedule, getAnarchyOpenData, MatchInfo } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleIdByName } from '../../../common/manager/role_manager';
@@ -29,19 +30,16 @@ import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inGuild()) return;
-
-    assertExistCheck(interaction.guild, 'guild');
+export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
     let rank = options.getString('募集ウデマエ');
-    const recruitNum = options.getInteger('募集人数') ?? -1;
+    const recruitNum = options.getInteger('募集人数', true);
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
     assertExistCheck(hostMember, 'hostMember');
     const user1 = options.getUser('参加者1');
@@ -150,6 +148,13 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
 
         if (notExists(condition)) condition = 'なし';
 
+        if (notExists(anarchyData)) {
+            await interaction.editReply({
+                content: 'バンカラマッチの情報が取得できなかったでし！',
+            });
+            return;
+        }
+
         await sendAnarchyMatch(
             interaction,
             mention,
@@ -165,14 +170,22 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction) {
         );
     } catch (error) {
         if (exists(channel)) {
-            channel.send('なんかエラーでてるわ');
+            await channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
     }
 }
 
+export type RuleIcon = {
+    url: string; // ガチルールのアイコン
+    xPosition: number; // アイコンx座標
+    yPosition: number; // アイコンy座標
+    xScale: number; // アイコン幅
+    yScale: number; // アイコン高さ
+};
+
 async function sendAnarchyMatch(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
     mention: string,
     txt: string,
     recruitNum: number,
@@ -182,49 +195,55 @@ async function sendAnarchyMatch(
     hostMember: GuildMember,
     user1: User | null,
     user2: User | null,
-    anarchyData: $TSFixMe,
+    anarchyData: MatchInfo,
 ) {
-    let thumbnailUrl; // ガチルールのアイコン
-    let thumbnailXP; // アイコンx座標
-    let thumbnailYP; // アイコンy座標
-    let thumbScaleX; // アイコン幅
-    let thumbScaleY; // アイコン高さ
+    let ruleIcon: RuleIcon;
     if (exists(anarchyData && anarchyData.rule)) {
         switch (anarchyData.rule) {
             case 'ガチエリア':
-                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
-                thumbnailXP = 600;
-                thumbnailYP = 20;
-                thumbScaleX = 90;
-                thumbScaleY = 100;
+                ruleIcon = {
+                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png',
+                    xPosition: 600,
+                    yPosition: 20,
+                    xScale: 90,
+                    yScale: 100,
+                };
                 break;
             case 'ガチヤグラ':
-                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
-                thumbnailXP = 595;
-                thumbnailYP = 20;
-                thumbScaleX = 90;
-                thumbScaleY = 100;
+                ruleIcon = {
+                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png',
+                    xPosition: 595,
+                    yPosition: 20,
+                    xScale: 90,
+                    yScale: 100,
+                };
                 break;
             case 'ガチホコバトル':
-                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
-                thumbnailXP = 585;
-                thumbnailYP = 23;
-                thumbScaleX = 110;
-                thumbScaleY = 90;
+                ruleIcon = {
+                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png',
+                    xPosition: 585,
+                    yPosition: 23,
+                    xScale: 110,
+                    yScale: 90,
+                };
                 break;
             case 'ガチアサリ':
-                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
-                thumbnailXP = 570;
-                thumbnailYP = 20;
-                thumbScaleX = 120;
-                thumbScaleY = 100;
+                ruleIcon = {
+                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png',
+                    xPosition: 570,
+                    yPosition: 20,
+                    xScale: 120,
+                    yScale: 100,
+                };
                 break;
             default:
-                thumbnailUrl = placeHold.error100x100;
-                thumbnailXP = 595;
-                thumbnailYP = 20;
-                thumbScaleX = 100;
-                thumbScaleY = 100;
+                ruleIcon = {
+                    url: placeHold.error100x100,
+                    xPosition: 595,
+                    yPosition: 20,
+                    xScale: 100,
+                    yScale: 100,
+                };
                 break;
         }
     } else {
@@ -235,17 +254,14 @@ async function sendAnarchyMatch(
         thumbScaleY = 100;
     }
 
-    assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
     let channelName = null;
     if (exists(reservedChannel)) {
         channelName = reservedChannel.name;
     }
-
-    const thumbnail = [thumbnailUrl, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
 
     const recruiter = await searchDBMemberById(guild, hostMember.id);
     assertExistCheck(recruiter, 'recruiter');
@@ -281,7 +297,7 @@ async function sendAnarchyMatch(
         name: 'ikabu_recruit.png',
     });
 
-    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, thumbnail), { name: 'rules.png' });
+    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, ruleIcon), { name: 'rules.png' });
 
     try {
         const recruitChannel = interaction.channel;
@@ -323,10 +339,10 @@ async function sendAnarchyMatch(
         });
 
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-            sentMessage.edit({
+            await sentMessage.edit({
                 components: [recruitActionRow(image1Message, reservedChannel?.id)],
             });
-            reservedChannel.permissionOverwrites.set(
+            await reservedChannel.permissionOverwrites.set(
                 [
                     {
                         id: guild.roles.everyone.id,
@@ -346,7 +362,7 @@ async function sendAnarchyMatch(
                 ephemeral: true,
             });
         } else {
-            sentMessage.edit({ components: [recruitActionRow(image1Message)] });
+            await sentMessage.edit({ components: [recruitActionRow(image1Message)] });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -362,11 +378,11 @@ async function sendAnarchyMatch(
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (exists(deleteButtonCheck)) {
-            deleteButtonCheck.delete();
+            await deleteButtonCheck.delete();
         } else {
             if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-                reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
+                await reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                await reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
             }
             return;
         }
@@ -387,14 +403,14 @@ async function sendAnarchyMatch(
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
         await ParticipantService.deleteAllParticipant(image1Message.id);
 
-        sentMessage.edit({
+        await sentMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: setButtonDisable(sentMessage),
         });
 
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-            reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-            reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
+            await reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+            await reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
         }
 
         await sendCloseEmbedSticky(guild, recruitChannel);

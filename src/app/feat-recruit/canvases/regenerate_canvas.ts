@@ -69,7 +69,7 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
 }
 
 async function regenRegularCanvas(
-    message: Message,
+    message: Message<true>,
     recruitData: Recruit,
     participantsData: Participant[],
     applicantNum: number,
@@ -107,7 +107,7 @@ async function regenRegularCanvas(
 }
 
 async function regenEventCanvas(
-    message: Message,
+    message: Message<true>,
     recruitData: Recruit,
     participantsData: Participant[],
     applicantNum: number,
@@ -147,7 +147,7 @@ async function regenEventCanvas(
 }
 
 async function regenAnarchyCanvas(
-    message: Message,
+    message: Message<true>,
     recruitData: Recruit,
     participantsData: Participant[],
     applicantNum: number,
@@ -189,7 +189,7 @@ async function regenAnarchyCanvas(
 }
 
 async function regenSalmonCanvas(
-    message: Message,
+    message: Message<true>,
     recruitData: Recruit,
     participantsData: Participant[],
     applicantNum: number,
@@ -280,7 +280,7 @@ async function regenFesCanvas(
     message.edit({ files: [recruit] });
 }
 async function regenBigRunCanvas(
-    message: Message,
+    message: Message<true>,
     recruitData: Recruit,
     participantsData: Participant[],
     applicantNum: number,

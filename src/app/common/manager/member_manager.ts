@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Guild, GuildMember } from 'discord.js';
+import { Guild, GuildMember, Message } from 'discord.js';
 
 import { MembersService } from '../../../db/members_service';
 import { Member } from '../../../db/model/member';
@@ -24,6 +24,16 @@ export async function searchAPIMemberById(guild: Guild, userId: string) {
         logger.warn('member missing (Discord API)');
     }
 
+    return member;
+}
+
+export async function getAPIMemberByMessage(message: Message<true>) {
+    const guild = message.guild;
+    const memberId = message.author.id;
+    let member = message.member;
+    if (notExists(member)) {
+        member = await guild.members.fetch(memberId);
+    }
     return member;
 }
 

@@ -2,7 +2,7 @@ import { URLSearchParams } from 'url';
 
 import { ButtonInteraction, CacheType } from 'discord.js';
 
-import { exists, isNotEmpty } from '../common/others';
+import { exists } from '../common/others';
 import { sendQuestionnaireFollowUp, disableQuestionnaireButtons } from '../event/rookie/send_questionnaire';
 import { setResolvedTag } from '../event/support_auto_tag/resolved_support';
 import { cancel } from '../feat-recruit/interactions/buttons/cancel_event';
@@ -44,7 +44,7 @@ export async function call(interaction: ButtonInteraction<CacheType>) {
         await deleteFriendCode(interaction);
     } else if (interaction.customId == 'support_resolved') {
         await setResolvedTag(interaction);
-    } else if (exists(param_d) && isNotEmpty(param_d)) {
+    } else if (exists(param_d) && exists(param_d)) {
         // buttonごとに呼び出すファンクション
         const recruitButtons: buttonFunctions = {
             jr: join,
@@ -58,7 +58,7 @@ export async function call(interaction: ButtonInteraction<CacheType>) {
             newr: handleCreateModal,
         };
         await recruitButtons[param_d](interaction, params);
-    } else if (exists(param_t) && isNotEmpty(param_t)) {
+    } else if (exists(param_t) && exists(param_t)) {
         const dividerButtons: buttonFunctions = {
             join: joinButton,
             register: registerButton,
@@ -71,7 +71,7 @@ export async function call(interaction: ButtonInteraction<CacheType>) {
             hide: hideButton,
         };
         await dividerButtons[param_t](interaction, params);
-    } else if (exists(param_q) && isNotEmpty(param_q)) {
+    } else if (exists(param_q) && exists(param_q)) {
         const questionnaireButtons: buttonFunctions = {
             yes: sendQuestionnaireFollowUp,
             no: disableQuestionnaireButtons,

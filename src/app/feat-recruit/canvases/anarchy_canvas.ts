@@ -5,9 +5,11 @@ import Canvas from 'canvas';
 import { RecruitOpCode } from './regenerate_canvas';
 import { modalRecruit } from '../../../constant';
 import { Participant } from '../../../db/model/participant';
+import { MatchInfo } from '../../common/apis/splatoon3_ink';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { exists, notExists } from '../../common/others';
+import { RuleIcon } from '../interactions/commands/anarchy_recruit';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -182,7 +184,7 @@ export async function recruitAnarchyCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleAnarchyCanvas(anarchyData: $TSFixMe, thumbnail: $TSFixMe) {
+export async function ruleAnarchyCanvas(anarchyData: MatchInfo, ruleIcon: RuleIcon) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
 
     const ruleCtx = ruleCanvas.getContext('2d');
@@ -277,8 +279,18 @@ export async function ruleAnarchyCanvas(anarchyData: $TSFixMe, thumbnail: $TSFix
     }
 
     ruleCtx.save();
-    const ruleImage = await Canvas.loadImage(thumbnail[0]);
-    ruleCtx.drawImage(ruleImage, 0, 0, ruleImage.width, ruleImage.height, thumbnail[1], thumbnail[2], thumbnail[3], thumbnail[4]);
+    const ruleImage = await Canvas.loadImage(ruleIcon.url);
+    ruleCtx.drawImage(
+        ruleImage,
+        0,
+        0,
+        ruleImage.width,
+        ruleImage.height,
+        ruleIcon.xPosition,
+        ruleIcon.yPosition,
+        ruleIcon.xScale,
+        ruleIcon.yScale,
+    );
     ruleCtx.restore();
 
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);

@@ -1,12 +1,23 @@
-import { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, APIEmbedField } from 'discord.js';
+import {
+    EmbedBuilder,
+    ButtonBuilder,
+    ActionRowBuilder,
+    ButtonStyle,
+    APIEmbedField,
+    ButtonInteraction,
+    ChatInputCommandInteraction,
+    CacheType,
+    GuildMember,
+} from 'discord.js';
 
 import { TeamDivider } from '../../../db/model/team_divider';
 import { TeamDividerService } from '../../../db/team_divider_service';
 import { log4js_obj } from '../../../log4js_settings';
 import { setButtonEnable, recoveryThinkingButton, disableThinkingButton, setButtonDisable } from '../../common/button_components';
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { searchMessageById } from '../../common/manager/message_manager';
-import { assertExistCheck, isEmpty } from '../../common/others';
+import { assertExistCheck, exists, isEmpty, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -14,11 +25,10 @@ const logger = log4js_obj.getLogger('interaction');
  * チーム分けコマンド実行時の登録メッセージを出す
  * @param {*} interaction コマンドのインタラクション
  */
-export async function dividerInitialMessage(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
-
+export async function dividerInitialMessage(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     try {
-        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
+        const guild = await getGuildByInteraction(interaction);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
         assertExistCheck(member, 'member');
         const hostId = member.id;
         const teamNum = interaction.options.getInteger('各チームのメンバー数');
@@ -81,7 +91,7 @@ export async function dividerInitialMessage(interaction: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-export async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function joinButton(interaction: ButtonInteraction<CacheType>, params: URLSearchParams) {
     /** @type {Discord.Snowflake} */
     try {
         await interaction.update({
@@ -174,7 +184,7 @@ export async function joinButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-export async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function cancelButton(interaction: ButtonInteraction<CacheType>, params: URLSearchParams) {
     /** @type {Discord.Snowflake} */
     try {
         await interaction.update({
@@ -250,7 +260,7 @@ export async function cancelButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-export async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function registerButton(interaction: ButtonInteraction<CacheType>, params: URLSearchParams) {
     /** @type {Discord.Snowflake} */
     try {
         await interaction.update({
@@ -364,7 +374,7 @@ export async function registerButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-export async function alfaButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function alfaButton(interaction: ButtonInteraction<CacheType>, params: URLSearchParams) {
     await matching(interaction, params, 0);
 }
 
@@ -373,7 +383,7 @@ export async function alfaButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-export async function bravoButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function bravoButton(interaction: ButtonInteraction<CacheType>, params: URLSearchParams) {
     await matching(interaction, params, 1);
 }
 
@@ -383,7 +393,7 @@ export async function bravoButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} params ボタンのパラメーター
  * @param {*} winTeam 勝利チーム(alfa=0, bravo=1, 観戦=2)
  */
-async function matching(interaction: $TSFixMe, params: $TSFixMe, winTeam: $TSFixMe) {
+async function matching(interaction: ButtonInteraction<CacheType>, params: URLSearchParams, winTeam: TSFixMe) {
     try {
         let winTeamName;
         switch (winTeam) {
@@ -449,7 +459,7 @@ async function matching(interaction: $TSFixMe, params: $TSFixMe, winTeam: $TSFix
         const participants = await TeamDividerService.getParticipants(messageId, count, teamNum);
         const fullMembers = await TeamDividerService.selectAllMemberFromDB(messageId, count);
 
-        const participantsIdList = participants.map((participant: $TSFixMe) => participant.member_id);
+        const participantsIdList = participants.map((participant: TSFixMe) => participant.member_id);
 
         // 観戦者セット
         for (const member of fullMembers) {
@@ -508,7 +518,7 @@ async function matching(interaction: $TSFixMe, params: $TSFixMe, winTeam: $TSFix
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function spectateButton(interaction: ButtonInteraction<CacheType>, params: URLSearchParams) {
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
@@ -522,7 +532,7 @@ export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
         const count = params.get('count');
         const fullMembers = await TeamDividerService.selectAllMemberFromDB(messageId, count);
 
-        const fullIdList = fullMembers.map((member: $TSFixMe) => member.member_id);
+        const fullIdList = fullMembers.map((member: TSFixMe) => member.member_id);
 
         assertExistCheck(hostMember, 'hostMember');
         assertExistCheck(member, 'member');
@@ -539,7 +549,7 @@ export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
         }
 
         const wantSpectateList = await TeamDividerService.getForceSpectate(messageId, count);
-        const wantSpectateIdList = wantSpectateList.map((member: $TSFixMe) => member.member_id);
+        const wantSpectateIdList = wantSpectateList.map((member: TSFixMe) => member.member_id);
 
         if (wantSpectateIdList.includes(member.id)) {
             await TeamDividerService.setForceSpectate(messageId, member.id, count, false);
@@ -588,7 +598,7 @@ export async function spectateButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-export async function endButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function endButton(interaction: ButtonInteraction<CacheType>, params: URLSearchParams) {
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
@@ -627,7 +637,7 @@ export async function endButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-export async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function correctButton(interaction: ButtonInteraction<CacheType>, params: URLSearchParams) {
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
@@ -682,16 +692,20 @@ export async function correctButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} interaction ボタンのインタラクション
  * @param {*} params ボタンのパラメーター
  */
-export async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
+export async function hideButton(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+    if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
         });
 
-        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
+        const guild = await getGuildByInteraction(interaction);
+        const member = await searchAPIMemberById(guild, interaction.member.user.id);
         const messageId = params.get('mid');
+        assertExistCheck(messageId, 'messageId');
         const hostId = params.get('hid');
-        const count = params.get('count');
+        assertExistCheck(hostId, 'hostId');
+        const count = Number(params.get('count'));
 
         assertExistCheck(member, 'member');
 
@@ -706,20 +720,20 @@ export async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
             return;
         }
 
-        const hostMember = await searchAPIMemberById(interaction.guild, hostId);
-
+        const hostMember = await searchAPIMemberById(guild, hostId);
+        assertExistCheck(hostMember, 'hostMember');
         const allMembers = await TeamDividerService.selectAllMemberFromDB(messageId, count);
 
         const hideWin = allMembers[0].hide_win;
 
         if (hideWin) {
-            TeamDividerService.setHideWin(messageId, false);
+            await TeamDividerService.setHideWin(messageId, false);
             await interaction.followUp({
                 content: '`【戦績表示】: 表示`',
                 ephemeral: true,
             });
         } else {
-            TeamDividerService.setHideWin(messageId, true);
+            await TeamDividerService.setHideWin(messageId, true);
             await interaction.followUp({
                 content: '`【戦績表示】: 非表示`',
                 ephemeral: true,
@@ -732,7 +746,9 @@ export async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
         });
     } catch (err) {
         logger.error(err);
-        await interaction.channel.send('なんかエラー出てるわ');
+        if (exists(interaction.channel) && interaction.channel.isTextBased()) {
+            await interaction.channel.send('なんかエラー出てるわ');
+        }
     }
 }
 
@@ -741,7 +757,7 @@ export async function hideButton(interaction: $TSFixMe, params: $TSFixMe) {
  * @param {*} array 該当配列
  * @returns 並べ替え後の配列
  */
-function arrayShuffle(array: $TSFixMe) {
+function arrayShuffle(array: TSFixMe) {
     for (let i = array.length - 1; i > 0; i--) {
         // 0〜(i+1)の範囲で値を取得
         const r = Math.floor(Math.random() * (i + 1));
@@ -761,20 +777,20 @@ function arrayShuffle(array: $TSFixMe) {
  * @param {*} hostMember コマンド使用者のメンバーオブジェクト
  * @returns 作成したEmbedを返す
  */
-async function loadTeamEmbed(messageId: $TSFixMe, count: $TSFixMe, hostMember: $TSFixMe) {
+async function loadTeamEmbed(messageId: string, count: number, hostMember: GuildMember) {
     try {
         const alfaList = usersString(await TeamDividerService.getTeamMember(messageId, count, 0));
         const bravoList = usersString(await TeamDividerService.getTeamMember(messageId, count, 1));
         let spectators = await TeamDividerService.getTeamMember(messageId, count, 2);
         let wantSpectate = await TeamDividerService.getForceSpectate(messageId, count);
 
-        if (isEmpty(spectators)) {
+        if (notExists(spectators)) {
             spectators = 'なし';
         } else {
             spectators = usersString(spectators);
         }
 
-        if (isEmpty(wantSpectate)) {
+        if (notExists(wantSpectate)) {
             wantSpectate = 'なし';
         } else {
             wantSpectate = usersString(wantSpectate);
@@ -825,7 +841,7 @@ async function loadTeamEmbed(messageId: $TSFixMe, count: $TSFixMe, hostMember: $
  * @param {*} hideWin 戦績非表示フラグ
  * @returns ボタンのActionRowを返す
  */
-function createInitButtons(hostId: $TSFixMe, teamNum: $TSFixMe, hideWin: $TSFixMe) {
+function createInitButtons(hostId: TSFixMe, teamNum: TSFixMe, hideWin: TSFixMe) {
     const joinParams = new URLSearchParams();
     joinParams.append('t', 'join');
     joinParams.append('hide', hideWin);
@@ -855,7 +871,7 @@ function createInitButtons(hostId: $TSFixMe, teamNum: $TSFixMe, hideWin: $TSFixM
  * @param {*} count 試合数
  * @returns ボタンのActionRowを返す
  */
-function createButtons(messageId: $TSFixMe, teamNum: $TSFixMe, hostId: $TSFixMe, count: $TSFixMe) {
+function createButtons(messageId: TSFixMe, teamNum: TSFixMe, hostId: TSFixMe, count: TSFixMe) {
     const alfaParams = new URLSearchParams();
     alfaParams.append('t', 'alfa');
     alfaParams.append('num', teamNum);
@@ -900,7 +916,7 @@ function createButtons(messageId: $TSFixMe, teamNum: $TSFixMe, hostId: $TSFixMe,
  * @param {*} count 試合数
  * @returns ボタンのActionRowを返す
  */
-function createSecondButtons(hostId: $TSFixMe, messageId: $TSFixMe, PreMessageId: $TSFixMe, count: $TSFixMe) {
+function createSecondButtons(hostId: TSFixMe, messageId: TSFixMe, PreMessageId: TSFixMe, count: TSFixMe) {
     const correctParams = new URLSearchParams();
     correctParams.append('t', 'correct');
     correctParams.append('mid', messageId);
@@ -926,7 +942,7 @@ function createSecondButtons(hostId: $TSFixMe, messageId: $TSFixMe, PreMessageId
  * @param {*} array DBからのresult
  * @returns 表示文字列
  */
-function usersString(array: $TSFixMe) {
+function usersString(array: TSFixMe) {
     try {
         const orderByWinRateArray = orderByWinRate(array);
         let usersString = '';
@@ -959,8 +975,8 @@ function usersString(array: $TSFixMe) {
  * @param {*} array DBからのresult
  * @returns 並べ替え後の配列
  */
-function orderByWinRate(array: $TSFixMe) {
-    return array.sort(function (p1: $TSFixMe, p2: $TSFixMe) {
+function orderByWinRate(array: TSFixMe) {
+    return array.sort(function (p1: TSFixMe, p2: TSFixMe) {
         const p1Key = p1.win_rate;
         const p2Key = p2.win_rate;
         if (p1Key < p2Key) {
@@ -978,9 +994,9 @@ function orderByWinRate(array: $TSFixMe) {
  * @param {*} array DBからのresult
  * @returns 全角文字数
  */
-function getMaxNameLength(array: $TSFixMe) {
-    const nameLengthList = array.map((member: $TSFixMe) => getLengthBasedOnZenkaku(truncateString(member.member_name)));
-    const aryMax = function (a: $TSFixMe, b: $TSFixMe) {
+function getMaxNameLength(array: TSFixMe) {
+    const nameLengthList = array.map((member: TSFixMe) => getLengthBasedOnZenkaku(truncateString(member.member_name)));
+    const aryMax = function (a: TSFixMe, b: TSFixMe) {
         return Math.max(a, b);
     };
     const max = nameLengthList.reduce(aryMax);
@@ -991,7 +1007,7 @@ function getMaxNameLength(array: $TSFixMe) {
 /**
  * 全角文字は1文字で半角文字は0.5文字としてカウントした文字列全体の文字数を返す
  */
-function getLengthBasedOnZenkaku(str: $TSFixMe) {
+function getLengthBasedOnZenkaku(str: string) {
     let len = 0;
 
     for (let i = 0; i < str.length; i++) {
@@ -1001,7 +1017,7 @@ function getLengthBasedOnZenkaku(str: $TSFixMe) {
     return len;
 }
 
-function spacePadding(val: $TSFixMe, len: $TSFixMe) {
+function spacePadding(val: string, len: number) {
     const zenkakuCharCount = getZenkakuCharCount(val);
     const hankakuCharCount = getHankakuCharCount(val);
     const paddingSpaceCount = len - (zenkakuCharCount + Math.round(hankakuCharCount / 2));
@@ -1011,7 +1027,7 @@ function spacePadding(val: $TSFixMe, len: $TSFixMe) {
     return val;
 }
 
-function getZenkakuCharCount(str: $TSFixMe) {
+function getZenkakuCharCount(str: string) {
     let count = 0;
     for (let i = 0; i < str.length; i++) {
         count += str.charCodeAt(i) <= 255 ? 0 : 1;
@@ -1019,7 +1035,7 @@ function getZenkakuCharCount(str: $TSFixMe) {
     return count;
 }
 
-function getHankakuCharCount(str: $TSFixMe) {
+function getHankakuCharCount(str: string) {
     let count = 0;
     for (let i = 0; i < str.length; i++) {
         count += str.charCodeAt(i) <= 255 ? 1 : 0;
@@ -1027,11 +1043,7 @@ function getHankakuCharCount(str: $TSFixMe) {
     return count;
 }
 
-function truncateString(str?: $TSFixMe, size?: $TSFixMe, suffix?: $TSFixMe) {
-    if (!str) str = '';
-    if (!size) size = 21;
-    if (!suffix) suffix = '…';
-
+function truncateString(str = '', size = 21, suffix = '…') {
     let b = 0;
     for (let i = 0; i < str.length; i++) {
         b += str.charCodeAt(i) <= 255 ? 1 : 2;

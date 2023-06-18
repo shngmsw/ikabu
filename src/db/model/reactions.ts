@@ -4,7 +4,7 @@ export class Reactions {
     channel_id: string;
     year: string;
     count: number;
-    constructor(reaction_seq: $TSFixMe, user_id: $TSFixMe, channel_id: $TSFixMe, year: $TSFixMe, count: $TSFixMe) {
+    constructor(reaction_seq: number, user_id: string, channel_id: string, year: string, count: number) {
         this.user_id = user_id;
         this.reaction_seq = reaction_seq;
         this.channel_id = channel_id;

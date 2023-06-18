@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 import { stringify } from 'csv-stringify/sync';
-import { AttachmentBuilder, ChannelType, PermissionsBitField } from 'discord.js';
+import { AttachmentBuilder, ChannelType, ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
@@ -9,9 +9,7 @@ import { notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
-export async function handleDeleteChannel(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
-
+export async function handleDeleteChannel(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 

@@ -1,4 +1,4 @@
-import { EmbedBuilder, Guild } from 'discord.js';
+import { EmbedBuilder, Guild, ModalSubmitInteraction } from 'discord.js';
 
 import { Recruit } from '../../../db/model/recruit';
 import { log4js_obj } from '../../../log4js_settings';
@@ -8,9 +8,10 @@ import { sendEmbedsWebhook } from '../../common/webhook';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function sendRecruitModalLog(interaction: $TSFixMe) {
+export async function sendRecruitModalLog(interaction: ModalSubmitInteraction<'raw' | 'cached'>) {
+    if (!interaction.inGuild()) return;
     const guild = interaction.guild;
-    const channelName = interaction.channel.name;
+    const channelName = interaction.channel.name ?? '不明なチャンネル';
     const authorId = interaction.member.user.id;
     const author = await searchDBMemberById(guild, authorId);
     const components = interaction.components;

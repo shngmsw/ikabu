@@ -3,7 +3,6 @@ import {
     ActivityType,
     AnyThreadChannel,
     AutocompleteInteraction,
-    BaseGuildTextChannel,
     CacheType,
     Client,
     GatewayIntentBits,
@@ -21,17 +20,17 @@ import {
 
 import { updateLocale, updateSchedule } from './common/apis/splatoon3_ink';
 import { searchAPIMemberById } from './common/manager/member_manager';
-import { assertExistCheck, exists, isNotEmpty, notExists } from './common/others';
+import { assertExistCheck, exists, notExists } from './common/others';
 import { emojiCountUp } from './event/reaction_count/reactions';
 import { guildMemberAddEvent } from './event/rookie/set_rookie';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
-import * as button_handler from './handlers/button_handler';
-import * as command_handler from './handlers/command_handler';
-import * as context_handler from './handlers/context_handler';
-import * as message_handler from './handlers/message_handler';
-import * as modal_handler from './handlers/modal_handler';
-import * as vcState_update_handler from './handlers/vcState_update_handler';
+import * as buttonHandler from './handlers/button_handler';
+import * as commandHandler from './handlers/command_handler';
+import * as contextHandler from './handlers/context_handler';
+import * as messageHandler from './handlers/message_handler';
+import * as modalHandler from './handlers/modal_handler';
+import * as vcStateUpdateHandler from './handlers/vcState_update_handler';
 import { DBCommon } from '../db/db';
 import { FriendCodeService } from '../db/friend_code_service';
 import { MembersService } from '../db/members_service';
@@ -57,12 +56,14 @@ const client = new Client({
     partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
-client.login(process.env.DISCORD_BOT_TOKEN);
+void client.login(process.env.DISCORD_BOT_TOKEN);
 
 const logger = log4js_obj.getLogger();
 
 client.on('messageCreate', async (message: Message<boolean>) => {
-    message_handler.call(message);
+    if (message.inGuild()) {
+        void messageHandler.call(message);
+    }
 });
 
 client.on('guildMemberAdd', async (member: GuildMember) => {
@@ -107,8 +108,8 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
 
         assertExistCheck(process.env.CHANNEL_ID_RETIRE_LOG);
         const retireLog = member.guild.channels.cache.get(process.env.CHANNEL_ID_RETIRE_LOG);
-        if (retireLog instanceof BaseGuildTextChannel) {
-            retireLog.send(text);
+        if (retireLog?.isTextBased()) {
+            await retireLog.send(text);
         }
 
         const guild = await member.guild.fetch();
@@ -162,7 +163,6 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
         const guildIdList = await MembersService.getMemberGuildsByUserId(userId);
         for (const guildId of guildIdList) {
             const guild = await client.guilds.fetch(guildId);
-            assertExistCheck(guild, 'guild');
 
             const member = await searchAPIMemberById(guild, userId);
 
@@ -202,8 +202,7 @@ client.on('ready', async () => {
         await ParticipantService.createTableIfNotExists();
         await MessageCountService.createTableIfNotExists();
         await TeamDividerService.createTableIfNotExists();
-        const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID || '');
-        assertExistCheck(guild);
+        const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
         client.user.setActivity(`${guild.memberCount}人`, {
             type: ActivityType.Playing,
         });
@@ -247,16 +246,19 @@ client.on('messageReactionRemove', async (reaction: MessageReaction | PartialMes
 
 client.on('interactionCreate', (interaction: Interaction<CacheType>) => {
     try {
-        if (interaction.isButton()) {
-            button_handler.call(interaction);
-        } else if (interaction.isModalSubmit()) {
-            modal_handler.call(interaction);
-        } else if (interaction.isMessageContextMenuCommand()) {
-            context_handler.call(interaction);
-        } else if (interaction.isUserContextMenuCommand()) {
-            // interaction.isCommand()はcontextMenu系も含むため条件分岐しておく
-        } else if (interaction.isCommand()) {
-            command_handler.call(interaction);
+        if (interaction.isRepliable()) {
+            // 各handlerの内どれかしか呼ばれないためawaitしない
+            if (interaction.isButton()) {
+                void buttonHandler.call(interaction);
+            } else if (interaction.isModalSubmit()) {
+                void modalHandler.call(interaction);
+            } else if (interaction.isMessageContextMenuCommand()) {
+                void contextHandler.call(interaction);
+            } else if (interaction.isUserContextMenuCommand()) {
+                // interaction.isCommand()はcontextMenu系も含むため条件分岐しておく
+            } else if (interaction.isChatInputCommand()) {
+                void commandHandler.call(interaction);
+            }
         }
     } catch (error) {
         const interactionLogger = log4js_obj.getLogger('interaction');
@@ -272,12 +274,12 @@ client.on('interactionCreate', (interaction: Interaction<CacheType>) => {
 });
 
 client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
-    if (isNotEmpty(thread.parentId) && thread.parentId === process.env.CHANNEL_ID_SUPPORT_CENTER) {
-        editThreadTag(thread);
-        sendCloseButton(thread);
+    if (exists(thread.parentId) && thread.parentId === process.env.CHANNEL_ID_SUPPORT_CENTER) {
+        await editThreadTag(thread);
+        await sendCloseButton(thread);
     }
 });
 
 client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
-    vcState_update_handler.call(oldState, newState);
+    void vcStateUpdateHandler.call(oldState, newState);
 });

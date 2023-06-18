@@ -19,7 +19,7 @@ export class MessageCountService {
         }
     }
 
-    static async save(id: $TSFixMe, count: $TSFixMe) {
+    static async save(id: string, count: number) {
         try {
             DBCommon.init();
             await DBCommon.run(`insert or replace into message_count (user_id, count)  values ($1, $2)`, [id, count]);
@@ -29,7 +29,7 @@ export class MessageCountService {
         }
     }
 
-    static async getMemberByUserId(user_id: $TSFixMe) {
+    static async getMemberByUserId(user_id: string) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all); // https://stackoverflow.com/questions/56122812/async-await-sqlite-in-javascript
         const results = (await db.all(`select * from message_count where user_id = ${user_id}`)) as MessageCount[];

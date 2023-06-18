@@ -7,6 +7,7 @@ import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, datetimeDiff, exists } from '../../../common/others.js';
@@ -16,17 +17,16 @@ import { getStickyChannelId, sendCloseEmbedSticky, sendRecruitSticky } from '../
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function close(interaction: ButtonInteraction, params: URLSearchParams) {
-    if (!interaction.inGuild()) return;
+export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+    if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
         });
 
-        assertExistCheck(interaction.guild, 'guild');
         assertExistCheck(interaction.channel, 'channel');
 
-        const guild = await interaction.guild.fetch();
+        const guild = await getGuildByInteraction(interaction);
         const channelId = params.get('vid');
         const image1MsgId = params.get('imid1');
         assertExistCheck(image1MsgId, "params.get('imid1')");

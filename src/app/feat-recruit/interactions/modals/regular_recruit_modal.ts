@@ -6,7 +6,9 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
+import { MatchInfo } from '../../../common/apis/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
@@ -18,7 +20,7 @@ import { getMemberMentions } from '../buttons/other_events';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function sendRegularMatch(
-    interaction: ModalSubmitInteraction,
+    interaction: ModalSubmitInteraction<'cached' | 'raw'>,
     txt: string,
     recruitNum: number,
     condition: string,
@@ -27,12 +29,11 @@ export async function sendRegularMatch(
     user1: Member | null,
     user2: Member | null,
     user3: Member | null,
-    regularData: $TSFixMe,
+    regularData: MatchInfo,
 ) {
-    assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await interaction.guild?.fetch();
+    const guild = await getGuildByInteraction(interaction);
 
     const channelName = '[簡易版募集]';
 
@@ -84,6 +85,8 @@ export async function sendRegularMatch(
             files: [recruit],
         });
 
+        if (!image1Message.inGuild()) return;
+
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
@@ -113,7 +116,7 @@ export async function sendRegularMatch(
             content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
-        buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
+        await buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
         const deleteButtonMsg = await recruitChannel.send({
             components: [recruitDeleteButton(buttonMessage, image1Message, image2Message)],
         });
@@ -132,7 +135,7 @@ export async function sendRegularMatch(
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (exists(deleteButtonCheck)) {
-            deleteButtonCheck.delete();
+            await deleteButtonCheck.delete();
         } else {
             return;
         }
@@ -154,7 +157,7 @@ export async function sendRegularMatch(
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
         await ParticipantService.deleteAllParticipant(image1Message.id);
 
-        buttonMessage.edit({
+        await buttonMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: setButtonDisable(buttonMessage),
         });

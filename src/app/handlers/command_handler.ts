@@ -35,10 +35,23 @@ import { handleVoicePick } from '../feat-utils/voice/vpick.js';
 import { sendCommandLog } from '../logs/commands/command_log';
 
 export async function call(interaction: ChatInputCommandInteraction<CacheType>) {
+    await sendCommandLog(interaction);
+
+    await CommandsHandler(interaction); // DMとGuild両方で動くコマンド
+
+    if (interaction.inGuild()) {
+        // Guildのみで動くコマンド
+        await guildOnlyCommandsHandler(interaction);
+    } else {
+        // DMのみで動くコマンド
+    }
+
+    return;
+}
+
+async function guildOnlyCommandsHandler(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     const { commandName } = interaction;
     const { options } = interaction;
-
-    await sendCommandLog(interaction); // DB使うものはawait付けないとcloseエラー出る
 
     if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
         await voiceLocker(interaction);
@@ -77,36 +90,17 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
         await fesRecruit(interaction);
     } else if (commandName === commandNames.salmon) {
         await salmonRecruit(interaction);
-    } else if (commandName === commandNames.friend_code) {
-        await handleFriendCode(interaction);
     } else if (commandName === commandNames.experience) {
         await handleIkabuExperience(interaction);
     } else if (commandName === commandNames.voiceChannelMention) {
         await voiceMention(interaction);
     } else if (commandName === commandNames.variablesSettings) {
         await variablesHandler(interaction);
-    } else if (commandName == commandNames.wiki) {
-        await handleWiki(interaction);
-    } else if (commandName == commandNames.kansen) {
-        await handleKansen(interaction);
-    } else if (commandName == commandNames.timer) {
-        await handleTimer(interaction);
-    } else if (commandName == commandNames.pick) {
-        await handlePick(interaction);
     } else if (commandName == commandNames.voice_pick) {
         await handleVoicePick(interaction);
-    } else if (commandName == commandNames.buki) {
-        await handleBuki(interaction);
-    } else if (commandName == commandNames.show) {
-        await handleShow(interaction);
-    } else if (commandName == commandNames.help) {
-        await handleHelp(interaction);
     } else if (commandName == commandNames.ban) {
         await handleBan(interaction);
     } else if (commandName === commandNames.voice) {
-        if (!interaction.inGuild()) {
-            return;
-        }
         // 'インタラクションに失敗'が出ないようにするため
         await interaction.deferReply();
         await handleVoiceCommand(interaction);
@@ -137,5 +131,26 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
                 break;
         }
     }
-    return;
+}
+
+async function CommandsHandler(interaction: ChatInputCommandInteraction<CacheType>) {
+    const { commandName } = interaction;
+
+    if (commandName === commandNames.friend_code) {
+        await handleFriendCode(interaction);
+    } else if (commandName == commandNames.wiki) {
+        await handleWiki(interaction);
+    } else if (commandName == commandNames.kansen) {
+        await handleKansen(interaction);
+    } else if (commandName == commandNames.timer) {
+        await handleTimer(interaction);
+    } else if (commandName == commandNames.pick) {
+        await handlePick(interaction);
+    } else if (commandName == commandNames.buki) {
+        await handleBuki(interaction);
+    } else if (commandName == commandNames.show) {
+        await handleShow(interaction);
+    } else if (commandName == commandNames.help) {
+        await handleHelp(interaction);
+    }
 }

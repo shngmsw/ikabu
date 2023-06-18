@@ -1,10 +1,8 @@
-import { PermissionsBitField } from 'discord.js';
+import { ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 
-export async function handleBan(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
-
+export async function handleBan(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply({ ephemeral: false });
 

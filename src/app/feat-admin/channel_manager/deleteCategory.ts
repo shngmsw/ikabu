@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import { parse } from 'csv';
 import { stringify } from 'csv-stringify/sync';
-import { AttachmentBuilder, ChannelType, PermissionsBitField } from 'discord.js';
+import { AttachmentBuilder, ChannelType, ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
 import request from 'request';
 
 import { log4js_obj } from '../../../log4js_settings';
@@ -11,9 +11,7 @@ import { exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
-export async function handleDeleteCategory(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
-
+export async function handleDeleteCategory(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 

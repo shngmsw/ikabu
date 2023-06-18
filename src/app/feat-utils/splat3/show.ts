@@ -55,7 +55,7 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
     }
 }
 
-async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>, schedule: sp3Schedule, scheduleNum: $TSFixMe) {
+async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>, schedule: sp3Schedule, scheduleNum: number) {
     let title;
     if (scheduleNum == 0) {
         title = '現在';
@@ -124,7 +124,7 @@ async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>
     });
 }
 
-async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe, scheduleNum: $TSFixMe) {
+async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheType>, data: sp3Schedule, scheduleNum: number) {
     const regularData = await getRegularData(data, scheduleNum);
     assertExistCheck(regularData, 'regularData');
     const startDate = formatDatetime(regularData.startTime, dateformat.ymdwhm);
@@ -154,7 +154,7 @@ async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheTyp
     });
 }
 
-async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe, scheduleNum: $TSFixMe) {
+async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, data: sp3Schedule, scheduleNum: number) {
     const festData = await getFesData(data, scheduleNum);
     assertExistCheck(festData, 'festData');
     const startDate = formatDatetime(festData.startTime, dateformat.ymdwhm);

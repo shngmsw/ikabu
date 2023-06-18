@@ -2,15 +2,13 @@ import { ActionRowBuilder, MessageContextMenuCommandInteraction, ModalBuilder, T
 
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { assertExistCheck } from '../../../common/others';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function createRecruitEditor(interaction: MessageContextMenuCommandInteraction) {
-    if (!interaction.inGuild()) return;
+export async function createRecruitEditor(interaction: MessageContextMenuCommandInteraction<'cached' | 'raw'>) {
     try {
-        assertExistCheck(interaction.guild, 'guild');
-        const guild = await interaction.guild.fetch();
+        const guild = await getGuildByInteraction(interaction);
         const message = interaction.targetMessage;
         const messageId = message.id;
         const userId = interaction.member.user.id;
@@ -30,7 +28,7 @@ export async function createRecruitEditor(interaction: MessageContextMenuCommand
             return;
         }
 
-        interaction.showModal(createRecruitEditorModal(messageId));
+        await interaction.showModal(createRecruitEditorModal(messageId));
     } catch (error) {
         logger.error(error);
     }

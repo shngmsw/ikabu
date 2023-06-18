@@ -7,10 +7,11 @@ import { Readable } from 'stream';
 
 import conf from 'config-reloadable';
 import { SHA256 } from 'crypto-js';
+import { CacheType, ChatInputCommandInteraction, Message } from 'discord.js';
 import { VoiceText } from 'voice-text';
 
 import { searchDBMemberById } from '../../../common/manager/member_manager';
-import { exists } from '../../../common/others';
+import { exists, notExists } from '../../../common/others';
 
 const config = conf();
 interface VoiceTypes {
@@ -61,7 +62,7 @@ function readConfig() {
     return true;
 }
 
-export async function mode_api(msg: $TSFixMe) {
+export async function mode_api(msg: Message<true>) {
     if (mode === 1) {
         // ユーザーによって音声変える
         const member = await searchDBMemberById(msg.guild, msg.author.id);
@@ -87,7 +88,7 @@ export async function mode_api(msg: $TSFixMe) {
     }
 }
 
-export function bufferToStream(buffer: $TSFixMe) {
+export function bufferToStream(buffer: unknown) {
     const hwm = 1024 * 1024;
     const stream = new Readable({ highWaterMark: hwm });
     stream.push(buffer);
@@ -95,8 +96,8 @@ export function bufferToStream(buffer: $TSFixMe) {
     return stream;
 }
 
-async function messageReplace(message: $TSFixMe) {
-    const w_replace = (str: $TSFixMe) => {
+async function messageReplace(message: Message<true>) {
+    const w_replace = (str: string) => {
         const judge = /.*w$/g;
         if (str.match(judge)) {
             const pat = /(w)/g;
@@ -105,57 +106,65 @@ async function messageReplace(message: $TSFixMe) {
         return str;
     };
 
-    const url_delete = (str: $TSFixMe) => {
+    const url_delete = (str: string) => {
         const pat = /(https?:\/\/[\x21-\x7e]+)/g;
         return str.replace(pat, ' URL省略。');
     };
 
-    const emoji_delete = (str: $TSFixMe) => {
+    const emoji_delete = (str: string) => {
         const pat = /(<:\w*:\d*>)/g;
         return str.replace(pat, '');
     };
 
-    const role_mention_replace = (str: $TSFixMe): string => {
+    const role_mention_replace = (str: string): string => {
         const [matchAllElement] = str.matchAll(/<@&(\d*)>/g);
-        if (matchAllElement === undefined) return str;
+        if (notExists(matchAllElement)) return str;
         for (let i = 0; i < [matchAllElement].length; i++) {
-            const roleName = message.mentions.roles.get([matchAllElement][i][1]).name;
-            str = str.replace([matchAllElement][i][0], '@' + roleName);
+            const role = message.mentions.roles.get([matchAllElement][i][1]);
+            if (exists(role)) {
+                str = str.replace([matchAllElement][i][0], '@' + role.name);
+            }
         }
         return role_mention_replace(str);
     };
 
-    const nickname_mention_replace = (str: $TSFixMe): string => {
+    const nickname_mention_replace = (str: string): string => {
         const [matchAllElement] = str.matchAll(/<@!(\d*)>/g);
-        if (matchAllElement === undefined) return str;
+        if (notExists(matchAllElement)) return str;
         for (let i = 0; i < [matchAllElement].length; i++) {
-            const username = message.mentions.users.get([matchAllElement][i][1]).username;
-            str = str.replace([matchAllElement][i][0], '@' + username);
+            const user = message.mentions.users.get([matchAllElement][i][1]);
+            if (exists(user)) {
+                str = str.replace([matchAllElement][i][0], '@' + user.username);
+            }
         }
         return nickname_mention_replace(str);
     };
 
-    const mention_replace = (str: $TSFixMe): string => {
+    const mention_replace = (str: string): string => {
         const [matchAllElement] = str.matchAll(/<@(\d*)>/g);
-        if (matchAllElement === undefined) return str;
+        if (notExists(matchAllElement)) return str;
         for (let i = 0; i < [matchAllElement].length; i++) {
-            const username = message.mentions.users.get([matchAllElement][i][1]).username;
-            str = str.replace([matchAllElement][i][0], '@' + username);
+            const user = message.mentions.users.get([matchAllElement][i][1]);
+            if (exists(user)) {
+                str = str.replace([matchAllElement][i][0], '@' + user.username);
+            }
         }
         return mention_replace(str);
     };
 
-    const channel_replace = async (str: $TSFixMe): Promise<string> => {
+    const channel_replace = async (str: string): Promise<string> => {
         const [matchAllElement] = str.matchAll(/<#(\d*)>/g);
-        if (matchAllElement === undefined) return str;
+        if (notExists(matchAllElement)) return str;
         for (let i = 0; i < [matchAllElement].length; i++) {
-            const chName = await message.guild.channels.fetch([matchAllElement][i][1]).name;
-            str = str.replace([matchAllElement][i][0], chName);
+            const channel = await message.guild.channels.fetch([matchAllElement][i][1]);
+            if (exists(channel)) {
+                str = str.replace([matchAllElement][i][0], channel.name);
+            }
         }
         return await channel_replace(str);
     };
 
-    const over200_cut = (str: $TSFixMe) => {
+    const over200_cut = (str: string) => {
         if (str.length > 200) {
             const str200 = str.substr(0, 195) + '以下略';
             return str200;
@@ -176,14 +185,14 @@ async function messageReplace(message: $TSFixMe) {
     return yomiage_message;
 }
 
-export async function setting(interaction: $TSFixMe) {
+export async function setting(interaction: ChatInputCommandInteraction<CacheType>) {
     if (!interaction.isCommand()) return;
     if (!interaction.guild) return;
     const { options } = interaction;
     const subCommand = options.getSubcommand();
 
     if (exists(subCommand) && subCommand === 'type') {
-        const type = options.getString('音声の種類');
+        const type = options.getString('音声の種類', true);
         voicePattern1 = type;
         const voiceMessage = `読み上げ音声を${voiceLists1[type]}に設定したでし`;
 

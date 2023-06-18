@@ -3,7 +3,7 @@ import sqlite3 from 'sqlite3';
 import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
-let database: $TSFixMe;
+let database: sqlite3.Database;
 
 export class DBCommon {
     static init() {
@@ -21,8 +21,9 @@ export class DBCommon {
         return database;
     }
     static close() {
-        database.close((err: $TSFixMe) => {
+        database.close((err) => {
             if (err) {
+                // @ts-expect-error TS(2339): プロパティ 'errno' は型 'Error' に存在しません。
                 if (err.errno === 21) {
                     return logger.warn('already closed');
                 } else {
@@ -32,11 +33,10 @@ export class DBCommon {
         });
     }
 
-    static async run(sql: $TSFixMe, params?: $TSFixMe) {
-        return new Promise((resolve, reject) => {
-            database.run(sql, params, (err: $TSFixMe) => {
+    static async run(sql: string, callback?: (this: sqlite3.RunResult, err: Error | null) => void) {
+        return new Promise<void>((resolve, reject) => {
+            database.run(sql, callback, (err) => {
                 if (err) reject(err);
-                // @ts-expect-error TS(2794): Expected 1 arguments, but got 0. Did you forget to... Remove this comment to see the full error message
                 resolve();
             });
         });

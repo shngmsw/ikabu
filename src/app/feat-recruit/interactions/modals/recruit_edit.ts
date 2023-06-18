@@ -4,6 +4,7 @@ import { RecruitType } from '../../../../db/model/recruit';
 import { ParticipantService } from '../../../../db/participants_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { assertExistCheck, notExists } from '../../../common/others';
 import { sendStickyMessage } from '../../../common/sticky_message';
 import { sendEditRecruitLog } from '../../../logs/modals/recruit_modal_log';
@@ -13,16 +14,14 @@ import { availableRecruitString } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function recruitEdit(interaction: ModalSubmitInteraction, params: URLSearchParams) {
+export async function recruitEdit(interaction: ModalSubmitInteraction<'cached' | 'raw'>, params: URLSearchParams) {
     try {
         const messageId = params.get('mid');
         assertExistCheck(messageId, "params.get('mid')");
 
-        interaction.deferReply({ ephemeral: true });
-        if (!interaction.inGuild()) return;
+        await interaction.deferReply({ ephemeral: true });
 
-        assertExistCheck(interaction.guild, 'guild');
-        const guild = await interaction.guild.fetch();
+        const guild = await getGuildByInteraction(interaction);
 
         const oldRecruitData = await RecruitService.getRecruit(guild.id, messageId);
 
@@ -81,7 +80,7 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
     } catch (error) {
         logger.error(error);
         if (interaction.channel instanceof BaseGuildTextChannel) {
-            interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send('なんかエラー出てるわ');
         }
     }
 }

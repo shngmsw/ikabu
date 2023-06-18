@@ -7,10 +7,12 @@ import {
     AudioPlayerStatus,
     generateDependencyReport,
 } from '@discordjs/voice';
+import { CacheType, ChatInputCommandInteraction, Message, VoiceState } from 'discord.js';
 
 import { mode_api, bufferToStream } from './voice_bot_node';
 import { log4js_obj } from '../../../../log4js_settings';
-import { isNotEmpty, notExists } from '../../../common/others';
+import { searchAPIMemberById } from '../../../common/manager/member_manager';
+import { exists, isNotEmpty, notExists } from '../../../common/others';
 
 const infoLogger = log4js_obj.getLogger('info');
 const interactionLogger = log4js_obj.getLogger('interaction');
@@ -23,19 +25,21 @@ const subscriptions = new Map();
 // 読み上げ対象のDicordチャンネル保存用のMapです。
 const channels = new Map();
 
-const join = async (interaction: $TSFixMe) => {
+const join = async (interaction: ChatInputCommandInteraction<CacheType>) => {
     try {
-        const guildId = interaction.guild.id;
-        const channelId = interaction.channel.id;
-        const member = interaction.member;
+        if (!interaction.inCachedGuild()) return;
+        const guildId = interaction.guildId;
+        const channelId = interaction.channelId;
+        const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
 
         let subscription = subscriptions.get(guildId);
         if (!subscription) {
-            // yoshi-taroがボイスチャンネルに入っていなければ参加
+            if (notExists(member)) {
+                return await interaction.followUp('メンバー情報が取得できなかったでし！');
+            }
             if (!member.voice.channelId) {
                 // メンバーがVCにいるかチェック
-                await interaction.followUp('ボイチャに参加してからコマンドを使うでし！');
-                return;
+                return await interaction.followUp('ボイチャに参加してからコマンドを使うでし！');
             }
             const connection = joinVoiceChannel({
                 selfMute: false,
@@ -44,7 +48,7 @@ const join = async (interaction: $TSFixMe) => {
                 adapterCreator: member.voice.guild.voiceAdapterCreator,
             });
             subscription = connection.subscribe(createAudioPlayer());
-            connection.on('error', (error: $TSFixMe) => {
+            connection.on('error', (error) => {
                 logger.warn(error);
             });
             subscriptions.set(guildId, subscription);
@@ -56,15 +60,15 @@ const join = async (interaction: $TSFixMe) => {
             await interaction.followUp('他の部屋で営業中でし！');
         }
     } catch (error) {
-        kill(interaction);
+        await kill(interaction);
         interactionLogger.error(error);
     }
 };
 
-const kill = async (interaction: $TSFixMe) => {
+const kill = async (interaction: ChatInputCommandInteraction<CacheType>) => {
     try {
-        const guildId = interaction.guild.id;
-        const channelId = interaction.channel.id;
+        const guildId = interaction.guildId;
+        const channelId = interaction.channelId;
         const subscription = subscriptions.get(guildId);
         if (subscription && channels.get(guildId) === channelId) {
             subscription.connection.destroy();
@@ -79,13 +83,14 @@ const kill = async (interaction: $TSFixMe) => {
     }
 };
 
-export async function autokill(oldState: $TSFixMe) {
+export async function autokill(oldState: VoiceState) {
+    if (notExists(oldState.channel)) return;
     const guildId = oldState.guild.id;
     const channelId = oldState.channel.id;
-    const oldChannel = await oldState.guild.channels.fetch(oldState.channelId);
+    const oldChannel = await oldState.guild.channels.fetch(oldState.channel.id);
     const subscription = subscriptions.get(guildId);
-    if (isNotEmpty(subscription) && channels.get(guildId) === channelId) {
-        if (oldChannel.members.size != 1) {
+    if (exists(subscription) && channels.get(guildId) === channelId && exists(oldChannel)) {
+        if (oldChannel.isVoiceBased() && oldChannel.members.size != 1) {
             return;
         }
         subscription.connection.destroy();
@@ -95,17 +100,17 @@ export async function autokill(oldState: $TSFixMe) {
     }
 }
 
-export async function handleVoiceCommand(interaction: $TSFixMe) {
+export async function handleVoiceCommand(interaction: ChatInputCommandInteraction<CacheType>) {
     try {
         if (!interaction.isCommand()) return;
         const { options } = interaction;
         const subCommand = options.getSubcommand();
         switch (subCommand) {
             case 'join':
-                join(interaction);
+                await join(interaction);
                 break;
             case 'kill':
-                kill(interaction);
+                await kill(interaction);
                 break;
         }
     } catch (error) {
@@ -113,7 +118,7 @@ export async function handleVoiceCommand(interaction: $TSFixMe) {
     }
 }
 
-export async function play(msg: $TSFixMe) {
+export async function play(msg: Message<true>) {
     try {
         const { guildId, channelId } = msg;
         const subscription = subscriptions.get(guildId);
@@ -132,9 +137,7 @@ export async function play(msg: $TSFixMe) {
             player.play(resource);
             await entersState(player, AudioPlayerStatus.Idle, 1000 * 900);
         }
-    } catch (error: $TSFixMe) {
+    } catch (error) {
         logger.warn(error);
-        logger.warn(error.code);
-        logger.warn(error.message);
     }
 }

@@ -2,11 +2,13 @@ import fs from 'fs';
 
 import { parse } from 'csv';
 import { stringify } from 'csv-stringify/sync';
-import { AttachmentBuilder, ChannelType, PermissionsBitField } from 'discord.js';
+import { AttachmentBuilder, ChannelType, ChatInputCommandInteraction, Guild, PermissionsBitField, Role } from 'discord.js';
 import request from 'request';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { createChannel } from '../../common/manager/channel_manager';
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { createRole, searchRoleById, setColorToRole, setRoleToMember } from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
 
@@ -22,22 +24,23 @@ const INDEX_MEMBER_ID_START = 8;
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
-export async function handleCreateRoom(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
-
+export async function handleCreateRoom(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
     const attachment = options.getAttachment('csv');
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
+    const guild = await getGuildByInteraction(interaction);
+    const member = await searchAPIMemberById(guild, interaction.member.user.id);
+    assertExistCheck(member, 'member');
+    if (!member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
         return await interaction.editReply('チャンネルを管理する権限がないでし！');
     }
 
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
+    if (!member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
         return await interaction.editReply('ロールを管理する権限がないでし！');
     }
 
-    if (!attachment.size) {
+    if (!member.size) {
         return await interaction.editReply('CSVファイルを添付するでし！');
     }
 
@@ -45,7 +48,7 @@ export async function handleCreateRoom(interaction: $TSFixMe) {
 
     try {
         request(attachment.url).pipe(
-            parse(async function (err: $TSFixMe, data: $TSFixMe) {
+            parse(async function (err, data) {
                 // i = CSV行数
                 // data[i][0] カテゴリID (カテゴリには権限がつかない)
                 // data[i][1] カテゴリ名 (空の場合カテゴリなし)
@@ -63,7 +66,7 @@ export async function handleCreateRoom(interaction: $TSFixMe) {
 
                 const resultData = [];
 
-                const guild = await interaction.guild.fetch();
+                const guild = await getGuildByInteraction(interaction);
 
                 resultData.push([
                     'カテゴリID',
@@ -102,7 +105,7 @@ export async function handleCreateRoom(interaction: $TSFixMe) {
                             channelType = checkChannelType(channelType);
 
                             if (channelType !== '') {
-                                if (channelType != 'ERROR!') {
+                                if (channelType !== 'ERROR!') {
                                     channelId = await createChannel(guild, channelName, channelType, categoryId);
                                 }
                             }
@@ -112,15 +115,14 @@ export async function handleCreateRoom(interaction: $TSFixMe) {
 
                         const roleId = await createRole(guild, roleName);
 
-                        if (exists(roleId)) {
-                            // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
-                            await setRoleToChanel(guild, roleId, channelId);
+                        if (exists(roleId) && exists(channelId)) {
+                            await setRoleToChanel(guild, roleId, channelId, channelType);
 
                             const role = await searchRoleById(guild, roleId);
                             assertExistCheck(role);
 
                             // the role will be displayed separately from other members
-                            role.setHoist(true);
+                            await role.setHoist(true);
 
                             roleColor = await setRoleColor(guild, role, roleColor, i);
                         }
@@ -189,20 +191,22 @@ function checkChannelType(channelType: $TSFixMe) {
     }
 }
 
-async function setRoleToChanel(guild: $TSFixMe, roleId: $TSFixMe, channelId: $TSFixMe, channelType: $TSFixMe) {
+async function setRoleToChanel(guild: Guild, roleId: string, channelId: string, channelType: string) {
     // set permission to channel
-    if (exists(channelId) && channelType != 'ERROR!') {
+    if (exists(channelId) && channelType !== 'ERROR!') {
         const channel = await guild.channels.fetch(channelId);
-        channel.permissionOverwrites.edit(roleId, {
-            ViewChannel: true,
-        });
-        await channel.permissionOverwrites.edit(guild.roles.everyone.id, {
-            ViewChannel: false,
-        });
+        if (exists(channel) && !channel.isDMBased() && !channel.isThread()) {
+            await channel.permissionOverwrites.edit(roleId, {
+                ViewChannel: true,
+            });
+            await channel.permissionOverwrites.edit(guild.roles.everyone.id, {
+                ViewChannel: false,
+            });
+        }
     }
 }
 
-async function setRoleColor(guild: $TSFixMe, role: $TSFixMe, roleColor: $TSFixMe, index: $TSFixMe) {
+async function setRoleColor(guild: Guild, role: Role, roleColor: string, index: number) {
     const originRoleColor = role.hexColor;
     let color;
 
@@ -238,7 +242,7 @@ async function setRoleColor(guild: $TSFixMe, role: $TSFixMe, roleColor: $TSFixMe
             '#E60033',
         ];
 
-        const colorIndex: number = index % 24;
+        const colorIndex = index % 24;
         color = await setColorToRole(guild, role, colorList[colorIndex]);
     }
 

@@ -1,3 +1,5 @@
+import { VoiceState } from 'discord.js';
+
 import { log4js_obj } from '../../log4js_settings';
 import { exists, notExists } from '../common/others';
 import { autokill } from '../feat-utils/voice/tts/discordjs_voice';
@@ -5,22 +7,22 @@ import { disableLimit } from '../feat-utils/voice/voice_locker';
 
 const logger = log4js_obj.getLogger('voiceStateUpdate');
 
-export async function call(oldState: $TSFixMe, newState: $TSFixMe) {
+export async function call(oldState: VoiceState, newState: VoiceState) {
     try {
         if (oldState.channelId === newState.channelId) {
             // ここはミュートなどの動作を行ったときに発火する場所
         } else if (notExists(oldState.channelId) && exists(newState.channelId)) {
             // ここはconnectしたときに発火する場所
-            deleteLimitPermission(newState);
+            await deleteLimitPermission(newState);
         } else if (exists(oldState.channelId) && notExists(newState.channelId)) {
             // ここはdisconnectしたときに発火する場所
-            disableLimit(oldState);
-            autokill(oldState);
+            await disableLimit(oldState);
+            await autokill(oldState);
         } else {
             // ここはチャンネル移動を行ったときに発火する場所
-            deleteLimitPermission(newState);
-            disableLimit(oldState);
-            autokill(oldState);
+            await deleteLimitPermission(newState);
+            await disableLimit(oldState);
+            await autokill(oldState);
         }
     } catch (error) {
         logger.error(error);
@@ -28,10 +30,15 @@ export async function call(oldState: $TSFixMe, newState: $TSFixMe) {
 }
 
 // 募集時のVCロックの解除
-async function deleteLimitPermission(newState: $TSFixMe) {
-    const newChannel = await newState.guild.channels.fetch(newState.channelId);
-    if (newChannel.members.size != 0) {
-        newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
-        newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
+async function deleteLimitPermission(newState: VoiceState) {
+    newState.channel;
+    if (exists(newState.channelId)) {
+        const newChannel = await newState.guild.channels.fetch(newState.channelId);
+        if (exists(newChannel) && newChannel.isVoiceBased()) {
+            if (newChannel.members.size !== 0 && exists(newState.member)) {
+                await newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
+                await newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
+            }
+        }
     }
 }

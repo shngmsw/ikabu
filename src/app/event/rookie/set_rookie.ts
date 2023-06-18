@@ -37,7 +37,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
         );
 
         if (!(beginnerRole instanceof Role)) {
-            lobbyChannel.send(
+            await lobbyChannel.send(
                 '「新入部員ロールのIDが設定されていないでし！\n気付いた方はサポートセンターまでお問合わせお願いします。」とのことでし！',
             );
         } else {

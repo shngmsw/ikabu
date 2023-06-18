@@ -32,7 +32,7 @@ export class TeamDividerService {
      * @param {*} messageId 登録メッセージID
      * @returns 表示用メッセージ
      */
-    static async registeredMembersStrings(message_id: $TSFixMe) {
+    static async registeredMembersStrings(message_id: string) {
         const db = DBCommon.open();
         db.all = util.promisify(db.all);
         const results = (await db.all(
@@ -66,7 +66,7 @@ export class TeamDividerService {
         return [usersString, results.length];
     }
 
-    static async deleteMemberFromDB(message_id: $TSFixMe, member_id: $TSFixMe) {
+    static async deleteMemberFromDB(message_id: string, member_id: string) {
         try {
             DBCommon.init();
 
@@ -84,7 +84,7 @@ export class TeamDividerService {
      * DBにメンバーを登録・試合回数更新時にも使用
      * @param {*} TeamDivider
      */
-    static async registerMemberToDB(teamDivider: $TSFixMe) {
+    static async registerMemberToDB(teamDivider: TeamDivider) {
         try {
             DBCommon.init();
 
@@ -180,7 +180,7 @@ export class TeamDividerService {
      * テーブルから該当のチーム分け情報を削除
      * @param {*} messageId 登録メッセージID
      */
-    static async deleteAllMemberFromDB(message_id: $TSFixMe) {
+    static async deleteAllMemberFromDB(message_id: string) {
         try {
             DBCommon.init();
             await DBCommon.run(`DELETE from team_divider where message_id = ?`, [message_id]);
@@ -197,7 +197,7 @@ export class TeamDividerService {
      * @param {*} matchNum 該当試合数
      * @param {*} team 該当チーム(alfa=0, bravo=1, 観戦=2)
      */
-    static async setTeam(message_id: $TSFixMe, member_id: $TSFixMe, match_num: $TSFixMe, team: $TSFixMe) {
+    static async setTeam(message_id: string, member_id: string, match_num: number, team: number) {
         try {
             DBCommon.init();
             await DBCommon.run(`UPDATE team_divider SET team = $1 WHERE message_id = $2 and member_id = $3 and match_num = $4`, [
@@ -219,7 +219,7 @@ export class TeamDividerService {
      * @param {*} matchNum 該当試合数
      * @param {*} count 試合参加回数
      */
-    static async setCount(message_id: $TSFixMe, member_id: $TSFixMe, match_num: $TSFixMe, count: $TSFixMe) {
+    static async setCount(message_id: string, member_id: string, match_num: number, count: number) {
         try {
             DBCommon.init();
 
@@ -240,7 +240,7 @@ export class TeamDividerService {
      * @param {*} matchNum 該当試合数
      * @param {*} winCount 勝利数
      */
-    static async setWin(message_id: $TSFixMe, member_id: $TSFixMe, match_num: $TSFixMe, win_count: $TSFixMe) {
+    static async setWin(message_id: string, member_id: string, match_num: number, win_count: number) {
         try {
             DBCommon.init();
             await DBCommon.run(`UPDATE team_divider SET win = $1 WHERE message_id = $2 and member_id = $3 and match_num = $4`, [
@@ -260,7 +260,7 @@ export class TeamDividerService {
      * @param {*} messageId 登録メッセージID
      * @param {*} flag true=隠す or false=表示
      */
-    static async setHideWin(message_id: $TSFixMe, flag: $TSFixMe) {
+    static async setHideWin(message_id: string, flag: boolean) {
         try {
             DBCommon.init();
             await DBCommon.run(`UPDATE team_divider SET hide_win = $1 WHERE message_id = $2`, [flag ? 1 : 0, message_id]);
@@ -277,7 +277,7 @@ export class TeamDividerService {
      * @param {*} matchNum 該当試合数
      * @param {*} flag true or false
      */
-    static async setForceSpectate(message_id: $TSFixMe, member_id: $TSFixMe, match_num: $TSFixMe, flag: $TSFixMe) {
+    static async setForceSpectate(message_id: string, member_id: string, match_num: number, flag: boolean) {
         try {
             DBCommon.init();
             await DBCommon.run(`UPDATE team_divider SET force_spectate = $1 WHERE message_id = $2 and member_id = $3 and match_num = $4`, [
@@ -412,10 +412,10 @@ export class TeamDividerService {
      * @param {*} messageId 登録メッセージID
      * @param {*} matchNum 該当試合数
      */
-    static async deleteMatchingResult(message_id: $TSFixMe, match_num: $TSFixMe) {
+    static async deleteMatchingResult(message_id: string, match_num: number) {
         try {
             DBCommon.init();
-            DBCommon.run(`DELETE from team_divider where message_id = $1 and match_num = $2`, [message_id, match_num]);
+            await DBCommon.run(`DELETE from team_divider where message_id = $1 and match_num = $2`, [message_id, match_num]);
             DBCommon.close();
         } catch (err) {
             logger.error(err);

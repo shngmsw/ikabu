@@ -1,4 +1,4 @@
-import { PermissionsBitField } from 'discord.js';
+import { ButtonInteraction, CacheType, PermissionsBitField } from 'discord.js';
 
 import { tagIdsEmbed } from './tag_ids_embed';
 import { log4js_obj } from '../../../log4js_settings';
@@ -7,7 +7,7 @@ import { isEmpty } from '../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function setResolvedTag(interaction: $TSFixMe) {
+export async function setResolvedTag(interaction: ButtonInteraction<CacheType>) {
     try {
         const thread = interaction.channel;
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageThreads)) {

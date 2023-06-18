@@ -7,6 +7,7 @@ import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, checkTeamContest, getSalmonData, getSchedule, getTeamContestData } from '../../../common/apis/splatoon3_ink';
 import { sp3Schedule } from '../../../common/apis/types/schedule';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
@@ -19,18 +20,15 @@ import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inGuild()) return;
-
-    assertExistCheck(interaction.guild, 'guild');
+export async function salmonRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
-    const recruitNum = options.getInteger('募集人数') ?? -1;
+    const recruitNum = options.getInteger('募集人数', true);
     let condition = options.getString('参加条件');
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const subcommand = options.getSubcommand() ?? 'run';
     const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
     const user1 = options.getUser('参加者1');
@@ -147,7 +145,7 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction) {
 }
 
 async function sendSalmonRun(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
     type: number,
     schedule: sp3Schedule,
     txt: string,
@@ -158,10 +156,9 @@ async function sendSalmonRun(
     user1: User | null,
     user2: User | null,
 ) {
-    assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
     let channelName = null;
     if (exists(reservedChannel)) {

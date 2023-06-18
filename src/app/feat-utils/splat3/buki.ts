@@ -3,8 +3,9 @@ import fetch from 'node-fetch';
 
 import { Member } from '../../../db/model/member';
 import { log4js_obj } from '../../../log4js_settings';
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../common/manager/member_manager';
-import { assertExistCheck, exists, randomSelect } from '../../common/others';
+import { exists, randomSelect } from '../../common/others';
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -27,8 +28,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
 
         let member: User | Member | null;
         if (interaction.inGuild()) {
-            assertExistCheck(interaction.guild, 'guild');
-            const guild = await interaction.guild.fetch();
+            const guild = await getGuildByInteraction(interaction);
             member = await searchDBMemberById(guild, interaction.member.user.id);
         } else {
             member = interaction.user;

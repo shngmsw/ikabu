@@ -1,6 +1,7 @@
 import {
     ActionRowBuilder,
     ButtonBuilder,
+    ButtonInteraction,
     ButtonStyle,
     CacheType,
     ChatInputCommandInteraction,
@@ -13,6 +14,7 @@ import { FriendCodeService } from '../../../db/friend_code_service.js';
 import { Member } from '../../../db/model/member.js';
 import { log4js_obj } from '../../../log4js_settings.js';
 import { searchChannelById } from '../../common/manager/channel_manager.js';
+import { getGuildByInteraction } from '../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../common/manager/member_manager.js';
 import { assertExistCheck, exists } from '../../common/others.js';
 const logger = log4js_obj.getLogger();
@@ -24,9 +26,9 @@ export async function handleFriendCode(interaction: ChatInputCommandInteraction<
     const options = interaction.options;
     const subCommand = options.getSubcommand();
     if (subCommand === 'add') {
-        insertFriendCode(interaction);
+        void insertFriendCode(interaction);
     } else if (subCommand === 'show') {
-        selectFriendCode(interaction);
+        void selectFriendCode(interaction);
     }
 }
 
@@ -36,8 +38,7 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
     let targetUser: Member | User | null;
     let userId: string;
     if (interaction.inGuild()) {
-        assertExistCheck(interaction.guild, 'guild');
-        const guild = interaction.guild;
+        const guild = await getGuildByInteraction(interaction);
         targetUser = await searchDBMemberById(guild, interaction.member.user.id);
         userId = interaction.member.user.id;
     } else {
@@ -65,8 +66,7 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
 
     if (interaction.inGuild()) {
         assertExistCheck(process.env.CHANNEL_ID_INTRODUCTION, 'CHANNEL_ID_INTRODUCTION');
-        assertExistCheck(interaction.guild, 'guild');
-        const guild = await interaction.guild.fetch();
+        const guild = await getGuildByInteraction(interaction);
         const channel = await searchChannelById(guild, process.env.CHANNEL_ID_INTRODUCTION);
         if (exists(channel) && channel.isTextBased()) {
             let result = null;
@@ -141,7 +141,7 @@ async function insertFriendCode(interaction: ChatInputCommandInteraction<CacheTy
         userId = interaction.user.id;
     }
     const options = interaction.options;
-    const code = options.getString('フレンドコード') ?? 'ERROR';
+    const code = options.getString('フレンドコード', true);
     const fcUrl = options.getString('フレンドコードurl');
 
     if (exists(fcUrl) && !isFcUrl(fcUrl)) {
@@ -154,7 +154,7 @@ async function insertFriendCode(interaction: ChatInputCommandInteraction<CacheTy
     });
 }
 
-export async function deleteFriendCode(interaction: $TSFixMe) {
+export async function deleteFriendCode(interaction: ButtonInteraction<CacheType>) {
     await interaction.message.delete();
 }
 

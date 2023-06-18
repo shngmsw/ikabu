@@ -7,6 +7,7 @@ import { ParticipantService } from '../../../../db/participants_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, exists } from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
@@ -19,17 +20,15 @@ import {
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function cancelNotify(interaction: ButtonInteraction) {
-    if (!interaction.inGuild()) return;
+export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'raw'>) {
+    if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
         });
 
-        assertExistCheck(interaction.guild, 'guild');
+        const guild = await getGuildByInteraction(interaction);
         assertExistCheck(interaction.channel, 'channel');
-
-        const guild = await interaction.guild.fetch();
 
         const embedMessageId = interaction.message.id;
 

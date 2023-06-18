@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, ButtonInteraction, ColorResolvable, EmbedBuilder } from 'discord.js';
+import { BaseGuildTextChannel, ButtonInteraction, CacheType, ColorResolvable, EmbedBuilder } from 'discord.js';
 
 import { Member } from '../../../db/model/member';
 import { Participant } from '../../../db/model/participant';
@@ -6,7 +6,7 @@ import { assertExistCheck } from '../../common/others';
 import { sendEmbedsWebhook } from '../../common/webhook';
 
 export async function sendRecruitButtonLog(
-    interaction: ButtonInteraction,
+    interaction: ButtonInteraction<CacheType>,
     member: Member,
     hostMember: Participant,
     buttonName: string,

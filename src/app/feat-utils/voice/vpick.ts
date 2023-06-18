@@ -1,6 +1,6 @@
-export async function handleVoicePick(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
+import { ChatInputCommandInteraction } from 'discord.js';
 
+export async function handleVoicePick(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 

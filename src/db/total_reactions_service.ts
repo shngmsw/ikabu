@@ -21,7 +21,7 @@ export class TotalReactionsService {
         }
     }
 
-    static async save(emoji_id: $TSFixMe, emoji_name: $TSFixMe, count: $TSFixMe) {
+    static async save(emoji_id: string, emoji_name: string, count: number) {
         try {
             DBCommon.init();
             await DBCommon.run(`insert or replace into total_reactions (emoji_id, emoji_name, count)  values ($1, $2, $3)`, [
@@ -35,7 +35,7 @@ export class TotalReactionsService {
         }
     }
 
-    static async update(reaction_seq: $TSFixMe, count: $TSFixMe) {
+    static async update(reaction_seq: number, count: number) {
         try {
             DBCommon.init();
             await DBCommon.run(`update total_reactions set count = ${count}  where reaction_seq = ${reaction_seq}`);

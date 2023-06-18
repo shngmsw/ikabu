@@ -1,17 +1,15 @@
 import fs from 'fs';
 
 import { stringify } from 'csv-stringify/sync';
-import { AttachmentBuilder, PermissionsBitField } from 'discord.js';
+import { AttachmentBuilder, ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { createRole, searchRoleById, searchRoleIdByName, setColorToRole } from '../../common/manager/role_manager';
-import { assertExistCheck, exists, isEmpty, isNotEmpty, notExists } from '../../common/others';
+import { assertExistCheck, exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('RoleManager');
 
-export async function handleCreateRole(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
-
+export async function handleCreateRole(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
@@ -23,14 +21,14 @@ export async function handleCreateRole(interaction: $TSFixMe) {
     const guild = await interaction.guild.fetch();
 
     try {
-        const roleName = options.getString('ロール名');
+        const roleName = options.getString('ロール名', true);
         let colorInput = options.getString('ロールカラー');
 
-        if (isNotEmpty(await searchRoleIdByName(guild, roleName))) {
+        if (exists(await searchRoleIdByName(guild, roleName))) {
             return await interaction.followUp('その名前のロールはもうあるでし！\n別のロール名を使うでし！');
         }
 
-        if (isEmpty(colorInput)) {
+        if (notExists(colorInput)) {
             await interaction.followUp('色はこっちで決めさせてもらうでし！');
         } else if (!colorInput.match('^#([\\da-fA-F]{6})$')) {
             await interaction.followUp(
@@ -46,7 +44,7 @@ export async function handleCreateRole(interaction: $TSFixMe) {
         const role = await searchRoleById(guild, roleId);
         assertExistCheck(role);
         const colorCode = await setColorToRole(guild, role, colorInput);
-        role.setHoist(true);
+        await role.setHoist(true);
 
         await interaction.followUp(
             'ロール名`' + role.name + '`を作ったでし！\nロールIDは`' + roleId + '`、カラーコードは`' + colorCode + '`でし！',
@@ -57,9 +55,7 @@ export async function handleCreateRole(interaction: $TSFixMe) {
     }
 }
 
-export async function handleDeleteRole(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
-
+export async function handleDeleteRole(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
@@ -68,7 +64,7 @@ export async function handleDeleteRole(interaction: $TSFixMe) {
     }
 
     let roleIdList = [];
-    const roleId1 = options.getMentionable('ロール名1');
+    const roleId1 = options.getMentionable('ロール名1', true);
     const roleId2 = options.getMentionable('ロール名2');
     const roleId3 = options.getMentionable('ロール名3');
     roleIdList.push(roleId1.id);
@@ -126,9 +122,7 @@ export async function handleDeleteRole(interaction: $TSFixMe) {
     });
 }
 
-export async function handleAssignRole(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
-
+export async function handleAssignRole(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
@@ -138,8 +132,8 @@ export async function handleAssignRole(interaction: $TSFixMe) {
     }
 
     try {
-        const targetRoleId = options.getMentionable('ターゲットロール').id;
-        const assignRole = options.getMentionable('割当ロール');
+        const targetRoleId = options.getMentionable('ターゲットロール', true).id;
+        const assignRole = options.getMentionable('割当ロール', true);
         const assignRoleId = assignRole.id;
 
         const targetRole = await searchRoleById(interaction.guild, targetRoleId);
@@ -158,9 +152,7 @@ export async function handleAssignRole(interaction: $TSFixMe) {
     }
 }
 
-export async function handleUnassignRole(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
-
+export async function handleUnassignRole(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;

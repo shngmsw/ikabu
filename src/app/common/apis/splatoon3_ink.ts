@@ -519,7 +519,7 @@ export async function getSalmonData(schedule: sp3Schedule, num: number) {
         const salmonSetting = salmonList[num].setting;
 
         const locale = await getLocale();
-        const result = {
+        const result: SalmonInfo = {
             startTime: salmonList[num].startTime,
             endTime: salmonList[num].endTime,
             stage: await stage2txt(locale, salmonSetting.coopStage.id),

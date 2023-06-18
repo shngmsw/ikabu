@@ -1,6 +1,6 @@
 import { URLSearchParams } from 'url';
 
-import { ModalSubmitInteraction } from 'discord.js';
+import { CacheType, ModalSubmitInteraction } from 'discord.js';
 
 import { isNotEmpty } from '../common/others';
 import {
@@ -12,7 +12,7 @@ import {
 } from '../feat-recruit/interactions/modals/extract_recruit_modal';
 import { recruitEdit } from '../feat-recruit/interactions/modals/recruit_edit';
 
-export async function call(interaction: ModalSubmitInteraction) {
+export async function call(interaction: ModalSubmitInteraction<CacheType>) {
     const params = new URLSearchParams(interaction.customId);
     if (isNotEmpty(params.get('recm'))) {
         switch (params.get('recm')) {
