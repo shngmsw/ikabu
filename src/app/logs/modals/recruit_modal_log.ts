@@ -1,5 +1,5 @@
 import { Recruit } from '@prisma/client';
-import { EmbedBuilder, Guild, ModalSubmitInteraction } from 'discord.js';
+import { ComponentType, EmbedBuilder, Guild, ModalSubmitInteraction } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
@@ -20,9 +20,9 @@ export async function sendRecruitModalLog(interaction: ModalSubmitInteraction<'r
     let commandLog = '';
 
     for (const subcomponents of components) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore Discord.jsの型定義に反しているが、実際には存在する かつ これがないと詳細なログが取れない
-        commandLog = commandLog + subcomponents.components[0].customId + ': ' + subcomponents.components[0].value + '\n';
+        if (subcomponents.components[0].type === ComponentType.TextInput) {
+            commandLog = commandLog + subcomponents.components[0].customId + ': ' + subcomponents.components[0].value + '\n';
+        }
     }
 
     const embed = new EmbedBuilder();
