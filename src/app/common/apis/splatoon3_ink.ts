@@ -22,13 +22,8 @@ export async function getSchedule() {
             return await updateSchedule();
         }
 
-        const regularList = getRegularList(schedule); // レギュラーの1つ目の時間でフェッチするか決定
-        assertExistCheck(regularList, 'regularSchedule');
-        const endDatetime = new Date(regularList[0].endTime).getTime();
-        const nowDatetime = new Date().getTime();
-
-        // スケジュールデータの終了時間よりも現在の時間が遅い場合
-        if (endDatetime - nowDatetime < 0) {
+        // レギュラーのデータが12個未満ならフェッチする
+        if (getRegularList(schedule).length < 12) {
             return await updateSchedule();
         } else {
             return schedule;
