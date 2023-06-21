@@ -8,7 +8,7 @@ import { sendEmbedsWebhook } from '../../common/webhook';
 export async function sendRecruitButtonLog(
     interaction: ButtonInteraction<CacheType>,
     member: Member,
-    hostMember: ParticipantMember,
+    recruiter: ParticipantMember,
     buttonName: string,
     color: ColorResolvable,
 ) {
@@ -20,7 +20,7 @@ export async function sendRecruitButtonLog(
         name: `${member.displayName} [${member.userId}]`,
         iconURL: member.iconUrl,
     });
-    embed.setDescription('**募集主**: ' + hostMember.member.displayName + ' [' + hostMember.userId + ']');
+    embed.setDescription('**募集主**: ' + recruiter.member.displayName + ' [' + recruiter.userId + ']');
     embed.setColor(color);
     embed.setTimestamp(interaction.createdAt);
     assertExistCheck(process.env.BUTTON_LOG_WEBHOOK_URL, 'BUTTON_LOG_WEBHOOK_URL');

@@ -28,7 +28,7 @@ export async function recruitFesCanvas(
     opCode: number,
     remaining: number,
     count: number,
-    host: Member,
+    recruiter: Member,
     user1: Member | null,
     user2: Member | null,
     user3: Member | null,
@@ -61,9 +61,9 @@ export async function recruitFesCanvas(
     recruitCtx.restore();
 
     // 募集主の画像
-    const hostImage = await Canvas.loadImage(host.iconUrl ?? modalRecruit.placeHold);
+    const recruiterImage = await Canvas.loadImage(recruiter.iconUrl ?? modalRecruit.placeHold);
     recruitCtx.save();
-    drawArcImage(recruitCtx, hostImage, 40, 120, 50);
+    drawArcImage(recruitCtx, recruiterImage, 40, 120, 50);
     recruitCtx.strokeStyle = '#1e1f23';
     recruitCtx.lineWidth = 9;
     recruitCtx.stroke();
@@ -96,8 +96,8 @@ export async function recruitFesCanvas(
         }
     }
 
-    const hostIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
-    recruitCtx.drawImage(hostIcon, 0, 0, hostIcon.width, hostIcon.height, 90, 172, 75, 75);
+    const recruiterIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
+    recruitCtx.drawImage(recruiterIcon, 0, 0, recruiterIcon.width, recruiterIcon.height, 90, 172, 75, 75);
 
     fillTextWithStroke(recruitCtx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
 

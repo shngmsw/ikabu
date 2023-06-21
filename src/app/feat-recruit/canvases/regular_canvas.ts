@@ -28,7 +28,7 @@ export async function recruitRegularCanvas(
     opCode: number,
     remaining: number,
     count: number,
-    host: Member,
+    recruiter: Member,
     user1: Member | null,
     user2: Member | null,
     user3: Member | null,
@@ -58,9 +58,9 @@ export async function recruitRegularCanvas(
     fillTextWithStroke(recruitCtx, 'レギュラーマッチ', '51px Splatfont', '#000000', '#B3FF00', 3, 115, 80);
 
     // 募集主の画像
-    const hostImage = await Canvas.loadImage(host.iconUrl ?? modalRecruit.placeHold);
+    const recruiterImage = await Canvas.loadImage(recruiter.iconUrl ?? modalRecruit.placeHold);
     recruitCtx.save();
-    drawArcImage(recruitCtx, hostImage, 40, 120, 40);
+    drawArcImage(recruitCtx, recruiterImage, 40, 120, 40);
     recruitCtx.strokeStyle = '#1e1f23';
     recruitCtx.lineWidth = 9;
     recruitCtx.stroke();
@@ -113,8 +113,8 @@ export async function recruitRegularCanvas(
         }
     }
 
-    const hostIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
-    recruitCtx.drawImage(hostIcon, 0, 0, hostIcon.width, hostIcon.height, 75, 155, 75, 75);
+    const recruiterIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
+    recruitCtx.drawImage(recruiterIcon, 0, 0, recruiterIcon.width, recruiterIcon.height, 75, 155, 75, 75);
 
     let channelString;
     if (notExists(channelName)) {
