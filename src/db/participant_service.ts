@@ -5,7 +5,7 @@ import { RecruitService } from './recruit_service.js';
 import { log4js_obj } from '../log4js_settings.js';
 const logger = log4js_obj.getLogger('database');
 
-export type participantMember = {
+export type ParticipantMember = {
     member: Member;
     userId: string;
     joinedAt: Date;
@@ -109,7 +109,7 @@ export class ParticipantService {
         }
     }
 
-    static async getParticipant(guildId: string, messageId: string, userId: string): Promise<participantMember | null> {
+    static async getParticipant(guildId: string, messageId: string, userId: string): Promise<ParticipantMember | null> {
         try {
             const participant = await prisma.participant.findUnique({
                 where: {
@@ -133,7 +133,7 @@ export class ParticipantService {
         }
     }
 
-    static async getAllParticipants(guildId: string, messageId: string): Promise<participantMember[]> {
+    static async getAllParticipants(guildId: string, messageId: string): Promise<ParticipantMember[]> {
         try {
             const participants = await prisma.participant.findMany({
                 where: {

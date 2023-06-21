@@ -1,14 +1,14 @@
 import { Member } from '@prisma/client';
 import { BaseGuildTextChannel, ButtonInteraction, CacheType, ColorResolvable, EmbedBuilder } from 'discord.js';
 
-import { participantMember } from '../../../db/participant_service';
+import { ParticipantMember } from '../../../db/participant_service';
 import { assertExistCheck } from '../../common/others';
 import { sendEmbedsWebhook } from '../../common/webhook';
 
 export async function sendRecruitButtonLog(
     interaction: ButtonInteraction<CacheType>,
     member: Member,
-    hostMember: participantMember,
+    hostMember: ParticipantMember,
     buttonName: string,
     color: ColorResolvable,
 ) {

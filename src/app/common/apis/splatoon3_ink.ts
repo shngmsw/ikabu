@@ -1,8 +1,8 @@
 import NodeCache from 'node-cache';
 import fetch from 'node-fetch';
 
-import { sp3Locale } from './types/locale';
-import { sp3Schedule } from './types/schedule';
+import { Sp3Locale } from './types/locale';
+import { Sp3Schedule } from './types/schedule';
 import { log4js_obj } from '../../../log4js_settings';
 import { isDateWithinRange } from '../datetime';
 import { assertExistCheck, exists, notExists } from '../others';
@@ -15,7 +15,7 @@ const storageCache = new NodeCache();
 
 export async function getSchedule() {
     try {
-        const schedule = storageCache.get('sp3_schedule') as sp3Schedule;
+        const schedule = storageCache.get('sp3_schedule') as Sp3Schedule;
 
         if (notExists(schedule)) {
             logger.warn('schedule data was not found. (fetch)');
@@ -75,7 +75,7 @@ export async function updateSchedule() {
  * @param num スケジュール番号
  * @returns フェス中ならtrueを返す
  */
-export function checkFes(schedule: sp3Schedule, num: number) {
+export function checkFes(schedule: Sp3Schedule, num: number) {
     try {
         const festList = getFesList(schedule);
         const festSetting = festList[num].festMatchSetting;
@@ -91,7 +91,7 @@ export function checkFes(schedule: sp3Schedule, num: number) {
  * @param num スケジュール番号
  * @returns ビッグラン中ならtrueを返す
  */
-export function checkBigRun(schedule: sp3Schedule, num: number) {
+export function checkBigRun(schedule: Sp3Schedule, num: number) {
     try {
         const bigRunList = getBigRunList(schedule);
 
@@ -120,7 +120,7 @@ export function checkBigRun(schedule: sp3Schedule, num: number) {
  * @param num スケジュール番号
  * @returns チームコンテスト中ならtrueを返す
  */
-export function checkTeamContest(schedule: sp3Schedule, num: number) {
+export function checkTeamContest(schedule: Sp3Schedule, num: number) {
     try {
         const teamContestList = getTeamContestList(schedule);
 
@@ -153,7 +153,7 @@ export function checkTeamContest(schedule: sp3Schedule, num: number) {
  * dataからレギュラー用のリストだけ返す
  * @param schedule スケジュールデータ
  */
-export function getRegularList(schedule: sp3Schedule) {
+export function getRegularList(schedule: Sp3Schedule) {
     try {
         const nodes = schedule.regularSchedules.nodes;
         const result = [];
@@ -175,7 +175,7 @@ export function getRegularList(schedule: sp3Schedule) {
  * dataからバンカラ用のリストだけ返す
  * @param schedule スケジュールデータ
  */
-export function getAnarchyList(schedule: sp3Schedule) {
+export function getAnarchyList(schedule: Sp3Schedule) {
     try {
         const nodes = schedule.bankaraSchedules.nodes;
         const result = [];
@@ -197,7 +197,7 @@ export function getAnarchyList(schedule: sp3Schedule) {
  * dataからリグマ用のリストだけ返す
  * @param schedule スケジュールデータ
  */
-export function getEventList(schedule: sp3Schedule) {
+export function getEventList(schedule: Sp3Schedule) {
     try {
         return schedule.eventSchedules.nodes;
     } catch (error) {
@@ -210,7 +210,7 @@ export function getEventList(schedule: sp3Schedule) {
  * dataからサーモン用のリストだけ返す
  * @param schedule スケジュールデータ
  */
-export function getSalmonList(schedule: sp3Schedule) {
+export function getSalmonList(schedule: Sp3Schedule) {
     try {
         const nodes = schedule.coopGroupingSchedule.regularSchedules.nodes;
         const result = [];
@@ -232,7 +232,7 @@ export function getSalmonList(schedule: sp3Schedule) {
  * dataからXマッチ用のリストだけ返す
  * @param schedule スケジュールデータ
  */
-export function getXMatchList(schedule: sp3Schedule) {
+export function getXMatchList(schedule: Sp3Schedule) {
     try {
         const nodes = schedule.xSchedules.nodes;
         const result = [];
@@ -254,7 +254,7 @@ export function getXMatchList(schedule: sp3Schedule) {
  * dataからフェス用のリストだけ返す
  * @param schedule スケジュールデータ
  */
-export function getFesList(schedule: sp3Schedule) {
+export function getFesList(schedule: Sp3Schedule) {
     try {
         const nodes = schedule.festSchedules.nodes;
         const result = [];
@@ -276,7 +276,7 @@ export function getFesList(schedule: sp3Schedule) {
  * dataからビッグラン用のリストだけ返す
  * @param schedule スケジュールデータ
  */
-export function getBigRunList(schedule: sp3Schedule) {
+export function getBigRunList(schedule: Sp3Schedule) {
     try {
         return schedule.coopGroupingSchedule.bigRunSchedules.nodes;
     } catch (error) {
@@ -289,7 +289,7 @@ export function getBigRunList(schedule: sp3Schedule) {
  * dataからチームコンテスト用のリストだけ返す
  * @param schedule スケジュールデータ
  */
-export function getTeamContestList(schedule: sp3Schedule) {
+export function getTeamContestList(schedule: Sp3Schedule) {
     try {
         return schedule.coopGroupingSchedule.teamContestSchedules.nodes;
     } catch (error) {
@@ -314,7 +314,7 @@ export type MatchInfo = {
  * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getRegularData(schedule: sp3Schedule, num: number) {
+export async function getRegularData(schedule: Sp3Schedule, num: number) {
     try {
         const regularList = getRegularList(schedule);
 
@@ -350,7 +350,7 @@ export async function getRegularData(schedule: sp3Schedule, num: number) {
  * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getAnarchyChallengeData(schedule: sp3Schedule, num: number) {
+export async function getAnarchyChallengeData(schedule: Sp3Schedule, num: number) {
     try {
         const anarchyList = getAnarchyList(schedule);
 
@@ -386,7 +386,7 @@ export async function getAnarchyChallengeData(schedule: sp3Schedule, num: number
  * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getAnarchyOpenData(schedule: sp3Schedule, num: number) {
+export async function getAnarchyOpenData(schedule: Sp3Schedule, num: number) {
     try {
         const anarchyList = getAnarchyList(schedule);
 
@@ -435,7 +435,7 @@ export type EventMatchInfo = {
  * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getEventData(schedule: sp3Schedule) {
+export async function getEventData(schedule: Sp3Schedule) {
     try {
         const eventList = getEventList(schedule);
 
@@ -504,7 +504,7 @@ export type SalmonInfo = {
  * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getSalmonData(schedule: sp3Schedule, num: number) {
+export async function getSalmonData(schedule: Sp3Schedule, num: number) {
     try {
         const salmonList = getSalmonList(schedule);
 
@@ -539,7 +539,7 @@ export async function getSalmonData(schedule: sp3Schedule, num: number) {
  * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getXMatchData(schedule: sp3Schedule, num: number) {
+export async function getXMatchData(schedule: Sp3Schedule, num: number) {
     try {
         const xMatchList = getXMatchList(schedule);
 
@@ -575,7 +575,7 @@ export async function getXMatchData(schedule: sp3Schedule, num: number) {
  * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getFesData(schedule: sp3Schedule, num: number) {
+export async function getFesData(schedule: Sp3Schedule, num: number) {
     try {
         const festList = getFesList(schedule);
 
@@ -611,7 +611,7 @@ export async function getFesData(schedule: sp3Schedule, num: number) {
  * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getBigRunData(schedule: sp3Schedule, num: number) {
+export async function getBigRunData(schedule: Sp3Schedule, num: number) {
     try {
         const bigRunList = getBigRunList(schedule);
         const bigRunSetting = bigRunList[num].setting;
@@ -640,7 +640,7 @@ export async function getBigRunData(schedule: sp3Schedule, num: number) {
  * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getTeamContestData(schedule: sp3Schedule, num: number) {
+export async function getTeamContestData(schedule: Sp3Schedule, num: number) {
     try {
         const teamContestList = getTeamContestList(schedule);
         const teamContestSetting = teamContestList[num].setting;
@@ -669,7 +669,7 @@ export async function getTeamContestData(schedule: sp3Schedule, num: number) {
  * @param id 変換するID
  * @returns ステージ名
  */
-export async function stage2txt(locale: sp3Locale, id: string, fetch = true): Promise<string> {
+export async function stage2txt(locale: Sp3Locale, id: string, fetch = true): Promise<string> {
     try {
         const stages = locale.stages;
         if (notExists(stages[id])) {
@@ -694,7 +694,7 @@ export async function stage2txt(locale: sp3Locale, id: string, fetch = true): Pr
  * @param id 変換するID
  * @returns ルール名
  */
-export async function rule2txt(locale: sp3Locale, id: string, fetch = true): Promise<string> {
+export async function rule2txt(locale: Sp3Locale, id: string, fetch = true): Promise<string> {
     try {
         const rules = locale.rules;
         if (notExists(rules[id])) {
@@ -713,7 +713,7 @@ export async function rule2txt(locale: sp3Locale, id: string, fetch = true): Pro
     }
 }
 
-async function event2txt(locale: sp3Locale, id: string, fetch = true): Promise<{ title: string; description: string; regulation: string }> {
+async function event2txt(locale: Sp3Locale, id: string, fetch = true): Promise<{ title: string; description: string; regulation: string }> {
     try {
         const result = {
             title: 'そーりー・あんでふぁいんど',

@@ -4,7 +4,7 @@ import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { checkBigRun, checkTeamContest, getSalmonData, getSchedule, getTeamContestData } from '../../../common/apis/splatoon3_ink';
-import { sp3Schedule } from '../../../common/apis/types/schedule';
+import { Sp3Schedule } from '../../../common/apis/types/schedule';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
@@ -145,7 +145,7 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction<'ca
 async function sendSalmonRun(
     interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
     type: number,
-    schedule: sp3Schedule,
+    schedule: Sp3Schedule,
     txt: string,
     recruitNum: number,
     condition: string,

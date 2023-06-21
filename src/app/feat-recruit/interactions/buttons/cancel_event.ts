@@ -1,7 +1,7 @@
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
 import { memberListMessage } from './other_events.js';
-import { ParticipantService, participantMember } from '../../../../db/participant_service.js';
+import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
@@ -54,8 +54,8 @@ export async function cancel(interaction: ButtonInteraction<'cached' | 'raw'>, p
 
         let recruiter = participantsData[0]; // 募集者
         const recruiterId = recruitData.authorId;
-        const attendeeList: participantMember[] = []; // 募集時参加確定者リスト
-        const applicantList: participantMember[] = []; // 参加希望者リスト
+        const attendeeList: ParticipantMember[] = []; // 募集時参加確定者リスト
+        const applicantList: ParticipantMember[] = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 0) {
                 recruiter = participant;

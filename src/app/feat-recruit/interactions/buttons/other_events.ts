@@ -1,6 +1,6 @@
 import { ButtonInteraction } from 'discord.js';
 
-import { ParticipantService, participantMember } from '../../../../db/participant_service.js';
+import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton } from '../../../common/button_components.js';
@@ -33,7 +33,7 @@ export async function unlock(interaction: ButtonInteraction<'cached' | 'raw'>, p
     }
 }
 
-export function getMemberMentions(recruitNum: number, participants: participantMember[]) {
+export function getMemberMentions(recruitNum: number, participants: ParticipantMember[]) {
     const applicantList = []; // 参加希望者リスト
     for (const participant of participants) {
         if (participant.userType === 2) {

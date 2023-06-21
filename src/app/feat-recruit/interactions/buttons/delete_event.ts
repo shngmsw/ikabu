@@ -1,7 +1,7 @@
 import { ButtonInteraction } from 'discord.js';
 
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
-import { ParticipantService, participantMember } from '../../../../db/participant_service.js';
+import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { setButtonDisable } from '../../../common/button_components';
@@ -49,8 +49,8 @@ export async function del(interaction: ButtonInteraction<'cached' | 'raw'>, para
         }
 
         let recruiter = participantsData[0]; // 募集者
-        const attendeeList: participantMember[] = []; // 募集時参加確定者リスト
-        const applicantList: participantMember[] = []; // 参加希望者リスト
+        const attendeeList: ParticipantMember[] = []; // 募集時参加確定者リスト
+        const applicantList: ParticipantMember[] = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 0) {
                 recruiter = participant;

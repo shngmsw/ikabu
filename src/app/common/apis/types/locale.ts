@@ -1,4 +1,4 @@
-export type sp3Locale = {
+export type Sp3Locale = {
     stages: {
         [id: string]: {
             name: string;

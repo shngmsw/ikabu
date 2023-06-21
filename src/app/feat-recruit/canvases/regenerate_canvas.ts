@@ -7,7 +7,7 @@ import { recruitEventCanvas } from './event_canvas';
 import { recruitFesCanvas } from './fes_canvas';
 import { recruitRegularCanvas } from './regular_canvas';
 import { recruitSalmonCanvas } from './salmon_canvas';
-import { ParticipantService, participantMember } from '../../../db/participant_service';
+import { ParticipantService, ParticipantMember } from '../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../db/recruit_service';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchMessageById } from '../../common/manager/message_manager';
@@ -32,7 +32,7 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
         const participantsData = await ParticipantService.getAllParticipants(guild.id, messageId);
         const message = await searchMessageById(guild, channelId, messageId);
         assertExistCheck(message, 'message');
-        const applicantList: participantMember[] = []; // 参加希望者リスト
+        const applicantList: ParticipantMember[] = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 2) {
                 applicantList.push(participant);
@@ -70,7 +70,7 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
 async function regenRegularCanvas(
     message: Message<true>,
     recruitData: Recruit,
-    participantsData: participantMember[],
+    participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
 ) {
@@ -110,11 +110,11 @@ async function regenRegularCanvas(
 async function regenEventCanvas(
     message: Message<true>,
     recruitData: Recruit,
-    participantsData: participantMember[],
+    participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
 ) {
-    const applicantList: participantMember[] = []; // 参加希望者リスト
+    const applicantList: ParticipantMember[] = []; // 参加希望者リスト
     for (const participant of participantsData) {
         if (participant.userType === 2) {
             applicantList.push(participant);
@@ -152,11 +152,11 @@ async function regenEventCanvas(
 async function regenAnarchyCanvas(
     message: Message<true>,
     recruitData: Recruit,
-    participantsData: participantMember[],
+    participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
 ) {
-    const applicantList: participantMember[] = []; // 参加希望者リスト
+    const applicantList: ParticipantMember[] = []; // 参加希望者リスト
     for (const participant of participantsData) {
         if (participant.userType === 2) {
             applicantList.push(participant);
@@ -196,12 +196,12 @@ async function regenAnarchyCanvas(
 async function regenSalmonCanvas(
     message: Message<true>,
     recruitData: Recruit,
-    participantsData: participantMember[],
+    participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
     isTeamContest: boolean,
 ) {
-    const applicantList: participantMember[] = []; // 参加希望者リスト
+    const applicantList: ParticipantMember[] = []; // 参加希望者リスト
     for (const participant of participantsData) {
         if (participant.userType === 2) {
             applicantList.push(participant);
@@ -241,11 +241,11 @@ async function regenSalmonCanvas(
 async function regenFesCanvas(
     message: Message<true>,
     recruitData: Recruit,
-    participantsData: participantMember[],
+    participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
 ) {
-    const applicantList: participantMember[] = []; // 参加希望者リスト
+    const applicantList: ParticipantMember[] = []; // 参加希望者リスト
     for (const participant of participantsData) {
         if (participant.userType === 2) {
             applicantList.push(participant);
@@ -291,11 +291,11 @@ async function regenFesCanvas(
 async function regenBigRunCanvas(
     message: Message<true>,
     recruitData: Recruit,
-    participantsData: participantMember[],
+    participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
 ) {
-    const applicantList: participantMember[] = []; // 参加希望者リスト
+    const applicantList: ParticipantMember[] = []; // 参加希望者リスト
     for (const participant of participantsData) {
         if (participant.userType === 2) {
             applicantList.push(participant);

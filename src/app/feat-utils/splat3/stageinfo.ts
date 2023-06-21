@@ -10,7 +10,7 @@ import {
     checkFes,
     getSchedule,
 } from '../../common/apis/splatoon3_ink';
-import { sp3Schedule } from '../../common/apis/types/schedule';
+import { Sp3Schedule } from '../../common/apis/types/schedule';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
 import { assertExistCheck } from '../../common/others';
 
@@ -69,7 +69,7 @@ async function stageinfo(msg: Message<true>) {
     }
 }
 
-async function getAOEmbed(schedule: sp3Schedule) {
+async function getAOEmbed(schedule: Sp3Schedule) {
     const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
     const num = getAnarchyList(schedule).length;
     for (let i = 0; i < num; i++) {
@@ -94,7 +94,7 @@ async function getAOEmbed(schedule: sp3Schedule) {
     return stageEmbed;
 }
 
-async function getACEmbed(schedule: sp3Schedule) {
+async function getACEmbed(schedule: Sp3Schedule) {
     const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
     const num = getAnarchyList(schedule).length;
     for (let i = 0; i < num; i++) {
@@ -119,7 +119,7 @@ async function getACEmbed(schedule: sp3Schedule) {
     return stageEmbed;
 }
 
-async function getXMatchEmbed(schedule: sp3Schedule) {
+async function getXMatchEmbed(schedule: Sp3Schedule) {
     const stageEmbed = new Discord.EmbedBuilder().setTitle('ステージ情報');
     const num = getXMatchList(schedule).length;
     for (let i = 0; i < num; i++) {
