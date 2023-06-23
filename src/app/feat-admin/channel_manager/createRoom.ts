@@ -1,9 +1,9 @@
 import fs from 'fs';
+import { request } from 'http';
 
 import { parse } from 'csv';
 import { stringify } from 'csv-stringify/sync';
 import { AttachmentBuilder, ChannelType, ChatInputCommandInteraction, Guild, PermissionsBitField, Role } from 'discord.js';
-import request from 'request';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { createChannel } from '../../common/manager/channel_manager';
