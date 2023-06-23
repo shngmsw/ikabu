@@ -8,10 +8,10 @@ import { Readable } from 'stream';
 import conf from 'config-reloadable';
 import { SHA256 } from 'crypto-js';
 import { CacheType, ChatInputCommandInteraction, Message } from 'discord.js';
-import { VoiceText } from 'voice-text';
 
+import VoiceTextApi, { VoiceTextApiParams } from '../../../common/apis/voice_text';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
-import { exists, notExists } from '../../../common/others';
+import { assertExistCheck, exists, notExists } from '../../../common/others';
 
 const config = conf();
 interface VoiceTypes {
@@ -36,7 +36,6 @@ const modeList1: ModeTypes = {
 };
 const pitchList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
 const speedList = [70, 80, 90, 100, 110, 120, 130, 140, 150, 160];
-let voiceTextApiKey = null;
 let autoRestart = true;
 let readMe = false;
 let apiType = '1';
@@ -44,13 +43,14 @@ let voiceType = 'haruka';
 let speed = 100;
 let pitch = 100;
 
+const voiceTextApiKey = process.env.VOICE_TEXT_API_KEY;
+assertExistCheck(voiceTextApiKey, 'VOICE_TEXT_API_KEY');
 readConfig();
 let voicePattern1 = voiceType; //初期時のよみあげ音声
 const mode = Number(apiType);
-const voiceText = new VoiceText(voiceTextApiKey); //Voice Text API key
+const voiceText = new VoiceTextApi(voiceTextApiKey); //Voice Text API key
 
 function readConfig() {
-    voiceTextApiKey = process.env.VOICE_TEXT_API_KEY;
     autoRestart = config.get('AutoRestart');
     if (typeof autoRestart !== 'boolean') throw new Error('Require a boolean type.');
     readMe = config.get('ReadMe');
@@ -62,7 +62,7 @@ function readConfig() {
     return true;
 }
 
-export async function mode_api(msg: Message<true>) {
+export async function modeApi(msg: Message<true>) {
     if (mode === 1) {
         // ユーザーによって音声変える
         const member = await searchDBMemberById(msg.guild, msg.author.id);
@@ -77,18 +77,20 @@ export async function mode_api(msg: Message<true>) {
         }
         pitch = pitchList[selectPitch];
         speed = speedList[selectSpeed];
-        return voiceText.fetchBuffer(replacedMessage, {
+        const voiceTextParams: VoiceTextApiParams = {
             format: 'wav',
+            text: replacedMessage,
             speaker: voicePattern1,
-            pitch,
-            speed,
-        });
+            pitch: pitch,
+            speed: speed,
+        };
+        return await voiceText.fetchBuffer(voiceTextParams);
     } else {
         throw Error(`不明なAPIが選択されています:${mode}`);
     }
 }
 
-export function bufferToStream(buffer: unknown) {
+export function bufferToStream(buffer: Uint8Array) {
     const hwm = 1024 * 1024;
     const stream = new Readable({ highWaterMark: hwm });
     stream.push(buffer);
