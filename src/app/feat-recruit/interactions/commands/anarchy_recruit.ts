@@ -12,7 +12,7 @@ import { placeHold } from '../../../../constant';
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, getSchedule, getAnarchyOpenData, MatchInfo } from '../../../common/apis/splatoon3_ink';
+import { checkFes, getSchedule, getAnarchyOpenData, MatchInfo } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';

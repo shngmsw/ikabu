@@ -19,7 +19,7 @@ import {
     VoiceState,
 } from 'discord.js';
 
-import { updateLocale, updateSchedule } from './common/apis/splatoon3_ink';
+import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from './common/others';
 import { emojiCountDown, emojiCountUp } from './event/reaction_count/reactions';

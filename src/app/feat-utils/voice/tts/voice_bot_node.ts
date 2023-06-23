@@ -9,7 +9,7 @@ import conf from 'config-reloadable';
 import { SHA256 } from 'crypto-js';
 import { CacheType, ChatInputCommandInteraction, Message } from 'discord.js';
 
-import VoiceTextApi, { VoiceTextApiParams } from '../../../common/apis/voice_text';
+import VoiceTextApi, { VoiceTextApiParams } from '../../../common/apis/voice-text/voice_text';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from '../../../common/others';
 

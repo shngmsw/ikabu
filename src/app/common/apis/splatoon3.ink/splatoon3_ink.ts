@@ -3,9 +3,9 @@ import fetch from 'node-fetch';
 
 import { Sp3Locale } from './types/locale';
 import { Sp3Schedule } from './types/schedule';
-import { log4js_obj } from '../../../log4js_settings';
-import { isDateWithinRange } from '../datetime';
-import { assertExistCheck, exists, notExists } from '../others';
+import { log4js_obj } from '../../../../log4js_settings';
+import { isDateWithinRange } from '../../datetime';
+import { assertExistCheck, exists, notExists } from '../../others';
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
 const locale_url = 'https://splatoon3.ink/data/locale/ja-JP.json';
 
