@@ -10,7 +10,7 @@ export async function removeRookie(msg: Message<true>) {
     const lastMonth = dt.setMonth(dt.getMonth() - 1);
     const authorId = msg.author.id;
     const member = await getAPIMemberByMessage(msg);
-    assertExistCheck(process.env.ROOKIE_ROLE_ID, 'process.env.ROOKIE_ROLE_ID');
+    assertExistCheck(process.env.ROOKIE_ROLE_ID, 'ROOKIE_ROLE_ID');
     const beginnerRoleId = process.env.ROOKIE_ROLE_ID;
     const messageCount = await getMessageCount(authorId);
     if ((exists(member.joinedTimestamp) && member.joinedTimestamp < lastMonth) || messageCount > 99) {
