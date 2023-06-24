@@ -8,5 +8,9 @@
       "source.addMissingImports": true,
       "source.fixAll.eslint": true
     }
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma",
+    "editor.formatOnSave": true,
   }
 }

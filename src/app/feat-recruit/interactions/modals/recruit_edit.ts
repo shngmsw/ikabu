@@ -1,9 +1,9 @@
 import { BaseGuildTextChannel, ModalSubmitInteraction } from 'discord.js';
 
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { assertExistCheck, notExists } from '../../../common/others';
 import { sendStickyMessage } from '../../../common/sticky_message';
 import { sendEditRecruitLog } from '../../../logs/modals/recruit_modal_log';
@@ -13,18 +13,20 @@ import { availableRecruitString } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function recruitEdit(interaction: ModalSubmitInteraction, params: URLSearchParams) {
+export async function recruitEdit(interaction: ModalSubmitInteraction<'cached' | 'raw'>, params: URLSearchParams) {
     try {
         const messageId = params.get('mid');
         assertExistCheck(messageId, "params.get('mid')");
 
-        interaction.deferReply({ ephemeral: true });
-        if (!interaction.inGuild()) return;
+        await interaction.deferReply({ ephemeral: true });
 
-        assertExistCheck(interaction.guild, 'guild');
-        const guild = await interaction.guild.fetch();
+        const guild = await getGuildByInteraction(interaction);
 
         const oldRecruitData = await RecruitService.getRecruit(guild.id, messageId);
+
+        if (notExists(oldRecruitData)) {
+            return interaction.editReply('募集データが存在しないでし！');
+        }
 
         let remaining = interaction.fields.getTextInputValue('remaining');
         remaining = remaining.replace(/\s+/g, '');
@@ -32,7 +34,7 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
 
         let replyMessage = '';
         if (remaining !== '' && !isNaN(Number(remaining))) {
-            replyMessage += await editRecruitNum(guild.id, messageId, oldRecruitData[0].recruitType, Number(remaining));
+            replyMessage += await editRecruitNum(guild.id, messageId, oldRecruitData.recruitType, Number(remaining));
         }
 
         const conditionStr = interaction.fields.getTextInputValue('condition');
@@ -55,7 +57,7 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
 
         const channelId = interaction.channel.id;
 
-        switch (oldRecruitData[0].recruitType) {
+        switch (oldRecruitData.recruitType) {
             case RecruitType.RegularRecruit:
             case RecruitType.AnarchyRecruit:
             case RecruitType.EventRecruit:
@@ -66,11 +68,16 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
                 break;
             case RecruitType.PrivateRecruit:
             case RecruitType.OtherGameRecruit:
-                await regenerateEmbed(guild, channelId, messageId, oldRecruitData[0].recruitType);
+                await regenerateEmbed(guild, channelId, messageId, oldRecruitData.recruitType);
         }
 
         const newRecruitData = await RecruitService.getRecruit(guild.id, messageId);
-        await sendEditRecruitLog(guild, oldRecruitData[0], newRecruitData[0], interaction.createdAt);
+
+        if (notExists(newRecruitData)) {
+            return interaction.editReply('募集データの更新に失敗したでし！');
+        }
+
+        await sendEditRecruitLog(guild, oldRecruitData, newRecruitData, interaction.createdAt);
 
         if (interaction.channel instanceof BaseGuildTextChannel) {
             const content = await availableRecruitString(guild, interaction.channel.id);
@@ -81,7 +88,7 @@ export async function recruitEdit(interaction: ModalSubmitInteraction, params: U
     } catch (error) {
         logger.error(error);
         if (interaction.channel instanceof BaseGuildTextChannel) {
-            interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send('なんかエラー出てるわ');
         }
     }
 }

@@ -1,10 +1,11 @@
 import path from 'path';
 
+import { Member } from '@prisma/client';
 import Canvas from 'canvas';
 
 import { RecruitOpCode } from './regenerate_canvas.js';
 import { modalRecruit } from '../../../constant.js';
-import { Participant } from '../../../db/model/participant.js';
+import { MatchInfo } from '../../common/apis/splatoon3.ink/splatoon3_ink.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { exists, notExists } from '../../common/others.js';
@@ -27,14 +28,14 @@ export async function recruitRegularCanvas(
     opCode: number,
     remaining: number,
     count: number,
-    host: Participant,
-    user1: Participant | null,
-    user2: Participant | null,
-    user3: Participant | null,
-    user4: Participant | null,
-    user5: Participant | null,
-    user6: Participant | null,
-    user7: Participant | null,
+    recruiter: Member,
+    user1: Member | null,
+    user2: Member | null,
+    user3: Member | null,
+    user4: Member | null,
+    user5: Member | null,
+    user6: Member | null,
+    user7: Member | null,
     condition: string,
     channelName: string | null,
 ) {
@@ -57,9 +58,9 @@ export async function recruitRegularCanvas(
     fillTextWithStroke(recruitCtx, 'レギュラーマッチ', '51px Splatfont', '#000000', '#B3FF00', 3, 115, 80);
 
     // 募集主の画像
-    const hostImage = await Canvas.loadImage(host.iconUrl ?? modalRecruit.placeHold);
+    const recruiterImage = await Canvas.loadImage(recruiter.iconUrl ?? modalRecruit.placeHold);
     recruitCtx.save();
-    drawArcImage(recruitCtx, hostImage, 40, 120, 40);
+    drawArcImage(recruitCtx, recruiterImage, 40, 120, 40);
     recruitCtx.strokeStyle = '#1e1f23';
     recruitCtx.lineWidth = 9;
     recruitCtx.stroke();
@@ -67,31 +68,31 @@ export async function recruitRegularCanvas(
 
     const memberIcons = [];
 
-    if (user1 instanceof Participant) {
+    if (exists(user1)) {
         memberIcons.push(user1.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user2 instanceof Participant) {
+    if (exists(user2)) {
         memberIcons.push(user2.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user3 instanceof Participant) {
+    if (exists(user3)) {
         memberIcons.push(user3.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user4 instanceof Participant) {
+    if (exists(user4)) {
         memberIcons.push(user4.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user5 instanceof Participant) {
+    if (exists(user5)) {
         memberIcons.push(user5.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user6 instanceof Participant) {
+    if (exists(user6)) {
         memberIcons.push(user6.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user7 instanceof Participant) {
+    if (exists(user7)) {
         memberIcons.push(user7.iconUrl ?? modalRecruit.placeHold);
     }
 
@@ -112,8 +113,8 @@ export async function recruitRegularCanvas(
         }
     }
 
-    const hostIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
-    recruitCtx.drawImage(hostIcon, 0, 0, hostIcon.width, hostIcon.height, 75, 155, 75, 75);
+    const recruiterIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
+    recruitCtx.drawImage(recruiterIcon, 0, 0, recruiterIcon.width, recruiterIcon.height, 75, 155, 75, 75);
 
     let channelString;
     if (notExists(channelName)) {
@@ -203,7 +204,7 @@ export async function recruitRegularCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleRegularCanvas(regularData: $TSFixMe) {
+export async function ruleRegularCanvas(regularData: MatchInfo | null) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
 
     const ruleCtx = ruleCanvas.getContext('2d');

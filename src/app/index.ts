@@ -1,9 +1,9 @@
 // Discord bot implements
+import { Member } from '@prisma/client';
 import {
     ActivityType,
     AnyThreadChannel,
     AutocompleteInteraction,
-    BaseGuildTextChannel,
     CacheType,
     Client,
     GatewayIntentBits,
@@ -19,28 +19,21 @@ import {
     VoiceState,
 } from 'discord.js';
 
-import { updateLocale, updateSchedule } from './common/apis/splatoon3_ink';
+import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
 import { searchAPIMemberById } from './common/manager/member_manager';
-import { assertExistCheck, exists, isNotEmpty, notExists } from './common/others';
-import { emojiCountUp } from './event/reaction_count/reactions';
+import { assertExistCheck, exists, notExists } from './common/others';
+import { emojiCountDown, emojiCountUp } from './event/reaction_count/reactions';
 import { guildMemberAddEvent } from './event/rookie/set_rookie';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
-import * as button_handler from './handlers/button_handler';
-import * as command_handler from './handlers/command_handler';
-import * as context_handler from './handlers/context_handler';
-import * as message_handler from './handlers/message_handler';
-import * as modal_handler from './handlers/modal_handler';
-import * as vcState_update_handler from './handlers/vcState_update_handler';
-import { DBCommon } from '../db/db';
-import { FriendCodeService } from '../db/friend_code_service';
-import { MembersService } from '../db/members_service';
-import { MessageCountService } from '../db/message_count_service';
-import { Member } from '../db/model/member';
-import { ParticipantService } from '../db/participants_service';
-import { RecruitService } from '../db/recruit_service';
-import { StickyService } from '../db/sticky_service';
-import { TeamDividerService } from '../db/team_divider_service';
+import * as buttonHandler from './handlers/button_handler';
+import * as commandHandler from './handlers/command_handler';
+import * as contextHandler from './handlers/context_handler';
+import * as messageHandler from './handlers/message_handler';
+import * as modalHandler from './handlers/modal_handler';
+import * as vcStateUpdateHandler from './handlers/vcState_update_handler';
+import { MemberService } from '../db/member_service';
+import { ParticipantService } from '../db/participant_service';
 import { log4js_obj } from '../log4js_settings';
 import { registerSlashCommands } from '../register';
 const client = new Client({
@@ -57,12 +50,14 @@ const client = new Client({
     partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
-client.login(process.env.DISCORD_BOT_TOKEN);
+void client.login(process.env.DISCORD_BOT_TOKEN);
 
 const logger = log4js_obj.getLogger();
 
 client.on('messageCreate', async (message: Message<boolean>) => {
-    message_handler.call(message);
+    if (message.inGuild()) {
+        void messageHandler.call(message);
+    }
 });
 
 client.on('guildMemberAdd', async (member: GuildMember) => {
@@ -89,9 +84,9 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
         let joinedAt = member.joinedAt;
         // joinedAtがnullだったらDBからとってくる
         if (notExists(joinedAt)) {
-            const dbMember = await MembersService.getMemberByUserId(member.guild.id, member.user.id);
-            if (dbMember.length !== 0) {
-                joinedAt = dbMember[0].joinedAt;
+            const dbMember = await MemberService.getMemberByUserId(member.guild.id, member.user.id);
+            if (exists(dbMember)) {
+                joinedAt = dbMember.joinedAt;
             }
         }
 
@@ -107,8 +102,8 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
 
         assertExistCheck(process.env.CHANNEL_ID_RETIRE_LOG);
         const retireLog = member.guild.channels.cache.get(process.env.CHANNEL_ID_RETIRE_LOG);
-        if (retireLog instanceof BaseGuildTextChannel) {
-            retireLog.send(text);
+        if (retireLog?.isTextBased()) {
+            await retireLog.send(text);
         }
 
         const guild = await member.guild.fetch();
@@ -135,19 +130,19 @@ client.on('guildMemberUpdate', async (oldMember: GuildMember | PartialGuildMembe
         assertExistCheck(member, 'member');
         assertExistCheck(member.joinedAt, 'joinedAt');
 
-        const updateMember = new Member(
-            guild.id,
-            userId,
-            member.displayName,
-            member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-            member.joinedAt,
-        );
+        const updateMember: Member = {
+            guildId: guild.id,
+            userId: userId,
+            displayName: member.displayName,
+            iconUrl: member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+            joinedAt: member.joinedAt,
+        };
 
         // membersテーブルにレコードがあるか確認
-        if ((await MembersService.getMemberByUserId(guild.id, userId)).length == 0) {
-            await MembersService.registerMember(updateMember);
+        if (notExists(await MemberService.getMemberByUserId(guild.id, userId))) {
+            await MemberService.registerMember(updateMember);
         } else {
-            await MembersService.updateMemberProfile(updateMember);
+            await MemberService.updateMemberProfile(updateMember);
         }
     } catch (err) {
         const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
@@ -159,25 +154,24 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
     try {
         const userId = newUser.id;
 
-        const guildIdList = await MembersService.getMemberGuildsByUserId(userId);
+        const guildIdList = await MemberService.getMemberGuildIdsByUserId(userId);
         for (const guildId of guildIdList) {
             const guild = await client.guilds.fetch(guildId);
-            assertExistCheck(guild, 'guild');
 
             const member = await searchAPIMemberById(guild, userId);
 
             assertExistCheck(member, 'member');
 
-            const updateMember = new Member(
-                guildId,
-                userId,
-                member.displayName,
-                member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-                member.joinedAt ?? 'dummy', // 読めなくても更新されないのでnullならダミー文字列を突っ込む
-            );
+            const updateMember: Member = {
+                guildId: guildId,
+                userId: userId,
+                displayName: member.displayName,
+                iconUrl: member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+                joinedAt: member.joinedAt,
+            };
 
             // プロフィールアップデート
-            await MembersService.updateMemberProfile(updateMember);
+            await MemberService.updateMemberProfile(updateMember);
         }
     } catch (err) {
         const loggerUU = log4js_obj.getLogger('userUpdate');
@@ -194,16 +188,7 @@ client.on('ready', async () => {
         // そのようなことを避けるためready内でハンドラを登録する。
         // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => logger.error(err)));
         await registerSlashCommands();
-        DBCommon.init();
-        await MembersService.createTableIfNotExists();
-        await StickyService.createTableIfNotExists();
-        await FriendCodeService.createTableIfNotExists();
-        await RecruitService.createTableIfNotExists();
-        await ParticipantService.createTableIfNotExists();
-        await MessageCountService.createTableIfNotExists();
-        await TeamDividerService.createTableIfNotExists();
-        const guild = client.user.client.guilds.cache.get(process.env.SERVER_ID || '');
-        assertExistCheck(guild);
+        const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
         client.user.setActivity(`${guild.memberCount}人`, {
             type: ActivityType.Playing,
         });
@@ -215,20 +200,24 @@ client.on('ready', async () => {
     }
 });
 
-client.on('messageReactionAdd', async (reaction: MessageReaction | PartialMessageReaction) => {
+client.on('messageReactionAdd', async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
     const loggerMRA = log4js_obj.getLogger('messageReactionAdd');
     try {
         // When a reaction is received, check if the structure is partial
         if (reaction.partial) {
             // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
-            try {
-                await reaction.fetch();
-            } catch (error) {
-                loggerMRA.error('Something went wrong when fetching the message:', error);
-                return;
-            }
+            reaction = await reaction.fetch();
         }
-        await emojiCountUp(reaction);
+
+        if (user.partial) {
+            user = await user.fetch();
+        }
+
+        if (user.bot) {
+            return;
+        }
+
+        await emojiCountUp(reaction, user);
     } catch (error) {
         loggerMRA.error(error);
     }
@@ -236,9 +225,19 @@ client.on('messageReactionAdd', async (reaction: MessageReaction | PartialMessag
 
 client.on('messageReactionRemove', async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
     try {
-        if (!user.bot) {
-            /* empty */
+        if (reaction.partial) {
+            reaction = await reaction.fetch();
         }
+
+        if (user.partial) {
+            user = await user.fetch();
+        }
+
+        if (user.bot) {
+            return;
+        }
+
+        await emojiCountDown(reaction, user);
     } catch (error) {
         const loggerMRR = log4js_obj.getLogger('messageReactionRemove');
         loggerMRR.error(error);
@@ -247,16 +246,19 @@ client.on('messageReactionRemove', async (reaction: MessageReaction | PartialMes
 
 client.on('interactionCreate', (interaction: Interaction<CacheType>) => {
     try {
-        if (interaction.isButton()) {
-            button_handler.call(interaction);
-        } else if (interaction.isModalSubmit()) {
-            modal_handler.call(interaction);
-        } else if (interaction.isMessageContextMenuCommand()) {
-            context_handler.call(interaction);
-        } else if (interaction.isUserContextMenuCommand()) {
-            // interaction.isCommand()はcontextMenu系も含むため条件分岐しておく
-        } else if (interaction.isCommand()) {
-            command_handler.call(interaction);
+        if (interaction.isRepliable()) {
+            // 各handlerの内どれかしか呼ばれないためawaitしない
+            if (interaction.isButton()) {
+                void buttonHandler.call(interaction);
+            } else if (interaction.isModalSubmit()) {
+                void modalHandler.call(interaction);
+            } else if (interaction.isMessageContextMenuCommand()) {
+                void contextHandler.call(interaction);
+            } else if (interaction.isUserContextMenuCommand()) {
+                // interaction.isCommand()はcontextMenu系も含むため条件分岐しておく
+            } else if (interaction.isChatInputCommand()) {
+                void commandHandler.call(interaction);
+            }
         }
     } catch (error) {
         const interactionLogger = log4js_obj.getLogger('interaction');
@@ -272,12 +274,12 @@ client.on('interactionCreate', (interaction: Interaction<CacheType>) => {
 });
 
 client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
-    if (isNotEmpty(thread.parentId) && thread.parentId === process.env.CHANNEL_ID_SUPPORT_CENTER) {
-        editThreadTag(thread);
-        sendCloseButton(thread);
+    if (exists(thread.parentId) && thread.parentId === process.env.CHANNEL_ID_SUPPORT_CENTER) {
+        await editThreadTag(thread);
+        await sendCloseButton(thread);
     }
 });
 
 client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
-    vcState_update_handler.call(oldState, newState);
+    void vcStateUpdateHandler.call(oldState, newState);
 });

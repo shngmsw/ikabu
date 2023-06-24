@@ -1,21 +1,20 @@
+import * as fs from 'fs/promises';
 import path from 'path';
 
-import { AttachmentBuilder } from 'discord.js';
+import { AttachmentBuilder, ChatInputCommandInteraction } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs').promises;
+import { assertExistCheck } from '../../common/others';
 
 const ENV_FILE_PATH = path.resolve('./', '.env');
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function setVariables(interaction: $TSFixMe) {
+export async function setVariables(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     try {
         const options = interaction.options;
-        const key = options.getString('key');
-        const value = options.getString('value');
+        const key = options.getString('key', true);
+        const value = options.getString('value', true);
 
         // .envファイル更新
         await setEnvValue(key, value);
@@ -26,7 +25,9 @@ export async function setVariables(interaction: $TSFixMe) {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         require('dotenv').config({ override: true });
 
-        await interaction.editReply({
+        await interaction.deleteReply();
+        assertExistCheck(interaction.channel, 'channel');
+        await interaction.channel.send({
             content: '設定したでし！',
             files: [env_file],
         });
@@ -40,11 +41,11 @@ export async function setVariables(interaction: $TSFixMe) {
  * @param {string} key 更新または作成するkey
  * @param {string} value 設定する値
  */
-async function setEnvValue(key: $TSFixMe, value: $TSFixMe) {
+async function setEnvValue(key: string, value: string) {
     try {
         const envFile = await fs.readFile(ENV_FILE_PATH, 'utf-8');
         const envVars = envFile.split(/\r\n|\n|\r/);
-        const targetLine = envVars.find((line: $TSFixMe) => line.split('=')[0] === key);
+        const targetLine = envVars.find((line: string) => line.split('=')[0] === key);
         if (targetLine !== undefined) {
             const targetLineIndex = envVars.indexOf(targetLine);
             // keyとvalueを置き換え

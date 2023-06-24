@@ -2,9 +2,9 @@ import { URLSearchParams } from 'url';
 
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message } from 'discord.js';
 
-import { isNotEmpty } from '../../common/others';
+import { exists } from '../../common/others';
 
-export function recruitDeleteButton(message: Message, image1Message: Message, image2Message: Message) {
+export function recruitDeleteButton(message: Message<true>, image1Message: Message<true>, image2Message: Message<true>) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
     deleteParams.append('mid', message.id);
@@ -16,7 +16,7 @@ export function recruitDeleteButton(message: Message, image1Message: Message, im
     return button;
 }
 
-export function embedRecruitDeleteButton(message: Message, header: Message) {
+export function embedRecruitDeleteButton(message: Message<true>, header: Message<true>) {
     const deleteParams = new URLSearchParams();
     deleteParams.append('d', 'del');
     deleteParams.append('mid', message.id);
@@ -27,25 +27,25 @@ export function embedRecruitDeleteButton(message: Message, header: Message) {
     return button;
 }
 
-export function recruitActionRow(imageMessage: Message, channelId?: string) {
+export function recruitActionRow(imageMessage: Message<true>, channelId?: string) {
     const joinParams = new URLSearchParams();
     joinParams.append('d', 'jr');
     joinParams.append('imid1', imageMessage.id);
-    if (isNotEmpty(channelId) && channelId !== undefined) {
+    if (exists(channelId)) {
         joinParams.append('vid', channelId);
     }
 
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', 'cr');
     cancelParams.append('imid1', imageMessage.id);
-    if (isNotEmpty(channelId) && channelId !== undefined) {
+    if (exists(channelId)) {
         cancelParams.append('vid', channelId);
     }
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', 'close');
     closeParams.append('imid1', imageMessage.id);
-    if (isNotEmpty(channelId) && channelId !== undefined) {
+    if (exists(channelId)) {
         closeParams.append('vid', channelId);
     }
 
@@ -99,7 +99,7 @@ export function createNewRecruitButton(channelName: string) {
                 .setStyle(ButtonStyle.Success),
         ]);
     }
-    if (isNotEmpty(process.env.HOW_TO_RECRUIT_URL) && process.env.HOW_TO_RECRUIT_URL !== undefined) {
+    if (exists(process.env.HOW_TO_RECRUIT_URL)) {
         button.addComponents([
             new ButtonBuilder().setURL(process.env.HOW_TO_RECRUIT_URL).setLabel('募集方法を確認').setStyle(ButtonStyle.Link),
         ]);
@@ -119,7 +119,7 @@ export function nsoRoomLinkButton(url: string) {
     return button;
 }
 
-export function channelLinkButtons(guildId: $TSFixMe, channelId: $TSFixMe) {
+export function channelLinkButtons(guildId: string, channelId: string) {
     const channelLink = `https://discord.com/channels/${guildId}/${channelId}`;
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
         new ButtonBuilder().setLabel('チャンネルに移動').setStyle(ButtonStyle.Link).setURL(channelLink),
@@ -127,14 +127,11 @@ export function channelLinkButtons(guildId: $TSFixMe, channelId: $TSFixMe) {
     return buttons;
 }
 
-export function messageLinkButtons(guildId: $TSFixMe, channelId: $TSFixMe, messageId: $TSFixMe, label?: $TSFixMe) {
+export function messageLinkButtons(guildId: string, channelId: string, messageId: string, label = 'メッセージを表示') {
     const link = `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
 
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
-        new ButtonBuilder()
-            .setLabel(label ?? 'メッセージを表示')
-            .setStyle(ButtonStyle.Link)
-            .setURL(link),
+        new ButtonBuilder().setLabel(label).setStyle(ButtonStyle.Link).setURL(link),
     ]);
     return buttons;
 }

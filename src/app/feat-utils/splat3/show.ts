@@ -13,8 +13,8 @@ import {
     getAnarchyChallengeData,
     getAnarchyOpenData,
     getXMatchData,
-} from '../../common/apis/splatoon3_ink';
-import { sp3Schedule } from '../../common/apis/types/schedule';
+} from '../../common/apis/splatoon3.ink/splatoon3_ink';
+import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule';
 import { createRoundRect, fillTextWithStroke } from '../../common/canvas_components';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
 import { assertExistCheck, notExists } from '../../common/others';
@@ -28,6 +28,7 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
         const { options } = interaction;
         const subCommand = options.getSubcommand();
         const schedule = await getSchedule();
+        assertExistCheck(schedule, 'schedule');
         if (subCommand === `now`) {
             if (checkFes(schedule, 0)) {
                 await sendFesInfo(interaction, schedule, 0);
@@ -41,7 +42,7 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
                 await sendStageInfo(interaction, schedule, 1);
             }
         } else if (subCommand === 'nawabari') {
-            if (checkFes(schedule.schedule, 1)) {
+            if (checkFes(schedule, 1)) {
                 await sendFesInfo(interaction, schedule, 0);
             } else {
                 await sendRegularInfo(interaction, schedule, 0);
@@ -55,7 +56,7 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
     }
 }
 
-async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>, schedule: sp3Schedule, scheduleNum: $TSFixMe) {
+async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>, schedule: Sp3Schedule, scheduleNum: number) {
     let title;
     if (scheduleNum == 0) {
         title = '現在';
@@ -124,7 +125,7 @@ async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>
     });
 }
 
-async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe, scheduleNum: $TSFixMe) {
+async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheType>, data: Sp3Schedule, scheduleNum: number) {
     const regularData = await getRegularData(data, scheduleNum);
     assertExistCheck(regularData, 'regularData');
     const startDate = formatDatetime(regularData.startTime, dateformat.ymdwhm);
@@ -154,7 +155,7 @@ async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheTyp
     });
 }
 
-async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, data: $TSFixMe, scheduleNum: $TSFixMe) {
+async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, data: Sp3Schedule, scheduleNum: number) {
     const festData = await getFesData(data, scheduleNum);
     assertExistCheck(festData, 'festData');
     const startDate = formatDatetime(festData.startTime, dateformat.ymdwhm);
@@ -184,7 +185,7 @@ async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, 
     });
 }
 
-async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, schedule: sp3Schedule) {
+async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, schedule: Sp3Schedule) {
     try {
         for (let i = 0; i < 2; i++) {
             let title = '';

@@ -1,4 +1,4 @@
-import { Guild, Role } from 'discord.js';
+import { ColorResolvable, Guild, GuildMember, Role } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { exists, notExists } from '../others';
@@ -11,9 +11,9 @@ const logger = log4js_obj.getLogger('RoleManager');
  * @param {string} roleName ロール名
  * @returns ロールID
  */
-export async function createRole(guild: $TSFixMe, roleName: $TSFixMe) {
-    if (roleName == '') {
-        return null;
+export async function createRole(guild: Guild, roleName: string) {
+    if (roleName === '') {
+        roleName = '新規ロール';
     }
 
     const roleId = await searchRoleIdByName(guild, roleName);
@@ -66,42 +66,20 @@ export async function searchRoleById(guild: Guild, roleId: string) {
  * @param {string} color カラーコード
  * @returns セットしたカラーコード
  */
-export async function setColorToRole(guild: $TSFixMe, role: $TSFixMe, color?: string) {
+export async function setColorToRole(guild: Guild, role: Role, color?: string | ColorResolvable | null) {
     if (exists(color)) {
-        await role.setColor(color);
+        try {
+            await role.setColor(color as ColorResolvable);
+        } catch (error) {
+            await role.setColor('Random');
+            logger.warn('role color format is invalid. set random color.');
+        }
         await guild.roles.fetch();
-        return color;
+        return role.hexColor;
     } else {
-        const colorList = [
-            '#E60012',
-            '#EB6100',
-            '#F39800',
-            '#FCC800',
-            '#FFF100',
-            '#CFDB00',
-            '#8FC31F',
-            '#22AC38',
-            '#009944',
-            '#009B6B',
-            '#009E96',
-            '#00A0C1',
-            '#00A0E9',
-            '#0086D1',
-            '#0068B7',
-            '#00479D',
-            '#1D2088',
-            '#601986',
-            '#920783',
-            '#BE0081',
-            '#E4007F',
-            '#E5006A',
-            '#E5004F',
-            '#E60033',
-        ];
-        const pickedColor = colorList[Math.floor(Math.random() * colorList.length)];
-        await role.setColor(pickedColor);
+        await role.setColor('Random');
         await guild.roles.fetch();
-        return await role.hexColor;
+        return role.hexColor;
     }
 }
 
@@ -112,14 +90,14 @@ export async function setColorToRole(guild: $TSFixMe, role: $TSFixMe, color?: st
  * @param {string} memberId メンバーID
  * @returns メンバーID
  */
-export async function setRoleToMember(guild: $TSFixMe, roleId: $TSFixMe, memberId: $TSFixMe) {
-    if (notExists(memberId) || memberId == '') {
+export async function setRoleToMember(guild: Guild, roleId: string, memberId: string) {
+    if (notExists(memberId) || memberId === '') {
         return null;
     } else {
-        let member;
+        let member: GuildMember | null | undefined;
 
         // 数値判定
-        if (!isNaN(memberId)) {
+        if (!isNaN(Number(memberId))) {
             // 桁数判定
             if (memberId.length == 18 || memberId.length == 19) {
                 try {
@@ -134,11 +112,15 @@ export async function setRoleToMember(guild: $TSFixMe, roleId: $TSFixMe, memberI
         } else {
             const members = await guild.members.fetch();
             // ユーザータグからメンバー取得
-            member = members.find((member: $TSFixMe) => member.user.tag === memberId);
+            member = members.find((member: GuildMember) => member.user.tag === memberId);
         }
 
         if (exists(member)) {
-            member.roles.add(await guild.roles.fetch(roleId));
+            const role = await guild.roles.fetch(roleId);
+            if (notExists(role)) {
+                return memberId + '(ROLE_NOT_FOUND)';
+            }
+            await member.roles.add(role);
             return member.id;
         } else {
             return memberId + '(NOT_FOUND)';

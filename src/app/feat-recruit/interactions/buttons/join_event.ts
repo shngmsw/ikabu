@@ -1,13 +1,12 @@
 import { ButtonInteraction, ChannelType, EmbedBuilder } from 'discord.js';
 
 import { memberListMessage } from './other_events.js';
-import { Participant } from '../../../../db/model/participant.js';
-import { RecruitType } from '../../../../db/model/recruit.js';
-import { ParticipantService } from '../../../../db/participants_service.js';
-import { RecruitService } from '../../../../db/recruit_service.js';
+import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, createMentionsFromIdList, exists, notExists, sleep } from '../../../common/others.js';
@@ -18,17 +17,16 @@ import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_stic
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function join(interaction: ButtonInteraction, params: URLSearchParams) {
-    if (!interaction.inGuild()) return;
+export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+    if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
         });
 
-        assertExistCheck(interaction.guild, 'guild');
         assertExistCheck(interaction.channel, 'channel');
 
-        const guild = await interaction.guild.fetch();
+        const guild = await getGuildByInteraction(interaction);
         const channelId = params.get('vid');
         const image1MsgId = params.get('imid1');
         assertExistCheck(image1MsgId, "params.get('imid1')");
@@ -39,7 +37,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
 
         const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             await interaction.editReply({ components: disableThinkingButton(interaction, '参加') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
@@ -51,9 +49,9 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
         const participantsData = await ParticipantService.getAllParticipants(guild.id, image1MsgId);
 
         let recruiter = participantsData[0]; // 募集者
-        const recruiterId = recruitData[0].authorId;
-        const attendeeList: Participant[] = []; // 募集時参加確定者リスト
-        const applicantList: Participant[] = []; // 参加希望者リスト
+        const recruiterId = recruitData.authorId;
+        const attendeeList: ParticipantMember[] = []; // 募集時参加確定者リスト
+        const applicantList: ParticipantMember[] = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 0) {
                 recruiter = participant;
@@ -111,7 +109,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             });
 
             // recruitテーブルにデータ追加
-            await ParticipantService.registerParticipant(image1MsgId, member.userId, 2, new Date());
+            await ParticipantService.registerParticipant(guild.id, image1MsgId, member.userId, 2, new Date());
 
             const recruitChannel = interaction.channel;
 
@@ -144,7 +142,7 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
             });
 
             // テキストの募集チャンネルにSticky Messageを送信
-            const stickyChannelId = getStickyChannelId(recruitData[0]) ?? recruitChannel.id;
+            const stickyChannelId = getStickyChannelId(recruitData) ?? recruitChannel.id;
             await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
 
             if (notExists(channelId)) {
@@ -161,10 +159,10 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
                 });
             }
 
-            if (recruitData[0].recruitType === RecruitType.PrivateRecruit && exists(recruitData[0].option)) {
+            if (recruitData.recruitType === RecruitType.PrivateRecruit && exists(recruitData.option)) {
                 await interaction.followUp({
                     content: `ボタンを押すとヘヤタテ機能を使ってプライベートマッチの部屋に参加できるでし！`,
-                    components: [nsoRoomLinkButton(recruitData[0].option)],
+                    components: [nsoRoomLinkButton(recruitData.option)],
                     ephemeral: true,
                 });
             }
@@ -190,6 +188,6 @@ export async function join(interaction: ButtonInteraction, params: URLSearchPara
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '参加'),
         });
-        interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send('なんかエラー出てるわ');
     }
 }

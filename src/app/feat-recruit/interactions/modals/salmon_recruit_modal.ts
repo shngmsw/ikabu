@@ -1,14 +1,13 @@
+import { Member } from '@prisma/client';
 import { AttachmentBuilder, ModalSubmitInteraction } from 'discord.js';
 
-import { Member } from '../../../../db/model/member';
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkBigRun, getSchedule, getSalmonData } from '../../../common/apis/splatoon3_ink';
+import { checkBigRun, getSchedule, getSalmonData } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, sleep } from '../../../common/others';
+import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_canvas';
 import { RecruitOpCode } from '../../canvases/regenerate_canvas';
@@ -19,35 +18,28 @@ import { getMemberMentions } from '../buttons/other_events';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function sendSalmonRun(
-    interaction: ModalSubmitInteraction,
+    interaction: ModalSubmitInteraction<'cached' | 'raw'>,
     txt: string,
     recruitNum: number,
     condition: string,
     count: number,
-    member: Member,
-    user1: Member | null,
-    user2: Member | null,
+    recruiter: Member,
+    attendee1: Member | null,
+    attendee2: Member | null,
 ) {
-    assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
 
     const channelName = '[簡易版募集]';
 
-    const recruiter = new Participant(member.userId, member.displayName, member.iconUrl, 0, new Date());
-
-    let attendee1 = null;
-    if (user1 instanceof Member) {
-        attendee1 = new Participant(user1.userId, user1.displayName, user1.iconUrl, 1, new Date());
-    }
-
-    let attendee2 = null;
-    if (user2 instanceof Member) {
-        attendee2 = new Participant(user2.userId, user2.displayName, user2.iconUrl, 1, new Date());
-    }
-
     const schedule = await getSchedule();
+
+    if (notExists(schedule)) {
+        return await interaction.editReply({
+            content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+        });
+    }
 
     let recruitBuffer;
     if (checkBigRun(schedule, 0)) {
@@ -80,7 +72,9 @@ export async function sendSalmonRun(
     if (checkBigRun(schedule, 0)) {
         ruleBuffer = await ruleBigRunCanvas(schedule);
     } else {
-        ruleBuffer = await ruleSalmonCanvas(await getSalmonData(schedule, 0));
+        const salmonData = await getSalmonData(schedule, 0);
+        if (notExists(salmonData)) return null;
+        ruleBuffer = await ruleSalmonCanvas(salmonData);
     }
     assertExistCheck(recruitBuffer, 'recruitBuffer');
 
@@ -99,12 +93,14 @@ export async function sendSalmonRun(
             files: [recruit],
         });
 
+        if (!image1Message.inGuild()) return;
+
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
             recruitChannel.id,
             image1Message.id,
-            member.userId,
+            recruiter.userId,
             recruitNum,
             condition,
             channelName,
@@ -112,12 +108,12 @@ export async function sendSalmonRun(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(image1Message.id, recruiter);
+        await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, recruiter, 0);
         if (exists(attendee1)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, attendee1);
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee1, 1);
         }
         if (exists(attendee2)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, attendee2);
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee2, 1);
         }
 
         const image2Message = await recruitChannel.send({ files: [rule] });
@@ -125,7 +121,7 @@ export async function sendSalmonRun(
             content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
-        buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
+        await buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
         const deleteButtonMsg = await recruitChannel.send({
             components: [recruitDeleteButton(buttonMessage, image1Message, image2Message)],
         });
@@ -144,7 +140,7 @@ export async function sendSalmonRun(
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (exists(deleteButtonCheck)) {
-            deleteButtonCheck.delete();
+            await deleteButtonCheck.delete();
         } else {
             return;
         }

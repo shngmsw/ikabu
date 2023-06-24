@@ -3,6 +3,7 @@ import path from 'path';
 import Canvas from 'canvas';
 import Discord, { ChatInputCommandInteraction } from 'discord.js';
 
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, dateDiff, notExists } from '../../common/others';
 const backgroundImgPaths = [
@@ -15,16 +16,13 @@ const backgroundImgPaths = [
     './images/1month.jpg',
 ];
 const colorCodes = ['#db4240', '#9849c9', '#2eddff', '#5d8e9c', '#f0c46e', '#86828f', '#ad745c'];
-export async function handleIkabuExperience(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inGuild()) return;
-
-    assertExistCheck(interaction.guild, 'guild');
+export async function handleIkabuExperience(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const member = await searchDBMemberById(guild, interaction.member.user.id);
     assertExistCheck(member, 'member');
     const joinDate = member.joinedAt;
@@ -132,7 +130,7 @@ export async function handleIkabuExperience(interaction: ChatInputCommandInterac
     await interaction.editReply({ files: [attachment] });
 }
 
-const userText = (canvas: $TSFixMe, text: $TSFixMe) => {
+const userText = (canvas: Canvas.Canvas, text: string) => {
     const context = canvas.getContext('2d');
     let fontSize = 50;
 
@@ -144,7 +142,7 @@ const userText = (canvas: $TSFixMe, text: $TSFixMe) => {
 };
 
 // Pass the entire Canvas object because you'll need access to its width and context
-const exText = (canvas: $TSFixMe, text: $TSFixMe) => {
+const exText = (canvas: Canvas.Canvas, text: string) => {
     const context = canvas.getContext('2d');
 
     // Declare a base size of the font

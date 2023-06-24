@@ -9,6 +9,7 @@ export async function composeEmbed(message: Message<true>, url: string) {
         embed.setDescription(message.content);
     }
     embed.setTimestamp(message.createdAt);
+    // webhookの場合はauthorがないので、getAPIMemberは使用しない
     const member = await searchAPIMemberById(message.guild, message.author.id);
     if (exists(url)) {
         embed.setTitle('引用元へジャンプ');
@@ -47,34 +48,19 @@ export function rgbToHex(r: number, g: number, b: number) {
 }
 
 /**
- * IsEmpty
- * @param obj {any} - Target Object
+ * 空文字チェック
+ * @param str 文字列
  */
-export function isEmpty(obj: $TSFixMe) {
-    if (obj === undefined || obj === null) {
-        return true;
-    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'String') {
-        if (obj === '') {
-            return true;
-        }
-    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'Array') {
-        if (obj.length === 0) {
-            return true;
-        }
-    } else if (Object.prototype.toString.call(obj).slice(8, -1) === 'Object') {
-        if (!Object.keys(obj).length) {
-            return true;
-        }
-    }
-    return false;
+export function isEmpty(str: string) {
+    return str === '';
 }
 
 /**
- * IsNotEmpty
- * @param obj {any} - Target Object
+ * 空文字でないことをチェック
+ * @param str 文字列
  */
-export function isNotEmpty(obj: $TSFixMe) {
-    return !isEmpty(obj);
+export function isNotEmpty(str: string) {
+    return !isEmpty(str);
 }
 
 /**
@@ -126,7 +112,7 @@ type PartialRequire<O, K extends keyof O> = {
  * @param idOnly 取得したメンションをIDで返す場合はtrue
  * @returns メンション文字列を格納した配列を返す
  */
-export function getMentionsFromMessage(message: Message, idOnly = false) {
+export function getMentionsFromMessage(message: Message<true>, idOnly = false) {
     const content = message.content;
     const matched = content.match(/<@\d{18,19}>/g);
     const results = [];
@@ -188,8 +174,7 @@ export function dateAdd(dt: Date, dd: number, u?: 'D' | 'M') {
         r.setDate(d + dd);
     } else if (u === 'M') {
         m += dd;
-        // @ts-expect-error TS(2345): Argument of type 'number' is not assignable to par... Remove this comment to see the full error message
-        y += parseInt(m / 12);
+        y += m / 12;
         m %= 12;
         const e = new Date(y, m + 1, 0).getDate();
         r.setFullYear(y, m, d > e ? e : d);

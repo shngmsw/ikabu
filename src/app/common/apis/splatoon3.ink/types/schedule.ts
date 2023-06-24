@@ -5,7 +5,7 @@ import { RegularProperties } from './regular_properties';
 import { BigRunProperties, SalmonRegularProperties, TeamContestProperties } from './salmon_properties';
 import { XProperties } from './x_properties';
 
-export type sp3Schedule = {
+export type Sp3Schedule = {
     regularSchedules: {
         nodes: RegularProperties[];
     };

@@ -1,10 +1,9 @@
-import { CacheType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
@@ -14,13 +13,11 @@ import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function privateRecruit(interaction: ChatInputCommandInteraction<CacheType>) {
-    if (!interaction.inGuild()) return;
-
+export async function privateRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     const options = interaction.options;
-    const startTime = options.getString('開始時刻') ?? 'ERROR';
-    const time = options.getString('所要時間') ?? 'ERROR';
-    const recruitNumText = options.getString('募集人数') ?? 'ERROR';
+    const startTime = options.getString('開始時刻', true);
+    const time = options.getString('所要時間', true);
+    const recruitNumText = options.getString('募集人数', true);
     const condition = options.getString('内容または参加条件') ?? 'なし';
     const roomUrl = options.getString('ヘヤタテurl');
     const logo = 'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
@@ -31,10 +28,9 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<Ca
 
     await interaction.deferReply();
 
-    assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = interaction.guild;
+    const guild = await getGuildByInteraction(interaction);
     const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
     const recruitChannel = interaction.channel;
 
@@ -78,6 +74,8 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<Ca
             embeds: [embed],
         });
 
+        if (!embedMessage.inGuild()) return;
+
         let recruitNum = Number(recruitNumText);
         if (isNaN(recruitNum)) {
             recruitNum = -1;
@@ -97,17 +95,14 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<Ca
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(
-            embedMessage.id,
-            new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date()),
-        );
+        await ParticipantService.registerParticipantFromMember(guild.id, embedMessage.id, recruiter, 0);
 
         const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
         const sentMessage = await recruitChannel.send({
             content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        sentMessage.edit({ components: [recruitActionRow(embedMessage)] });
+        await sentMessage.edit({ components: [recruitActionRow(embedMessage)] });
         const deleteButtonMsg = await recruitChannel.send({
             components: [embedRecruitDeleteButton(sentMessage, embedMessage)],
         });
@@ -126,7 +121,7 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<Ca
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (exists(deleteButtonCheck)) {
-            deleteButtonCheck.delete();
+            await deleteButtonCheck.delete();
         } else {
             return;
         }

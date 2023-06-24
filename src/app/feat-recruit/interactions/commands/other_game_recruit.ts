@@ -1,4 +1,5 @@
 import {
+    CacheType,
     ChatInputCommandInteraction,
     Collection,
     ColorResolvable,
@@ -11,11 +12,10 @@ import {
     VoiceChannel,
 } from 'discord.js';
 
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
@@ -24,13 +24,10 @@ import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function otherGameRecruit(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inGuild()) return;
-
-    assertExistCheck(interaction.guild, 'guild');
+export async function otherGameRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const options = interaction.options;
     const member = await searchAPIMemberById(guild, interaction.member.user.id);
 
@@ -88,7 +85,7 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction)
 }
 
 async function monsterHunterRise(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
     recruitChannel: TextBasedChannel,
     member: GuildMember,
@@ -96,11 +93,11 @@ async function monsterHunterRise(
 ) {
     const role = roles.find((role: Role) => role.name === 'ハンター');
     if (role === undefined) {
-        sendErrorMessage(recruitChannel);
+        await sendErrorMessage(recruitChannel);
         return;
     }
     const title = 'MONSTER HUNTER RISE';
-    const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
+    const recruitNumText = interaction.options.getString('募集人数', true);
     const mention = role.toString();
     const txt = `### <@${member.user.id}>` + 'たんのモンハンライズ募集\n';
     const color = '#b71008';
@@ -110,7 +107,7 @@ async function monsterHunterRise(
 }
 
 async function apexLegends(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
     recruitChannel: TextBasedChannel,
     member: GuildMember,
@@ -118,11 +115,11 @@ async function apexLegends(
 ) {
     const role = roles.find((role: Role) => role.name === 'レジェンド');
     if (role === undefined) {
-        sendErrorMessage(recruitChannel);
+        await sendErrorMessage(recruitChannel);
         return;
     }
     const title = 'Apex Legends';
-    const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
+    const recruitNumText = interaction.options.getString('募集人数', true);
     const mention = role.toString();
     const txt = `### <@${member.user.id}>` + 'たんのApexLegends募集\n';
     const color = '#F30100';
@@ -132,7 +129,7 @@ async function apexLegends(
 }
 
 async function overwatch(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
     recruitChannel: TextBasedChannel,
     member: GuildMember,
@@ -140,11 +137,11 @@ async function overwatch(
 ) {
     const role = roles.find((role: Role) => role.name === 'ヒーロー');
     if (role === undefined) {
-        sendErrorMessage(recruitChannel);
+        await sendErrorMessage(recruitChannel);
         return;
     }
     const title = 'Overwatch2';
-    const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
+    const recruitNumText = interaction.options.getString('募集人数', true);
     const mention = role.toString();
     const txt = `### <@${member.user.id}>` + 'たんのOverwatch2募集\n';
     const color = '#ED6516';
@@ -154,7 +151,7 @@ async function overwatch(
 }
 
 async function valorant(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
     recruitChannel: TextBasedChannel,
     member: GuildMember,
@@ -162,11 +159,11 @@ async function valorant(
 ) {
     const role = roles.find((role: Role) => role.name === 'エージェント');
     if (role === undefined) {
-        sendErrorMessage(recruitChannel);
+        await sendErrorMessage(recruitChannel);
         return;
     }
     const title = 'VALORANT';
-    const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
+    const recruitNumText = interaction.options.getString('募集人数', true);
     const mention = role.toString();
     const txt = `### <@${member.user.id}>` + 'たんのVALORANT募集\n';
     const color = '#FF4654';
@@ -175,14 +172,19 @@ async function valorant(
     await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
 }
 
-async function others(interaction: ChatInputCommandInteraction, guild: Guild, recruitChannel: TextBasedChannel, member: GuildMember) {
+async function others(
+    interaction: ChatInputCommandInteraction<CacheType>,
+    guild: Guild,
+    recruitChannel: TextBasedChannel,
+    member: GuildMember,
+) {
     const roleId = process.env.ROLE_ID_RECRUIT_OTHERGAMES;
     if (roleId === undefined) {
-        sendErrorMessage(recruitChannel);
+        await sendErrorMessage(recruitChannel);
         return;
     }
-    const title = interaction.options.getString('ゲームタイトル') ?? 'ERROR';
-    const recruitNumText = interaction.options.getString('募集人数') ?? 'ERROR';
+    const title = interaction.options.getString('ゲームタイトル', true);
+    const recruitNumText = interaction.options.getString('募集人数', true);
     const mention = `<@&${roleId}>`;
     const txt = `### <@${member.user.id}>` + `たんの${title}募集\n`;
     const color = '#379C30';
@@ -192,7 +194,7 @@ async function others(interaction: ChatInputCommandInteraction, guild: Guild, re
 }
 
 async function sendOtherGames(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
     recruitChannel: TextBasedChannel,
     member: GuildMember,
@@ -266,14 +268,14 @@ async function sendOtherGames(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(
-            embedMessage.id,
-            new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date()),
-        );
+        await ParticipantService.registerParticipantFromMember(guild.id, embedMessage.id, recruiter, 0);
 
         const sentMessage = await recruitChannel.send({
             content: mention + ' ボタンを押して参加表明するでし',
         });
+
+        if (!sentMessage.inGuild()) return;
+        if (!embedMessage.inGuild()) return;
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         const deleteButtonMsg = await recruitChannel.send({
@@ -281,10 +283,10 @@ async function sendOtherGames(
         });
 
         if (reserveChannel instanceof VoiceChannel && member.voice.channelId != reserveChannel.id) {
-            sentMessage.edit({
+            await sentMessage.edit({
                 components: [recruitActionRow(embedMessage, reserveChannel.id)],
             });
-            reserveChannel.permissionOverwrites.set(
+            await reserveChannel.permissionOverwrites.set(
                 [
                     {
                         id: guild.roles.everyone.id,
@@ -304,7 +306,7 @@ async function sendOtherGames(
                 ephemeral: true,
             });
         } else {
-            sentMessage.edit({ components: [recruitActionRow(embedMessage)] });
+            await sentMessage.edit({ components: [recruitActionRow(embedMessage)] });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -320,11 +322,11 @@ async function sendOtherGames(
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (exists(deleteButtonCheck)) {
-            deleteButtonCheck.delete();
+            await deleteButtonCheck.delete();
         } else {
             if (reserveChannel instanceof VoiceChannel && member.voice.channelId != reserveChannel.id) {
-                reserveChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                reserveChannel.permissionOverwrites.delete(member.user, 'UnLock Voice Channel');
+                await reserveChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                await reserveChannel.permissionOverwrites.delete(member.user, 'UnLock Voice Channel');
             }
             return;
         }
@@ -332,8 +334,8 @@ async function sendOtherGames(
         // 2時間後にVCロック解除
         await sleep(7200 - 15);
         if (reserveChannel instanceof VoiceChannel && member.voice.channelId != reserveChannel.id) {
-            reserveChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-            reserveChannel.permissionOverwrites.delete(member.user, 'UnLock Voice Channel');
+            await reserveChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+            await reserveChannel.permissionOverwrites.delete(member.user, 'UnLock Voice Channel');
         }
     } catch (error) {
         logger.error(error);
