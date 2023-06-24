@@ -31,7 +31,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.SERVER_DEPLOY_DIR_STG }}
-
             ${{ secrets.NPM_PATH }} install
             ${{ secrets.NPM_PATH }} run compile
 
