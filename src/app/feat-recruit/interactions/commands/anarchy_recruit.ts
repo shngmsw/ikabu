@@ -125,6 +125,12 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
     try {
         const schedule = await getSchedule();
 
+        if (notExists(schedule)) {
+            return await interaction.editReply({
+                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+            });
+        }
+
         if (checkFes(schedule, type)) {
             const fesChannelId = await searchChannelIdByName(guild, 'フェス募集', ChannelType.GuildText, null);
             await interaction.editReply({

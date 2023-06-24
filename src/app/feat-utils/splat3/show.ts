@@ -28,6 +28,7 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
         const { options } = interaction;
         const subCommand = options.getSubcommand();
         const schedule = await getSchedule();
+        assertExistCheck(schedule, 'schedule');
         if (subCommand === `now`) {
             if (checkFes(schedule, 0)) {
                 await sendFesInfo(interaction, schedule, 0);
@@ -41,7 +42,7 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
                 await sendStageInfo(interaction, schedule, 1);
             }
         } else if (subCommand === 'nawabari') {
-            if (checkFes(schedule.schedule, 1)) {
+            if (checkFes(schedule, 1)) {
                 await sendFesInfo(interaction, schedule, 0);
             } else {
                 await sendRegularInfo(interaction, schedule, 0);

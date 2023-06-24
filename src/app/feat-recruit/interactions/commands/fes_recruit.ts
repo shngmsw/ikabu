@@ -100,6 +100,12 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<'cache
     try {
         const schedule = await getSchedule();
 
+        if (notExists(schedule)) {
+            return await interaction.editReply({
+                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+            });
+        }
+
         if (!checkFes(schedule, type)) {
             await interaction.editReply({
                 content: '募集を建てようとした期間はフェスが行われていないでし！',

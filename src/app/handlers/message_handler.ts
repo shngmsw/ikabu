@@ -8,7 +8,7 @@ import { chatCountUp } from '../event/message_related/message_count';
 import { removeRookie } from '../event/rookie/remove_rookie';
 import { sendIntentionConfirmReply } from '../event/rookie/send_questionnaire';
 import { sendRecruitSticky } from '../feat-recruit/sticky/recruit_sticky_messages';
-import { handleStageInfo } from '../feat-utils/splat3/stageinfo';
+import { stageInfo } from '../feat-utils/splat3/stageinfo';
 import { play } from '../feat-utils/voice/tts/discordjs_voice';
 const logger = log4js_obj.getLogger('message');
 
@@ -23,7 +23,7 @@ export async function call(message: Message<true>) {
             }
             // ステージ情報
             if (message.content === 'stageinfo') {
-                await handleStageInfo(message);
+                await stageInfo(message);
             }
             return;
         } else {
@@ -32,7 +32,7 @@ export async function call(message: Message<true>) {
                 const guild = await message.guild.fetch();
                 const member = await guild.members.fetch(message.author.id);
                 if (member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
-                    await handleStageInfo(message);
+                    await stageInfo(message);
                 }
             }
 

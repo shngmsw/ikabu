@@ -93,6 +93,13 @@ export async function eventRecruit(interaction: ChatInputCommandInteraction<'cac
 
     try {
         const schedule = await getSchedule();
+
+        if (notExists(schedule)) {
+            return await interaction.editReply({
+                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+            });
+        }
+
         const eventData = await getEventData(schedule);
 
         if (notExists(eventData)) {
