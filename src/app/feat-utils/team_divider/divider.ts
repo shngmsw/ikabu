@@ -813,11 +813,11 @@ async function loadTeamEmbed(messageId: string, count: number, hostMember: Guild
         let spectateString = 'なし';
         let wantSpectateString = 'なし';
 
-        if (exists(spectators)) {
+        if (spectators.length !== 0) {
             spectateString = usersString(spectators);
         }
 
-        if (exists(wantSpectate)) {
+        if (spectators.length !== 0) {
             wantSpectateString = usersString(wantSpectate);
         }
 
