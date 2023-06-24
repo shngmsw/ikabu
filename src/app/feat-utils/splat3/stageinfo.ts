@@ -12,57 +12,44 @@ import {
 } from '../../common/apis/splatoon3.ink/splatoon3_ink';
 import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
-import { assertExistCheck } from '../../common/others';
+import { assertExistCheck, exists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function handleStageInfo(msg: Message<true>) {
-    if (msg.content.startsWith('stageinfo')) {
-        await stageinfo(msg);
-    } else if (msg.content.startsWith('stage')) {
-        await sf(msg);
-    }
-}
-async function sf(msg: Message<true>) {
+export async function stageInfo(msg: Message<true>) {
     try {
         const schedule = await getSchedule();
 
-        const embedStr_challenge = await getACEmbed(schedule);
-        embedStr_challenge.setAuthor({
-            name: 'バンカラマッチ (チャレンジ)',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
-        });
-        embedStr_challenge.setColor('#F54910');
+        if (exists(schedule)) {
+            await msgDelete(msg);
 
-        const embedStr_open = await getAOEmbed(schedule);
-        embedStr_open.setAuthor({
-            name: 'バンカラマッチ (オープン)',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
-        });
-        embedStr_open.setColor('#F54910');
+            const embedStr_challenge = await getACEmbed(schedule);
+            embedStr_challenge.setAuthor({
+                name: 'バンカラマッチ (チャレンジ)',
+                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+            });
+            embedStr_challenge.setColor('#F54910');
 
-        const embedStr_x = await getXMatchEmbed(schedule);
-        embedStr_x.setAuthor({
-            name: 'Xマッチ',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
-        });
-        embedStr_x.setColor('#0edb9b');
+            const embedStr_open = await getAOEmbed(schedule);
+            embedStr_open.setAuthor({
+                name: 'バンカラマッチ (オープン)',
+                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+            });
+            embedStr_open.setColor('#F54910');
 
-        await msg.channel.send({
-            embeds: [embedStr_x, embedStr_challenge, embedStr_open],
-        });
-    } catch (error) {
-        await msg.channel.send('なんかエラーでてるわ');
-        logger.error(error);
-    }
-}
+            const embedStr_x = await getXMatchEmbed(schedule);
+            embedStr_x.setAuthor({
+                name: 'Xマッチ',
+                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
+            });
+            embedStr_x.setColor('#0edb9b');
 
-async function stageinfo(msg: Message<true>) {
-    // 過去分は削除
-    await msgDelete(msg);
-
-    try {
-        await sf(msg);
+            await msg.channel.send({
+                embeds: [embedStr_x, embedStr_challenge, embedStr_open],
+            });
+        } else {
+            await msg.channel.send(`スケジュールデータを取得できなかったでし！\n${new Date().toLocaleString()}`);
+        }
     } catch (error) {
         await msg.channel.send('なんかエラーでてるわ');
         logger.error(error);

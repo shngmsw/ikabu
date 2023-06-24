@@ -77,6 +77,12 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
     try {
         const schedule = await getSchedule();
 
+        if (notExists(schedule)) {
+            return await interaction.editReply({
+                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+            });
+        }
+
         if (checkFes(schedule, type)) {
             const fes1ChannelId = await searchChannelIdByName(guild, 'フウカ募集', ChannelType.GuildText, null);
             const fes2ChannelId = await searchChannelIdByName(guild, 'ウツホ募集', ChannelType.GuildText, null);
@@ -245,6 +251,13 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
 
     try {
         const schedule = await getSchedule();
+
+        if (notExists(schedule)) {
+            return await interaction.editReply({
+                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+            });
+        }
+
         const eventData = await getEventData(schedule);
 
         if (notExists(eventData)) {
@@ -382,6 +395,12 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
 
     try {
         const schedule = await getSchedule();
+
+        if (notExists(schedule)) {
+            return await interaction.editReply({
+                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+            });
+        }
 
         if (checkFes(schedule, type)) {
             const fes1ChannelId = await searchChannelIdByName(guild, 'フウカ募集', ChannelType.GuildText, null);
@@ -595,6 +614,12 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction<'cache
 
     try {
         const schedule = await getSchedule();
+
+        if (notExists(schedule)) {
+            return await interaction.editReply({
+                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+            });
+        }
 
         if (!checkFes(schedule, type)) {
             await interaction.editReply({

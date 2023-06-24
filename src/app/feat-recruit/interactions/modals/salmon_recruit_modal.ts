@@ -35,6 +35,12 @@ export async function sendSalmonRun(
 
     const schedule = await getSchedule();
 
+    if (notExists(schedule)) {
+        return await interaction.editReply({
+            content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+        });
+    }
+
     let recruitBuffer;
     if (checkBigRun(schedule, 0)) {
         recruitBuffer = await recruitBigRunCanvas(
