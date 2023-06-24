@@ -1,5 +1,6 @@
-import { PrismaClient, TeamDivider } from '@prisma/client';
+import { TeamDivider } from '@prisma/client';
 
+import { prisma } from './prisma';
 import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
@@ -32,9 +33,7 @@ export class TeamDividerService {
         hideWin: boolean,
     ) {
         try {
-            const client = new PrismaClient();
-
-            await client.teamDivider.create({
+            await prisma.teamDivider.create({
                 data: {
                     messageId: messageId,
                     memberId: memberId,
@@ -54,9 +53,7 @@ export class TeamDividerService {
 
     static async deleteMemberFromDB(messageId: string, memberId: string) {
         try {
-            const client = new PrismaClient();
-
-            await client.teamDivider.deleteMany({
+            await prisma.teamDivider.deleteMany({
                 where: {
                     messageId: messageId,
                     memberId: memberId,
@@ -74,9 +71,7 @@ export class TeamDividerService {
      */
     static async registeredMembersStrings(messageId: string) {
         try {
-            const client = new PrismaClient();
-
-            const members = await client.teamDivider.findMany({
+            const members = await prisma.teamDivider.findMany({
                 where: {
                     messageId: messageId,
                     matchNum: 0,
@@ -106,9 +101,7 @@ export class TeamDividerService {
      */
     static async selectMemberFromDB(messageId: string, matchNum: number, memberId: string) {
         try {
-            const client = new PrismaClient();
-
-            const member = await client.teamDivider.findUnique({
+            const member = await prisma.teamDivider.findUnique({
                 where: {
                     messageId_memberId_matchNum: {
                         messageId: messageId,
@@ -132,9 +125,7 @@ export class TeamDividerService {
      */
     static async selectAllMemberFromDB(messageId: string, matchNum: number) {
         try {
-            const client = new PrismaClient();
-
-            const members = await client.teamDivider.findMany({
+            const members = await prisma.teamDivider.findMany({
                 where: {
                     messageId: messageId,
                     matchNum: matchNum,
@@ -153,9 +144,7 @@ export class TeamDividerService {
      */
     static async deleteAllMemberFromDB(messageId: string) {
         try {
-            const client = new PrismaClient();
-
-            await client.teamDivider.deleteMany({
+            await prisma.teamDivider.deleteMany({
                 where: {
                     messageId: messageId,
                 },
@@ -174,9 +163,7 @@ export class TeamDividerService {
      */
     static async setTeam(messageId: string, memberId: string, matchNum: number, team: number) {
         try {
-            const client = new PrismaClient();
-
-            await client.teamDivider.updateMany({
+            await prisma.teamDivider.updateMany({
                 where: {
                     messageId: messageId,
                     memberId: memberId,
@@ -200,9 +187,7 @@ export class TeamDividerService {
      */
     static async setCount(messageId: string, memberId: string, matchNum: number, count: number) {
         try {
-            const client = new PrismaClient();
-
-            await client.teamDivider.updateMany({
+            await prisma.teamDivider.updateMany({
                 where: {
                     messageId: messageId,
                     memberId: memberId,
@@ -226,9 +211,7 @@ export class TeamDividerService {
      */
     static async setWin(messageId: string, memberId: string, matchNum: number, winCount: number) {
         try {
-            const client = new PrismaClient();
-
-            await client.teamDivider.updateMany({
+            await prisma.teamDivider.updateMany({
                 where: {
                     messageId: messageId,
                     memberId: memberId,
@@ -250,9 +233,7 @@ export class TeamDividerService {
      */
     static async setHideWin(messageId: string, flag: boolean) {
         try {
-            const client = new PrismaClient();
-
-            await client.teamDivider.updateMany({
+            await prisma.teamDivider.updateMany({
                 where: {
                     messageId: messageId,
                 },
@@ -274,9 +255,7 @@ export class TeamDividerService {
      */
     static async setForceSpectate(messageId: string, memberId: string, matchNum: number, flag: boolean) {
         try {
-            const client = new PrismaClient();
-
-            await client.teamDivider.updateMany({
+            await prisma.teamDivider.updateMany({
                 where: {
                     messageId: messageId,
                     memberId: memberId,
@@ -301,9 +280,7 @@ export class TeamDividerService {
     static async getTeamMembers(messageId: string, matchNum: number, team: number): Promise<TeamMember[]> {
         let members: TeamDivider[] = [];
         try {
-            const client = new PrismaClient();
-
-            members = await client.teamDivider.findMany({
+            members = await prisma.teamDivider.findMany({
                 where: {
                     messageId: messageId,
                     matchNum: matchNum,
@@ -346,9 +323,7 @@ export class TeamDividerService {
     static async getForceSpectate(messageId: string, matchNum: number): Promise<TeamMember[]> {
         let members: TeamDivider[] = [];
         try {
-            const client = new PrismaClient();
-
-            members = await client.teamDivider.findMany({
+            members = await prisma.teamDivider.findMany({
                 where: {
                     messageId: messageId,
                     matchNum: matchNum,
@@ -392,9 +367,7 @@ export class TeamDividerService {
     static async getParticipants(messageId: string, matchNum: number, teamNum: number): Promise<TeamMember[]> {
         let members: TeamDivider[] = [];
         try {
-            const client = new PrismaClient();
-
-            members = await client.teamDivider.findMany({
+            members = await prisma.teamDivider.findMany({
                 where: {
                     messageId: messageId,
                     matchNum: matchNum,
@@ -439,9 +412,7 @@ export class TeamDividerService {
      */
     static async deleteMatchingResult(messageId: string, matchNum: number) {
         try {
-            const client = new PrismaClient();
-
-            await client.teamDivider.deleteMany({
+            await prisma.teamDivider.deleteMany({
                 where: {
                     messageId: messageId,
                     matchNum: matchNum,
