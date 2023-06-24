@@ -5,7 +5,7 @@ import Canvas from 'canvas';
 
 import { RecruitOpCode } from './regenerate_canvas.js';
 import { modalRecruit } from '../../../constant.js';
-import { MatchInfo } from '../../common/apis/splatoon3_ink.js';
+import { MatchInfo } from '../../common/apis/splatoon3.ink/splatoon3_ink.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { exists, notExists } from '../../common/others.js';

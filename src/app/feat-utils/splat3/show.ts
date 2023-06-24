@@ -13,8 +13,8 @@ import {
     getAnarchyChallengeData,
     getAnarchyOpenData,
     getXMatchData,
-} from '../../common/apis/splatoon3_ink';
-import { Sp3Schedule } from '../../common/apis/types/schedule';
+} from '../../common/apis/splatoon3.ink/splatoon3_ink';
+import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule';
 import { createRoundRect, fillTextWithStroke } from '../../common/canvas_components';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
 import { assertExistCheck, notExists } from '../../common/others';

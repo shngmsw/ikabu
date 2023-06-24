@@ -8,7 +8,14 @@ import { sendRegularMatch } from './regular_recruit_modal';
 import { sendSalmonRun } from './salmon_recruit_modal';
 import { modalRecruit } from '../../../../constant';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, getSchedule, getAnarchyOpenData, getEventData, getFesData, getRegularData } from '../../../common/apis/splatoon3_ink';
+import {
+    checkFes,
+    getSchedule,
+    getAnarchyOpenData,
+    getEventData,
+    getFesData,
+    getRegularData,
+} from '../../../common/apis/splatoon3.ink/splatoon3_ink';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';

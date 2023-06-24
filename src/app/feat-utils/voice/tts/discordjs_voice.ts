@@ -9,7 +9,7 @@ import {
 } from '@discordjs/voice';
 import { CacheType, ChatInputCommandInteraction, Message, VoiceState } from 'discord.js';
 
-import { mode_api, bufferToStream } from './voice_bot_node';
+import { modeApi, bufferToStream } from './voice_bot_node';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { exists, isNotEmpty, notExists } from '../../../common/others';
@@ -124,7 +124,7 @@ export async function play(msg: Message<true>) {
         const subscription = subscriptions.get(guildId);
         if (exists(subscription) && isNotEmpty(subscription) && channels.get(guildId) === channelId) {
             // メッセージから音声ファイルを取得
-            const buffer = await mode_api(msg);
+            const buffer = await modeApi(msg);
             if (notExists(buffer)) return;
             const stream = bufferToStream(buffer);
 
