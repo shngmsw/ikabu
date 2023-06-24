@@ -1,106 +1,100 @@
+import { Member } from '@prisma/client';
 import { AttachmentBuilder, ModalSubmitInteraction } from 'discord.js';
 
 import { placeHold } from '../../../../constant';
-import { Member } from '../../../../db/model/member';
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
+import { MatchInfo } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { assertExistCheck, exists, sleep } from '../../../common/others';
+import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 import { sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
+import { RuleIcon } from '../commands/anarchy_recruit';
 
 const logger = log4js_obj.getLogger('recruit');
 
 export async function sendAnarchyMatch(
-    interaction: ModalSubmitInteraction,
+    interaction: ModalSubmitInteraction<'cached' | 'raw'>,
     txt: string,
     recruitNum: number,
     condition: string,
     count: number,
     rank: string,
-    member: Member,
-    user1: Member | null,
-    user2: Member | null,
-    anarchyData: $TSFixMe,
+    recruiter: Member,
+    attendee1: Member | null,
+    attendee2: Member | null,
+    anarchyData: MatchInfo,
 ) {
-    let thumbnailUrl; // ガチルールのアイコン
-    let thumbnailXP; // アイコンx座標
-    let thumbnailYP; // アイコンy座標
-    let thumbScaleX; // アイコン幅
-    let thumbScaleY; // アイコン高さ
+    let ruleIcon: RuleIcon;
     if (exists(anarchyData && anarchyData.rule)) {
         switch (anarchyData.rule) {
             case 'ガチエリア':
-                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
-                thumbnailXP = 600;
-                thumbnailYP = 20;
-                thumbScaleX = 90;
-                thumbScaleY = 100;
+                ruleIcon = {
+                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png',
+                    xPosition: 600,
+                    yPosition: 20,
+                    xScale: 90,
+                    yScale: 100,
+                };
                 break;
             case 'ガチヤグラ':
-                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
-                thumbnailXP = 595;
-                thumbnailYP = 20;
-                thumbScaleX = 90;
-                thumbScaleY = 100;
+                ruleIcon = {
+                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png',
+                    xPosition: 595,
+                    yPosition: 20,
+                    xScale: 90,
+                    yScale: 100,
+                };
                 break;
             case 'ガチホコバトル':
-                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
-                thumbnailXP = 585;
-                thumbnailYP = 23;
-                thumbScaleX = 110;
-                thumbScaleY = 90;
+                ruleIcon = {
+                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png',
+                    xPosition: 585,
+                    yPosition: 23,
+                    xScale: 110,
+                    yScale: 90,
+                };
                 break;
             case 'ガチアサリ':
-                thumbnailUrl = 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
-                thumbnailXP = 570;
-                thumbnailYP = 20;
-                thumbScaleX = 120;
-                thumbScaleY = 100;
+                ruleIcon = {
+                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png',
+                    xPosition: 570,
+                    yPosition: 20,
+                    xScale: 120,
+                    yScale: 100,
+                };
                 break;
             default:
-                thumbnailUrl = placeHold.error100x100;
-                thumbnailXP = 595;
-                thumbnailYP = 20;
-                thumbScaleX = 100;
-                thumbScaleY = 100;
+                ruleIcon = {
+                    url: placeHold.error100x100,
+                    xPosition: 595,
+                    yPosition: 20,
+                    xScale: 100,
+                    yScale: 100,
+                };
                 break;
         }
     } else {
-        thumbnailUrl = placeHold.error100x100;
-        thumbnailXP = 595;
-        thumbnailYP = 20;
-        thumbScaleX = 100;
-        thumbScaleY = 100;
+        ruleIcon = {
+            url: placeHold.error100x100,
+            xPosition: 595,
+            yPosition: 20,
+            xScale: 100,
+            yScale: 100,
+        };
     }
 
     const channelName = '[簡易版募集]';
 
-    const thumbnail = [thumbnailUrl, thumbnailXP, thumbnailYP, thumbScaleX, thumbScaleY];
-
-    assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await interaction.guild.fetch();
-
-    const recruiter = new Participant(member.userId, member.displayName, member.iconUrl, 0, new Date());
-
-    let attendee1 = null;
-    if (user1 instanceof Member) {
-        attendee1 = new Participant(user1.userId, user1.displayName, user1.iconUrl, 1, new Date());
-    }
-
-    let attendee2 = null;
-    if (user2 instanceof Member) {
-        attendee2 = new Participant(user2.userId, user2.displayName, user2.iconUrl, 1, new Date());
-    }
+    const guild = await getGuildByInteraction(interaction);
 
     const recruitBuffer = await recruitAnarchyCanvas(
         RecruitOpCode.open,
@@ -118,7 +112,7 @@ export async function sendAnarchyMatch(
         name: 'ikabu_recruit.png',
     });
 
-    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, thumbnail), { name: 'rules.png' });
+    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, ruleIcon), { name: 'rules.png' });
 
     try {
         const recruitChannel = interaction.channel;
@@ -128,12 +122,14 @@ export async function sendAnarchyMatch(
             files: [recruit],
         });
 
+        if (!image1Message.inGuild()) return;
+
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
             recruitChannel.id,
             image1Message.id,
-            member.userId,
+            recruiter.userId,
             recruitNum,
             condition,
             channelName,
@@ -142,12 +138,12 @@ export async function sendAnarchyMatch(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(image1Message.id, recruiter);
+        await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, recruiter, 0);
         if (exists(attendee1)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, attendee1);
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee1, 1);
         }
         if (exists(attendee2)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, attendee2);
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee2, 1);
         }
 
         const image2Message = await recruitChannel.send({ files: [rule] });
@@ -155,7 +151,7 @@ export async function sendAnarchyMatch(
             content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
-        buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
+        await buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
         const deleteButtonMsg = await recruitChannel.send({
             components: [recruitDeleteButton(buttonMessage, image1Message, image2Message)],
         });
@@ -174,7 +170,7 @@ export async function sendAnarchyMatch(
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (exists(deleteButtonCheck)) {
-            deleteButtonCheck.delete();
+            await deleteButtonCheck.delete();
         } else {
             return;
         }
@@ -182,21 +178,21 @@ export async function sendAnarchyMatch(
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
         const recruitData = await RecruitService.getRecruit(guild.id, image1Message.id);
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             return;
         }
 
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
-        const memberList = getMemberMentions(recruitData[0].recruitNum, participants);
-        const hostMention = `<@${member.userId}>`;
+        const memberList = getMemberMentions(recruitData.recruitNum, participants);
+        const hostMention = `<@${recruiter.userId}>`;
 
         await regenerateCanvas(guild, recruitChannel.id, image1Message.id, RecruitOpCode.close);
 
         // DBから募集情報削除
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
-        await ParticipantService.deleteAllParticipant(image1Message.id);
+        await ParticipantService.deleteAllParticipant(guild.id, image1Message.id);
 
-        buttonMessage.edit({
+        await buttonMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: setButtonDisable(buttonMessage),
         });

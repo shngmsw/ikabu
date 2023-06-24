@@ -1,13 +1,15 @@
 import path from 'path';
 
+import { Member } from '@prisma/client';
 import Canvas from 'canvas';
 
 import { RecruitOpCode } from './regenerate_canvas';
 import { modalRecruit } from '../../../constant';
-import { Participant } from '../../../db/model/participant';
+import { MatchInfo } from '../../common/apis/splatoon3.ink/splatoon3_ink';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { exists, notExists } from '../../common/others';
+import { RuleIcon } from '../interactions/commands/anarchy_recruit';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -27,10 +29,10 @@ export async function recruitAnarchyCanvas(
     opCode: number,
     remaining: number,
     count: number,
-    host: Participant,
-    user1: Participant | null,
-    user2: Participant | null,
-    user3: Participant | null,
+    recruiter: Member,
+    user1: Member | null,
+    user2: Member | null,
+    user3: Member | null,
     condition: string,
     rank: string | null,
     channelName: string | null,
@@ -54,9 +56,9 @@ export async function recruitAnarchyCanvas(
     fillTextWithStroke(recruitCtx, 'バンカラマッチ', '51px Splatfont', '#000000', '#F14400', 3, 115, 80);
 
     // 募集主の画像
-    const hostImage = await Canvas.loadImage(host.iconUrl ?? modalRecruit.placeHold);
+    const recruiterImage = await Canvas.loadImage(recruiter.iconUrl ?? modalRecruit.placeHold);
     recruitCtx.save();
-    drawArcImage(recruitCtx, hostImage, 40, 120, 50);
+    drawArcImage(recruitCtx, recruiterImage, 40, 120, 50);
     recruitCtx.strokeStyle = '#1e1f23';
     recruitCtx.lineWidth = 9;
     recruitCtx.stroke();
@@ -64,15 +66,15 @@ export async function recruitAnarchyCanvas(
 
     const memberIcons = [];
 
-    if (user1 instanceof Participant) {
+    if (exists(user1)) {
         memberIcons.push(user1.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user2 instanceof Participant) {
+    if (exists(user2)) {
         memberIcons.push(user2.iconUrl ?? modalRecruit.placeHold);
     }
 
-    if (user3 instanceof Participant) {
+    if (exists(user3)) {
         memberIcons.push(user3.iconUrl ?? modalRecruit.placeHold);
     }
 
@@ -89,8 +91,8 @@ export async function recruitAnarchyCanvas(
         }
     }
 
-    const hostIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
-    recruitCtx.drawImage(hostIcon, 0, 0, hostIcon.width, hostIcon.height, 90, 172, 75, 75);
+    const recruiterIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
+    recruitCtx.drawImage(recruiterIcon, 0, 0, recruiterIcon.width, recruiterIcon.height, 90, 172, 75, 75);
 
     fillTextWithStroke(recruitCtx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
 
@@ -182,7 +184,7 @@ export async function recruitAnarchyCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleAnarchyCanvas(anarchyData: $TSFixMe, thumbnail: $TSFixMe) {
+export async function ruleAnarchyCanvas(anarchyData: MatchInfo | null, ruleIcon: RuleIcon) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
 
     const ruleCtx = ruleCanvas.getContext('2d');
@@ -277,8 +279,18 @@ export async function ruleAnarchyCanvas(anarchyData: $TSFixMe, thumbnail: $TSFix
     }
 
     ruleCtx.save();
-    const ruleImage = await Canvas.loadImage(thumbnail[0]);
-    ruleCtx.drawImage(ruleImage, 0, 0, ruleImage.width, ruleImage.height, thumbnail[1], thumbnail[2], thumbnail[3], thumbnail[4]);
+    const ruleImage = await Canvas.loadImage(ruleIcon.url);
+    ruleCtx.drawImage(
+        ruleImage,
+        0,
+        0,
+        ruleImage.width,
+        ruleImage.height,
+        ruleIcon.xPosition,
+        ruleIcon.yPosition,
+        ruleIcon.xScale,
+        ruleIcon.yScale,
+    );
     ruleCtx.restore();
 
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);

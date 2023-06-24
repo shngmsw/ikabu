@@ -5,4 +5,5 @@ package-lock.json
 .history/
 ikabu.code-workspace
 ikabu.sqlite3
+ikabu.sqlite3-journal
 build/

@@ -1,24 +1,28 @@
-import { PermissionsBitField } from 'discord.js';
+import { ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
+import { assertExistCheck, exists } from '../../common/others';
 
-export async function handleBan(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
+const logger = log4js_obj.getLogger('ban');
 
+export async function handleBan(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply({ ephemeral: false });
 
-    const logger = log4js_obj.getLogger('ban');
-
+    const guild = await getGuildByInteraction(interaction);
+    const member = await searchAPIMemberById(guild, interaction.member.user.id);
+    assertExistCheck(member, 'member');
     const options = interaction.options;
-    const banTarget = options.getUser('ban対象');
+    const banTarget = options.getUser('ban対象', true);
     const reason = options.getString('ban理由');
 
-    if (interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)) {
-        const memberId = banTarget.id;
+    if (member.permissions.has(PermissionsBitField.Flags.BanMembers)) {
+        const targetId = banTarget.id;
 
-        const guild = await interaction.guild.fetch();
-        const member = await guild.members.fetch(memberId);
+        const targetMember = await searchAPIMemberById(guild, targetId);
+        assertExistCheck(targetMember, 'targetMember');
 
         const reasonText =
             'イカ部の管理人です。以下の理由によりイカ部から退部とさせていただきました。```' +
@@ -26,17 +30,20 @@ export async function handleBan(interaction: $TSFixMe) {
             '```' +
             '申し訳ありませんが、質問等は受け付けておりませんので、よろしくお願いいたします。';
 
-        const DMChannel = await member.createDM();
-        await DMChannel.send({ content: reasonText }).catch((error: $TSFixMe) => {
+        const DMChannel = await targetMember.createDM();
+        await DMChannel.send({ content: reasonText }).catch((error) => {
             logger.error(error);
         });
 
-        await member.ban({ reason: reasonText }).catch((error: $TSFixMe) => {
+        await targetMember.ban({ reason: reasonText }).catch((error) => {
             logger.error(error);
         });
+
         const channels = await guild.channels.fetch();
-        const banChannel = channels.find((channel: $TSFixMe) => channel.name === 'banコマンド');
-        banChannel.send(`${member.user.tag}さんを以下の理由によりBANしました。\n` + reasonText);
+        const banChannel = channels.find((channel) => exists(channel) && channel.name === 'banコマンド');
+        if (exists(banChannel) && banChannel.isTextBased()) {
+            await banChannel.send(`${targetMember.user.tag}さんを以下の理由によりBANしました。\n` + reasonText);
+        }
         await interaction.editReply('BANしたでし！');
     } else {
         return await interaction.editReply('BANする権限がないでし！');

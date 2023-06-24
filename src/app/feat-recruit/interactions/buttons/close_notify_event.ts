@@ -2,28 +2,27 @@ import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
 import { getMemberMentions } from './other_events.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
-import { Participant } from '../../../../db/model/participant.js';
-import { ParticipantService } from '../../../../db/participants_service.js';
+import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, datetimeDiff, exists } from '../../../common/others.js';
+import { assertExistCheck, datetimeDiff, exists, notExists } from '../../../common/others.js';
 import { getStickyChannelId, sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function closeNotify(interaction: ButtonInteraction) {
-    if (!interaction.inGuild()) return;
+export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw'>) {
+    if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
         });
 
-        assertExistCheck(interaction.guild, 'guild');
         assertExistCheck(interaction.channel, 'channel');
 
-        const guild = await interaction.guild.fetch();
+        const guild = await getGuildByInteraction(interaction);
         const embedMessageId = interaction.message.id;
 
         // interaction.member.user.idでなければならない。なぜならば、APIInteractionGuildMemberはid を直接持たないからである。
@@ -32,7 +31,7 @@ export async function closeNotify(interaction: ButtonInteraction) {
 
         const recruitData = await RecruitService.getRecruit(guild.id, embedMessageId);
 
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             await interaction.editReply({ components: disableThinkingButton(interaction, '〆') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
@@ -44,9 +43,9 @@ export async function closeNotify(interaction: ButtonInteraction) {
         const participantsData = await ParticipantService.getAllParticipants(guild.id, embedMessageId);
 
         let recruiter = participantsData[0]; // 募集者
-        const recruiterId = recruitData[0].authorId;
-        const attendeeList: Participant[] = []; // 募集時参加確定者リスト
-        const applicantList: Participant[] = []; // 参加希望者リスト
+        const recruiterId = recruitData.authorId;
+        const attendeeList: ParticipantMember[] = []; // 募集時参加確定者リスト
+        const applicantList: ParticipantMember[] = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 0) {
                 recruiter = participant;
@@ -77,13 +76,13 @@ export async function closeNotify(interaction: ButtonInteraction) {
         const recruitChannel = interaction.channel;
 
         if (member.userId === recruiterId) {
-            const memberList = getMemberMentions(recruitData[0].recruitNum, participantsData);
+            const memberList = getMemberMentions(recruitData.recruitNum, participantsData);
 
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, embedMessageId);
 
             // participantsテーブルから該当募集のメンバー全員削除
-            await ParticipantService.deleteAllParticipant(embedMessageId);
+            await ParticipantService.deleteAllParticipant(guild.id, embedMessageId);
 
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
@@ -94,7 +93,7 @@ export async function closeNotify(interaction: ButtonInteraction) {
 
             if (recruitChannel.isThread()) {
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
-                const stickyChannelId = getStickyChannelId(recruitData[0]);
+                const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
                     await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
                 }
@@ -102,13 +101,13 @@ export async function closeNotify(interaction: ButtonInteraction) {
                 await sendCloseEmbedSticky(guild, recruitChannel);
             }
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
-            const memberList = getMemberMentions(recruitData[0].recruitNum, participantsData);
+            const memberList = getMemberMentions(recruitData.recruitNum, participantsData);
 
             // recruitテーブルから削除
             await RecruitService.deleteRecruit(guild.id, embedMessageId);
 
             // participantsテーブルから該当募集のメンバー全員削除
-            await ParticipantService.deleteAllParticipant(embedMessageId);
+            await ParticipantService.deleteAllParticipant(guild.id, embedMessageId);
 
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
@@ -120,7 +119,7 @@ export async function closeNotify(interaction: ButtonInteraction) {
 
             if (recruitChannel.isThread()) {
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
-                const stickyChannelId = getStickyChannelId(recruitData[0]);
+                const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
                     await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
                 }
@@ -141,6 +140,6 @@ export async function closeNotify(interaction: ButtonInteraction) {
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '〆'),
         });
-        interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send('なんかエラー出てるわ');
     }
 }

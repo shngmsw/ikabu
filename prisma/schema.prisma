@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../ikabu.sqlite3?connection_limit=1"
+}
+
+model FriendCode {
+  userId String  @unique @map("user_id")
+  code   String
+  url    String?
+
+  @@map("friend_code")
+}
+
+model Member {
+  guildId     String        @map("guild_id")
+  userId      String        @map("user_id")
+  displayName String        @map("display_name")
+  iconUrl     String        @map("icon_url")
+  joinedAt    DateTime?     @map("joined_at")
+  participant Participant[]
+
+  @@unique([guildId, userId])
+  @@map("member")
+}
+
+model MessageCount {
+  userId String @unique @map("user_id")
+  count  Int
+
+  @@map("message_count")
+}
+
+model Participant {
+  guildId   String   @map("guild_id")
+  messageId String   @map("message_id")
+  userId    String   @map("user_id")
+  member    Member   @relation(fields: [guildId, userId], references: [guildId, userId])
+  userType  Int      @map("user_type")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  @@unique([guildId, messageId, userId])
+  @@map("participant")
+}
+
+model UserReaction {
+  userId      String   @map("user_id")
+  reactionSeq Int      @map("reaction_seq")
+  year        String
+  channelId   String   @map("channel_id")
+  reaction    Reaction @relation(fields: [reactionSeq], references: [reactionSeq])
+  count       Int
+
+  @@unique([userId, reactionSeq, year, channelId])
+  @@map("user_reaction")
+}
+
+model Recruit {
+  guildId     String   @map("guild_id")
+  channelId   String   @map("channel_id")
+  messageId   String   @map("message_id")
+  authorId    String   @map("author_id")
+  recruitNum  Int      @map("recruit_num")
+  condition   String   @default("なし")
+  vcName      String?  @map("vc_name")
+  recruitType Int      @map("recruit_type")
+  option      String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([guildId, messageId])
+  @@map("recruit")
+}
+
+model Sticky {
+  guildId   String  @map("guild_id")
+  channelId String  @map("channel_id")
+  messageId String? @map("message_id")
+
+  @@unique([guildId, channelId])
+  @@map("sticky")
+}
+
+model TeamDivider {
+  messageId        String   @map("message_id")
+  memberId         String   @map("member_id")
+  memberName       String   @map("member_name")
+  team             Int
+  matchNum         Int      @map("match_num")
+  joinedMatchCount Int      @map("joined_match_count")
+  win              Int      @map("win")
+  forceSpectate    Boolean  @map("force_spectate")
+  hideWin          Boolean  @map("hide_win")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@unique([messageId, memberId, matchNum])
+  @@map("team_divider")
+}
+
+model Reaction {
+  reactionSeq Int            @id @default(autoincrement()) @map("reaction_seq")
+  emojiId     String?        @default("none") @map("emoji_id")
+  emojiName   String         @map("emoji_name")
+  count       Int
+  users       UserReaction[]
+
+  @@unique([emojiId, emojiName])
+  @@map("reaction")
+}

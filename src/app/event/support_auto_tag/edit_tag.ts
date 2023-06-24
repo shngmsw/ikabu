@@ -1,13 +1,18 @@
+import { AnyThreadChannel } from 'discord.js';
+
 import { tagIdsEmbed } from './tag_ids_embed';
 import { log4js_obj } from '../../../log4js_settings';
-import { isEmpty } from '../../common/others';
+import { exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('default');
 
-export async function editThreadTag(thread: $TSFixMe) {
+export async function editThreadTag(thread: AnyThreadChannel<boolean>) {
     try {
-        if (isEmpty(process.env.TAG_ID_SUPPORT_PROGRESS) || isEmpty(process.env.TAG_ID_SUPPORT_RESOLVED)) {
-            await thread.send({ embeds: [tagIdsEmbed(thread)] });
+        if (notExists(process.env.TAG_ID_SUPPORT_PROGRESS) || notExists(process.env.TAG_ID_SUPPORT_RESOLVED)) {
+            const embed = tagIdsEmbed(thread);
+            if (exists(embed)) {
+                await thread.send({ embeds: [embed] });
+            }
             return;
         }
 

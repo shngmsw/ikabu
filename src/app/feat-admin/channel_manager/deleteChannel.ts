@@ -1,25 +1,29 @@
 import fs from 'fs';
 
 import { stringify } from 'csv-stringify/sync';
-import { AttachmentBuilder, ChannelType, PermissionsBitField } from 'discord.js';
+import { AttachmentBuilder, ChannelType, ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
-import { notExists } from '../../common/others';
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
+import { searchAPIMemberById } from '../../common/manager/member_manager';
+import { assertExistCheck, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
-export async function handleDeleteChannel(interaction: $TSFixMe) {
-    if (!interaction.inGuild()) return;
-
+export async function handleDeleteChannel(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
+    const guild = await getGuildByInteraction(interaction);
+    const member = await searchAPIMemberById(guild, interaction.member.user.id);
+    assertExistCheck(member, 'member');
+
+    if (!member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
         return await interaction.followUp('チャンネルを管理する権限がないでし！');
     }
     const { options } = interaction;
-    const categoryIds = options.getString('チャンネルid');
+    const categoryIds = options.getString('チャンネルid', true);
 
     const strCmd = categoryIds.replace('\x20+', ' ');
     const splits = strCmd.split(' ');
@@ -36,7 +40,6 @@ export async function handleDeleteChannel(interaction: $TSFixMe) {
 
     await interaction.editReply('指定されたIDのチャンネルを削除中でし！\nちょっと待つでし！');
 
-    const guild = await interaction.guild.fetch();
     const removed = [];
 
     removed.push(['チャンネルID', 'チャンネル名']);

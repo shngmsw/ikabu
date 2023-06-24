@@ -1,14 +1,14 @@
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
 import { memberListMessage } from './other_events.js';
-import { Participant } from '../../../../db/model/participant.js';
-import { ParticipantService } from '../../../../db/participants_service.js';
+import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, createMentionsFromIdList, exists } from '../../../common/others.js';
+import { assertExistCheck, createMentionsFromIdList, exists, notExists } from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
@@ -21,16 +21,15 @@ import {
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function cancel(interaction: ButtonInteraction, params: URLSearchParams) {
-    if (!interaction.inGuild()) return;
+export async function cancel(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+    if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
             components: setButtonDisable(interaction.message, interaction),
         });
 
-        assertExistCheck(interaction.guild, 'guild');
+        const guild = await getGuildByInteraction(interaction);
         assertExistCheck(interaction.channel, 'channel');
-        const guild = await interaction.guild.fetch();
         const channelId = params.get('vid');
         const image1MsgId = params.get('imid1');
         assertExistCheck(image1MsgId, "params.get('imid1')");
@@ -42,7 +41,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
 
         const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             await interaction.editReply({ components: disableThinkingButton(interaction, 'キャンセル') });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
@@ -54,9 +53,9 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
         const participantsData = await ParticipantService.getAllParticipants(guild.id, image1MsgId);
 
         let recruiter = participantsData[0]; // 募集者
-        const recruiterId = recruitData[0].authorId;
-        const attendeeList: Participant[] = []; // 募集時参加確定者リスト
-        const applicantList: Participant[] = []; // 参加希望者リスト
+        const recruiterId = recruitData.authorId;
+        const attendeeList: ParticipantMember[] = []; // 募集時参加確定者リスト
+        const applicantList: ParticipantMember[] = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 0) {
                 recruiter = participant;
@@ -93,14 +92,14 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
             await RecruitService.deleteRecruit(guild.id, image1MsgId);
 
             // participantsテーブルから該当募集のメンバー全員削除
-            await ParticipantService.deleteAllParticipant(image1MsgId);
+            await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
             if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
                 const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
                 if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
-                    channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                    channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
+                    await channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                    await channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
                 }
             }
 
@@ -112,7 +111,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
 
             if (recruitChannel.isThread()) {
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
-                const stickyChannelId = getStickyChannelId(recruitData[0]);
+                const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
                     await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
                 }
@@ -123,7 +122,7 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
             // 既に参加済みかチェック
             if (applicantIdList.includes(member.userId)) {
                 // participantsテーブルから自分のデータのみ削除
-                await ParticipantService.deleteParticipant(image1MsgId, member.userId);
+                await ParticipantService.deleteParticipant(guild.id, image1MsgId, member.userId);
 
                 await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.open);
 
@@ -155,6 +154,6 @@ export async function cancel(interaction: ButtonInteraction, params: URLSearchPa
         await interaction.message.edit({
             components: disableThinkingButton(interaction, 'キャンセル'),
         });
-        interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send('なんかエラー出てるわ');
     }
 }

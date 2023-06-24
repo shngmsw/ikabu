@@ -1,4 +1,6 @@
-export function handlePoll(msg: $TSFixMe) {
+import { Message } from 'discord.js';
+
+export async function handlePoll(msg: Message<true>) {
     let strCmd = msg.content.replace(/　/g, ' ');
     strCmd = msg.content.replace(/\r?\n/g, ' ');
     const args = strCmd.split(' ');
@@ -7,5 +9,5 @@ export function handlePoll(msg: $TSFixMe) {
     for (let i = 0; i < args.length; i++) {
         pollCmd = pollCmd + '"' + args[i] + '" ';
     }
-    msg.channel.send({ content: pollCmd });
+    await msg.channel.send({ content: pollCmd });
 }

@@ -1,6 +1,6 @@
-import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
+import { ActionRowBuilder, ButtonInteraction, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 
-export async function createRegularModal(interaction: $TSFixMe) {
+export async function createRegularModal(interaction: ButtonInteraction<'cached' | 'raw'>) {
     const modalParams = new URLSearchParams();
     modalParams.append('recm', 'regrec');
 

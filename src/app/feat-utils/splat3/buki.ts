@@ -1,13 +1,49 @@
+import { Member } from '@prisma/client';
 import { CacheType, ChatInputCommandInteraction, EmbedBuilder, User } from 'discord.js';
 import fetch from 'node-fetch';
 
-import { Member } from '../../../db/model/member';
 import { log4js_obj } from '../../../log4js_settings';
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../common/manager/member_manager';
-import { assertExistCheck, exists, randomSelect } from '../../common/others';
+import { exists, randomSelect } from '../../common/others';
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 
 const logger = log4js_obj.getLogger('interaction');
+
+type Weapon = {
+    key: string;
+    aliases: string[];
+    type: {
+        key: string;
+        aliases: [];
+        name: {
+            en_US: string;
+            ja_JP: string;
+        };
+    };
+    name: {
+        en_US: string;
+        ja_JP: string;
+    };
+    main: string;
+    sub: {
+        key: string;
+        aliases: [];
+        name: {
+            en_US: string;
+            ja_JP: string;
+        };
+    };
+    special: {
+        key: string;
+        aliases: [];
+        name: {
+            en_US: string;
+            ja_JP: string;
+        };
+    };
+    reskin_of: string;
+};
 
 export async function handleBuki(interaction: ChatInputCommandInteraction<CacheType>) {
     const { options } = interaction;
@@ -22,19 +58,17 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
 
     try {
         const response = await fetch(weaponsUrl);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const weapons = (await response.json()) as any;
+        const weapons = (await response.json()) as Weapon[];
 
         let member: User | Member | null;
         if (interaction.inGuild()) {
-            assertExistCheck(interaction.guild, 'guild');
-            const guild = await interaction.guild.fetch();
+            const guild = await getGuildByInteraction(interaction);
             member = await searchDBMemberById(guild, interaction.member.user.id);
         } else {
             member = interaction.user;
         }
 
-        const bukis = weapons.filter(function (value: $TSFixMe) {
+        const bukis = weapons.filter(function (value: Weapon) {
             if (exists(bukiType)) {
                 // 特定のbukiTypeが指定されているとき
                 return bukiType === value.type.key;
@@ -42,7 +76,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
                 return true;
             }
         });
-        const bukiNames = bukis.map(function (value: $TSFixMe) {
+        const bukiNames = bukis.map(function (value: Weapon) {
             const embed = new EmbedBuilder()
                 .setColor(0xf02d7d)
                 .setTitle(value.name.ja_JP)
@@ -50,15 +84,15 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
                     value: value.name.en_US,
                     name: value.sub.name.ja_JP + ' / ' + value.special.name.ja_JP,
                 });
-            if (member instanceof Member) {
-                embed.setAuthor({
-                    name: member.displayName + 'のブキ',
-                    iconURL: member.iconUrl,
-                });
-            } else if (member instanceof User) {
+            if (member instanceof User) {
                 embed.setAuthor({
                     name: member.username + 'のブキ',
                     iconURL: member.displayAvatarURL(),
+                });
+            } else if (exists(member) && exists(member.displayName) && exists(member.iconUrl)) {
+                embed.setAuthor({
+                    name: member.displayName + 'のブキ',
+                    iconURL: member.iconUrl,
                 });
             }
             return embed;

@@ -1,23 +1,28 @@
-import { EmbedBuilder, Guild } from 'discord.js';
+import { Recruit } from '@prisma/client';
+import { ComponentType, EmbedBuilder, Guild, ModalSubmitInteraction } from 'discord.js';
 
-import { Recruit } from '../../../db/model/recruit';
 import { log4js_obj } from '../../../log4js_settings';
+import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, exists } from '../../common/others';
 import { sendEmbedsWebhook } from '../../common/webhook';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function sendRecruitModalLog(interaction: $TSFixMe) {
-    const guild = interaction.guild;
-    const channelName = interaction.channel.name;
+export async function sendRecruitModalLog(interaction: ModalSubmitInteraction<'raw' | 'cached'>) {
+    const guild = await getGuildByInteraction(interaction);
+    const channel = interaction.channel;
+    assertExistCheck(channel, 'channel');
+    const channelName = channel.name;
     const authorId = interaction.member.user.id;
     const author = await searchDBMemberById(guild, authorId);
     const components = interaction.components;
     let commandLog = '';
 
     for (const subcomponents of components) {
-        commandLog = commandLog + subcomponents.components[0].customId + ': ' + subcomponents.components[0].value + '\n';
+        if (subcomponents.components[0].type === ComponentType.TextInput) {
+            commandLog = commandLog + subcomponents.components[0].customId + ': ' + subcomponents.components[0].value + '\n';
+        }
     }
 
     const embed = new EmbedBuilder();

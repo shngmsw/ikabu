@@ -1,12 +1,12 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
+import { ActionRowBuilder, AnyThreadChannel, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 
 const logger = log4js_obj.getLogger('default');
 
-export async function sendCloseButton(thread: $TSFixMe) {
+export async function sendCloseButton(thread: AnyThreadChannel<boolean>) {
     try {
-        const buttons = new ActionRowBuilder().addComponents([
+        const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
             new ButtonBuilder().setCustomId('support_resolved').setLabel('回答終了(クローズ)').setStyle(ButtonStyle.Success),
         ]);
 

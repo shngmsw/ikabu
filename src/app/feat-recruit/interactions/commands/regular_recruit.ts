@@ -8,14 +8,13 @@ import {
     VoiceChannel,
 } from 'discord.js';
 
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { checkFes, getSchedule, getRegularData } from '../../../common/apis/splatoon3_ink';
+import { checkFes, getSchedule, getRegularData, MatchInfo } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { searchChannelIdByName } from '../../../common/manager/channel_manager';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
@@ -27,19 +26,16 @@ import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function regularRecruit(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inGuild()) return;
-
-    assertExistCheck(interaction.guild, 'guild');
+export async function regularRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
     const options = interaction.options;
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
     assertExistCheck(hostMember, 'hostMember');
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
-    const recruitNum = options.getInteger('募集人数') ?? -1;
+    const recruitNum = options.getInteger('募集人数', true);
     let condition = options.getString('参加条件');
     const user1 = options.getUser('参加者1');
     const user2 = options.getUser('参加者2');
@@ -124,7 +120,7 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
         const regularData = await getRegularData(schedule, type);
 
         let txt = `### <@${hostMember.user.id}>` + 'たんのナワバリ募集\n';
-        const members = [];
+        const members: string[] = [];
 
         if (exists(user1)) {
             members.push(`<@${user1.id}>` + 'たん');
@@ -136,10 +132,9 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
             members.push(`<@${user3.id}>` + 'たん');
         }
 
-        if (members.length != 0) {
+        if (members.length !== 0) {
             for (const i in members) {
-                // @ts-expect-error TS(2367): This condition will always return 'false' since th... Remove this comment to see the full error message
-                if (i == 0) {
+                if (parseInt(i) === 0) {
                     txt = txt + members[i];
                 } else {
                     txt = txt + 'と' + members[i];
@@ -152,17 +147,24 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction) {
 
         if (notExists(condition)) condition = 'なし';
 
+        if (notExists(regularData)) {
+            await interaction.editReply({
+                content: 'レギュラーマッチの情報が取得できなかったでし！',
+            });
+            return;
+        }
+
         await sendRegularMatch(interaction, txt, recruitNum, condition, memberCounter, hostMember, user1, user2, user3, regularData);
     } catch (error) {
         if (exists(channel)) {
-            channel.send('なんかエラーでてるわ');
+            await channel.send('なんかエラーでてるわ');
         }
         logger.error(error);
     }
 }
 
 async function sendRegularMatch(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
     txt: string,
     recruitNum: number,
     condition: string,
@@ -171,7 +173,7 @@ async function sendRegularMatch(
     user1: User | null,
     user2: User | null,
     user3: User | null,
-    regularData: $TSFixMe,
+    regularData: MatchInfo,
 ) {
     const reservedChannel = interaction.options.getChannel('使用チャンネル');
     let channelName = null;
@@ -179,43 +181,38 @@ async function sendRegularMatch(
         channelName = reservedChannel.name;
     }
 
-    assertExistCheck(interaction.guild, 'guild');
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
 
     const recruiter = await searchDBMemberById(guild, hostMember.id);
     assertExistCheck(recruiter, 'recruiter');
-    const hostPt = new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date());
 
-    let participant1 = null;
-    let participant2 = null;
-    let participant3 = null;
+    let attendee1 = null;
+    let attendee2 = null;
+    let attendee3 = null;
 
     if (exists(user1)) {
-        const member = await searchDBMemberById(guild, user1.id);
-        assertExistCheck(member, 'member1');
-        participant1 = new Participant(user1.id, member.displayName, member.iconUrl, 1, new Date());
+        attendee1 = await searchDBMemberById(guild, user1.id);
+        assertExistCheck(attendee1, 'member1');
     }
     if (exists(user2)) {
-        const member = await searchDBMemberById(guild, user2.id);
-        assertExistCheck(member, 'member2');
-        participant2 = new Participant(user2.id, member.displayName, member.iconUrl, 1, new Date());
+        attendee2 = await searchDBMemberById(guild, user2.id);
+        assertExistCheck(attendee2, 'member2');
     }
     if (exists(user3)) {
-        const member = await searchDBMemberById(guild, user3.id);
-        assertExistCheck(member, 'member3');
-        participant3 = new Participant(user3.id, member.displayName, member.iconUrl, 1, new Date());
+        attendee3 = await searchDBMemberById(guild, user3.id);
+        assertExistCheck(attendee3, 'member3');
     }
 
     const recruitBuffer = await recruitRegularCanvas(
         RecruitOpCode.open,
         recruitNum,
         count,
-        hostPt,
-        participant1,
-        participant2,
-        participant3,
+        recruiter,
+        attendee1,
+        attendee2,
+        attendee3,
         null,
         null,
         null,
@@ -239,6 +236,8 @@ async function sendRegularMatch(
             files: [recruit],
         });
 
+        if (!image1Message.inGuild()) return;
+
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
@@ -252,15 +251,15 @@ async function sendRegularMatch(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromObj(image1Message.id, hostPt);
-        if (exists(participant1)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, participant1);
+        await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, recruiter, 0);
+        if (exists(attendee1)) {
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee1, 1);
         }
-        if (exists(participant2)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, participant2);
+        if (exists(attendee2)) {
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee2, 1);
         }
-        if (exists(participant3)) {
-            await ParticipantService.registerParticipantFromObj(image1Message.id, participant3);
+        if (exists(attendee3)) {
+            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee3, 1);
         }
 
         const image2Message = await recruitChannel.send({ files: [rule] });
@@ -274,10 +273,10 @@ async function sendRegularMatch(
         });
 
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-            sentMessage.edit({
+            await sentMessage.edit({
                 components: [recruitActionRow(image1Message, reservedChannel.id)],
             });
-            reservedChannel.permissionOverwrites.set(
+            await reservedChannel.permissionOverwrites.set(
                 [
                     {
                         id: guild.roles.everyone.id,
@@ -297,7 +296,7 @@ async function sendRegularMatch(
                 ephemeral: true,
             });
         } else {
-            sentMessage.edit({ components: [recruitActionRow(image1Message)] });
+            await sentMessage.edit({ components: [recruitActionRow(image1Message)] });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -313,11 +312,11 @@ async function sendRegularMatch(
         await sleep(15);
         const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
         if (exists(deleteButtonCheck)) {
-            deleteButtonCheck.delete();
+            await deleteButtonCheck.delete();
         } else {
             if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-                reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
+                await reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                await reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
             }
             return;
         }
@@ -325,27 +324,27 @@ async function sendRegularMatch(
         // 2時間後にボタンを無効化する
         await sleep(7200 - 15);
         const recruitData = await RecruitService.getRecruit(guild.id, image1Message.id);
-        if (recruitData.length === 0) {
+        if (notExists(recruitData)) {
             return;
         }
         const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
-        const memberList = getMemberMentions(recruitData[0].recruitNum, participants);
+        const memberList = getMemberMentions(recruitData.recruitNum, participants);
         const hostMention = `<@${hostMember.user.id}>`;
 
         await regenerateCanvas(guild, interaction.channelId, image1Message.id, RecruitOpCode.close);
 
         // DBから募集情報削除
         await RecruitService.deleteRecruit(guild.id, image1Message.id);
-        await ParticipantService.deleteAllParticipant(image1Message.id);
+        await ParticipantService.deleteAllParticipant(guild.id, image1Message.id);
 
-        sentMessage.edit({
+        await sentMessage.edit({
             content: '`[自動〆]`\n' + `${hostMention}たんの募集は〆！\n${memberList}`,
             components: setButtonDisable(sentMessage),
         });
 
         if (reservedChannel instanceof VoiceChannel && hostMember.voice.channelId != reservedChannel.id) {
-            reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-            reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
+            await reservedChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+            await reservedChannel.permissionOverwrites.delete(hostMember.user, 'UnLock Voice Channel');
         }
 
         await sendCloseEmbedSticky(guild, recruitChannel);

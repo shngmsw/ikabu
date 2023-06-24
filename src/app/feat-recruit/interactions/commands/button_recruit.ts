@@ -1,23 +1,19 @@
-import { ChatInputCommandInteraction, CacheType } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 
-import { Participant } from '../../../../db/model/participant';
-import { RecruitType } from '../../../../db/model/recruit';
-import { ParticipantService } from '../../../../db/participants_service';
-import { RecruitService } from '../../../../db/recruit_service';
+import { ParticipantService } from '../../../../db/participant_service';
+import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { searchChannelById } from '../../../common/manager/channel_manager';
+import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from '../../../common/others';
 import { notifyActionRow } from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
 
-export async function buttonRecruit(interaction: ChatInputCommandInteraction<CacheType>) {
-    if (!interaction.inGuild()) return;
-
-    assertExistCheck(interaction.guild, 'guild');
+export async function buttonRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await interaction.guild.fetch();
+    const guild = await getGuildByInteraction(interaction);
     const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
     const recruitChannel = await searchChannelById(guild, interaction.channel.id);
     if (notExists(recruitChannel) || !recruitChannel.isTextBased()) return;
@@ -65,10 +61,7 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<Cac
     );
 
     // DBに参加者情報を登録
-    await ParticipantService.registerParticipantFromObj(
-        sentMessage.id,
-        new Participant(recruiter.userId, recruiter.displayName, recruiter.iconUrl, 0, new Date()),
-    );
+    await ParticipantService.registerParticipantFromMember(guild.id, sentMessage.id, recruiter, 0);
 
     // 募集リスト更新
     if (recruitType === RecruitType.PrivateRecruit) {
@@ -82,5 +75,5 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<Cac
     await interaction.editReply({
         content: '募集完了でし！参加者が来るまで気長に待つでし！',
     });
-    sentMessage.edit({ components: [notifyActionRow()] });
+    await sentMessage.edit({ components: [notifyActionRow()] });
 }
