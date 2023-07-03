@@ -29,6 +29,7 @@ export const commandNames = {
     recuitEditor: '募集を編集',
     voiceChannelMention: 'ボイスメンション',
     variablesSettings: '環境変数設定',
+    joinedDateFixer: '入部日修正',
 };
 export const modalRecruit = {
     placeHold:

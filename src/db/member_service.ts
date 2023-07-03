@@ -51,6 +51,24 @@ export class MemberService {
         }
     }
 
+    static async updateJoinedAt(guildId: string, userId: string, joinedAt: Date) {
+        try {
+            await prisma.member.update({
+                where: {
+                    guildId_userId: {
+                        guildId: guildId,
+                        userId: userId,
+                    },
+                },
+                data: {
+                    joinedAt: joinedAt,
+                },
+            });
+        } catch (error) {
+            logger.error(error);
+        }
+    }
+
     static async getMemberByUserId(guildId: string, userId: string) {
         try {
             const member = await prisma.member.findUnique({
