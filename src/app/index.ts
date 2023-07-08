@@ -28,6 +28,7 @@ import { emojiCountDown, emojiCountUp } from './event/reaction_count/reactions';
 import { guildMemberAddEvent } from './event/rookie/set_rookie';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
+import { stageInfo } from './feat-utils/splat3/stageinfo';
 import * as buttonHandler from './handlers/button_handler';
 import * as commandHandler from './handlers/command_handler';
 import * as contextHandler from './handlers/context_handler';
@@ -299,6 +300,8 @@ const job = cron.schedule('1 1-23/2 * * *', async () => {
         // イベント作成
         // イベントマッチの作成
         await subscribeSplatEventMatch(guild);
+        // ステージ情報の送信
+        await stageInfo(guild);
     } catch (error) {
         console.error('schedule job failed:', error);
     }

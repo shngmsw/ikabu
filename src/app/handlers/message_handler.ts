@@ -1,4 +1,4 @@
-import { PermissionsBitField, AttachmentBuilder, Message } from 'discord.js';
+import { AttachmentBuilder, Message } from 'discord.js';
 
 import { log4js_obj } from '../../log4js_settings';
 import { randomBool, exists } from '../common/others';
@@ -8,7 +8,6 @@ import { chatCountUp } from '../event/message_related/message_count';
 import { removeRookie } from '../event/rookie/remove_rookie';
 import { sendIntentionConfirmReply } from '../event/rookie/send_questionnaire';
 import { sendRecruitSticky } from '../feat-recruit/sticky/recruit_sticky_messages';
-import { stageInfo } from '../feat-utils/splat3/stageinfo';
 import { play } from '../feat-utils/voice/tts/discordjs_voice';
 const logger = log4js_obj.getLogger('message');
 
@@ -21,21 +20,8 @@ export async function call(message: Message<true>) {
                     await message.delete();
                 }
             }
-            // ステージ情報
-            if (message.content === 'stageinfo') {
-                await stageInfo(message);
-            }
             return;
         } else {
-            // ステージ情報デバッグ用
-            if (message.content === 'stageinfo') {
-                const guild = await message.guild.fetch();
-                const member = await guild.members.fetch(message.author.id);
-                if (member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
-                    await stageInfo(message);
-                }
-            }
-
             if (exists(process.env.QUESTIONNAIRE_URL)) {
                 if (message.channel.id != process.env.CHANNEL_ID_BOT_CMD && randomBool(0.00025)) {
                     await sendIntentionConfirmReply(message, message.author.id, 'QUESTIONNAIRE_URL');
