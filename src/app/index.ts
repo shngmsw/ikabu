@@ -18,10 +18,13 @@ import {
     User,
     VoiceState,
 } from 'discord.js';
+import cron from 'node-cron';
 
 import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from './common/others';
+import { subscribeSplatEventMatch } from './event/cron/event_match_register';
+import { stageInfo } from './event/cron/stageinfo';
 import { emojiCountDown, emojiCountUp } from './event/reaction_count/reactions';
 import { guildMemberAddEvent } from './event/rookie/set_rookie';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
@@ -36,6 +39,7 @@ import { MemberService } from '../db/member_service';
 import { ParticipantService } from '../db/participant_service';
 import { log4js_obj } from '../log4js_settings';
 import { registerSlashCommands } from '../register';
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -46,6 +50,7 @@ const client = new Client({
         GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildScheduledEvents,
     ],
     partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Channel, Partials.Reaction],
 });
@@ -283,3 +288,26 @@ client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
 client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
     void vcStateUpdateHandler.call(oldState, newState);
 });
+
+// cronジョブを定義
+// スプラトゥーンのスケジュール更新に合わせて2時間毎に実行する
+const job = cron.schedule('1 1-23/2 * * *', async () => {
+    logger.info('cron job started');
+
+    try {
+        const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
+
+        // イベント作成
+        // イベントマッチの作成
+        await subscribeSplatEventMatch(guild);
+        // ステージ情報の送信
+        await stageInfo(guild);
+    } catch (error) {
+        logger.error('schedule job failed:', error);
+    }
+
+    logger.info('cron job finished');
+});
+
+// cronジョブの実行を開始
+job.start();
