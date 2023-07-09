@@ -1,6 +1,7 @@
 import { AttachmentBuilder, Message, PermissionsBitField } from 'discord.js';
 
 import { log4js_obj } from '../../log4js_settings';
+import { searchAPIMemberById } from '../common/manager/member_manager';
 import { randomBool, exists } from '../common/others';
 import { stageInfo } from '../event/cron/stageinfo';
 import { deleteToken } from '../event/message_related/delete_token';
@@ -26,8 +27,8 @@ export async function call(message: Message<true>) {
             // ステージ情報デバッグ用
             if (message.content === 'stageinfo') {
                 const guild = await message.guild.fetch();
-                const member = await guild.members.fetch(message.author.id);
-                if (member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
+                const member = await searchAPIMemberById(guild, message.author.id);
+                if (exists(member) && member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
                     await stageInfo(guild);
                 }
             }
