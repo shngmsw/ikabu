@@ -292,7 +292,7 @@ client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
 // cronジョブを定義
 // スプラトゥーンのスケジュール更新に合わせて2時間毎に実行する
 const job = cron.schedule('1 1-23/2 * * *', async () => {
-    console.log('cron job started');
+    logger.info('cron job started');
 
     try {
         const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
@@ -303,10 +303,10 @@ const job = cron.schedule('1 1-23/2 * * *', async () => {
         // ステージ情報の送信
         await stageInfo(guild);
     } catch (error) {
-        console.error('schedule job failed:', error);
+        logger.error('schedule job failed:', error);
     }
 
-    console.log('cron job finished');
+    logger.info('cron job finished');
 });
 
 // cronジョブの実行を開始
