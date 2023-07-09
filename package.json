@@ -24,6 +24,7 @@
     "canvas": "^2.9.1",
     "config": "^3.3.7",
     "config-reloadable": "^1.0.9",
+    "cron": "^2.3.1",
     "crypto-js": "^4.1.1",
     "csv": "^6.0.5",
     "csv-stringify": "^6.0.5",
@@ -41,7 +42,6 @@
     "js-combinatorics": "^1.5.6",
     "log4js": "^6.7.0",
     "node-cache": "^5.1.2",
-    "node-cron": "^3.0.2",
     "node-fetch": "^2.6.7",
     "npm": "^9.7.1",
     "opusscript": "^0.0.8",
@@ -63,6 +63,7 @@
     ]
   },
   "devDependencies": {
+    "@types/cron": "^2.0.1",
     "@types/crypto-js": "^4.1.1",
     "@types/eslint": "^8.4.3",
     "@types/eslint-plugin-prettier": "^3.1.0",

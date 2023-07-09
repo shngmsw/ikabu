@@ -1,5 +1,6 @@
 // Discord bot implements
 import { Member } from '@prisma/client';
+import cron from 'cron';
 import {
     ActivityType,
     AnyThreadChannel,
@@ -18,7 +19,6 @@ import {
     User,
     VoiceState,
 } from 'discord.js';
-import cron from 'node-cron';
 
 import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
 import { searchAPIMemberById } from './common/manager/member_manager';
@@ -291,23 +291,29 @@ client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
 
 // cronジョブを定義
 // スプラトゥーンのスケジュール更新に合わせて2時間毎に実行する
-const job = cron.schedule('1 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
-    logger.info('cron job started');
+const job = new cron.CronJob(
+    '1 1-23/2 * * *',
+    async () => {
+        logger.info('cron job started');
 
-    try {
-        const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
+        try {
+            const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
 
-        // イベント作成
-        // イベントマッチの作成
-        await subscribeSplatEventMatch(guild);
-        // ステージ情報の送信
-        await stageInfo(guild);
-    } catch (error) {
-        logger.error('schedule job failed:', error);
-    }
+            // イベント作成
+            // イベントマッチの作成
+            await subscribeSplatEventMatch(guild);
+            // ステージ情報の送信
+            await stageInfo(guild);
+        } catch (error) {
+            logger.error('schedule job failed:', error);
+        }
 
-    logger.info('cron job finished');
-});
+        logger.info('cron job finished');
+    },
+    null,
+    true,
+    'Asia/Tokyo',
+);
 
 // cronジョブの実行を開始
 job.start();
