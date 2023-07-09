@@ -1,4 +1,4 @@
-import Discord, { Message } from 'discord.js';
+import Discord, { Guild, GuildTextBasedChannel } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import {
@@ -12,16 +12,23 @@ import {
 } from '../../common/apis/splatoon3.ink/splatoon3_ink';
 import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
-import { assertExistCheck, exists } from '../../common/others';
+import { searchChannelById } from '../../common/manager/channel_manager';
+import { assertExistCheck, exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function stageInfo(msg: Message<true>) {
+export async function stageInfo(guild: Guild) {
     try {
         const schedule = await getSchedule();
+        assertExistCheck(process.env.CHANNEL_ID_STAGE_INFO, 'CHANNEL_ID_STAGE_INFO');
+        const stageInfoChannel = await searchChannelById(guild, process.env.CHANNEL_ID_STAGE_INFO);
+        if (notExists(stageInfoChannel) || !stageInfoChannel.isTextBased()) {
+            logger.error('stageInfo channel not found!');
+            return;
+        }
 
         if (exists(schedule)) {
-            await msgDelete(msg);
+            await msgDelete(stageInfoChannel);
 
             const embedStr_challenge = await getACEmbed(schedule);
             embedStr_challenge.setAuthor({
@@ -44,14 +51,13 @@ export async function stageInfo(msg: Message<true>) {
             });
             embedStr_x.setColor('#0edb9b');
 
-            await msg.channel.send({
+            await stageInfoChannel.send({
                 embeds: [embedStr_x, embedStr_challenge, embedStr_open],
             });
         } else {
-            await msg.channel.send(`スケジュールデータを取得できなかったでし！\n${new Date().toLocaleString()}`);
+            await stageInfoChannel.send('スケジュールデータを取得できなかったでし！\n`' + new Date().toLocaleString() + '`');
         }
     } catch (error) {
-        await msg.channel.send('なんかエラーでてるわ');
         logger.error(error);
     }
 }
@@ -131,12 +137,12 @@ async function getXMatchEmbed(schedule: Sp3Schedule) {
     return stageEmbed;
 }
 
-async function msgDelete(message: Message<true>) {
+async function msgDelete(stageInfoChannel: GuildTextBasedChannel) {
     try {
-        // コマンドが送信されたチャンネルから直近100件(上限)メッセージを取得する
-        const messages = await message.channel.messages.fetch({ limit: 100 });
+        // ステージ情報チャンネルの直近100件(上限)メッセージを取得する
+        const messages = await stageInfoChannel.messages.fetch({ limit: 100 });
         // それらのメッセージを一括削除
-        await message.channel.bulkDelete(messages);
+        await stageInfoChannel.bulkDelete(messages);
     } catch (error) {
         logger.error(error);
     }

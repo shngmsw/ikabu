@@ -8,6 +8,7 @@ import { handleDeleteCategory } from '../feat-admin/channel_manager/deleteCatego
 import { handleDeleteChannel } from '../feat-admin/channel_manager/deleteChannel.js';
 import { handleCreateRole, handleDeleteRole, handleAssignRole, handleUnassignRole } from '../feat-admin/channel_manager/manageRole.js';
 import { variablesHandler } from '../feat-admin/environment_variables/variables_handler';
+import { joinedAtFixer } from '../feat-admin/joined_date_fixer/fix_joined_date.js';
 import { createNewRecruitButton } from '../feat-recruit/buttons/create_recruit_buttons';
 import { anarchyRecruit } from '../feat-recruit/interactions/commands/anarchy_recruit';
 import { buttonRecruit } from '../feat-recruit/interactions/commands/button_recruit.js';
@@ -100,6 +101,8 @@ async function guildOnlyCommandsHandler(interaction: ChatInputCommandInteraction
         await handleVoicePick(interaction);
     } else if (commandName == commandNames.ban) {
         await handleBan(interaction);
+    } else if (commandName == commandNames.joinedDateFixer) {
+        await joinedAtFixer(interaction);
     } else if (commandName === commandNames.voice) {
         // 'インタラクションに失敗'が出ないようにするため
         await interaction.deferReply();

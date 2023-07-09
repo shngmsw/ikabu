@@ -197,7 +197,7 @@ export function getAnarchyList(schedule: Sp3Schedule) {
 }
 
 /**
- * dataからリグマ用のリストだけ返す
+ * dataからイベントマッチ用のリストだけ返す
  * @param schedule スケジュールデータ
  */
 export function getEventList(schedule: Sp3Schedule) {
@@ -758,7 +758,11 @@ export async function rule2txt(locale: Sp3Locale, id: string, fetch = true): Pro
     }
 }
 
-async function event2txt(locale: Sp3Locale, id: string, fetch = true): Promise<{ title: string; description: string; regulation: string }> {
+export async function event2txt(
+    locale: Sp3Locale,
+    id: string,
+    fetch = true,
+): Promise<{ title: string; description: string; regulation: string }> {
     try {
         const result = {
             title: 'そーりー・あんでふぁいんど',
