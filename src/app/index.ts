@@ -291,7 +291,7 @@ client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
 
 // cronジョブを定義
 // スプラトゥーンのスケジュール更新に合わせて2時間毎に実行する
-const job = cron.schedule('1 1-23/2 * * *', async () => {
+const job = cron.schedule('1 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     logger.info('cron job started');
 
     try {
