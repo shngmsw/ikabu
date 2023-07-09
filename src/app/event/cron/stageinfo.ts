@@ -55,7 +55,7 @@ export async function stageInfo(guild: Guild) {
                 embeds: [embedStr_x, embedStr_challenge, embedStr_open],
             });
         } else {
-            await stageInfoChannel.send(`スケジュールデータを取得できなかったでし！\n${new Date().toLocaleString()}`);
+            await stageInfoChannel.send('スケジュールデータを取得できなかったでし！\n`' + new Date().toLocaleString() + '`');
         }
     } catch (error) {
         logger.error(error);

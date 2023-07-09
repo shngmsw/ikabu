@@ -21,14 +21,14 @@ import {
 import cron from 'node-cron';
 
 import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
-import { subscribeSplatEventMatch } from './common/manager/guild_scheduled_event_manager';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from './common/others';
+import { subscribeSplatEventMatch } from './event/cron/event_match_register';
+import { stageInfo } from './event/cron/stageinfo';
 import { emojiCountDown, emojiCountUp } from './event/reaction_count/reactions';
 import { guildMemberAddEvent } from './event/rookie/set_rookie';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
-import { stageInfo } from './feat-utils/splat3/stageinfo';
 import * as buttonHandler from './handlers/button_handler';
 import * as commandHandler from './handlers/command_handler';
 import * as contextHandler from './handlers/context_handler';
