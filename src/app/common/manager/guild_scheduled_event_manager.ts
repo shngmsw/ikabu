@@ -2,12 +2,12 @@ import { Guild, GuildScheduledEventCreateOptions } from 'discord.js';
 
 import { exists } from '../others';
 
-export function getGuildEvents(guild: Guild) {
+export function getGuildScheduledEvents(guild: Guild) {
     const scheduledEvents = guild.scheduledEvents.cache;
     return scheduledEvents;
 }
 
-export async function createGuildEvent(guild: Guild, startTime: Date, endTime: Date, name: string, description: string) {
+export async function createGuildScheduledEvent(guild: Guild, startTime: Date, endTime: Date, name: string, description: string) {
     const options: GuildScheduledEventCreateOptions = {
         scheduledStartTime: startTime,
         scheduledEndTime: endTime,
@@ -22,8 +22,8 @@ export async function createGuildEvent(guild: Guild, startTime: Date, endTime: D
     await guild.scheduledEvents.create(options);
 }
 
-export function existsGuildEvent(guild: Guild, name: string) {
-    const events = getGuildEvents(guild);
+export function existsGuildScheduledEvent(guild: Guild, name: string) {
+    const events = getGuildScheduledEvents(guild);
     const event = events.find((event) => event.name === name);
     return exists(event);
 }

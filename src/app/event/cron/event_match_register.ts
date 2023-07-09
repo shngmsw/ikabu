@@ -3,7 +3,7 @@ import { Guild } from 'discord.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { getSchedule, getEventList, getLocale, event2txt } from '../../common/apis/splatoon3.ink/splatoon3_ink';
 import { formatDatetime, dateformat } from '../../common/convert_datetime';
-import { createGuildEvent, existsGuildEvent } from '../../common/manager/guild_scheduled_event_manager';
+import { createGuildScheduledEvent, existsGuildScheduledEvent } from '../../common/manager/guild_scheduled_event_manager';
 import { exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('recruit');
@@ -41,8 +41,8 @@ export async function subscribeSplatEventMatch(guild: Guild) {
                 return;
             }
             const eventNameWithTime = `${name} ${formatDatetime(startTime, dateformat.ymdwhm)}`;
-            if (!existsGuildEvent(guild, eventNameWithTime)) {
-                await createGuildEvent(guild, startTime, endTime, eventNameWithTime, description);
+            if (!existsGuildScheduledEvent(guild, eventNameWithTime)) {
+                await createGuildScheduledEvent(guild, startTime, endTime, eventNameWithTime, description);
             }
         });
     });
