@@ -67,7 +67,7 @@ async function getAOEmbed(schedule: Sp3Schedule) {
     const num = getAnarchyList(schedule).length;
     for (let i = 0; i < num; i++) {
         const anarchyData = await getAnarchyOpenData(schedule, i);
-        assertExistCheck(anarchyData);
+        assertExistCheck(anarchyData, 'anarchyData');
         let stage;
         let rule;
         if (checkFes(schedule, i)) {
@@ -92,7 +92,7 @@ async function getACEmbed(schedule: Sp3Schedule) {
     const num = getAnarchyList(schedule).length;
     for (let i = 0; i < num; i++) {
         const anarchyData = await getAnarchyChallengeData(schedule, i);
-        assertExistCheck(anarchyData);
+        assertExistCheck(anarchyData, 'anarchyData');
         let stage;
         let rule;
         if (checkFes(schedule, i)) {
@@ -117,7 +117,7 @@ async function getXMatchEmbed(schedule: Sp3Schedule) {
     const num = getXMatchList(schedule).length;
     for (let i = 0; i < num; i++) {
         const xData = await getXMatchData(schedule, i);
-        assertExistCheck(xData);
+        assertExistCheck(xData, 'xData');
         let stage;
         let rule;
         if (checkFes(schedule, i)) {
