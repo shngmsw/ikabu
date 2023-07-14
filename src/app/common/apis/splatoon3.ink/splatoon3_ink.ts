@@ -327,22 +327,21 @@ export async function getRegularData(schedule: Sp3Schedule, num: number) {
 
         const regularSetting = regularList[num].regularMatchSetting;
 
-        if (notExists(regularSetting)) return null;
-
         const result: MatchInfo = {
             startTime: regularList[num].startTime,
             endTime: regularList[num].endTime,
-            rule: regularSetting.vsRule.name,
-            stage1: regularSetting.vsStages[0].name,
-            stage2: regularSetting.vsStages[1].name,
         };
 
         const locale = await getLocale();
-        if (!checkFes(schedule, num)) {
+        if (!checkFes(schedule, num) && exists(regularSetting)) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, regularSetting.vsRule.id);
                 result.stage1 = await stage2txt(locale, regularSetting.vsStages[0].id);
                 result.stage2 = await stage2txt(locale, regularSetting.vsStages[1].id);
+            } else {
+                result.rule = regularSetting.vsRule.name;
+                result.stage1 = regularSetting.vsStages[0].name;
+                result.stage2 = regularSetting.vsStages[1].name;
             }
             result.stageImage1 = regularSetting.vsStages[0].image.url;
             result.stageImage2 = regularSetting.vsStages[1].image.url;
@@ -370,22 +369,21 @@ export async function getAnarchyChallengeData(schedule: Sp3Schedule, num: number
 
         const anarchySettings = anarchyList[num].bankaraMatchSettings; // aSettings[0]: Challenge
 
-        if (notExists(anarchySettings)) return null;
-
         const result: MatchInfo = {
             startTime: anarchyList[num].startTime,
             endTime: anarchyList[num].endTime,
-            rule: anarchySettings[0].vsRule.name,
-            stage1: anarchySettings[0].vsStages[0].name,
-            stage2: anarchySettings[0].vsStages[1].name,
         };
 
         const locale = await getLocale();
-        if (!checkFes(schedule, num)) {
+        if (!checkFes(schedule, num) && exists(anarchySettings)) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, anarchySettings[0].vsRule.id);
                 result.stage1 = await stage2txt(locale, anarchySettings[0].vsStages[0].id);
                 result.stage2 = await stage2txt(locale, anarchySettings[0].vsStages[1].id);
+            } else {
+                result.rule = anarchySettings[0].vsRule.name;
+                result.stage1 = anarchySettings[0].vsStages[0].name;
+                result.stage2 = anarchySettings[0].vsStages[1].name;
             }
             result.stageImage1 = anarchySettings[0].vsStages[0].image.url;
             result.stageImage2 = anarchySettings[0].vsStages[1].image.url;
@@ -413,22 +411,21 @@ export async function getAnarchyOpenData(schedule: Sp3Schedule, num: number) {
 
         const anarchySettings = anarchyList[num].bankaraMatchSettings; // aSettings[1]: Open
 
-        if (notExists(anarchySettings)) return null;
-
         const result: MatchInfo = {
             startTime: anarchyList[num].startTime,
             endTime: anarchyList[num].endTime,
-            rule: anarchySettings[1].vsRule.name,
-            stage1: anarchySettings[1].vsStages[0].name,
-            stage2: anarchySettings[1].vsStages[1].name,
         };
 
         const locale = await getLocale();
-        if (!checkFes(schedule, num)) {
+        if (!checkFes(schedule, num) && exists(anarchySettings)) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, anarchySettings[1].vsRule.id);
                 result.stage1 = await stage2txt(locale, anarchySettings[1].vsStages[0].id);
                 result.stage2 = await stage2txt(locale, anarchySettings[1].vsStages[1].id);
+            } else {
+                result.rule = anarchySettings[1].vsRule.name;
+                result.stage1 = anarchySettings[1].vsStages[0].name;
+                result.stage2 = anarchySettings[1].vsStages[1].name;
             }
             result.stageImage1 = anarchySettings[1].vsStages[0].image.url;
             result.stageImage2 = anarchySettings[1].vsStages[1].image.url;
@@ -580,22 +577,21 @@ export async function getXMatchData(schedule: Sp3Schedule, num: number) {
 
         const xMatchSettings = xMatchList[num].xMatchSetting;
 
-        if (notExists(xMatchSettings)) return null;
-
         const result: MatchInfo = {
             startTime: xMatchList[num].startTime,
             endTime: xMatchList[num].endTime,
-            rule: xMatchSettings.vsRule.name,
-            stage1: xMatchSettings.vsStages[0].name,
-            stage2: xMatchSettings.vsStages[1].name,
         };
 
         const locale = await getLocale();
-        if (!checkFes(schedule, num)) {
+        if (!checkFes(schedule, num) && exists(xMatchSettings)) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, xMatchSettings.vsRule.id);
                 result.stage1 = await stage2txt(locale, xMatchSettings.vsStages[0].id);
                 result.stage2 = await stage2txt(locale, xMatchSettings.vsStages[1].id);
+            } else {
+                result.rule = xMatchSettings.vsRule.name;
+                result.stage1 = xMatchSettings.vsStages[0].name;
+                result.stage2 = xMatchSettings.vsStages[1].name;
             }
             result.stageImage1 = xMatchSettings.vsStages[0].image.url;
             result.stageImage2 = xMatchSettings.vsStages[1].image.url;
@@ -623,22 +619,21 @@ export async function getFesData(schedule: Sp3Schedule, num: number) {
 
         const festSetting = festList[num].festMatchSetting;
 
-        if (notExists(festSetting)) return null;
-
         const result: MatchInfo = {
             startTime: festList[num].startTime,
             endTime: festList[num].endTime,
-            rule: festSetting.vsRule.name,
-            stage1: festSetting.vsStages[0].name,
-            stage2: festSetting.vsStages[1].name,
         };
 
         const locale = await getLocale();
-        if (checkFes(schedule, num)) {
+        if (checkFes(schedule, num) && exists(festSetting)) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, festSetting.vsRule.id);
                 result.stage1 = await stage2txt(locale, festSetting.vsStages[0].id);
                 result.stage2 = await stage2txt(locale, festSetting.vsStages[1].id);
+            } else {
+                result.rule = festSetting.vsRule.name;
+                result.stage1 = festSetting.vsStages[0].name;
+                result.stage2 = festSetting.vsStages[1].name;
             }
             result.stageImage1 = festSetting.vsStages[0].image.url;
             result.stageImage2 = festSetting.vsStages[1].image.url;
