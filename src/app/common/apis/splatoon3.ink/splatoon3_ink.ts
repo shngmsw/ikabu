@@ -619,22 +619,21 @@ export async function getFesData(schedule: Sp3Schedule, num: number) {
 
         const festSetting = festList[num].festMatchSetting;
 
-        if (notExists(festSetting)) return null;
-
         const result: MatchInfo = {
             startTime: festList[num].startTime,
             endTime: festList[num].endTime,
-            rule: festSetting.vsRule.name,
-            stage1: festSetting.vsStages[0].name,
-            stage2: festSetting.vsStages[1].name,
         };
 
         const locale = await getLocale();
-        if (checkFes(schedule, num)) {
+        if (checkFes(schedule, num) && exists(festSetting)) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, festSetting.vsRule.id);
                 result.stage1 = await stage2txt(locale, festSetting.vsStages[0].id);
                 result.stage2 = await stage2txt(locale, festSetting.vsStages[1].id);
+            } else {
+                result.rule = festSetting.vsRule.name;
+                result.stage1 = festSetting.vsStages[0].name;
+                result.stage2 = festSetting.vsStages[1].name;
             }
             result.stageImage1 = festSetting.vsStages[0].image.url;
             result.stageImage2 = festSetting.vsStages[1].image.url;
