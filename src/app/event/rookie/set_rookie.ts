@@ -60,7 +60,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
 }
 
 async function setRookieRole(member: GuildMember, beginnerRole: Role, messageCount: number, friendCode: FriendCode | null) {
-    if (messageCount == 0 && exists(friendCode)) {
+    if (messageCount === 0 && notExists(friendCode)) {
         if (member) {
             member.roles.add(beginnerRole).catch((error) => {
                 logger.error(error);
