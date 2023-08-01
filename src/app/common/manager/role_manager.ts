@@ -111,8 +111,8 @@ export async function setRoleToMember(guild: Guild, roleId: string, memberId: st
             }
         } else {
             const members = await guild.members.fetch();
-            // ユーザータグからメンバー取得
-            member = members.find((member: GuildMember) => member.user.tag === memberId);
+            // ユーザーネーム(unique)からメンバー取得
+            member = members.find((member: GuildMember) => member.user.username === memberId);
         }
 
         if (exists(member)) {

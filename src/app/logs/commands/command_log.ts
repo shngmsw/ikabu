@@ -29,7 +29,7 @@ export async function sendCommandLog(
             }
         } else {
             const user = interaction.user;
-            authorName = user.username;
+            authorName = user.displayName;
             authorId = user.id;
             iconUrl = user.avatarURL() ?? 'https://cdn.discordapp.com/embed/avatars/0.png';
             channelName = 'DM';

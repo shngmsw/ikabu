@@ -26,14 +26,14 @@ export async function createEventModal(interaction: ButtonInteraction<'cached' |
         .setCustomId('participant1')
         .setLabel('参加者数が「1」の場合、あなた以外の参加者名(1人目)を入力')
         .setStyle(TextInputStyle.Short)
-        .setPlaceholder('例: ブキチ#3671 ←この形式で入力すればアイコンが表示されます。')
+        .setPlaceholder('ユーザー名 (ユーザーIDを入力した場合はアイコンが表示されます。)')
         .setRequired(false);
 
     const participant2 = new TextInputBuilder()
         .setCustomId('participant2')
         .setLabel('参加者数が「2」の場合、あなた以外の参加者名(2人目)を入力')
         .setStyle(TextInputStyle.Short)
-        .setPlaceholder('例: スパイキー#1234 ←この形式で入力すればアイコンが表示されます。')
+        .setPlaceholder('ユーザー名 (ユーザーIDを入力した場合はアイコンが表示されます。)')
         .setRequired(false);
 
     const conditionInput = new TextInputBuilder()
