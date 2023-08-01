@@ -86,7 +86,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
                 });
             if (member instanceof User) {
                 embed.setAuthor({
-                    name: member.username + 'のブキ',
+                    name: member.displayName + 'のブキ',
                     iconURL: member.displayAvatarURL(),
                 });
             } else if (exists(member) && exists(member.displayName) && exists(member.iconUrl)) {

@@ -136,7 +136,7 @@ async function messageReplace(message: Message<true>) {
         for (let i = 0; i < [matchAllElement].length; i++) {
             const user = message.mentions.users.get([matchAllElement][i][1]);
             if (exists(user)) {
-                str = str.replace([matchAllElement][i][0], '@' + user.username);
+                str = str.replace([matchAllElement][i][0], '@' + user.displayName);
             }
         }
         return nickname_mention_replace(str);
@@ -148,7 +148,7 @@ async function messageReplace(message: Message<true>) {
         for (let i = 0; i < [matchAllElement].length; i++) {
             const user = message.mentions.users.get([matchAllElement][i][1]);
             if (exists(user)) {
-                str = str.replace([matchAllElement][i][0], '@' + user.username);
+                str = str.replace([matchAllElement][i][0], '@' + user.displayName);
             }
         }
         return mention_replace(str);

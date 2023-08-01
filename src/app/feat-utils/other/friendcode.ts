@@ -113,7 +113,7 @@ function composeEmbed(user: User | Member, fc: string, isDatabase: boolean) {
 
     if (user instanceof User) {
         embed.setAuthor({
-            name: user.username,
+            name: user.displayName,
             iconURL: user.displayAvatarURL(),
         });
     } else if (exists(user) && exists(user.displayName) && exists(user.iconUrl)) {
