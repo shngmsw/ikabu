@@ -42,7 +42,9 @@ export async function handleBan(interaction: ChatInputCommandInteraction<'cached
         const channels = await guild.channels.fetch();
         const banChannel = channels.find((channel) => exists(channel) && channel.name === 'banコマンド');
         if (exists(banChannel) && banChannel.isTextBased()) {
-            await banChannel.send(`${targetMember.user.tag}さんを以下の理由によりBANしました。\n` + reasonText);
+            await banChannel.send(
+                `${targetMember.displayName}さん\`[${targetMember.user.username}]\`を以下の理由によりBANしました。\n` + reasonText,
+            );
         }
         await interaction.editReply('BANしたでし！');
     } else {

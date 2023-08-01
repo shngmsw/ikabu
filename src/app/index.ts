@@ -85,7 +85,8 @@ client.on('guildMemberAdd', async (member: GuildMember) => {
 
 client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) => {
     try {
-        const tag = member.user.tag;
+        const displayName = member.displayName;
+        const username = member.user.username;
         let joinedAt = member.joinedAt;
         // joinedAtがnullだったらDBからとってくる
         if (notExists(joinedAt)) {
@@ -95,7 +96,7 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
             }
         }
 
-        let text = `\`${tag}\`たんが退部したでし！\n`;
+        let text = `${displayName}たん \`[${username}]\`が退部したでし！\n`;
 
         if (exists(joinedAt)) {
             const unixJoinedAt = Math.floor(joinedAt.getTime() / 1000);
@@ -134,6 +135,8 @@ client.on('guildMemberUpdate', async (oldMember: GuildMember | PartialGuildMembe
 
         assertExistCheck(member, 'member');
         assertExistCheck(member.joinedAt, 'joinedAt');
+
+        member.nickname;
 
         const updateMember: Member = {
             guildId: guild.id,
