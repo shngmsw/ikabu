@@ -213,7 +213,7 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
 
     if (exists(user1) && user1 !== '') {
         // ユーザータグからメンバー取得
-        const member = members.find((member: GuildMember) => member.user.tag === user1);
+        const member = members.find((member: GuildMember) => member.user.username === user1);
         if (member !== undefined) {
             member1 = await searchDBMemberById(guild, member.user.id);
             assertExistCheck(member1, 'member1');
@@ -232,7 +232,7 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
 
     if (exists(user2) && user2 !== '') {
         // ユーザータグからメンバー取得
-        const member = members.find((member: GuildMember) => member.user.tag === user2);
+        const member = members.find((member: GuildMember) => member.user.username === user2);
         if (member !== undefined) {
             member2 = await searchDBMemberById(guild, member.user.id);
             assertExistCheck(member2, 'member2');
@@ -357,7 +357,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
 
     if (exists(user1) && user1 !== '') {
         // ユーザータグからメンバー取得
-        const member = members.find((member: GuildMember) => member.user.tag === user1);
+        const member = members.find((member: GuildMember) => member.user.username === user1);
         if (member !== undefined) {
             member1 = await searchDBMemberById(guild, member.user.id);
             assertExistCheck(member1, 'member1');
@@ -376,7 +376,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
 
     if (exists(user2) && user2 !== '') {
         // ユーザータグからメンバー取得
-        const member = members.find((member: GuildMember) => member.user.tag === user2);
+        const member = members.find((member: GuildMember) => member.user.username === user2);
         if (member !== undefined) {
             member2 = await searchDBMemberById(guild, member.user.id);
             assertExistCheck(member2, 'member2');
@@ -500,7 +500,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
 
         if (exists(user1) && user1 !== '') {
             // ユーザータグからメンバー取得
-            const member = members.find((member: GuildMember) => member.user.tag === user1);
+            const member = members.find((member: GuildMember) => member.user.username === user1);
             if (member !== undefined) {
                 member1 = await searchDBMemberById(guild, member.user.id);
                 assertExistCheck(member1, 'member1');
@@ -519,7 +519,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
 
         if (exists(user2) && user2 !== '') {
             // ユーザータグからメンバー取得
-            const member = members.find((member: GuildMember) => member.user.tag === user2);
+            const member = members.find((member: GuildMember) => member.user.username === user2);
             if (member !== undefined) {
                 member2 = await searchDBMemberById(guild, member.user.id);
                 assertExistCheck(member2, 'member2');
@@ -639,7 +639,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction<'cache
 
         if (exists(user1) && user1 !== '') {
             // ユーザータグからメンバー取得
-            const member = members.find((member: GuildMember) => member.user.tag === user1);
+            const member = members.find((member: GuildMember) => member.user.username === user1);
             if (member !== undefined) {
                 member1 = await searchDBMemberById(guild, member.user.id);
                 assertExistCheck(member1, 'member1');
@@ -658,7 +658,7 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction<'cache
 
         if (exists(user2) && user2 !== '') {
             // ユーザータグからメンバー取得
-            const member = members.find((member: GuildMember) => member.user.tag === user2);
+            const member = members.find((member: GuildMember) => member.user.username === user2);
             if (member !== undefined) {
                 member2 = await searchDBMemberById(guild, member.user.id);
                 assertExistCheck(member2, 'member2');
