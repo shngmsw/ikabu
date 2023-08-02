@@ -2,6 +2,7 @@ import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/build
 import { REST } from '@discordjs/rest';
 import { ApplicationCommandType, ChannelType, Routes } from 'discord-api-types/v10';
 import {
+    PermissionFlagsBits,
     SlashCommandAttachmentOption,
     SlashCommandBooleanOption,
     SlashCommandChannelOption,
@@ -926,6 +927,22 @@ const joinedDateFixer = new SlashCommandBuilder()
     )
     .setDMPermission(false);
 
+const festStart = new SlashCommandSubcommandBuilder().setName('開始').setDescription('フェスカテゴリのチャンネルを表示します。');
+const festEnd = new SlashCommandSubcommandBuilder()
+    .setName('終了')
+    .setDescription('フェスカテゴリのチャンネルを非表示にします。')
+    .addBooleanOption((option: SlashCommandBooleanOption) =>
+        option.setName('フェスロールを外す').setDescription('フェスロールを全部員から剥奪します。').setRequired(false),
+    );
+
+const festivalSettings = new SlashCommandBuilder()
+    .setName(commandNames.festivalSettings)
+    .setDescription('フェスカテゴリの表示設定を行います。')
+    .addSubcommand(festStart)
+    .addSubcommand(festEnd)
+    .setDMPermission(false)
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels);
+
 const commands = [
     voiceLock,
     friendCode,
@@ -958,6 +975,7 @@ const commands = [
     voiceChannelMention,
     variablesSettings,
     joinedDateFixer,
+    festivalSettings,
 ];
 
 // 登録用関数

@@ -1,4 +1,4 @@
-import { ColorResolvable, Guild, GuildMember, Role } from 'discord.js';
+import { Collection, ColorResolvable, Guild, GuildMember, Role } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { exists, notExists } from '../others';
@@ -58,6 +58,24 @@ export async function searchRoleById(guild: Guild, roleId: string) {
     }
 
     return role;
+}
+
+/**
+ * 指定のロールをメンバーから解除する
+ * @param roleId 解除するロールID
+ * @param members メンバーコレクション
+ * @returns 成功したかどうかを返す
+ */
+export async function unassginRoleFromMembers(roleId: string, members: Collection<string, GuildMember>) {
+    try {
+        for (const target of members) {
+            await target[1].roles.remove(roleId);
+        }
+        return true;
+    } catch (error) {
+        logger.error(error);
+        return false;
+    }
 }
 
 /**
