@@ -68,9 +68,9 @@ export async function searchRoleById(guild: Guild, roleId: string) {
  */
 export async function unassginRoleFromMembers(roleId: string, members: Collection<string, GuildMember>) {
     try {
-        for (const target of members) {
-            await target[1].roles.remove(roleId);
-        }
+        members.forEach(async (member: GuildMember) => {
+            await member.roles.remove(roleId);
+        });
         return true;
     } catch (error) {
         logger.error(error);
