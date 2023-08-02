@@ -6,11 +6,8 @@ import { searchChannelById } from '../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { notExists } from '../../common/others';
-import { sendCommandLog } from '../../logs/commands/command_log';
 
 export async function festSettingHandler(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
-    await sendCommandLog(interaction);
-
     await interaction.deferReply({ ephemeral: false });
 
     const guild = await getGuildByInteraction(interaction);
