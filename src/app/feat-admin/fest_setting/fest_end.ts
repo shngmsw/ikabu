@@ -46,14 +46,14 @@ export async function festEnd(interaction: ChatInputCommandInteraction<'cached' 
     }
 
     try {
-        const FryeId = await searchRoleIdByName(guild, 'ウツホ陣営');
-        assertExistCheck(FryeId, '[role name: ウツホ陣営]');
-        const FryeRole = await searchRoleById(guild, FryeId);
-        assertExistCheck(FryeRole, 'FryeRole');
-        const FryeCount = FryeRole.members.size;
-        const success = await unassginRoleFromMembers(FryeId, FryeRole.members);
+        const fryeId = await searchRoleIdByName(guild, 'ウツホ陣営');
+        assertExistCheck(fryeId, '[role name: ウツホ陣営]');
+        const fryeRole = await searchRoleById(guild, fryeId);
+        assertExistCheck(fryeRole, 'fryeRole');
+        const fryeCount = fryeRole.members.size;
+        const success = await unassginRoleFromMembers(fryeId, fryeRole.members);
         if (success) {
-            await interaction.followUp(`\`ウツホ陣営\`ロールを外したでし！ \`[${FryeCount}]\``);
+            await interaction.followUp(`\`ウツホ陣営\`ロールを外したでし！ \`[${fryeCount}]\``);
         } else {
             await interaction.followUp('`ウツホ陣営`ロールを外すのに失敗したでし！');
         }
