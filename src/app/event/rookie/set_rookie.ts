@@ -7,7 +7,7 @@ import { MessageCountService } from '../../../db/message_count_service.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager.js';
-import { searchRoleById } from '../../common/manager/role_manager';
+import { assignRoleToMember, searchRoleById } from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../common/others.js';
 
 const logger = log4js_obj.getLogger('guildMemberAdd');
@@ -62,9 +62,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
 async function setRookieRole(member: GuildMember, beginnerRole: Role, messageCount: number, friendCode: FriendCode | null) {
     if (messageCount === 0 && notExists(friendCode)) {
         if (member) {
-            member.roles.add(beginnerRole).catch((error) => {
-                logger.error(error);
-            });
+            await assignRoleToMember(beginnerRole, member);
         }
     }
 }
