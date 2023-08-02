@@ -30,6 +30,7 @@ export const commandNames = {
     voiceChannelMention: 'ボイスメンション',
     variablesSettings: '環境変数設定',
     joinedDateFixer: '入部日修正',
+    festivalSettings: 'フェスカテゴリ設定',
 };
 export const modalRecruit = {
     placeHold:
