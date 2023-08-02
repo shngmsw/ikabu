@@ -6,7 +6,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, Permission
 import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
-import { createRole, searchRoleById, searchRoleIdByName, setColorToRole } from '../../common/manager/role_manager';
+import { createRole, searchRoleById, searchRoleIdByName, setColorToRole, unassginRoleFromMembers } from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('RoleManager');
@@ -198,13 +198,15 @@ export async function handleUnassignRole(interaction: ChatInputCommandInteractio
         }
         const unAssignRoleId = unAssignRole.id;
 
-        const targets = targetRole.members;
+        const success = await unassginRoleFromMembers(unAssignRoleId, targetRole.members);
 
-        for (const target of targets) {
-            await target[1].roles.remove(unAssignRoleId);
+        if (success) {
+            return await interaction.editReply(
+                '`' + targetRole.name + '`のメンバーから`' + unAssignRole.name + '`のロールを削除したでし！',
+            );
+        } else {
+            return await interaction.editReply('ロールの解除に失敗したでし!');
         }
-
-        await interaction.editReply('`' + targetRole.name + '`のメンバーから`' + unAssignRole.name + '`のロールを削除したでし！');
     } catch (error) {
         logger.error(error);
         await interaction.editReply('なんかエラーでてるわ');

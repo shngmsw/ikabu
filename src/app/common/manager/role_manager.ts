@@ -1,4 +1,4 @@
-import { ColorResolvable, Guild, GuildMember, Role } from 'discord.js';
+import { Collection, ColorResolvable, Guild, GuildMember, Role } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { exists, notExists } from '../others';
@@ -61,6 +61,74 @@ export async function searchRoleById(guild: Guild, roleId: string) {
 }
 
 /**
+ * 指定のロールを特定のメンバーに付与する
+ * @param roleIdOrRole 付与するロールID or Roleオブジェクト
+ * @param member GuildMemberオブジェクト
+ * @returns 成功したかどうかを返す
+ */
+export async function assignRoleToMember(roleIdOrRole: string | Role, member: GuildMember) {
+    try {
+        await member.roles.add(roleIdOrRole);
+        return true;
+    } catch (error) {
+        logger.error(error);
+        return false;
+    }
+}
+
+/**
+ * 指定のロールを特定のメンバーから解除する
+ * @param roleIdOrRole 解除するロールID or Roleオブジェクト
+ * @param member GuildMemberオブジェクト
+ * @returns 成功したかどうかを返す
+ */
+export async function unassignRoleFromMember(roleIdOrRole: string | Role, member: GuildMember) {
+    try {
+        await member.roles.remove(roleIdOrRole);
+        return true;
+    } catch (error) {
+        logger.error(error);
+        return false;
+    }
+}
+
+/**
+ * 指定のロールをメンバーに付与する
+ * @param roleIdOrRole 付与するロールID or Roleオブジェクト
+ * @param members メンバーコレクション
+ * @returns 成功したかどうかを返す
+ */
+export async function assginRoleToMembers(roleIdOrRole: string | Role, members: Collection<string, GuildMember>) {
+    try {
+        members.forEach(async (member: GuildMember) => {
+            await member.roles.add(roleIdOrRole);
+        });
+        return true;
+    } catch (error) {
+        logger.error(error);
+        return false;
+    }
+}
+
+/**
+ * 指定のロールをメンバーから解除する
+ * @param roleIdOrRole 解除するロールID or Roleオブジェクト
+ * @param members メンバーコレクション
+ * @returns 成功したかどうかを返す
+ */
+export async function unassginRoleFromMembers(roleIdOrRole: string | Role, members: Collection<string, GuildMember>) {
+    try {
+        members.forEach(async (member: GuildMember) => {
+            await member.roles.remove(roleIdOrRole);
+        });
+        return true;
+    } catch (error) {
+        logger.error(error);
+        return false;
+    }
+}
+
+/**
  * 渡されたロールに色を設定する．色がnullのときはランダムな色を設定する
  * @param {Role} role Roleオブジェクト
  * @param {string} color カラーコード
@@ -83,6 +151,8 @@ export async function setColorToRole(guild: Guild, role: Role, color?: string | 
     }
 }
 
+// 余計な処理をしているので非推奨 そのうち直す
+// assignRoleToSpecificMember or assignRoleToMembers 推奨
 /**
  * メンバーにロールを付与するコマンド，メンバーが見つからない場合エラーメッセージを返す
  * @param {Guild} guild Guildオブジェクト

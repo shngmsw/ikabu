@@ -3,6 +3,7 @@ import Discord, { Message, Role } from 'discord.js';
 import { sendIntentionConfirmReply } from './send_questionnaire';
 import { MessageCountService } from '../../../db/message_count_service.js';
 import { getAPIMemberByMessage } from '../../common/manager/member_manager';
+import { unassignRoleFromMember } from '../../common/manager/role_manager';
 import { assertExistCheck, exists } from '../../common/others';
 
 export async function removeRookie(msg: Message<true>) {
@@ -16,7 +17,7 @@ export async function removeRookie(msg: Message<true>) {
     if ((exists(member.joinedTimestamp) && member.joinedTimestamp < lastMonth) || messageCount > 99) {
         const hasBeginnerRole = member.roles.cache.find((role: Role) => role.id === beginnerRoleId);
         if (hasBeginnerRole) {
-            await member.roles.remove([beginnerRoleId]);
+            await unassignRoleFromMember(beginnerRoleId, member);
             const embed = new Discord.EmbedBuilder();
             embed.setDescription('新入部員期間が終わったでし！\nこれからもイカ部心得を守ってイカ部生活をエンジョイするでし！');
             embed.setAuthor({

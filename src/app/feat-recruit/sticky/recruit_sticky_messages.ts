@@ -38,29 +38,42 @@ export async function sendRecruitSticky(stickyOptions: StickyOptions) {
         }
 
         let content: string;
+        let channelName: string | null;
         if (channelId === process.env.CHANNEL_ID_RECRUIT_PRIVATE) {
             content = await availableRecruitString(guild, channelId);
+            channelName = null;
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_ANARCHY) {
             content = await availableRecruitString(guild, channelId);
+            channelName = 'バンカラ募集';
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_REGULAR) {
             content = await availableRecruitString(guild, channelId);
+            channelName = 'ナワバリ募集';
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_EVENT) {
             content = await availableRecruitString(guild, channelId);
+            channelName = 'イベマ募集';
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_SALMON) {
             content = await availableRecruitString(guild, channelId);
+            channelName = 'サーモン募集';
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_OTHERGAMES) {
             content = await availableRecruitString(guild, channelId);
+            channelName = null;
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_SHIVER) {
             content = await availableRecruitString(guild, channelId);
+            channelName = 'フウカ募集';
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_FRYE) {
             content = await availableRecruitString(guild, channelId);
+            channelName = 'ウツホ募集';
         } else if (channelId === process.env.CHANNEL_ID_RECRUIT_BIGMAN) {
             content = await availableRecruitString(guild, channelId);
+            channelName = 'マンタロー募集';
         } else {
             return;
         }
 
-        await sendStickyMessage(guild, channelId, content);
+        await sendStickyMessage(guild, channelId, {
+            content: content,
+            components: exists(channelName) ? [createNewRecruitButton(channelName)] : [],
+        });
     } catch (error) {
         logger.error(error);
     }
