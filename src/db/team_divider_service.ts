@@ -253,7 +253,12 @@ export class TeamDividerService {
      * @param matchNum 該当試合数
      * @param flag true or false
      */
-    static async setForceSpectate(messageId: string, memberId: string, matchNum: number, flag: boolean) {
+    static async setForceSpectate(
+        messageId: string,
+        memberId: string,
+        matchNum: number,
+        flag: boolean,
+    ) {
         try {
             await prisma.teamDivider.updateMany({
                 where: {
@@ -277,7 +282,11 @@ export class TeamDividerService {
      * @param teamNum 該当チーム(alfa=0, bravo=1, 観戦=2)
      * @returns 取得結果
      */
-    static async getTeamMembers(messageId: string, matchNum: number, team: number): Promise<TeamMember[]> {
+    static async getTeamMembers(
+        messageId: string,
+        matchNum: number,
+        team: number,
+    ): Promise<TeamMember[]> {
         let members: TeamDivider[] = [];
         try {
             members = await prisma.teamDivider.findMany({
@@ -364,7 +373,11 @@ export class TeamDividerService {
      * @param teamNum 1チームのメンバー数
      * @returns 取得結果
      */
-    static async getParticipants(messageId: string, matchNum: number, teamNum: number): Promise<TeamMember[]> {
+    static async getParticipants(
+        messageId: string,
+        matchNum: number,
+        teamNum: number,
+    ): Promise<TeamMember[]> {
         let members: TeamDivider[] = [];
         try {
             members = await prisma.teamDivider.findMany({

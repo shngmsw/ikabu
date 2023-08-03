@@ -52,7 +52,13 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildScheduledEvents,
     ],
-    partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Channel, Partials.Reaction],
+    partials: [
+        Partials.User,
+        Partials.GuildMember,
+        Partials.Message,
+        Partials.Channel,
+        Partials.Reaction,
+    ],
 });
 
 void client.login(process.env.DISCORD_BOT_TOKEN);
@@ -125,38 +131,44 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
     }
 });
 
-client.on('guildMemberUpdate', async (oldMember: GuildMember | PartialGuildMember, newMember: GuildMember) => {
-    try {
-        const guild = await newMember.guild.fetch();
-        const userId = newMember.user.id;
-        let member: GuildMember | null = newMember;
+client.on(
+    'guildMemberUpdate',
+    async (oldMember: GuildMember | PartialGuildMember, newMember: GuildMember) => {
+        try {
+            const guild = await newMember.guild.fetch();
+            const userId = newMember.user.id;
+            let member: GuildMember | null = newMember;
 
-        member = await searchAPIMemberById(guild, userId);
+            member = await searchAPIMemberById(guild, userId);
 
-        assertExistCheck(member, 'member');
-        assertExistCheck(member.joinedAt, 'joinedAt');
+            assertExistCheck(member, 'member');
+            assertExistCheck(member.joinedAt, 'joinedAt');
 
-        member.nickname;
+            member.nickname;
 
-        const updateMember: Member = {
-            guildId: guild.id,
-            userId: userId,
-            displayName: member.displayName,
-            iconUrl: member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-            joinedAt: member.joinedAt,
-        };
+            const updateMember: Member = {
+                guildId: guild.id,
+                userId: userId,
+                displayName: member.displayName,
+                iconUrl: member
+                    .displayAvatarURL()
+                    .replace('.webp', '.png')
+                    .replace('.webm', '.gif'),
+                joinedAt: member.joinedAt,
+            };
 
-        // membersテーブルにレコードがあるか確認
-        if (notExists(await MemberService.getMemberByUserId(guild.id, userId))) {
-            await MemberService.registerMember(updateMember);
-        } else {
-            await MemberService.updateMemberProfile(updateMember);
+            // membersテーブルにレコードがあるか確認
+            if (notExists(await MemberService.getMemberByUserId(guild.id, userId))) {
+                await MemberService.registerMember(updateMember);
+            } else {
+                await MemberService.updateMemberProfile(updateMember);
+            }
+        } catch (err) {
+            const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
+            loggerMU.error({ err });
         }
-    } catch (err) {
-        const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
-        loggerMU.error({ err });
-    }
-});
+    },
+);
 
 client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
     try {
@@ -174,7 +186,10 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
                 guildId: guildId,
                 userId: userId,
                 displayName: member.displayName,
-                iconUrl: member.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+                iconUrl: member
+                    .displayAvatarURL()
+                    .replace('.webp', '.png')
+                    .replace('.webm', '.gif'),
                 joinedAt: member.joinedAt,
             };
 
@@ -208,49 +223,55 @@ client.on('ready', async () => {
     }
 });
 
-client.on('messageReactionAdd', async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
-    const loggerMRA = log4js_obj.getLogger('messageReactionAdd');
-    try {
-        // When a reaction is received, check if the structure is partial
-        if (reaction.partial) {
-            // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
-            reaction = await reaction.fetch();
+client.on(
+    'messageReactionAdd',
+    async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
+        const loggerMRA = log4js_obj.getLogger('messageReactionAdd');
+        try {
+            // When a reaction is received, check if the structure is partial
+            if (reaction.partial) {
+                // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
+                reaction = await reaction.fetch();
+            }
+
+            if (user.partial) {
+                user = await user.fetch();
+            }
+
+            if (user.bot) {
+                return;
+            }
+
+            await emojiCountUp(reaction, user);
+        } catch (error) {
+            loggerMRA.error(error);
         }
+    },
+);
 
-        if (user.partial) {
-            user = await user.fetch();
+client.on(
+    'messageReactionRemove',
+    async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
+        try {
+            if (reaction.partial) {
+                reaction = await reaction.fetch();
+            }
+
+            if (user.partial) {
+                user = await user.fetch();
+            }
+
+            if (user.bot) {
+                return;
+            }
+
+            await emojiCountDown(reaction, user);
+        } catch (error) {
+            const loggerMRR = log4js_obj.getLogger('messageReactionRemove');
+            loggerMRR.error(error);
         }
-
-        if (user.bot) {
-            return;
-        }
-
-        await emojiCountUp(reaction, user);
-    } catch (error) {
-        loggerMRA.error(error);
-    }
-});
-
-client.on('messageReactionRemove', async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
-    try {
-        if (reaction.partial) {
-            reaction = await reaction.fetch();
-        }
-
-        if (user.partial) {
-            user = await user.fetch();
-        }
-
-        if (user.bot) {
-            return;
-        }
-
-        await emojiCountDown(reaction, user);
-    } catch (error) {
-        const loggerMRR = log4js_obj.getLogger('messageReactionRemove');
-        loggerMRR.error(error);
-    }
-});
+    },
+);
 
 client.on('interactionCreate', (interaction: Interaction<CacheType>) => {
     try {

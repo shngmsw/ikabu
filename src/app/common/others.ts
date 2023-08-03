@@ -86,7 +86,10 @@ export function notExists<Type>(value: Type | null | undefined): value is null |
  * @param value チェックする値
  * @param target エラーに表示する変数名
  */
-export function assertExistCheck<Type>(value: Type | null | undefined, target = 'value'): asserts value is Type {
+export function assertExistCheck<Type>(
+    value: Type | null | undefined,
+    target = 'value',
+): asserts value is Type {
     if (notExists(value)) {
         throw new Error(`'${target}' should be specified.`);
     }
@@ -101,7 +104,9 @@ export function createMentionsFromIdList(idList: string[]) {
 }
 
 // オブジェクト型でどれか一つのプロパティを必須にする
-export type RequireOne<T, K extends keyof T = keyof T> = K extends keyof T ? PartialRequire<T, K> : never;
+export type RequireOne<T, K extends keyof T = keyof T> = K extends keyof T
+    ? PartialRequire<T, K>
+    : never;
 type PartialRequire<O, K extends keyof O> = {
     [P in K]-?: O[P];
 } & O;
@@ -201,7 +206,12 @@ export async function sleep(sec: number) {
  *      false: 初日不算入
  *
  */
-export function dateDiff(date1: Date, date2?: Date, u?: 'Y' | 'M' | 'D' | 'YM' | 'MD' | 'YD', f?: boolean) {
+export function dateDiff(
+    date1: Date,
+    date2?: Date,
+    u?: 'Y' | 'M' | 'D' | 'YM' | 'MD' | 'YD',
+    f?: boolean,
+) {
     if (notExists(date2)) date2 = new Date();
     if (exists(f)) date1 = dateAdd(date1, -1, 'D');
     const y1 = date1.getFullYear();
@@ -253,7 +263,8 @@ const recruit_command = {
     バンカラ募集: '`/バンカラ募集 now` or `/バンカラ募集 next`',
     フェス募集: '`/〇〇陣営 now` or `/〇〇陣営 next`',
     サーモン募集: '`/サーモンラン募集 run`',
-    別ゲー募集: '`/別ゲー募集 apex` or `/別ゲー募集 overwatch` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`',
+    別ゲー募集:
+        '`/別ゲー募集 apex` or `/別ゲー募集 overwatch` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`',
 };
 
 export function getCommandHelpEmbed(channelName: string) {
@@ -288,6 +299,10 @@ export function getCommandHelpEmbed(channelName: string) {
     }
 
     const embed = new EmbedBuilder();
-    embed.setDescription('募集コマンドは ' + `${commandMessage}` + `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`);
+    embed.setDescription(
+        '募集コマンドは ' +
+            `${commandMessage}` +
+            `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`,
+    );
     return embed;
 }

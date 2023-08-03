@@ -5,11 +5,19 @@ import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
-import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
+import {
+    disableThinkingButton,
+    recoveryThinkingButton,
+    setButtonDisable,
+} from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, datetimeDiff, exists, notExists } from '../../../common/others.js';
-import { getStickyChannelId, sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
+import {
+    getStickyChannelId,
+    sendCloseEmbedSticky,
+    sendRecruitSticky,
+} from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -40,7 +48,10 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
             return;
         }
 
-        const participantsData = await ParticipantService.getAllParticipants(guild.id, embedMessageId);
+        const participantsData = await ParticipantService.getAllParticipants(
+            guild.id,
+            embedMessageId,
+        );
 
         let recruiter = participantsData[0]; // 募集者
         const recruiterId = recruitData.authorId;
@@ -95,7 +106,9 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
                 const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
-                    await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
+                    await sendRecruitSticky({
+                        channelOpt: { guild: guild, channelId: stickyChannelId },
+                    });
                 }
             } else {
                 await sendCloseEmbedSticky(guild, recruitChannel);
@@ -114,14 +127,18 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
                 components: disableThinkingButton(interaction, '〆'),
             });
 
-            const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆 \n <@${member.userId}>たんが代理〆`);
+            const embed = new EmbedBuilder().setDescription(
+                `<@${recruiterId}>たんの募集〆 \n <@${member.userId}>たんが代理〆`,
+            );
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
             if (recruitChannel.isThread()) {
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
                 const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
-                    await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
+                    await sendRecruitSticky({
+                        channelOpt: { guild: guild, channelId: stickyChannelId },
+                    });
                 }
             } else {
                 await sendCloseEmbedSticky(guild, recruitChannel);

@@ -59,7 +59,12 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
     }
 }
 
-async function setRookieRole(member: GuildMember, beginnerRole: Role, messageCount: number, friendCode: FriendCode | null) {
+async function setRookieRole(
+    member: GuildMember,
+    beginnerRole: Role,
+    messageCount: number,
+    friendCode: FriendCode | null,
+) {
     if (messageCount === 0 && notExists(friendCode)) {
         if (member) {
             await assignRoleToMember(beginnerRole, member);

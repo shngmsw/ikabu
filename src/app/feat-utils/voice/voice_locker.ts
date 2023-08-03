@@ -247,33 +247,65 @@ function createButton(channelState: ChannelState) {
         // 制限人数が1のとき，'－'ボタンを無効化
         if (limit == 1) {
             button.addComponents([
-                new ButtonBuilder().setCustomId('voiceLock_dec').setLabel('－').setStyle(ButtonStyle.Primary).setDisabled(true),
+                new ButtonBuilder()
+                    .setCustomId('voiceLock_dec')
+                    .setLabel('－')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(true),
             ]);
         } else {
             button.addComponents([
-                new ButtonBuilder().setCustomId('voiceLock_dec').setLabel('－').setStyle(ButtonStyle.Primary).setDisabled(false),
+                new ButtonBuilder()
+                    .setCustomId('voiceLock_dec')
+                    .setLabel('－')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(false),
             ]);
         }
 
         button.addComponents([
-            new ButtonBuilder().setCustomId('voiceLockOrUnlock').setLabel('UNLOCK').setStyle(ButtonStyle.Success).setEmoji('🔓'),
+            new ButtonBuilder()
+                .setCustomId('voiceLockOrUnlock')
+                .setLabel('UNLOCK')
+                .setStyle(ButtonStyle.Success)
+                .setEmoji('🔓'),
         ]);
 
         // 制限人数が99のとき，'＋'ボタンを無効化
         if (limit == 99) {
             button.addComponents([
-                new ButtonBuilder().setCustomId('voiceLock_inc').setLabel('＋').setStyle(ButtonStyle.Primary).setDisabled(true),
+                new ButtonBuilder()
+                    .setCustomId('voiceLock_inc')
+                    .setLabel('＋')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(true),
             ]);
         } else {
             button.addComponents([
-                new ButtonBuilder().setCustomId('voiceLock_inc').setLabel('＋').setStyle(ButtonStyle.Primary).setDisabled(false),
+                new ButtonBuilder()
+                    .setCustomId('voiceLock_inc')
+                    .setLabel('＋')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(false),
             ]);
         }
     } else {
         button.addComponents([
-            new ButtonBuilder().setCustomId('voiceLock_dec').setLabel('－').setStyle(ButtonStyle.Primary).setDisabled(true),
-            new ButtonBuilder().setCustomId('voiceLockOrUnlock').setLabel('LOCK').setStyle(ButtonStyle.Danger).setEmoji('🔒'),
-            new ButtonBuilder().setCustomId('voiceLock_inc').setLabel('＋').setStyle(ButtonStyle.Primary).setDisabled(true),
+            new ButtonBuilder()
+                .setCustomId('voiceLock_dec')
+                .setLabel('－')
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(true),
+            new ButtonBuilder()
+                .setCustomId('voiceLockOrUnlock')
+                .setLabel('LOCK')
+                .setStyle(ButtonStyle.Danger)
+                .setEmoji('🔒'),
+            new ButtonBuilder()
+                .setCustomId('voiceLock_inc')
+                .setLabel('＋')
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(true),
         ]);
     }
     return button;

@@ -83,7 +83,10 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
                 guildId: guild.id,
                 userId: userId,
                 displayName: memberRaw.displayName,
-                iconUrl: memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
+                iconUrl: memberRaw
+                    .displayAvatarURL()
+                    .replace('.webp', '.png')
+                    .replace('.webm', '.gif'),
                 joinedAt: member.joinedAt,
             };
 

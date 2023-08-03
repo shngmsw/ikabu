@@ -37,7 +37,8 @@ export async function recruitAnarchyCanvas(
     rank: string | null,
     channelName: string | null,
 ) {
-    const blankAvatarUrl = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
+    const blankAvatarUrl =
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
     const recruitCtx = recruitCanvas.getContext('2d');
@@ -50,10 +51,21 @@ export async function recruitAnarchyCanvas(
     recruitCtx.lineWidth = 4;
     recruitCtx.stroke();
 
-    const anarchyIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png');
+    const anarchyIcon = await Canvas.loadImage(
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+    );
     recruitCtx.drawImage(anarchyIcon, 18, 15, 86, 86);
 
-    fillTextWithStroke(recruitCtx, 'バンカラマッチ', '51px Splatfont', '#000000', '#F14400', 3, 115, 80);
+    fillTextWithStroke(
+        recruitCtx,
+        'バンカラマッチ',
+        '51px Splatfont',
+        '#000000',
+        '#F14400',
+        3,
+        115,
+        80,
+    );
 
     // 募集主の画像
     const recruiterImage = await Canvas.loadImage(recruiter.iconUrl ?? modalRecruit.placeHold);
@@ -91,10 +103,31 @@ export async function recruitAnarchyCanvas(
         }
     }
 
-    const recruiterIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
-    recruitCtx.drawImage(recruiterIcon, 0, 0, recruiterIcon.width, recruiterIcon.height, 90, 172, 75, 75);
+    const recruiterIcon = await Canvas.loadImage(
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png',
+    );
+    recruitCtx.drawImage(
+        recruiterIcon,
+        0,
+        0,
+        recruiterIcon.width,
+        recruiterIcon.height,
+        90,
+        172,
+        75,
+        75,
+    );
 
-    fillTextWithStroke(recruitCtx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
+    fillTextWithStroke(
+        recruitCtx,
+        '募集人数',
+        '39px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        525,
+        155,
+    );
 
     let remainingString;
     if (opCode === RecruitOpCode.open || opCode === RecruitOpCode.cancel) {
@@ -107,10 +140,28 @@ export async function recruitAnarchyCanvas(
 
     recruitCtx.save();
     recruitCtx.textAlign = 'center';
-    fillTextWithStroke(recruitCtx, remainingString, '42px "Splatfont"', '#FFFFFF', '#2D3130', 1, 605, 218);
+    fillTextWithStroke(
+        recruitCtx,
+        remainingString,
+        '42px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        605,
+        218,
+    );
     recruitCtx.restore();
 
-    fillTextWithStroke(recruitCtx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 290);
+    fillTextWithStroke(
+        recruitCtx,
+        '参加条件',
+        '43px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        35,
+        290,
+    );
 
     recruitCtx.font = '30px "Genshin", "SEGUI"';
     const width = 600;
@@ -154,11 +205,29 @@ export async function recruitAnarchyCanvas(
         channelString = '🔉 ' + channelName;
     }
 
-    fillTextWithStroke(recruitCtx, channelString, '37px "Splatfont"', '#FFFFFF', '#2D3130', 1, 30, 520);
+    fillTextWithStroke(
+        recruitCtx,
+        channelString,
+        '37px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        30,
+        520,
+    );
 
     recruitCtx.save();
     recruitCtx.textAlign = 'right';
-    fillTextWithStroke(recruitCtx, '募集ウデマエ: ' + rank ?? 'ERROR', '38px "Splatfont"', '#FFFFFF', '#2D3130', 1, 690, 520);
+    fillTextWithStroke(
+        recruitCtx,
+        '募集ウデマエ: ' + rank ?? 'ERROR',
+        '38px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        690,
+        520,
+    );
     recruitCtx.restore();
 
     if (opCode === RecruitOpCode.cancel) {
@@ -168,12 +237,34 @@ export async function recruitAnarchyCanvas(
         const cancelStamp = await Canvas.loadImage(
             'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/canceled_stamp.png',
         );
-        recruitCtx.drawImage(cancelStamp, 0, 0, cancelStamp.width, cancelStamp.height, 0, 0, 600, 600);
+        recruitCtx.drawImage(
+            cancelStamp,
+            0,
+            0,
+            cancelStamp.width,
+            cancelStamp.height,
+            0,
+            0,
+            600,
+            600,
+        );
         recruitCtx.restore;
     } else if (opCode === RecruitOpCode.close) {
         recruitCtx.save();
-        const cancelStamp = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/closed_stamp.png');
-        recruitCtx.drawImage(cancelStamp, 0, 0, cancelStamp.width, cancelStamp.height, 130, 80, 500, 340);
+        const cancelStamp = await Canvas.loadImage(
+            'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/closed_stamp.png',
+        );
+        recruitCtx.drawImage(
+            cancelStamp,
+            0,
+            0,
+            cancelStamp.width,
+            cancelStamp.height,
+            130,
+            80,
+            500,
+            340,
+        );
         recruitCtx.restore;
     }
 
@@ -200,34 +291,109 @@ export async function ruleAnarchyCanvas(anarchyData: MatchInfo | null, ruleIcon:
 
     if (exists(anarchyData) && exists(anarchyData.rule)) {
         const ruleWidth = ruleCtx.measureText(anarchyData.rule).width;
-        fillTextWithStroke(ruleCtx, anarchyData.rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - ruleWidth) / 2, 145); // 中央寄せ
+        fillTextWithStroke(
+            ruleCtx,
+            anarchyData.rule,
+            '45px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            (320 - ruleWidth) / 2,
+            145,
+        ); // 中央寄せ
     } else {
         const ruleWidth = ruleCtx.measureText('えらー').width;
-        fillTextWithStroke(ruleCtx, 'えらー', '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - ruleWidth) / 2, 145); // 中央寄せ
+        fillTextWithStroke(
+            ruleCtx,
+            'えらー',
+            '45px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            (320 - ruleWidth) / 2,
+            145,
+        ); // 中央寄せ
     }
 
     fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
     if (exists(anarchyData) && exists(anarchyData.startTime) && exists(anarchyData.endTime)) {
         const date = formatDatetime(anarchyData.startTime, dateformat.ymdw);
-        const time = formatDatetime(anarchyData.startTime, dateformat.hm) + ' - ' + formatDatetime(anarchyData.endTime, dateformat.hm);
+        const time =
+            formatDatetime(anarchyData.startTime, dateformat.hm) +
+            ' - ' +
+            formatDatetime(anarchyData.endTime, dateformat.hm);
 
         const dateWidth = ruleCtx.measureText(date).width;
-        fillTextWithStroke(ruleCtx, date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - dateWidth) / 2, 270); // 中央寄せ
+        fillTextWithStroke(
+            ruleCtx,
+            date,
+            '35px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            (350 - dateWidth) / 2,
+            270,
+        ); // 中央寄せ
         const timeWidth = ruleCtx.measureText(time).width;
-        fillTextWithStroke(ruleCtx, time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - timeWidth) / 2, 320); // 中央寄せ
+        fillTextWithStroke(
+            ruleCtx,
+            time,
+            '35px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            15 + (350 - timeWidth) / 2,
+            320,
+        ); // 中央寄せ
     } else {
         const dateWidth = ruleCtx.measureText('えらー').width;
-        fillTextWithStroke(ruleCtx, 'えらー', '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - dateWidth) / 2, 270); // 中央寄せ
+        fillTextWithStroke(
+            ruleCtx,
+            'えらー',
+            '35px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            (350 - dateWidth) / 2,
+            270,
+        ); // 中央寄せ
         const timeWidth = ruleCtx.measureText('えらー').width;
-        fillTextWithStroke(ruleCtx, 'えらー', '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - timeWidth) / 2, 320); // 中央寄せ
+        fillTextWithStroke(
+            ruleCtx,
+            'えらー',
+            '35px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            15 + (350 - timeWidth) / 2,
+            320,
+        ); // 中央寄せ
     }
 
     fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
     ruleCtx.save();
     ruleCtx.textAlign = 'center';
     if (exists(anarchyData) && exists(anarchyData.stage1) && exists(anarchyData.stage2)) {
-        fillTextWithStroke(ruleCtx, anarchyData.stage1, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
-        fillTextWithStroke(ruleCtx, anarchyData.stage2, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
+        fillTextWithStroke(
+            ruleCtx,
+            anarchyData.stage1,
+            '32px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            190,
+            440,
+        );
+        fillTextWithStroke(
+            ruleCtx,
+            anarchyData.stage2,
+            '32px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            190,
+            490,
+        );
     } else {
         fillTextWithStroke(ruleCtx, 'えらー', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
         fillTextWithStroke(ruleCtx, 'えらー', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);

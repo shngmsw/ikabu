@@ -54,9 +54,16 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
         const fcUrl = fcObj.url;
         const buttons = new ActionRowBuilder<ButtonBuilder>();
         if (exists(fcUrl)) {
-            buttons.addComponents([new ButtonBuilder().setURL(fcUrl).setLabel('NSOアプリで開く').setStyle(ButtonStyle.Link)]);
+            buttons.addComponents([
+                new ButtonBuilder()
+                    .setURL(fcUrl)
+                    .setLabel('NSOアプリで開く')
+                    .setStyle(ButtonStyle.Link),
+            ]);
         }
-        buttons.addComponents([new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger)]);
+        buttons.addComponents([
+            new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger),
+        ]);
         await interaction.editReply({
             embeds: [composeEmbed(targetUser, fcObj.code, true)],
             components: [buttons],
@@ -72,7 +79,9 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
             let result = null;
             try {
                 const messages = await channel.messages.fetch({ limit: 100 });
-                const list = messages.filter((message: Message<true>) => userId === message.author.id && !message.author.bot);
+                const list = messages.filter(
+                    (message: Message<true>) => userId === message.author.id && !message.author.bot,
+                );
                 result = list.map(function (value: Message<true>) {
                     return value.content;
                 });
@@ -81,7 +90,12 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
             }
 
             const button = new ActionRowBuilder<ButtonBuilder>();
-            button.addComponents([new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger)]);
+            button.addComponents([
+                new ButtonBuilder()
+                    .setCustomId('fchide')
+                    .setLabel('削除')
+                    .setStyle(ButtonStyle.Danger),
+            ]);
 
             if (exists(result) && result.length > 0) {
                 const embeds = [];
@@ -104,7 +118,9 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
     }
 
     // DMかつDBにないとき or GuildかつDBにないかつ自己紹介チャンネルが見つからないとき(練習鯖とか)
-    await interaction.editReply('フレンドコードが登録されていないでし！\n`/friend_code add`でコードを登録してみるでし！');
+    await interaction.editReply(
+        'フレンドコードが登録されていないでし！\n`/friend_code add`でコードを登録してみるでし！',
+    );
 }
 
 function composeEmbed(user: User | Member, fc: string, isDatabase: boolean) {

@@ -26,7 +26,8 @@ export async function recruitBigRunCanvas(
     condition: string,
     channelName: string | null,
 ) {
-    const blankAvatarUrl = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
+    const blankAvatarUrl =
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
     const recruitCtx = recruitCanvas.getContext('2d');
@@ -39,7 +40,9 @@ export async function recruitBigRunCanvas(
     recruitCtx.lineWidth = 4;
     recruitCtx.stroke();
 
-    const bigRunLogo = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/BIGRUN_logo.png');
+    const bigRunLogo = await Canvas.loadImage(
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/BIGRUN_logo.png',
+    );
     recruitCtx.drawImage(bigRunLogo, 25, 32, 400, 60);
 
     // 募集主の画像
@@ -78,10 +81,31 @@ export async function recruitBigRunCanvas(
         }
     }
 
-    const recruiterIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
-    recruitCtx.drawImage(recruiterIcon, 0, 0, recruiterIcon.width, recruiterIcon.height, 90, 172, 75, 75);
+    const recruiterIcon = await Canvas.loadImage(
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png',
+    );
+    recruitCtx.drawImage(
+        recruiterIcon,
+        0,
+        0,
+        recruiterIcon.width,
+        recruiterIcon.height,
+        90,
+        172,
+        75,
+        75,
+    );
 
-    fillTextWithStroke(recruitCtx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
+    fillTextWithStroke(
+        recruitCtx,
+        '募集人数',
+        '39px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        525,
+        155,
+    );
 
     let remainingString;
     if (opCode === RecruitOpCode.open || opCode === RecruitOpCode.cancel) {
@@ -94,10 +118,28 @@ export async function recruitBigRunCanvas(
 
     recruitCtx.save();
     recruitCtx.textAlign = 'center';
-    fillTextWithStroke(recruitCtx, remainingString, '42px "Splatfont"', '#FFFFFF', '#2D3130', 1, 605, 218);
+    fillTextWithStroke(
+        recruitCtx,
+        remainingString,
+        '42px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        605,
+        218,
+    );
     recruitCtx.restore();
 
-    fillTextWithStroke(recruitCtx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 290);
+    fillTextWithStroke(
+        recruitCtx,
+        '参加条件',
+        '43px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        35,
+        290,
+    );
 
     recruitCtx.font = '30px "Genshin", "SEGUI"';
     const width = 600;
@@ -141,7 +183,16 @@ export async function recruitBigRunCanvas(
         channelString = '🔉 ' + channelName;
     }
 
-    fillTextWithStroke(recruitCtx, channelString, '37px "Splatfont"', '#FFFFFF', '#2D3130', 1, 30, 520);
+    fillTextWithStroke(
+        recruitCtx,
+        channelString,
+        '37px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        30,
+        520,
+    );
 
     if (opCode === RecruitOpCode.cancel) {
         recruitCtx.save();
@@ -150,12 +201,34 @@ export async function recruitBigRunCanvas(
         const cancelStamp = await Canvas.loadImage(
             'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/canceled_stamp.png',
         );
-        recruitCtx.drawImage(cancelStamp, 0, 0, cancelStamp.width, cancelStamp.height, 0, 0, 600, 600);
+        recruitCtx.drawImage(
+            cancelStamp,
+            0,
+            0,
+            cancelStamp.width,
+            cancelStamp.height,
+            0,
+            0,
+            600,
+            600,
+        );
         recruitCtx.restore;
     } else if (opCode === RecruitOpCode.close) {
         recruitCtx.save();
-        const cancelStamp = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/closed_stamp.png');
-        recruitCtx.drawImage(cancelStamp, 0, 0, cancelStamp.width, cancelStamp.height, 130, 80, 500, 340);
+        const cancelStamp = await Canvas.loadImage(
+            'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/closed_stamp.png',
+        );
+        recruitCtx.drawImage(
+            cancelStamp,
+            0,
+            0,
+            cancelStamp.width,
+            cancelStamp.height,
+            130,
+            80,
+            500,
+            340,
+        );
         recruitCtx.restore;
     }
 
@@ -184,10 +257,21 @@ export async function ruleBigRunCanvas(data: Sp3Schedule) {
         fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 60);
 
         const datetime =
-            formatDatetime(salmonData.startTime, dateformat.mdwhm) + ' - ' + formatDatetime(salmonData.endTime, dateformat.mdwhm);
+            formatDatetime(salmonData.startTime, dateformat.mdwhm) +
+            ' - ' +
+            formatDatetime(salmonData.endTime, dateformat.mdwhm);
 
         const dateWidth = ruleCtx.measureText(datetime).width;
-        fillTextWithStroke(ruleCtx, datetime, '37px Splatfont', '#FFFFFF', '#2D3130', 1, (650 - dateWidth) / 2, 120);
+        fillTextWithStroke(
+            ruleCtx,
+            datetime,
+            '37px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            (650 - dateWidth) / 2,
+            120,
+        );
 
         fillTextWithStroke(ruleCtx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 180);
 
@@ -203,12 +287,32 @@ export async function ruleBigRunCanvas(data: Sp3Schedule) {
         const weapon4Image = await Canvas.loadImage(salmonData.weapon4);
         ruleCtx.drawImage(weapon4Image, 150, 305, 85, 85);
 
-        fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 310, 180);
+        fillTextWithStroke(
+            ruleCtx,
+            'ステージ',
+            '33px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            310,
+            180,
+        );
 
         const stageWidth = ruleCtx.measureText(salmonData.stage).width;
-        fillTextWithStroke(ruleCtx, salmonData.stage, '38px Splatfont', '#FFFFFF', '#2D3130', 1, 110 + (700 - stageWidth) / 2, 235);
+        fillTextWithStroke(
+            ruleCtx,
+            salmonData.stage,
+            '38px Splatfont',
+            '#FFFFFF',
+            '#2D3130',
+            1,
+            110 + (700 - stageWidth) / 2,
+            235,
+        );
 
-        const illust = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/BIGRUN_illust.png');
+        const illust = await Canvas.loadImage(
+            'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/BIGRUN_illust.png',
+        );
         ruleCtx.drawImage(illust, 380, 240, 330, 160);
 
         ruleCtx.save();

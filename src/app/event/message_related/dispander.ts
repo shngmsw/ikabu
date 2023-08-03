@@ -7,7 +7,8 @@ import { composeEmbed, exists, notExists } from '../../common/others';
 const logger = log4js_obj.getLogger('dispander');
 
 const regexDiscordMessageUrl =
-    'https://(ptb.|canary.)?discord(app)?.com/channels/' + '(?<guild>[0-9]{18,19})/(?<channel>[0-9]{18,19})/(?<message>[0-9]{18,19})';
+    'https://(ptb.|canary.)?discord(app)?.com/channels/' +
+    '(?<guild>[0-9]{18,19})/(?<channel>[0-9]{18,19})/(?<message>[0-9]{18,19})';
 
 export async function dispand(message: Message<true>) {
     try {
@@ -51,7 +52,11 @@ async function extractMessages(message: Message<true>) {
     if (guild.id !== matches.groups.guild) {
         return { url: null, messages: [] };
     }
-    const fetchedMessage = await searchMessageById(guild, matches.groups.channel, matches.groups.message);
+    const fetchedMessage = await searchMessageById(
+        guild,
+        matches.groups.channel,
+        matches.groups.message,
+    );
     if (exists(fetchedMessage)) {
         messages.push(fetchedMessage);
     } else {

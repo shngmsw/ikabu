@@ -79,14 +79,30 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
 
         if (notExists(schedule)) {
             return await interaction.editReply({
-                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                content:
+                    'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
             });
         }
 
         if (checkFes(schedule, type)) {
-            const fes1ChannelId = await searchChannelIdByName(guild, 'フウカ募集', ChannelType.GuildText, null);
-            const fes2ChannelId = await searchChannelIdByName(guild, 'ウツホ募集', ChannelType.GuildText, null);
-            const fes3ChannelId = await searchChannelIdByName(guild, 'マンタロー募集', ChannelType.GuildText, null);
+            const fes1ChannelId = await searchChannelIdByName(
+                guild,
+                'フウカ募集',
+                ChannelType.GuildText,
+                null,
+            );
+            const fes2ChannelId = await searchChannelIdByName(
+                guild,
+                'ウツホ募集',
+                ChannelType.GuildText,
+                null,
+            );
+            const fes3ChannelId = await searchChannelIdByName(
+                guild,
+                'マンタロー募集',
+                ChannelType.GuildText,
+                null,
+            );
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！\n<#${fes1ChannelId}>, <#${fes2ChannelId}>, <#${fes3ChannelId}>のチャンネルを使うでし！`,
             });
@@ -146,7 +162,18 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
             return;
         }
 
-        await sendRegularMatch(interaction, txt, recruitNum, condition, memberCounter, hostMember, member1, member2, member3, regularData);
+        await sendRegularMatch(
+            interaction,
+            txt,
+            recruitNum,
+            condition,
+            memberCounter,
+            hostMember,
+            member1,
+            member2,
+            member3,
+            regularData,
+        );
     } catch (error) {
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
@@ -254,7 +281,8 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
 
         if (notExists(schedule)) {
             return await interaction.editReply({
-                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                content:
+                    'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
             });
         }
 
@@ -271,7 +299,12 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
         let txt = `### <@${hostMember.userId}>` + 'たんのイベマ募集\n';
         txt = txt + '```' + `${eventData.regulation.replace(/<br \/>/g, '\n')}` + '```\n';
         if (exists(member1Mention) && exists(member2Mention)) {
-            txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
+            txt =
+                txt +
+                member1Mention +
+                'たんと' +
+                member2Mention +
+                'たんの参加が既に決定しているでし！';
         } else if (exists(member1Mention)) {
             txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
         } else if (exists(member2Mention)) {
@@ -287,7 +320,17 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
             return;
         }
 
-        await sendEventMatch(interaction, txt, recruitNum, condition, memberCounter, hostMember, member1, member2, eventData);
+        await sendEventMatch(
+            interaction,
+            txt,
+            recruitNum,
+            condition,
+            memberCounter,
+            hostMember,
+            member1,
+            member2,
+            eventData,
+        );
     } catch (error) {
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
@@ -398,14 +441,30 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
 
         if (notExists(schedule)) {
             return await interaction.editReply({
-                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                content:
+                    'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
             });
         }
 
         if (checkFes(schedule, type)) {
-            const fes1ChannelId = await searchChannelIdByName(guild, 'フウカ募集', ChannelType.GuildText, null);
-            const fes2ChannelId = await searchChannelIdByName(guild, 'ウツホ募集', ChannelType.GuildText, null);
-            const fes3ChannelId = await searchChannelIdByName(guild, 'マンタロー募集', ChannelType.GuildText, null);
+            const fes1ChannelId = await searchChannelIdByName(
+                guild,
+                'フウカ募集',
+                ChannelType.GuildText,
+                null,
+            );
+            const fes2ChannelId = await searchChannelIdByName(
+                guild,
+                'ウツホ募集',
+                ChannelType.GuildText,
+                null,
+            );
+            const fes3ChannelId = await searchChannelIdByName(
+                guild,
+                'マンタロー募集',
+                ChannelType.GuildText,
+                null,
+            );
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！\n<#${fes1ChannelId}>, <#${fes2ChannelId}>, <#${fes3ChannelId}>のチャンネルを使うでし！`,
             });
@@ -416,7 +475,12 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
 
         let txt = `### <@${hostMember.userId}>` + 'たんのバンカラ募集\n';
         if (exists(member1Mention) && exists(member2Mention)) {
-            txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
+            txt =
+                txt +
+                member1Mention +
+                'たんと' +
+                member2Mention +
+                'たんの参加が既に決定しているでし！';
         } else if (exists(member1Mention)) {
             txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
         } else if (exists(member2Mention)) {
@@ -432,7 +496,18 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
             return;
         }
 
-        await sendAnarchyMatch(interaction, txt, recruitNum, condition, memberCounter, rank, hostMember, member1, member2, anarchyData);
+        await sendAnarchyMatch(
+            interaction,
+            txt,
+            recruitNum,
+            condition,
+            memberCounter,
+            rank,
+            hostMember,
+            member1,
+            member2,
+            anarchyData,
+        );
     } catch (error) {
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
@@ -538,7 +613,12 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
 
         let txt = `### <@${hostMember.userId}>` + 'たんのバイト募集\n';
         if (exists(member1Mention) && exists(member2Mention)) {
-            txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
+            txt =
+                txt +
+                member1Mention +
+                'たんと' +
+                member2Mention +
+                'たんの参加が既に決定しているでし！';
         } else if (exists(member1Mention)) {
             txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
         } else if (exists(member2Mention)) {
@@ -549,7 +629,16 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
 
         if (isEmpty(condition)) condition = 'なし';
 
-        await sendSalmonRun(interaction, txt, recruitNum, condition, memberCounter, hostMember, member1, member2);
+        await sendSalmonRun(
+            interaction,
+            txt,
+            recruitNum,
+            condition,
+            memberCounter,
+            hostMember,
+            member1,
+            member2,
+        );
     } catch (error) {
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
@@ -558,7 +647,10 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
     }
 }
 
-export async function modalFesRecruit(interaction: ModalSubmitInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+export async function modalFesRecruit(
+    interaction: ModalSubmitInteraction<'cached' | 'raw'>,
+    params: URLSearchParams,
+) {
     assertExistCheck(interaction.channel, 'channel');
 
     const guild = await getGuildByInteraction(interaction);
@@ -617,7 +709,8 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction<'cache
 
         if (notExists(schedule)) {
             return await interaction.editReply({
-                content: 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                content:
+                    'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
             });
         }
 
@@ -677,7 +770,12 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction<'cache
 
         let txt = `### <@${hostMember.userId}>` + 'たんのフェスマッチ募集\n';
         if (exists(member1Mention) && exists(member2Mention)) {
-            txt = txt + member1Mention + 'たんと' + member2Mention + 'たんの参加が既に決定しているでし！';
+            txt =
+                txt +
+                member1Mention +
+                'たんと' +
+                member2Mention +
+                'たんの参加が既に決定しているでし！';
         } else if (exists(member1Mention)) {
             txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
         } else if (exists(member2Mention)) {
@@ -693,7 +791,18 @@ export async function modalFesRecruit(interaction: ModalSubmitInteraction<'cache
             return;
         }
 
-        await sendFesMatch(interaction, team, txt, recruitNum, condition, memberCounter, hostMember, member1, member2, fesData);
+        await sendFesMatch(
+            interaction,
+            team,
+            txt,
+            recruitNum,
+            condition,
+            memberCounter,
+            hostMember,
+            member1,
+            member2,
+            fesData,
+        );
     } catch (error) {
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');

@@ -4,7 +4,11 @@ import { getMemberMentions } from './other_events.js';
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
-import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
+import {
+    disableThinkingButton,
+    recoveryThinkingButton,
+    setButtonDisable,
+} from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
@@ -12,11 +16,18 @@ import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, datetimeDiff, exists, notExists } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { regenerateCanvas, RecruitOpCode } from '../../canvases/regenerate_canvas.js';
-import { getStickyChannelId, sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
+import {
+    getStickyChannelId,
+    sendCloseEmbedSticky,
+    sendRecruitSticky,
+} from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+export async function close(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    params: URLSearchParams,
+) {
     if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
@@ -97,7 +108,10 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
                 const channel = await searchChannelById(guild, channelId);
                 const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
                 if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
-                    await channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                    await channel.permissionOverwrites.delete(
+                        guild.roles.everyone,
+                        'UnLock Voice Channel',
+                    );
                     await channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
                 }
             }
@@ -112,7 +126,9 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
                 const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
-                    await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
+                    await sendRecruitSticky({
+                        channelOpt: { guild: guild, channelId: stickyChannelId },
+                    });
                 }
             } else {
                 await sendCloseEmbedSticky(guild, recruitChannel);
@@ -132,7 +148,10 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
                 const channel = await searchChannelById(guild, channelId);
                 const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
                 if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
-                    await channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                    await channel.permissionOverwrites.delete(
+                        guild.roles.everyone,
+                        'UnLock Voice Channel',
+                    );
                     await channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
                 }
             }
@@ -141,14 +160,18 @@ export async function close(interaction: ButtonInteraction<'cached' | 'raw'>, pa
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
                 components: disableThinkingButton(interaction, '〆'),
             });
-            const embed = new EmbedBuilder().setDescription(`<@${recruiterId}>たんの募集〆 \n <@${member.userId}>たんが代理〆`);
+            const embed = new EmbedBuilder().setDescription(
+                `<@${recruiterId}>たんの募集〆 \n <@${member.userId}>たんが代理〆`,
+            );
             await interaction.followUp({ embeds: [embed], ephemeral: false });
 
             if (recruitChannel.isThread()) {
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
                 const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
-                    await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
+                    await sendRecruitSticky({
+                        channelOpt: { guild: guild, channelId: stickyChannelId },
+                    });
                 }
             } else {
                 await sendCloseEmbedSticky(guild, recruitChannel);

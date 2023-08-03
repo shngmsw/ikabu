@@ -19,7 +19,10 @@ export async function variablesHandler(interaction: ChatInputCommandInteraction<
         });
     }
 
-    if (exists(interaction.channel) && interaction.channel.parentId !== process.env.CATEGORY_PARENT_ID_ADMIN_ONLY) {
+    if (
+        exists(interaction.channel) &&
+        interaction.channel.parentId !== process.env.CATEGORY_PARENT_ID_ADMIN_ONLY
+    ) {
         return sendChannelError(interaction, guild);
     }
 
@@ -36,7 +39,10 @@ export async function variablesHandler(interaction: ChatInputCommandInteraction<
     }
 }
 
-async function sendChannelError(interaction: ChatInputCommandInteraction<'cached' | 'raw'>, guild: Guild) {
+async function sendChannelError(
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+    guild: Guild,
+) {
     const envChannelId = process.env.CATEGORY_PARENT_ID_ADMIN_ONLY;
     if (notExists(envChannelId)) {
         // .envに記載がない場合

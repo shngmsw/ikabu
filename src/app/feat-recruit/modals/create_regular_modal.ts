@@ -1,10 +1,18 @@
-import { ActionRowBuilder, ButtonInteraction, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ButtonInteraction,
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle,
+} from 'discord.js';
 
 export async function createRegularModal(interaction: ButtonInteraction<'cached' | 'raw'>) {
     const modalParams = new URLSearchParams();
     modalParams.append('recm', 'regrec');
 
-    const modal = new ModalBuilder().setCustomId(modalParams.toString()).setTitle('ナワバリ募集を作成');
+    const modal = new ModalBuilder()
+        .setCustomId(modalParams.toString())
+        .setTitle('ナワバリ募集を作成');
 
     const recruitNumInput = new TextInputBuilder()
         .setCustomId('rNum')

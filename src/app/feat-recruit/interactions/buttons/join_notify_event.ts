@@ -5,7 +5,11 @@ import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
-import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
+import {
+    disableThinkingButton,
+    recoveryThinkingButton,
+    setButtonDisable,
+} from '../../../common/button_components';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
@@ -43,7 +47,10 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
             return;
         }
 
-        const participantsData = await ParticipantService.getAllParticipants(guild.id, embedMessageId);
+        const participantsData = await ParticipantService.getAllParticipants(
+            guild.id,
+            embedMessageId,
+        );
 
         let recruiter = participantsData[0]; // 募集者
         const recruiterId = recruitData.authorId;
@@ -101,7 +108,13 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
             });
 
             // recruitテーブルにデータ追加
-            await ParticipantService.registerParticipant(guild.id, embedMessageId, member.userId, 2, new Date());
+            await ParticipantService.registerParticipant(
+                guild.id,
+                embedMessageId,
+                member.userId,
+                2,
+                new Date(),
+            );
 
             const recruitChannel = interaction.channel;
 
@@ -113,12 +126,21 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
                     exists(recruiterGuildMember.voice.channel) &&
                     recruiterGuildMember.voice.channel.type === ChannelType.GuildVoice
                 ) {
-                    const hostJoinedVC = await searchChannelById(guild, recruiterGuildMember.voice.channel.id);
+                    const hostJoinedVC = await searchChannelById(
+                        guild,
+                        recruiterGuildMember.voice.channel.id,
+                    );
 
                     if (exists(hostJoinedVC) && hostJoinedVC.isTextBased()) {
                         await hostJoinedVC.send({
                             embeds: [embed],
-                            components: [messageLinkButtons(interaction.guildId, recruitChannel.id, interaction.message.id)],
+                            components: [
+                                messageLinkButtons(
+                                    interaction.guildId,
+                                    recruitChannel.id,
+                                    interaction.message.id,
+                                ),
+                            ],
                         });
                     }
                 }
@@ -147,7 +169,11 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
 
             await sleep(300);
             // 5分後にホストへの通知を削除
-            const checkNotifyMessage = await searchMessageById(guild, recruitChannel.id, notifyMessage.id);
+            const checkNotifyMessage = await searchMessageById(
+                guild,
+                recruitChannel.id,
+                notifyMessage.id,
+            );
             if (exists(checkNotifyMessage)) {
                 try {
                     await checkNotifyMessage.delete();

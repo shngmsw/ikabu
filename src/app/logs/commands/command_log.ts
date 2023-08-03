@@ -1,4 +1,9 @@
-import { CacheType, ChatInputCommandInteraction, EmbedBuilder, MessageContextMenuCommandInteraction } from 'discord.js';
+import {
+    CacheType,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    MessageContextMenuCommandInteraction,
+} from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
@@ -9,7 +14,9 @@ import { sendEmbedsWebhook } from '../../common/webhook';
 const logger = log4js_obj.getLogger('interaction');
 
 export async function sendCommandLog(
-    interaction: MessageContextMenuCommandInteraction<CacheType> | ChatInputCommandInteraction<CacheType>,
+    interaction:
+        | MessageContextMenuCommandInteraction<CacheType>
+        | ChatInputCommandInteraction<CacheType>,
 ) {
     try {
         let authorName = '不明なユーザー';

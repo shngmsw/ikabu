@@ -80,7 +80,12 @@ export async function sendRecruitSticky(stickyOptions: StickyOptions) {
 }
 
 export async function sendCloseEmbedSticky(guild: Guild, channel: Channel) {
-    if (channel.isTextBased() && !channel.isDMBased() && !channel.isThread() && !channel.isVoiceBased()) {
+    if (
+        channel.isTextBased() &&
+        !channel.isDMBased() &&
+        !channel.isThread() &&
+        !channel.isVoiceBased()
+    ) {
         const content = await availableRecruitString(guild, channel.id);
         const helpEmbed = getCommandHelpEmbed(channel.name);
         await sendStickyMessage(guild, channel.id, {
@@ -96,10 +101,16 @@ export async function availableRecruitString(guild: Guild, channelId: string) {
 
     if (channelId === process.env.CHANNEL_ID_RECRUIT_PRIVATE) {
         // チャンネルIDがプラベ募集チャンネルの場合は、フォーラムでのコマンド募集も含める
-        recruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.PrivateRecruit);
+        recruitData = await RecruitService.getRecruitsByRecruitType(
+            guild.id,
+            RecruitType.PrivateRecruit,
+        );
     } else if (channelId === process.env.CHANNEL_ID_RECRUIT_OTHERGAMES) {
         // チャンネルIDが別ゲー募集チャンネルの場合は、フォーラムでの別ゲー募集も含める
-        recruitData = await RecruitService.getRecruitsByRecruitType(guild.id, RecruitType.OtherGameRecruit);
+        recruitData = await RecruitService.getRecruitsByRecruitType(
+            guild.id,
+            RecruitType.OtherGameRecruit,
+        );
     }
 
     recruitData.sort((x, y) => x.createdAt.getTime() - y.createdAt.getTime()); // 作成順でソート
@@ -107,7 +118,10 @@ export async function availableRecruitString(guild: Guild, channelId: string) {
     let recruits = '';
     let count = 0; // 募集数カウンタ
     for (const recruit of recruitData) {
-        const participantsData = await ParticipantService.getAllParticipants(guild.id, recruit.messageId);
+        const participantsData = await ParticipantService.getAllParticipants(
+            guild.id,
+            recruit.messageId,
+        );
         const applicantList = []; // 参加希望者リスト
         for (const participant of participantsData) {
             if (participant.userType === 2) {
@@ -120,15 +134,20 @@ export async function availableRecruitString(guild: Guild, channelId: string) {
             // 別チャンネルで同じタイプの募集をしているときmessage = nullになる
             if (recruit.recruitNum !== -1) {
                 recruits =
-                    recruits + `\n\`${recruiter.member.displayName}\`: ${message.url} \`[${applicantList.length}/${recruit.recruitNum}\`]`;
+                    recruits +
+                    `\n\`${recruiter.member.displayName}\`: ${message.url} \`[${applicantList.length}/${recruit.recruitNum}\`]`;
             } else {
-                recruits = recruits + `\n\`${recruiter.member.displayName}\`: ${message.url} \`[${applicantList.length}\`]`;
+                recruits =
+                    recruits +
+                    `\n\`${recruiter.member.displayName}\`: ${message.url} \`[${applicantList.length}\`]`;
             }
             count++;
         } else {
             await RecruitService.deleteRecruit(guild.id, recruit.messageId);
             await ParticipantService.deleteAllParticipant(guild.id, recruit.messageId);
-            logger.warn(`recruit message is not found. record deleted. \n[guildId: ${guild.id}, messageId: ${recruit.messageId}]`);
+            logger.warn(
+                `recruit message is not found. record deleted. \n[guildId: ${guild.id}, messageId: ${recruit.messageId}]`,
+            );
         }
     }
 

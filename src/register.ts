@@ -25,7 +25,10 @@ const voiceLock = new SlashCommandBuilder()
             .setName('vclock')
             .setDescription('このボイスチャンネルに人数制限をかけます')
             .addIntegerOption((option: SlashCommandIntegerOption) =>
-                option.setName('人数').setDescription('制限人数を指定する場合は1～99で指定してください。').setRequired(false),
+                option
+                    .setName('人数')
+                    .setDescription('制限人数を指定する場合は1～99で指定してください。')
+                    .setRequired(false),
             ),
     )
     .setDMPermission(false);
@@ -38,14 +41,23 @@ const friendCode = new SlashCommandBuilder()
             .setName('add')
             .setDescription('フレンドコードを登録します。')
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('フレンドコード').setDescription('例：SW-0000-0000-0000').setRequired(true),
+                option
+                    .setName('フレンドコード')
+                    .setDescription('例：SW-0000-0000-0000')
+                    .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('フレンドコードurl').setDescription('Nintendo Switch OnlineのフレンドコードURLを登録できます。'),
+                option
+                    .setName('フレンドコードurl')
+                    .setDescription('Nintendo Switch OnlineのフレンドコードURLを登録できます。'),
             ),
     )
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
-        subcommand.setName('show').setDescription('登録したフレンドコードを表示します。未登録の場合は自己紹介から引用します。'),
+        subcommand
+            .setName('show')
+            .setDescription(
+                '登録したフレンドコードを表示します。未登録の場合は自己紹介から引用します。',
+            ),
     );
 
 const wiki = new SlashCommandBuilder()
@@ -59,31 +71,46 @@ const kansen = new SlashCommandBuilder()
     .setName(commandNames.kansen)
     .setDescription('プラベの観戦する人をランダムな組み合わせで抽出します。')
     .addIntegerOption((option: SlashCommandIntegerOption) =>
-        option.setName('回数').setDescription('何回分の組み合わせを抽出するかを指定します。5回がおすすめ').setRequired(true),
+        option
+            .setName('回数')
+            .setDescription('何回分の組み合わせを抽出するかを指定します。5回がおすすめ')
+            .setRequired(true),
     );
 
 const minutesTimer = new SlashCommandBuilder()
     .setName(commandNames.timer)
     .setDescription('分タイマー')
     .addIntegerOption((option: SlashCommandIntegerOption) =>
-        option.setName('分').setDescription('〇〇分後まで1分ごとにカウントダウンします。').setRequired(true),
+        option
+            .setName('分')
+            .setDescription('〇〇分後まで1分ごとにカウントダウンします。')
+            .setRequired(true),
     );
 
 const pick = new SlashCommandBuilder()
     .setName(commandNames.pick)
     .setDescription('選択肢の中からランダムに抽出します。')
     .addStringOption((option: SlashCommandStringOption) =>
-        option.setName('選択肢').setDescription('半角スペースで区切って入力してください。').setRequired(true),
+        option
+            .setName('選択肢')
+            .setDescription('半角スペースで区切って入力してください。')
+            .setRequired(true),
     )
     .addIntegerOption((option: SlashCommandIntegerOption) =>
-        option.setName('ピックする数').setDescription('2つ以上ピックしたい場合は指定してください。').setRequired(false),
+        option
+            .setName('ピックする数')
+            .setDescription('2つ以上ピックしたい場合は指定してください。')
+            .setRequired(false),
     );
 
 const vpick = new SlashCommandBuilder()
     .setName(commandNames.voice_pick)
     .setDescription('VCに接続しているメンバーからランダムに抽出します。')
     .addIntegerOption((option: SlashCommandIntegerOption) =>
-        option.setName('ピックする人数').setDescription('2人以上ピックしたい場合は指定してください。').setRequired(false),
+        option
+            .setName('ピックする人数')
+            .setDescription('2人以上ピックしたい場合は指定してください。')
+            .setRequired(false),
     )
     .setDMPermission(false);
 
@@ -91,7 +118,10 @@ const buki = new SlashCommandBuilder()
     .setName(commandNames.buki)
     .setDescription('ブキをランダムに抽出します。')
     .addIntegerOption((option: SlashCommandIntegerOption) =>
-        option.setName('ブキの数').setDescription('指定するとn個のブキをランダムに選びます。').setRequired(false),
+        option
+            .setName('ブキの数')
+            .setDescription('指定するとn個のブキをランダムに選びます。')
+            .setRequired(false),
     )
     .addStringOption((option: SlashCommandStringOption) =>
         option
@@ -126,7 +156,9 @@ const show = new SlashCommandBuilder()
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand.setName('nawabari').setDescription('現在のナワバリのステージ情報を表示'),
     )
-    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) => subcommand.setName('run').setDescription('2つ先までのシフトを表示'));
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand.setName('run').setDescription('2つ先までのシフトを表示'),
+    );
 
 const help = new SlashCommandBuilder()
     .setName(commandNames.help)
@@ -134,7 +166,9 @@ const help = new SlashCommandBuilder()
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand.setName('recruit').setDescription('募集コマンドの使い方を表示'),
     )
-    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) => subcommand.setName('voice').setDescription('読み上げ機能のヘルプを表示'))
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand.setName('voice').setDescription('読み上げ機能のヘルプを表示'),
+    )
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand.setName('other').setDescription('募集コマンド以外の使い方を表示'),
     );
@@ -146,7 +180,10 @@ const ban = new SlashCommandBuilder()
         option.setName('ban対象').setDescription('banする人を指定してください。').setRequired(true),
     )
     .addStringOption((option: SlashCommandStringOption) =>
-        option.setName('ban理由').setDescription('ban対象の人にブキチがDMします。').setRequired(true),
+        option
+            .setName('ban理由')
+            .setDescription('ban対象の人にブキチがDMします。')
+            .setRequired(true),
     )
     .setDMPermission(false);
 
@@ -160,7 +197,9 @@ const chManager = new SlashCommandBuilder()
             .addAttachmentOption((option: SlashCommandAttachmentOption) =>
                 option
                     .setName('csv')
-                    .setDescription('CSV（ヘッダー有り）:catID,catName,chID,chName,chType,roleID,roleName,roleColor,member1,member2,member')
+                    .setDescription(
+                        'CSV（ヘッダー有り）:catID,catName,chID,chName,chType,roleID,roleName,roleColor,member1,member2,member',
+                    )
                     .setRequired(true),
             ),
     )
@@ -169,10 +208,16 @@ const chManager = new SlashCommandBuilder()
             .setName('ロール作成')
             .setDescription('ロール作成')
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('ロール名').setDescription('ロール名を指定してください。').setRequired(true),
+                option
+                    .setName('ロール名')
+                    .setDescription('ロール名を指定してください。')
+                    .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('ロールカラー').setDescription('カラーコードをhexで入力してください。').setRequired(false),
+                option
+                    .setName('ロールカラー')
+                    .setDescription('カラーコードをhexで入力してください。')
+                    .setRequired(false),
             ),
     )
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
@@ -180,10 +225,16 @@ const chManager = new SlashCommandBuilder()
             .setName('ロール割当')
             .setDescription('ロール割当')
             .addMentionableOption((option: SlashCommandMentionableOption) =>
-                option.setName('ターゲットロール').setDescription('どのロールにつけますか？').setRequired(true),
+                option
+                    .setName('ターゲットロール')
+                    .setDescription('どのロールにつけますか？')
+                    .setRequired(true),
             )
             .addMentionableOption((option: SlashCommandMentionableOption) =>
-                option.setName('割当ロール').setDescription('どのロールをつけますか？').setRequired(true),
+                option
+                    .setName('割当ロール')
+                    .setDescription('どのロールをつけますか？')
+                    .setRequired(true),
             ),
     )
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
@@ -191,10 +242,16 @@ const chManager = new SlashCommandBuilder()
             .setName('ロール解除')
             .setDescription('ロール解除')
             .addMentionableOption((option: SlashCommandMentionableOption) =>
-                option.setName('ターゲットロール').setDescription('どのロールから外しますか？').setRequired(true),
+                option
+                    .setName('ターゲットロール')
+                    .setDescription('どのロールから外しますか？')
+                    .setRequired(true),
             )
             .addMentionableOption((option: SlashCommandMentionableOption) =>
-                option.setName('解除ロール').setDescription('どのロールを外しますか？').setRequired(true),
+                option
+                    .setName('解除ロール')
+                    .setDescription('どのロールを外しますか？')
+                    .setRequired(true),
             ),
     )
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
@@ -202,22 +259,36 @@ const chManager = new SlashCommandBuilder()
             .setName('ロール削除')
             .setDescription('ロール削除')
             .addMentionableOption((option: SlashCommandMentionableOption) =>
-                option.setName('ロール名1').setDescription('ロール名を指定してください。').setRequired(true),
+                option
+                    .setName('ロール名1')
+                    .setDescription('ロール名を指定してください。')
+                    .setRequired(true),
             )
             .addMentionableOption((option: SlashCommandMentionableOption) =>
-                option.setName('ロール名2').setDescription('ロール名を指定してください。').setRequired(false),
+                option
+                    .setName('ロール名2')
+                    .setDescription('ロール名を指定してください。')
+                    .setRequired(false),
             )
             .addMentionableOption((option: SlashCommandMentionableOption) =>
-                option.setName('ロール名3').setDescription('ロール名を指定してください。').setRequired(false),
+                option
+                    .setName('ロール名3')
+                    .setDescription('ロール名を指定してください。')
+                    .setRequired(false),
             ),
     )
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('カテゴリー削除')
             .setDescription('カテゴリー削除')
-            .addAttachmentOption((option: SlashCommandAttachmentOption) => option.setName('csv').setDescription('csv').setRequired(false))
+            .addAttachmentOption((option: SlashCommandAttachmentOption) =>
+                option.setName('csv').setDescription('csv').setRequired(false),
+            )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('カテゴリーid').setDescription('カテゴリーIDを半角スペース区切りで指定').setRequired(false),
+                option
+                    .setName('カテゴリーid')
+                    .setDescription('カテゴリーIDを半角スペース区切りで指定')
+                    .setRequired(false),
             ),
     )
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
@@ -225,7 +296,10 @@ const chManager = new SlashCommandBuilder()
             .setName('チャンネル削除')
             .setDescription('チャンネル削除')
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('チャンネルid').setDescription('チャンネルIDをを半角スペース区切りで指定').setRequired(true),
+                option
+                    .setName('チャンネルid')
+                    .setDescription('チャンネルIDをを半角スペース区切りで指定')
+                    .setRequired(true),
             ),
     )
     .setDMPermission(false);
@@ -238,7 +312,9 @@ const experience = new SlashCommandBuilder()
 const voice = new SlashCommandBuilder()
     .setName(commandNames.voice)
     .setDescription('テキストチャットの読み上げコマンド')
-    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) => subcommand.setName('join').setDescription('読み上げを開始'))
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand.setName('join').setDescription('読み上げを開始'),
+    )
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('type')
@@ -258,7 +334,9 @@ const voice = new SlashCommandBuilder()
                     .setRequired(true),
             ),
     )
-    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) => subcommand.setName('kill').setDescription('読み上げを終了'))
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand.setName('kill').setDescription('読み上げを終了'),
+    )
     .setDMPermission(false);
 
 const closeRecruit = new SlashCommandBuilder()
@@ -276,7 +354,9 @@ const regularMatch = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
                     .setChoices(
                         { name: '@1', value: 1 },
                         { name: '@2', value: 2 },
@@ -289,7 +369,10 @@ const regularMatch = new SlashCommandBuilder()
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
                 option
@@ -299,13 +382,22 @@ const regularMatch = new SlashCommandBuilder()
                     .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者3').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者3')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             ),
     )
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
@@ -315,7 +407,9 @@ const regularMatch = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
                     .setChoices(
                         { name: '@1', value: 1 },
                         { name: '@2', value: 2 },
@@ -328,16 +422,28 @@ const regularMatch = new SlashCommandBuilder()
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者3').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者3')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             ),
     )
     .setDMPermission(false);
@@ -352,18 +458,33 @@ const eventMatch = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
                 option
@@ -385,8 +506,14 @@ const anarchyMatch = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
@@ -402,13 +529,22 @@ const anarchyMatch = new SlashCommandBuilder()
                     ),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
                 option
@@ -425,8 +561,14 @@ const anarchyMatch = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
@@ -442,13 +584,22 @@ const anarchyMatch = new SlashCommandBuilder()
                     ),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             ),
     )
     .setDMPermission(false);
@@ -463,18 +614,33 @@ const salmonRun = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
                 option
@@ -491,18 +657,33 @@ const salmonRun = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
                 option
@@ -519,18 +700,33 @@ const salmonRun = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
                 option
@@ -552,18 +748,33 @@ const fesA = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
                 option
@@ -580,18 +791,33 @@ const fesA = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             ),
     )
     .setDMPermission(false);
@@ -606,18 +832,33 @@ const fesB = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
                 option
@@ -634,18 +875,33 @@ const fesB = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             ),
     )
     .setDMPermission(false);
@@ -660,18 +916,33 @@ const fesC = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
                 option
@@ -688,18 +959,33 @@ const fesC = new SlashCommandBuilder()
             .addIntegerOption((option: SlashCommandIntegerOption) =>
                 option
                     .setName('募集人数')
-                    .setDescription('募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。')
-                    .setChoices({ name: '@1', value: 1 }, { name: '@2', value: 2 }, { name: '@3', value: 3 })
+                    .setDescription(
+                        '募集人数を設定します。あなたの他に参加者が決定している場合は参加者に指定してください。',
+                    )
+                    .setChoices(
+                        { name: '@1', value: 1 },
+                        { name: '@2', value: 2 },
+                        { name: '@3', value: 3 },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('参加条件').setDescription('プレイ内容や参加条件など').setRequired(false),
+                option
+                    .setName('参加条件')
+                    .setDescription('プレイ内容や参加条件など')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者1').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者1')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             )
             .addUserOption((option: SlashCommandUserOption) =>
-                option.setName('参加者2').setDescription('既に決定している参加者を指定してください。').setRequired(false),
+                option
+                    .setName('参加者2')
+                    .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
             ),
     )
     .setDMPermission(false);
@@ -710,12 +996,20 @@ const privateMatch = new SlashCommandBuilder()
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('private')
-            .setDescription('開始時刻や人数などを細かく設定できます。通常はこちらを使ってください。')
-            .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('開始時刻').setDescription('何時から始める？例: 21:00').setRequired(true),
+            .setDescription(
+                '開始時刻や人数などを細かく設定できます。通常はこちらを使ってください。',
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('所要時間').setDescription('何時間ぐらいやる？例: 2時間').setRequired(true),
+                option
+                    .setName('開始時刻')
+                    .setDescription('何時から始める？例: 21:00')
+                    .setRequired(true),
+            )
+            .addStringOption((option: SlashCommandStringOption) =>
+                option
+                    .setName('所要時間')
+                    .setDescription('何時間ぐらいやる？例: 2時間')
+                    .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true),
@@ -724,7 +1018,9 @@ const privateMatch = new SlashCommandBuilder()
                 option.setName('内容または参加条件').setDescription('プレイ内容や参加条件など'),
             )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('ヘヤタテurl').setDescription('イカリング3のヘヤタテURLがある場合はこちらに入力してください'),
+                option
+                    .setName('ヘヤタテurl')
+                    .setDescription('イカリング3のヘヤタテURLがある場合はこちらに入力してください'),
             ),
     )
     .setDMPermission(false);
@@ -762,7 +1058,11 @@ const otherGame = new SlashCommandBuilder()
                 option
                     .setName('募集人数')
                     .setDescription('募集人数')
-                    .setChoices({ name: '@1', value: '1' }, { name: '@2', value: '2' }, { name: '@3', value: '3' })
+                    .setChoices(
+                        { name: '@1', value: '1' },
+                        { name: '@2', value: '2' },
+                        { name: '@3', value: '3' },
+                    )
                     .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
@@ -817,7 +1117,10 @@ const otherGame = new SlashCommandBuilder()
             .setName('other')
             .setDescription('その他別ゲーの募集')
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('ゲームタイトル').setDescription('ゲームタイトルを入力してください。').setRequired(true),
+                option
+                    .setName('ゲームタイトル')
+                    .setDescription('ゲームタイトルを入力してください。')
+                    .setRequired(true),
             )
             .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('募集人数').setDescription('募集人数 (自由入力)').setRequired(true),
@@ -834,9 +1137,14 @@ const buttonRecruit = new SlashCommandBuilder()
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('button')
-            .setDescription('募集条件を通常のチャットで打ち込んだ後に通知と募集用のボタンを出せます。')
+            .setDescription(
+                '募集条件を通常のチャットで打ち込んだ後に通知と募集用のボタンを出せます。',
+            )
             .addIntegerOption((option: SlashCommandIntegerOption) =>
-                option.setName('募集人数').setDescription('募集人数を入力してください。').setRequired(false),
+                option
+                    .setName('募集人数')
+                    .setDescription('募集人数を入力してください。')
+                    .setRequired(false),
             ),
     )
     .setDMPermission(false);
@@ -849,10 +1157,15 @@ const teamDivider = new SlashCommandBuilder()
             .setName('team')
             .setDescription('勝率に応じてチーム分けを行うことができます。')
             .addIntegerOption((option: SlashCommandIntegerOption) =>
-                option.setName('各チームのメンバー数').setDescription('それぞれのチームメンバー数(ex: スプラ=4, valo=5)').setRequired(true),
+                option
+                    .setName('各チームのメンバー数')
+                    .setDescription('それぞれのチームメンバー数(ex: スプラ=4, valo=5)')
+                    .setRequired(true),
             )
             .addBooleanOption((option: SlashCommandBooleanOption) =>
-                option.setName('勝利数と勝率を隠す').setDescription('勝利数と勝率を隠すことができます。'),
+                option
+                    .setName('勝利数と勝率を隠す')
+                    .setDescription('勝利数と勝率を隠すことができます。'),
             ),
     )
     .setDMPermission(false);
@@ -873,9 +1186,14 @@ const voiceChannelMention = new SlashCommandBuilder()
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
             .setName('vcmention')
-            .setDescription('このチャンネルに、指定したVCにいるメンバー全員へのメンションを送ります。')
+            .setDescription(
+                'このチャンネルに、指定したVCにいるメンバー全員へのメンションを送ります。',
+            )
             .addStringOption((option: SlashCommandStringOption) =>
-                option.setName('メッセージ').setDescription('メンションと一緒に送るメッセージを入力します。').setRequired(true),
+                option
+                    .setName('メッセージ')
+                    .setDescription('メンションと一緒に送るメッセージを入力します。')
+                    .setRequired(true),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
                 option
@@ -897,7 +1215,9 @@ const variablesSettings = new SlashCommandBuilder()
         subcommand
             .setName('登録更新')
             .setDescription('環境変数ファイル(.env)を上書きします。')
-            .addStringOption((option: SlashCommandStringOption) => option.setName('key').setDescription('変数名を入力').setRequired(true))
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('key').setDescription('変数名を入力').setRequired(true),
+            )
             .addStringOption((option: SlashCommandStringOption) =>
                 option.setName('value').setDescription('登録する値を入力').setRequired(true),
             ),
@@ -906,7 +1226,9 @@ const variablesSettings = new SlashCommandBuilder()
         subcommand
             .setName('削除')
             .setDescription('環境変数ファイル(.env)から変数を削除します。')
-            .addStringOption((option: SlashCommandStringOption) => option.setName('key').setDescription('変数名を入力').setRequired(true)),
+            .addStringOption((option: SlashCommandStringOption) =>
+                option.setName('key').setDescription('変数名を入力').setRequired(true),
+            ),
     )
     .setDMPermission(false);
 
@@ -914,25 +1236,48 @@ const joinedDateFixer = new SlashCommandBuilder()
     .setName(commandNames.joinedDateFixer)
     .setDescription('入部日を修正します。(開発者限定コマンド)')
     .addUserOption((option: SlashCommandUserOption) =>
-        option.setName('ユーザー').setDescription('入部日を修正するユーザーを指定').setRequired(true),
+        option
+            .setName('ユーザー')
+            .setDescription('入部日を修正するユーザーを指定')
+            .setRequired(true),
     )
-    .addIntegerOption((option: SlashCommandIntegerOption) => option.setName('年').setDescription('西暦で年を入力').setRequired(true))
-    .addIntegerOption((option: SlashCommandIntegerOption) => option.setName('月').setDescription('月を入力').setRequired(true))
-    .addIntegerOption((option: SlashCommandIntegerOption) => option.setName('日').setDescription('日を入力').setRequired(true))
-    .addIntegerOption((option: SlashCommandIntegerOption) => option.setName('時').setDescription('24h表記で時間を入力').setRequired(true))
-    .addIntegerOption((option: SlashCommandIntegerOption) => option.setName('分').setDescription('分を入力').setRequired(true))
-    .addIntegerOption((option: SlashCommandIntegerOption) => option.setName('秒').setDescription('秒を入力').setRequired(false))
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
+        option.setName('年').setDescription('西暦で年を入力').setRequired(true),
+    )
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
+        option.setName('月').setDescription('月を入力').setRequired(true),
+    )
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
+        option.setName('日').setDescription('日を入力').setRequired(true),
+    )
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
+        option.setName('時').setDescription('24h表記で時間を入力').setRequired(true),
+    )
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
+        option.setName('分').setDescription('分を入力').setRequired(true),
+    )
+    .addIntegerOption((option: SlashCommandIntegerOption) =>
+        option.setName('秒').setDescription('秒を入力').setRequired(false),
+    )
     .addBooleanOption((option: SlashCommandBooleanOption) =>
-        option.setName('強制設定').setDescription('入部日を強制的に設定します。【後の日付でも設定可能】').setRequired(false),
+        option
+            .setName('強制設定')
+            .setDescription('入部日を強制的に設定します。【後の日付でも設定可能】')
+            .setRequired(false),
     )
     .setDMPermission(false);
 
-const festStart = new SlashCommandSubcommandBuilder().setName('開始').setDescription('フェスカテゴリのチャンネルを表示します。');
+const festStart = new SlashCommandSubcommandBuilder()
+    .setName('開始')
+    .setDescription('フェスカテゴリのチャンネルを表示します。');
 const festEnd = new SlashCommandSubcommandBuilder()
     .setName('終了')
     .setDescription('フェスカテゴリのチャンネルを非表示にします。')
     .addBooleanOption((option: SlashCommandBooleanOption) =>
-        option.setName('フェスロールを外す').setDescription('フェスロールを全部員から剥奪します。').setRequired(false),
+        option
+            .setName('フェスロールを外す')
+            .setDescription('フェスロールを全部員から剥奪します。')
+            .setRequired(false),
     );
 
 const festivalSettings = new SlashCommandBuilder()

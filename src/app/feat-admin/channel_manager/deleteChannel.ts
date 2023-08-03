@@ -1,7 +1,12 @@
 import fs from 'fs';
 
 import { stringify } from 'csv-stringify/sync';
-import { AttachmentBuilder, ChannelType, ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
+import {
+    AttachmentBuilder,
+    ChannelType,
+    ChatInputCommandInteraction,
+    PermissionsBitField,
+} from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
@@ -11,7 +16,9 @@ import { assertExistCheck, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
-export async function handleDeleteChannel(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function handleDeleteChannel(
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
@@ -86,7 +93,8 @@ export async function handleDeleteChannel(interaction: ChatInputCommandInteracti
     });
 
     await interaction.followUp({
-        content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
+        content:
+            '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
         files: [attachment],
     });
 }

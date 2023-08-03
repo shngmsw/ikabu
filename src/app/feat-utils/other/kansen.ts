@@ -42,22 +42,30 @@ export async function handleKansen(interaction: ChatInputCommandInteraction<Cach
             resultList.push(i + 1 + '回目：' + selectedComb);
 
             // now spectators をnext spectatorsから取り除く
-            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(players: string[]) {
+            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(
+                players: string[],
+            ) {
                 if (players[0] != selectedComb[0]) {
                     return players;
                 }
             });
-            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(players: string[]) {
+            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(
+                players: string[],
+            ) {
                 if (players[1] != selectedComb[0]) {
                     return players;
                 }
             });
-            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(players: string[]) {
+            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(
+                players: string[],
+            ) {
                 if (players[0] != selectedComb[1]) {
                     return players;
                 }
             });
-            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(players: string[]) {
+            tmpSpectatorList = tmpSpectatorList.filter(function excludePrevSpectator(
+                players: string[],
+            ) {
                 if (players[1] != selectedComb[1]) {
                     return players;
                 }
@@ -65,6 +73,8 @@ export async function handleKansen(interaction: ChatInputCommandInteraction<Cach
         }
     }
 
-    const emb = new EmbedBuilder().setColor(0xf02d7d).addFields([{ name: '観戦の人', value: resultList.join('\n') }]);
+    const emb = new EmbedBuilder()
+        .setColor(0xf02d7d)
+        .addFields([{ name: '観戦の人', value: resultList.join('\n') }]);
     await interaction.editReply({ embeds: [emb] });
 }

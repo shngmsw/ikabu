@@ -3,7 +3,13 @@ import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
 export class UserReactionService {
-    static async save(userId: string, reactionSeq: number, channelId: string, year: string, count: number) {
+    static async save(
+        userId: string,
+        reactionSeq: number,
+        channelId: string,
+        year: string,
+        count: number,
+    ) {
         try {
             await prisma.userReaction.upsert({
                 where: {
@@ -30,7 +36,12 @@ export class UserReactionService {
         }
     }
 
-    static async getReactionCountByPK(userId: string, reactionSeq: number, channelId: string, year: string) {
+    static async getReactionCountByPK(
+        userId: string,
+        reactionSeq: number,
+        channelId: string,
+        year: string,
+    ) {
         try {
             const result = await prisma.userReaction.findUnique({
                 where: {

@@ -13,7 +13,10 @@ import { availableRecruitString } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function recruitEdit(interaction: ModalSubmitInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+export async function recruitEdit(
+    interaction: ModalSubmitInteraction<'cached' | 'raw'>,
+    params: URLSearchParams,
+) {
     try {
         const messageId = params.get('mid');
         assertExistCheck(messageId, "params.get('mid')");
@@ -34,7 +37,12 @@ export async function recruitEdit(interaction: ModalSubmitInteraction<'cached' |
 
         let replyMessage = '';
         if (remaining !== '' && !isNaN(Number(remaining))) {
-            replyMessage += await editRecruitNum(guild.id, messageId, oldRecruitData.recruitType, Number(remaining));
+            replyMessage += await editRecruitNum(
+                guild.id,
+                messageId,
+                oldRecruitData.recruitType,
+                Number(remaining),
+            );
         }
 
         const conditionStr = interaction.fields.getTextInputValue('condition');
@@ -93,7 +101,12 @@ export async function recruitEdit(interaction: ModalSubmitInteraction<'cached' |
     }
 }
 
-async function editRecruitNum(guildId: string, messageId: string, recruitType: number, remainingNum: number) {
+async function editRecruitNum(
+    guildId: string,
+    messageId: string,
+    recruitType: number,
+    remainingNum: number,
+) {
     const participants = await ParticipantService.getAllParticipants(guildId, messageId);
     const recruitersList = [];
     for (const participant of participants) {
