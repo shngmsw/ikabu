@@ -1,12 +1,20 @@
 import { CategoryChannel, ChatInputCommandInteraction, Guild } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
-import { searchRoleById, searchRoleIdByName, unassginRoleFromMembers } from '../../common/manager/role_manager';
+import {
+    searchRoleById,
+    searchRoleIdByName,
+    unassginRoleFromMembers,
+} from '../../common/manager/role_manager';
 import { assertExistCheck } from '../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function festEnd(interaction: ChatInputCommandInteraction<'cached' | 'raw'>, guild: Guild, categoryChannel: CategoryChannel) {
+export async function festEnd(
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+    guild: Guild,
+    categoryChannel: CategoryChannel,
+) {
     // フェスカテゴリのチャンネルを非表示にする
     try {
         const channels = categoryChannel.children.cache;
@@ -19,7 +27,8 @@ export async function festEnd(interaction: ChatInputCommandInteraction<'cached' 
         await interaction.editReply('設定中にエラーが発生したでし！');
     }
 
-    const unassignFestivalRole = interaction.options.getBoolean('フェスロールを外す', false) ?? false;
+    const unassignFestivalRole =
+        interaction.options.getBoolean('フェスロールを外す', false) ?? false;
 
     if (!unassignFestivalRole) {
         return;
@@ -70,7 +79,9 @@ export async function festEnd(interaction: ChatInputCommandInteraction<'cached' 
         const bigmanCount = bigmanRole.members.size;
         const success = await unassginRoleFromMembers(bigmanId, bigmanRole.members);
         if (success) {
-            await interaction.followUp(`\`マンタロー陣営\`ロールを外したでし！ \`[${bigmanCount}]\``);
+            await interaction.followUp(
+                `\`マンタロー陣営\`ロールを外したでし！ \`[${bigmanCount}]\``,
+            );
         } else {
             await interaction.followUp('`マンタロー陣営`ロールを外すのに失敗したでし！');
         }

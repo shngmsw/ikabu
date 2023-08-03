@@ -14,7 +14,12 @@ const logger = log4js_obj.getLogger('ChannelManager');
  * @param channelType チャンネルタイプ(discord.jsのenumを使用)
  * @returns チャンネルID
  */
-export async function createChannel(guild: Guild, channelName: string, channelType: ChannelType, categoryId: string | null = null) {
+export async function createChannel(
+    guild: Guild,
+    channelName: string,
+    channelType: ChannelType,
+    categoryId: string | null = null,
+) {
     try {
         // channelNameがおかしいときは作成せずnullを返す
         // TODO: 正規表現でチェックをかける
@@ -76,7 +81,12 @@ export async function createChannel(guild: Guild, channelName: string, channelTy
  * @param categoryId カテゴリID or null
  * @returns チャンネルID
  */
-export async function searchChannelIdByName(guild: Guild, channelName: string, channelType: ChannelType, categoryId: string | null = null) {
+export async function searchChannelIdByName(
+    guild: Guild,
+    channelName: string,
+    channelType: ChannelType,
+    categoryId: string | null = null,
+) {
     let channel = null;
     const channels = await guild.channels.fetch();
 
@@ -84,7 +94,10 @@ export async function searchChannelIdByName(guild: Guild, channelName: string, c
         if (exists(categoryId)) {
             channel = channels.find(
                 (channel: NonThreadGuildBasedChannel | null) =>
-                    exists(channel) && channel.name === channelName && channel.type === channelType && channel.parent?.id === categoryId,
+                    exists(channel) &&
+                    channel.name === channelName &&
+                    channel.type === channelType &&
+                    channel.parent?.id === categoryId,
             );
         } else {
             channel = channels.find(

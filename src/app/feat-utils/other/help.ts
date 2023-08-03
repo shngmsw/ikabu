@@ -12,7 +12,8 @@ export async function handleHelp(interaction: ChatInputCommandInteraction<CacheT
                 new EmbedBuilder()
                     .setAuthor({
                         name: 'ブキチの使い方(読み上げbot)',
-                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
+                        iconURL:
+                            'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
                     })
                     .setColor(0x1bc2a5)
                     .addFields([
@@ -40,7 +41,8 @@ export async function handleHelp(interaction: ChatInputCommandInteraction<CacheT
                 new EmbedBuilder()
                     .setAuthor({
                         name: 'ブキチの使い方(2/2)',
-                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
+                        iconURL:
+                            'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
                     })
                     .setColor(0x1bc2a5)
                     .addFields([
@@ -118,7 +120,8 @@ export async function handleHelp(interaction: ChatInputCommandInteraction<CacheT
                 new EmbedBuilder()
                     .setAuthor({
                         name: 'ブキチの使い方(1/2)',
-                        iconURL: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
+                        iconURL:
+                            'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fthumbnails%2Fbukichi.jpg',
                     })
                     .setColor(0x1bc2a5)
                     .addFields([

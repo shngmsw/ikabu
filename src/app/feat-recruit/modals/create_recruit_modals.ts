@@ -6,7 +6,10 @@ import { createFesModal } from './create_fes_modal';
 import { createRegularModal } from './create_regular_modal';
 import { createSalmonModal } from './create_salmon_modal';
 
-export async function handleCreateModal(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+export async function handleCreateModal(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    params: URLSearchParams,
+) {
     const channelName = params.get('cn');
     switch (channelName) {
         case 'イベマ募集':

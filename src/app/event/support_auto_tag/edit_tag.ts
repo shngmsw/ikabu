@@ -8,7 +8,10 @@ const logger = log4js_obj.getLogger('default');
 
 export async function editThreadTag(thread: AnyThreadChannel<boolean>) {
     try {
-        if (notExists(process.env.TAG_ID_SUPPORT_PROGRESS) || notExists(process.env.TAG_ID_SUPPORT_RESOLVED)) {
+        if (
+            notExists(process.env.TAG_ID_SUPPORT_PROGRESS) ||
+            notExists(process.env.TAG_ID_SUPPORT_RESOLVED)
+        ) {
             const embed = tagIdsEmbed(thread);
             if (exists(embed)) {
                 await thread.send({ embeds: [embed] });

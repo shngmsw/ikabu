@@ -4,20 +4,37 @@ import { memberListMessage } from './other_events.js';
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
-import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
+import {
+    disableThinkingButton,
+    recoveryThinkingButton,
+    setButtonDisable,
+} from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
-import { assertExistCheck, createMentionsFromIdList, exists, notExists, sleep } from '../../../common/others.js';
+import {
+    assertExistCheck,
+    createMentionsFromIdList,
+    exists,
+    notExists,
+    sleep,
+} from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
-import { channelLinkButtons, messageLinkButtons, nsoRoomLinkButton } from '../../buttons/create_recruit_buttons.js';
+import {
+    channelLinkButtons,
+    messageLinkButtons,
+    nsoRoomLinkButton,
+} from '../../buttons/create_recruit_buttons.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
 import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+export async function join(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    params: URLSearchParams,
+) {
     if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
@@ -109,7 +126,13 @@ export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, par
             });
 
             // recruitテーブルにデータ追加
-            await ParticipantService.registerParticipant(guild.id, image1MsgId, member.userId, 2, new Date());
+            await ParticipantService.registerParticipant(
+                guild.id,
+                image1MsgId,
+                member.userId,
+                2,
+                new Date(),
+            );
 
             const recruitChannel = interaction.channel;
 
@@ -121,12 +144,21 @@ export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, par
                     exists(recruiterGuildMember.voice.channel) &&
                     recruiterGuildMember.voice.channel.type === ChannelType.GuildVoice
                 ) {
-                    const hostJoinedVC = await searchChannelById(guild, recruiterGuildMember.voice.channel.id);
+                    const hostJoinedVC = await searchChannelById(
+                        guild,
+                        recruiterGuildMember.voice.channel.id,
+                    );
 
                     if (exists(hostJoinedVC) && hostJoinedVC.isTextBased()) {
                         await hostJoinedVC.send({
                             embeds: [embed],
-                            components: [messageLinkButtons(interaction.guildId, recruitChannel.id, interaction.message.id)],
+                            components: [
+                                messageLinkButtons(
+                                    interaction.guildId,
+                                    recruitChannel.id,
+                                    interaction.message.id,
+                                ),
+                            ],
                         });
                     }
                 }
@@ -159,7 +191,10 @@ export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, par
                 });
             }
 
-            if (recruitData.recruitType === RecruitType.PrivateRecruit && exists(recruitData.option)) {
+            if (
+                recruitData.recruitType === RecruitType.PrivateRecruit &&
+                exists(recruitData.option)
+            ) {
                 await interaction.followUp({
                     content: `ボタンを押すとヘヤタテ機能を使ってプライベートマッチの部屋に参加できるでし！`,
                     components: [nsoRoomLinkButton(recruitData.option)],
@@ -174,7 +209,11 @@ export async function join(interaction: ButtonInteraction<'cached' | 'raw'>, par
 
             await sleep(300);
             // 5分後にホストへの通知を削除
-            const checkNotifyMessage = await searchMessageById(guild, recruitChannel.id, notifyMessage.id);
+            const checkNotifyMessage = await searchMessageById(
+                guild,
+                recruitChannel.id,
+                notifyMessage.id,
+            );
             if (exists(checkNotifyMessage)) {
                 try {
                     await checkNotifyMessage.delete();

@@ -41,14 +41,22 @@ export async function joinedAtFixer(interaction: ChatInputCommandInteraction<'ca
 
         const newDate = new Date(year, month - 1, day, hour, minute, second);
 
-        if (!isForceSet && exists(targetDBMember.joinedAt) && targetDBMember.joinedAt.getTime() < newDate.getTime()) {
-            return await interaction.editReply('現在の参加日時よりも後の日時を指定することはできないでし！');
+        if (
+            !isForceSet &&
+            exists(targetDBMember.joinedAt) &&
+            targetDBMember.joinedAt.getTime() < newDate.getTime()
+        ) {
+            return await interaction.editReply(
+                '現在の参加日時よりも後の日時を指定することはできないでし！',
+            );
         }
 
         await MemberService.updateJoinedAt(guild.id, targetDBMember.userId, newDate);
 
         return await interaction.editReply(
-            '参加日時を更新したでし！\n`' + newDate.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) + '`',
+            '参加日時を更新したでし！\n`' +
+                newDate.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) +
+                '`',
         );
     } catch (error) {
         logger.error(error);

@@ -28,13 +28,20 @@ export async function call(message: Message<true>) {
             if (message.content === 'stageinfo') {
                 const guild = await message.guild.fetch();
                 const member = await searchAPIMemberById(guild, message.author.id);
-                if (exists(member) && member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
+                if (
+                    exists(member) &&
+                    member.permissions.has(PermissionsBitField.Flags.ManageChannels)
+                ) {
                     await stageInfo(guild);
                 }
             }
             if (exists(process.env.QUESTIONNAIRE_URL)) {
                 if (message.channel.id != process.env.CHANNEL_ID_BOT_CMD && randomBool(0.00025)) {
-                    await sendIntentionConfirmReply(message, message.author.id, 'QUESTIONNAIRE_URL');
+                    await sendIntentionConfirmReply(
+                        message,
+                        message.author.id,
+                        'QUESTIONNAIRE_URL',
+                    );
                 }
             }
         }

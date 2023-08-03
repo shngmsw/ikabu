@@ -21,7 +21,12 @@ export async function sendRecruitModalLog(interaction: ModalSubmitInteraction<'r
 
     for (const subcomponents of components) {
         if (subcomponents.components[0].type === ComponentType.TextInput) {
-            commandLog = commandLog + subcomponents.components[0].customId + ': ' + subcomponents.components[0].value + '\n';
+            commandLog =
+                commandLog +
+                subcomponents.components[0].customId +
+                ': ' +
+                subcomponents.components[0].value +
+                '\n';
         }
     }
 
@@ -53,7 +58,12 @@ export async function sendRecruitModalLog(interaction: ModalSubmitInteraction<'r
     await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
 }
 
-export async function sendEditRecruitLog(guild: Guild, oldRecruitData: Recruit, newRecruitData: Recruit, editedAt: Date) {
+export async function sendEditRecruitLog(
+    guild: Guild,
+    oldRecruitData: Recruit,
+    newRecruitData: Recruit,
+    editedAt: Date,
+) {
     const recruiterId = newRecruitData.authorId;
     const recruiter = await searchDBMemberById(guild, recruiterId);
 

@@ -3,13 +3,25 @@ import { request } from 'http';
 
 import { parse } from 'csv';
 import { stringify } from 'csv-stringify/sync';
-import { AttachmentBuilder, ChannelType, ChatInputCommandInteraction, Guild, PermissionsBitField, Role } from 'discord.js';
+import {
+    AttachmentBuilder,
+    ChannelType,
+    ChatInputCommandInteraction,
+    Guild,
+    PermissionsBitField,
+    Role,
+} from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { createChannel } from '../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
-import { createRole, searchRoleById, setColorToRole, setRoleToMember } from '../../common/manager/role_manager';
+import {
+    createRole,
+    searchRoleById,
+    setColorToRole,
+    setRoleToMember,
+} from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
 
 // const INDEX_CATEGORY_ID = 0;
@@ -61,7 +73,9 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
                 // data[i][8...n] メンバーID
 
                 if (data == undefined) {
-                    return await interaction.followUp('CSVファイルがおかしいでし！\n要素数が全ての行で同じになっているか確認するでし！');
+                    return await interaction.followUp(
+                        'CSVファイルがおかしいでし！\n要素数が全ての行で同じになっているか確認するでし！',
+                    );
                 }
 
                 const resultData: string[][] = [];
@@ -98,7 +112,11 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
                         }
 
                         if (categoryName != '') {
-                            categoryId = await createChannel(guild, categoryName, ChannelType.GuildCategory);
+                            categoryId = await createChannel(
+                                guild,
+                                categoryName,
+                                ChannelType.GuildCategory,
+                            );
                         }
 
                         if (channelName != '') {
@@ -106,7 +124,12 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
 
                             if (channelType !== '') {
                                 if (channelType !== 'ERROR!') {
-                                    channelId = await createChannel(guild, channelName, channelType, categoryId);
+                                    channelId = await createChannel(
+                                        guild,
+                                        channelName,
+                                        channelType,
+                                        categoryId,
+                                    );
                                 }
                             }
                         } else {
@@ -127,7 +150,16 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
                             roleColor = await setRoleColor(guild, role, roleColor, i);
                         }
 
-                        resultData.push([categoryId, categoryName, channelId, channelName, channelType, roleId, roleName, roleColor]);
+                        resultData.push([
+                            categoryId,
+                            categoryName,
+                            channelId,
+                            channelName,
+                            channelType,
+                            roleId,
+                            roleName,
+                            roleColor,
+                        ]);
 
                         if (exists(roleId)) {
                             for (let j = INDEX_MEMBER_ID_START; j < data[i].length; j++) {
@@ -179,7 +211,9 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
     }
 }
 
-function checkChannelType(channelType: 'txt' | 'TEXT' | 'GUILD_TEXT' | 'vc' | 'VOICE' | 'GUILD_VOICE' | '') {
+function checkChannelType(
+    channelType: 'txt' | 'TEXT' | 'GUILD_TEXT' | 'vc' | 'VOICE' | 'GUILD_VOICE' | '',
+) {
     if (channelType == 'txt' || channelType == 'TEXT' || channelType == 'GUILD_TEXT') {
         return ChannelType.GuildText;
     } else if (channelType == 'vc' || channelType == 'VOICE' || channelType == 'GUILD_VOICE') {
@@ -191,7 +225,12 @@ function checkChannelType(channelType: 'txt' | 'TEXT' | 'GUILD_TEXT' | 'vc' | 'V
     }
 }
 
-async function setRoleToChanel(guild: Guild, roleId: string, channelId: string, channelType: string) {
+async function setRoleToChanel(
+    guild: Guild,
+    roleId: string,
+    channelId: string,
+    channelType: string,
+) {
     // set permission to channel
     if (exists(channelId) && channelType !== 'ERROR!') {
         const channel = await guild.channels.fetch(channelId);

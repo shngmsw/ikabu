@@ -46,7 +46,8 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
     await interaction.deferReply({ ephemeral: true });
 
     const sentMessage = await recruitChannel.send({
-        content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
+        content:
+            mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
     });
     // DBに募集情報を登録
     await RecruitService.registerRecruit(
@@ -66,10 +67,17 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
     // 募集リスト更新
     if (recruitType === RecruitType.PrivateRecruit) {
         assertExistCheck(process.env.CHANNEL_ID_RECRUIT_PRIVATE, 'CHANNEL_ID_RECRUIT_PRIVATE');
-        await sendRecruitSticky({ channelOpt: { guild: guild, channelId: process.env.CHANNEL_ID_RECRUIT_PRIVATE } });
+        await sendRecruitSticky({
+            channelOpt: { guild: guild, channelId: process.env.CHANNEL_ID_RECRUIT_PRIVATE },
+        });
     } else if (recruitType === RecruitType.OtherGameRecruit) {
-        assertExistCheck(process.env.CHANNEL_ID_RECRUIT_OTHERGAMES, 'CHANNEL_ID_RECRUIT_OTHERGAMES');
-        await sendRecruitSticky({ channelOpt: { guild: guild, channelId: process.env.CHANNEL_ID_RECRUIT_OTHERGAMES } });
+        assertExistCheck(
+            process.env.CHANNEL_ID_RECRUIT_OTHERGAMES,
+            'CHANNEL_ID_RECRUIT_OTHERGAMES',
+        );
+        await sendRecruitSticky({
+            channelOpt: { guild: guild, channelId: process.env.CHANNEL_ID_RECRUIT_OTHERGAMES },
+        });
     }
 
     await interaction.editReply({

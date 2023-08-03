@@ -13,7 +13,7 @@
     "migrate-deploy": "prisma migrate deploy",
     "prisma-generate": "prisma generate",
     "lint": "eslint .",
-    "fix": "npm run lint:eslint -- --fix"
+    "fix": "npm run lint -- --fix"
   },
   "dependencies": {
     "@discordjs/opus": "0.9.0",

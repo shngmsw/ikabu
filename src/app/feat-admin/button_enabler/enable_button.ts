@@ -8,7 +8,9 @@ import { assertExistCheck, exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function buttonEnable(interaction: MessageContextMenuCommandInteraction<'cached' | 'raw'>) {
+export async function buttonEnable(
+    interaction: MessageContextMenuCommandInteraction<'cached' | 'raw'>,
+) {
     const guild = await getGuildByInteraction(interaction);
     const member = await searchAPIMemberById(guild, interaction.member.user.id);
     assertExistCheck(member, 'member');
@@ -34,7 +36,8 @@ export async function buttonEnable(interaction: MessageContextMenuCommandInterac
         await message.edit({ components: setButtonEnable(message) });
 
         await interaction.editReply({
-            content: 'ボタンを有効化したでし！\n最後に押されたボタンが考え中になっていても通常の処理は行われるはずでし！',
+            content:
+                'ボタンを有効化したでし！\n最後に押されたボタンが考え中になっていても通常の処理は行われるはずでし！',
         });
     } catch (error) {
         logger.error(error);

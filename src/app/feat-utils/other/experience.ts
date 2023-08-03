@@ -16,7 +16,9 @@ const backgroundImgPaths = [
     './images/1month.jpg',
 ];
 const colorCodes = ['#db4240', '#9849c9', '#2eddff', '#5d8e9c', '#f0c46e', '#86828f', '#ad745c'];
-export async function handleIkabuExperience(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function handleIkabuExperience(
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+) {
     assertExistCheck(interaction.channel, 'channel');
 
     // 'インタラクションに失敗'が出ないようにするため
@@ -67,7 +69,17 @@ export async function handleIkabuExperience(interaction: ChatInputCommandInterac
     }
     // set & crop background image
     const background = await Canvas.loadImage(backgroundImgPaths[experienceRank]);
-    context.drawImage(background, 150, 200, canvas.width * 3, canvas.height * 3, 0, 0, canvas.width, canvas.height);
+    context.drawImage(
+        background,
+        150,
+        200,
+        canvas.width * 3,
+        canvas.height * 3,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+    );
 
     context.strokeRect(0, 0, canvas.width, canvas.height);
 

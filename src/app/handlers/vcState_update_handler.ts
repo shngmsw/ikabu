@@ -36,8 +36,14 @@ async function deleteLimitPermission(newState: VoiceState) {
         const newChannel = await newState.guild.channels.fetch(newState.channelId);
         if (exists(newChannel) && newChannel.isVoiceBased()) {
             if (newChannel.members.size !== 0 && exists(newState.member)) {
-                await newChannel.permissionOverwrites.delete(newState.guild.roles.everyone, 'UnLock Voice Channel');
-                await newChannel.permissionOverwrites.delete(newState.member, 'UnLock Voice Channel');
+                await newChannel.permissionOverwrites.delete(
+                    newState.guild.roles.everyone,
+                    'UnLock Voice Channel',
+                );
+                await newChannel.permissionOverwrites.delete(
+                    newState.member,
+                    'UnLock Voice Channel',
+                );
             }
         }
     }

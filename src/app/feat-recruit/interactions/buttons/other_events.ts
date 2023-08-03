@@ -11,7 +11,10 @@ import { assertExistCheck, exists, notExists } from '../../../common/others.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function unlock(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+export async function unlock(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    params: URLSearchParams,
+) {
     if (!interaction.message.inGuild()) return;
     try {
         const guild = await getGuildByInteraction(interaction);
@@ -51,7 +54,10 @@ export function getMemberMentions(recruitNum: number, participants: ParticipantM
     return mentionString;
 }
 
-export async function memberListMessage(interaction: ButtonInteraction<'cached' | 'raw'>, messageId: string) {
+export async function memberListMessage(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    messageId: string,
+) {
     const guild = await getGuildByInteraction(interaction);
     const recruit = await RecruitService.getRecruit(guild.id, messageId);
     if (notExists(recruit)) return;

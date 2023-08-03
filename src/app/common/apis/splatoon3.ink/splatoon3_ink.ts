@@ -466,7 +466,13 @@ export async function getEventData(schedule: Sp3Schedule) {
 
         for (const event of eventList) {
             for (const timePeriod of event.timePeriods) {
-                if (isDateWithinRange(new Date(), new Date(timePeriod.startTime), new Date(timePeriod.endTime))) {
+                if (
+                    isDateWithinRange(
+                        new Date(),
+                        new Date(timePeriod.startTime),
+                        new Date(timePeriod.endTime),
+                    )
+                ) {
                     targetEvent = event;
                     startTime = timePeriod.startTime;
                     endTime = timePeriod.endTime;
@@ -501,9 +507,15 @@ export async function getEventData(schedule: Sp3Schedule) {
             regulation: eventTexts.regulation,
             startTime: startTime,
             endTime: endTime,
-            rule: exists(locale) ? await rule2txt(locale, eventSetting.vsRule.id) : eventSetting.vsRule.name,
-            stage1: exists(locale) ? await stage2txt(locale, eventSetting.vsStages[0].id) : eventSetting.vsStages[0].name,
-            stage2: exists(locale) ? await stage2txt(locale, eventSetting.vsStages[1].id) : eventSetting.vsStages[1].name,
+            rule: exists(locale)
+                ? await rule2txt(locale, eventSetting.vsRule.id)
+                : eventSetting.vsRule.name,
+            stage1: exists(locale)
+                ? await stage2txt(locale, eventSetting.vsStages[0].id)
+                : eventSetting.vsStages[0].name,
+            stage2: exists(locale)
+                ? await stage2txt(locale, eventSetting.vsStages[1].id)
+                : eventSetting.vsStages[1].name,
             stageImage1: eventSetting.vsStages[0].image.url,
             stageImage2: eventSetting.vsStages[1].image.url,
         };
@@ -546,7 +558,9 @@ export async function getSalmonData(schedule: Sp3Schedule, num: number) {
         const result: SalmonInfo = {
             startTime: salmonList[num].startTime,
             endTime: salmonList[num].endTime,
-            stage: exists(locale) ? await stage2txt(locale, salmonSetting.coopStage.id) : salmonSetting.coopStage.name,
+            stage: exists(locale)
+                ? await stage2txt(locale, salmonSetting.coopStage.id)
+                : salmonSetting.coopStage.name,
             weapon1: salmonSetting.weapons[0].image.url,
             weapon2: salmonSetting.weapons[1].image.url,
             weapon3: salmonSetting.weapons[2].image.url,
@@ -660,7 +674,9 @@ export async function getBigRunData(schedule: Sp3Schedule, num: number) {
         const result: SalmonInfo = {
             startTime: bigRunList[num].startTime,
             endTime: bigRunList[num].endTime,
-            stage: exists(locale) ? await stage2txt(locale, bigRunSetting.coopStage.id) : bigRunSetting.coopStage.name,
+            stage: exists(locale)
+                ? await stage2txt(locale, bigRunSetting.coopStage.id)
+                : bigRunSetting.coopStage.name,
             weapon1: bigRunSetting.weapons[0].image.url,
             weapon2: bigRunSetting.weapons[1].image.url,
             weapon3: bigRunSetting.weapons[2].image.url,
@@ -689,7 +705,9 @@ export async function getTeamContestData(schedule: Sp3Schedule, num: number) {
         const result: SalmonInfo = {
             startTime: teamContestList[num].startTime,
             endTime: teamContestList[num].endTime,
-            stage: exists(locale) ? await stage2txt(locale, teamContestSetting.coopStage.id) : teamContestSetting.coopStage.name,
+            stage: exists(locale)
+                ? await stage2txt(locale, teamContestSetting.coopStage.id)
+                : teamContestSetting.coopStage.name,
             weapon1: teamContestSetting.weapons[0].image.url,
             weapon2: teamContestSetting.weapons[1].image.url,
             weapon3: teamContestSetting.weapons[2].image.url,

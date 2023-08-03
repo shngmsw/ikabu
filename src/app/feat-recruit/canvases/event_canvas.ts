@@ -35,7 +35,8 @@ export async function recruitEventCanvas(
     condition: string,
     channelName: string | null,
 ) {
-    const blankAvatarUrl = 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
+    const blankAvatarUrl =
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/blank_avatar.png'; // blankのアバター画像URL
 
     const recruitCanvas = Canvas.createCanvas(720, 550);
     const recruitCtx = recruitCanvas.getContext('2d');
@@ -48,10 +49,21 @@ export async function recruitEventCanvas(
     recruitCtx.lineWidth = 4;
     recruitCtx.stroke();
 
-    const eventIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/event_icon.png');
+    const eventIcon = await Canvas.loadImage(
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/event_icon.png',
+    );
     recruitCtx.drawImage(eventIcon, 19, 19, 77, 77);
 
-    fillTextWithStroke(recruitCtx, 'イベントマッチ', '51px Splatfont', '#000000', '#FF2F82', 3, 112, 80);
+    fillTextWithStroke(
+        recruitCtx,
+        'イベントマッチ',
+        '51px Splatfont',
+        '#000000',
+        '#FF2F82',
+        3,
+        112,
+        80,
+    );
 
     // 募集主の画像
     const recruiterImage = await Canvas.loadImage(recruiter.iconUrl ?? modalRecruit.placeHold);
@@ -89,10 +101,31 @@ export async function recruitEventCanvas(
         }
     }
 
-    const recruiterIcon = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png');
-    recruitCtx.drawImage(recruiterIcon, 0, 0, recruiterIcon.width, recruiterIcon.height, 90, 172, 75, 75);
+    const recruiterIcon = await Canvas.loadImage(
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/squid.png',
+    );
+    recruitCtx.drawImage(
+        recruiterIcon,
+        0,
+        0,
+        recruiterIcon.width,
+        recruiterIcon.height,
+        90,
+        172,
+        75,
+        75,
+    );
 
-    fillTextWithStroke(recruitCtx, '募集人数', '39px "Splatfont"', '#FFFFFF', '#2D3130', 1, 525, 155);
+    fillTextWithStroke(
+        recruitCtx,
+        '募集人数',
+        '39px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        525,
+        155,
+    );
 
     let remainingString;
     if (opCode === RecruitOpCode.open || opCode === RecruitOpCode.cancel) {
@@ -105,10 +138,28 @@ export async function recruitEventCanvas(
 
     recruitCtx.save();
     recruitCtx.textAlign = 'center';
-    fillTextWithStroke(recruitCtx, remainingString, '42px "Splatfont"', '#FFFFFF', '#2D3130', 1, 605, 218);
+    fillTextWithStroke(
+        recruitCtx,
+        remainingString,
+        '42px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        605,
+        218,
+    );
     recruitCtx.restore();
 
-    fillTextWithStroke(recruitCtx, '参加条件', '43px "Splatfont"', '#FFFFFF', '#2D3130', 1, 35, 290);
+    fillTextWithStroke(
+        recruitCtx,
+        '参加条件',
+        '43px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        35,
+        290,
+    );
 
     recruitCtx.font = '30px "Genshin", "SEGUI"';
     const width = 600;
@@ -152,7 +203,16 @@ export async function recruitEventCanvas(
         channelString = '🔉 ' + channelName;
     }
 
-    fillTextWithStroke(recruitCtx, channelString, '37px "Splatfont"', '#FFFFFF', '#2D3130', 1, 30, 520);
+    fillTextWithStroke(
+        recruitCtx,
+        channelString,
+        '37px "Splatfont"',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        30,
+        520,
+    );
 
     if (opCode === RecruitOpCode.cancel) {
         recruitCtx.save();
@@ -161,12 +221,34 @@ export async function recruitEventCanvas(
         const cancelStamp = await Canvas.loadImage(
             'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/canceled_stamp.png',
         );
-        recruitCtx.drawImage(cancelStamp, 0, 0, cancelStamp.width, cancelStamp.height, 0, 0, 600, 600);
+        recruitCtx.drawImage(
+            cancelStamp,
+            0,
+            0,
+            cancelStamp.width,
+            cancelStamp.height,
+            0,
+            0,
+            600,
+            600,
+        );
         recruitCtx.restore;
     } else if (opCode === RecruitOpCode.close) {
         recruitCtx.save();
-        const cancelStamp = await Canvas.loadImage('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/closed_stamp.png');
-        recruitCtx.drawImage(cancelStamp, 0, 0, cancelStamp.width, cancelStamp.height, 130, 80, 500, 340);
+        const cancelStamp = await Canvas.loadImage(
+            'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/closed_stamp.png',
+        );
+        recruitCtx.drawImage(
+            cancelStamp,
+            0,
+            0,
+            cancelStamp.width,
+            cancelStamp.height,
+            130,
+            80,
+            500,
+            340,
+        );
         recruitCtx.restore;
     }
 
@@ -191,31 +273,88 @@ export async function ruleEventCanvas(eventData: EventMatchInfo) {
 
     ruleCtx.save();
     ruleCtx.textAlign = 'right';
-    fillTextWithStroke(ruleCtx, eventData.title, '38px Splatfont', '#FFE02EFB', '#2D3130', 1, 690, 65);
+    fillTextWithStroke(
+        ruleCtx,
+        eventData.title,
+        '38px Splatfont',
+        '#FFE02EFB',
+        '#2D3130',
+        1,
+        690,
+        65,
+    );
     ruleCtx.restore();
 
     fillTextWithStroke(ruleCtx, 'ルール', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
     const ruleWidth = ruleCtx.measureText(eventData.rule).width;
-    fillTextWithStroke(ruleCtx, eventData.rule, '45px Splatfont', '#FFFFFF', '#2D3130', 1, (320 - ruleWidth) / 2, 145); // 中央寄せ
+    fillTextWithStroke(
+        ruleCtx,
+        eventData.rule,
+        '45px Splatfont',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        (320 - ruleWidth) / 2,
+        145,
+    ); // 中央寄せ
 
     fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
 
     const date = formatDatetime(eventData.startTime, dateformat.ymdw);
-    const time = formatDatetime(eventData.startTime, dateformat.hm) + ' - ' + formatDatetime(eventData.endTime, dateformat.hm);
+    const time =
+        formatDatetime(eventData.startTime, dateformat.hm) +
+        ' - ' +
+        formatDatetime(eventData.endTime, dateformat.hm);
 
     const dateWidth = ruleCtx.measureText(date).width;
-    fillTextWithStroke(ruleCtx, date, '35px Splatfont', '#FFFFFF', '#2D3130', 1, (350 - dateWidth) / 2, 270); // 中央寄せ
+    fillTextWithStroke(
+        ruleCtx,
+        date,
+        '35px Splatfont',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        (350 - dateWidth) / 2,
+        270,
+    ); // 中央寄せ
 
     const timeWidth = ruleCtx.measureText(time).width;
-    fillTextWithStroke(ruleCtx, time, '35px Splatfont', '#FFFFFF', '#2D3130', 1, 15 + (350 - timeWidth) / 2, 320); // 中央寄せ
+    fillTextWithStroke(
+        ruleCtx,
+        time,
+        '35px Splatfont',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        15 + (350 - timeWidth) / 2,
+        320,
+    ); // 中央寄せ
 
     fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
 
     ruleCtx.save();
     ruleCtx.textAlign = 'center';
-    fillTextWithStroke(ruleCtx, eventData.stage1, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
-    fillTextWithStroke(ruleCtx, eventData.stage2, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
+    fillTextWithStroke(
+        ruleCtx,
+        eventData.stage1,
+        '32px Splatfont',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        190,
+        440,
+    );
+    fillTextWithStroke(
+        ruleCtx,
+        eventData.stage2,
+        '32px Splatfont',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        190,
+        490,
+    );
     ruleCtx.restore();
 
     const stage1Image = await Canvas.loadImage(eventData.stageImage1);

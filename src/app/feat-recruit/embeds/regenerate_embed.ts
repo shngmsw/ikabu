@@ -7,7 +7,12 @@ import { assertExistCheck, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function regenerateEmbed(guild: Guild, channelId: string, messageId: string, recruitType: number) {
+export async function regenerateEmbed(
+    guild: Guild,
+    channelId: string,
+    messageId: string,
+    recruitType: number,
+) {
     try {
         const message = await searchMessageById(guild, channelId, messageId);
         assertExistCheck(message, 'message');
@@ -34,7 +39,11 @@ export async function regenerateEmbed(guild: Guild, channelId: string, messageId
             if (field.name === conditionTitle) {
                 newFields.push({ name: field.name, value: condition, inline: field.inline });
             } else if (field.name === '募集人数' && recruitNum != -1) {
-                newFields.push({ name: field.name, value: recruitNum.toString(), inline: field.inline });
+                newFields.push({
+                    name: field.name,
+                    value: recruitNum.toString(),
+                    inline: field.inline,
+                });
             } else {
                 newFields.push({ name: field.name, value: field.value, inline: field.inline });
             }

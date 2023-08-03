@@ -1,4 +1,10 @@
-import { ActionRowBuilder, MessageContextMenuCommandInteraction, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
+import {
+    ActionRowBuilder,
+    MessageContextMenuCommandInteraction,
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle,
+} from 'discord.js';
 
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
@@ -7,7 +13,9 @@ import { notExists } from '../../../common/others';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function createRecruitEditor(interaction: MessageContextMenuCommandInteraction<'cached' | 'raw'>) {
+export async function createRecruitEditor(
+    interaction: MessageContextMenuCommandInteraction<'cached' | 'raw'>,
+) {
     try {
         const guild = await getGuildByInteraction(interaction);
         const message = interaction.targetMessage;
@@ -18,7 +26,8 @@ export async function createRecruitEditor(interaction: MessageContextMenuCommand
 
         if (notExists(recruitData)) {
             await interaction.reply({
-                content: '該当の募集が見つからなかったでし！\n参加条件が表示されている画像のメッセージに対して使用するでし！',
+                content:
+                    '該当の募集が見つからなかったでし！\n参加条件が表示されている画像のメッセージに対して使用するでし！',
                 ephemeral: true,
             });
             return;

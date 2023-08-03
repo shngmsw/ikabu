@@ -46,9 +46,19 @@ export async function emojiCountDown(reaction: MessageReaction, user: User) {
     }
 }
 
-async function getReactionCount(userId: string, reactionSeq: number, channelId: string, year: string) {
+async function getReactionCount(
+    userId: string,
+    reactionSeq: number,
+    channelId: string,
+    year: string,
+) {
     let count = 1;
-    const result = await UserReactionService.getReactionCountByPK(userId, reactionSeq, channelId, year);
+    const result = await UserReactionService.getReactionCountByPK(
+        userId,
+        reactionSeq,
+        channelId,
+        year,
+    );
     if (exists(result)) {
         count = result.count;
     }

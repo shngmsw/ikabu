@@ -4,11 +4,20 @@ import { memberListMessage } from './other_events.js';
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
-import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components.js';
+import {
+    disableThinkingButton,
+    recoveryThinkingButton,
+    setButtonDisable,
+} from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, createMentionsFromIdList, exists, notExists } from '../../../common/others.js';
+import {
+    assertExistCheck,
+    createMentionsFromIdList,
+    exists,
+    notExists,
+} from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
@@ -21,7 +30,10 @@ import {
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function cancel(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+export async function cancel(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    params: URLSearchParams,
+) {
     if (!interaction.message.inGuild()) return;
     try {
         await interaction.update({
@@ -42,7 +54,9 @@ export async function cancel(interaction: ButtonInteraction<'cached' | 'raw'>, p
         const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
         if (notExists(recruitData)) {
-            await interaction.editReply({ components: disableThinkingButton(interaction, 'キャンセル') });
+            await interaction.editReply({
+                components: disableThinkingButton(interaction, 'キャンセル'),
+            });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
                 ephemeral: false,
@@ -98,7 +112,10 @@ export async function cancel(interaction: ButtonInteraction<'cached' | 'raw'>, p
                 const channel = await searchChannelById(guild, channelId);
                 const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
                 if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
-                    await channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+                    await channel.permissionOverwrites.delete(
+                        guild.roles.everyone,
+                        'UnLock Voice Channel',
+                    );
                     await channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
                 }
             }
@@ -113,7 +130,9 @@ export async function cancel(interaction: ButtonInteraction<'cached' | 'raw'>, p
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
                 const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
-                    await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
+                    await sendRecruitSticky({
+                        channelOpt: { guild: guild, channelId: stickyChannelId },
+                    });
                 }
             } else {
                 await sendCloseEmbedSticky(guild, recruitChannel);
@@ -128,7 +147,9 @@ export async function cancel(interaction: ButtonInteraction<'cached' | 'raw'>, p
 
                 // ホストに通知
                 await interaction.message.reply({
-                    content: createMentionsFromIdList(confirmedMemberIDList).join(' ') + `\n<@${member.userId}>たんがキャンセルしたでし！`,
+                    content:
+                        createMentionsFromIdList(confirmedMemberIDList).join(' ') +
+                        `\n<@${member.userId}>たんがキャンセルしたでし！`,
                 });
                 await interaction.editReply({
                     content: await memberListMessage(interaction, image1MsgId),
