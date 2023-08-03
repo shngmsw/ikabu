@@ -98,7 +98,10 @@ export async function unassignRoleFromMember(roleIdOrRole: string | Role, member
  * @param members メンバーコレクション
  * @returns 成功したかどうかを返す
  */
-export async function assginRoleToMembers(roleIdOrRole: string | Role, members: Collection<string, GuildMember>) {
+export async function assginRoleToMembers(
+    roleIdOrRole: string | Role,
+    members: Collection<string, GuildMember>,
+) {
     try {
         members.forEach(async (member: GuildMember) => {
             await member.roles.add(roleIdOrRole);
@@ -116,7 +119,10 @@ export async function assginRoleToMembers(roleIdOrRole: string | Role, members: 
  * @param members メンバーコレクション
  * @returns 成功したかどうかを返す
  */
-export async function unassginRoleFromMembers(roleIdOrRole: string | Role, members: Collection<string, GuildMember>) {
+export async function unassginRoleFromMembers(
+    roleIdOrRole: string | Role,
+    members: Collection<string, GuildMember>,
+) {
     try {
         members.forEach(async (member: GuildMember) => {
             await member.roles.remove(roleIdOrRole);
@@ -134,7 +140,11 @@ export async function unassginRoleFromMembers(roleIdOrRole: string | Role, membe
  * @param {string} color カラーコード
  * @returns セットしたカラーコード
  */
-export async function setColorToRole(guild: Guild, role: Role, color?: string | ColorResolvable | null) {
+export async function setColorToRole(
+    guild: Guild,
+    role: Role,
+    color?: string | ColorResolvable | null,
+) {
     if (exists(color)) {
         try {
             await role.setColor(color as ColorResolvable);

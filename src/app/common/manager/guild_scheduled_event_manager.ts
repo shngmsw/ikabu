@@ -7,7 +7,13 @@ export function getGuildScheduledEvents(guild: Guild) {
     return scheduledEvents;
 }
 
-export async function createGuildScheduledEvent(guild: Guild, startTime: Date, endTime: Date, name: string, description: string) {
+export async function createGuildScheduledEvent(
+    guild: Guild,
+    startTime: Date,
+    endTime: Date,
+    name: string,
+    description: string,
+) {
     const options: GuildScheduledEventCreateOptions = {
         scheduledStartTime: startTime,
         scheduledEndTime: endTime,

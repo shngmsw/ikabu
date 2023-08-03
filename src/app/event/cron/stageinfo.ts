@@ -33,21 +33,24 @@ export async function stageInfo(guild: Guild) {
             const embedStr_challenge = await getACEmbed(schedule);
             embedStr_challenge.setAuthor({
                 name: 'バンカラマッチ (チャレンジ)',
-                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+                iconURL:
+                    'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
             });
             embedStr_challenge.setColor('#F54910');
 
             const embedStr_open = await getAOEmbed(schedule);
             embedStr_open.setAuthor({
                 name: 'バンカラマッチ (オープン)',
-                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+                iconURL:
+                    'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
             });
             embedStr_open.setColor('#F54910');
 
             const embedStr_x = await getXMatchEmbed(schedule);
             embedStr_x.setAuthor({
                 name: 'Xマッチ',
-                iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
+                iconURL:
+                    'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
             });
             embedStr_x.setColor('#0edb9b');
 
@@ -55,7 +58,9 @@ export async function stageInfo(guild: Guild) {
                 embeds: [embedStr_x, embedStr_challenge, embedStr_open],
             });
         } else {
-            await stageInfoChannel.send('スケジュールデータを取得できなかったでし！\n`' + new Date().toLocaleString() + '`');
+            await stageInfoChannel.send(
+                'スケジュールデータを取得できなかったでし！\n`' + new Date().toLocaleString() + '`',
+            );
         }
     } catch (error) {
         logger.error(error);

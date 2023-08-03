@@ -5,7 +5,11 @@ import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
-import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
+import {
+    disableThinkingButton,
+    recoveryThinkingButton,
+    setButtonDisable,
+} from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
@@ -38,7 +42,9 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
         const recruitData = await RecruitService.getRecruit(guild.id, embedMessageId);
 
         if (notExists(recruitData)) {
-            await interaction.editReply({ components: disableThinkingButton(interaction, 'キャンセル') });
+            await interaction.editReply({
+                components: disableThinkingButton(interaction, 'キャンセル'),
+            });
             await interaction.followUp({
                 content: '募集データが存在しないでし！',
                 ephemeral: false,
@@ -46,7 +52,10 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
             return;
         }
 
-        const participantsData = await ParticipantService.getAllParticipants(guild.id, embedMessageId);
+        const participantsData = await ParticipantService.getAllParticipants(
+            guild.id,
+            embedMessageId,
+        );
 
         let recruiter = participantsData[0]; // 募集者
         const recruiterId = recruitData.authorId;
@@ -98,7 +107,9 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
                 const stickyChannelId = getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
-                    await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
+                    await sendRecruitSticky({
+                        channelOpt: { guild: guild, channelId: stickyChannelId },
+                    });
                 }
             } else {
                 await sendCloseEmbedSticky(guild, recruitChannel);

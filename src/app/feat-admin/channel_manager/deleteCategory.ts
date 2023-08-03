@@ -3,7 +3,13 @@ import { request } from 'http';
 
 import { parse } from 'csv';
 import { stringify } from 'csv-stringify/sync';
-import { AttachmentBuilder, ChannelType, ChatInputCommandInteraction, Guild, PermissionsBitField } from 'discord.js';
+import {
+    AttachmentBuilder,
+    ChannelType,
+    ChatInputCommandInteraction,
+    Guild,
+    PermissionsBitField,
+} from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
@@ -13,7 +19,9 @@ import { assertExistCheck, exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
-export async function handleDeleteCategory(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function handleDeleteCategory(
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
@@ -67,7 +75,10 @@ export async function handleDeleteCategory(interaction: ChatInputCommandInteract
     }
 }
 
-async function deleteCategory(interaction: ChatInputCommandInteraction<'cached' | 'raw'>, categoryIdList: string[]) {
+async function deleteCategory(
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+    categoryIdList: string[],
+) {
     const guild = await (await getGuildByInteraction(interaction)).fetch();
     const removed = [];
 
@@ -90,7 +101,10 @@ async function deleteCategory(interaction: ChatInputCommandInteraction<'cached' 
                 const channels = await deleteChannelsByCategoryId(guild, categoryId);
                 const channelCollection = await guild.channels.fetch();
                 const category = channelCollection.find(
-                    (channel) => exists(channel) && channel.id == categoryId && channel.type == ChannelType.GuildCategory,
+                    (channel) =>
+                        exists(channel) &&
+                        channel.id == categoryId &&
+                        channel.type == ChannelType.GuildCategory,
                 );
                 if (notExists(category)) {
                     continue;
@@ -121,7 +135,8 @@ async function deleteCategory(interaction: ChatInputCommandInteraction<'cached' 
     });
 
     await interaction.followUp({
-        content: '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
+        content:
+            '操作が完了したでし！\nしゃべると長くなるから下に削除したチャンネルをまとめておいたでし！',
         files: [attachment],
     });
 }
@@ -132,12 +147,20 @@ async function deleteChannelsByCategoryId(guild: Guild, categoryId: string) {
     while (
         exists(
             channelCollection.find(
-                (c) => exists(c) && c.type !== ChannelType.GuildCategory && exists(c.parent) && c.parent.id === categoryId,
+                (c) =>
+                    exists(c) &&
+                    c.type !== ChannelType.GuildCategory &&
+                    exists(c.parent) &&
+                    c.parent.id === categoryId,
             ),
         )
     ) {
         const channel = channelCollection.find(
-            (c) => exists(c) && c.type != ChannelType.GuildCategory && exists(c.parent) && c.parent.id === categoryId,
+            (c) =>
+                exists(c) &&
+                c.type != ChannelType.GuildCategory &&
+                exists(c.parent) &&
+                c.parent.id === categoryId,
         );
         assertExistCheck(channel, 'channel');
         if (channel.type == ChannelType.GuildText) {

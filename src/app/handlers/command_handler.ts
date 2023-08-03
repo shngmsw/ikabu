@@ -6,7 +6,12 @@ import { handleBan } from '../feat-admin/ban/ban';
 import { handleCreateRoom } from '../feat-admin/channel_manager/createRoom.js';
 import { handleDeleteCategory } from '../feat-admin/channel_manager/deleteCategory.js';
 import { handleDeleteChannel } from '../feat-admin/channel_manager/deleteChannel.js';
-import { handleCreateRole, handleDeleteRole, handleAssignRole, handleUnassignRole } from '../feat-admin/channel_manager/manageRole.js';
+import {
+    handleCreateRole,
+    handleDeleteRole,
+    handleAssignRole,
+    handleUnassignRole,
+} from '../feat-admin/channel_manager/manageRole.js';
 import { variablesHandler } from '../feat-admin/environment_variables/variables_handler';
 import { festSettingHandler } from '../feat-admin/fest_setting/fest_settings.js';
 import { joinedAtFixer } from '../feat-admin/joined_date_fixer/fix_joined_date.js';
@@ -51,7 +56,9 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
     return;
 }
 
-async function guildOnlyCommandsHandler(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+async function guildOnlyCommandsHandler(
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+) {
     const { commandName } = interaction;
     const { options } = interaction;
 

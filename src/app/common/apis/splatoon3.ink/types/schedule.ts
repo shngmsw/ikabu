@@ -2,7 +2,11 @@ import { BankaraProperties } from './bankara_properties';
 import { EventProperties } from './event_properties';
 import { FestProperties } from './fest_properties';
 import { RegularProperties } from './regular_properties';
-import { BigRunProperties, SalmonRegularProperties, TeamContestProperties } from './salmon_properties';
+import {
+    BigRunProperties,
+    SalmonRegularProperties,
+    TeamContestProperties,
+} from './salmon_properties';
 import { XProperties } from './x_properties';
 
 export type Sp3Schedule = {

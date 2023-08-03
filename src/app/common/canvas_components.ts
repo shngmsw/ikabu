@@ -37,7 +37,14 @@ export function fillTextWithStroke(
  * @param height 高さ
  * @param radius 角の半径サイズ
  */
-export function createRoundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
+export function createRoundRect(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+) {
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width - radius, y);
     ctx.arcTo(x + width, y, x + width, y + radius, radius);
@@ -58,7 +65,13 @@ export function createRoundRect(ctx: CanvasRenderingContext2D, x: number, y: num
  * @param yPosition y座標
  * @param radius 半径
  */
-export function drawArcImage(ctx: CanvasRenderingContext2D, img: Canvas | Image, xPosition: number, yPosition: number, radius: number) {
+export function drawArcImage(
+    ctx: CanvasRenderingContext2D,
+    img: Canvas | Image,
+    xPosition: number,
+    yPosition: number,
+    radius: number,
+) {
     ctx.beginPath();
     ctx.arc(xPosition + radius, yPosition + radius, radius, 0, Math.PI * 2, true);
     ctx.closePath();

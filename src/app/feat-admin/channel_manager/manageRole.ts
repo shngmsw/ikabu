@@ -1,12 +1,25 @@
 import fs from 'fs';
 
 import { stringify } from 'csv-stringify/sync';
-import { AttachmentBuilder, ChatInputCommandInteraction, GuildMember, PermissionsBitField, Role, User } from 'discord.js';
+import {
+    AttachmentBuilder,
+    ChatInputCommandInteraction,
+    GuildMember,
+    PermissionsBitField,
+    Role,
+    User,
+} from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
-import { createRole, searchRoleById, searchRoleIdByName, setColorToRole, unassginRoleFromMembers } from '../../common/manager/role_manager';
+import {
+    createRole,
+    searchRoleById,
+    searchRoleIdByName,
+    setColorToRole,
+    unassginRoleFromMembers,
+} from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
 
 const logger = log4js_obj.getLogger('RoleManager');
@@ -29,14 +42,18 @@ export async function handleCreateRole(interaction: ChatInputCommandInteraction<
         let colorInput = options.getString('ロールカラー');
 
         if (exists(await searchRoleIdByName(guild, roleName))) {
-            return await interaction.followUp('その名前のロールはもうあるでし！\n別のロール名を使うでし！');
+            return await interaction.followUp(
+                'その名前のロールはもうあるでし！\n別のロール名を使うでし！',
+            );
         }
 
         if (notExists(colorInput)) {
             await interaction.followUp('色はこっちで決めさせてもらうでし！');
         } else if (!colorInput.match('^#([\\da-fA-F]{6})$')) {
             await interaction.followUp(
-                '`' + colorInput + '`はカラーコードじゃないでし！\n`[ex]: #5d4efd, #111`\n色はこっちで決めさせてもらうでし！',
+                '`' +
+                    colorInput +
+                    '`はカラーコードじゃないでし！\n`[ex]: #5d4efd, #111`\n色はこっちで決めさせてもらうでし！',
             );
             colorInput = null;
         }
@@ -51,7 +68,13 @@ export async function handleCreateRole(interaction: ChatInputCommandInteraction<
         await role.setHoist(true);
 
         await interaction.followUp(
-            'ロール名`' + role.name + '`を作ったでし！\nロールIDは`' + roleId + '`、カラーコードは`' + colorCode + '`でし！',
+            'ロール名`' +
+                role.name +
+                '`を作ったでし！\nロールIDは`' +
+                roleId +
+                '`、カラーコードは`' +
+                colorCode +
+                '`でし！',
         );
     } catch (error) {
         logger.error(error);
@@ -77,14 +100,17 @@ export async function handleDeleteRole(interaction: ChatInputCommandInteraction<
     const role2 = options.getMentionable('ロール名2');
     const role3 = options.getMentionable('ロール名3');
 
-    if (!(role1 instanceof GuildMember) && !(role1 instanceof Role) && !(role1 instanceof User)) return;
+    if (!(role1 instanceof GuildMember) && !(role1 instanceof Role) && !(role1 instanceof User))
+        return;
     roleIdList.push(role1.id);
     if (exists(role2)) {
-        if (!(role2 instanceof GuildMember) && !(role2 instanceof Role) && !(role2 instanceof User)) return;
+        if (!(role2 instanceof GuildMember) && !(role2 instanceof Role) && !(role2 instanceof User))
+            return;
         roleIdList.push(role2.id);
     }
     if (exists(role3)) {
-        if (!(role3 instanceof GuildMember) && !(role3 instanceof Role) && !(role3 instanceof User)) return;
+        if (!(role3 instanceof GuildMember) && !(role3 instanceof Role) && !(role3 instanceof User))
+            return;
         roleIdList.push(role3.id);
     }
 
@@ -129,7 +155,8 @@ export async function handleDeleteRole(interaction: ChatInputCommandInteraction<
     });
 
     await interaction.followUp({
-        content: '操作が完了したでし！\nしゃべると長くなるから下に削除したロールをまとめておいたでし！',
+        content:
+            '操作が完了したでし！\nしゃべると長くなるから下に削除したロールをまとめておいたでし！',
         files: [attachment],
     });
 }
@@ -165,14 +192,18 @@ export async function handleAssignRole(interaction: ChatInputCommandInteraction<
             await target[1].roles.add(assignRoleId);
         }
 
-        await interaction.editReply('`' + targetRole.name + '`のメンバーに`' + assignRole.name + '`のロールつけたでし！');
+        await interaction.editReply(
+            '`' + targetRole.name + '`のメンバーに`' + assignRole.name + '`のロールつけたでし！',
+        );
     } catch (error) {
         logger.error(error);
         await interaction.editReply('なんかエラーでてるわ');
     }
 }
 
-export async function handleUnassignRole(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function handleUnassignRole(
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
     const { options } = interaction;
@@ -202,7 +233,11 @@ export async function handleUnassignRole(interaction: ChatInputCommandInteractio
 
         if (success) {
             return await interaction.editReply(
-                '`' + targetRole.name + '`のメンバーから`' + unAssignRole.name + '`のロールを削除したでし！',
+                '`' +
+                    targetRole.name +
+                    '`のメンバーから`' +
+                    unAssignRole.name +
+                    '`のロールを削除したでし！',
             );
         } else {
             return await interaction.editReply('ロールの解除に失敗したでし!');

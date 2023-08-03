@@ -11,7 +11,10 @@ export async function handleWiki(interaction: ChatInputCommandInteraction<CacheT
         const word = options.getString('キーワード');
 
         if (notExists(word)) {
-            return await interaction.reply({ content: 'キーワードが読み取れなかったでし！', ephemeral: true });
+            return await interaction.reply({
+                content: 'キーワードが読み取れなかったでし！',
+                ephemeral: true,
+            });
         }
 
         // 'インタラクションに失敗'が出ないようにするため

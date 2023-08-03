@@ -14,12 +14,17 @@ export async function removeRookie(msg: Message<true>) {
     assertExistCheck(process.env.ROOKIE_ROLE_ID, 'ROOKIE_ROLE_ID');
     const beginnerRoleId = process.env.ROOKIE_ROLE_ID;
     const messageCount = await getMessageCount(authorId);
-    if ((exists(member.joinedTimestamp) && member.joinedTimestamp < lastMonth) || messageCount > 99) {
+    if (
+        (exists(member.joinedTimestamp) && member.joinedTimestamp < lastMonth) ||
+        messageCount > 99
+    ) {
         const hasBeginnerRole = member.roles.cache.find((role: Role) => role.id === beginnerRoleId);
         if (hasBeginnerRole) {
             await unassignRoleFromMember(beginnerRoleId, member);
             const embed = new Discord.EmbedBuilder();
-            embed.setDescription('新入部員期間が終わったでし！\nこれからもイカ部心得を守ってイカ部生活をエンジョイするでし！');
+            embed.setDescription(
+                '新入部員期間が終わったでし！\nこれからもイカ部心得を守ってイカ部生活をエンジョイするでし！',
+            );
             embed.setAuthor({
                 name: member.displayName,
                 iconURL: member.displayAvatarURL(),

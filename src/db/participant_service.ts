@@ -12,7 +12,13 @@ export type ParticipantMember = {
     userType: number;
 };
 export class ParticipantService {
-    static async registerParticipant(guildId: string, messageId: string, userId: string, userType: number, joinedAt: Date) {
+    static async registerParticipant(
+        guildId: string,
+        messageId: string,
+        userId: string,
+        userType: number,
+        joinedAt: Date,
+    ) {
         try {
             await prisma.participant.upsert({
                 where: {
@@ -39,7 +45,12 @@ export class ParticipantService {
         }
     }
 
-    static async registerParticipantFromMember(guildId: string, messageId: string, member: Member, userType: number) {
+    static async registerParticipantFromMember(
+        guildId: string,
+        messageId: string,
+        member: Member,
+        userType: number,
+    ) {
         try {
             await prisma.participant.upsert({
                 where: {
@@ -109,7 +120,11 @@ export class ParticipantService {
         }
     }
 
-    static async getParticipant(guildId: string, messageId: string, userId: string): Promise<ParticipantMember | null> {
+    static async getParticipant(
+        guildId: string,
+        messageId: string,
+        userId: string,
+    ): Promise<ParticipantMember | null> {
         try {
             const participant = await prisma.participant.findUnique({
                 where: {
@@ -133,7 +148,10 @@ export class ParticipantService {
         }
     }
 
-    static async getAllParticipants(guildId: string, messageId: string): Promise<ParticipantMember[]> {
+    static async getAllParticipants(
+        guildId: string,
+        messageId: string,
+    ): Promise<ParticipantMember[]> {
         try {
             const participants = await prisma.participant.findMany({
                 where: {

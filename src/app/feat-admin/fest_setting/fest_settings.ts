@@ -7,7 +7,9 @@ import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { notExists } from '../../common/others';
 
-export async function festSettingHandler(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function festSettingHandler(
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+) {
     await interaction.deferReply({ ephemeral: false });
 
     const guild = await getGuildByInteraction(interaction);

@@ -13,7 +13,10 @@ import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_stic
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export async function del(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+export async function del(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    params: URLSearchParams,
+) {
     if (!interaction.message.inGuild()) return;
     try {
         // 処理待ち
@@ -28,7 +31,11 @@ export async function del(interaction: ButtonInteraction<'cached' | 'raw'>, para
         assertExistCheck(member, 'member');
         const buttonMessageId = params.get('mid');
         assertExistCheck(buttonMessageId, "params.get('mid')");
-        const buttonMessage = await searchMessageById(guild, interaction.channelId, buttonMessageId);
+        const buttonMessage = await searchMessageById(
+            guild,
+            interaction.channelId,
+            buttonMessageId,
+        );
         const image1MsgId = params.get('imid1');
         assertExistCheck(image1MsgId, "params.get('imid1')");
         const image1Message = await searchMessageById(guild, interaction.channelId, image1MsgId);

@@ -1,5 +1,11 @@
 import { Member } from '@prisma/client';
-import { BaseGuildTextChannel, ButtonInteraction, CacheType, ColorResolvable, EmbedBuilder } from 'discord.js';
+import {
+    BaseGuildTextChannel,
+    ButtonInteraction,
+    CacheType,
+    ColorResolvable,
+    EmbedBuilder,
+} from 'discord.js';
 
 import { ParticipantMember } from '../../../db/participant_service';
 import { assertExistCheck } from '../../common/others';
@@ -20,7 +26,9 @@ export async function sendRecruitButtonLog(
         name: `${member.displayName} [${member.userId}]`,
         iconURL: member.iconUrl,
     });
-    embed.setDescription('**募集主**: ' + recruiter.member.displayName + ' [' + recruiter.userId + ']');
+    embed.setDescription(
+        '**募集主**: ' + recruiter.member.displayName + ' [' + recruiter.userId + ']',
+    );
     embed.setColor(color);
     embed.setTimestamp(interaction.createdAt);
     assertExistCheck(process.env.BUTTON_LOG_WEBHOOK_URL, 'BUTTON_LOG_WEBHOOK_URL');

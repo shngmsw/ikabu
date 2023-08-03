@@ -1,6 +1,11 @@
 import Canvas from 'canvas';
 import { getUnixTime } from 'date-fns';
-import { EmbedBuilder, AttachmentBuilder, ChatInputCommandInteraction, CacheType } from 'discord.js';
+import {
+    EmbedBuilder,
+    AttachmentBuilder,
+    ChatInputCommandInteraction,
+    CacheType,
+} from 'discord.js';
 
 import { placeHold } from '../../../constant';
 import { log4js_obj } from '../../../log4js_settings';
@@ -56,7 +61,11 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
     }
 }
 
-async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>, schedule: Sp3Schedule, scheduleNum: number) {
+async function sendStageInfo(
+    interaction: ChatInputCommandInteraction<CacheType>,
+    schedule: Sp3Schedule,
+    scheduleNum: number,
+) {
     let title;
     if (scheduleNum == 0) {
         title = '現在';
@@ -82,7 +91,8 @@ async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>
     const challengeEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のバンカラマッチ (チャレンジ)',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+            iconURL:
+                'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
         })
         .setColor('#F54910')
         .addFields({
@@ -96,7 +106,8 @@ async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>
     const openEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のバンカラマッチ (オープン)',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
+            iconURL:
+                'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/anarchy_icon.png',
         })
         .setColor('#F54910')
         .addFields({
@@ -111,7 +122,8 @@ async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>
         .setAuthor({
             name: title + 'のXマッチ',
 
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
+            iconURL:
+                'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/x_match_icon.png',
         })
         .setColor('#0edb9b')
         .addFields({
@@ -125,7 +137,11 @@ async function sendStageInfo(interaction: ChatInputCommandInteraction<CacheType>
     });
 }
 
-async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheType>, data: Sp3Schedule, scheduleNum: number) {
+async function sendRegularInfo(
+    interaction: ChatInputCommandInteraction<CacheType>,
+    data: Sp3Schedule,
+    scheduleNum: number,
+) {
     const regularData = await getRegularData(data, scheduleNum);
     assertExistCheck(regularData, 'regularData');
     const startDate = formatDatetime(regularData.startTime, dateformat.ymdwhm);
@@ -141,21 +157,28 @@ async function sendRegularInfo(interaction: ChatInputCommandInteraction<CacheTyp
     const regularEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のレギュラーマッチ',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png',
+            iconURL:
+                'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png',
         })
         .setColor('#B3FF00')
         .addFields({
             name: startDate + '-' + endDate,
             value: regularData.stage1 + '／' + regularData.stage2,
         })
-        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png');
+        .setThumbnail(
+            'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/regular_icon.png',
+        );
 
     await interaction.editReply({
         embeds: [regularEmbed],
     });
 }
 
-async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, data: Sp3Schedule, scheduleNum: number) {
+async function sendFesInfo(
+    interaction: ChatInputCommandInteraction<CacheType>,
+    data: Sp3Schedule,
+    scheduleNum: number,
+) {
     const festData = await getFesData(data, scheduleNum);
     assertExistCheck(festData, 'festData');
     const startDate = formatDatetime(festData.startTime, dateformat.ymdwhm);
@@ -171,21 +194,27 @@ async function sendFesInfo(interaction: ChatInputCommandInteraction<CacheType>, 
     const fesEmbed = new EmbedBuilder()
         .setAuthor({
             name: title + 'のフェスマッチ',
-            iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png',
+            iconURL:
+                'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png',
         })
         .setColor('#ead147')
         .addFields({
             name: startDate + '-' + endDate,
             value: festData.stage1 + '／' + festData.stage2,
         })
-        .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png');
+        .setThumbnail(
+            'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/fes_icon.png',
+        );
 
     await interaction.editReply({
         embeds: [fesEmbed],
     });
 }
 
-async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, schedule: Sp3Schedule) {
+async function sendRunInfo(
+    interaction: ChatInputCommandInteraction<CacheType>,
+    schedule: Sp3Schedule,
+) {
     try {
         for (let i = 0; i < 2; i++) {
             let title = '';
@@ -200,7 +229,12 @@ async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, 
             const endDate = formatDatetime(salmonData.endTime, dateformat.ymdwhm);
 
             const weaponsImage = new AttachmentBuilder(
-                await salmonWeaponCanvas(salmonData.weapon1, salmonData.weapon2, salmonData.weapon3, salmonData.weapon4),
+                await salmonWeaponCanvas(
+                    salmonData.weapon1,
+                    salmonData.weapon2,
+                    salmonData.weapon3,
+                    salmonData.weapon4,
+                ),
                 {
                     name: 'weapons.png',
                     description: '',
@@ -210,22 +244,33 @@ async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, 
             const salmonEmbed = new EmbedBuilder()
                 .setAuthor({
                     name: title + 'のSALMON RUN',
-                    iconURL: 'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
+                    iconURL:
+                        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
                 })
                 .setTitle(salmonData.stage)
                 .setColor('#FC892C')
                 .addFields(
                     {
                         name: '開始日時',
-                        value: startDate + '【' + `<t:${getUnixTime(new Date(salmonData.startTime))}:R>` + '】',
+                        value:
+                            startDate +
+                            '【' +
+                            `<t:${getUnixTime(new Date(salmonData.startTime))}:R>` +
+                            '】',
                     },
                     {
                         name: '終了日時',
-                        value: endDate + '【' + `<t:${getUnixTime(new Date(salmonData.endTime))}:R>` + '】',
+                        value:
+                            endDate +
+                            '【' +
+                            `<t:${getUnixTime(new Date(salmonData.endTime))}:R>` +
+                            '】',
                     },
                 )
                 .setImage('attachment://weapons.png')
-                .setThumbnail('https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png');
+                .setThumbnail(
+                    'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/salmon_black_icon.png',
+                );
 
             if (i == 0) {
                 await interaction.editReply({
@@ -248,7 +293,12 @@ async function sendRunInfo(interaction: ChatInputCommandInteraction<CacheType>, 
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-async function salmonWeaponCanvas(weapon1: string, weapon2: string, weapon3: string, weapon4: string) {
+async function salmonWeaponCanvas(
+    weapon1: string,
+    weapon2: string,
+    weapon3: string,
+    weapon4: string,
+) {
     const canvas_width = 650;
     const canvas_height = 220;
     const weaponCanvas = Canvas.createCanvas(canvas_width, canvas_height);

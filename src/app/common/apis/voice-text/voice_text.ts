@@ -91,7 +91,9 @@ export default class VoiceTextApi {
         return res.body;
     }
 
-    private convertToQueryParams(param: VoiceTextApiParams): Record<string, string | number | boolean> {
+    private convertToQueryParams(
+        param: VoiceTextApiParams,
+    ): Record<string, string | number | boolean> {
         const result: Record<string, string | number | boolean> = {};
         for (const key in param) {
             if (param[key as keyof VoiceTextApiParams] !== undefined) {

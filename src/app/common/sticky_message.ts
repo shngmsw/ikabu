@@ -8,7 +8,11 @@ import { log4js_obj } from '../../log4js_settings';
 
 const logger = log4js_obj.getLogger('message');
 
-export async function sendStickyMessage(guild: Guild, channelId: string, content: string | MessagePayload | MessageCreateOptions) {
+export async function sendStickyMessage(
+    guild: Guild,
+    channelId: string,
+    content: string | MessagePayload | MessageCreateOptions,
+) {
     const lastStickyMsgId = await StickyService.getMessageId(guild.id, channelId);
     if (exists(lastStickyMsgId)) {
         const lastStickyMsg = await searchMessageById(guild, channelId, lastStickyMsgId);

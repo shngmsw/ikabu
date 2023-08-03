@@ -53,7 +53,9 @@ const join = async (interaction: ChatInputCommandInteraction<CacheType>) => {
             });
             subscriptions.set(guildId, subscription);
             channels.set(guildId, channelId);
-            await interaction.followUp('ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！');
+            await interaction.followUp(
+                'ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！',
+            );
         } else if (channels.get(guildId) === channelId) {
             await interaction.followUp('既に接続済みでし！');
         } else {
@@ -122,7 +124,11 @@ export async function play(msg: Message<true>) {
     try {
         const { guildId, channelId } = msg;
         const subscription = subscriptions.get(guildId);
-        if (exists(subscription) && isNotEmpty(subscription) && channels.get(guildId) === channelId) {
+        if (
+            exists(subscription) &&
+            isNotEmpty(subscription) &&
+            channels.get(guildId) === channelId
+        ) {
             // メッセージから音声ファイルを取得
             const buffer = await modeApi(msg);
             if (notExists(buffer)) return;

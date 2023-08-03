@@ -1,10 +1,18 @@
-import { ActionRowBuilder, ButtonInteraction, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ButtonInteraction,
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle,
+} from 'discord.js';
 
 export async function createEventModal(interaction: ButtonInteraction<'cached' | 'raw'>) {
     const modalParams = new URLSearchParams();
     modalParams.append('recm', 'everec');
 
-    const modal = new ModalBuilder().setCustomId(modalParams.toString()).setTitle('イベマ募集を作成');
+    const modal = new ModalBuilder()
+        .setCustomId(modalParams.toString())
+        .setTitle('イベマ募集を作成');
 
     const recruitNumInput = new TextInputBuilder()
         .setCustomId('rNum')

@@ -112,7 +112,9 @@ export async function sendAnarchyMatch(
         name: 'ikabu_recruit.png',
     });
 
-    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, ruleIcon), { name: 'rules.png' });
+    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, ruleIcon), {
+        name: 'rules.png',
+    });
 
     try {
         const recruitChannel = interaction.channel;
@@ -138,17 +140,33 @@ export async function sendAnarchyMatch(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, recruiter, 0);
+        await ParticipantService.registerParticipantFromMember(
+            guild.id,
+            image1Message.id,
+            recruiter,
+            0,
+        );
         if (exists(attendee1)) {
-            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee1, 1);
+            await ParticipantService.registerParticipantFromMember(
+                guild.id,
+                image1Message.id,
+                attendee1,
+                1,
+            );
         }
         if (exists(attendee2)) {
-            await ParticipantService.registerParticipantFromMember(guild.id, image1Message.id, attendee2, 1);
+            await ParticipantService.registerParticipantFromMember(
+                guild.id,
+                image1Message.id,
+                attendee2,
+                1,
+            );
         }
 
         const image2Message = await recruitChannel.send({ files: [rule] });
         const buttonMessage = await recruitChannel.send({
-            content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
+            content:
+                mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
         await buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
@@ -168,7 +186,11 @@ export async function sendAnarchyMatch(
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(
+            guild,
+            recruitChannel.id,
+            deleteButtonMsg.id,
+        );
         if (exists(deleteButtonCheck)) {
             await deleteButtonCheck.delete();
         } else {
@@ -182,7 +204,10 @@ export async function sendAnarchyMatch(
             return;
         }
 
-        const participants = await ParticipantService.getAllParticipants(guild.id, image1Message.id);
+        const participants = await ParticipantService.getAllParticipants(
+            guild.id,
+            image1Message.id,
+        );
         const memberList = getMemberMentions(recruitData.recruitNum, participants);
         const hostMention = `<@${recruiter.userId}>`;
 

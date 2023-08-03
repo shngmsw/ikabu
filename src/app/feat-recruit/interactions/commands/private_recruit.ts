@@ -20,10 +20,14 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
     const recruitNumText = options.getString('募集人数', true);
     const condition = options.getString('内容または参加条件') ?? 'なし';
     const roomUrl = options.getString('ヘヤタテurl');
-    const logo = 'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
+    const logo =
+        'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
 
     if (exists(roomUrl) && !isRoomUrl(roomUrl)) {
-        return await interaction.reply({ content: `\`${roomUrl}\`はヘヤタテURLではないでし！`, ephemeral: true });
+        return await interaction.reply({
+            content: `\`${roomUrl}\`はヘヤタテURLではないでし！`,
+            ephemeral: true,
+        });
     }
 
     await interaction.deferReply();
@@ -61,7 +65,10 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
             },
             {
                 name: 'ヘヤタテURL',
-                value: roomUrl !== null ? 'あり\n`※参加ボタンを押すと参加用URLが表示されます。`' : 'なし',
+                value:
+                    roomUrl !== null
+                        ? 'あり\n`※参加ボタンを押すと参加用URLが表示されます。`'
+                        : 'なし',
             },
         ])
         .setColor('#5900b7')
@@ -95,11 +102,17 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromMember(guild.id, embedMessage.id, recruiter, 0);
+        await ParticipantService.registerParticipantFromMember(
+            guild.id,
+            embedMessage.id,
+            recruiter,
+            0,
+        );
 
         const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
         const sentMessage = await recruitChannel.send({
-            content: mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
+            content:
+                mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         await sentMessage.edit({ components: [recruitActionRow(embedMessage)] });
@@ -108,7 +121,8 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
         });
 
         await interaction.followUp({
-            content: '募集完了でし！参加者が来るまで気長に待つでし！\n15秒間は募集を取り消せるでし！',
+            content:
+                '募集完了でし！参加者が来るまで気長に待つでし！\n15秒間は募集を取り消せるでし！',
             ephemeral: true,
         });
 
@@ -119,7 +133,11 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(
+            guild,
+            recruitChannel.id,
+            deleteButtonMsg.id,
+        );
         if (exists(deleteButtonCheck)) {
             await deleteButtonCheck.delete();
         } else {

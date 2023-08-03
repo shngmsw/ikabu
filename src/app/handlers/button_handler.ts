@@ -3,7 +3,10 @@ import { URLSearchParams } from 'url';
 import { ButtonInteraction, CacheType } from 'discord.js';
 
 import { exists } from '../common/others';
-import { sendQuestionnaireFollowUp, disableQuestionnaireButtons } from '../event/rookie/send_questionnaire';
+import {
+    sendQuestionnaireFollowUp,
+    disableQuestionnaireButtons,
+} from '../event/rookie/send_questionnaire';
 import { setResolvedTag } from '../event/support_auto_tag/resolved_support';
 import { cancel } from '../feat-recruit/interactions/buttons/cancel_event';
 import { cancelNotify } from '../feat-recruit/interactions/buttons/cancel_notify_event';

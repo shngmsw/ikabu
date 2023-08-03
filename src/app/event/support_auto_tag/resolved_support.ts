@@ -25,7 +25,10 @@ export async function setResolvedTag(interaction: ButtonInteraction<'cached' | '
             });
         }
 
-        if (notExists(process.env.TAG_ID_SUPPORT_PROGRESS) || notExists(process.env.TAG_ID_SUPPORT_RESOLVED)) {
+        if (
+            notExists(process.env.TAG_ID_SUPPORT_PROGRESS) ||
+            notExists(process.env.TAG_ID_SUPPORT_RESOLVED)
+        ) {
             const embed = tagIdsEmbed(channel);
             if (exists(embed)) {
                 return await interaction.reply({ embeds: [embed] });

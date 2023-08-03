@@ -148,7 +148,9 @@ export class MemberService {
                 const existingUserIds = members.map((member) => member.userId);
 
                 // 既に存在するダミーユーザーを除外
-                const usersToCreate = dummyUsers.filter((user) => !existingUserIds.includes(user.userId));
+                const usersToCreate = dummyUsers.filter(
+                    (user) => !existingUserIds.includes(user.userId),
+                );
 
                 // 新たに作成すべきダミーユーザーを追加
                 for (const user of usersToCreate) {

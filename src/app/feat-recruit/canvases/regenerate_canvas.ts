@@ -22,7 +22,12 @@ export const RecruitOpCode = {
     cancel: 2,
 };
 
-export async function regenerateCanvas(guild: Guild, channelId: string, messageId: string, opCode: number) {
+export async function regenerateCanvas(
+    guild: Guild,
+    channelId: string,
+    messageId: string,
+    opCode: number,
+) {
     try {
         const recruitData = await RecruitService.getRecruit(guild.id, messageId);
         if (notExists(recruitData)) {
@@ -41,25 +46,63 @@ export async function regenerateCanvas(guild: Guild, channelId: string, messageI
         const applicantNum = applicantList.length;
         switch (recruitData.recruitType) {
             case RecruitType.RegularRecruit:
-                await regenRegularCanvas(message, recruitData, participantsData, applicantNum, opCode);
+                await regenRegularCanvas(
+                    message,
+                    recruitData,
+                    participantsData,
+                    applicantNum,
+                    opCode,
+                );
                 break;
             case RecruitType.EventRecruit:
-                await regenEventCanvas(message, recruitData, participantsData, applicantNum, opCode);
+                await regenEventCanvas(
+                    message,
+                    recruitData,
+                    participantsData,
+                    applicantNum,
+                    opCode,
+                );
                 break;
             case RecruitType.AnarchyRecruit:
-                await regenAnarchyCanvas(message, recruitData, participantsData, applicantNum, opCode);
+                await regenAnarchyCanvas(
+                    message,
+                    recruitData,
+                    participantsData,
+                    applicantNum,
+                    opCode,
+                );
                 break;
             case RecruitType.SalmonRecruit:
-                await regenSalmonCanvas(message, recruitData, participantsData, applicantNum, opCode, false);
+                await regenSalmonCanvas(
+                    message,
+                    recruitData,
+                    participantsData,
+                    applicantNum,
+                    opCode,
+                    false,
+                );
                 break;
             case RecruitType.FestivalRecruit:
                 await regenFesCanvas(message, recruitData, participantsData, applicantNum, opCode);
                 break;
             case RecruitType.BigRunRecruit:
-                await regenBigRunCanvas(message, recruitData, participantsData, applicantNum, opCode);
+                await regenBigRunCanvas(
+                    message,
+                    recruitData,
+                    participantsData,
+                    applicantNum,
+                    opCode,
+                );
                 break;
             case RecruitType.TeamContestRecruit:
-                await regenSalmonCanvas(message, recruitData, participantsData, applicantNum, opCode, true);
+                await regenSalmonCanvas(
+                    message,
+                    recruitData,
+                    participantsData,
+                    applicantNum,
+                    opCode,
+                    true,
+                );
                 break;
         }
     } catch (error) {
@@ -81,7 +124,9 @@ async function regenRegularCanvas(
     const condition = recruitData.condition;
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
-    participantsData.forEach((participant, index) => (submitMembersList[index] = participant.member));
+    participantsData.forEach(
+        (participant, index) => (submitMembersList[index] = participant.member),
+    );
 
     if (notExists(submitMembersList[0])) return;
 
@@ -127,7 +172,9 @@ async function regenEventCanvas(
     const condition = recruitData.condition;
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
-    participantsData.forEach((participant, index) => (submitMembersList[index] = participant.member));
+    participantsData.forEach(
+        (participant, index) => (submitMembersList[index] = participant.member),
+    );
 
     if (notExists(submitMembersList[0])) return;
 
@@ -170,7 +217,9 @@ async function regenAnarchyCanvas(
     const rank = recruitData.option;
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
-    participantsData.forEach((participant, index) => (submitMembersList[index] = participant.member));
+    participantsData.forEach(
+        (participant, index) => (submitMembersList[index] = participant.member),
+    );
 
     if (notExists(submitMembersList[0])) return;
 
@@ -214,7 +263,9 @@ async function regenSalmonCanvas(
     const condition = recruitData.condition;
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
-    participantsData.forEach((participant, index) => (submitMembersList[index] = participant.member));
+    participantsData.forEach(
+        (participant, index) => (submitMembersList[index] = participant.member),
+    );
 
     if (notExists(submitMembersList[0])) return;
 
@@ -265,7 +316,9 @@ async function regenFesCanvas(
     assertExistCheck(teamRole, 'teamRole');
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
-    participantsData.forEach((participant, index) => (submitMembersList[index] = participant.member));
+    participantsData.forEach(
+        (participant, index) => (submitMembersList[index] = participant.member),
+    );
 
     if (notExists(submitMembersList[0])) return;
 
@@ -308,7 +361,9 @@ async function regenBigRunCanvas(
     const condition = recruitData.condition;
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
-    participantsData.forEach((participant, index) => (submitMembersList[index] = participant.member));
+    participantsData.forEach(
+        (participant, index) => (submitMembersList[index] = participant.member),
+    );
 
     if (notExists(submitMembersList[0])) return;
 

@@ -11,7 +11,10 @@ export async function handleTimer(interaction: ChatInputCommandInteraction<Cache
     }
 
     if (count > 10 || count <= 0) {
-        return await interaction.reply({ content: '10分以内しか入力できないでし！', ephemeral: true });
+        return await interaction.reply({
+            content: '10分以内しか入力できないでし！',
+            ephemeral: true,
+        });
     }
 
     await interaction.reply('タイマーを`' + count + '分後`にセットしたでし！');

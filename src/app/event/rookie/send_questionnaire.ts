@@ -1,7 +1,18 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DiscordAPIError, Message } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonInteraction,
+    ButtonStyle,
+    DiscordAPIError,
+    Message,
+} from 'discord.js';
 import log4js from 'log4js';
 
-import { disableThinkingButton, recoveryThinkingButton, setButtonDisable } from '../../common/button_components';
+import {
+    disableThinkingButton,
+    recoveryThinkingButton,
+    setButtonDisable,
+} from '../../common/button_components';
 import { searchMessageById } from '../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../common/others';
 
@@ -11,7 +22,11 @@ import { assertExistCheck, exists, notExists, sleep } from '../../common/others'
  * @param {*} member 答えるメンバー
  * @param {*} url_key アンケートURLを格納している環境変数のキー名
  */
-export async function sendIntentionConfirmReply(message: Message<true>, userId: string, urlKey: string) {
+export async function sendIntentionConfirmReply(
+    message: Message<true>,
+    userId: string,
+    urlKey: string,
+) {
     const logger = log4js.getLogger('message');
     try {
         const buttons = questionnaireButton(userId, urlKey);
@@ -25,7 +40,11 @@ export async function sendIntentionConfirmReply(message: Message<true>, userId: 
         });
         await sleep(60 * 60 * 2);
         // リプライが残っているか確認 (手動以外で消えることはないはずだけど一応)
-        const buttonCheck = await searchMessageById(message.guild, sentReply.channel.id, sentReply.id);
+        const buttonCheck = await searchMessageById(
+            message.guild,
+            sentReply.channel.id,
+            sentReply.id,
+        );
         if (exists(buttonCheck)) {
             await buttonCheck.delete();
         } else {
@@ -54,15 +73,28 @@ function questionnaireButton(userId: string, urlKey: string) {
         noParams.append('uid', userId);
 
         const buttons = new ActionRowBuilder<ButtonBuilder>();
-        buttons.addComponents([new ButtonBuilder().setCustomId(yesParams.toString()).setLabel('答える').setStyle(ButtonStyle.Danger)]);
-        buttons.addComponents([new ButtonBuilder().setCustomId(noParams.toString()).setLabel('答えない').setStyle(ButtonStyle.Primary)]);
+        buttons.addComponents([
+            new ButtonBuilder()
+                .setCustomId(yesParams.toString())
+                .setLabel('答える')
+                .setStyle(ButtonStyle.Danger),
+        ]);
+        buttons.addComponents([
+            new ButtonBuilder()
+                .setCustomId(noParams.toString())
+                .setLabel('答えない')
+                .setStyle(ButtonStyle.Primary),
+        ]);
         return buttons;
     } catch (error) {
         logger.error(error);
     }
 }
 
-export async function sendQuestionnaireFollowUp(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+export async function sendQuestionnaireFollowUp(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    params: URLSearchParams,
+) {
     const logger = log4js.getLogger('interaction');
     if (!interaction.message.inGuild()) return;
     try {
@@ -89,7 +121,9 @@ export async function sendQuestionnaireFollowUp(interaction: ButtonInteraction<'
         }
 
         const urlButton = new ActionRowBuilder<ButtonBuilder>();
-        urlButton.addComponents([new ButtonBuilder().setURL(url).setLabel('回答画面へ行く').setStyle(ButtonStyle.Link)]);
+        urlButton.addComponents([
+            new ButtonBuilder().setURL(url).setLabel('回答画面へ行く').setStyle(ButtonStyle.Link),
+        ]);
 
         await interaction.followUp({
             content:
@@ -108,7 +142,10 @@ export async function sendQuestionnaireFollowUp(interaction: ButtonInteraction<'
     }
 }
 
-export async function disableQuestionnaireButtons(interaction: ButtonInteraction<'cached' | 'raw'>, params: URLSearchParams) {
+export async function disableQuestionnaireButtons(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    params: URLSearchParams,
+) {
     const logger = log4js.getLogger('interaction');
     if (!interaction.message.inGuild()) return;
     try {

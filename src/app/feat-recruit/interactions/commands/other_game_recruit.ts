@@ -19,7 +19,11 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
-import { embedRecruitDeleteButton, recruitActionRow, unlockChannelButton } from '../../buttons/create_recruit_buttons';
+import {
+    embedRecruitDeleteButton,
+    recruitActionRow,
+    unlockChannelButton,
+} from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
@@ -59,7 +63,8 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction<
             return;
         } else if (!availableChannel.includes(voiceChannel.name)) {
             await interaction.reply({
-                content: 'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
+                content:
+                    'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
                 ephemeral: true,
             });
             return;
@@ -101,9 +106,23 @@ async function monsterHunterRise(
     const mention = role.toString();
     const txt = `### <@${member.user.id}>` + 'たんのモンハンライズ募集\n';
     const color = '#b71008';
-    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak.jpg';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak_logo.png';
-    await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
+    const image =
+        'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak.jpg';
+    const logo =
+        'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak_logo.png';
+    await sendOtherGames(
+        interaction,
+        guild,
+        recruitChannel,
+        member,
+        title,
+        recruitNumText,
+        mention,
+        txt,
+        color,
+        image,
+        logo,
+    );
 }
 
 async function apexLegends(
@@ -123,9 +142,23 @@ async function apexLegends(
     const mention = role.toString();
     const txt = `### <@${member.user.id}>` + 'たんのApexLegends募集\n';
     const color = '#F30100';
-    const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends.jpg';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends_logo.png';
-    await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
+    const image =
+        'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends.jpg';
+    const logo =
+        'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/ApexLegends_logo.png';
+    await sendOtherGames(
+        interaction,
+        guild,
+        recruitChannel,
+        member,
+        title,
+        recruitNumText,
+        mention,
+        txt,
+        color,
+        image,
+        logo,
+    );
 }
 
 async function overwatch(
@@ -146,8 +179,21 @@ async function overwatch(
     const txt = `### <@${member.user.id}>` + 'たんのOverwatch2募集\n';
     const color = '#ED6516';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch2.png';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch_logo.png';
-    await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
+    const logo =
+        'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/Overwatch_logo.png';
+    await sendOtherGames(
+        interaction,
+        guild,
+        recruitChannel,
+        member,
+        title,
+        recruitNumText,
+        mention,
+        txt,
+        color,
+        image,
+        logo,
+    );
 }
 
 async function valorant(
@@ -168,8 +214,21 @@ async function valorant(
     const txt = `### <@${member.user.id}>` + 'たんのVALORANT募集\n';
     const color = '#FF4654';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant.jpg';
-    const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant_logo.png';
-    await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
+    const logo =
+        'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/valorant_logo.png';
+    await sendOtherGames(
+        interaction,
+        guild,
+        recruitChannel,
+        member,
+        title,
+        recruitNumText,
+        mention,
+        txt,
+        color,
+        image,
+        logo,
+    );
 }
 
 async function others(
@@ -190,7 +249,19 @@ async function others(
     const color = '#379C30';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others.jpg';
     const logo = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others_logo.png';
-    await sendOtherGames(interaction, guild, recruitChannel, member, title, recruitNumText, mention, txt, color, image, logo);
+    await sendOtherGames(
+        interaction,
+        guild,
+        recruitChannel,
+        member,
+        title,
+        recruitNumText,
+        mention,
+        txt,
+        color,
+        image,
+        logo,
+    );
 }
 
 async function sendOtherGames(
@@ -268,7 +339,12 @@ async function sendOtherGames(
         );
 
         // DBに参加者情報を登録
-        await ParticipantService.registerParticipantFromMember(guild.id, embedMessage.id, recruiter, 0);
+        await ParticipantService.registerParticipantFromMember(
+            guild.id,
+            embedMessage.id,
+            recruiter,
+            0,
+        );
 
         const sentMessage = await recruitChannel.send({
             content: mention + ' ボタンを押して参加表明するでし',
@@ -320,13 +396,26 @@ async function sendOtherGames(
 
         // 15秒後に削除ボタンを消す
         await sleep(15);
-        const deleteButtonCheck = await searchMessageById(guild, recruitChannel.id, deleteButtonMsg.id);
+        const deleteButtonCheck = await searchMessageById(
+            guild,
+            recruitChannel.id,
+            deleteButtonMsg.id,
+        );
         if (exists(deleteButtonCheck)) {
             await deleteButtonCheck.delete();
         } else {
-            if (reserveChannel instanceof VoiceChannel && member.voice.channelId != reserveChannel.id) {
-                await reserveChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-                await reserveChannel.permissionOverwrites.delete(member.user, 'UnLock Voice Channel');
+            if (
+                reserveChannel instanceof VoiceChannel &&
+                member.voice.channelId != reserveChannel.id
+            ) {
+                await reserveChannel.permissionOverwrites.delete(
+                    guild.roles.everyone,
+                    'UnLock Voice Channel',
+                );
+                await reserveChannel.permissionOverwrites.delete(
+                    member.user,
+                    'UnLock Voice Channel',
+                );
             }
             return;
         }
@@ -334,7 +423,10 @@ async function sendOtherGames(
         // 2時間後にVCロック解除
         await sleep(7200 - 15);
         if (reserveChannel instanceof VoiceChannel && member.voice.channelId != reserveChannel.id) {
-            await reserveChannel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
+            await reserveChannel.permissionOverwrites.delete(
+                guild.roles.everyone,
+                'UnLock Voice Channel',
+            );
             await reserveChannel.permissionOverwrites.delete(member.user, 'UnLock Voice Channel');
         }
     } catch (error) {
@@ -343,5 +435,7 @@ async function sendOtherGames(
 }
 
 async function sendErrorMessage(channel: TextBasedChannel) {
-    await channel.send('設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！');
+    await channel.send(
+        '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+    );
 }
