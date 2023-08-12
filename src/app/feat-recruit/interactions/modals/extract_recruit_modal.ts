@@ -1,5 +1,5 @@
 import { Member } from '@prisma/client';
-import { ChannelType, GuildMember, ModalSubmitInteraction } from 'discord.js';
+import { GuildMember, ModalSubmitInteraction } from 'discord.js';
 
 import { sendAnarchyMatch } from './anarchy_recruit_modal';
 import { sendEventMatch } from './event_recruit_modal';
@@ -16,7 +16,7 @@ import {
     getFesData,
     getRegularData,
 } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
-import { searchChannelIdByName } from '../../../common/manager/channel_manager';
+import { searchChannelById } from '../../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, isEmpty, isNotEmpty, notExists } from '../../../common/others';
@@ -85,26 +85,23 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
         }
 
         if (checkFes(schedule, type)) {
-            const fes1ChannelId = await searchChannelIdByName(
+            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_SHIVER, 'CHANNEL_ID_RECRUIT_SHIVER');
+            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_FRYE, 'CHANNEL_ID_RECRUIT_FRYE');
+            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_BIGMAN, 'CHANNEL_ID_RECRUIT_BIGMAN');
+            const fes1ChannelId = await searchChannelById(
                 guild,
-                'フウカ募集',
-                ChannelType.GuildText,
-                null,
+                process.env.CHANNEL_ID_RECRUIT_SHIVER,
             );
-            const fes2ChannelId = await searchChannelIdByName(
+            const fes2ChannelId = await searchChannelById(
                 guild,
-                'ウツホ募集',
-                ChannelType.GuildText,
-                null,
+                process.env.CHANNEL_ID_RECRUIT_FRYE,
             );
-            const fes3ChannelId = await searchChannelIdByName(
+            const fes3ChannelId = await searchChannelById(
                 guild,
-                'マンタロー募集',
-                ChannelType.GuildText,
-                null,
+                process.env.CHANNEL_ID_RECRUIT_BIGMAN,
             );
             await interaction.editReply({
-                content: `募集を建てようとした期間はフェス中でし！\n<#${fes1ChannelId}>, <#${fes2ChannelId}>, <#${fes3ChannelId}>のチャンネルを使うでし！`,
+                content: `募集を建てようとした期間はフェス中でし！\n${fes1ChannelId}, ${fes2ChannelId}, ${fes3ChannelId}のチャンネルを使うでし！`,
             });
             return;
         }
@@ -447,23 +444,20 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
         }
 
         if (checkFes(schedule, type)) {
-            const fes1ChannelId = await searchChannelIdByName(
+            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_SHIVER, 'CHANNEL_ID_RECRUIT_SHIVER');
+            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_FRYE, 'CHANNEL_ID_RECRUIT_FRYE');
+            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_BIGMAN, 'CHANNEL_ID_RECRUIT_BIGMAN');
+            const fes1ChannelId = await searchChannelById(
                 guild,
-                'フウカ募集',
-                ChannelType.GuildText,
-                null,
+                process.env.CHANNEL_ID_RECRUIT_SHIVER,
             );
-            const fes2ChannelId = await searchChannelIdByName(
+            const fes2ChannelId = await searchChannelById(
                 guild,
-                'ウツホ募集',
-                ChannelType.GuildText,
-                null,
+                process.env.CHANNEL_ID_RECRUIT_FRYE,
             );
-            const fes3ChannelId = await searchChannelIdByName(
+            const fes3ChannelId = await searchChannelById(
                 guild,
-                'マンタロー募集',
-                ChannelType.GuildText,
-                null,
+                process.env.CHANNEL_ID_RECRUIT_BIGMAN,
             );
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！\n<#${fes1ChannelId}>, <#${fes2ChannelId}>, <#${fes3ChannelId}>のチャンネルを使うでし！`,
