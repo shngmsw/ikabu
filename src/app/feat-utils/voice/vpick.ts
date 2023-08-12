@@ -26,10 +26,12 @@ export async function handleVoicePick(interaction: ChatInputCommandInteraction<'
         return await interaction.editReply('このチャンネルに接続してないでし！');
     }
 
-    const pickNum = Number(options.getInteger('ピックする人数')) ?? 1;
+    const pickNum = options.getInteger('ピックする人数') ?? 1;
 
     if (pickNum > member.voice.channel.members.size) {
         return await interaction.editReply('接続中の人数よりも多い数を指定してるでし！');
+    } else if (pickNum < 1) {
+        return await interaction.editReply('0人未満で選択することはできないでし！');
     }
 
     const pickedMembers = member.voice.channel.members.random(pickNum);
