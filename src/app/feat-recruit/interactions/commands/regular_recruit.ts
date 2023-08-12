@@ -128,14 +128,26 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction<'c
         }
 
         if (checkFes(schedule, type)) {
-            const fesChannelId = await searchChannelIdByName(
+            const fes1ChannelId = await searchChannelIdByName(
                 guild,
-                'フェス募集',
+                'フウカ募集',
+                ChannelType.GuildText,
+                null,
+            );
+            const fes2ChannelId = await searchChannelIdByName(
+                guild,
+                'ウツホ募集',
+                ChannelType.GuildText,
+                null,
+            );
+            const fes3ChannelId = await searchChannelIdByName(
+                guild,
+                'マンタロー募集',
                 ChannelType.GuildText,
                 null,
             );
             await interaction.editReply({
-                content: `募集を建てようとした期間はフェス中でし！<#${fesChannelId}>のチャンネルを使うでし！`,
+                content: `募集を建てようとした期間はフェス中でし！\n<#${fes1ChannelId}>, <#${fes2ChannelId}>, <#${fes3ChannelId}>のチャンネルを使うでし！`,
             });
             return;
         }
