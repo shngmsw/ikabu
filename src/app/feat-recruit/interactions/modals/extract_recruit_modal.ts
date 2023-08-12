@@ -16,7 +16,6 @@ import {
     getFesData,
     getRegularData,
 } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
-import { searchChannelById } from '../../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, isEmpty, isNotEmpty, notExists } from '../../../common/others';
@@ -85,21 +84,12 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
         }
 
         if (checkFes(schedule, type)) {
-            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_SHIVER, 'CHANNEL_ID_RECRUIT_SHIVER');
-            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_FRYE, 'CHANNEL_ID_RECRUIT_FRYE');
-            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_BIGMAN, 'CHANNEL_ID_RECRUIT_BIGMAN');
-            const fes1ChannelId = await searchChannelById(
-                guild,
-                process.env.CHANNEL_ID_RECRUIT_SHIVER,
-            );
-            const fes2ChannelId = await searchChannelById(
-                guild,
-                process.env.CHANNEL_ID_RECRUIT_FRYE,
-            );
-            const fes3ChannelId = await searchChannelById(
-                guild,
-                process.env.CHANNEL_ID_RECRUIT_BIGMAN,
-            );
+            const fes1ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_SHIVER}>`;
+            const fes2ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_FRYE}>`;
+            const fes3ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_BIGMAN}>`;
+            assertExistCheck(fes1ChannelId, 'CHANNEL_ID_RECRUIT_SHIVER');
+            assertExistCheck(fes2ChannelId, 'CHANNEL_ID_RECRUIT_FRYE');
+            assertExistCheck(fes3ChannelId, 'CHANNEL_ID_RECRUIT_BIGMAN');
             await interaction.editReply({
                 content: `募集を建てようとした期間はフェス中でし！\n${fes1ChannelId}, ${fes2ChannelId}, ${fes3ChannelId}のチャンネルを使うでし！`,
             });
@@ -444,23 +434,14 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
         }
 
         if (checkFes(schedule, type)) {
-            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_SHIVER, 'CHANNEL_ID_RECRUIT_SHIVER');
-            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_FRYE, 'CHANNEL_ID_RECRUIT_FRYE');
-            assertExistCheck(process.env.CHANNEL_ID_RECRUIT_BIGMAN, 'CHANNEL_ID_RECRUIT_BIGMAN');
-            const fes1ChannelId = await searchChannelById(
-                guild,
-                process.env.CHANNEL_ID_RECRUIT_SHIVER,
-            );
-            const fes2ChannelId = await searchChannelById(
-                guild,
-                process.env.CHANNEL_ID_RECRUIT_FRYE,
-            );
-            const fes3ChannelId = await searchChannelById(
-                guild,
-                process.env.CHANNEL_ID_RECRUIT_BIGMAN,
-            );
+            const fes1ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_SHIVER}>`;
+            const fes2ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_FRYE}>`;
+            const fes3ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_BIGMAN}>`;
+            assertExistCheck(fes1ChannelId, 'CHANNEL_ID_RECRUIT_SHIVER');
+            assertExistCheck(fes2ChannelId, 'CHANNEL_ID_RECRUIT_FRYE');
+            assertExistCheck(fes3ChannelId, 'CHANNEL_ID_RECRUIT_BIGMAN');
             await interaction.editReply({
-                content: `募集を建てようとした期間はフェス中でし！\n<#${fes1ChannelId}>, <#${fes2ChannelId}>, <#${fes3ChannelId}>のチャンネルを使うでし！`,
+                content: `募集を建てようとした期間はフェス中でし！\n${fes1ChannelId}, ${fes2ChannelId}, ${fes3ChannelId}のチャンネルを使うでし！`,
             });
             return;
         }
