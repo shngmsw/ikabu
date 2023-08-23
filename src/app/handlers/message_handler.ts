@@ -9,6 +9,7 @@ import { dispand } from '../event/message_related/dispander';
 import { chatCountUp } from '../event/message_related/message_count';
 import { removeRookie } from '../event/rookie/remove_rookie';
 import { sendIntentionConfirmReply } from '../event/rookie/send_questionnaire';
+import { vcToolsStickyFromMessage } from '../event/vctools_sticky/vc_tools_message';
 import { sendRecruitSticky } from '../feat-recruit/sticky/recruit_sticky_messages';
 import { play } from '../feat-utils/voice/tts/discordjs_voice';
 const logger = log4js_obj.getLogger('message');
@@ -63,6 +64,7 @@ export async function call(message: Message<true>) {
         await play(message);
         await chatCountUp(message);
         await sendRecruitSticky({ message: message });
+        await vcToolsStickyFromMessage(message);
         await removeRookie(message);
     } catch (error) {
         logger.error(error);
