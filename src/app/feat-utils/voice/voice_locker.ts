@@ -8,13 +8,15 @@ import {
     ButtonInteraction,
     ChatInputCommandInteraction,
     VoiceState,
-    Channel,
+    VoiceBasedChannel,
+    TextBasedChannel,
 } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
-import { assertExistCheck, exists, notExists } from '../../common/others';
+import { Merge, assertExistCheck, exists, notExists } from '../../common/others';
+import { sendVCToolsSticky } from '../../event/vctools_sticky/vc_tools_message';
 const logger = log4js_obj.getLogger('interaction');
 
 /*
@@ -60,12 +62,14 @@ export async function voiceLocker(interaction: ChatInputCommandInteraction<'cach
             await channel.setUserLimit(limitNum);
         }
     } else {
-        channelState = await getVoiceChannelState(channel);
+        if (channel.isVoiceBased()) {
+            channelState = await getVoiceChannelState(channel);
+        }
     }
 
     if (exists(channelState)) {
-        const embed = createEmbed(channelState);
-        const button = createButton(channelState);
+        const embed = createVCLEmbed(channelState);
+        const button = createVCLButton(channelState);
 
         await interaction
             .reply({
@@ -125,12 +129,11 @@ export async function voiceLockerUpdate(interaction: ButtonInteraction<'cached' 
 
     // 'LOCK'ボタンor'UNLOCK'ボタンを押したとき
     if (interaction.customId == 'voiceLockOrUnlock') {
-        const label = interaction.component.label; // ボタンのラベルから設定する状態を取得
-        if (label === 'LOCK') {
+        if (channel.userLimit === 0) {
             await channel.setUserLimit(voiceMemberNum);
             channelState.isLock = true;
             channelState.limit = voiceMemberNum;
-        } else if (label === 'UNLOCK') {
+        } else {
             await channel.setUserLimit(0);
             channelState.isLock = false;
             channelState.limit = 0;
@@ -172,13 +175,15 @@ export async function voiceLockerUpdate(interaction: ButtonInteraction<'cached' 
 
     await interaction
         .update({
-            embeds: [createEmbed(channelState)],
-            components: [createButton(channelState)],
+            embeds: [createVCLEmbed(channelState)],
+            components: [createVCLButton(channelState)],
             fetchReply: true,
         })
         .catch((error) => {
             logger.error(error);
         });
+
+    await sendVCToolsSticky(guild, channel, false);
 }
 
 export async function disableLimit(oldState: VoiceState) {
@@ -221,7 +226,7 @@ type ChannelState = {
  * @param {*} channel チャンネル情報
  * @returns channelStateのオブジェクトを返す
  */
-async function getVoiceChannelState(channel: Channel) {
+export async function getVoiceChannelState(channel: Merge<VoiceBasedChannel & TextBasedChannel>) {
     if (channel.isVoiceBased()) {
         const channelStateObj: ChannelState = {
             id: channel.id,
@@ -240,7 +245,7 @@ async function getVoiceChannelState(channel: Channel) {
  * @param {*} channelState チャンネル情報の読み込み
  * @returns 作成したボタンを返す
  */
-function createButton(channelState: ChannelState) {
+export function createVCLButton(channelState: ChannelState) {
     const button = new ActionRowBuilder<ButtonBuilder>();
     const limit = channelState.limit;
     if (channelState.isLock) {
@@ -266,9 +271,9 @@ function createButton(channelState: ChannelState) {
         button.addComponents([
             new ButtonBuilder()
                 .setCustomId('voiceLockOrUnlock')
-                .setLabel('UNLOCK')
-                .setStyle(ButtonStyle.Success)
-                .setEmoji('🔓'),
+                .setLabel(limit + '人')
+                .setStyle(ButtonStyle.Danger)
+                .setEmoji('🔒'),
         ]);
 
         // 制限人数が99のとき，'＋'ボタンを無効化
@@ -298,9 +303,9 @@ function createButton(channelState: ChannelState) {
                 .setDisabled(true),
             new ButtonBuilder()
                 .setCustomId('voiceLockOrUnlock')
-                .setLabel('LOCK')
-                .setStyle(ButtonStyle.Danger)
-                .setEmoji('🔒'),
+                .setLabel('制限なし')
+                .setStyle(ButtonStyle.Success)
+                .setEmoji('🔓'),
             new ButtonBuilder()
                 .setCustomId('voiceLock_inc')
                 .setLabel('＋')
@@ -316,7 +321,7 @@ function createButton(channelState: ChannelState) {
  * @param {*} channelState チャンネル情報の読み込み
  * @returns 作成したEmbedを返す
  */
-function createEmbed(channelState: ChannelState) {
+export function createVCLEmbed(channelState: ChannelState) {
     let limit;
     // 制限人数表示用の判定
     if (channelState.limit === 0) {

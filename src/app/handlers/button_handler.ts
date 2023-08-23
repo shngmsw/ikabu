@@ -8,6 +8,7 @@ import {
     disableQuestionnaireButtons,
 } from '../event/rookie/send_questionnaire';
 import { setResolvedTag } from '../event/support_auto_tag/resolved_support';
+import { showLockPanelFromVCTools } from '../event/vctools_sticky/linkage_voice_lock';
 import { sendRadioRequest } from '../event/vctools_sticky/radio_request';
 import { cancel } from '../feat-recruit/interactions/buttons/cancel_event';
 import { cancelNotify } from '../feat-recruit/interactions/buttons/cancel_notify_event';
@@ -57,6 +58,8 @@ export async function call(interaction: ButtonInteraction<CacheType>) {
             await killTTS(interaction);
         } else if (interaction.customId === 'requestRadio') {
             await sendRadioRequest(interaction);
+        } else if (interaction.customId === 'showLockPanel') {
+            await showLockPanelFromVCTools(interaction);
         } else if (interaction.customId === 'support_resolved') {
             await setResolvedTag(interaction);
         } else if (exists(param_d) && exists(param_d)) {

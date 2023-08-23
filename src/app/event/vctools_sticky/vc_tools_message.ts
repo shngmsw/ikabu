@@ -153,7 +153,7 @@ function createLockButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
 function createRequestRadioButton() {
     return new ButtonBuilder()
         .setCustomId('requestRadio')
-        .setLabel('ラジオ依頼')
+        .setLabel('ラジオ')
         .setStyle(ButtonStyle.Secondary)
         .setEmoji('📻');
 }
