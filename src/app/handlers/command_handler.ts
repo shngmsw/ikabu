@@ -115,7 +115,7 @@ async function guildOnlyCommandsHandler(
         await festSettingHandler(interaction);
     } else if (commandName === commandNames.voice) {
         // 'インタラクションに失敗'が出ないようにするため
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: true });
         await handleVoiceCommand(interaction);
         await setting(interaction);
     } else if (commandName == commandNames.ch_manager) {

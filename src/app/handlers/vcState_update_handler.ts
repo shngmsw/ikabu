@@ -2,6 +2,7 @@ import { VoiceState } from 'discord.js';
 
 import { log4js_obj } from '../../log4js_settings';
 import { exists, notExists } from '../common/others';
+import { vcToolsStickyFromVoiceState } from '../event/vctools_sticky/vc_tools_message';
 import { autokill } from '../feat-utils/voice/tts/discordjs_voice';
 import { disableLimit } from '../feat-utils/voice/voice_locker';
 
@@ -14,12 +15,16 @@ export async function call(oldState: VoiceState, newState: VoiceState) {
         } else if (notExists(oldState.channelId) && exists(newState.channelId)) {
             // ここはconnectしたときに発火する場所
             await deleteLimitPermission(newState);
+            await vcToolsStickyFromVoiceState(newState, true);
         } else if (exists(oldState.channelId) && notExists(newState.channelId)) {
             // ここはdisconnectしたときに発火する場所
+            await vcToolsStickyFromVoiceState(oldState, false);
             await disableLimit(oldState);
             await autokill(oldState);
         } else {
             // ここはチャンネル移動を行ったときに発火する場所
+            await vcToolsStickyFromVoiceState(newState, true);
+            await vcToolsStickyFromVoiceState(oldState, false);
             await deleteLimitPermission(newState);
             await disableLimit(oldState);
             await autokill(oldState);
