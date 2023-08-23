@@ -29,14 +29,19 @@ export async function vcToolsStickyFromMessage(message: Message<true>) {
     await sendVCToolsSticky(guild, channel, false);
 }
 
-export async function vcToolsStickyFromVoiceState(voiceState: VoiceState) {
+export async function vcToolsStickyFromVoiceState(voiceState: VoiceState, showOnboarding = false) {
     const guild = voiceState.guild;
     const channel = voiceState.channel;
-    let showOnboarding = true;
 
     if (notExists(channel) || !channel.isTextBased()) return;
 
+    // ボットの入室時はオンボーディングを表示しない
     if (exists(voiceState.member) && voiceState.member.user.bot) {
+        showOnboarding = false;
+    }
+
+    // 最初の1人以外はオンボーディングを表示しない
+    if (channel.members.size !== 1) {
         showOnboarding = false;
     }
 
@@ -44,8 +49,10 @@ export async function vcToolsStickyFromVoiceState(voiceState: VoiceState) {
 }
 
 /**
- * VCTools紹介のSticky Messageを送信する
- * @param {VoiceState} voiceState voiceStateオブジェクト
+ * VCToolsのSticky Messageを送信する
+ * @param {Guild} guild guildオブジェクト
+ * @param {Merge<TextBasedChannel & VoiceBasedChannel>} channel チャンネルオブジェクト
+ * @param {boolean} showOnboarding チャンネルに初めて入ったときの案内を表示するかどうか
  */
 export async function sendVCToolsSticky(
     guild: Guild,

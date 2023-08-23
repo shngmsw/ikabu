@@ -15,16 +15,16 @@ export async function call(oldState: VoiceState, newState: VoiceState) {
         } else if (notExists(oldState.channelId) && exists(newState.channelId)) {
             // ここはconnectしたときに発火する場所
             await deleteLimitPermission(newState);
-            await vcToolsStickyFromVoiceState(newState);
+            await vcToolsStickyFromVoiceState(newState, true);
         } else if (exists(oldState.channelId) && notExists(newState.channelId)) {
             // ここはdisconnectしたときに発火する場所
-            await vcToolsStickyFromVoiceState(oldState);
+            await vcToolsStickyFromVoiceState(oldState, false);
             await disableLimit(oldState);
             await autokill(oldState);
         } else {
             // ここはチャンネル移動を行ったときに発火する場所
-            await vcToolsStickyFromVoiceState(newState);
-            await vcToolsStickyFromVoiceState(oldState);
+            await vcToolsStickyFromVoiceState(newState, true);
+            await vcToolsStickyFromVoiceState(oldState, false);
             await deleteLimitPermission(newState);
             await disableLimit(oldState);
             await autokill(oldState);

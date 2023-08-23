@@ -2,13 +2,13 @@ import { URLSearchParams } from 'url';
 
 import { ButtonInteraction, CacheType } from 'discord.js';
 
-import { log4js_obj } from '../../log4js_settings';
 import { exists } from '../common/others';
 import {
     sendQuestionnaireFollowUp,
     disableQuestionnaireButtons,
 } from '../event/rookie/send_questionnaire';
 import { setResolvedTag } from '../event/support_auto_tag/resolved_support';
+import { sendRadioRequest } from '../event/vctools_sticky/radio_request';
 import { cancel } from '../feat-recruit/interactions/buttons/cancel_event';
 import { cancelNotify } from '../feat-recruit/interactions/buttons/cancel_notify_event';
 import { close } from '../feat-recruit/interactions/buttons/close_event';
@@ -33,8 +33,6 @@ import {
 import { joinTTS, killTTS } from '../feat-utils/voice/tts/discordjs_voice';
 import { voiceLockerUpdate } from '../feat-utils/voice/voice_locker';
 
-const logger = log4js_obj.getLogger('button');
-
 export async function call(interaction: ButtonInteraction<CacheType>) {
     // サーバとDM両方で動くボタン
 
@@ -51,13 +49,15 @@ export async function call(interaction: ButtonInteraction<CacheType>) {
         const voiceLockerIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
         if (voiceLockerIds.includes(interaction.customId)) {
             await voiceLockerUpdate(interaction);
-        } else if (interaction.customId == 'voiceJoin') {
-            await interaction.deferReply();
+        } else if (interaction.customId === 'voiceJoin') {
+            await interaction.deferReply({ ephemeral: true });
             await joinTTS(interaction);
-        } else if (interaction.customId == 'voiceKill') {
-            await interaction.deferReply();
+        } else if (interaction.customId === 'voiceKill') {
+            await interaction.deferReply({ ephemeral: true });
             await killTTS(interaction);
-        } else if (interaction.customId == 'support_resolved') {
+        } else if (interaction.customId === 'requestRadio') {
+            await sendRadioRequest(interaction);
+        } else if (interaction.customId === 'support_resolved') {
             await setResolvedTag(interaction);
         } else if (exists(param_d) && exists(param_d)) {
             switch (param_d) {

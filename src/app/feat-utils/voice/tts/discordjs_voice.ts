@@ -18,7 +18,7 @@ import {
 import { modeApi, bufferToStream } from './voice_bot_node';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
-import { exists, isNotEmpty, notExists } from '../../../common/others';
+import { exists, getDeveloperMention, isNotEmpty, notExists } from '../../../common/others';
 
 const infoLogger = log4js_obj.getLogger('info');
 const interactionLogger = log4js_obj.getLogger('interaction');
@@ -40,17 +40,18 @@ export const joinTTS = async (
         const channelId = interaction.channelId;
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
 
+        if (notExists(interaction.channel) || !interaction.channel.isVoiceBased()) return;
+
         let subscription = subscriptions.get(guildId);
         if (!subscription) {
             if (notExists(member)) {
-                return await interaction.followUp('メンバー情報が取得できなかったでし！');
+                return await interaction.channel.send(
+                    getDeveloperMention() + 'メンバー情報が取得できなかったでし！',
+                );
             }
             if (!member.voice.channelId) {
                 // メンバーがVCにいるかチェック
-                return await interaction.followUp({
-                    content: 'ボイチャに参加してからコマンドを使うでし！',
-                    ephemeral: true,
-                });
+                return await interaction.editReply('ボイチャに参加してからコマンドを使うでし！');
             }
             const connection = joinVoiceChannel({
                 selfMute: false,
@@ -64,13 +65,14 @@ export const joinTTS = async (
             });
             subscriptions.set(guildId, subscription);
             channels.set(guildId, channelId);
-            await interaction.followUp(
+            await interaction.channel.send(
                 'ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！',
             );
+            await interaction.deleteReply();
         } else if (channels.get(guildId) === channelId) {
-            await interaction.followUp('既に接続済みでし！');
+            await interaction.editReply('既に接続済みでし！');
         } else {
-            await interaction.followUp('他の部屋で営業中でし！');
+            await interaction.editReply('他の部屋で営業中でし！');
         }
     } catch (error) {
         await killTTS(interaction);
@@ -85,13 +87,17 @@ export const killTTS = async (
         const guildId = interaction.guildId;
         const channelId = interaction.channelId;
         const subscription = subscriptions.get(guildId);
+
+        if (notExists(interaction.channel) || !interaction.channel.isVoiceBased()) return;
+
         if (subscription && channels.get(guildId) === channelId) {
             subscription.connection.destroy();
             subscriptions.delete(guildId);
             channels.delete(guildId);
-            await interaction.followUp(':dash:');
+            await interaction.channel.send(':dash:');
+            await interaction.deleteReply();
         } else if (channels.get(guildId) != channelId) {
-            await interaction.followUp('他の部屋で営業中でし！');
+            await interaction.editReply('他の部屋で営業中でし！');
         }
     } catch (error) {
         interactionLogger.error(error);
