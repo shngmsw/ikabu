@@ -1,6 +1,7 @@
 import { ButtonInteraction } from 'discord.js';
 
 import { sendVCToolsSticky } from './vc_tools_message';
+import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { getDeveloperMention, notExists, sleep } from '../../common/others';
@@ -9,6 +10,8 @@ import {
     createVCLEmbed,
     createVCLButton,
 } from '../../feat-utils/voice/voice_locker';
+
+const logger = log4js_obj.getLogger('interaction');
 
 export async function showLockPanelFromVCTools(interaction: ButtonInteraction<'cached' | 'raw'>) {
     await interaction.deferReply({ ephemeral: true });
@@ -35,16 +38,18 @@ export async function showLockPanelFromVCTools(interaction: ButtonInteraction<'c
     const embed = createVCLEmbed(channelState);
     const button = createVCLButton(channelState);
 
-    const lockPanel = await channel.send({
+    const lockPanel = await interaction.editReply({
         embeds: [embed],
         components: [button],
     });
 
-    await interaction.deleteReply();
-
     await sendVCToolsSticky(guild, channel, false);
 
-    await sleep(15);
+    await sleep(60);
 
-    await lockPanel.delete();
+    try {
+        await lockPanel.delete();
+    } catch (error) {
+        logger.warn('message missing!');
+    }
 }
