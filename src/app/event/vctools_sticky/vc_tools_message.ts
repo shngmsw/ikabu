@@ -60,17 +60,17 @@ export async function sendVCToolsSticky(
     showOnboarding: boolean,
 ) {
     try {
-        if (notExists(process.env.CATEGORY_ID_MAIN_VC)) {
+        if (notExists(process.env.CATEGORY_ID_PHONETIC_VC)) {
             return await channel.send(
-                getDeveloperMention() + 'カテゴリID`CATEGORY_ID_MAIN_VC`が設定されてないでし！',
+                getDeveloperMention() + 'カテゴリID`CATEGORY_ID_PHONETIC_VC`が設定されてないでし！',
             );
         }
 
-        const vcCategory = await searchChannelById(guild, process.env.CATEGORY_ID_MAIN_VC);
+        const vcCategory = await searchChannelById(guild, process.env.CATEGORY_ID_PHONETIC_VC);
 
         if (notExists(vcCategory) || vcCategory.type !== ChannelType.GuildCategory) {
             return await channel.send(
-                getDeveloperMention() + 'カテゴリID`CATEGORY_ID_MAIN_VC`がおかしいでし！',
+                getDeveloperMention() + 'カテゴリID`CATEGORY_ID_PHONETIC_VC`がおかしいでし！',
             );
         }
 
