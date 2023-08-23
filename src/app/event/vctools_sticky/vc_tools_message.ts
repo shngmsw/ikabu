@@ -11,6 +11,7 @@ import {
     VoiceState,
 } from 'discord.js';
 
+import { createVCLockedButton } from './voice_lock';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { Merge, exists, getDeveloperMention, notExists } from '../../common/others';
@@ -80,7 +81,7 @@ export async function sendVCToolsSticky(
 
         await sendStickyMessage(guild, channel.id, {
             embeds: showOnboarding ? [createVCToolsEmbed(channel)] : [],
-            components: [createMenuButton(channel)],
+            components: createVCToolsButtons(channel),
         });
     } catch (error) {
         logger.error(error);
@@ -94,16 +95,23 @@ function createVCToolsEmbed(channel: Merge<TextBasedChannel & VoiceBasedChannel>
     embed.addFields(
         {
             name: '読み上げ機能',
-            value: 'テキストチャットの内容を読み上げるでし！\n' + '**コマンド: `/voice join`**',
+            value: 'テキストチャットの内容を読み上げるでし！',
         },
         {
             name: 'VCロック機能',
-            value:
-                '指定人数でVCに入室制限をかけるでし！\n' + '**コマンド: `/ボイスロック vclock`**',
+            value: '指定人数でVCに入室制限をかけるでし！',
         },
     );
     embed.setTimestamp();
     return embed;
+}
+
+export function createVCToolsButtons(channel: Merge<TextBasedChannel & VoiceBasedChannel>) {
+    const buttons = [createMenuButton(channel)];
+    if (channel.userLimit !== 0) {
+        buttons.unshift(createVCLockedButton(channel));
+    }
+    return buttons;
 }
 
 export function createMenuButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) {
@@ -137,13 +145,13 @@ function createLockButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
     const limit = channel.userLimit;
     if (limit === 0) {
         return new ButtonBuilder()
-            .setCustomId('showLockPanel')
+            .setCustomId('LockSwitch')
             .setLabel('制限なし')
             .setStyle(ButtonStyle.Success)
             .setEmoji('🔓');
     } else {
         return new ButtonBuilder()
-            .setCustomId('showLockPanel')
+            .setCustomId('LockSwitch')
             .setLabel(limit + '人')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('🔒');

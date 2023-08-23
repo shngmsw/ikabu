@@ -8,8 +8,8 @@ import {
     disableQuestionnaireButtons,
 } from '../event/rookie/send_questionnaire';
 import { setResolvedTag } from '../event/support_auto_tag/resolved_support';
-import { showLockPanelFromVCTools } from '../event/vctools_sticky/linkage_voice_lock';
 import { sendRadioRequest } from '../event/vctools_sticky/radio_request';
+import { voiceLockUpdate } from '../event/vctools_sticky/voice_lock';
 import { cancel } from '../feat-recruit/interactions/buttons/cancel_event';
 import { cancelNotify } from '../feat-recruit/interactions/buttons/cancel_notify_event';
 import { close } from '../feat-recruit/interactions/buttons/close_event';
@@ -32,7 +32,7 @@ import {
     spectateButton,
 } from '../feat-utils/team_divider/divider';
 import { joinTTS, killTTS } from '../feat-utils/voice/tts/discordjs_voice';
-import { voiceLockerUpdate } from '../feat-utils/voice/voice_locker';
+import { voiceLockCommandUpdate } from '../feat-utils/voice/voice_locker';
 
 export async function call(interaction: ButtonInteraction<CacheType>) {
     // サーバとDM両方で動くボタン
@@ -47,9 +47,18 @@ export async function call(interaction: ButtonInteraction<CacheType>) {
         const param_q = params.get('q') || null;
         const param_d = params.get('d') || null;
         const param_t = params.get('t') || null;
-        const voiceLockerIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
-        if (voiceLockerIds.includes(interaction.customId)) {
-            await voiceLockerUpdate(interaction);
+        const voiceLockeCommandIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
+        const voiceLockIds = [
+            'voiceLock_dec1',
+            'voiceLock_dec10',
+            'voiceLock_inc1',
+            'voiceLock_inc10',
+            'LockSwitch',
+        ];
+        if (voiceLockeCommandIds.includes(interaction.customId)) {
+            await voiceLockCommandUpdate(interaction);
+        } else if (voiceLockIds.includes(interaction.customId)) {
+            await voiceLockUpdate(interaction);
         } else if (interaction.customId === 'voiceJoin') {
             await interaction.deferReply({ ephemeral: true });
             await joinTTS(interaction);
@@ -58,8 +67,6 @@ export async function call(interaction: ButtonInteraction<CacheType>) {
             await killTTS(interaction);
         } else if (interaction.customId === 'requestRadio') {
             await sendRadioRequest(interaction);
-        } else if (interaction.customId === 'showLockPanel') {
-            await showLockPanelFromVCTools(interaction);
         } else if (interaction.customId === 'support_resolved') {
             await setResolvedTag(interaction);
         } else if (exists(param_d) && exists(param_d)) {

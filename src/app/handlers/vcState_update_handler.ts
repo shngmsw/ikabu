@@ -3,8 +3,8 @@ import { VoiceState } from 'discord.js';
 import { log4js_obj } from '../../log4js_settings';
 import { exists, notExists } from '../common/others';
 import { vcToolsStickyFromVoiceState } from '../event/vctools_sticky/vc_tools_message';
+import { disableLimit } from '../event/vctools_sticky/voice_lock';
 import { autokill } from '../feat-utils/voice/tts/discordjs_voice';
-import { disableLimit } from '../feat-utils/voice/voice_locker';
 
 const logger = log4js_obj.getLogger('voiceStateUpdate');
 
