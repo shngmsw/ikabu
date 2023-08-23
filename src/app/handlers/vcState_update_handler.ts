@@ -18,15 +18,15 @@ export async function call(oldState: VoiceState, newState: VoiceState) {
             await vcToolsStickyFromVoiceState(newState, true);
         } else if (exists(oldState.channelId) && notExists(newState.channelId)) {
             // ここはdisconnectしたときに発火する場所
+            await disableLimit(oldState); // vcToolsStickyよりも先に実行しないと人数が反映されない
             await vcToolsStickyFromVoiceState(oldState, false);
-            await disableLimit(oldState);
             await autokill(oldState);
         } else {
             // ここはチャンネル移動を行ったときに発火する場所
+            await disableLimit(oldState); // vcToolsStickyよりも先に実行しないと人数が反映されない
             await vcToolsStickyFromVoiceState(newState, true);
             await vcToolsStickyFromVoiceState(oldState, false);
             await deleteLimitPermission(newState);
-            await disableLimit(oldState);
             await autokill(oldState);
         }
     } catch (error) {
