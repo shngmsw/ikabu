@@ -3,6 +3,14 @@ import { Attachment, EmbedBuilder, Message } from 'discord.js';
 import { searchAPIMemberById } from './manager/member_manager.js';
 import { placeHold } from '../../constant.js';
 
+export async function getDeveloperMention() {
+    if (exists(process.env.ROLE_ID_DEVELOPER)) {
+        return `<@&${process.env.ROLE_ID_DEVELOPER}>`;
+    } else {
+        return '開発者ロールが設定されていないでし！\nサポートセンターまでお問い合わせくださいでし！\n';
+    }
+}
+
 export async function composeEmbed(message: Message<true>, url: string) {
     const embed = new EmbedBuilder();
     if (exists(message.content) && isNotEmpty(message.content)) {
@@ -110,6 +118,14 @@ export type RequireOne<T, K extends keyof T = keyof T> = K extends keyof T
 type PartialRequire<O, K extends keyof O> = {
     [P in K]-?: O[P];
 } & O;
+
+/**
+ * 型をマージする
+ * Ex. Merge<Type1 & Type2>
+ */
+export type Merge<T> = {
+    [K in keyof T]: T[K];
+};
 
 /**
  * メッセージから順番に取得したメンションを配列で返す

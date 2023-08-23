@@ -198,6 +198,6 @@ export async function setting(interaction: ChatInputCommandInteraction<CacheType
         voicePattern1 = type;
         const voiceMessage = `読み上げ音声を${voiceLists1[type]}に設定したでし`;
 
-        await interaction.followUp(voiceMessage);
+        await interaction.editReply(voiceMessage);
     }
 }

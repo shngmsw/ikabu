@@ -7,12 +7,18 @@ import {
     AudioPlayerStatus,
     generateDependencyReport,
 } from '@discordjs/voice';
-import { CacheType, ChatInputCommandInteraction, Message, VoiceState } from 'discord.js';
+import {
+    ButtonInteraction,
+    CacheType,
+    ChatInputCommandInteraction,
+    Message,
+    VoiceState,
+} from 'discord.js';
 
 import { modeApi, bufferToStream } from './voice_bot_node';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
-import { exists, isNotEmpty, notExists } from '../../../common/others';
+import { exists, getDeveloperMention, isNotEmpty, notExists } from '../../../common/others';
 
 const infoLogger = log4js_obj.getLogger('info');
 const interactionLogger = log4js_obj.getLogger('interaction');
@@ -25,21 +31,27 @@ const subscriptions = new Map();
 // 読み上げ対象のDicordチャンネル保存用のMapです。
 const channels = new Map();
 
-const join = async (interaction: ChatInputCommandInteraction<CacheType>) => {
+export const joinTTS = async (
+    interaction: ChatInputCommandInteraction<CacheType> | ButtonInteraction<'cached' | 'raw'>,
+) => {
     try {
         if (!interaction.inCachedGuild()) return;
         const guildId = interaction.guildId;
         const channelId = interaction.channelId;
         const member = await searchAPIMemberById(interaction.guild, interaction.member.user.id);
 
+        if (notExists(interaction.channel) || !interaction.channel.isVoiceBased()) return;
+
         let subscription = subscriptions.get(guildId);
         if (!subscription) {
             if (notExists(member)) {
-                return await interaction.followUp('メンバー情報が取得できなかったでし！');
+                return await interaction.channel.send(
+                    getDeveloperMention() + 'メンバー情報が取得できなかったでし！',
+                );
             }
             if (!member.voice.channelId) {
                 // メンバーがVCにいるかチェック
-                return await interaction.followUp('ボイチャに参加してからコマンドを使うでし！');
+                return await interaction.editReply('ボイチャに参加してからコマンドを使うでし！');
             }
             const connection = joinVoiceChannel({
                 selfMute: false,
@@ -53,32 +65,39 @@ const join = async (interaction: ChatInputCommandInteraction<CacheType>) => {
             });
             subscriptions.set(guildId, subscription);
             channels.set(guildId, channelId);
-            await interaction.followUp(
+            await interaction.channel.send(
                 'ボイスチャンネルに接続したでし！`/help voice`で使い方を説明するでし！',
             );
+            await interaction.deleteReply();
         } else if (channels.get(guildId) === channelId) {
-            await interaction.followUp('既に接続済みでし！');
+            await interaction.editReply('既に接続済みでし！');
         } else {
-            await interaction.followUp('他の部屋で営業中でし！');
+            await interaction.editReply('他の部屋で営業中でし！');
         }
     } catch (error) {
-        await kill(interaction);
+        await killTTS(interaction);
         interactionLogger.error(error);
     }
 };
 
-const kill = async (interaction: ChatInputCommandInteraction<CacheType>) => {
+export const killTTS = async (
+    interaction: ChatInputCommandInteraction<CacheType> | ButtonInteraction<'cached' | 'raw'>,
+) => {
     try {
         const guildId = interaction.guildId;
         const channelId = interaction.channelId;
         const subscription = subscriptions.get(guildId);
+
+        if (notExists(interaction.channel) || !interaction.channel.isVoiceBased()) return;
+
         if (subscription && channels.get(guildId) === channelId) {
             subscription.connection.destroy();
             subscriptions.delete(guildId);
             channels.delete(guildId);
-            await interaction.followUp(':dash:');
+            await interaction.channel.send(':dash:');
+            await interaction.deleteReply();
         } else if (channels.get(guildId) != channelId) {
-            await interaction.followUp('他の部屋で営業中でし！');
+            await interaction.editReply('他の部屋で営業中でし！');
         }
     } catch (error) {
         interactionLogger.error(error);
@@ -109,10 +128,10 @@ export async function handleVoiceCommand(interaction: ChatInputCommandInteractio
         const subCommand = options.getSubcommand();
         switch (subCommand) {
             case 'join':
-                await join(interaction);
+                await joinTTS(interaction);
                 break;
             case 'kill':
-                await kill(interaction);
+                await killTTS(interaction);
                 break;
         }
     } catch (error) {
