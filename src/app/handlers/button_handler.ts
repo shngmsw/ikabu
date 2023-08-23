@@ -2,6 +2,7 @@ import { URLSearchParams } from 'url';
 
 import { ButtonInteraction, CacheType } from 'discord.js';
 
+import { log4js_obj } from '../../log4js_settings';
 import { exists } from '../common/others';
 import {
     sendQuestionnaireFollowUp,
@@ -29,7 +30,10 @@ import {
     registerButton,
     spectateButton,
 } from '../feat-utils/team_divider/divider';
+import { joinTTS, killTTS } from '../feat-utils/voice/tts/discordjs_voice';
 import { voiceLockerUpdate } from '../feat-utils/voice/voice_locker';
+
+const logger = log4js_obj.getLogger('button');
 
 export async function call(interaction: ButtonInteraction<CacheType>) {
     // サーバとDM両方で動くボタン
@@ -47,6 +51,12 @@ export async function call(interaction: ButtonInteraction<CacheType>) {
         const voiceLockerIds = ['voiceLock_inc', 'voiceLock_dec', 'voiceLockOrUnlock'];
         if (voiceLockerIds.includes(interaction.customId)) {
             await voiceLockerUpdate(interaction);
+        } else if (interaction.customId == 'voiceJoin') {
+            await interaction.deferReply();
+            await joinTTS(interaction);
+        } else if (interaction.customId == 'voiceKill') {
+            await interaction.deferReply();
+            await killTTS(interaction);
         } else if (interaction.customId == 'support_resolved') {
             await setResolvedTag(interaction);
         } else if (exists(param_d) && exists(param_d)) {

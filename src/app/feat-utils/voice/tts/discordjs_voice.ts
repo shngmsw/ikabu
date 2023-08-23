@@ -7,7 +7,13 @@ import {
     AudioPlayerStatus,
     generateDependencyReport,
 } from '@discordjs/voice';
-import { CacheType, ChatInputCommandInteraction, Message, VoiceState } from 'discord.js';
+import {
+    ButtonInteraction,
+    CacheType,
+    ChatInputCommandInteraction,
+    Message,
+    VoiceState,
+} from 'discord.js';
 
 import { modeApi, bufferToStream } from './voice_bot_node';
 import { log4js_obj } from '../../../../log4js_settings';
@@ -25,7 +31,9 @@ const subscriptions = new Map();
 // 読み上げ対象のDicordチャンネル保存用のMapです。
 const channels = new Map();
 
-const join = async (interaction: ChatInputCommandInteraction<CacheType>) => {
+export const joinTTS = async (
+    interaction: ChatInputCommandInteraction<CacheType> | ButtonInteraction<'cached' | 'raw'>,
+) => {
     try {
         if (!interaction.inCachedGuild()) return;
         const guildId = interaction.guildId;
@@ -39,7 +47,10 @@ const join = async (interaction: ChatInputCommandInteraction<CacheType>) => {
             }
             if (!member.voice.channelId) {
                 // メンバーがVCにいるかチェック
-                return await interaction.followUp('ボイチャに参加してからコマンドを使うでし！');
+                return await interaction.followUp({
+                    content: 'ボイチャに参加してからコマンドを使うでし！',
+                    ephemeral: true,
+                });
             }
             const connection = joinVoiceChannel({
                 selfMute: false,
@@ -62,12 +73,14 @@ const join = async (interaction: ChatInputCommandInteraction<CacheType>) => {
             await interaction.followUp('他の部屋で営業中でし！');
         }
     } catch (error) {
-        await kill(interaction);
+        await killTTS(interaction);
         interactionLogger.error(error);
     }
 };
 
-const kill = async (interaction: ChatInputCommandInteraction<CacheType>) => {
+export const killTTS = async (
+    interaction: ChatInputCommandInteraction<CacheType> | ButtonInteraction<'cached' | 'raw'>,
+) => {
     try {
         const guildId = interaction.guildId;
         const channelId = interaction.channelId;
@@ -109,10 +122,10 @@ export async function handleVoiceCommand(interaction: ChatInputCommandInteractio
         const subCommand = options.getSubcommand();
         switch (subCommand) {
             case 'join':
-                await join(interaction);
+                await joinTTS(interaction);
                 break;
             case 'kill':
-                await kill(interaction);
+                await killTTS(interaction);
                 break;
         }
     } catch (error) {
