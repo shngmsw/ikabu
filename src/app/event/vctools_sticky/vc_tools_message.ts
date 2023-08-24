@@ -129,13 +129,13 @@ function createReadButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
     if (notExists(bukichi)) {
         return new ButtonBuilder()
             .setCustomId('voiceJoin')
-            .setLabel('読み上げ開始')
+            .setLabel('読み上げ')
             .setStyle(ButtonStyle.Primary)
             .setEmoji('🔊');
     } else {
         return new ButtonBuilder()
             .setCustomId('voiceKill')
-            .setLabel('読み上げ終了')
+            .setLabel('ブキチ切断')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('🔇');
     }
@@ -144,11 +144,13 @@ function createReadButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
 function createLockButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) {
     const limit = channel.userLimit;
     if (limit === 0) {
-        return new ButtonBuilder()
-            .setCustomId('LockSwitch')
-            .setLabel('制限なし')
-            .setStyle(ButtonStyle.Success)
-            .setEmoji('🔓');
+        return (
+            new ButtonBuilder()
+                .setCustomId('LockSwitch')
+                // .setLabel('無制限')
+                .setStyle(ButtonStyle.Success)
+                .setEmoji('🔓')
+        );
     } else {
         return new ButtonBuilder()
             .setCustomId('LockSwitch')
@@ -161,7 +163,6 @@ function createLockButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
 function createRequestRadioButton() {
     return new ButtonBuilder()
         .setCustomId('requestRadio')
-        .setLabel('ラジオ')
         .setStyle(ButtonStyle.Secondary)
         .setEmoji('📻');
 }

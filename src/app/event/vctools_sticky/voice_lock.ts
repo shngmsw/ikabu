@@ -143,7 +143,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
         button.addComponents([
             new ButtonBuilder()
                 .setCustomId('voiceLock_dec1')
-                .setLabel('－')
+                .setLabel('－1')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(true),
         ]);
@@ -151,7 +151,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
         button.addComponents([
             new ButtonBuilder()
                 .setCustomId('voiceLock_dec1')
-                .setLabel('－')
+                .setLabel('－1')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(false),
         ]);
@@ -197,7 +197,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
         button.addComponents([
             new ButtonBuilder()
                 .setCustomId('voiceLock_inc1')
-                .setLabel('＋')
+                .setLabel('＋1')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(true),
         ]);
@@ -205,7 +205,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
         button.addComponents([
             new ButtonBuilder()
                 .setCustomId('voiceLock_inc1')
-                .setLabel('＋')
+                .setLabel('＋1')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(false),
         ]);
