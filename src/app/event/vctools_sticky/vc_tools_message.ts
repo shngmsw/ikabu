@@ -79,8 +79,11 @@ export async function sendVCToolsSticky(
             return;
         }
 
+        if (showOnboarding) {
+            await channel.send({ embeds: [createVCToolsEmbed(channel)] });
+        }
+
         await sendStickyMessage(guild, channel.id, {
-            embeds: showOnboarding ? [createVCToolsEmbed(channel)] : [],
             components: createVCToolsButtons(channel),
         });
     } catch (error) {
@@ -90,16 +93,20 @@ export async function sendVCToolsSticky(
 
 function createVCToolsEmbed(channel: Merge<TextBasedChannel & VoiceBasedChannel>) {
     const embed = new EmbedBuilder();
-    embed.setTitle(channel.name + 'で利用できるコマンド');
+    embed.setTitle(channel.name + 'で利用できる機能');
     embed.setDescription(`<#${channel.id}>で利用できるVC関連ツールを紹介するでし！`);
     embed.addFields(
         {
-            name: '読み上げ機能',
+            name: '🔊 読み上げ機能',
             value: 'テキストチャットの内容を読み上げるでし！',
         },
         {
-            name: 'VCロック機能',
+            name: '🔒/🔓 VCロック機能',
             value: '指定人数でVCに入室制限をかけるでし！',
+        },
+        {
+            name: '📻 VCラジオ依頼機能',
+            value: 'VC内のメンバーに「ラジオいいですか？」スタンプをメンション付きで送信するでし！',
         },
     );
     embed.setTimestamp();
