@@ -22,6 +22,7 @@ import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { searchMessageById } from '../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
+import { TeamDividerParam } from '../../constant/button_id';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -988,17 +989,17 @@ async function loadTeamEmbed(messageId: string, count: number, hostMember: Guild
  */
 function createInitButtons(hostId: string, teamNum: number, hideWin: boolean) {
     const joinParams = new URLSearchParams();
-    joinParams.append('t', 'join');
+    joinParams.append('t', TeamDividerParam.Join);
     joinParams.append('hide', hideWin.toString());
     joinParams.append('hid', hostId);
 
     const registerParams = new URLSearchParams();
-    registerParams.append('t', 'register');
+    registerParams.append('t', TeamDividerParam.Register);
     registerParams.append('num', teamNum.toString());
     registerParams.append('hid', hostId);
 
     const cancelParams = new URLSearchParams();
-    cancelParams.append('t', 'cancel');
+    cancelParams.append('t', TeamDividerParam.Cancel);
     cancelParams.append('hid', hostId);
 
     const buttons = new ActionRowBuilder<ButtonBuilder>();
@@ -1033,28 +1034,28 @@ function createInitButtons(hostId: string, teamNum: number, hideWin: boolean) {
  */
 function createButtons(messageId: string, teamNum: number, hostId: string, count: number) {
     const alfaParams = new URLSearchParams();
-    alfaParams.append('t', 'alfa');
+    alfaParams.append('t', TeamDividerParam.Alfa);
     alfaParams.append('num', teamNum.toString());
     alfaParams.append('hid', hostId);
     alfaParams.append('mid', messageId);
     alfaParams.append('count', (count + 1).toString());
 
     const bravoParams = new URLSearchParams();
-    bravoParams.append('t', 'bravo');
+    bravoParams.append('t', TeamDividerParam.Bravo);
     bravoParams.append('num', teamNum.toString());
     bravoParams.append('hid', hostId);
     bravoParams.append('mid', messageId);
     bravoParams.append('count', (count + 1).toString());
 
     const spectateParams = new URLSearchParams();
-    spectateParams.append('t', 'spectate');
+    spectateParams.append('t', TeamDividerParam.Spectate);
     spectateParams.append('num', teamNum.toString());
     spectateParams.append('hid', hostId);
     spectateParams.append('mid', messageId);
     spectateParams.append('count', count.toString());
 
     const endParams = new URLSearchParams();
-    endParams.append('t', 'end');
+    endParams.append('t', TeamDividerParam.End);
     endParams.append('hid', hostId);
     endParams.append('mid', messageId);
 
@@ -1101,13 +1102,13 @@ function createSecondButtons(
     count: number,
 ) {
     const correctParams = new URLSearchParams();
-    correctParams.append('t', 'correct');
+    correctParams.append('t', TeamDividerParam.Correct);
     correctParams.append('mid', messageId);
     correctParams.append('pmid', PreMessageId);
     correctParams.append('count', count.toString());
 
     const hideParams = new URLSearchParams();
-    hideParams.append('t', 'hide');
+    hideParams.append('t', TeamDividerParam.Hide);
     hideParams.append('hid', hostId);
     hideParams.append('mid', messageId);
     hideParams.append('count', count.toString());

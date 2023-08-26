@@ -14,13 +14,17 @@ import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { getAPIMemberByInteraction } from '../../common/manager/member_manager';
 import { Merge, getDeveloperMention, notExists } from '../../common/others';
+import { VCLockButton } from '../../constant/button_id';
 
 const logger = log4js_obj.getLogger('interaction');
 
 /*
  * ボタンが押されたときの動作
  */
-export async function voiceLockUpdate(interaction: ButtonInteraction<'cached' | 'raw'>) {
+export async function voiceLockUpdate(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    customId: VCLockButton,
+) {
     try {
         const member = await getAPIMemberByInteraction(interaction);
         const channel = interaction.channel;
@@ -46,7 +50,7 @@ export async function voiceLockUpdate(interaction: ButtonInteraction<'cached' | 
         let limit = channel.userLimit;
 
         // ロック切り替えボタンを押したとき
-        if (interaction.customId == 'LockSwitch') {
+        if (customId === VCLockButton.LockSwitch) {
             if (channel.userLimit === 0) {
                 await channel.setUserLimit(vcMemberNum);
             } else {
@@ -55,25 +59,25 @@ export async function voiceLockUpdate(interaction: ButtonInteraction<'cached' | 
         }
 
         if (limit !== 0) {
-            if (interaction.customId === 'voiceLock_inc1') {
+            if (customId === VCLockButton.Increase1) {
                 // 99人で押されたときは何もしない
                 if (limit !== 99) {
                     limit += 1;
                     await channel.setUserLimit(limit);
                 }
-            } else if (interaction.customId === 'voiceLock_inc10') {
+            } else if (customId === VCLockButton.Increase10) {
                 // 99人で押されたときは何もしない
                 if (limit !== 90) {
                     limit += 10;
                     await channel.setUserLimit(limit);
                 }
-            } else if (interaction.customId === 'voiceLock_dec1') {
+            } else if (customId === VCLockButton.Decrease1) {
                 // 1人で押されたときは何もしない
                 if (limit !== 1) {
                     limit -= 1;
                     await channel.setUserLimit(limit);
                 }
-            } else if (interaction.customId === 'voiceLock_dec10') {
+            } else if (customId === VCLockButton.Decrease10) {
                 // 1人で押されたときは何もしない
                 if (limit !== 10) {
                     limit -= 10;
@@ -83,10 +87,10 @@ export async function voiceLockUpdate(interaction: ButtonInteraction<'cached' | 
         } else {
             // ロックされていないのに'＋'or'－'が押されたときの動作
             if (
-                interaction.customId === 'voiceLock_inc1' ||
-                interaction.customId === 'voiceLock_inc10' ||
-                interaction.customId === 'voiceLock_dec1' ||
-                interaction.customId === 'voiceLock_dec10'
+                customId === VCLockButton.Increase1 ||
+                customId === VCLockButton.Increase10 ||
+                customId === VCLockButton.Decrease1 ||
+                customId === VCLockButton.Decrease10
             ) {
                 return await interaction.reply({
                     content: '今はロックされてないでし！',
@@ -142,7 +146,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
     if (limit === 1) {
         button.addComponents([
             new ButtonBuilder()
-                .setCustomId('voiceLock_dec1')
+                .setCustomId(VCLockButton.Decrease1)
                 .setLabel('－1')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(true),
@@ -150,7 +154,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
     } else {
         button.addComponents([
             new ButtonBuilder()
-                .setCustomId('voiceLock_dec1')
+                .setCustomId(VCLockButton.Decrease1)
                 .setLabel('－1')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(false),
@@ -160,7 +164,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
     if (limit <= 10) {
         button.addComponents([
             new ButtonBuilder()
-                .setCustomId('voiceLock_dec10')
+                .setCustomId(VCLockButton.Decrease10)
                 .setLabel('－10')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(true),
@@ -168,7 +172,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
     } else {
         button.addComponents([
             new ButtonBuilder()
-                .setCustomId('voiceLock_dec10')
+                .setCustomId(VCLockButton.Decrease10)
                 .setLabel('－10')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(false),
@@ -178,7 +182,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
     if (limit >= 89) {
         button.addComponents([
             new ButtonBuilder()
-                .setCustomId('voiceLock_inc10')
+                .setCustomId(VCLockButton.Increase10)
                 .setLabel('＋10')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(true),
@@ -186,7 +190,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
     } else {
         button.addComponents([
             new ButtonBuilder()
-                .setCustomId('voiceLock_inc10')
+                .setCustomId(VCLockButton.Increase10)
                 .setLabel('＋10')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(false),
@@ -196,7 +200,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
     if (limit === 99) {
         button.addComponents([
             new ButtonBuilder()
-                .setCustomId('voiceLock_inc1')
+                .setCustomId(VCLockButton.Increase1)
                 .setLabel('＋1')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(true),
@@ -204,7 +208,7 @@ export function createVCLockedButton(channel: Merge<TextBasedChannel & VoiceBase
     } else {
         button.addComponents([
             new ButtonBuilder()
-                .setCustomId('voiceLock_inc1')
+                .setCustomId(VCLockButton.Increase1)
                 .setLabel('＋1')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(false),

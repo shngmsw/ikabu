@@ -16,6 +16,7 @@ import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { Merge, exists, getDeveloperMention, notExists } from '../../common/others';
 import { sendStickyMessage } from '../../common/sticky_message';
+import { VCLockButton, VCToolsButton } from '../../constant/button_id';
 
 const logger = log4js_obj.getLogger('voiceStateUpdate');
 
@@ -135,13 +136,13 @@ function createReadButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
 
     if (notExists(bukichi)) {
         return new ButtonBuilder()
-            .setCustomId('voiceJoin')
+            .setCustomId(VCToolsButton.VoiceJoin)
             .setLabel('読み上げ')
             .setStyle(ButtonStyle.Primary)
             .setEmoji('🔊');
     } else {
         return new ButtonBuilder()
-            .setCustomId('voiceKill')
+            .setCustomId(VCToolsButton.VoiceKill)
             .setLabel('ブキチ切断')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('🔇');
@@ -151,16 +152,13 @@ function createReadButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
 function createLockButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) {
     const limit = channel.userLimit;
     if (limit === 0) {
-        return (
-            new ButtonBuilder()
-                .setCustomId('LockSwitch')
-                // .setLabel('無制限')
-                .setStyle(ButtonStyle.Success)
-                .setEmoji('🔓')
-        );
+        return new ButtonBuilder()
+            .setCustomId(VCLockButton.LockSwitch)
+            .setStyle(ButtonStyle.Success)
+            .setEmoji('🔓');
     } else {
         return new ButtonBuilder()
-            .setCustomId('LockSwitch')
+            .setCustomId(VCLockButton.LockSwitch)
             .setLabel(limit + '人')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('🔒');
@@ -169,7 +167,7 @@ function createLockButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
 
 function createRequestRadioButton() {
     return new ButtonBuilder()
-        .setCustomId('requestRadio')
+        .setCustomId(VCToolsButton.RequestRadio)
         .setStyle(ButtonStyle.Secondary)
         .setEmoji('📻');
 }
