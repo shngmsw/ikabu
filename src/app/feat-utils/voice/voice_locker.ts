@@ -7,7 +7,6 @@ import {
     ButtonStyle,
     ButtonInteraction,
     ChatInputCommandInteraction,
-    VoiceState,
     VoiceBasedChannel,
     TextBasedChannel,
 } from 'discord.js';
@@ -94,7 +93,7 @@ export async function voiceLocker(interaction: ChatInputCommandInteraction<'cach
 /*
  * ボタンが押されたときの動作
  */
-export async function voiceLockerUpdate(interaction: ButtonInteraction<'cached' | 'raw'>) {
+export async function voiceLockCommandUpdate(interaction: ButtonInteraction<'cached' | 'raw'>) {
     const guild = await getGuildByInteraction(interaction);
 
     const member = await searchAPIMemberById(guild, interaction.member.user.id);
@@ -184,35 +183,6 @@ export async function voiceLockerUpdate(interaction: ButtonInteraction<'cached' 
         });
 
     await sendVCToolsSticky(guild, channel, false);
-}
-
-export async function disableLimit(oldState: VoiceState) {
-    const oldChannel = oldState.channel;
-    if (notExists(oldChannel)) return;
-    const usable_channel = [
-        'alfa',
-        'bravo',
-        'charlie',
-        'delta',
-        'echo',
-        'fox',
-        'golf',
-        'hotel',
-        'india',
-        'juliett',
-        'kilo',
-        'lima',
-        'mike',
-    ];
-
-    // 使用可能VCかチェック
-    if (!usable_channel.includes(oldChannel.name)) {
-        return;
-    }
-
-    if (oldChannel.members.size == 0) {
-        await oldChannel.setUserLimit(0);
-    }
 }
 
 type ChannelState = {
