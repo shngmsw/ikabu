@@ -3,13 +3,19 @@ import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
 export class StickyService {
-    static async registerMessageId(guildId: string, channelId: string, messageId: string) {
+    static async registerMessageId(
+        guildId: string,
+        channelId: string,
+        key: string,
+        messageId: string,
+    ) {
         try {
             await prisma.sticky.upsert({
                 where: {
-                    guildId_channelId: {
+                    guildId_channelId_key: {
                         guildId: guildId,
                         channelId: channelId,
+                        key: key,
                     },
                 },
                 update: {
@@ -18,6 +24,7 @@ export class StickyService {
                 create: {
                     guildId: guildId,
                     channelId: channelId,
+                    key: key,
                     messageId: messageId,
                 },
             });
@@ -26,13 +33,14 @@ export class StickyService {
         }
     }
 
-    static async getMessageId(guildId: string, channelId: string) {
+    static async getMessageId(guildId: string, channelId: string, key: string) {
         try {
             const sticky = await prisma.sticky.findUnique({
                 where: {
-                    guildId_channelId: {
+                    guildId_channelId_key: {
                         guildId: guildId,
                         channelId: channelId,
+                        key: key,
                     },
                 },
             });

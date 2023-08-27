@@ -77,9 +77,10 @@ model Recruit {
 model Sticky {
   guildId   String  @map("guild_id")
   channelId String  @map("channel_id")
+  key       String
   messageId String? @map("message_id")
 
-  @@unique([guildId, channelId])
+  @@unique([guildId, channelId, key])
   @@map("sticky")
 }
 

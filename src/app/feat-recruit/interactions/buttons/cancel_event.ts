@@ -19,6 +19,7 @@ import {
     notExists,
 } from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
+import { StickyKey } from '../../../constant/sticky_key.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
 import {
@@ -158,7 +159,12 @@ export async function cancel(
 
                 if (recruitChannel.isTextBased()) {
                     const content = await availableRecruitString(guild, recruitChannel.id);
-                    await sendStickyMessage(guild, recruitChannel.id, content);
+                    await sendStickyMessage(
+                        guild,
+                        recruitChannel.id,
+                        StickyKey.AvailableRecruit,
+                        content,
+                    );
                 }
             } else {
                 await interaction.followUp({

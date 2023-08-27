@@ -17,6 +17,7 @@ import { searchChannelById } from '../../common/manager/channel_manager';
 import { Merge, exists, getDeveloperMention, notExists } from '../../common/others';
 import { sendStickyMessage } from '../../common/sticky_message';
 import { VCLockButton, VCToolsButton } from '../../constant/button_id';
+import { StickyKey } from '../../constant/sticky_key';
 
 const logger = log4js_obj.getLogger('voiceStateUpdate');
 
@@ -81,10 +82,12 @@ export async function sendVCToolsSticky(
         }
 
         if (showOnboarding) {
-            await channel.send({ embeds: [createVCToolsEmbed(channel)] });
+            await sendStickyMessage(guild, channel.id, StickyKey.VCToolsOnboardingEmbed, {
+                embeds: [createVCToolsEmbed(channel)],
+            });
         }
 
-        await sendStickyMessage(guild, channel.id, {
+        await sendStickyMessage(guild, channel.id, StickyKey.VCToolsButton, {
             components: createVCToolsButtons(channel),
         });
     } catch (error) {

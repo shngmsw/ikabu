@@ -6,6 +6,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { assertExistCheck, notExists } from '../../../common/others';
 import { sendStickyMessage } from '../../../common/sticky_message';
+import { StickyKey } from '../../../constant/sticky_key';
 import { sendEditRecruitLog } from '../../../logs/modals/recruit_modal_log';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 import { regenerateEmbed } from '../../embeds/regenerate_embed';
@@ -89,7 +90,7 @@ export async function recruitEdit(
 
         if (interaction.channel instanceof BaseGuildTextChannel) {
             const content = await availableRecruitString(guild, interaction.channel.id);
-            await sendStickyMessage(guild, channelId, content);
+            await sendStickyMessage(guild, channelId, StickyKey.AvailableRecruit, content);
         }
 
         await interaction.editReply(replyMessage);

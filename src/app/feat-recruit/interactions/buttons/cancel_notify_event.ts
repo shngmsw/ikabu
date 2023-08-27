@@ -14,6 +14,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager.js'
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
+import { StickyKey } from '../../../constant/sticky_key.js';
 import {
     availableRecruitString,
     getStickyChannelId,
@@ -131,7 +132,12 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
 
                 if (recruitChannel.isTextBased()) {
                     const content = await availableRecruitString(guild, recruitChannel.id);
-                    await sendStickyMessage(guild, recruitChannel.id, content);
+                    await sendStickyMessage(
+                        guild,
+                        recruitChannel.id,
+                        StickyKey.AvailableRecruit,
+                        content,
+                    );
                 }
             } else {
                 await interaction.followUp({
