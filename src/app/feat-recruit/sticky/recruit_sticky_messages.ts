@@ -70,7 +70,7 @@ export async function sendRecruitSticky(stickyOptions: StickyOptions) {
             return;
         }
 
-        await sendStickyMessage(guild, channelId, {
+        await sendStickyMessage(guild, channelId, 'available_recruit', {
             content: content,
             components: exists(channelName) ? [createNewRecruitButton(channelName)] : [],
         });
@@ -88,7 +88,7 @@ export async function sendCloseEmbedSticky(guild: Guild, channel: Channel) {
     ) {
         const content = await availableRecruitString(guild, channel.id);
         const helpEmbed = getCommandHelpEmbed(channel.name);
-        await sendStickyMessage(guild, channel.id, {
+        await sendStickyMessage(guild, channel.id, 'available_recruit', {
             content: content,
             embeds: [helpEmbed],
             components: [createNewRecruitButton(channel.name)],

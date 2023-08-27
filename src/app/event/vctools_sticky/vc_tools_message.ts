@@ -84,7 +84,7 @@ export async function sendVCToolsSticky(
             await channel.send({ embeds: [createVCToolsEmbed(channel)] });
         }
 
-        await sendStickyMessage(guild, channel.id, {
+        await sendStickyMessage(guild, channel.id, 'vctools_buttons', {
             components: createVCToolsButtons(channel),
         });
     } catch (error) {

@@ -131,7 +131,7 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
 
                 if (recruitChannel.isTextBased()) {
                     const content = await availableRecruitString(guild, recruitChannel.id);
-                    await sendStickyMessage(guild, recruitChannel.id, content);
+                    await sendStickyMessage(guild, recruitChannel.id, 'available_recruit', content);
                 }
             } else {
                 await interaction.followUp({

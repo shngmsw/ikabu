@@ -28,13 +28,21 @@ export async function processQueue() {
     isProcessing = false;
 }
 
+/**
+ * StickyMessageを送信する
+ * @param guild 送信するサーバーのGuildオブジェクト
+ * @param channelId 送信するチャンネルID
+ * @param key 同一チャンネルでの識別子
+ * @param content 送信するコンテンツ
+ */
 export async function sendStickyMessage(
     guild: Guild,
     channelId: string,
+    key: string,
     content: string | MessagePayload | MessageCreateOptions,
 ) {
     const task: AsyncVoidFunction = async () => {
-        const lastStickyMsgId = await StickyService.getMessageId(guild.id, channelId);
+        const lastStickyMsgId = await StickyService.getMessageId(guild.id, channelId, key);
         if (lastStickyMsgId) {
             const lastStickyMsg = await searchMessageById(guild, channelId, lastStickyMsgId);
             if (lastStickyMsg) {
@@ -48,7 +56,7 @@ export async function sendStickyMessage(
         const channel = await searchChannelById(guild, channelId);
         if (channel && channel.isTextBased()) {
             const stickyMessage = await channel.send(content);
-            await StickyService.registerMessageId(guild.id, channelId, stickyMessage.id);
+            await StickyService.registerMessageId(guild.id, channelId, key, stickyMessage.id);
         }
     };
 

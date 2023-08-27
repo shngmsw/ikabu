@@ -89,7 +89,7 @@ export async function recruitEdit(
 
         if (interaction.channel instanceof BaseGuildTextChannel) {
             const content = await availableRecruitString(guild, interaction.channel.id);
-            await sendStickyMessage(guild, channelId, content);
+            await sendStickyMessage(guild, channelId, 'available_recruit', content);
         }
 
         await interaction.editReply(replyMessage);
