@@ -81,7 +81,9 @@ export async function sendVCToolsSticky(
         }
 
         if (showOnboarding) {
-            await channel.send({ embeds: [createVCToolsEmbed(channel)] });
+            await sendStickyMessage(guild, channel.id, 'vctools_onboarding_embed', {
+                embeds: [createVCToolsEmbed(channel)],
+            });
         }
 
         await sendStickyMessage(guild, channel.id, 'vctools_buttons', {
