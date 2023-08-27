@@ -2,25 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Prisma migration generate",
-      "type": "npm",
-      "script": "prisma-generate",
-      "presentation": {
-        "reveal": "silent",
-        "clear": true
-      }
-    },
-    {
-      "label": "Prisma migration deploy",
-      "type": "npm",
-      "script": "migrate-deploy",
-      "presentation": {
-        "reveal": "silent",
-        "clear": true
-      },
-      "dependsOn": ["Prisma migration generate"]
-    },
-    {
       "label": "Compile TypeScript",
       "type": "typescript",
       "tsconfig": "tsconfig.json",
@@ -29,7 +10,6 @@
         "reveal": "silent",
         "clear": true
       },
-      "dependsOn": ["Prisma migration deploy"]
     }
   ]
 }

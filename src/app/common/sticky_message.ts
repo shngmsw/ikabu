@@ -4,6 +4,7 @@ import { searchChannelById } from './manager/channel_manager';
 import { searchMessageById } from './manager/message_manager';
 import { StickyService } from '../../db/sticky_service';
 import { log4js_obj } from '../../log4js_settings';
+import { StickyKey } from '../constant/sticky_key';
 
 const logger = log4js_obj.getLogger('message');
 
@@ -38,7 +39,7 @@ export async function processQueue() {
 export async function sendStickyMessage(
     guild: Guild,
     channelId: string,
-    key: string,
+    key: StickyKey,
     content: string | MessagePayload | MessageCreateOptions,
 ) {
     const task: AsyncVoidFunction = async () => {

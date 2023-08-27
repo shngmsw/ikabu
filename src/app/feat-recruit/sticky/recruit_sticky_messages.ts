@@ -7,6 +7,7 @@ import { log4js_obj } from '../../../log4js_settings';
 import { searchMessageById } from '../../common/manager/message_manager';
 import { RequireOne, assertExistCheck, exists, getCommandHelpEmbed } from '../../common/others';
 import { sendStickyMessage } from '../../common/sticky_message';
+import { StickyKey } from '../../constant/sticky_key';
 import { createNewRecruitButton } from '../buttons/create_recruit_buttons';
 
 const logger = log4js_obj.getLogger('message');
@@ -70,7 +71,7 @@ export async function sendRecruitSticky(stickyOptions: StickyOptions) {
             return;
         }
 
-        await sendStickyMessage(guild, channelId, 'available_recruit', {
+        await sendStickyMessage(guild, channelId, StickyKey.AvailableRecruit, {
             content: content,
             components: exists(channelName) ? [createNewRecruitButton(channelName)] : [],
         });
@@ -88,7 +89,7 @@ export async function sendCloseEmbedSticky(guild: Guild, channel: Channel) {
     ) {
         const content = await availableRecruitString(guild, channel.id);
         const helpEmbed = getCommandHelpEmbed(channel.name);
-        await sendStickyMessage(guild, channel.id, 'available_recruit', {
+        await sendStickyMessage(guild, channel.id, StickyKey.AvailableRecruit, {
             content: content,
             embeds: [helpEmbed],
             components: [createNewRecruitButton(channel.name)],
