@@ -9,7 +9,7 @@
   "scripts": {
     "compile": "prisma generate && tsc -p . && prisma migrate deploy",
     "start": "npm run compile && node -r dotenv/config ./build/server.js dotenv_config_path=./.env",
-    "migrate-dev": "prisma migrate dev",
+    "create-migrate": "prisma migrate dev --create-only",
     "migrate-deploy": "prisma migrate deploy",
     "prisma-generate": "prisma generate",
     "lint": "eslint .",
