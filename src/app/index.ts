@@ -171,6 +171,8 @@ client.on(
 );
 
 client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
+    const loggerUU = log4js_obj.getLogger('userUpdate');
+
     try {
         const userId = newUser.id;
 
@@ -180,7 +182,9 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
 
             const member = await searchAPIMemberById(guild, userId);
 
-            assertExistCheck(member, 'member');
+            if (notExists(member)) {
+                return loggerUU.error(`member is missing. userId: ${userId}, guildId: ${guildId}`);
+            }
 
             const updateMember: Member = {
                 guildId: guildId,
@@ -197,7 +201,6 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
             await MemberService.updateMemberProfile(updateMember);
         }
     } catch (err) {
-        const loggerUU = log4js_obj.getLogger('userUpdate');
         loggerUU.error({ err });
     }
 });
