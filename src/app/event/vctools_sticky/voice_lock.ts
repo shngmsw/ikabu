@@ -4,6 +4,7 @@ import {
     ButtonInteraction,
     ButtonStyle,
     ChannelType,
+    DiscordAPIError,
     TextBasedChannel,
     VoiceBasedChannel,
     VoiceState,
@@ -38,7 +39,6 @@ export async function voiceLockUpdate(
 
         // ボイスチャンネル内のメンバー数
         const vcMemberNum = channel.members.size;
-
         // ボイスチャンネル未接続or違うボイスチャンネル接続中だと弾く
         if (notExists(member.voice.channel) || member.voice.channel.id != channel.id) {
             return await interaction.reply({
@@ -46,9 +46,7 @@ export async function voiceLockUpdate(
                 ephemeral: true,
             });
         }
-
         let limit = channel.userLimit;
-
         // ロック切り替えボタンを押したとき
         if (customId === VCLockButton.LockSwitch) {
             if (channel.userLimit === 0) {
@@ -57,7 +55,6 @@ export async function voiceLockUpdate(
                 await channel.setUserLimit(0);
             }
         }
-
         if (limit !== 0) {
             if (customId === VCLockButton.Increase1) {
                 // 99人で押されたときは何もしない
@@ -99,9 +96,14 @@ export async function voiceLockUpdate(
             }
         }
 
-        return interaction.update({ components: createVCToolsButtons(channel) });
+        return await interaction.update({ components: createVCToolsButtons(channel) });
     } catch (error) {
-        logger.error(error);
+        if (error instanceof DiscordAPIError && error.code === 10008) {
+            // ボタンを押されたときにメッセージが削除されていた場合
+            logger.warn('interaction.message was missing. (Sticky)');
+        } else {
+            logger.error(error);
+        }
     }
 }
 

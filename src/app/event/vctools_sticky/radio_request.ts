@@ -1,39 +1,46 @@
 import { Member } from '@prisma/client';
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
+import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, notExists } from '../../common/others';
 
+const logger = log4js_obj.getLogger('interaction');
+
 export async function sendRadioRequest(interaction: ButtonInteraction<'cached' | 'raw'>) {
-    await interaction.deferReply({ ephemeral: true });
+    try {
+        await interaction.deferReply({ ephemeral: true });
 
-    const guild = await getGuildByInteraction(interaction);
-    const sender = await searchDBMemberById(guild, interaction.member.user.id);
+        const guild = await getGuildByInteraction(interaction);
+        const sender = await searchDBMemberById(guild, interaction.member.user.id);
 
-    const channel = interaction.channel;
+        const channel = interaction.channel;
 
-    if (notExists(channel) || !channel.isVoiceBased()) return;
+        if (notExists(channel) || !channel.isVoiceBased()) return;
 
-    assertExistCheck(sender, 'DBMember');
+        assertExistCheck(sender, 'DBMember');
 
-    const members = channel.members;
+        const members = channel.members;
 
-    if (members.size < 1) {
-        await interaction.editReply({ content: 'そのVCには誰もいないでし！' });
-        return;
+        if (members.size < 1) {
+            await interaction.editReply({ content: 'そのVCには誰もいないでし！' });
+            return;
+        }
+
+        let mentions = '';
+        for (const member of members) {
+            mentions += `<@${member[1].id}>`;
+        }
+
+        await channel.send({
+            content: mentions,
+            embeds: [createRadioRequestEmbed(sender)],
+        });
+        await interaction.deleteReply();
+    } catch (error) {
+        logger.error(error);
     }
-
-    let mentions = '';
-    for (const member of members) {
-        mentions += `<@${member[1].id}>`;
-    }
-
-    await channel.send({
-        content: mentions,
-        embeds: [createRadioRequestEmbed(sender)],
-    });
-    await interaction.deleteReply();
 }
 
 function createRadioRequestEmbed(member: Member) {
