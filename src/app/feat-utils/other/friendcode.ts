@@ -17,6 +17,7 @@ import { searchChannelById } from '../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../common/manager/member_manager.js';
 import { assertExistCheck, exists } from '../../common/others.js';
+import { FriendCodeButton } from '../../constant/button_id.js';
 const logger = log4js_obj.getLogger();
 
 export async function handleFriendCode(interaction: ChatInputCommandInteraction<CacheType>) {
@@ -62,7 +63,10 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
             ]);
         }
         buttons.addComponents([
-            new ButtonBuilder().setCustomId('fchide').setLabel('削除').setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(FriendCodeButton.Hide)
+                .setLabel('削除')
+                .setStyle(ButtonStyle.Danger),
         ]);
         await interaction.editReply({
             embeds: [composeEmbed(targetUser, fcObj.code, true)],
@@ -92,7 +96,7 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
             const button = new ActionRowBuilder<ButtonBuilder>();
             button.addComponents([
                 new ButtonBuilder()
-                    .setCustomId('fchide')
+                    .setCustomId(FriendCodeButton.Hide)
                     .setLabel('削除')
                     .setStyle(ButtonStyle.Danger),
             ]);

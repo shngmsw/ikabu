@@ -3,6 +3,7 @@ import { URLSearchParams } from 'url';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message } from 'discord.js';
 
 import { exists } from '../../common/others';
+import { RecruitParam } from '../../constant/button_id';
 
 export function recruitDeleteButton(
     message: Message<true>,
@@ -10,7 +11,7 @@ export function recruitDeleteButton(
     image2Message: Message<true>,
 ) {
     const deleteParams = new URLSearchParams();
-    deleteParams.append('d', 'del');
+    deleteParams.append('d', RecruitParam.Delete);
     deleteParams.append('mid', message.id);
     deleteParams.append('imid1', image1Message.id);
     deleteParams.append('imid2', image2Message.id);
@@ -27,7 +28,7 @@ export function recruitDeleteButton(
 
 export function embedRecruitDeleteButton(message: Message<true>, header: Message<true>) {
     const deleteParams = new URLSearchParams();
-    deleteParams.append('d', 'del');
+    deleteParams.append('d', RecruitParam.Delete);
     deleteParams.append('mid', message.id);
     deleteParams.append('imid1', header.id);
 
@@ -43,21 +44,21 @@ export function embedRecruitDeleteButton(message: Message<true>, header: Message
 
 export function recruitActionRow(imageMessage: Message<true>, channelId?: string) {
     const joinParams = new URLSearchParams();
-    joinParams.append('d', 'jr');
+    joinParams.append('d', RecruitParam.Join);
     joinParams.append('imid1', imageMessage.id);
     if (exists(channelId)) {
         joinParams.append('vid', channelId);
     }
 
     const cancelParams = new URLSearchParams();
-    cancelParams.append('d', 'cr');
+    cancelParams.append('d', RecruitParam.Cancel);
     cancelParams.append('imid1', imageMessage.id);
     if (exists(channelId)) {
         cancelParams.append('vid', channelId);
     }
 
     const closeParams = new URLSearchParams();
-    closeParams.append('d', 'close');
+    closeParams.append('d', RecruitParam.Close);
     closeParams.append('imid1', imageMessage.id);
     if (exists(channelId)) {
         closeParams.append('vid', channelId);
@@ -81,13 +82,13 @@ export function recruitActionRow(imageMessage: Message<true>, channelId?: string
 
 export function notifyActionRow() {
     const joinParams = new URLSearchParams();
-    joinParams.append('d', 'njr');
+    joinParams.append('d', RecruitParam.JoinNotify);
 
     const cancelParams = new URLSearchParams();
-    cancelParams.append('d', 'ncr');
+    cancelParams.append('d', RecruitParam.CancelNotify);
 
     const closeParams = new URLSearchParams();
-    closeParams.append('d', 'nclose');
+    closeParams.append('d', RecruitParam.CloseNotify);
 
     return new ActionRowBuilder<ButtonBuilder>().addComponents([
         new ButtonBuilder()
@@ -107,7 +108,7 @@ export function notifyActionRow() {
 
 export function unlockChannelButton(channelId: string) {
     const buttonParams = new URLSearchParams();
-    buttonParams.append('d', 'unl');
+    buttonParams.append('d', RecruitParam.Unlock);
     buttonParams.append('vid', channelId);
 
     const button = new ActionRowBuilder<ButtonBuilder>().addComponents([
@@ -131,7 +132,7 @@ export function createNewRecruitButton(channelName: string) {
     ];
 
     const buttonParams = new URLSearchParams();
-    buttonParams.append('d', 'newr');
+    buttonParams.append('d', RecruitParam.NewModalRecruit);
     buttonParams.append('cn', channelName);
     const button = new ActionRowBuilder<ButtonBuilder>();
     if (allowedChannel.includes(channelName)) {

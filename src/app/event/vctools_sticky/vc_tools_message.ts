@@ -11,10 +11,13 @@ import {
     VoiceState,
 } from 'discord.js';
 
+import { createVCLockedButton } from './voice_lock';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { Merge, exists, getDeveloperMention, notExists } from '../../common/others';
 import { sendStickyMessage } from '../../common/sticky_message';
+import { VCLockButton, VCToolsButton } from '../../constant/button_id';
+import { StickyKey } from '../../constant/sticky_key';
 
 const logger = log4js_obj.getLogger('voiceStateUpdate');
 
@@ -78,9 +81,14 @@ export async function sendVCToolsSticky(
             return;
         }
 
-        await sendStickyMessage(guild, channel.id, {
-            embeds: showOnboarding ? [createVCToolsEmbed(channel)] : [],
-            components: [createMenuButton(channel)],
+        if (showOnboarding) {
+            await sendStickyMessage(guild, channel.id, StickyKey.VCToolsOnboardingEmbed, {
+                embeds: [createVCToolsEmbed(channel)],
+            });
+        }
+
+        await sendStickyMessage(guild, channel.id, StickyKey.VCToolsButton, {
+            components: createVCToolsButtons(channel),
         });
     } catch (error) {
         logger.error(error);
@@ -89,21 +97,32 @@ export async function sendVCToolsSticky(
 
 function createVCToolsEmbed(channel: Merge<TextBasedChannel & VoiceBasedChannel>) {
     const embed = new EmbedBuilder();
-    embed.setTitle(channel.name + 'で利用できるコマンド');
+    embed.setTitle(channel.name + 'で利用できる機能');
     embed.setDescription(`<#${channel.id}>で利用できるVC関連ツールを紹介するでし！`);
     embed.addFields(
         {
-            name: '読み上げ機能',
-            value: 'テキストチャットの内容を読み上げるでし！\n' + '**コマンド: `/voice join`**',
+            name: '🔊 読み上げ機能',
+            value: 'テキストチャットの内容を読み上げるでし！',
         },
         {
-            name: 'VCロック機能',
-            value:
-                '指定人数でVCに入室制限をかけるでし！\n' + '**コマンド: `/ボイスロック vclock`**',
+            name: '🔒/🔓 VCロック機能',
+            value: '指定人数でVCに入室制限をかけるでし！',
+        },
+        {
+            name: '📻 VCラジオ依頼機能',
+            value: 'VC内のメンバーに「ラジオいいですか？」スタンプをメンション付きで送信するでし！',
         },
     );
     embed.setTimestamp();
     return embed;
+}
+
+export function createVCToolsButtons(channel: Merge<TextBasedChannel & VoiceBasedChannel>) {
+    const buttons = [createMenuButton(channel)];
+    if (channel.userLimit !== 0) {
+        buttons.unshift(createVCLockedButton(channel));
+    }
+    return buttons;
 }
 
 export function createMenuButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) {
@@ -120,14 +139,14 @@ function createReadButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
 
     if (notExists(bukichi)) {
         return new ButtonBuilder()
-            .setCustomId('voiceJoin')
-            .setLabel('読み上げ開始')
+            .setCustomId(VCToolsButton.VoiceJoin)
+            .setLabel('読み上げ')
             .setStyle(ButtonStyle.Primary)
             .setEmoji('🔊');
     } else {
         return new ButtonBuilder()
-            .setCustomId('voiceKill')
-            .setLabel('読み上げ終了')
+            .setCustomId(VCToolsButton.VoiceKill)
+            .setLabel('ブキチ切断')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('🔇');
     }
@@ -137,13 +156,12 @@ function createLockButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
     const limit = channel.userLimit;
     if (limit === 0) {
         return new ButtonBuilder()
-            .setCustomId('showLockPanel')
-            .setLabel('制限なし')
+            .setCustomId(VCLockButton.LockSwitch)
             .setStyle(ButtonStyle.Success)
             .setEmoji('🔓');
     } else {
         return new ButtonBuilder()
-            .setCustomId('showLockPanel')
+            .setCustomId(VCLockButton.LockSwitch)
             .setLabel(limit + '人')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('🔒');
@@ -152,8 +170,7 @@ function createLockButton(channel: Merge<TextBasedChannel & VoiceBasedChannel>) 
 
 function createRequestRadioButton() {
     return new ButtonBuilder()
-        .setCustomId('requestRadio')
-        .setLabel('ラジオ')
+        .setCustomId(VCToolsButton.RequestRadio)
         .setStyle(ButtonStyle.Secondary)
         .setEmoji('📻');
 }

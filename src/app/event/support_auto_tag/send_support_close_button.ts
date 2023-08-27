@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
+import { SupportCloseButton } from '../../constant/button_id';
 
 const logger = log4js_obj.getLogger('default');
 
@@ -14,7 +15,7 @@ export async function sendCloseButton(thread: AnyThreadChannel<boolean>) {
     try {
         const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
             new ButtonBuilder()
-                .setCustomId('support_resolved')
+                .setCustomId(SupportCloseButton.Resolved)
                 .setLabel('回答終了(クローズ)')
                 .setStyle(ButtonStyle.Success),
         ]);

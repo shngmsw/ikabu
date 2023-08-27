@@ -3,7 +3,7 @@ import { Attachment, EmbedBuilder, Message } from 'discord.js';
 import { searchAPIMemberById } from './manager/member_manager.js';
 import { placeHold } from '../../constant.js';
 
-export async function getDeveloperMention() {
+export function getDeveloperMention() {
     if (exists(process.env.ROLE_ID_DEVELOPER)) {
         return `<@&${process.env.ROLE_ID_DEVELOPER}>`;
     } else {

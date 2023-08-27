@@ -1,12 +1,23 @@
 import { Member } from '@prisma/client';
 import axios from 'axios';
-import { Guild, GuildMember, Message } from 'discord.js';
+import { Guild, GuildMember, Interaction, Message } from 'discord.js';
 
+import { getGuildByInteraction } from './guild_manager';
 import { MemberService } from '../../../db/member_service';
 import { log4js_obj } from '../../../log4js_settings';
 import { assertExistCheck, notExists } from '../others';
 
 const logger = log4js_obj.getLogger('MemberManager');
+
+export async function getAPIMemberByInteraction(interaction: Interaction<'cached' | 'raw'>) {
+    const guild = await getGuildByInteraction(interaction);
+    const memberId = interaction.user.id;
+    let member = interaction.member;
+    if (notExists(member) || !(member instanceof GuildMember)) {
+        member = await guild.members.fetch(memberId);
+    }
+    return member;
+}
 
 /**
  * ユーザーIDからメンバーを検索する．ない場合はnullを返す．
