@@ -15,12 +15,30 @@ import {
 } from '../../common/button_components';
 import { searchMessageById } from '../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../common/others';
+import { QuestionnaireParam } from '../../constant/button_id';
+
+export async function questionnaireButtonHandler(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    questionnaireParam: QuestionnaireParam,
+    params: URLSearchParams,
+) {
+    switch (questionnaireParam) {
+        case QuestionnaireParam.Yes:
+            await sendQuestionnaireFollowUp(interaction, params);
+            break;
+        case QuestionnaireParam.No:
+            await disableQuestionnaireButtons(interaction, params);
+            break;
+        default:
+            break;
+    }
+}
 
 /**
  * アンケートに答えるか選択してもらうためのリプライを送信
- * @param {*} message リプライ元
- * @param {*} member 答えるメンバー
- * @param {*} url_key アンケートURLを格納している環境変数のキー名
+ * @param {Message<true>} message リプライ元
+ * @param {string} userId アンケートに答えるユーザーのID
+ * @param {string} urlKey アンケートURLを格納している環境変数のキー名
  */
 export async function sendIntentionConfirmReply(
     message: Message<true>,
@@ -64,12 +82,12 @@ function questionnaireButton(userId: string, urlKey: string) {
     const logger = log4js.getLogger();
     try {
         const yesParams = new URLSearchParams();
-        yesParams.append('q', 'yes');
+        yesParams.append('q', QuestionnaireParam.Yes);
         yesParams.append('uid', userId);
         yesParams.append('type', urlKey); // 直接URLだと文字数が多すぎる可能性があるため
 
         const noParams = new URLSearchParams();
-        noParams.append('q', 'no');
+        noParams.append('q', QuestionnaireParam.No);
         noParams.append('uid', userId);
 
         const buttons = new ActionRowBuilder<ButtonBuilder>();

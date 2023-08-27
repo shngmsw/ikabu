@@ -15,6 +15,7 @@ import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { Merge, assertExistCheck, exists, notExists } from '../../common/others';
+import { CommandVCLockButton } from '../../constant/button_id';
 import { sendVCToolsSticky } from '../../event/vctools_sticky/vc_tools_message';
 const logger = log4js_obj.getLogger('interaction');
 
@@ -93,7 +94,10 @@ export async function voiceLocker(interaction: ChatInputCommandInteraction<'cach
 /*
  * ボタンが押されたときの動作
  */
-export async function voiceLockCommandUpdate(interaction: ButtonInteraction<'cached' | 'raw'>) {
+export async function voiceLockCommandUpdate(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    customId: CommandVCLockButton,
+) {
     const guild = await getGuildByInteraction(interaction);
 
     const member = await searchAPIMemberById(guild, interaction.member.user.id);
@@ -127,7 +131,7 @@ export async function voiceLockCommandUpdate(interaction: ButtonInteraction<'cac
     let limit = channelState.limit;
 
     // 'LOCK'ボタンor'UNLOCK'ボタンを押したとき
-    if (interaction.customId == 'voiceLockOrUnlock') {
+    if (customId === CommandVCLockButton.LockSwitch) {
         if (channel.userLimit === 0) {
             await channel.setUserLimit(voiceMemberNum);
             channelState.isLock = true;
@@ -141,14 +145,14 @@ export async function voiceLockCommandUpdate(interaction: ButtonInteraction<'cac
 
     // 以前に出したEmbedの操作が行われた時用の判定
     if (channelState.isLock) {
-        if (interaction.customId === 'voiceLock_inc') {
+        if (customId === CommandVCLockButton.Increase) {
             // 99人で押されたときは何もしない
             if (limit != 99) {
                 limit += 1;
                 channelState.limit = limit;
                 await channel.setUserLimit(limit);
             }
-        } else if (interaction.customId === 'voiceLock_dec') {
+        } else if (customId === CommandVCLockButton.Decrease) {
             // 1人で押されたときは何もしない
             if (limit != 1) {
                 limit -= 1;
@@ -158,7 +162,10 @@ export async function voiceLockCommandUpdate(interaction: ButtonInteraction<'cac
         }
     } else {
         // ロックされていないのに'＋'or'－'が押されたときの動作
-        if (interaction.customId === 'voiceLock_inc' || interaction.customId === 'voiceLock_dec') {
+        if (
+            customId === CommandVCLockButton.Increase ||
+            customId === CommandVCLockButton.Decrease
+        ) {
             await interaction
                 .reply({
                     content: '今はロックされてないでし！',
@@ -223,7 +230,7 @@ export function createVCLButton(channelState: ChannelState) {
         if (limit == 1) {
             button.addComponents([
                 new ButtonBuilder()
-                    .setCustomId('voiceLock_dec')
+                    .setCustomId(CommandVCLockButton.Decrease)
                     .setLabel('－')
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(true),
@@ -231,7 +238,7 @@ export function createVCLButton(channelState: ChannelState) {
         } else {
             button.addComponents([
                 new ButtonBuilder()
-                    .setCustomId('voiceLock_dec')
+                    .setCustomId(CommandVCLockButton.Decrease)
                     .setLabel('－')
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(false),
@@ -240,7 +247,7 @@ export function createVCLButton(channelState: ChannelState) {
 
         button.addComponents([
             new ButtonBuilder()
-                .setCustomId('voiceLockOrUnlock')
+                .setCustomId(CommandVCLockButton.LockSwitch)
                 .setLabel(limit + '人')
                 .setStyle(ButtonStyle.Danger)
                 .setEmoji('🔒'),
@@ -250,7 +257,7 @@ export function createVCLButton(channelState: ChannelState) {
         if (limit == 99) {
             button.addComponents([
                 new ButtonBuilder()
-                    .setCustomId('voiceLock_inc')
+                    .setCustomId(CommandVCLockButton.Increase)
                     .setLabel('＋')
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(true),
@@ -258,7 +265,7 @@ export function createVCLButton(channelState: ChannelState) {
         } else {
             button.addComponents([
                 new ButtonBuilder()
-                    .setCustomId('voiceLock_inc')
+                    .setCustomId(CommandVCLockButton.Increase)
                     .setLabel('＋')
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(false),
@@ -267,17 +274,17 @@ export function createVCLButton(channelState: ChannelState) {
     } else {
         button.addComponents([
             new ButtonBuilder()
-                .setCustomId('voiceLock_dec')
+                .setCustomId(CommandVCLockButton.Decrease)
                 .setLabel('－')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(true),
             new ButtonBuilder()
-                .setCustomId('voiceLockOrUnlock')
+                .setCustomId(CommandVCLockButton.LockSwitch)
                 .setLabel('制限なし')
                 .setStyle(ButtonStyle.Success)
                 .setEmoji('🔓'),
             new ButtonBuilder()
-                .setCustomId('voiceLock_inc')
+                .setCustomId(CommandVCLockButton.Increase)
                 .setLabel('＋')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(true),
