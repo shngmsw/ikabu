@@ -34,6 +34,22 @@ model MessageCount {
   @@map("message_count")
 }
 
+model RecruitCount {
+  userId       String @unique @map("user_id")
+  recruitCount Int    @map("recruit_count")
+  joinCount    Int    @map("join_count")
+
+  @@map("recruit_count")
+}
+
+model VoiceCount {
+  userId    String    @unique @map("user_id")
+  startTime DateTime? @map("start_time")
+  totalSec  Int       @map("total_sec")
+
+  @@map("voice_count")
+}
+
 model Participant {
   guildId   String   @map("guild_id")
   messageId String   @map("message_id")
