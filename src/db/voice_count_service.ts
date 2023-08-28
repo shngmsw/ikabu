@@ -55,4 +55,20 @@ export class VoiceCountService {
             return null;
         }
     }
+
+    static async getInCallCount() {
+        try {
+            const counter = await prisma.voiceCount.findMany({
+                where: {
+                    startTime: {
+                        not: null,
+                    },
+                },
+            });
+            return counter;
+        } catch (error) {
+            logger.error(error);
+            return [];
+        }
+    }
 }
