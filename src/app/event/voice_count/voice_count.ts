@@ -50,7 +50,7 @@ export async function checkCallMember(guild: Guild) {
                 );
             } else {
                 // DBに保存されていない場合はその時間から通話開始とみなす
-                await VoiceCountService.saveStartTime(userId, new Date());
+                await startCall(userId);
             }
         }
     }
