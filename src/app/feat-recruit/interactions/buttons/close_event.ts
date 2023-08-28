@@ -1,6 +1,7 @@
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
 import { getMemberMentions } from './other_events.js';
+import { increaseJoinCount, increaseRecruitCount } from './recruit_count.js';
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
@@ -104,6 +105,14 @@ export async function close(
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
+            confirmedMemberIDList.forEach(async (userId) => {
+                await increaseRecruitCount(userId);
+            });
+
+            applicantIdList.forEach(async (userId) => {
+                await increaseJoinCount(userId);
+            });
+
             if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
                 const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
@@ -143,6 +152,14 @@ export async function close(
 
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
+
+            confirmedMemberIDList.forEach(async (userId) => {
+                await increaseRecruitCount(userId);
+            });
+
+            applicantIdList.forEach(async (userId) => {
+                await increaseJoinCount(userId);
+            });
 
             if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);

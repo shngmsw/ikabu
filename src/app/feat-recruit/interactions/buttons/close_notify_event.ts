@@ -1,6 +1,7 @@
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
 import { getMemberMentions } from './other_events.js';
+import { increaseRecruitCount, increaseJoinCount } from './recruit_count.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
@@ -95,6 +96,14 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, embedMessageId);
 
+            confirmedMemberIDList.forEach(async (userId) => {
+                await increaseRecruitCount(userId);
+            });
+
+            applicantIdList.forEach(async (userId) => {
+                await increaseJoinCount(userId);
+            });
+
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
                 components: disableThinkingButton(interaction, '〆'),
@@ -121,6 +130,14 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
 
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, embedMessageId);
+
+            confirmedMemberIDList.forEach(async (userId) => {
+                await increaseRecruitCount(userId);
+            });
+
+            applicantIdList.forEach(async (userId) => {
+                await increaseJoinCount(userId);
+            });
 
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
