@@ -105,13 +105,15 @@ export async function close(
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
-            confirmedMemberIDList.forEach(async (userId) => {
-                await increaseRecruitCount(userId);
-            });
+            if (guild.id === process.env.SERVER_ID) {
+                confirmedMemberIDList.forEach(async (userId) => {
+                    await increaseRecruitCount(userId);
+                });
 
-            applicantIdList.forEach(async (userId) => {
-                await increaseJoinCount(userId);
-            });
+                applicantIdList.forEach(async (userId) => {
+                    await increaseJoinCount(userId);
+                });
+            }
 
             if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
@@ -153,13 +155,15 @@ export async function close(
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
-            confirmedMemberIDList.forEach(async (userId) => {
-                await increaseRecruitCount(userId);
-            });
+            if (guild.id === process.env.SERVER_ID) {
+                confirmedMemberIDList.forEach(async (userId) => {
+                    await increaseRecruitCount(userId);
+                });
 
-            applicantIdList.forEach(async (userId) => {
-                await increaseJoinCount(userId);
-            });
+                applicantIdList.forEach(async (userId) => {
+                    await increaseJoinCount(userId);
+                });
+            }
 
             if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
