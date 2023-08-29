@@ -159,7 +159,7 @@ export async function play(msg: Message<true>) {
 
     const subscription = subscriptions.get(guildId);
     if (exists(subscription) && channels.get(guildId) === channelId) {
-        // 「でし！」が含まれていたら読み上げリセット
+        // 「でし！」で読み上げリセット
         if (content === 'でし！') {
             // キューをクリア
             messageQueue.length = 0;
@@ -172,7 +172,7 @@ export async function play(msg: Message<true>) {
         }
 
         messageQueue.push(msg); // メッセージをキューに追加
-        await playNextMessage(subscription); // 次のメッセージを再生（既に再生中でない場合）
+        await playNextMessage(subscription); // 次のメッセージを再生
     }
 }
 
