@@ -24,7 +24,7 @@ export async function endCall(userId: string) {
 // bot再起動時の通話中メンバーのチェック
 export async function checkCallMember(guild: Guild) {
     // DBから通話中メンバーリストを取得
-    const previousInCallMemberList = await VoiceCountService.getInCallCount();
+    let previousInCallMemberList = await VoiceCountService.getInCallCount();
 
     const channelCollection = await guild.channels.fetch();
 
@@ -45,7 +45,7 @@ export async function checkCallMember(guild: Guild) {
 
             if (exists(previousInCallMember)) {
                 // previousInCallMemberListから削除
-                previousInCallMemberList.map(
+                previousInCallMemberList = previousInCallMemberList.filter(
                     (member) => member.userId !== previousInCallMember.userId,
                 );
             } else {
