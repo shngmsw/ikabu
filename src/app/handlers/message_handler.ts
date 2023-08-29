@@ -61,11 +61,11 @@ export async function call(message: Message<true>) {
 
         await deleteToken(message);
         await dispand(message);
-        await play(message);
         await chatCountUp(message);
         await sendRecruitSticky({ message: message });
         await vcToolsStickyFromMessage(message);
         await removeRookie(message);
+        await play(message);
     } catch (error) {
         logger.error(error);
     }
