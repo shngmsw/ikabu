@@ -153,9 +153,24 @@ const messageQueue: Message<true>[] = []; // メッセージキュー
 let isPlaying = false; // 現在再生中かどうかを示すフラグ
 
 export async function play(msg: Message<true>) {
-    const { guildId, channelId } = msg;
+    const { guildId, channelId, content } = msg;
+
+    if (content.startsWith('!') || content.startsWith('！')) return;
+
     const subscription = subscriptions.get(guildId);
     if (exists(subscription) && channels.get(guildId) === channelId) {
+        // 「でし！」が含まれていたら読み上げリセット
+        if (content === 'でし！') {
+            // キューをクリア
+            messageQueue.length = 0;
+
+            // 読み上げを停止
+            subscription.player.stop();
+
+            // 再生中フラグをリセット
+            isPlaying = false;
+        }
+
         messageQueue.push(msg); // メッセージをキューに追加
         await playNextMessage(subscription); // 次のメッセージを再生（既に再生中でない場合）
     }
