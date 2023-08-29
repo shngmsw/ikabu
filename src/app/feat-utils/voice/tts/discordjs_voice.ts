@@ -6,19 +6,16 @@ import {
     createAudioPlayer,
     AudioPlayerStatus,
     generateDependencyReport,
+    AudioResource,
+    AudioPlayer,
+    VoiceConnection,
 } from '@discordjs/voice';
-import {
-    ButtonInteraction,
-    CacheType,
-    ChatInputCommandInteraction,
-    Message,
-    VoiceState,
-} from 'discord.js';
+import { ButtonInteraction, ChatInputCommandInteraction, Message, VoiceState } from 'discord.js';
 
 import { modeApi, bufferToStream } from './voice_bot_node';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
-import { exists, getDeveloperMention, isNotEmpty, notExists } from '../../../common/others';
+import { exists, getDeveloperMention, notExists } from '../../../common/others';
 
 const infoLogger = log4js_obj.getLogger('info');
 const interactionLogger = log4js_obj.getLogger('interaction');
@@ -27,12 +24,20 @@ const logger = log4js_obj.getLogger('voice');
 infoLogger.info(generateDependencyReport());
 
 // ボイスチャットセッション保存用のMapです。
-const subscriptions = new Map();
+const subscriptions = new Map<string, Subscription>();
+
+type Subscription = {
+    connection: VoiceConnection;
+    player: AudioPlayer;
+};
+
 // 読み上げ対象のDicordチャンネル保存用のMapです。
 const channels = new Map();
 
 export const joinTTS = async (
-    interaction: ChatInputCommandInteraction<CacheType> | ButtonInteraction<'cached' | 'raw'>,
+    interaction:
+        | ChatInputCommandInteraction<'cached' | 'raw'>
+        | ButtonInteraction<'cached' | 'raw'>,
 ) => {
     try {
         if (!interaction.inCachedGuild()) return;
@@ -63,6 +68,7 @@ export const joinTTS = async (
             connection.on('error', (error) => {
                 logger.warn(error);
             });
+            if (notExists(subscription)) return;
             subscriptions.set(guildId, subscription);
             channels.set(guildId, channelId);
             await interaction.channel.send(
@@ -81,7 +87,9 @@ export const joinTTS = async (
 };
 
 export const killTTS = async (
-    interaction: ChatInputCommandInteraction<CacheType> | ButtonInteraction<'cached' | 'raw'>,
+    interaction:
+        | ChatInputCommandInteraction<'cached' | 'raw'>
+        | ButtonInteraction<'cached' | 'raw'>,
 ) => {
     try {
         const guildId = interaction.guildId;
@@ -121,7 +129,9 @@ export async function autokill(oldState: VoiceState) {
     }
 }
 
-export async function handleVoiceCommand(interaction: ChatInputCommandInteraction<CacheType>) {
+export async function handleVoiceCommand(
+    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+) {
     try {
         if (!interaction.isCommand()) return;
         const { options } = interaction;
@@ -139,30 +149,62 @@ export async function handleVoiceCommand(interaction: ChatInputCommandInteractio
     }
 }
 
+const messageQueue: Message<true>[] = []; // メッセージキュー
+let isPlaying = false; // 現在再生中かどうかを示すフラグ
+
 export async function play(msg: Message<true>) {
-    try {
-        const { guildId, channelId } = msg;
-        const subscription = subscriptions.get(guildId);
-        if (
-            exists(subscription) &&
-            isNotEmpty(subscription) &&
-            channels.get(guildId) === channelId
-        ) {
-            // メッセージから音声ファイルを取得
-            const buffer = await modeApi(msg);
-            if (notExists(buffer)) return;
-            const stream = bufferToStream(buffer);
+    const { guildId, channelId, content } = msg;
 
-            // ボイスチャットセッションの音声プレイヤーに音声ファイルのURLを指定して再生させます。
-            const player = subscription.player;
-            const resource = createAudioResource(stream, {
-                inputType: StreamType.Arbitrary,
-            });
+    if (content.startsWith('!') || content.startsWith('！')) return;
 
-            player.play(resource);
-            await entersState(player, AudioPlayerStatus.Idle, 1000 * 900);
+    const subscription = subscriptions.get(guildId);
+    if (exists(subscription) && channels.get(guildId) === channelId) {
+        // 「でし！」で読み上げリセット
+        if (content === 'でし！') {
+            // キューをクリア
+            messageQueue.length = 0;
+
+            // 読み上げを停止
+            subscription.player.stop();
+
+            // 再生中フラグをリセット
+            isPlaying = false;
         }
-    } catch (error) {
-        logger.warn(error);
+
+        messageQueue.push(msg); // メッセージをキューに追加
+        await playNextMessage(subscription); // 次のメッセージを再生
     }
+}
+
+async function playNextMessage(subscription: Subscription) {
+    if (messageQueue.length === 0 || isPlaying) {
+        return;
+    }
+
+    // 再生中フラグをセット
+    isPlaying = true;
+
+    const nextMsg = messageQueue.shift(); // キューから次のメッセージを取得
+    if (!nextMsg) {
+        isPlaying = false;
+        return;
+    }
+
+    const buffer = await modeApi(nextMsg);
+    if (notExists(buffer)) return;
+    const stream = bufferToStream(buffer);
+
+    const resource: AudioResource = createAudioResource(stream, {
+        inputType: StreamType.Arbitrary,
+    });
+    subscription.player.play(resource);
+
+    // 再生が完了するまで待つ
+    await entersState(subscription.player, AudioPlayerStatus.Idle, 1000 * 900);
+
+    // 再生が終わったのでフラグをリセット
+    isPlaying = false;
+
+    // 次のメッセージを再生
+    await playNextMessage(subscription);
 }

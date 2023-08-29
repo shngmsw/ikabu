@@ -1,6 +1,7 @@
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
 import { getMemberMentions } from './other_events.js';
+import { increaseRecruitCount, increaseJoinCount } from './recruit_count.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
@@ -95,6 +96,12 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, embedMessageId);
 
+            // 環境変数にSERVER_IDが設定されている場合は、募集カウンタを増やす
+            if (guild.id === process.env.SERVER_ID) {
+                await increaseRecruitCount(confirmedMemberIDList);
+                await increaseJoinCount(applicantIdList);
+            }
+
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
                 components: disableThinkingButton(interaction, '〆'),
@@ -121,6 +128,12 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
 
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, embedMessageId);
+
+            // 環境変数にSERVER_IDが設定されている場合は、募集カウンタを増やす
+            if (guild.id === process.env.SERVER_ID) {
+                await increaseRecruitCount(confirmedMemberIDList);
+                await increaseJoinCount(applicantIdList);
+            }
 
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,

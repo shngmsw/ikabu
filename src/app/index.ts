@@ -29,6 +29,7 @@ import { emojiCountDown, emojiCountUp } from './event/reaction_count/reactions';
 import { guildMemberAddEvent } from './event/rookie/set_rookie';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
+import { checkCallMember } from './event/voice_count/voice_count';
 import * as buttonHandler from './handlers/button_handler';
 import * as commandHandler from './handlers/command_handler';
 import * as contextHandler from './handlers/context_handler';
@@ -220,6 +221,7 @@ client.on('ready', async () => {
         });
         await updateSchedule();
         await updateLocale();
+        await checkCallMember(guild);
         await ParticipantService.deleteUnuseParticipant();
     } catch (error) {
         logger.error(error);

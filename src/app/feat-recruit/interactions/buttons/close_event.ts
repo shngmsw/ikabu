@@ -1,6 +1,7 @@
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
 import { getMemberMentions } from './other_events.js';
+import { increaseJoinCount, increaseRecruitCount } from './recruit_count.js';
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
@@ -104,6 +105,12 @@ export async function close(
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
+            // 環境変数にSERVER_IDが設定されている場合は、募集カウンタを増やす
+            if (guild.id === process.env.SERVER_ID) {
+                await increaseRecruitCount(confirmedMemberIDList);
+                await increaseJoinCount(applicantIdList);
+            }
+
             if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
                 const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
@@ -143,6 +150,12 @@ export async function close(
 
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
+
+            // 環境変数にSERVER_IDが設定されている場合は、募集カウンタを増やす
+            if (guild.id === process.env.SERVER_ID) {
+                await increaseRecruitCount(confirmedMemberIDList);
+                await increaseJoinCount(applicantIdList);
+            }
 
             if (exists(channelId)) {
                 const channel = await searchChannelById(guild, channelId);
