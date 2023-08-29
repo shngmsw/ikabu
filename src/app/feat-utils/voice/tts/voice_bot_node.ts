@@ -100,9 +100,9 @@ export function bufferToStream(buffer: Uint8Array) {
 
 async function messageReplace(message: Message<true>) {
     const w_replace = (str: string) => {
-        const judge = /.*w$/g;
+        const judge = /.*[wWｗＷ]+$/g;
         if (str.match(judge)) {
-            const pat = /(w)/g;
+            const pat = /[wWｗＷ]+/g;
             return str.replace(pat, 'わらあた');
         }
         return str;
