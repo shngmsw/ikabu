@@ -166,10 +166,10 @@ async function messageReplace(message: Message<true>) {
         return await channel_replace(str);
     };
 
-    const over200_cut = (str: string) => {
-        if (str.length > 200) {
-            const str200 = str.substr(0, 195) + '以下略';
-            return str200;
+    const over150_cut = (str: string) => {
+        if (str.length > 150) {
+            const str150 = str.substr(0, 145) + '以下略';
+            return str150;
         } else {
             return str;
         }
@@ -183,7 +183,7 @@ async function messageReplace(message: Message<true>) {
     const role_mention_replaced = role_mention_replace(nickname_replaced);
     const channel_replaced = await channel_replace(role_mention_replaced);
 
-    const yomiage_message = over200_cut(channel_replaced);
+    const yomiage_message = over150_cut(channel_replaced);
     return yomiage_message;
 }
 
