@@ -105,14 +105,10 @@ export async function close(
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
+            // 環境変数にSERVER_IDが設定されている場合は、募集カウンタを増やす
             if (guild.id === process.env.SERVER_ID) {
-                confirmedMemberIDList.forEach(async (userId) => {
-                    await increaseRecruitCount(userId);
-                });
-
-                applicantIdList.forEach(async (userId) => {
-                    await increaseJoinCount(userId);
-                });
+                await increaseRecruitCount(confirmedMemberIDList);
+                await increaseJoinCount(applicantIdList);
             }
 
             if (exists(channelId)) {
@@ -155,14 +151,10 @@ export async function close(
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
+            // 環境変数にSERVER_IDが設定されている場合は、募集カウンタを増やす
             if (guild.id === process.env.SERVER_ID) {
-                confirmedMemberIDList.forEach(async (userId) => {
-                    await increaseRecruitCount(userId);
-                });
-
-                applicantIdList.forEach(async (userId) => {
-                    await increaseJoinCount(userId);
-                });
+                await increaseRecruitCount(confirmedMemberIDList);
+                await increaseJoinCount(applicantIdList);
             }
 
             if (exists(channelId)) {

@@ -96,14 +96,10 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, embedMessageId);
 
+            // 環境変数にSERVER_IDが設定されている場合は、募集カウンタを増やす
             if (guild.id === process.env.SERVER_ID) {
-                confirmedMemberIDList.forEach(async (userId) => {
-                    await increaseRecruitCount(userId);
-                });
-
-                applicantIdList.forEach(async (userId) => {
-                    await increaseJoinCount(userId);
-                });
+                await increaseRecruitCount(confirmedMemberIDList);
+                await increaseJoinCount(applicantIdList);
             }
 
             await buttonMessage.edit({
@@ -133,14 +129,10 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, embedMessageId);
 
+            // 環境変数にSERVER_IDが設定されている場合は、募集カウンタを増やす
             if (guild.id === process.env.SERVER_ID) {
-                confirmedMemberIDList.forEach(async (userId) => {
-                    await increaseRecruitCount(userId);
-                });
-
-                applicantIdList.forEach(async (userId) => {
-                    await increaseJoinCount(userId);
-                });
+                await increaseRecruitCount(confirmedMemberIDList);
+                await increaseJoinCount(applicantIdList);
             }
 
             await buttonMessage.edit({
