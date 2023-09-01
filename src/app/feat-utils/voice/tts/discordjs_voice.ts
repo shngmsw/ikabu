@@ -15,7 +15,7 @@ import { ButtonInteraction, ChatInputCommandInteraction, Message, VoiceState } f
 import { modeApi, bufferToStream } from './voice_bot_node';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
-import { exists, getDeveloperMention, notExists } from '../../../common/others';
+import { exists, getDeveloperMention, isEmpty, notExists } from '../../../common/others';
 
 const infoLogger = log4js_obj.getLogger('info');
 const interactionLogger = log4js_obj.getLogger('interaction');
@@ -155,7 +155,7 @@ let isPlaying = false; // 現在再生中かどうかを示すフラグ
 export async function play(msg: Message<true>) {
     const { guildId, channelId, content } = msg;
 
-    if (content.startsWith('!') || content.startsWith('！')) return;
+    if (content.startsWith('!') || content.startsWith('！') || isEmpty(content)) return;
 
     const subscription = subscriptions.get(guildId);
     if (exists(subscription) && channels.get(guildId) === channelId) {
