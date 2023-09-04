@@ -7,7 +7,9 @@ import {
     AutocompleteInteraction,
     CacheType,
     Client,
+    ClientUser,
     GatewayIntentBits,
+    Guild,
     GuildMember,
     Interaction,
     Message,
@@ -79,9 +81,7 @@ client.on('guildMemberAdd', async (member: GuildMember) => {
             throw new Error('client.user is null');
         }
         if (guild.id === process.env.SERVER_ID) {
-            client.user.setActivity(`${guild.memberCount}人`, {
-                type: ActivityType.Playing,
-            });
+            setEnrollmentCount(client.user, guild);
         }
         await guildMemberAddEvent(member); // 10分待つ可能性があるので最後に処理
     } catch (error) {
@@ -122,9 +122,7 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
         const guild = await member.guild.fetch();
         if (guild.id === process.env.SERVER_ID) {
             assertExistCheck(client.user, 'client.user');
-            client.user.setActivity(`${guild.memberCount}人`, {
-                type: ActivityType.Playing,
-            });
+            setEnrollmentCount(client.user, guild);
         }
     } catch (err) {
         const loggerMR = log4js_obj.getLogger('guildMemberRemove');
@@ -216,9 +214,7 @@ client.on('ready', async () => {
         // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => logger.error(err)));
         await registerSlashCommands();
         const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
-        client.user.setActivity(`${guild.memberCount}人`, {
-            type: ActivityType.Playing,
-        });
+        setEnrollmentCount(client.user, guild);
         await updateSchedule();
         await updateLocale();
         await checkCallMember(guild);
@@ -317,6 +313,12 @@ client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
 client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
     void vcStateUpdateHandler.call(oldState, newState);
 });
+
+function setEnrollmentCount(clientUser: ClientUser, guild: Guild) {
+    clientUser.setActivity(`部員数: ${guild.memberCount}人`, {
+        type: ActivityType.Custom,
+    });
+}
 
 // cronジョブを定義
 // スプラトゥーンのスケジュール更新に合わせて2時間毎に実行する
