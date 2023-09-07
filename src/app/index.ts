@@ -204,7 +204,7 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
     }
 });
 
-client.on('ready', async () => {
+client.on('ready', async (client: Client<true>) => {
     try {
         assertExistCheck(client.user);
         logger.info(`Logged in as ${client.user.tag}!`);
@@ -218,11 +218,27 @@ client.on('ready', async () => {
         await updateSchedule();
         await updateLocale();
         await checkCallMember(guild);
+        await disconnectFromVC(client);
         await ParticipantService.deleteUnuseParticipant();
     } catch (error) {
         logger.error(error);
     }
 });
+
+async function disconnectFromVC(client: Client<true>) {
+    // ギルド（サーバー）ごとに処理
+    client.guilds.cache.forEach(async (guild) => {
+        const botMember = await searchAPIMemberById(guild, client.user.id);
+        if (notExists(botMember)) return;
+        // ボイスチャンネルにBotが接続しているか確認
+        const voiceState = botMember.voice;
+        const voiceChannel = voiceState.channel;
+        if (exists(voiceChannel) && voiceChannel.isVoiceBased()) {
+            logger.info(`Disconnecting from 🔊${voiceChannel.name} in ${guild.name}`);
+            await voiceState.disconnect(); // ボイスチャンネルから切断
+        }
+    });
+}
 
 client.on(
     'messageReactionAdd',
