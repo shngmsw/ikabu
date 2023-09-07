@@ -16,6 +16,7 @@ import {
 } from 'discord.js';
 
 import { assertExistCheck } from './app/common/others.js';
+import { sendErrorLogs } from './app/logs/error/send_error_logs.js';
 import { commandNames } from './constant.js';
 import { log4js_obj } from './log4js_settings.js';
 
@@ -1340,31 +1341,31 @@ export async function registerSlashCommands() {
         await rest
             .put(Routes.applicationCommands(botId), { body: [] })
             .then(() => logger.info('Successfully deleted application global commands.'))
-            .catch((error) => {
-                logger.error(error);
+            .catch(async (error) => {
+                await sendErrorLogs(logger, error);
             });
         await rest
             .put(Routes.applicationGuildCommands(botId, serverId), {
                 body: commands,
             })
             .then(() => logger.info('Successfully registered application guild commands.'))
-            .catch((error) => {
-                logger.error(error);
+            .catch(async (error) => {
+                await sendErrorLogs(logger, error);
             });
     } else if (mode === 'global') {
         await rest
             .put(Routes.applicationGuildCommands(botId, serverId), { body: [] })
             .then(() => logger.info('Successfully deleted application guild commands.'))
-            .catch((error) => {
-                logger.error(error);
+            .catch(async (error) => {
+                await sendErrorLogs(logger, error);
             });
         await rest
             .put(Routes.applicationCommands(botId), {
                 body: commands,
             })
             .then(() => logger.info('Successfully registered application global commands.'))
-            .catch((error) => {
-                logger.error(error);
+            .catch(async (error) => {
+                await sendErrorLogs(logger, error);
             });
     }
 }

@@ -38,12 +38,13 @@ import * as contextHandler from './handlers/context_handler';
 import * as messageHandler from './handlers/message_handler';
 import * as modalHandler from './handlers/modal_handler';
 import * as vcStateUpdateHandler from './handlers/vcState_update_handler';
+import { sendErrorLogs } from './logs/error/send_error_logs';
 import { MemberService } from '../db/member_service';
 import { ParticipantService } from '../db/participant_service';
 import { log4js_obj } from '../log4js_settings';
 import { registerSlashCommands } from '../register';
 
-const client = new Client({
+export const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -86,7 +87,7 @@ client.on('guildMemberAdd', async (member: GuildMember) => {
         await guildMemberAddEvent(member); // 10分待つ可能性があるので最後に処理
     } catch (error) {
         const loggerMA = log4js_obj.getLogger('guildMemberAdd');
-        loggerMA.error(error);
+        await sendErrorLogs(loggerMA, error);
     }
 });
 
@@ -124,9 +125,9 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
             assertExistCheck(client.user, 'client.user');
             setEnrollmentCount(client.user, guild);
         }
-    } catch (err) {
+    } catch (error) {
         const loggerMR = log4js_obj.getLogger('guildMemberRemove');
-        loggerMR.error({ err });
+        await sendErrorLogs(loggerMR, error);
     }
 });
 
@@ -162,9 +163,9 @@ client.on(
             } else {
                 await MemberService.updateMemberProfile(updateMember);
             }
-        } catch (err) {
+        } catch (error) {
             const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
-            loggerMU.error({ err });
+            await sendErrorLogs(loggerMU, error);
         }
     },
 );
@@ -182,7 +183,10 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
             const member = await searchAPIMemberById(guild, userId);
 
             if (notExists(member)) {
-                return loggerUU.error(`member is missing. userId: ${userId}, guildId: ${guildId}`);
+                return await sendErrorLogs(
+                    loggerUU,
+                    `member is missing. userId: ${userId}, guildId: ${guildId}`,
+                );
             }
 
             const updateMember: Member = {
@@ -199,8 +203,8 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
             // プロフィールアップデート
             await MemberService.updateMemberProfile(updateMember);
         }
-    } catch (err) {
-        loggerUU.error({ err });
+    } catch (error) {
+        await sendErrorLogs(loggerUU, error);
     }
 });
 
@@ -208,10 +212,6 @@ client.on('ready', async (client: Client<true>) => {
     try {
         assertExistCheck(client.user);
         logger.info(`Logged in as ${client.user.tag}!`);
-        // ready後にready以前に実行されたinteractionのinteractionCreateがemitされるが、
-        // そのときにはinteractionがtimeoutしておりfollowupで失敗することがよくある。
-        // そのようなことを避けるためready内でハンドラを登録する。
-        // client.on('interactionCreate', (interaction) => onInteraction(interaction).catch((err) => logger.error(err)));
         await registerSlashCommands();
         const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
         setEnrollmentCount(client.user, guild);
@@ -221,7 +221,7 @@ client.on('ready', async (client: Client<true>) => {
         await disconnectFromVC(client);
         await ParticipantService.deleteUnuseParticipant();
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 });
 
@@ -261,7 +261,7 @@ client.on(
 
             await emojiCountUp(reaction, user);
         } catch (error) {
-            loggerMRA.error(error);
+            await sendErrorLogs(loggerMRA, error);
         }
     },
 );
@@ -285,12 +285,12 @@ client.on(
             await emojiCountDown(reaction, user);
         } catch (error) {
             const loggerMRR = log4js_obj.getLogger('messageReactionRemove');
-            loggerMRR.error(error);
+            await sendErrorLogs(loggerMRR, error);
         }
     },
 );
 
-client.on('interactionCreate', (interaction: Interaction<CacheType>) => {
+client.on('interactionCreate', async (interaction: Interaction<CacheType>) => {
     try {
         if (interaction.isRepliable()) {
             // 各handlerの内どれかしか呼ばれないためawaitしない
@@ -314,7 +314,7 @@ client.on('interactionCreate', (interaction: Interaction<CacheType>) => {
                 interaction_replied: interaction.replied,
                 interaction_deferred: interaction.deferred,
             };
-            interactionLogger.error(errorDetail);
+            await sendErrorLogs(interactionLogger, errorDetail);
         }
     }
 });
@@ -352,7 +352,7 @@ const job = new cron.CronJob(
             // ステージ情報の送信
             await stageInfo(guild);
         } catch (error) {
-            logger.error('schedule job failed:', error);
+            await sendErrorLogs(logger, 'schedule job failed: \n' + error);
         }
 
         logger.info('cron job finished');

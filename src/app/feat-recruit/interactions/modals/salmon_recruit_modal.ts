@@ -12,6 +12,7 @@ import {
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_canvas';
 import { RecruitOpCode } from '../../canvases/regenerate_canvas';
@@ -170,6 +171,6 @@ export async function sendSalmonRun(
             return;
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

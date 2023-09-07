@@ -1,4 +1,5 @@
 import { prisma } from './prisma.js';
+import { sendErrorLogs } from '../app/logs/error/send_error_logs.js';
 import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
@@ -42,7 +43,7 @@ export class RecruitService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -57,7 +58,7 @@ export class RecruitService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -75,7 +76,7 @@ export class RecruitService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -93,7 +94,7 @@ export class RecruitService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -109,7 +110,7 @@ export class RecruitService {
             });
             return recruit;
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
             return null;
         }
     }
@@ -124,7 +125,7 @@ export class RecruitService {
             });
             return recruits;
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
             return [];
         }
     }
@@ -139,7 +140,7 @@ export class RecruitService {
             });
             return recruits;
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
             return [];
         }
     }
@@ -159,7 +160,7 @@ export class RecruitService {
 
             return result;
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
             return [];
         }
     }

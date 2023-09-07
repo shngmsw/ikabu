@@ -21,6 +21,7 @@ import {
 import { sendStickyMessage } from '../../../common/sticky_message.js';
 import { StickyKey } from '../../../constant/sticky_key.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
 import {
     availableRecruitString,
@@ -176,8 +177,8 @@ export async function cancel(
                 });
             }
         }
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         await interaction.message.edit({
             components: disableThinkingButton(interaction, 'キャンセル'),
         });

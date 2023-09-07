@@ -16,6 +16,7 @@ import { modeApi, bufferToStream } from './voice_bot_node';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { exists, getDeveloperMention, isEmpty, notExists } from '../../../common/others';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 
 const infoLogger = log4js_obj.getLogger('info');
 const interactionLogger = log4js_obj.getLogger('interaction');
@@ -84,7 +85,7 @@ export const joinTTS = async (
         }
     } catch (error) {
         await killTTS(interaction);
-        interactionLogger.error(error);
+        await sendErrorLogs(interactionLogger, error);
     }
 };
 
@@ -114,7 +115,7 @@ export const killTTS = async (
             await interaction.editReply('他の部屋で営業中でし！');
         }
     } catch (error) {
-        interactionLogger.error(error);
+        await sendErrorLogs(interactionLogger, error);
     }
 };
 
@@ -155,7 +156,7 @@ export async function handleVoiceCommand(
                 break;
         }
     } catch (error) {
-        interactionLogger.error(error);
+        await sendErrorLogs(interactionLogger, error);
     }
 }
 

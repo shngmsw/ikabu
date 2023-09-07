@@ -12,6 +12,7 @@ import { sendIntentionConfirmReply } from '../event/rookie/send_questionnaire';
 import { vcToolsStickyFromMessage } from '../event/vctools_sticky/vc_tools_message';
 import { sendRecruitSticky } from '../feat-recruit/sticky/recruit_sticky_messages';
 import { play } from '../feat-utils/voice/tts/discordjs_voice';
+import { sendErrorLogs } from '../logs/error/send_error_logs';
 const logger = log4js_obj.getLogger('message');
 
 export async function call(message: Message<true>) {
@@ -67,6 +68,6 @@ export async function call(message: Message<true>) {
         await removeRookie(message);
         await play(message);
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

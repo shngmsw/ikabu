@@ -16,6 +16,7 @@ import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, datetimeDiff, exists, notExists } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import { regenerateCanvas, RecruitOpCode } from '../../canvases/regenerate_canvas.js';
 import {
     getStickyChannelId,
@@ -198,8 +199,8 @@ export async function close(
                 components: recoveryThinkingButton(interaction, '〆'),
             });
         }
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '〆'),
         });

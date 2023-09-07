@@ -5,6 +5,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { assertExistCheck } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const ENV_FILE_PATH = path.resolve('./', '.env');
 
@@ -32,7 +33,7 @@ export async function setVariables(interaction: ChatInputCommandInteraction<'cac
             files: [env_file],
         });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
@@ -58,6 +59,6 @@ async function setEnvValue(key: string, value: string) {
         // ファイル書き込み
         await fs.writeFile(ENV_FILE_PATH, envVars.join('\n'));
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

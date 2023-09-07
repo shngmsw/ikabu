@@ -10,6 +10,7 @@ import { setButtonDisable } from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { recruitAnarchyCanvas, ruleAnarchyCanvas } from '../../canvases/anarchy_canvas';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
@@ -224,6 +225,6 @@ export async function sendAnarchyMatch(
 
         await sendCloseEmbedSticky(guild, recruitChannel);
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

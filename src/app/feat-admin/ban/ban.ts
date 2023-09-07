@@ -4,6 +4,7 @@ import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, exists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('ban');
 
@@ -32,11 +33,11 @@ export async function handleBan(interaction: ChatInputCommandInteraction<'cached
 
         const DMChannel = await targetMember.createDM();
         await DMChannel.send({ content: reasonText }).catch((error) => {
-            logger.error(error);
+            void sendErrorLogs(logger, error);
         });
 
         await targetMember.ban({ reason: reasonText }).catch((error) => {
-            logger.error(error);
+            void sendErrorLogs(logger, error);
         });
 
         const channels = await guild.channels.fetch();

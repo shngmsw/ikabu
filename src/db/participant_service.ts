@@ -2,6 +2,7 @@ import { Member } from '@prisma/client';
 
 import { prisma } from './prisma.js';
 import { RecruitService } from './recruit_service.js';
+import { sendErrorLogs } from '../app/logs/error/send_error_logs.js';
 import { log4js_obj } from '../log4js_settings.js';
 const logger = log4js_obj.getLogger('database');
 
@@ -41,7 +42,7 @@ export class ParticipantService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -71,7 +72,7 @@ export class ParticipantService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -87,7 +88,7 @@ export class ParticipantService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -100,7 +101,7 @@ export class ParticipantService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -116,7 +117,7 @@ export class ParticipantService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -143,7 +144,7 @@ export class ParticipantService {
             });
             return participant;
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
             return null;
         }
     }
@@ -176,7 +177,7 @@ export class ParticipantService {
 
             return participants;
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
             return [];
         }
     }

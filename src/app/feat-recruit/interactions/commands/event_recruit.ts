@@ -20,6 +20,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import {
     recruitActionRow,
     recruitDeleteButton,
@@ -160,7 +161,7 @@ export async function eventRecruit(interaction: ChatInputCommandInteraction<'cac
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
         }
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
@@ -378,6 +379,6 @@ async function sendEventMatch(
 
         await sendCloseEmbedSticky(guild, recruitChannel);
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

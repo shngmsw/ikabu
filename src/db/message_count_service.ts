@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { sendErrorLogs } from '../app/logs/error/send_error_logs';
 import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
@@ -18,7 +19,7 @@ export class MessageCountService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -31,7 +32,7 @@ export class MessageCountService {
             });
             return member;
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
             return null;
         }
     }

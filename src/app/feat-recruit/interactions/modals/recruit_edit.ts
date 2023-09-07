@@ -7,6 +7,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { assertExistCheck, notExists } from '../../../common/others';
 import { sendStickyMessage } from '../../../common/sticky_message';
 import { StickyKey } from '../../../constant/sticky_key';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { sendEditRecruitLog } from '../../../logs/modals/recruit_modal_log';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 import { regenerateEmbed } from '../../embeds/regenerate_embed';
@@ -95,7 +96,7 @@ export async function recruitEdit(
 
         await interaction.editReply(replyMessage);
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         if (interaction.channel instanceof BaseGuildTextChannel) {
             await interaction.channel.send('なんかエラー出てるわ');
         }

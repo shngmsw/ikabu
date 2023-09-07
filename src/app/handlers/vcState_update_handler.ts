@@ -6,6 +6,7 @@ import { vcToolsStickyFromVoiceState } from '../event/vctools_sticky/vc_tools_me
 import { disableLimit } from '../event/vctools_sticky/voice_lock';
 import { endCall, startCall } from '../event/voice_count/voice_count';
 import { autokill } from '../feat-utils/voice/tts/discordjs_voice';
+import { sendErrorLogs } from '../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('voiceStateUpdate');
 
@@ -37,7 +38,7 @@ export async function call(oldState: VoiceState, newState: VoiceState) {
             await autokill(oldState);
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 

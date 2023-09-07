@@ -15,6 +15,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager.js'
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others.js';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import { messageLinkButtons } from '../../buttons/create_recruit_buttons';
 import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
 
@@ -145,7 +146,7 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
                     }
                 }
             } catch (error) {
-                logger.error(error);
+                await sendErrorLogs(logger, error);
             }
 
             const notifyMessage = await interaction.message.reply({
@@ -182,8 +183,8 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
                 }
             }
         }
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '参加'),
         });

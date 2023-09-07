@@ -7,6 +7,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { embedRecruitDeleteButton, recruitActionRow } from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
@@ -144,7 +145,7 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
             return;
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
