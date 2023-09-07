@@ -2,6 +2,7 @@ import { AnyThreadChannel, ChannelType, EmbedBuilder } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { assertExistCheck } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('default');
 
@@ -22,7 +23,7 @@ export function tagIdsEmbed(thread: AnyThreadChannel<boolean>) {
         embed.setDescription(description);
         return embed;
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
         return null;
     }
 }

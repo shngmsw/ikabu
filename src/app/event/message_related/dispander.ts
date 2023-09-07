@@ -3,6 +3,7 @@ import { Message } from 'discord.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchMessageById } from '../../common/manager/message_manager';
 import { composeEmbed, exists, notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('dispander');
 
@@ -30,7 +31,7 @@ export async function dispand(message: Message<true>) {
             }
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await message.reply('なんかエラー出てるわ');
     }
 }

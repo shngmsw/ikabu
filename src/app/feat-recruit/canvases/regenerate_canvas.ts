@@ -13,6 +13,7 @@ import { log4js_obj } from '../../../log4js_settings';
 import { searchMessageById } from '../../common/manager/message_manager';
 import { searchRoleById, searchRoleIdByName } from '../../common/manager/role_manager';
 import { assertExistCheck, notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -106,7 +107,7 @@ export async function regenerateCanvas(
                 break;
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 

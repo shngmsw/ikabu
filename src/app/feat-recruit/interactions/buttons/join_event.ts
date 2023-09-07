@@ -21,6 +21,7 @@ import {
     sleep,
 } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import {
     channelLinkButtons,
     messageLinkButtons,
@@ -163,7 +164,7 @@ export async function join(
                     }
                 }
             } catch (error) {
-                logger.error(error);
+                await sendErrorLogs(logger, error);
             }
 
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.open);
@@ -222,8 +223,8 @@ export async function join(
                 }
             }
         }
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '参加'),
         });

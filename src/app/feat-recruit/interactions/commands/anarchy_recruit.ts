@@ -23,6 +23,7 @@ import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleIdByName } from '../../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import {
     recruitActionRow,
     recruitDeleteButton,
@@ -196,7 +197,7 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
         }
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
@@ -486,6 +487,6 @@ async function sendAnarchyMatch(
 
         await sendCloseEmbedSticky(guild, recruitChannel);
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

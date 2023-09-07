@@ -5,6 +5,7 @@ import { setButtonEnable } from '../../common/button_components';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -40,7 +41,7 @@ export async function buttonEnable(
                 'ボタンを有効化したでし！\n最後に押されたボタンが考え中になっていても通常の処理は行われるはずでし！',
         });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
             await interaction.channel.send('なんかエラー出てるわ');
         }

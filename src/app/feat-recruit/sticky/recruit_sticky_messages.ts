@@ -8,6 +8,7 @@ import { searchMessageById } from '../../common/manager/message_manager';
 import { RequireOne, assertExistCheck, exists, getCommandHelpEmbed } from '../../common/others';
 import { sendStickyMessage } from '../../common/sticky_message';
 import { StickyKey } from '../../constant/sticky_key';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 import { createNewRecruitButton } from '../buttons/create_recruit_buttons';
 
 const logger = log4js_obj.getLogger('message');
@@ -76,7 +77,7 @@ export async function sendRecruitSticky(stickyOptions: StickyOptions) {
             components: exists(channelName) ? [createNewRecruitButton(channelName)] : [],
         });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 

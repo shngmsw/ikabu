@@ -5,6 +5,7 @@ import { searchChannelById } from '../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById, getMemberColor } from '../../common/manager/member_manager';
 import { isNotEmpty, isEmpty, notExists, assertExistCheck, exists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -62,7 +63,7 @@ export async function voiceMention(interaction: ChatInputCommandInteraction<'cac
             await sendChannel.send({ content: mentions, embeds: [embed] });
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel) && interaction.channel.isTextBased()) {
             await interaction.channel.send('なんかエラー出てるわ');
         }

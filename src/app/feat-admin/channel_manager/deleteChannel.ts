@@ -13,6 +13,7 @@ import { searchChannelById } from '../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
@@ -82,7 +83,7 @@ export async function handleDeleteChannel(
             await interaction.editReply(parseInt(progress, 10) + '% 完了');
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await interaction.followUp('チャンネル削除中にエラーでし！');
     }
 

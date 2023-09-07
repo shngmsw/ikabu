@@ -14,6 +14,7 @@ import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -23,7 +24,7 @@ export async function stageInfo(guild: Guild) {
         assertExistCheck(process.env.CHANNEL_ID_STAGE_INFO, 'CHANNEL_ID_STAGE_INFO');
         const stageInfoChannel = await searchChannelById(guild, process.env.CHANNEL_ID_STAGE_INFO);
         if (notExists(stageInfoChannel) || !stageInfoChannel.isTextBased()) {
-            logger.error('stageInfo channel not found!');
+            await sendErrorLogs(logger, 'stageInfo channel not found!');
             return;
         }
 
@@ -63,7 +64,7 @@ export async function stageInfo(guild: Guild) {
             );
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
@@ -149,6 +150,6 @@ async function msgDelete(stageInfoChannel: GuildTextBasedChannel) {
         // それらのメッセージを一括削除
         await stageInfoChannel.bulkDelete(messages);
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

@@ -9,6 +9,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruitButton');
@@ -134,8 +135,8 @@ export async function del(
                 content: '他人の募集は消せる訳無いでし！！！',
             });
         }
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         await interaction.message.edit({
             components: setButtonDisable(interaction.message),
         });

@@ -23,6 +23,7 @@ import {
     setRoleToMember,
 } from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 // const INDEX_CATEGORY_ID = 0;
 const INDEX_CATEGORY_NAME = 1;
@@ -172,7 +173,7 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
                         const progress = `${(i / (data.length - 1)) * 100}`;
                         await interaction.editReply(parseInt(progress, 10) + '% 完了');
                     } catch (error) {
-                        logger.error(error);
+                        await sendErrorLogs(logger, error);
                         await interaction.followUp('データの' + i + '行目でエラーでし！');
                     }
                 }

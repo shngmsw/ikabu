@@ -16,6 +16,7 @@ import { modeApi, bufferToStream } from './voice_bot_node';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { exists, getDeveloperMention, isEmpty, notExists } from '../../../common/others';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 
 const infoLogger = log4js_obj.getLogger('info');
 const interactionLogger = log4js_obj.getLogger('interaction');
@@ -64,6 +65,8 @@ export const joinTTS = async (
                 guildId: guildId,
                 adapterCreator: member.voice.guild.voiceAdapterCreator,
             });
+            messageQueue.length = 0; // キューリセット
+            isPlaying = false; // 再生中フラグをリセット
             subscription = connection.subscribe(createAudioPlayer());
             connection.on('error', (error) => {
                 logger.warn(error);
@@ -82,7 +85,7 @@ export const joinTTS = async (
         }
     } catch (error) {
         await killTTS(interaction);
-        interactionLogger.error(error);
+        await sendErrorLogs(interactionLogger, error);
     }
 };
 
@@ -99,16 +102,20 @@ export const killTTS = async (
         if (notExists(interaction.channel) || !interaction.channel.isVoiceBased()) return;
 
         if (subscription && channels.get(guildId) === channelId) {
+            subscription.player.stop(); // 読み上げを停止
             subscription.connection.destroy();
             subscriptions.delete(guildId);
             channels.delete(guildId);
+            messageQueue.length = 0; // キューリセット
+            isPlaying = false; // 再生中フラグをリセット
+
             await interaction.channel.send(':dash:');
             await interaction.deleteReply();
         } else if (channels.get(guildId) != channelId) {
             await interaction.editReply('他の部屋で営業中でし！');
         }
     } catch (error) {
-        interactionLogger.error(error);
+        await sendErrorLogs(interactionLogger, error);
     }
 };
 
@@ -122,9 +129,13 @@ export async function autokill(oldState: VoiceState) {
         if (oldChannel.isVoiceBased() && oldChannel.members.size != 1) {
             return;
         }
+        subscription.player.stop(); // 読み上げを停止
         subscription.connection.destroy();
         subscriptions.delete(guildId);
         channels.delete(guildId);
+        messageQueue.length = 0; // キューリセット
+        isPlaying = false; // 再生中フラグをリセット
+
         await oldState.channel.send(':dash:');
     }
 }
@@ -145,7 +156,7 @@ export async function handleVoiceCommand(
                 break;
         }
     } catch (error) {
-        interactionLogger.error(error);
+        await sendErrorLogs(interactionLogger, error);
     }
 }
 
@@ -161,6 +172,9 @@ export async function play(msg: Message<true>) {
     if (exists(subscription) && channels.get(guildId) === channelId) {
         // 「でし！」で読み上げリセット
         if (content === 'でし！') {
+            const author = await searchAPIMemberById(msg.guild, msg.author.id);
+            if (notExists(author) || author.voice.channelId !== channelId) return;
+
             // キューをクリア
             messageQueue.length = 0;
 

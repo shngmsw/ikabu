@@ -1,6 +1,7 @@
 import { Member } from '@prisma/client';
 
 import { prisma } from './prisma';
+import { sendErrorLogs } from '../app/logs/error/send_error_logs';
 import { modalRecruit } from '../constant';
 import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
@@ -28,7 +29,7 @@ export class MemberService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -47,7 +48,7 @@ export class MemberService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -65,7 +66,7 @@ export class MemberService {
                 },
             });
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 
@@ -82,7 +83,7 @@ export class MemberService {
 
             return member;
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
             return null;
         }
     }
@@ -100,7 +101,7 @@ export class MemberService {
             }
             return guildIds;
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
             return [];
         }
     }
@@ -161,7 +162,7 @@ export class MemberService {
                 }
             }
         } catch (error) {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 }

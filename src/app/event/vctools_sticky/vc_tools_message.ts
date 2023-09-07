@@ -18,6 +18,7 @@ import { Merge, exists, getDeveloperMention, notExists } from '../../common/othe
 import { sendStickyMessage } from '../../common/sticky_message';
 import { VCLockButton, VCToolsButton } from '../../constant/button_id';
 import { StickyKey } from '../../constant/sticky_key';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('voiceStateUpdate');
 
@@ -91,7 +92,7 @@ export async function sendVCToolsSticky(
             components: createVCToolsButtons(channel),
         });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 

@@ -1,6 +1,7 @@
 import { Collection, ColorResolvable, Guild, GuildMember, Role } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 import { exists, notExists } from '../others';
 const logger = log4js_obj.getLogger('RoleManager');
 
@@ -71,7 +72,7 @@ export async function assignRoleToMember(roleIdOrRole: string | Role, member: Gu
         await member.roles.add(roleIdOrRole);
         return true;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return false;
     }
 }
@@ -87,7 +88,7 @@ export async function unassignRoleFromMember(roleIdOrRole: string | Role, member
         await member.roles.remove(roleIdOrRole);
         return true;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return false;
     }
 }
@@ -108,7 +109,7 @@ export async function assginRoleToMembers(
         });
         return true;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return false;
     }
 }
@@ -129,7 +130,7 @@ export async function unassginRoleFromMembers(
         });
         return true;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return false;
     }
 }

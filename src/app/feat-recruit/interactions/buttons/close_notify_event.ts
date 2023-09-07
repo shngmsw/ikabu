@@ -14,6 +14,7 @@ import {
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, datetimeDiff, exists, notExists } from '../../../common/others.js';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import {
     getStickyChannelId,
     sendCloseEmbedSticky,
@@ -165,8 +166,8 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
                 components: recoveryThinkingButton(interaction, '〆'),
             });
         }
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '〆'),
         });

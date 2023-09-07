@@ -8,6 +8,7 @@ import {
 
 import { log4js_obj } from '../../../log4js_settings';
 import { SupportCloseButton } from '../../constant/button_id';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('default');
 
@@ -27,6 +28,6 @@ export async function sendCloseButton(thread: AnyThreadChannel<boolean>) {
         );
         await thread.send({ embeds: [embed], components: [buttons] });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

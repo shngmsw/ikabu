@@ -9,6 +9,7 @@ import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { exists, notExists } from '../../common/others.js';
+import { sendErrorLogs } from '../../logs/error/send_error_logs.js';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -336,6 +337,6 @@ export async function ruleBigRunCanvas(data: Sp3Schedule) {
         const rule = ruleCanvas.toBuffer();
         return rule;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
