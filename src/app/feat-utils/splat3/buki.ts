@@ -6,6 +6,7 @@ import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 import { exists, randomSelect } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -113,6 +114,6 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
         }
     } catch (error) {
         await interaction.followUp('なんかエラーでてるわ');
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

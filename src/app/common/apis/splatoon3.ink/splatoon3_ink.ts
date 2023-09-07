@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 import { Sp3Locale } from './types/locale';
 import { Sp3Schedule } from './types/schedule';
 import { log4js_obj } from '../../../../log4js_settings';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { isDateWithinRange } from '../../datetime';
 import { assertExistCheck, exists, notExists } from '../../others';
 const schedule_url = 'https://splatoon3.ink/data/schedules.json';
@@ -29,7 +30,7 @@ export async function getSchedule() {
             return schedule;
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -44,7 +45,7 @@ export async function getLocale() {
         }
         return locale;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -67,7 +68,7 @@ export async function updateSchedule() {
         logger.info('schedule fetched!');
         return schduleData;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -84,7 +85,7 @@ export function checkFes(schedule: Sp3Schedule, num: number) {
         const festSetting = festList[num].festMatchSetting;
         return exists(festSetting);
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
     }
 }
 
@@ -113,7 +114,7 @@ export function checkBigRun(schedule: Sp3Schedule, num: number) {
         const nowDatetime = new Date();
         return isDateWithinRange(nowDatetime, startDatetime, endDatetime);
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
     }
 }
 
@@ -148,7 +149,7 @@ export function checkTeamContest(schedule: Sp3Schedule, num: number) {
             return true;
         }
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
     }
 }
 
@@ -169,7 +170,7 @@ export function getRegularList(schedule: Sp3Schedule) {
         }
         return result;
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
         return [];
     }
 }
@@ -191,7 +192,7 @@ export function getAnarchyList(schedule: Sp3Schedule) {
         }
         return result;
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
         return [];
     }
 }
@@ -204,7 +205,7 @@ export function getEventList(schedule: Sp3Schedule) {
     try {
         return schedule.eventSchedules.nodes;
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
         return [];
     }
 }
@@ -226,7 +227,7 @@ export function getSalmonList(schedule: Sp3Schedule) {
         }
         return result;
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
         return [];
     }
 }
@@ -248,7 +249,7 @@ export function getXMatchList(schedule: Sp3Schedule) {
         }
         return result;
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
         return [];
     }
 }
@@ -270,7 +271,7 @@ export function getFesList(schedule: Sp3Schedule) {
         }
         return result;
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
         return [];
     }
 }
@@ -283,7 +284,7 @@ export function getBigRunList(schedule: Sp3Schedule) {
     try {
         return schedule.coopGroupingSchedule.bigRunSchedules.nodes;
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
         return [];
     }
 }
@@ -296,7 +297,7 @@ export function getTeamContestList(schedule: Sp3Schedule) {
     try {
         return schedule.coopGroupingSchedule.teamContestSchedules.nodes;
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
         return [];
     }
 }
@@ -348,7 +349,7 @@ export async function getRegularData(schedule: Sp3Schedule, num: number) {
         }
         return result;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -390,7 +391,7 @@ export async function getAnarchyChallengeData(schedule: Sp3Schedule, num: number
         }
         return result;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -432,7 +433,7 @@ export async function getAnarchyOpenData(schedule: Sp3Schedule, num: number) {
         }
         return result;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -522,7 +523,7 @@ export async function getEventData(schedule: Sp3Schedule) {
 
         return result;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -570,7 +571,7 @@ export async function getSalmonData(schedule: Sp3Schedule, num: number) {
 
         return result;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -612,7 +613,7 @@ export async function getXMatchData(schedule: Sp3Schedule, num: number) {
         }
         return result;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -654,7 +655,7 @@ export async function getFesData(schedule: Sp3Schedule, num: number) {
         }
         return result;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -685,7 +686,7 @@ export async function getBigRunData(schedule: Sp3Schedule, num: number) {
         };
         return result;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -716,7 +717,7 @@ export async function getTeamContestData(schedule: Sp3Schedule, num: number) {
         };
         return result;
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -741,7 +742,7 @@ export async function stage2txt(locale: Sp3Locale, id: string, fetch = true): Pr
             return stages[id].name;
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return 'そーりー・あんでふぁいんど';
     }
 }
@@ -766,7 +767,7 @@ export async function rule2txt(locale: Sp3Locale, id: string, fetch = true): Pro
             return rules[id].name;
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return 'そーりー・あんでふぁいんど';
     }
 }
@@ -799,7 +800,7 @@ export async function event2txt(
             return result;
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return {
             title: 'そーりー・あんでふぁいんど',
             description: 'そーりー・あんでふぁいんど',

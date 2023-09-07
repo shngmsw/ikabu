@@ -16,6 +16,7 @@ import {
 import { searchMessageById } from '../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../common/others';
 import { QuestionnaireParam } from '../../constant/button_id';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 export async function questionnaireButtonHandler(
     interaction: ButtonInteraction<'cached' | 'raw'>,
@@ -73,7 +74,7 @@ export async function sendIntentionConfirmReply(
             // チャットがすぐに消されて処理が間に合わなかった時にエラーでると面倒なので警告のみ
             logger.warn('questionnaire was not sent. [ message missing! ]');
         } else {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 }
@@ -105,7 +106,7 @@ function questionnaireButton(userId: string, urlKey: string) {
         ]);
         return buttons;
     } catch (error) {
-        logger.error(error);
+        void sendErrorLogs(logger, error);
     }
 }
 
@@ -156,7 +157,7 @@ export async function sendQuestionnaireFollowUp(
             components: disableThinkingButton(interaction, '答える'),
         });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
@@ -185,6 +186,6 @@ export async function disableQuestionnaireButtons(
             components: disableThinkingButton(interaction, '答えない'),
         });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

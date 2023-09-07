@@ -19,6 +19,7 @@ import {
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, isEmpty, isNotEmpty, notExists } from '../../../common/others';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { sendRecruitModalLog } from '../../../logs/modals/recruit_modal_log';
 
 const logger = log4js_obj.getLogger('recruit');
@@ -165,7 +166,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
         }
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
@@ -322,7 +323,7 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
         }
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
@@ -487,7 +488,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
         }
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
@@ -618,7 +619,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
         }
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
@@ -782,6 +783,6 @@ export async function modalFesRecruit(
         if (exists(channel)) {
             await channel.send('なんかエラーでてるわ');
         }
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

@@ -18,6 +18,7 @@ import { getGuildByInteraction } from '../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../common/manager/member_manager.js';
 import { assertExistCheck, exists } from '../../common/others.js';
 import { FriendCodeButton } from '../../constant/button_id.js';
+import { sendErrorLogs } from '../../logs/error/send_error_logs.js';
 const logger = log4js_obj.getLogger();
 
 export async function handleFriendCode(interaction: ChatInputCommandInteraction<CacheType>) {
@@ -90,7 +91,7 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
                     return value.content;
                 });
             } catch (error) {
-                logger.error(error);
+                await sendErrorLogs(logger, error);
             }
 
             const button = new ActionRowBuilder<ButtonBuilder>();

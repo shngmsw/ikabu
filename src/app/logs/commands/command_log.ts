@@ -10,6 +10,7 @@ import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, exists } from '../../common/others';
 import { sendEmbedsWebhook } from '../../common/webhook';
+import { sendErrorLogs } from '../error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -79,6 +80,6 @@ export async function sendCommandLog(
         assertExistCheck(process.env.COMMAND_LOG_WEBHOOK_URL, 'COMMAND_LOG_WEBHOOK_URL');
         await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

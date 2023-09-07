@@ -7,6 +7,7 @@ import {
     unassginRoleFromMembers,
 } from '../../common/manager/role_manager';
 import { assertExistCheck } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -23,7 +24,7 @@ export async function festEnd(
         });
         await interaction.editReply('フェス設定を`オフ`にしたでし！');
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await interaction.editReply('設定中にエラーが発生したでし！');
     }
 
@@ -50,7 +51,7 @@ export async function festEnd(
             await interaction.followUp('`フウカ陣営`ロールを外すのに失敗したでし！');
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await interaction.followUp('`フウカ陣営`ロールを外すのに失敗したでし！');
     }
 
@@ -67,7 +68,7 @@ export async function festEnd(
             await interaction.followUp('`ウツホ陣営`ロールを外すのに失敗したでし！');
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await interaction.followUp('`ウツホ陣営`ロールを外すのに失敗したでし！');
     }
 
@@ -86,7 +87,7 @@ export async function festEnd(
             await interaction.followUp('`マンタロー陣営`ロールを外すのに失敗したでし！');
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await interaction.followUp('`マンタロー陣営`ロールを外すのに失敗したでし！');
     }
 }

@@ -23,6 +23,7 @@ import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { searchMessageById } from '../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
 import { TeamDividerParam } from '../../constant/button_id';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -88,8 +89,8 @@ export async function dividerInitialMessage(
             embeds: [embed],
             components: [buttons],
         });
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
             if (exists(interaction.channel)) {
                 await interaction.channel.send('なんかエラー出てるわ');
@@ -188,8 +189,8 @@ export async function joinButton(
             components: recoveryThinkingButton(interaction, '参加'),
         });
         await interaction.followUp({ content: '登録したでし！', ephemeral: true });
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
             await interaction.channel.send('なんかエラー出てるわ');
         }
@@ -270,8 +271,8 @@ export async function cancelButton(
                 components: recoveryThinkingButton(interaction, 'キャンセル'),
             });
         }
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
             await interaction.channel.send('なんかエラー出てるわ');
         }
@@ -396,8 +397,8 @@ export async function registerButton(
             content: 'チームを更新したでし！',
             ephemeral: true,
         });
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
             await interaction.channel.send('なんかエラー出てるわ');
         }
@@ -601,8 +602,8 @@ async function matching(
                 ephemeral: false,
             });
         }
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
             await interaction.channel.send('なんかエラー出てるわ');
         }
@@ -705,8 +706,8 @@ export async function spectateButton(
                 ephemeral: true,
             });
         }
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
             await interaction.channel.send('なんかエラー出てるわ');
         }
@@ -751,8 +752,8 @@ export async function endButton(
         });
         await TeamDividerService.deleteAllMemberFromDB(messageId);
         await interaction.message.reply({ content: 'チーム分けを終了したでし！' });
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
             await interaction.channel.send('なんかエラー出てるわ');
         }
@@ -812,8 +813,8 @@ export async function correctButton(
                 '最新のチーム分けを削除したでし！\nもう一度同じ操作をしても違うチーム分けになる場合があるでし！',
             ephemeral: true,
         });
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
             await interaction.channel.send('なんかエラー出てるわ');
             await interaction.channel.send(
@@ -889,8 +890,8 @@ export async function hideButton(
             embeds: [embed],
             components: recoveryThinkingButton(interaction, '戦績表示切替'),
         });
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         if (exists(interaction.channel) && interaction.channel.isTextBased()) {
             if (exists(interaction.channel)) {
                 await interaction.channel.send('なんかエラー出てるわ');
@@ -974,8 +975,8 @@ async function loadTeamEmbed(messageId: string, count: number, hostMember: Guild
             },
         ]);
         return embed;
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
         return null;
     }
 }
@@ -1157,8 +1158,8 @@ function usersString(array: TeamMember[]) {
             }
         }
         return usersString;
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        void sendErrorLogs(logger, error);
         return 'エラー';
     }
 }

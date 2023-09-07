@@ -16,6 +16,7 @@ import { searchChannelById } from '../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('ChannelManager');
 
@@ -59,7 +60,7 @@ export async function handleDeleteCategory(
                     }
                     categoryIdList = Array.from(new Set(categoryIdList));
                 } catch (error) {
-                    logger.error(error);
+                    await sendErrorLogs(logger, error);
                     await interaction.followUp('CSVファイル読み込み中にエラーでし！');
                 }
                 await deleteCategory(interaction, categoryIdList);
@@ -124,7 +125,7 @@ async function deleteCategory(
             await interaction.editReply(parseInt(progress, 10) + '% 完了');
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await interaction.followUp('カテゴリ削除中にエラーでし！');
     }
 

@@ -5,6 +5,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { assertExistCheck } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const ENV_FILE_PATH = path.resolve('./', '.env');
 
@@ -35,7 +36,7 @@ export async function deleteVariables(interaction: ChatInputCommandInteraction<'
             files: [env_file],
         });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 
@@ -61,6 +62,6 @@ async function deleteEnvValue(key: string) {
             return false;
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

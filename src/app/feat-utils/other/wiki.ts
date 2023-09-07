@@ -3,6 +3,7 @@ import wiki from 'wikijs';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 export async function handleWiki(interaction: ChatInputCommandInteraction<CacheType>) {
     const logger = log4js_obj.getLogger('interaction');
@@ -40,6 +41,6 @@ export async function handleWiki(interaction: ChatInputCommandInteraction<CacheT
 
         await interaction.editReply({ embeds: [embed] });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

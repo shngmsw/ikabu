@@ -8,6 +8,7 @@ import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
+import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -31,8 +32,8 @@ export async function unlock(
         await interaction.update({
             components: disableThinkingButton(interaction, 'ロック解除済み'),
         });
-    } catch (err) {
-        logger.error(err);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
     }
 }
 

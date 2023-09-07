@@ -16,6 +16,7 @@ import { searchChannelById } from '../../common/manager/channel_manager';
 import { getAPIMemberByInteraction } from '../../common/manager/member_manager';
 import { Merge, getDeveloperMention, notExists } from '../../common/others';
 import { VCLockButton } from '../../constant/button_id';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -102,7 +103,7 @@ export async function voiceLockUpdate(
             // ボタンを押されたときにメッセージが削除されていた場合
             logger.warn('interaction.message was missing. (Sticky)');
         } else {
-            logger.error(error);
+            await sendErrorLogs(logger, error);
         }
     }
 }

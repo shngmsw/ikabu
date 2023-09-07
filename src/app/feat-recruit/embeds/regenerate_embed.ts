@@ -4,6 +4,7 @@ import { RecruitService, RecruitType } from '../../../db/recruit_service';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchMessageById } from '../../common/manager/message_manager';
 import { assertExistCheck, notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -52,6 +53,6 @@ export async function regenerateEmbed(
         const newEmbed = EmbedBuilder.from(oldEmbed).setFields(newFields);
         await message.edit({ embeds: [newEmbed] });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

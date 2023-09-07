@@ -9,6 +9,7 @@ import { searchChannelById } from '../../common/manager/channel_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager.js';
 import { assignRoleToMember, searchRoleById } from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../common/others.js';
+import { sendErrorLogs } from '../../logs/error/send_error_logs.js';
 
 const logger = log4js_obj.getLogger('guildMemberAdd');
 
@@ -25,7 +26,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
         const userId = newMember.user.id;
 
         if (notExists(lobbyChannel) || !lobbyChannel.isTextBased()) {
-            logger.error('lobby channel not found!');
+            await sendErrorLogs(logger, 'lobby channel not found!');
             return;
         }
 
@@ -55,7 +56,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
             }
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }
 

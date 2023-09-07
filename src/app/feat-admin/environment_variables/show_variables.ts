@@ -2,6 +2,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
 import { assertExistCheck } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -16,6 +17,6 @@ export async function showVariables(interaction: ChatInputCommandInteraction<'ca
             files: [env_file],
         });
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
     }
 }

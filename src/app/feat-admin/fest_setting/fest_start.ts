@@ -1,6 +1,7 @@
 import { CategoryChannel, ChatInputCommandInteraction, Guild } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
@@ -16,7 +17,7 @@ export async function festStart(
         });
         return await interaction.editReply('フェス設定を`オン`にしたでし！');
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         return await interaction.editReply('設定中にエラーが発生したでし！');
     }
 }

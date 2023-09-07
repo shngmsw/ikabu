@@ -17,6 +17,7 @@ import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { Merge, assertExistCheck, exists, notExists } from '../../common/others';
 import { CommandVCLockButton } from '../../constant/button_id';
 import { sendVCToolsSticky } from '../../event/vctools_sticky/vc_tools_message';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 const logger = log4js_obj.getLogger('interaction');
 
 /*
@@ -77,8 +78,8 @@ export async function voiceLocker(interaction: ChatInputCommandInteraction<'cach
                 components: [button],
                 fetchReply: true,
             })
-            .catch((error) => {
-                logger.error(error);
+            .catch(async (error) => {
+                await sendErrorLogs(logger, error);
             });
 
         // 1分後にメッセージを削除
@@ -172,8 +173,8 @@ export async function voiceLockCommandUpdate(
                     ephemeral: true,
                     fetchReply: true,
                 })
-                .catch((error) => {
-                    logger.error(error);
+                .catch(async (error) => {
+                    await sendErrorLogs(logger, error);
                 });
             return;
         }
@@ -185,8 +186,8 @@ export async function voiceLockCommandUpdate(
             components: [createVCLButton(channelState)],
             fetchReply: true,
         })
-        .catch((error) => {
-            logger.error(error);
+        .catch(async (error) => {
+            await sendErrorLogs(logger, error);
         });
 
     await sendVCToolsSticky(guild, channel, false);

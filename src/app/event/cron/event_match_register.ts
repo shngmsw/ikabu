@@ -13,6 +13,7 @@ import {
     existsGuildScheduledEvent,
 } from '../../common/manager/guild_scheduled_event_manager';
 import { exists, notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -21,7 +22,7 @@ export async function subscribeSplatEventMatch(guild: Guild) {
     const schedule = await getSchedule();
 
     if (notExists(schedule)) {
-        logger.error('schedule is not exists!');
+        await sendErrorLogs(logger, 'schedule is not exists!');
         return;
     }
     const eventList = getEventList(schedule);

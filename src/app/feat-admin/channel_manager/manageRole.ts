@@ -21,6 +21,7 @@ import {
     unassginRoleFromMembers,
 } from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
+import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('RoleManager');
 
@@ -77,7 +78,7 @@ export async function handleCreateRole(interaction: ChatInputCommandInteraction<
                 '`でし！',
         );
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await interaction.followUp('なんかエラーでてるわ');
     }
 }
@@ -144,7 +145,7 @@ export async function handleDeleteRole(interaction: ChatInputCommandInteraction<
             await interaction.editReply(parseInt(progress, 10) + '% 完了');
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await interaction.editReply('ロール削除中にエラーでし！');
     }
 
@@ -196,7 +197,7 @@ export async function handleAssignRole(interaction: ChatInputCommandInteraction<
             '`' + targetRole.name + '`のメンバーに`' + assignRole.name + '`のロールつけたでし！',
         );
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await interaction.editReply('なんかエラーでてるわ');
     }
 }
@@ -243,7 +244,7 @@ export async function handleUnassignRole(
             return await interaction.editReply('ロールの解除に失敗したでし!');
         }
     } catch (error) {
-        logger.error(error);
+        await sendErrorLogs(logger, error);
         await interaction.editReply('なんかエラーでてるわ');
     }
 }
