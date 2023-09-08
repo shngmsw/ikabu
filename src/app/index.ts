@@ -8,12 +8,14 @@ import {
     CacheType,
     Client,
     ClientUser,
+    DMChannel,
     GatewayIntentBits,
     Guild,
     GuildMember,
     Interaction,
     Message,
     MessageReaction,
+    NonThreadGuildBasedChannel,
     PartialGuildMember,
     PartialMessageReaction,
     PartialUser,
@@ -25,6 +27,11 @@ import {
 import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from './common/others';
+import {
+    deleteChannel,
+    saveChannel,
+    saveChannelAtLaunch,
+} from './event/channel_related/store_channel';
 import { subscribeSplatEventMatch } from './event/cron/event_match_register';
 import { stageInfo } from './event/cron/stageinfo';
 import { emojiCountDown, emojiCountUp } from './event/reaction_count/reactions';
@@ -212,6 +219,7 @@ client.on('ready', async (client: Client<true>) => {
     try {
         assertExistCheck(client.user);
         logger.info(`Logged in as ${client.user.tag}!`);
+        await saveChannelAtLaunch(client);
         await registerSlashCommands();
         const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
         setEnrollmentCount(client.user, guild);
@@ -328,6 +336,31 @@ client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
 
 client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
     void vcStateUpdateHandler.call(oldState, newState);
+});
+
+// チャンネルが作成されたとき
+client.on('channelCreate', async (channel: NonThreadGuildBasedChannel) => {
+    await saveChannel(channel);
+});
+
+// チャンネルが更新されたとき
+client.on(
+    'channelUpdate',
+    async (
+        oldChannel: DMChannel | NonThreadGuildBasedChannel,
+        newChannel: DMChannel | NonThreadGuildBasedChannel,
+    ) => {
+        if (!newChannel.isDMBased()) {
+            await saveChannel(newChannel);
+        }
+    },
+);
+
+// チャンネルが削除されたとき
+client.on('channelDelete', async (channel: DMChannel | NonThreadGuildBasedChannel) => {
+    if (!channel.isDMBased()) {
+        await deleteChannel(channel);
+    }
 });
 
 function setEnrollmentCount(clientUser: ClientUser, guild: Guild) {
