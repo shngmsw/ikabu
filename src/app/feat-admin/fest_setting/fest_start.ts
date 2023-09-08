@@ -13,16 +13,9 @@ export async function festStart(
     try {
         const channels = categoryChannel.children.cache;
         channels.each(async (channel) => {
-            if (channel.id === process.env.CHANNEL_ID_FEST_VOTE) {
-                await channel.permissionOverwrites.create(guild.roles.everyone, {
-                    ViewChannel: true,
-                    SendMessages: false,
-                });
-            } else {
-                await channel.permissionOverwrites.create(guild.roles.everyone, {
-                    ViewChannel: true,
-                });
-            }
+            await channel.permissionOverwrites.edit(guild.roles.everyone, {
+                ViewChannel: true,
+            });
         });
         return await interaction.editReply('フェス設定を`オン`にしたでし！');
     } catch (error) {

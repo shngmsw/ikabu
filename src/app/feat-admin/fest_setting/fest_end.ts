@@ -20,7 +20,9 @@ export async function festEnd(
     try {
         const channels = categoryChannel.children.cache;
         channels.each(async (channel) => {
-            await channel.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
+            await channel.permissionOverwrites.edit(guild.roles.everyone, {
+                ViewChannel: false,
+            });
         });
         await interaction.editReply('フェス設定を`オフ`にしたでし！');
     } catch (error) {
