@@ -16,6 +16,7 @@ import {
 } from 'discord.js';
 
 import { assertExistCheck } from './app/common/others.js';
+import { ChannelKeySet } from './app/constant/channel_key.js';
 import { sendErrorLogs } from './app/logs/error/send_error_logs.js';
 import { commandNames } from './constant.js';
 import { log4js_obj } from './log4js_settings.js';
@@ -1208,6 +1209,51 @@ const voiceChannelMention = new SlashCommandBuilder()
     )
     .setDMPermission(false);
 
+function addUniqueChannelChoices(stringOption: SlashCommandStringOption) {
+    for (const { name, key } of Object.values(ChannelKeySet)) {
+        stringOption.addChoices({ name: name, value: key });
+    }
+    return stringOption;
+}
+
+const channelSettings = new SlashCommandBuilder()
+    .setName(commandNames.channelSettings)
+    .setDescription('固有チャンネルの設定ができます。')
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand
+            .setName('全設定表示')
+            .setDescription('すべての固有チャンネルの設定を表示します。'),
+    )
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand
+            .setName('登録')
+            .setDescription('固有チャンネルを設定します。')
+            .addStringOption((option: SlashCommandStringOption) =>
+                addUniqueChannelChoices(option)
+                    .setName('設定項目')
+                    .setDescription('設定する項目を選択してください。')
+                    .setRequired(true),
+            )
+            .addChannelOption((option: SlashCommandChannelOption) =>
+                option
+                    .setName('チャンネル')
+                    .setDescription('設定するチャンネルを指定してください。')
+                    .setRequired(true),
+            ),
+    )
+    .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
+        subcommand
+            .setName('解除')
+            .setDescription('固有チャンネルの設定を解除します。')
+            .addStringOption((option: SlashCommandStringOption) =>
+                addUniqueChannelChoices(option)
+                    .setName('設定項目')
+                    .setDescription('設定を解除する項目を選択してください。')
+                    .setRequired(true),
+            ),
+    )
+    .setDMPermission(false);
+
 const variablesSettings = new SlashCommandBuilder()
     .setName(commandNames.variablesSettings)
     .setDescription('環境変数の設定・表示ができます。')
@@ -1321,6 +1367,7 @@ const commands = [
     buttonEnabler,
     recruitEditor,
     voiceChannelMention,
+    channelSettings,
     variablesSettings,
     joinedDateFixer,
     festivalSettings,

@@ -28,6 +28,7 @@ export const commandNames = {
     buttonEnabler: 'ボタンを有効化する',
     recuitEditor: '募集を編集',
     voiceChannelMention: 'ボイスメンション',
+    channelSettings: '固有チャンネル設定',
     variablesSettings: '環境変数設定',
     joinedDateFixer: '入部日修正',
     festivalSettings: 'フェスカテゴリ設定',
