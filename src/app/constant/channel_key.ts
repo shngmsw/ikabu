@@ -1,5 +1,6 @@
 import { ObjectValueList } from './constant_common';
 
+// 固有の機能チャンネルを増やすときはここに追加するだけでOK
 export const ChannelKeySet = {
     Lobby: { name: 'イカ部ロビー', key: 'CHANNEL_ID_LOBBY' },
     Description: { name: 'チャンネル説明', key: 'CHANNEL_ID_DESCRIPTION' },
