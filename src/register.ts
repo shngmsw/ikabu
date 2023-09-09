@@ -1209,6 +1209,30 @@ const voiceChannelMention = new SlashCommandBuilder()
     )
     .setDMPermission(false);
 
+const channelSettings = new SlashCommandBuilder()
+    .setName(commandNames.channelSetting)
+    .setDescription('各チャンネルの設定ができます。')
+    .addBooleanOption((option: SlashCommandBooleanOption) =>
+        option
+            .setName('vctoolsを使用する')
+            .setDescription('VCToolsを使用するかどうかを設定します。')
+            .setRequired(false),
+    )
+    .addBooleanOption((option: SlashCommandBooleanOption) =>
+        option
+            .setName('管理者限定チャンネルとして設定する')
+            .setDescription(
+                '⚠このチャンネルで管理者限定コマンドを使用することができるようになります。',
+            )
+            .setRequired(false),
+    )
+    .addChannelOption((option: SlashCommandChannelOption) =>
+        option
+            .setName('チャンネル')
+            .setDescription('⚠カテゴリを指定するとカテゴリ内のチャンネルが一括で変更されます。')
+            .setRequired(false),
+    );
+
 function addUniqueChannelChoices(stringOption: SlashCommandStringOption) {
     for (const { name, key } of Object.values(ChannelKeySet)) {
         stringOption.addChoices({ name: name, value: key });
@@ -1216,8 +1240,8 @@ function addUniqueChannelChoices(stringOption: SlashCommandStringOption) {
     return stringOption;
 }
 
-const channelSettings = new SlashCommandBuilder()
-    .setName(commandNames.channelSettings)
+const uniqueChannelSettings = new SlashCommandBuilder()
+    .setName(commandNames.uniqueChannelSetting)
     .setDescription('固有チャンネルの設定ができます。')
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
@@ -1368,6 +1392,7 @@ const commands = [
     recruitEditor,
     voiceChannelMention,
     channelSettings,
+    uniqueChannelSettings,
     variablesSettings,
     joinedDateFixer,
     festivalSettings,

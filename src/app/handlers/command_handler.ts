@@ -13,6 +13,7 @@ import {
     handleAssignRole,
     handleUnassignRole,
 } from '../feat-admin/channel_manager/manageRole.js';
+import { channelSettingsHandler } from '../feat-admin/channel_settings/channel_settings_hanlder.js';
 import { variablesHandler } from '../feat-admin/environment_variables/variables_handler';
 import { festSettingHandler } from '../feat-admin/fest_setting/fest_settings.js';
 import { joinedAtFixer } from '../feat-admin/joined_date_fixer/fix_joined_date.js';
@@ -106,7 +107,9 @@ async function guildOnlyCommandsHandler(
         await handleIkabuExperience(interaction);
     } else if (commandName === commandNames.voiceChannelMention) {
         await voiceMention(interaction);
-    } else if (commandName === commandNames.channelSettings) {
+    } else if (commandName === commandNames.channelSetting) {
+        await channelSettingsHandler(interaction);
+    } else if (commandName === commandNames.uniqueChannelSetting) {
         await uniqueChannelSettingsHandler(interaction);
     } else if (commandName === commandNames.variablesSettings) {
         await variablesHandler(interaction);

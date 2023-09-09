@@ -117,6 +117,20 @@ export class ChannelService {
         }
     }
 
+    static async getChannelsByCategoryId(guildId: string, categoryId: string) {
+        try {
+            return await prisma.dBChannel.findMany({
+                where: {
+                    guildId: guildId,
+                    parentId: categoryId,
+                },
+            });
+        } catch (error) {
+            await sendErrorLogs(logger, error);
+            return [];
+        }
+    }
+
     static async getAllGuildChannels(guildId: string) {
         try {
             return await prisma.dBChannel.findMany({
