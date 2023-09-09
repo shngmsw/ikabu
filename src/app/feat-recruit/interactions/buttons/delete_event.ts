@@ -128,7 +128,8 @@ export async function del(
             });
 
             // テキストの募集チャンネルにSticky Messageを送信
-            const stickyChannelId = getStickyChannelId(recruitData) ?? interaction.channel.id;
+            const stickyChannelId =
+                (await getStickyChannelId(recruitData)) ?? interaction.channel.id;
             await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
         } else {
             await interaction.editReply({

@@ -25,8 +25,10 @@ import {
 } from 'discord.js';
 
 import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
+import { searchChannelById } from './common/manager/channel_manager';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from './common/others';
+import { ChannelKeySet } from './constant/channel_key';
 import {
     deleteChannel,
     saveChannel,
@@ -48,6 +50,7 @@ import * as vcStateUpdateHandler from './handlers/vcState_update_handler';
 import { sendErrorLogs } from './logs/error/send_error_logs';
 import { MemberService } from '../db/member_service';
 import { ParticipantService } from '../db/participant_service';
+import { UniqueChannelService } from '../db/unique_channel_service';
 import { log4js_obj } from '../log4js_settings';
 import { registerSlashCommands } from '../register';
 
@@ -99,6 +102,7 @@ client.on('guildMemberAdd', async (member: GuildMember) => {
 });
 
 client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) => {
+    const loggerMR = log4js_obj.getLogger('guildMemberRemove');
     try {
         const displayName = member.displayName;
         const username = member.user.username;
@@ -121,19 +125,25 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
             text += '入部日を取得できなかったでし！';
         }
 
-        assertExistCheck(process.env.CHANNEL_ID_RETIRE_LOG);
-        const retireLog = member.guild.channels.cache.get(process.env.CHANNEL_ID_RETIRE_LOG);
+        const guild = await member.guild.fetch();
+
+        const logChannelId = await UniqueChannelService.getChannelIdByKey(
+            guild.id,
+            ChannelKeySet.RetireLog.key,
+        );
+        if (notExists(logChannelId)) {
+            return logger.warn(`${ChannelKeySet.RetireLog.key} is not set. [${guild.name}]`);
+        }
+        const retireLog = await searchChannelById(guild, logChannelId);
         if (retireLog?.isTextBased()) {
             await retireLog.send(text);
         }
 
-        const guild = await member.guild.fetch();
         if (guild.id === process.env.SERVER_ID) {
             assertExistCheck(client.user, 'client.user');
             setEnrollmentCount(client.user, guild);
         }
     } catch (error) {
-        const loggerMR = log4js_obj.getLogger('guildMemberRemove');
         await sendErrorLogs(loggerMR, error);
     }
 });
@@ -328,7 +338,11 @@ client.on('interactionCreate', async (interaction: Interaction<CacheType>) => {
 });
 
 client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
-    if (exists(thread.parentId) && thread.parentId === process.env.CHANNEL_ID_SUPPORT_CENTER) {
+    const supportChannelId = await UniqueChannelService.getChannelIdByKey(
+        thread.guildId,
+        ChannelKeySet.SupportCenter.key,
+    );
+    if (exists(thread.parentId) && thread.parentId === supportChannelId) {
         await editThreadTag(thread);
         await sendCloseButton(thread);
     }

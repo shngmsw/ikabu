@@ -23,7 +23,10 @@ export async function unsetUniqueChannelCommand(
             });
         }
 
-        const storedChannelId = await UniqueChannelService.getChannelId(interaction.guildId, key);
+        const storedChannelId = await UniqueChannelService.getChannelIdByKey(
+            interaction.guildId,
+            key,
+        );
 
         if (notExists(storedChannelId)) {
             await interaction.editReply({

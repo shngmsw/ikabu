@@ -1,8 +1,10 @@
 import { Logger } from 'log4js';
 
 import { client } from '../..';
+import { UniqueChannelService } from '../../../db/unique_channel_service';
 import { log4js_obj } from '../../../log4js_settings';
 import { assertExistCheck, notExists } from '../../common/others';
+import { ChannelKeySet } from '../../constant/channel_key';
 
 export async function sendErrorLogs(logger: Logger, error: unknown) {
     const defaultLogger = log4js_obj.getLogger('default');
@@ -11,16 +13,21 @@ export async function sendErrorLogs(logger: Logger, error: unknown) {
 
     if (!client.isReady()) return;
 
-    const serverId = process.env.SERVER_ID;
-    assertExistCheck(serverId, 'SERVER_ID');
+    const guildId = process.env.SERVER_ID;
+    assertExistCheck(guildId, 'SERVER_ID');
 
-    if (notExists(process.env.CHANNEL_ID_ERROR_LOG)) {
-        return defaultLogger.warn('CHANNEL_ID_ERROR_LOG is not defined.');
+    const errorLogChannelId = await UniqueChannelService.getChannelIdByKey(
+        guildId,
+        ChannelKeySet.ErrorLog.key,
+    );
+
+    if (notExists(errorLogChannelId)) {
+        return defaultLogger.warn(ChannelKeySet.ErrorLog.key + ' is not defined.');
     }
 
     try {
-        const guild = await client.guilds.fetch(serverId);
-        const errorLogChannel = await guild.channels.fetch(process.env.CHANNEL_ID_ERROR_LOG);
+        const guild = await client.guilds.fetch(guildId);
+        const errorLogChannel = await guild.channels.fetch(errorLogChannelId);
 
         if (notExists(errorLogChannel)) {
             return defaultLogger.warn('error log channel is not found.');

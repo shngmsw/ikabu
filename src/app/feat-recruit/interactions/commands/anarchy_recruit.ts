@@ -24,6 +24,7 @@ import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleIdByName } from '../../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
+import { getFestPeriodAlertText } from '../../alert_texts/schedule_related_alerts';
 import {
     recruitActionRow,
     recruitDeleteButton,
@@ -143,16 +144,7 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
         }
 
         if (checkFes(schedule, type)) {
-            const fes1ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_SHIVER}>`;
-            const fes2ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_FRYE}>`;
-            const fes3ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_BIGMAN}>`;
-            assertExistCheck(fes1ChannelId, 'CHANNEL_ID_RECRUIT_SHIVER');
-            assertExistCheck(fes2ChannelId, 'CHANNEL_ID_RECRUIT_FRYE');
-            assertExistCheck(fes3ChannelId, 'CHANNEL_ID_RECRUIT_BIGMAN');
-            await interaction.editReply({
-                content: `募集を建てようとした期間はフェス中でし！\n${fes1ChannelId}, ${fes2ChannelId}, ${fes3ChannelId}のチャンネルを使うでし！`,
-            });
-            return;
+            return await interaction.editReply(await getFestPeriodAlertText(guild.id));
         }
 
         const anarchyData = await getAnarchyOpenData(schedule, type);

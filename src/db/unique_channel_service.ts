@@ -31,7 +31,7 @@ export class UniqueChannelService {
         }
     }
 
-    static async getChannelId(guildId: string, key: ChannelKey) {
+    static async getChannelIdByKey(guildId: string, key: ChannelKey) {
         try {
             const result = await prisma.uniqueChannel.findUnique({
                 where: {

@@ -1,6 +1,7 @@
 import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 import { commandNames } from '../../constant.js';
+import { getGuildByInteraction } from '../common/manager/guild_manager.js';
 import { assertExistCheck, getCloseEmbed, getCommandHelpEmbed } from '../common/others';
 import { handleBan } from '../feat-admin/ban/ban';
 import { handleCreateRoom } from '../feat-admin/channel_manager/createRoom.js';
@@ -71,10 +72,11 @@ async function guildOnlyCommandsHandler(
         }
         assertExistCheck(interaction.channel, 'channel');
         //serverコマンド
+        const guild = await getGuildByInteraction(interaction);
         const embed = getCloseEmbed();
         if (!interaction.replied) {
             await interaction.reply({
-                embeds: [embed, getCommandHelpEmbed(interaction.channel.name)],
+                embeds: [embed, await getCommandHelpEmbed(guild, interaction.channel.name)],
                 components: [createNewRecruitButton(interaction.channel.name)],
             });
         }
