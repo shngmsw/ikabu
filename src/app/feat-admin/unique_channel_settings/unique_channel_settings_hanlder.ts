@@ -13,7 +13,7 @@ export async function uniqueChannelSettingsHandler(
     interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
 ) {
     try {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: false });
 
         const member = await getAPIMemberByInteraction(interaction);
 
