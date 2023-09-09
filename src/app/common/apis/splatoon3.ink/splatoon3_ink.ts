@@ -82,7 +82,7 @@ export async function updateSchedule() {
 export function checkFes(schedule: Sp3Schedule, num: number) {
     try {
         const festList = getFesList(schedule);
-        const festSetting = festList[num].festMatchSetting;
+        const festSetting = festList[num].festMatchSettings[1];
         return exists(festSetting);
     } catch (error) {
         void sendErrorLogs(logger, error);
@@ -632,7 +632,7 @@ export async function getFesData(schedule: Sp3Schedule, num: number) {
             return null;
         }
 
-        const festSetting = festList[num].festMatchSetting;
+        const festSetting = festList[num].festMatchSettings[1];
 
         const result: MatchInfo = {
             startTime: festList[num].startTime,
