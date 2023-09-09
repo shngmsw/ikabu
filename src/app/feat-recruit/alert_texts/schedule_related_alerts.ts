@@ -17,6 +17,6 @@ export async function getFestPeriodAlertText(guildId: string) {
 
     return (
         `募集を建てようとした期間はフェス中でし！\n` +
-        `\`<#${shiverChannelId}>\`, \`<#${fryeChannelId}>\`, \`<#${bigmanChannelId}>\`のチャンネルを使うでし！`
+        `<#${shiverChannelId}>, <#${fryeChannelId}>, <#${bigmanChannelId}>のチャンネルを使うでし！`
     );
 }
