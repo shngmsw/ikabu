@@ -82,8 +82,8 @@ export async function updateSchedule() {
 export function checkFes(schedule: Sp3Schedule, num: number) {
     try {
         const festList = getFesList(schedule);
-        const festSetting = festList[num].festMatchSettings;
-        return exists(festSetting);
+        const festSettings = festList[num].festMatchSettings;
+        return exists(festSettings);
     } catch (error) {
         void sendErrorLogs(logger, error);
     }
@@ -631,7 +631,7 @@ export async function getFesChallengeData(schedule: Sp3Schedule, num: number) {
             return null;
         }
 
-        const festSetting = festList[num].festMatchSettings;
+        const festSettings = festList[num].festMatchSettings;
 
         const result: MatchInfo = {
             startTime: festList[num].startTime,
@@ -639,18 +639,18 @@ export async function getFesChallengeData(schedule: Sp3Schedule, num: number) {
         };
 
         const locale = await getLocale();
-        if (checkFes(schedule, num) && exists(festSetting)) {
+        if (checkFes(schedule, num) && exists(festSettings)) {
             if (exists(locale)) {
-                result.rule = await rule2txt(locale, festSetting[1].vsRule.id);
-                result.stage1 = await stage2txt(locale, festSetting[1].vsStages[0].id);
-                result.stage2 = await stage2txt(locale, festSetting[1].vsStages[1].id);
+                result.rule = await rule2txt(locale, festSettings[1].vsRule.id);
+                result.stage1 = await stage2txt(locale, festSettings[1].vsStages[0].id);
+                result.stage2 = await stage2txt(locale, festSettings[1].vsStages[1].id);
             } else {
-                result.rule = festSetting[1].vsRule.name;
-                result.stage1 = festSetting[1].vsStages[0].name;
-                result.stage2 = festSetting[1].vsStages[1].name;
+                result.rule = festSettings[1].vsRule.name;
+                result.stage1 = festSettings[1].vsStages[0].name;
+                result.stage2 = festSettings[1].vsStages[1].name;
             }
-            result.stageImage1 = festSetting[1].vsStages[0].image.url;
-            result.stageImage2 = festSetting[1].vsStages[1].image.url;
+            result.stageImage1 = festSettings[1].vsStages[0].image.url;
+            result.stageImage2 = festSettings[1].vsStages[1].image.url;
         }
         return result;
     } catch (error) {
@@ -673,7 +673,7 @@ export async function getFesRegularData(schedule: Sp3Schedule, num: number) {
             return null;
         }
 
-        const festSetting = festList[num].festMatchSettings;
+        const festSettings = festList[num].festMatchSettings;
 
         const result: MatchInfo = {
             startTime: festList[num].startTime,
@@ -681,18 +681,18 @@ export async function getFesRegularData(schedule: Sp3Schedule, num: number) {
         };
 
         const locale = await getLocale();
-        if (checkFes(schedule, num) && exists(festSetting)) {
+        if (checkFes(schedule, num) && exists(festSettings)) {
             if (exists(locale)) {
-                result.rule = await rule2txt(locale, festSetting[1].vsRule.id);
-                result.stage1 = await stage2txt(locale, festSetting[1].vsStages[0].id);
-                result.stage2 = await stage2txt(locale, festSetting[1].vsStages[1].id);
+                result.rule = await rule2txt(locale, festSettings[1].vsRule.id);
+                result.stage1 = await stage2txt(locale, festSettings[1].vsStages[0].id);
+                result.stage2 = await stage2txt(locale, festSettings[1].vsStages[1].id);
             } else {
-                result.rule = festSetting[1].vsRule.name;
-                result.stage1 = festSetting[1].vsStages[0].name;
-                result.stage2 = festSetting[1].vsStages[1].name;
+                result.rule = festSettings[1].vsRule.name;
+                result.stage1 = festSettings[1].vsStages[0].name;
+                result.stage2 = festSettings[1].vsStages[1].name;
             }
-            result.stageImage1 = festSetting[1].vsStages[0].image.url;
-            result.stageImage2 = festSetting[1].vsStages[1].image.url;
+            result.stageImage1 = festSettings[1].vsStages[0].image.url;
+            result.stageImage2 = festSettings[1].vsStages[1].image.url;
         }
         return result;
     } catch (error) {
