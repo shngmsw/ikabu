@@ -1,4 +1,4 @@
-import { DBChannel } from '@prisma/client';
+import { Channel } from '@prisma/client';
 import {
     ChannelType,
     ChatInputCommandInteraction,
@@ -43,7 +43,7 @@ export async function channelSettingsHandler(
             });
         }
 
-        let dbChannel: DBChannel | null = null;
+        let dbChannel: Channel | null = null;
 
         if (exists(isVCToolsEnabled)) {
             const result = await vcToolsSetting(interaction, targetChannel, isVCToolsEnabled);

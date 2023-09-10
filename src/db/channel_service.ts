@@ -16,7 +16,7 @@ export class ChannelService {
         parentId?: string | null,
     ) {
         try {
-            return await prisma.dBChannel.upsert({
+            return await prisma.channel.upsert({
                 where: {
                     guildId_channelId: {
                         guildId: guildId,
@@ -49,7 +49,7 @@ export class ChannelService {
 
     static async setVCToolsEnabled(guildId: string, channelId: string, isVCToolsEnabled = true) {
         try {
-            return await prisma.dBChannel.update({
+            return await prisma.channel.update({
                 where: {
                     guildId_channelId: {
                         guildId: guildId,
@@ -68,7 +68,7 @@ export class ChannelService {
 
     static async setAdminChannel(guildId: string, channelId: string, isAdminChannel = true) {
         try {
-            return await prisma.dBChannel.update({
+            return await prisma.channel.update({
                 where: {
                     guildId_channelId: {
                         guildId: guildId,
@@ -87,7 +87,7 @@ export class ChannelService {
 
     static async delete(guildId: string, channelId: string) {
         try {
-            return await prisma.dBChannel.delete({
+            return await prisma.channel.delete({
                 where: {
                     guildId_channelId: {
                         guildId: guildId,
@@ -103,7 +103,7 @@ export class ChannelService {
 
     static async getChannel(guildId: string, channelId: string) {
         try {
-            return await prisma.dBChannel.findUnique({
+            return await prisma.channel.findUnique({
                 where: {
                     guildId_channelId: {
                         guildId: guildId,
@@ -119,7 +119,7 @@ export class ChannelService {
 
     static async getChannelsByCategoryId(guildId: string, categoryId: string) {
         try {
-            return await prisma.dBChannel.findMany({
+            return await prisma.channel.findMany({
                 where: {
                     guildId: guildId,
                     parentId: categoryId,
@@ -133,7 +133,7 @@ export class ChannelService {
 
     static async getAllGuildChannels(guildId: string) {
         try {
-            return await prisma.dBChannel.findMany({
+            return await prisma.channel.findMany({
                 where: {
                     guildId: guildId,
                 },
@@ -146,7 +146,7 @@ export class ChannelService {
 
     static async getAllChannels() {
         try {
-            return await prisma.dBChannel.findMany();
+            return await prisma.channel.findMany();
         } catch (error) {
             await sendErrorLogs(logger, error);
             return [];
