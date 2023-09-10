@@ -2,18 +2,36 @@ import { ChatInputCommandInteraction } from 'discord.js';
 
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
+import { UniqueChannelService } from '../../../../db/unique_channel_service';
 import { searchChannelById } from '../../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
-import { assertExistCheck, exists, notExists } from '../../../common/others';
+import { assertExistCheck, exists, getDeveloperMention, notExists } from '../../../common/others';
+import { ChannelKeySet } from '../../../constant/channel_key';
 import { notifyActionRow } from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
 
 export async function buttonRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
-
     const guild = await getGuildByInteraction(interaction);
+
+    const privateRecruitChannelId = await UniqueChannelService.getChannelIdByKey(
+        guild.id,
+        ChannelKeySet.PrivateRecruit.key,
+    );
+    const otherGamesRecruitChannelId = await UniqueChannelService.getChannelIdByKey(
+        guild.id,
+        ChannelKeySet.OtherGamesRecruit.key,
+    );
+
+    if (notExists(privateRecruitChannelId) || notExists(otherGamesRecruitChannelId)) {
+        await interaction.reply('募集に失敗したでし！');
+        return interaction.channel.send({
+            content: getDeveloperMention() + '募集チャンネルが設定されていないでし！',
+        });
+    }
+
     const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
     const recruitChannel = await searchChannelById(guild, interaction.channel.id);
     if (notExists(recruitChannel) || !recruitChannel.isTextBased()) return;
@@ -66,17 +84,12 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
 
     // 募集リスト更新
     if (recruitType === RecruitType.PrivateRecruit) {
-        assertExistCheck(process.env.CHANNEL_ID_RECRUIT_PRIVATE, 'CHANNEL_ID_RECRUIT_PRIVATE');
         await sendRecruitSticky({
-            channelOpt: { guild: guild, channelId: process.env.CHANNEL_ID_RECRUIT_PRIVATE },
+            channelOpt: { guild: guild, channelId: privateRecruitChannelId },
         });
     } else if (recruitType === RecruitType.OtherGameRecruit) {
-        assertExistCheck(
-            process.env.CHANNEL_ID_RECRUIT_OTHERGAMES,
-            'CHANNEL_ID_RECRUIT_OTHERGAMES',
-        );
         await sendRecruitSticky({
-            channelOpt: { guild: guild, channelId: process.env.CHANNEL_ID_RECRUIT_OTHERGAMES },
+            channelOpt: { guild: guild, channelId: otherGamesRecruitChannelId },
         });
     }
 

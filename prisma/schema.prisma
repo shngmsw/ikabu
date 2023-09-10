@@ -7,6 +7,31 @@ datasource db {
   url      = "file:../ikabu.sqlite3?connection_limit=1"
 }
 
+model Channel {
+  guildId          String          @map("guild_id")
+  channelId        String          @map("channel_id")
+  name             String
+  type             Int
+  position         Int
+  parentId         String?         @map("parent_id")
+  isVCToolsEnabled Boolean         @map("is_vc_tools_enabled")
+  isAdminChannel   Boolean         @map("is_admin_channel")
+  uniqueChannel    UniqueChannel[]
+
+  @@unique([guildId, channelId])
+  @@map("channel")
+}
+
+model UniqueChannel {
+  guildId   String  @map("guild_id")
+  key       String
+  channelId String  @map("channel_id")
+  channel   Channel @relation(fields: [guildId, channelId], references: [guildId, channelId])
+
+  @@unique([guildId, key])
+  @@map("unique_channel")
+}
+
 model FriendCode {
   userId String  @unique @map("user_id")
   code   String

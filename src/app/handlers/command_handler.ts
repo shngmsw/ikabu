@@ -1,6 +1,7 @@
 import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 import { commandNames } from '../../constant.js';
+import { getGuildByInteraction } from '../common/manager/guild_manager.js';
 import { assertExistCheck, getCloseEmbed, getCommandHelpEmbed } from '../common/others';
 import { handleBan } from '../feat-admin/ban/ban';
 import { handleCreateRoom } from '../feat-admin/channel_manager/createRoom.js';
@@ -12,9 +13,11 @@ import {
     handleAssignRole,
     handleUnassignRole,
 } from '../feat-admin/channel_manager/manageRole.js';
+import { channelSettingsHandler } from '../feat-admin/channel_settings/channel_settings_hanlder.js';
 import { variablesHandler } from '../feat-admin/environment_variables/variables_handler';
 import { festSettingHandler } from '../feat-admin/fest_setting/fest_settings.js';
 import { joinedAtFixer } from '../feat-admin/joined_date_fixer/fix_joined_date.js';
+import { uniqueChannelSettingsHandler } from '../feat-admin/unique_channel_settings/unique_channel_settings_hanlder.js';
 import { createNewRecruitButton } from '../feat-recruit/buttons/create_recruit_buttons';
 import { anarchyRecruit } from '../feat-recruit/interactions/commands/anarchy_recruit';
 import { buttonRecruit } from '../feat-recruit/interactions/commands/button_recruit.js';
@@ -70,10 +73,11 @@ async function guildOnlyCommandsHandler(
         }
         assertExistCheck(interaction.channel, 'channel');
         //serverコマンド
+        const guild = await getGuildByInteraction(interaction);
         const embed = getCloseEmbed();
         if (!interaction.replied) {
             await interaction.reply({
-                embeds: [embed, getCommandHelpEmbed(interaction.channel.name)],
+                embeds: [embed, await getCommandHelpEmbed(guild, interaction.channel.name)],
                 components: [createNewRecruitButton(interaction.channel.name)],
             });
         }
@@ -103,6 +107,10 @@ async function guildOnlyCommandsHandler(
         await handleIkabuExperience(interaction);
     } else if (commandName === commandNames.voiceChannelMention) {
         await voiceMention(interaction);
+    } else if (commandName === commandNames.channelSetting) {
+        await channelSettingsHandler(interaction);
+    } else if (commandName === commandNames.uniqueChannelSetting) {
+        await uniqueChannelSettingsHandler(interaction);
     } else if (commandName === commandNames.variablesSettings) {
         await variablesHandler(interaction);
     } else if (commandName == commandNames.voice_pick) {

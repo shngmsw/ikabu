@@ -1,5 +1,6 @@
 import Discord, { Guild, GuildTextBasedChannel } from 'discord.js';
 
+import { UniqueChannelService } from '../../../db/unique_channel_service';
 import { log4js_obj } from '../../../log4js_settings';
 import {
     getAnarchyList,
@@ -14,6 +15,7 @@ import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
+import { ChannelKeySet } from '../../constant/channel_key';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -21,8 +23,12 @@ const logger = log4js_obj.getLogger('interaction');
 export async function stageInfo(guild: Guild) {
     try {
         const schedule = await getSchedule();
-        assertExistCheck(process.env.CHANNEL_ID_STAGE_INFO, 'CHANNEL_ID_STAGE_INFO');
-        const stageInfoChannel = await searchChannelById(guild, process.env.CHANNEL_ID_STAGE_INFO);
+        const stageInfoChannelId = await UniqueChannelService.getChannelIdByKey(
+            guild.id,
+            ChannelKeySet.StageInfo.key,
+        );
+        if (notExists(stageInfoChannelId)) return;
+        const stageInfoChannel = await searchChannelById(guild, stageInfoChannelId);
         if (notExists(stageInfoChannel) || !stageInfoChannel.isTextBased()) {
             await sendErrorLogs(logger, 'stageInfo channel not found!');
             return;

@@ -1,8 +1,10 @@
 import { AttachmentBuilder, Message, PermissionsBitField } from 'discord.js';
 
+import { UniqueChannelService } from '../../db/unique_channel_service';
 import { log4js_obj } from '../../log4js_settings';
 import { searchAPIMemberById } from '../common/manager/member_manager';
 import { randomBool, exists } from '../common/others';
+import { ChannelKeySet } from '../constant/channel_key';
 import { stageInfo } from '../event/cron/stageinfo';
 import { deleteToken } from '../event/message_related/delete_token';
 import { dispand } from '../event/message_related/dispander';
@@ -38,7 +40,11 @@ export async function call(message: Message<true>) {
                 }
             }
             if (exists(process.env.QUESTIONNAIRE_URL)) {
-                if (message.channel.id != process.env.CHANNEL_ID_BOT_CMD && randomBool(0.00025)) {
+                const botCommandChannelId = await UniqueChannelService.getChannelIdByKey(
+                    message.guild.id,
+                    ChannelKeySet.BotCommand.key,
+                );
+                if (message.channel.id !== botCommandChannelId && randomBool(0.00025)) {
                     await sendIntentionConfirmReply(
                         message,
                         message.author.id,
