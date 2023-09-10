@@ -1,0 +1,48 @@
+{
+    // devcontainer を作るのにつかう　Dockerfile
+    "build": {
+      "dockerfile": "Dockerfile"
+    },
+    "service": "devcontainer",
+
+    // prebuild
+    "onCreateCommand": "sh .devcontainer/prebuild.sh",
+
+    // post build
+    "postCreateCommand": "sh .devcontainer/post-create.sh", // devcontainer が作られた後に実行されるコマンド
+  
+    // Visual studio code の Remote [Codespaces]-scoped settings の設定 codespace
+    "settings": {
+        {
+            "git.ignoreLimitWarning": true,
+            "files.eol": "\n",
+            "npm.packageManager": "npm",
+            "[typescript]": {
+              "editor.defaultFormatter": "esbenp.prettier-vscode",
+              "editor.formatOnSave": false,
+              "editor.codeActionsOnSave": {
+                "source.addMissingImports": true,
+                "source.fixAll.eslint": true
+              }
+            },
+            "[prisma]": {
+              "editor.defaultFormatter": "Prisma.prisma",
+              "editor.formatOnSave": true,
+            }
+		},
+		"customizations": {
+			"vscode": {
+				"extensions": [
+					"VisualStudioExptTeam.vscodeintellicode",
+					"VisualStudioExptTeam.intellicode-api-usage-examples",
+					"circlecodesolution.ccs-flutter-color",
+					"MS-CEINTL.vscode-language-pack-ja",
+					"esbenp.prettier-vscode",
+					"Prisma.prisma",
+					"yy0931.vscode-sqlite3-editor",
+					"dbaeumer.vscode-eslint"
+				]
+			}
+		},  
+  }
+}
