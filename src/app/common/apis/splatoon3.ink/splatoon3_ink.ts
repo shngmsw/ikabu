@@ -82,7 +82,7 @@ export async function updateSchedule() {
 export function checkFes(schedule: Sp3Schedule, num: number) {
     try {
         const festList = getFesList(schedule);
-        const festSetting = festList[num].festMatchSettings[1];
+        const festSetting = festList[num].festMatchSettings;
         return exists(festSetting);
     } catch (error) {
         void sendErrorLogs(logger, error);
@@ -355,7 +355,7 @@ export async function getRegularData(schedule: Sp3Schedule, num: number) {
 }
 
 /**
- * バンカラ(チャレンジ)用データに整形する
+ * バンカラマッチ(チャレンジ)用データに整形する
  * @param schedule フェッチしたデータ
  * @param num スケジュール番号
  * @returns 連想配列で返す
@@ -397,7 +397,7 @@ export async function getAnarchyChallengeData(schedule: Sp3Schedule, num: number
 }
 
 /**
- * バンカラ募集用データに整形する
+ * バンカラマッチ(オープン)用データに整形する
  * @param schedule フェッチしたデータ
  * @param num スケジュール番号
  * @returns 連想配列で返す
@@ -617,14 +617,13 @@ export async function getXMatchData(schedule: Sp3Schedule, num: number) {
         return null;
     }
 }
-
 /**
- * フェス募集用データに整形する
+ * フェスマッチ(チャレンジ)用データに整形する
  * @param schedule フェッチしたデータ
  * @param num スケジュール番号
  * @returns 連想配列で返す
  */
-export async function getFesData(schedule: Sp3Schedule, num: number) {
+export async function getFesChallengeData(schedule: Sp3Schedule, num: number) {
     try {
         const festList = getFesList(schedule);
 
@@ -632,7 +631,7 @@ export async function getFesData(schedule: Sp3Schedule, num: number) {
             return null;
         }
 
-        const festSetting = festList[num].festMatchSettings[1];
+        const festSetting = festList[num].festMatchSettings;
 
         const result: MatchInfo = {
             startTime: festList[num].startTime,
@@ -642,16 +641,58 @@ export async function getFesData(schedule: Sp3Schedule, num: number) {
         const locale = await getLocale();
         if (checkFes(schedule, num) && exists(festSetting)) {
             if (exists(locale)) {
-                result.rule = await rule2txt(locale, festSetting.vsRule.id);
-                result.stage1 = await stage2txt(locale, festSetting.vsStages[0].id);
-                result.stage2 = await stage2txt(locale, festSetting.vsStages[1].id);
+                result.rule = await rule2txt(locale, festSetting[1].vsRule.id);
+                result.stage1 = await stage2txt(locale, festSetting[1].vsStages[0].id);
+                result.stage2 = await stage2txt(locale, festSetting[1].vsStages[1].id);
             } else {
-                result.rule = festSetting.vsRule.name;
-                result.stage1 = festSetting.vsStages[0].name;
-                result.stage2 = festSetting.vsStages[1].name;
+                result.rule = festSetting[1].vsRule.name;
+                result.stage1 = festSetting[1].vsStages[0].name;
+                result.stage2 = festSetting[1].vsStages[1].name;
             }
-            result.stageImage1 = festSetting.vsStages[0].image.url;
-            result.stageImage2 = festSetting.vsStages[1].image.url;
+            result.stageImage1 = festSetting[1].vsStages[0].image.url;
+            result.stageImage2 = festSetting[1].vsStages[1].image.url;
+        }
+        return result;
+    } catch (error) {
+        await sendErrorLogs(logger, error);
+        return null;
+    }
+}
+
+/**
+ * フェス(オープン)用データに整形する
+ * @param schedule フェッチしたデータ
+ * @param num スケジュール番号
+ * @returns 連想配列で返す
+ */
+export async function getFesRegularData(schedule: Sp3Schedule, num: number) {
+    try {
+        const festList = getFesList(schedule);
+
+        if (festList.length - 1 < num) {
+            return null;
+        }
+
+        const festSetting = festList[num].festMatchSettings;
+
+        const result: MatchInfo = {
+            startTime: festList[num].startTime,
+            endTime: festList[num].endTime,
+        };
+
+        const locale = await getLocale();
+        if (checkFes(schedule, num) && exists(festSetting)) {
+            if (exists(locale)) {
+                result.rule = await rule2txt(locale, festSetting[1].vsRule.id);
+                result.stage1 = await stage2txt(locale, festSetting[1].vsStages[0].id);
+                result.stage2 = await stage2txt(locale, festSetting[1].vsStages[1].id);
+            } else {
+                result.rule = festSetting[1].vsRule.name;
+                result.stage1 = festSetting[1].vsStages[0].name;
+                result.stage2 = festSetting[1].vsStages[1].name;
+            }
+            result.stageImage1 = festSetting[1].vsStages[0].image.url;
+            result.stageImage2 = festSetting[1].vsStages[1].image.url;
         }
         return result;
     } catch (error) {

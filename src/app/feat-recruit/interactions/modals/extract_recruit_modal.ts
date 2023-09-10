@@ -13,7 +13,7 @@ import {
     getSchedule,
     getAnarchyOpenData,
     getEventData,
-    getFesData,
+    getFesRegularData,
     getRegularData,
 } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
@@ -697,7 +697,7 @@ export async function modalFesRecruit(
             return;
         }
 
-        const fesData = await getFesData(schedule, type);
+        const fesData = await getFesRegularData(schedule, type);
 
         const members = await guild.members.fetch();
 

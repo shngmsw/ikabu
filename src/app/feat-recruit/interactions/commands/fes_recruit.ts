@@ -13,7 +13,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import {
     checkFes,
     getSchedule,
-    getFesData,
+    getFesRegularData,
     MatchInfo,
 } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
@@ -132,7 +132,7 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<'cache
             return;
         }
 
-        const fesData = await getFesData(schedule, type);
+        const fesData = await getFesRegularData(schedule, type);
 
         let txt = `### <@${hostMember.user.id}>` + 'たんのフェスマッチ募集\n';
         const members = [];
