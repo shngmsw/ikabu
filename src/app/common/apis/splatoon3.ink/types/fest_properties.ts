@@ -1,33 +1,62 @@
 export type FestProperties = {
     startTime: string;
     endTime: string;
-    festMatchSettings: festMatchSetting[];
+    festMatchSettings: festMatchSettings | null;
 };
 
-type festMatchSetting = {
-    __isVsSetting: string;
-    __typename: string;
-    vsStages: [
-        {
-            vsStageId: number;
+type festMatchSettings = [
+    {
+        __isVsSetting: string;
+        __typename: string;
+        vsStages: [
+            {
+                vsStageId: number;
+                name: string;
+                image: {
+                    url: string;
+                };
+                id: string;
+            },
+            {
+                vsStageId: number;
+                name: string;
+                image: {
+                    url: string;
+                };
+                id: string;
+            },
+        ];
+        vsRule: {
             name: string;
-            image: {
-                url: string;
-            };
+            rule: string;
             id: string;
-        },
-        {
-            vsStageId: number;
+        };
+    },
+    {
+        __isVsSetting: string;
+        __typename: string;
+        vsStages: [
+            {
+                vsStageId: number;
+                name: string;
+                image: {
+                    url: string;
+                };
+                id: string;
+            },
+            {
+                vsStageId: number;
+                name: string;
+                image: {
+                    url: string;
+                };
+                id: string;
+            },
+        ];
+        vsRule: {
             name: string;
-            image: {
-                url: string;
-            };
+            rule: string;
             id: string;
-        },
-    ];
-    vsRule: {
-        name: string;
-        rule: string;
-        id: string;
-    };
-} | null;
+        };
+    },
+];

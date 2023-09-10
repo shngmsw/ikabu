@@ -12,7 +12,7 @@ import { log4js_obj } from '../../../log4js_settings';
 import {
     getSchedule,
     checkFes,
-    getFesData,
+    getFesRegularData,
     getRegularData,
     getSalmonData,
     getAnarchyChallengeData,
@@ -180,7 +180,7 @@ async function sendFesInfo(
     data: Sp3Schedule,
     scheduleNum: number,
 ) {
-    const festData = await getFesData(data, scheduleNum);
+    const festData = await getFesRegularData(data, scheduleNum);
     assertExistCheck(festData, 'festData');
     const startDate = formatDatetime(festData.startTime, dateformat.ymdwhm);
     const endDate = formatDatetime(festData.endTime, dateformat.hm);
