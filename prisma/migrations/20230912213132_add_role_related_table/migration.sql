@@ -4,6 +4,7 @@ CREATE TABLE "role" (
     "role_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "mention" TEXT NOT NULL,
+    "member_count" INTEGER NOT NULL,
     "hex_color" TEXT NOT NULL,
     "position" INTEGER NOT NULL
 );

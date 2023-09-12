@@ -11,6 +11,7 @@ export class RoleService {
         guildId: string,
         roleId: string,
         roleName: string,
+        memberCount: number,
         color: ColorResolvable,
         position: number,
     ) {
@@ -25,6 +26,7 @@ export class RoleService {
                 update: {
                     name: roleName,
                     mention: `<@&${roleId}>`,
+                    memberCount: memberCount,
                     hexColor: color.toString(),
                     position: position,
                 },
@@ -33,6 +35,7 @@ export class RoleService {
                     roleId: roleId,
                     name: roleName,
                     mention: `<@&${roleId}>`,
+                    memberCount: memberCount,
                     hexColor: color.toString(),
                     position: position,
                 },

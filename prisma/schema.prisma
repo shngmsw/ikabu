@@ -53,13 +53,14 @@ model Member {
 }
 
 model Role {
-  guildId    String       @map("guild_id")
-  roleId     String       @map("role_id")
-  name       String
-  mention    String
-  hexColor   String       @map("hex_color")
-  position   Int
-  UniqueRole UniqueRole[]
+  guildId     String       @map("guild_id")
+  roleId      String       @map("role_id")
+  name        String
+  mention     String
+  memberCount Int          @map("member_count")
+  hexColor    String       @map("hex_color")
+  position    Int
+  UniqueRole  UniqueRole[]
 
   @@unique([guildId, roleId])
   @@map("role")
