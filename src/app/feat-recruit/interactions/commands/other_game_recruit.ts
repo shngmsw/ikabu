@@ -14,11 +14,13 @@ import {
 
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
+import { UniqueRoleService } from '../../../../db/unique_role_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
+import { RoleKeySet } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import {
     embedRecruitDeleteButton,
@@ -238,14 +240,14 @@ async function others(
     recruitChannel: TextBasedChannel,
     member: GuildMember,
 ) {
-    const roleId = process.env.ROLE_ID_RECRUIT_OTHERGAMES;
-    if (roleId === undefined) {
-        await sendErrorMessage(recruitChannel);
-        return;
-    }
+    const otherGamesRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
+        guild.id,
+        RoleKeySet.OtherGamesRecruit.key,
+    );
+
     const title = interaction.options.getString('ゲームタイトル', true);
     const recruitNumText = interaction.options.getString('募集人数', true);
-    const mention = `<@&${roleId}>`;
+    const mention = `<@&${otherGamesRecruitRoleId}>`;
     const txt = `### <@${member.user.id}>` + `たんの${title}募集\n`;
     const color = '#379C30';
     const image = 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/others.jpg';

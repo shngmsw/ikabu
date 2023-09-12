@@ -5,12 +5,14 @@ import { FriendCodeService } from '../../../db/friend_code_service.js';
 import { MemberService } from '../../../db/member_service.js';
 import { MessageCountService } from '../../../db/message_count_service.js';
 import { UniqueChannelService } from '../../../db/unique_channel_service.js';
+import { UniqueRoleService } from '../../../db/unique_role_service.js';
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager.js';
 import { assignRoleToMember, searchRoleById } from '../../common/manager/role_manager';
-import { assertExistCheck, exists, notExists, sleep } from '../../common/others.js';
+import { exists, getDeveloperMention, notExists, sleep } from '../../common/others.js';
 import { ChannelKeySet } from '../../constant/channel_key.js';
+import { RoleKeySet } from '../../constant/role_key.js';
 import { sendErrorLogs } from '../../logs/error/send_error_logs.js';
 
 const logger = log4js_obj.getLogger('guildMemberAdd');
@@ -56,8 +58,26 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
             );
         }
 
-        assertExistCheck(process.env.ROOKIE_ROLE_ID, 'ROOKIE_ROLE_ID');
-        const beginnerRole = await searchRoleById(guild, process.env.ROOKIE_ROLE_ID);
+        const rookieRoleId = await UniqueRoleService.getRoleIdByKey(
+            guild.id,
+            RoleKeySet.Rookie.key,
+        );
+
+        if (notExists(rookieRoleId)) {
+            if (guild.id === process.env.SERVER_ID) {
+                if (exists(lobbyChannel) && lobbyChannel.isTextBased()) {
+                    await lobbyChannel.send(
+                        (await getDeveloperMention(guild.id)) +
+                            '新入部員ロールが設定されていないでし！',
+                    );
+                } else {
+                    await sendErrorLogs(logger, RoleKeySet.Rookie.key + 'was not found.');
+                }
+            }
+            return;
+        }
+
+        const beginnerRole = await searchRoleById(guild, rookieRoleId);
 
         // 新入部員ロールが設定されているサーバーでは、新入部員ロールを付与する
         if (exists(beginnerRole)) {

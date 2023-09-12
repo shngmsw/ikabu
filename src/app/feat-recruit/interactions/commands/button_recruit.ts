@@ -3,11 +3,13 @@ import { ChatInputCommandInteraction } from 'discord.js';
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { UniqueChannelService } from '../../../../db/unique_channel_service';
+import { UniqueRoleService } from '../../../../db/unique_role_service';
 import { searchChannelById } from '../../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, getDeveloperMention, notExists } from '../../../common/others';
 import { ChannelKeySet } from '../../../constant/channel_key';
+import { RoleKeySet } from '../../../constant/role_key';
 import { notifyActionRow } from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
@@ -28,7 +30,8 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
     if (notExists(privateRecruitChannelId) || notExists(otherGamesRecruitChannelId)) {
         await interaction.reply('募集に失敗したでし！');
         return interaction.channel.send({
-            content: getDeveloperMention() + '募集チャンネルが設定されていないでし！',
+            content:
+                (await getDeveloperMention(guild.id)) + '募集チャンネルが設定されていないでし！',
         });
     }
 
@@ -52,11 +55,20 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
         recruitType = RecruitType.OtherGameRecruit;
     }
 
+    const privateRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
+        guild.id,
+        RoleKeySet.PrivateRecruit.key,
+    );
+    const otherGamesRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
+        guild.id,
+        RoleKeySet.OtherGamesRecruit.key,
+    );
+
     let mention = '';
     if (recruitType === RecruitType.PrivateRecruit) {
-        mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
+        mention = `<@&${privateRecruitRoleId}>`;
     } else if (recruitType === RecruitType.OtherGameRecruit) {
-        mention = `<@&${process.env.ROLE_ID_RECRUIT_OTHERGAMES}>`;
+        mention = `<@&${otherGamesRecruitRoleId}>`;
     }
 
     assertExistCheck(recruiter, 'recruiter');

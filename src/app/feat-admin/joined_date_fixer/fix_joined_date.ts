@@ -1,25 +1,29 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
 import { MemberService } from '../../../db/member_service';
+import { UniqueRoleService } from '../../../db/unique_role_service';
 import { log4js_obj } from '../../../log4js_settings';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
-import { searchAPIMemberById, searchDBMemberById } from '../../common/manager/member_manager';
-import { assertExistCheck, exists, notExists } from '../../common/others';
+import { getAPIMemberByInteraction, searchDBMemberById } from '../../common/manager/member_manager';
+import { exists, notExists } from '../../common/others';
+import { RoleKeySet } from '../../constant/role_key';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
 export async function joinedAtFixer(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     try {
-        if (notExists(process.env.ROLE_ID_DEVELOPER)) {
-            return await interaction.reply('`ROLE_ID_DEVELOPER`が環境変数に設定されてないでし！');
-        }
-
         const guild = await getGuildByInteraction(interaction);
-        const member = await searchAPIMemberById(guild, interaction.member.user.id);
-        assertExistCheck(member, 'member');
+        const member = await getAPIMemberByInteraction(interaction);
 
-        if (!member.roles.cache.has(process.env.ROLE_ID_DEVELOPER)) {
+        const developerRoleId = await UniqueRoleService.getRoleIdByKey(
+            guild.id,
+            RoleKeySet.Developer.key,
+        );
+
+        if (notExists(developerRoleId)) {
+            return await interaction.reply('開発者ロールが設定されていないでし！');
+        } else if (!member.roles.cache.has(developerRoleId)) {
             return await interaction.reply('開発者のみが実行できるコマンドでし！');
         }
 
