@@ -73,7 +73,7 @@ model UniqueRole {
   role    Role   @relation(fields: [guildId, roleId], references: [guildId, roleId], onDelete: Cascade)
 
   @@unique([guildId, key])
-  @@map("unique_Role")
+  @@map("unique_role")
 }
 
 model MessageCount {
