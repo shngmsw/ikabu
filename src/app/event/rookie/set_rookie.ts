@@ -22,10 +22,6 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
         const guild = await newMember.guild.fetch();
         const userId = newMember.user.id;
 
-        if (guild.id != process.env.SERVER_ID) {
-            return;
-        }
-
         const lobbyChannelId = await UniqueChannelService.getChannelIdByKey(
             guild.id,
             ChannelKeySet.Lobby.key,
