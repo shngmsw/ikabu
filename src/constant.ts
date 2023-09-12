@@ -30,6 +30,7 @@ export const commandNames = {
     voiceChannelMention: 'ボイスメンション',
     channelSetting: 'チャンネル設定',
     uniqueChannelSetting: '固有チャンネル設定',
+    uniqueRoleSetting: '固有ロール設定',
     variablesSettings: '環境変数設定',
     joinedDateFixer: '入部日修正',
     festivalSettings: 'フェスカテゴリ設定',
