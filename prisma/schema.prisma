@@ -52,6 +52,29 @@ model Member {
   @@map("member")
 }
 
+model Role {
+  guildId    String       @map("guild_id")
+  roleId     String       @map("role_id")
+  name       String
+  mention    String
+  hexColor   String       @map("hex_color")
+  position   Int
+  UniqueRole UniqueRole[]
+
+  @@unique([guildId, roleId])
+  @@map("role")
+}
+
+model UniqueRole {
+  guildId String @map("guild_id")
+  key     String
+  roleId  String @map("channel_id")
+  role    Role   @relation(fields: [guildId, roleId], references: [guildId, roleId])
+
+  @@unique([guildId, key])
+  @@map("unique_Role")
+}
+
 model MessageCount {
   userId String @unique @map("user_id")
   count  Int
