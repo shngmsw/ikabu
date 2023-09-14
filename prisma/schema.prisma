@@ -26,7 +26,7 @@ model UniqueChannel {
   guildId   String  @map("guild_id")
   key       String
   channelId String  @map("channel_id")
-  channel   Channel @relation(fields: [guildId, channelId], references: [guildId, channelId])
+  channel   Channel @relation(fields: [guildId, channelId], references: [guildId, channelId], onDelete: Cascade)
 
   @@unique([guildId, key])
   @@map("unique_channel")
@@ -50,6 +50,30 @@ model Member {
 
   @@unique([guildId, userId])
   @@map("member")
+}
+
+model Role {
+  guildId     String       @map("guild_id")
+  roleId      String       @map("role_id")
+  name        String
+  mention     String
+  memberCount Int          @map("member_count")
+  hexColor    String       @map("hex_color")
+  position    Int
+  UniqueRole  UniqueRole[]
+
+  @@unique([guildId, roleId])
+  @@map("role")
+}
+
+model UniqueRole {
+  guildId String @map("guild_id")
+  key     String
+  roleId  String @map("channel_id")
+  role    Role   @relation(fields: [guildId, roleId], references: [guildId, roleId], onDelete: Cascade)
+
+  @@unique([guildId, key])
+  @@map("unique_role")
 }
 
 model MessageCount {
@@ -79,7 +103,7 @@ model Participant {
   guildId   String   @map("guild_id")
   messageId String   @map("message_id")
   userId    String   @map("user_id")
-  member    Member   @relation(fields: [guildId, userId], references: [guildId, userId])
+  member    Member   @relation(fields: [guildId, userId], references: [guildId, userId], onDelete: Cascade)
   userType  Int      @map("user_type")
   joinedAt  DateTime @default(now()) @map("joined_at")
 
@@ -92,7 +116,7 @@ model UserReaction {
   reactionSeq Int      @map("reaction_seq")
   year        String
   channelId   String   @map("channel_id")
-  reaction    Reaction @relation(fields: [reactionSeq], references: [reactionSeq])
+  reaction    Reaction @relation(fields: [reactionSeq], references: [reactionSeq], onDelete: Cascade)
   count       Int
 
   @@unique([userId, reactionSeq, year, channelId])

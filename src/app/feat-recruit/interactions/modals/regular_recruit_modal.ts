@@ -3,12 +3,14 @@ import { AttachmentBuilder, ModalSubmitInteraction } from 'discord.js';
 
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
+import { UniqueRoleService } from '../../../../db/unique_role_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { MatchInfo } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
 import { setButtonDisable } from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
+import { RoleKeySet } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
@@ -61,7 +63,12 @@ export async function sendRegularMatch(
 
     try {
         const recruitChannel = interaction.channel;
-        const mention = `<@&${process.env.ROLE_ID_RECRUIT_REGULAR}>`;
+        const regularRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
+            guild.id,
+            RoleKeySet.RegularRecruit.key,
+        );
+
+        const mention = `<@&${regularRecruitRoleId}>`;
         const image1Message = await interaction.editReply({
             content: txt,
             files: [recruit],

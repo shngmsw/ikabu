@@ -20,6 +20,7 @@ import {
     PartialMessageReaction,
     PartialUser,
     Partials,
+    Role,
     User,
     VoiceState,
 } from 'discord.js';
@@ -37,6 +38,12 @@ import {
 import { subscribeSplatEventMatch } from './event/cron/event_match_register';
 import { stageInfo } from './event/cron/stageinfo';
 import { emojiCountDown, emojiCountUp } from './event/reaction_count/reactions';
+import {
+    deleteRole,
+    saveRole,
+    saveRoleAtLaunch,
+    updateGuildRoles,
+} from './event/role_related/store_role';
 import { guildMemberAddEvent } from './event/rookie/set_rookie';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
@@ -153,6 +160,8 @@ client.on(
     async (oldMember: GuildMember | PartialGuildMember, newMember: GuildMember) => {
         try {
             const guild = await newMember.guild.fetch();
+            await updateGuildRoles(guild);
+
             const userId = newMember.user.id;
             let member: GuildMember | null = newMember;
 
@@ -230,6 +239,7 @@ client.on('ready', async (client: Client<true>) => {
         assertExistCheck(client.user);
         logger.info(`Logged in as ${client.user.tag}!`);
         await saveChannelAtLaunch(client);
+        await saveRoleAtLaunch(client);
         await registerSlashCommands();
         const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
         setEnrollmentCount(client.user, guild);
@@ -375,6 +385,21 @@ client.on('channelDelete', async (channel: DMChannel | NonThreadGuildBasedChanne
     if (!channel.isDMBased()) {
         await deleteChannel(channel);
     }
+});
+
+// ロールが作成されたとき
+client.on('roleCreate', async (role: Role) => {
+    await saveRole(role);
+});
+
+// ロールが更新されたとき
+client.on('roleUpdate', async (oldRole: Role, newRole: Role) => {
+    await saveRole(newRole);
+});
+
+// ロールが削除されたとき
+client.on('roleDelete', async (role: Role) => {
+    await deleteRole(role);
 });
 
 function setEnrollmentCount(clientUser: ClientUser, guild: Guild) {

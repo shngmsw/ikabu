@@ -18,6 +18,7 @@ import { variablesHandler } from '../feat-admin/environment_variables/variables_
 import { festSettingHandler } from '../feat-admin/fest_setting/fest_settings.js';
 import { joinedAtFixer } from '../feat-admin/joined_date_fixer/fix_joined_date.js';
 import { uniqueChannelSettingsHandler } from '../feat-admin/unique_channel_settings/unique_channel_settings_hanlder.js';
+import { uniqueRoleSettingsHandler } from '../feat-admin/unique_role_settings/unique_role_settings_hanlder.js';
 import { createNewRecruitButton } from '../feat-recruit/buttons/create_recruit_buttons';
 import { anarchyRecruit } from '../feat-recruit/interactions/commands/anarchy_recruit';
 import { buttonRecruit } from '../feat-recruit/interactions/commands/button_recruit.js';
@@ -111,6 +112,8 @@ async function guildOnlyCommandsHandler(
         await channelSettingsHandler(interaction);
     } else if (commandName === commandNames.uniqueChannelSetting) {
         await uniqueChannelSettingsHandler(interaction);
+    } else if (commandName === commandNames.uniqueRoleSetting) {
+        await uniqueRoleSettingsHandler(interaction);
     } else if (commandName === commandNames.variablesSettings) {
         await variablesHandler(interaction);
     } else if (commandName == commandNames.voice_pick) {

@@ -17,6 +17,7 @@ import {
 
 import { assertExistCheck } from './app/common/others.js';
 import { ChannelKeySet } from './app/constant/channel_key.js';
+import { uniqueRoleSettings } from './app/feat-admin/unique_role_settings/command_builder.js';
 import { sendErrorLogs } from './app/logs/error/send_error_logs.js';
 import { commandNames } from './constant.js';
 import { log4js_obj } from './log4js_settings.js';
@@ -1393,6 +1394,7 @@ const commands = [
     voiceChannelMention,
     channelSettings,
     uniqueChannelSettings,
+    uniqueRoleSettings,
     variablesSettings,
     joinedDateFixer,
     festivalSettings,
