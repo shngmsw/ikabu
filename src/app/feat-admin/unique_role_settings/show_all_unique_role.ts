@@ -19,7 +19,7 @@ export async function showAllUniqueRoleSettings(
         if (notExists(keyName)) {
             message += `- \`${uniqueRole.key}\`: \`keyName missing.\`\n`;
         } else {
-            message += `- **${keyName}**: <#${uniqueRole.roleId}>\n`;
+            message += `- **${keyName}**: <@&${uniqueRole.roleId}>\n`;
         }
     }
 
