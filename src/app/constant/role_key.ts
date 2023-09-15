@@ -12,7 +12,7 @@ export const RoleKeySet = {
     FryeRecruit: { name: 'ウツホ募集', key: 'ROLE_ID_RECRUIT_FRYE' },
     ShiverRecruit: { name: 'フウカ募集', key: 'ROLE_ID_RECRUIT_SHIVER' },
     BigmanRecruit: { name: 'マンタロー募集', key: 'ROLE_ID_RECRUIT_BIGMAN' },
-    OtherGamesRecruit: { name: '別ゲー募集', key: 'ROLE_ID_RECRUIT_OTHERGAMES' },
+    OtherGamesRecruit: { name: '別ゲー募集', key: 'ROLE_ID_RECRUIT_OTHER_GAMES' },
 } as const;
 export type RoleKeySet = ObjectValueList<typeof RoleKeySet>;
 // RoleKeyタイプを派生させる
