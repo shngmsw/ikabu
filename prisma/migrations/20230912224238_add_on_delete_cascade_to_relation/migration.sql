@@ -27,10 +27,10 @@ CREATE UNIQUE INDEX "participant_guild_id_message_id_user_id_key" ON "participan
 CREATE TABLE "new_unique_role" (
     "guild_id" TEXT NOT NULL,
     "key" TEXT NOT NULL,
-    "channel_id" TEXT NOT NULL,
-    CONSTRAINT "unique_role_guild_id_channel_id_fkey" FOREIGN KEY ("guild_id", "channel_id") REFERENCES "role" ("guild_id", "role_id") ON DELETE CASCADE ON UPDATE CASCADE
+    "role_id" TEXT NOT NULL,
+    CONSTRAINT "unique_role_guild_id_role_id_fkey" FOREIGN KEY ("guild_id", "role_id") REFERENCES "role" ("guild_id", "role_id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "new_unique_role" ("channel_id", "guild_id", "key") SELECT "channel_id", "guild_id", "key" FROM "unique_role";
+INSERT INTO "new_unique_role" ("role_id", "guild_id", "key") SELECT "role_id", "guild_id", "key" FROM "unique_role";
 DROP TABLE "unique_role";
 ALTER TABLE "new_unique_role" RENAME TO "unique_role";
 CREATE UNIQUE INDEX "unique_role_guild_id_key_key" ON "unique_role"("guild_id", "key");

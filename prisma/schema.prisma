@@ -69,7 +69,7 @@ model Role {
 model UniqueRole {
   guildId String @map("guild_id")
   key     String
-  roleId  String @map("channel_id")
+  roleId  String @map("role_id")
   role    Role   @relation(fields: [guildId, roleId], references: [guildId, roleId], onDelete: Cascade)
 
   @@unique([guildId, key])
