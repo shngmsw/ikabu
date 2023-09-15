@@ -155,7 +155,7 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
             });
 
             // テキストの募集チャンネルにSticky Messageを送信
-            const stickyChannelId = getStickyChannelId(recruitData) ?? recruitChannel.id;
+            const stickyChannelId = (await getStickyChannelId(recruitData)) ?? recruitChannel.id;
             await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
 
             await interaction.followUp({

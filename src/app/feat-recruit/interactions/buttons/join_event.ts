@@ -175,7 +175,7 @@ export async function join(
             });
 
             // テキストの募集チャンネルにSticky Messageを送信
-            const stickyChannelId = getStickyChannelId(recruitData) ?? recruitChannel.id;
+            const stickyChannelId = (await getStickyChannelId(recruitData)) ?? recruitChannel.id;
             await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
 
             if (notExists(channelId)) {

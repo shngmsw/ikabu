@@ -2,11 +2,13 @@ import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
+import { UniqueRoleService } from '../../../../db/unique_role_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
+import { RoleKeySet } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { embedRecruitDeleteButton, recruitActionRow } from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
@@ -110,7 +112,11 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
             0,
         );
 
-        const mention = `<@&${process.env.ROLE_ID_RECRUIT_PRIVATE}>`;
+        const privateRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
+            guild.id,
+            RoleKeySet.PrivateRecruit.key,
+        );
+        const mention = `<@&${privateRecruitRoleId}>`;
         const sentMessage = await recruitChannel.send({
             content:
                 mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,

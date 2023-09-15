@@ -52,7 +52,7 @@ export const joinTTS = async (
         if (!subscription) {
             if (notExists(member)) {
                 return await interaction.channel.send(
-                    getDeveloperMention() + 'メンバー情報が取得できなかったでし！',
+                    (await getDeveloperMention(guildId)) + 'メンバー情報が取得できなかったでし！',
                 );
             }
             if (!member.voice.channelId) {

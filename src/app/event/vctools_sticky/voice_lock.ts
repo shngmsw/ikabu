@@ -11,10 +11,10 @@ import {
 } from 'discord.js';
 
 import { createVCToolsButtons } from './vc_tools_message';
+import { ChannelService } from '../../../db/channel_service';
 import { log4js_obj } from '../../../log4js_settings';
-import { searchChannelById } from '../../common/manager/channel_manager';
 import { getAPIMemberByInteraction } from '../../common/manager/member_manager';
-import { Merge, getDeveloperMention, notExists } from '../../common/others';
+import { Merge, notExists } from '../../common/others';
 import { VCLockButton } from '../../constant/button_id';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
@@ -114,21 +114,12 @@ export async function disableLimit(voiceState: VoiceState) {
 
     if (notExists(channel) || !channel.isTextBased()) return;
 
-    if (notExists(process.env.CATEGORY_ID_PHONETIC_VC)) {
-        return await channel.send(
-            getDeveloperMention() + 'カテゴリID`CATEGORY_ID_PHONETIC_VC`が設定されてないでし！',
-        );
+    const dbChannel = await ChannelService.getChannel(guild.id, channel.id);
+    if (notExists(dbChannel) || dbChannel.type !== ChannelType.GuildVoice) {
+        return;
     }
 
-    const vcCategory = await searchChannelById(guild, process.env.CATEGORY_ID_PHONETIC_VC);
-
-    if (notExists(vcCategory) || vcCategory.type !== ChannelType.GuildCategory) {
-        return await channel.send(
-            getDeveloperMention() + 'カテゴリID`CATEGORY_ID_PHONETIC_VC`がおかしいでし！',
-        );
-    }
-
-    if (!vcCategory.children.cache.has(channel.id)) {
+    if (!dbChannel.isVCToolsEnabled) {
         return;
     }
 

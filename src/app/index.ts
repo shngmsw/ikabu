@@ -8,26 +8,42 @@ import {
     CacheType,
     Client,
     ClientUser,
+    DMChannel,
     GatewayIntentBits,
     Guild,
     GuildMember,
     Interaction,
     Message,
     MessageReaction,
+    NonThreadGuildBasedChannel,
     PartialGuildMember,
     PartialMessageReaction,
     PartialUser,
     Partials,
+    Role,
     User,
     VoiceState,
 } from 'discord.js';
 
 import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
+import { searchChannelById } from './common/manager/channel_manager';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from './common/others';
+import { ChannelKeySet } from './constant/channel_key';
+import {
+    deleteChannel,
+    saveChannel,
+    saveChannelAtLaunch,
+} from './event/channel_related/store_channel';
 import { subscribeSplatEventMatch } from './event/cron/event_match_register';
 import { stageInfo } from './event/cron/stageinfo';
 import { emojiCountDown, emojiCountUp } from './event/reaction_count/reactions';
+import {
+    deleteRole,
+    saveRole,
+    saveRoleAtLaunch,
+    updateGuildRoles,
+} from './event/role_related/store_role';
 import { guildMemberAddEvent } from './event/rookie/set_rookie';
 import { editThreadTag } from './event/support_auto_tag/edit_tag';
 import { sendCloseButton } from './event/support_auto_tag/send_support_close_button';
@@ -41,6 +57,7 @@ import * as vcStateUpdateHandler from './handlers/vcState_update_handler';
 import { sendErrorLogs } from './logs/error/send_error_logs';
 import { MemberService } from '../db/member_service';
 import { ParticipantService } from '../db/participant_service';
+import { UniqueChannelService } from '../db/unique_channel_service';
 import { log4js_obj } from '../log4js_settings';
 import { registerSlashCommands } from '../register';
 
@@ -92,6 +109,7 @@ client.on('guildMemberAdd', async (member: GuildMember) => {
 });
 
 client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) => {
+    const loggerMR = log4js_obj.getLogger('guildMemberRemove');
     try {
         const displayName = member.displayName;
         const username = member.user.username;
@@ -114,19 +132,25 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
             text += '入部日を取得できなかったでし！';
         }
 
-        assertExistCheck(process.env.CHANNEL_ID_RETIRE_LOG);
-        const retireLog = member.guild.channels.cache.get(process.env.CHANNEL_ID_RETIRE_LOG);
+        const guild = await member.guild.fetch();
+
+        const logChannelId = await UniqueChannelService.getChannelIdByKey(
+            guild.id,
+            ChannelKeySet.RetireLog.key,
+        );
+        if (notExists(logChannelId)) {
+            return logger.warn(`${ChannelKeySet.RetireLog.key} is not set. [${guild.name}]`);
+        }
+        const retireLog = await searchChannelById(guild, logChannelId);
         if (retireLog?.isTextBased()) {
             await retireLog.send(text);
         }
 
-        const guild = await member.guild.fetch();
         if (guild.id === process.env.SERVER_ID) {
             assertExistCheck(client.user, 'client.user');
             setEnrollmentCount(client.user, guild);
         }
     } catch (error) {
-        const loggerMR = log4js_obj.getLogger('guildMemberRemove');
         await sendErrorLogs(loggerMR, error);
     }
 });
@@ -136,6 +160,8 @@ client.on(
     async (oldMember: GuildMember | PartialGuildMember, newMember: GuildMember) => {
         try {
             const guild = await newMember.guild.fetch();
+            await updateGuildRoles(guild);
+
             const userId = newMember.user.id;
             let member: GuildMember | null = newMember;
 
@@ -212,6 +238,8 @@ client.on('ready', async (client: Client<true>) => {
     try {
         assertExistCheck(client.user);
         logger.info(`Logged in as ${client.user.tag}!`);
+        await saveChannelAtLaunch(client);
+        await saveRoleAtLaunch(client);
         await registerSlashCommands();
         const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
         setEnrollmentCount(client.user, guild);
@@ -320,7 +348,11 @@ client.on('interactionCreate', async (interaction: Interaction<CacheType>) => {
 });
 
 client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
-    if (exists(thread.parentId) && thread.parentId === process.env.CHANNEL_ID_SUPPORT_CENTER) {
+    const supportChannelId = await UniqueChannelService.getChannelIdByKey(
+        thread.guildId,
+        ChannelKeySet.SupportCenter.key,
+    );
+    if (exists(thread.parentId) && thread.parentId === supportChannelId) {
         await editThreadTag(thread);
         await sendCloseButton(thread);
     }
@@ -328,6 +360,46 @@ client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
 
 client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
     void vcStateUpdateHandler.call(oldState, newState);
+});
+
+// チャンネルが作成されたとき
+client.on('channelCreate', async (channel: NonThreadGuildBasedChannel) => {
+    await saveChannel(channel);
+});
+
+// チャンネルが更新されたとき
+client.on(
+    'channelUpdate',
+    async (
+        oldChannel: DMChannel | NonThreadGuildBasedChannel,
+        newChannel: DMChannel | NonThreadGuildBasedChannel,
+    ) => {
+        if (!newChannel.isDMBased()) {
+            await saveChannel(newChannel);
+        }
+    },
+);
+
+// チャンネルが削除されたとき
+client.on('channelDelete', async (channel: DMChannel | NonThreadGuildBasedChannel) => {
+    if (!channel.isDMBased()) {
+        await deleteChannel(channel);
+    }
+});
+
+// ロールが作成されたとき
+client.on('roleCreate', async (role: Role) => {
+    await saveRole(role);
+});
+
+// ロールが更新されたとき
+client.on('roleUpdate', async (oldRole: Role, newRole: Role) => {
+    await saveRole(newRole);
+});
+
+// ロールが削除されたとき
+client.on('roleDelete', async (role: Role) => {
+    await deleteRole(role);
 });
 
 function setEnrollmentCount(clientUser: ClientUser, guild: Guild) {

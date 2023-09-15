@@ -12,12 +12,14 @@ import {
 } from 'discord.js';
 
 import { FriendCodeService } from '../../../db/friend_code_service.js';
+import { UniqueChannelService } from '../../../db/unique_channel_service.js';
 import { log4js_obj } from '../../../log4js_settings.js';
 import { searchChannelById } from '../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../common/manager/member_manager.js';
-import { assertExistCheck, exists } from '../../common/others.js';
+import { assertExistCheck, exists, notExists } from '../../common/others.js';
 import { FriendCodeButton } from '../../constant/button_id.js';
+import { ChannelKeySet } from '../../constant/channel_key.js';
 import { sendErrorLogs } from '../../logs/error/send_error_logs.js';
 const logger = log4js_obj.getLogger();
 
@@ -69,21 +71,30 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
                 .setLabel('削除')
                 .setStyle(ButtonStyle.Danger),
         ]);
-        await interaction.editReply({
+        return await interaction.editReply({
             embeds: [composeEmbed(targetUser, fcObj.code, true)],
             components: [buttons],
         });
-        return;
     }
 
     if (interaction.inGuild()) {
-        assertExistCheck(process.env.CHANNEL_ID_INTRODUCTION, 'CHANNEL_ID_INTRODUCTION');
         const guild = await getGuildByInteraction(interaction);
-        const channel = await searchChannelById(guild, process.env.CHANNEL_ID_INTRODUCTION);
-        if (exists(channel) && channel.isTextBased()) {
+        const introductionChannelId = await UniqueChannelService.getChannelIdByKey(
+            guild.id,
+            ChannelKeySet.Introduction.key,
+        );
+
+        if (notExists(introductionChannelId)) {
+            return await interaction.editReply(
+                'フレンドコードが登録されていないでし！\n`/friend_code add`でコードを登録してみるでし！',
+            );
+        }
+
+        const introductionChannel = await searchChannelById(guild, introductionChannelId);
+        if (exists(introductionChannel) && introductionChannel.isTextBased()) {
             let result = null;
             try {
-                const messages = await channel.messages.fetch({ limit: 100 });
+                const messages = await introductionChannel.messages.fetch({ limit: 100 });
                 const list = messages.filter(
                     (message: Message<true>) => userId === message.author.id && !message.author.bot,
                 );
@@ -107,7 +118,7 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
                 for (const r of result) {
                     embeds.push(composeEmbed(targetUser, r, false));
                 }
-                await interaction.editReply({
+                return await interaction.editReply({
                     embeds,
                     components: [button],
                 });
@@ -116,16 +127,15 @@ export async function selectFriendCode(interaction: ChatInputCommandInteraction<
                     content:
                         '自己紹介チャンネルに投稿がないか、投稿した日時が古すぎて検索できないでし\n `/friend_code add`でコードを登録してみるでし！',
                 });
-                await interaction.deleteReply();
+                return await interaction.deleteReply();
             }
-            return;
         }
+    } else {
+        // DMかつDBにないとき or GuildかつDBにないかつ自己紹介チャンネルが見つからないとき(練習鯖とか)
+        return await interaction.editReply(
+            'フレンドコードが登録されていないでし！\n`/friend_code add`でコードを登録してみるでし！',
+        );
     }
-
-    // DMかつDBにないとき or GuildかつDBにないかつ自己紹介チャンネルが見つからないとき(練習鯖とか)
-    await interaction.editReply(
-        'フレンドコードが登録されていないでし！\n`/friend_code add`でコードを登録してみるでし！',
-    );
 }
 
 function composeEmbed(user: User | Member, fc: string, isDatabase: boolean) {

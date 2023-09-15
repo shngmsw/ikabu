@@ -1,12 +1,10 @@
 import { CategoryChannel, ChatInputCommandInteraction, Guild } from 'discord.js';
 
+import { UniqueRoleService } from '../../../db/unique_role_service';
 import { log4js_obj } from '../../../log4js_settings';
-import {
-    searchRoleById,
-    searchRoleIdByName,
-    unassginRoleFromMembers,
-} from '../../common/manager/role_manager';
-import { assertExistCheck } from '../../common/others';
+import { searchRoleById, unassginRoleFromMembers } from '../../common/manager/role_manager';
+import { assertExistCheck, notExists } from '../../common/others';
+import { RoleKeySet } from '../../constant/role_key';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -41,8 +39,13 @@ export async function festEnd(
 
     // フェスロールを外す
     try {
-        const shiverId = await searchRoleIdByName(guild, 'フウカ陣営');
-        assertExistCheck(shiverId, '[role name: フウカ陣営]');
+        const shiverId = await UniqueRoleService.getRoleIdByKey(
+            guild.id,
+            RoleKeySet.ShiverRecruit.key,
+        );
+        if (notExists(shiverId)) {
+            return await interaction.followUp('`フウカ陣営`ロールは設定されていないでし！');
+        }
         const shiverRole = await searchRoleById(guild, shiverId);
         assertExistCheck(shiverRole, 'shiverRole');
         const shiverCount = shiverRole.members.size;
@@ -58,8 +61,10 @@ export async function festEnd(
     }
 
     try {
-        const fryeId = await searchRoleIdByName(guild, 'ウツホ陣営');
-        assertExistCheck(fryeId, '[role name: ウツホ陣営]');
+        const fryeId = await UniqueRoleService.getRoleIdByKey(guild.id, RoleKeySet.FryeRecruit.key);
+        if (notExists(fryeId)) {
+            return await interaction.followUp('`ウツホ陣営`ロールは設定されていないでし！');
+        }
         const fryeRole = await searchRoleById(guild, fryeId);
         assertExistCheck(fryeRole, 'fryeRole');
         const fryeCount = fryeRole.members.size;
@@ -75,8 +80,13 @@ export async function festEnd(
     }
 
     try {
-        const bigmanId = await searchRoleIdByName(guild, 'マンタロー陣営');
-        assertExistCheck(bigmanId, '[role name: マンタロー陣営]');
+        const bigmanId = await UniqueRoleService.getRoleIdByKey(
+            guild.id,
+            RoleKeySet.BigmanRecruit.key,
+        );
+        if (notExists(bigmanId)) {
+            return await interaction.followUp('`マンタロー陣営`ロールは設定されていないでし！');
+        }
         const bigmanRole = await searchRoleById(guild, bigmanId);
         assertExistCheck(bigmanRole, 'bigmanRole');
         const bigmanCount = bigmanRole.members.size;
