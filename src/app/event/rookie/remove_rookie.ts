@@ -53,22 +53,17 @@ export async function removeRookie(msg: Message<true>) {
  * @return boolean
  */
 async function shouldRemoveRookie(member: GuildMember) {
-    const recruitCountResult: {
-        userId: string;
-        recruitCount: number;
-        joinCount: number;
-    } | null = await RecruitCountService.getCountByUserId(member.id);
+    const recruitCountResult = await RecruitCountService.getCountByUserId(member.id);
     if (recruitCountResult === null) {
         return false;
     }
-    const count = recruitCountResult?.recruitCount + recruitCountResult?.joinCount;
-    const voiceCountResult: { userId: string; totalSec: number } | null =
-        await VoiceCountService.getCountByUserId(member.id);
-    if (voiceCountResult === null) {
+    const count = recruitCountResult.recruitCount + recruitCountResult.joinCount;
+    const voiceCountResult = await VoiceCountService.getCountByUserId(member.id);
+    if (notExists(recruitCountResult) || notExists(voiceCountResult)) {
         return false;
     }
     const totalSec = voiceCountResult.totalSec;
-    if (count >= 20 && totalSec >= 72000) {
+    if (count >= 20 && totalSec >= 60 * 60 * 20) {
         return true;
     } else {
         return false;
