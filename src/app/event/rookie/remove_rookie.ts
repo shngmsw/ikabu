@@ -54,14 +54,11 @@ export async function removeRookie(msg: Message<true>) {
  */
 async function shouldRemoveRookie(member: GuildMember) {
     const recruitCountResult = await RecruitCountService.getCountByUserId(member.id);
-    if (recruitCountResult === null) {
-        return false;
-    }
-    const count = recruitCountResult.recruitCount + recruitCountResult.joinCount;
     const voiceCountResult = await VoiceCountService.getCountByUserId(member.id);
     if (notExists(recruitCountResult) || notExists(voiceCountResult)) {
         return false;
     }
+    const count = recruitCountResult.recruitCount + recruitCountResult.joinCount;
     const totalSec = voiceCountResult.totalSec;
     if (count >= 20 && totalSec >= 60 * 60 * 20) {
         return true;
