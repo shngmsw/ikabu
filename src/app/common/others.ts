@@ -1,11 +1,19 @@
-import { Attachment, EmbedBuilder, Message } from 'discord.js';
+import { Attachment, EmbedBuilder, Guild, Message } from 'discord.js';
 
 import { searchAPIMemberById } from './manager/member_manager.js';
 import { placeHold } from '../../constant.js';
+import { UniqueChannelService } from '../../db/unique_channel_service.js';
+import { UniqueRoleService } from '../../db/unique_role_service.js';
+import { ChannelKeySet } from '../constant/channel_key.js';
+import { RoleKeySet } from '../constant/role_key.js';
 
-export function getDeveloperMention() {
-    if (exists(process.env.ROLE_ID_DEVELOPER)) {
-        return `<@&${process.env.ROLE_ID_DEVELOPER}>`;
+export async function getDeveloperMention(guildId: string) {
+    const developerRoleId = await UniqueRoleService.getRoleIdByKey(
+        guildId,
+        RoleKeySet.Developer.key,
+    );
+    if (exists(developerRoleId)) {
+        return `<@&${developerRoleId}>`;
     } else {
         return '開発者ロールが設定されていないでし！\nサポートセンターまでお問い合わせくださいでし！\n';
     }
@@ -283,7 +291,7 @@ const recruit_command = {
         '`/別ゲー募集 apex` or `/別ゲー募集 overwatch` or `/別ゲー募集 mhr` or `/別ゲー募集 valo` or `/別ゲー募集 other`',
 };
 
-export function getCommandHelpEmbed(channelName: string) {
+export async function getCommandHelpEmbed(guild: Guild, channelName: string) {
     let commandMessage;
     switch (channelName) {
         case 'プラベ募集':
@@ -314,11 +322,15 @@ export function getCommandHelpEmbed(channelName: string) {
             break;
     }
 
+    const recruitHelpChannelId = await UniqueChannelService.getChannelIdByKey(
+        guild.id,
+        ChannelKeySet.RecruitHelp.key,
+    );
     const embed = new EmbedBuilder();
     embed.setDescription(
         '募集コマンドは ' +
             `${commandMessage}` +
-            `\n詳しくは <#${process.env.CHANNEL_ID_RECRUIT_HELP}> を確認するでし！`,
+            `\n詳しくは <#${recruitHelpChannelId}> を確認するでし！`,
     );
     return embed;
 }

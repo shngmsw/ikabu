@@ -9,6 +9,7 @@ import {
 
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
+import { UniqueRoleService } from '../../../../db/unique_role_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import {
     EventMatchInfo,
@@ -20,6 +21,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
+import { RoleKeySet } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import {
     recruitActionRow,
@@ -106,7 +108,11 @@ export async function eventRecruit(interaction: ChatInputCommandInteraction<'cac
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    const mention = `<@&${process.env.ROLE_ID_RECRUIT_EVENT}>`;
+    const eventRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
+        guild.id,
+        RoleKeySet.EventRecruit.key,
+    );
+    const mention = `<@&${eventRecruitRoleId}>`;
 
     try {
         const schedule = await getSchedule();

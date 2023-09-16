@@ -21,6 +21,7 @@ import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, isEmpty, isNotEmpty, notExists } from '../../../common/others';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { sendRecruitModalLog } from '../../../logs/modals/recruit_modal_log';
+import { getFestPeriodAlertText } from '../../alert_texts/schedule_related_alerts';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -85,16 +86,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
         }
 
         if (checkFes(schedule, type)) {
-            const fes1ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_SHIVER}>`;
-            const fes2ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_FRYE}>`;
-            const fes3ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_BIGMAN}>`;
-            assertExistCheck(fes1ChannelId, 'CHANNEL_ID_RECRUIT_SHIVER');
-            assertExistCheck(fes2ChannelId, 'CHANNEL_ID_RECRUIT_FRYE');
-            assertExistCheck(fes3ChannelId, 'CHANNEL_ID_RECRUIT_BIGMAN');
-            await interaction.editReply({
-                content: `募集を建てようとした期間はフェス中でし！\n${fes1ChannelId}, ${fes2ChannelId}, ${fes3ChannelId}のチャンネルを使うでし！`,
-            });
-            return;
+            return await interaction.editReply(await getFestPeriodAlertText(guild.id));
         }
 
         const regularData = await getRegularData(schedule, type);
@@ -435,16 +427,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
         }
 
         if (checkFes(schedule, type)) {
-            const fes1ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_SHIVER}>`;
-            const fes2ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_FRYE}>`;
-            const fes3ChannelId = `<#${process.env.CHANNEL_ID_RECRUIT_BIGMAN}>`;
-            assertExistCheck(fes1ChannelId, 'CHANNEL_ID_RECRUIT_SHIVER');
-            assertExistCheck(fes2ChannelId, 'CHANNEL_ID_RECRUIT_FRYE');
-            assertExistCheck(fes3ChannelId, 'CHANNEL_ID_RECRUIT_BIGMAN');
-            await interaction.editReply({
-                content: `募集を建てようとした期間はフェス中でし！\n${fes1ChannelId}, ${fes2ChannelId}, ${fes3ChannelId}のチャンネルを使うでし！`,
-            });
-            return;
+            return await interaction.editReply(await getFestPeriodAlertText(guild.id));
         }
 
         const anarchyData = await getAnarchyOpenData(schedule, type);

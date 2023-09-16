@@ -132,7 +132,7 @@ export async function close(
 
             if (recruitChannel.isThread()) {
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
-                const stickyChannelId = getStickyChannelId(recruitData);
+                const stickyChannelId = await getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
                     await sendRecruitSticky({
                         channelOpt: { guild: guild, channelId: stickyChannelId },
@@ -181,7 +181,7 @@ export async function close(
 
             if (recruitChannel.isThread()) {
                 // フォーラムやスレッドの場合は、テキストの募集チャンネルにSticky Messageを送信する
-                const stickyChannelId = getStickyChannelId(recruitData);
+                const stickyChannelId = await getStickyChannelId(recruitData);
                 if (exists(stickyChannelId)) {
                     await sendRecruitSticky({
                         channelOpt: { guild: guild, channelId: stickyChannelId },

@@ -12,9 +12,9 @@ import {
 } from 'discord.js';
 
 import { createVCLockedButton } from './voice_lock';
+import { ChannelService } from '../../../db/channel_service';
 import { log4js_obj } from '../../../log4js_settings';
-import { searchChannelById } from '../../common/manager/channel_manager';
-import { Merge, exists, getDeveloperMention, notExists } from '../../common/others';
+import { Merge, exists, notExists } from '../../common/others';
 import { sendStickyMessage } from '../../common/sticky_message';
 import { VCLockButton, VCToolsButton } from '../../constant/button_id';
 import { StickyKey } from '../../constant/sticky_key';
@@ -64,21 +64,12 @@ export async function sendVCToolsSticky(
     showOnboarding: boolean,
 ) {
     try {
-        if (notExists(process.env.CATEGORY_ID_PHONETIC_VC)) {
-            return await channel.send(
-                getDeveloperMention() + 'カテゴリID`CATEGORY_ID_PHONETIC_VC`が設定されてないでし！',
-            );
+        const dbChannel = await ChannelService.getChannel(guild.id, channel.id);
+        if (notExists(dbChannel) || dbChannel.type !== ChannelType.GuildVoice) {
+            return;
         }
 
-        const vcCategory = await searchChannelById(guild, process.env.CATEGORY_ID_PHONETIC_VC);
-
-        if (notExists(vcCategory) || vcCategory.type !== ChannelType.GuildCategory) {
-            return await channel.send(
-                getDeveloperMention() + 'カテゴリID`CATEGORY_ID_PHONETIC_VC`がおかしいでし！',
-            );
-        }
-
-        if (!vcCategory.children.cache.has(channel.id)) {
+        if (!dbChannel.isVCToolsEnabled) {
             return;
         }
 

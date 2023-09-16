@@ -2,10 +2,12 @@ import { ChannelType, ChatInputCommandInteraction, PermissionsBitField } from 'd
 
 import { festEnd } from './fest_end';
 import { festStart } from './fest_start';
+import { UniqueChannelService } from '../../../db/unique_channel_service';
 import { searchChannelById } from '../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { notExists } from '../../common/others';
+import { ChannelKeySet } from '../../constant/channel_key';
 
 export async function festSettingHandler(
     interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
@@ -24,14 +26,19 @@ export async function festSettingHandler(
         return await interaction.editReply('チャンネルを管理する権限がないでし！');
     }
 
-    const categoryId = process.env.CATEGORY_ID_RECRUIT_FESTIVAL;
+    const fesCategoryId = await UniqueChannelService.getChannelIdByKey(
+        guild.id,
+        ChannelKeySet.FestivalCategory.key,
+    );
 
     // .envにカテゴリIDが設定されているかチェック
-    if (notExists(categoryId)) {
-        return await interaction.editReply('カテゴリIDが設定されていないでし！');
+    if (notExists(fesCategoryId)) {
+        return await interaction.editReply(
+            ChannelKeySet.FestivalCategory.name + 'が設定されていないでし！',
+        );
     }
 
-    const categoryChannel = await searchChannelById(guild, categoryId);
+    const categoryChannel = await searchChannelById(guild, fesCategoryId);
 
     if (notExists(categoryChannel) || categoryChannel.type !== ChannelType.GuildCategory) {
         return await interaction.editReply('カテゴリチャンネルが見つからないでし！');
