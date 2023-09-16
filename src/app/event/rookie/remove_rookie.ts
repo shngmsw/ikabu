@@ -24,7 +24,7 @@ export async function removeRookie(msg: Message<true>) {
         return;
     }
 
-    if (await isRemoveRookie(member)) {
+    if (await shouldRemoveRookie(member)) {
         const hasRookieRole = member.roles.cache.find((role: Role) => role.id === rookieRoleId);
         if (hasRookieRole) {
             await unassignRoleFromMember(rookieRoleId, member);
@@ -45,14 +45,14 @@ export async function removeRookie(msg: Message<true>) {
 }
 
 /*
- * 新入部員かどうかを判定する
+ * 新入部員ロールを削除すべきかどうかを判定する
  * voice_countテーブルのtotal_secが20時間以上
  * かつ recruit_countテーブルのrecruit_count + join_countが20回以上
  * の場合
  * @param member
  * @return boolean
  */
-async function isRemoveRookie(member: GuildMember) {
+async function shouldRemoveRookie(member: GuildMember) {
     const recruitCountResult: {
         userId: string;
         recruitCount: number;
