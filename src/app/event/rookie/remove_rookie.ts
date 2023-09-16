@@ -1,17 +1,16 @@
-import Discord, { Message, Role } from 'discord.js';
+import Discord, { GuildMember, Message, Role } from 'discord.js';
 
 import { sendIntentionConfirmReply } from './send_questionnaire';
-import { MessageCountService } from '../../../db/message_count_service.js';
+import { RecruitCountService } from '../../../db/recruit_count_service';
 import { UniqueRoleService } from '../../../db/unique_role_service';
+import { VoiceCountService } from '../../../db/voice_count_service';
 import { getAPIMemberByMessage } from '../../common/manager/member_manager';
 import { unassignRoleFromMember } from '../../common/manager/role_manager';
 import { exists, getDeveloperMention, notExists } from '../../common/others';
 import { RoleKeySet } from '../../constant/role_key';
 
 export async function removeRookie(msg: Message<true>) {
-    const dt = new Date();
     const guild = msg.guild;
-    const lastMonth = dt.setMonth(dt.getMonth() - 1);
     const authorId = msg.author.id;
     const member = await getAPIMemberByMessage(msg);
     const rookieRoleId = await UniqueRoleService.getRoleIdByKey(guild.id, RoleKeySet.Rookie.key);
@@ -25,11 +24,7 @@ export async function removeRookie(msg: Message<true>) {
         return;
     }
 
-    const messageCount = await getMessageCount(authorId);
-    if (
-        (exists(member.joinedTimestamp) && member.joinedTimestamp < lastMonth) ||
-        messageCount > 99
-    ) {
+    if (await isRemoveRookie(member)) {
         const hasRookieRole = member.roles.cache.find((role: Role) => role.id === rookieRoleId);
         if (hasRookieRole) {
             await unassignRoleFromMember(rookieRoleId, member);
@@ -49,10 +44,33 @@ export async function removeRookie(msg: Message<true>) {
     }
 }
 
-async function getMessageCount(userId: string) {
-    const result = await MessageCountService.getMemberByUserId(userId);
-    if (exists(result)) {
-        return result.count;
+/*
+ * 新入部員かどうかを判定する
+ * voice_countテーブルのtotal_secが20時間以上
+ * かつ recruit_countテーブルのrecruit_count + join_countが20回以上
+ * の場合
+ * @param member
+ * @return boolean
+ */
+async function isRemoveRookie(member: GuildMember) {
+    const recruitCountResult: {
+        userId: string;
+        recruitCount: number;
+        joinCount: number;
+    } | null = await RecruitCountService.getCountByUserId(member.id);
+    if (recruitCountResult === null) {
+        return false;
     }
-    return 0;
+    const count = recruitCountResult?.recruitCount + recruitCountResult?.joinCount;
+    const voiceCountResult: { userId: string; totalSec: number } | null =
+        await VoiceCountService.getCountByUserId(member.id);
+    if (voiceCountResult === null) {
+        return false;
+    }
+    const totalSec = voiceCountResult.totalSec;
+    if (count >= 20 && totalSec >= 72000) {
+        return true;
+    } else {
+        return false;
+    }
 }
