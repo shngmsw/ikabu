@@ -106,6 +106,8 @@ export const killTTS = async (
             subscriptions.delete(guildId);
             channels.delete(guildId);
             messageQueue.length = 0; // キューリセット
+            // 状態遷移が完了するまで待つ
+            await entersState(subscription.player, AudioPlayerStatus.Idle, 1000 * 60);
             subscription.connection.destroy();
             isPlaying = false; // 再生中フラグをリセット
 
@@ -133,6 +135,8 @@ export async function autokill(oldState: VoiceState) {
         subscriptions.delete(guildId);
         channels.delete(guildId);
         messageQueue.length = 0; // キューリセット
+        // 状態遷移が完了するまで待つ
+        await entersState(subscription.player, AudioPlayerStatus.Idle, 1000 * 60);
         subscription.connection.destroy();
         isPlaying = false; // 再生中フラグをリセット
 
