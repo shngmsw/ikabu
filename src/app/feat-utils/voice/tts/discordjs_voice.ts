@@ -214,7 +214,7 @@ async function playNextMessage(subscription: Subscription) {
     subscription.player.play(resource);
 
     // 再生が完了するまで待つ
-    await entersState(subscription.player, AudioPlayerStatus.Idle, 1000 * 900);
+    await entersState(subscription.player, AudioPlayerStatus.Idle, 1000 * 60);
 
     // 再生が終わったのでフラグをリセット
     isPlaying = false;
