@@ -103,10 +103,10 @@ export const killTTS = async (
 
         if (subscription && channels.get(guildId) === channelId) {
             subscription.player.stop(); // 読み上げを停止
-            subscription.connection.destroy();
             subscriptions.delete(guildId);
             channels.delete(guildId);
             messageQueue.length = 0; // キューリセット
+            subscription.connection.destroy();
             isPlaying = false; // 再生中フラグをリセット
 
             await interaction.channel.send(':dash:');
@@ -130,10 +130,10 @@ export async function autokill(oldState: VoiceState) {
             return;
         }
         subscription.player.stop(); // 読み上げを停止
-        subscription.connection.destroy();
         subscriptions.delete(guildId);
         channels.delete(guildId);
         messageQueue.length = 0; // キューリセット
+        subscription.connection.destroy();
         isPlaying = false; // 再生中フラグをリセット
 
         await oldState.channel.send(':dash:');
