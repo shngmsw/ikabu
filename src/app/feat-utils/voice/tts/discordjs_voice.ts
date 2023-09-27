@@ -35,6 +35,9 @@ type Subscription = {
 // 読み上げ対象のDicordチャンネル保存用のMapです。
 const channels = new Map();
 
+// entersState()のAbortSignalを生成します。
+const ac = new AbortController();
+
 export const joinTTS = async (
     interaction:
         | ChatInputCommandInteraction<'cached' | 'raw'>
@@ -107,10 +110,10 @@ export const killTTS = async (
             channels.delete(guildId);
             messageQueue.length = 0; // キューリセット
             // 状態遷移が完了するまで待つ
-            await entersState(subscription.player, AudioPlayerStatus.Idle, 1000 * 60);
+            await entersState(subscription.player, AudioPlayerStatus.Idle, ac.signal);
             subscription.connection.destroy();
-            isPlaying = false; // 再生中フラグをリセット
 
+            isPlaying = false; // 再生中フラグをリセット
             await interaction.channel.send(':dash:');
             await interaction.deleteReply();
         } else if (channels.get(guildId) != channelId) {
@@ -136,8 +139,9 @@ export async function autokill(oldState: VoiceState) {
         channels.delete(guildId);
         messageQueue.length = 0; // キューリセット
         // 状態遷移が完了するまで待つ
-        await entersState(subscription.player, AudioPlayerStatus.Idle, 1000 * 60);
+        await entersState(subscription.player, AudioPlayerStatus.Idle, ac.signal);
         subscription.connection.destroy();
+
         isPlaying = false; // 再生中フラグをリセット
 
         await oldState.channel.send(':dash:');
@@ -190,11 +194,11 @@ export async function play(msg: Message<true>) {
         }
 
         messageQueue.push(msg); // メッセージをキューに追加
-        await playNextMessage(subscription); // 次のメッセージを再生
+        await playNextMessage(); // 次のメッセージを再生
     }
 }
 
-async function playNextMessage(subscription: Subscription) {
+async function playNextMessage() {
     if (messageQueue.length === 0 || isPlaying) {
         return;
     }
@@ -205,6 +209,11 @@ async function playNextMessage(subscription: Subscription) {
     const nextMsg = messageQueue.shift(); // キューから次のメッセージを取得
     if (!nextMsg) {
         isPlaying = false;
+        return;
+    }
+
+    const subscription = subscriptions.get(nextMsg.guildId);
+    if (notExists(subscription) || channels.get(nextMsg.guildId) !== nextMsg.channelId) {
         return;
     }
 
@@ -224,5 +233,5 @@ async function playNextMessage(subscription: Subscription) {
     isPlaying = false;
 
     // 次のメッセージを再生
-    await playNextMessage(subscription);
+    await playNextMessage();
 }
