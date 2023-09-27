@@ -35,9 +35,6 @@ type Subscription = {
 // 読み上げ対象のDicordチャンネル保存用のMapです。
 const channels = new Map();
 
-// entersState()のAbortSignalを生成します。
-const ac = new AbortController();
-
 export const joinTTS = async (
     interaction:
         | ChatInputCommandInteraction<'cached' | 'raw'>
@@ -110,7 +107,11 @@ export const killTTS = async (
             channels.delete(guildId);
             messageQueue.length = 0; // キューリセット
             // 状態遷移が完了するまで待つ
-            await entersState(subscription.player, AudioPlayerStatus.Idle, ac.signal);
+            await entersState(
+                subscription.player,
+                AudioPlayerStatus.Idle,
+                new AbortController().signal,
+            );
             subscription.connection.destroy();
 
             isPlaying = false; // 再生中フラグをリセット
@@ -139,7 +140,11 @@ export async function autokill(oldState: VoiceState) {
         channels.delete(guildId);
         messageQueue.length = 0; // キューリセット
         // 状態遷移が完了するまで待つ
-        await entersState(subscription.player, AudioPlayerStatus.Idle, ac.signal);
+        await entersState(
+            subscription.player,
+            AudioPlayerStatus.Idle,
+            new AbortController().signal,
+        );
         subscription.connection.destroy();
 
         isPlaying = false; // 再生中フラグをリセット
