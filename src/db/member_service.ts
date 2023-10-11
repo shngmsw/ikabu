@@ -26,6 +26,7 @@ export class MemberService {
                     displayName: member.displayName,
                     iconUrl: member.iconUrl,
                     joinedAt: member.joinedAt,
+                    isRookie: true,
                 },
             });
         } catch (error) {
@@ -63,6 +64,24 @@ export class MemberService {
                 },
                 data: {
                     joinedAt: joinedAt,
+                },
+            });
+        } catch (error) {
+            await sendErrorLogs(logger, error);
+        }
+    }
+
+    static async setRookieFlag(guildId: string, userId: string, isRookie: boolean) {
+        try {
+            await prisma.member.update({
+                where: {
+                    guildId_userId: {
+                        guildId: guildId,
+                        userId: userId,
+                    },
+                },
+                data: {
+                    isRookie: isRookie,
                 },
             });
         } catch (error) {

@@ -1,9 +1,6 @@
-import { FriendCode } from '@prisma/client';
 import { GuildMember, Role } from 'discord.js';
 
-import { FriendCodeService } from '../../../db/friend_code_service.js';
 import { MemberService } from '../../../db/member_service.js';
-import { MessageCountService } from '../../../db/message_count_service.js';
 import { UniqueChannelService } from '../../../db/unique_channel_service.js';
 import { UniqueRoleService } from '../../../db/unique_role_service.js';
 import { log4js_obj } from '../../../log4js_settings';
@@ -20,7 +17,7 @@ const logger = log4js_obj.getLogger('guildMemberAdd');
 export async function guildMemberAddEvent(newMember: GuildMember) {
     try {
         const guild = await newMember.guild.fetch();
-        const userId = newMember.user.id;
+        const memberId = newMember.user.id;
 
         const lobbyChannelId = await UniqueChannelService.getChannelIdByKey(
             guild.id,
@@ -47,7 +44,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
             );
 
             welcomeMessage = await lobbyChannel.send(
-                `<@!${userId}> たん、よろしくお願いします！\n` +
+                `<@!${memberId}> たん、よろしくお願いします！\n` +
                     `最初の10分間は閲覧しかできません、その間に <#${ruleChannelId}> と <#${descriptionChannelId}> をよく読んでくださいね\n` +
                     `10分経ったら、書き込めるようになります。 <#${introductionChannelId}> で自己紹介も兼ねて自分のフレコを貼ってください\n\n` +
                     `${guild.name}のみんなが歓迎していますよ〜`,
@@ -77,16 +74,18 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
 
         // 新入部員ロールが設定されているサーバーでは、新入部員ロールを付与する
         if (exists(beginnerRole)) {
-            const messageCount = await getMessageCount(newMember.id);
-
             // membersテーブルにレコードがあるか確認
-            if (notExists(await MemberService.getMemberByUserId(guild.id, userId))) {
-                const friendCode = await FriendCodeService.getFriendCodeObjByUserId(newMember.id);
-                await sleep(600);
-                const memberCheck = await searchAPIMemberById(guild, userId);
-                if (exists(memberCheck)) {
-                    await setRookieRole(memberCheck, beginnerRole, messageCount, friendCode);
+            const storedMember = await MemberService.getMemberByUserId(guild.id, memberId);
+            if (exists(storedMember)) {
+                if (storedMember.isRookie) {
+                    await setRookieRole(memberId, beginnerRole);
                 }
+                // 出戻り勢の場合はリアクションを変える
+                if (exists(welcomeMessage)) {
+                    await welcomeMessage.react('👌');
+                }
+            } else {
+                await setRookieRole(memberId, beginnerRole);
                 if (exists(welcomeMessage)) {
                     await welcomeMessage.react('👍');
                 }
@@ -97,23 +96,10 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
     }
 }
 
-async function setRookieRole(
-    member: GuildMember,
-    beginnerRole: Role,
-    messageCount: number,
-    friendCode: FriendCode | null,
-) {
-    if (messageCount === 0 && notExists(friendCode)) {
-        if (member) {
-            await assignRoleToMember(beginnerRole, member);
-        }
+async function setRookieRole(memberId: string, beginnerRole: Role) {
+    await sleep(600);
+    const member = await searchAPIMemberById(beginnerRole.guild, memberId);
+    if (exists(member)) {
+        await assignRoleToMember(beginnerRole, member);
     }
-}
-
-async function getMessageCount(userId: string) {
-    const result = await MessageCountService.getMemberByUserId(userId);
-    if (exists(result)) {
-        return result.count;
-    }
-    return 0;
 }
