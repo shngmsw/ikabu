@@ -112,6 +112,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
                 displayName: '参加確定者1',
                 iconUrl: modalRecruit.placeHold,
                 joinedAt: new Date(),
+                isRookie: false,
             };
         }
 
@@ -122,6 +123,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
                 displayName: '参加確定者2',
                 iconUrl: modalRecruit.placeHold,
                 joinedAt: new Date(),
+                isRookie: false,
             };
         }
 
@@ -132,6 +134,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
                 displayName: '参加確定者3',
                 iconUrl: modalRecruit.placeHold,
                 joinedAt: new Date(),
+                isRookie: false,
             };
         }
 
@@ -232,6 +235,7 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
                 displayName: '参加確定者1',
                 iconUrl: modalRecruit.placeHold,
                 joinedAt: new Date(),
+                isRookie: false,
             };
             member1Mention = user1;
         }
@@ -251,6 +255,7 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
                 displayName: '参加確定者2',
                 iconUrl: modalRecruit.placeHold,
                 joinedAt: new Date(),
+                isRookie: false,
             };
             member2Mention = user2;
         }
@@ -392,6 +397,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
                 displayName: '参加確定者1',
                 iconUrl: modalRecruit.placeHold,
                 joinedAt: new Date(),
+                isRookie: false,
             };
             member1Mention = user1;
         }
@@ -411,6 +417,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
                 displayName: '参加確定者2',
                 iconUrl: modalRecruit.placeHold,
                 joinedAt: new Date(),
+                isRookie: false,
             };
             member2Mention = user2;
         }
@@ -546,6 +553,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
                     displayName: '参加確定者1',
                     iconUrl: modalRecruit.placeHold,
                     joinedAt: new Date(),
+                    isRookie: false,
                 };
                 member1Mention = user1;
             }
@@ -565,6 +573,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
                     displayName: '参加確定者2',
                     iconUrl: modalRecruit.placeHold,
                     joinedAt: new Date(),
+                    isRookie: false,
                 };
                 member2Mention = user2;
             }
@@ -703,6 +712,7 @@ export async function modalFesRecruit(
                     displayName: '参加確定者1',
                     iconUrl: modalRecruit.placeHold,
                     joinedAt: new Date(),
+                    isRookie: false,
                 };
                 member1Mention = user1;
             }
@@ -722,6 +732,7 @@ export async function modalFesRecruit(
                     displayName: '参加確定者2',
                     iconUrl: modalRecruit.placeHold,
                     joinedAt: new Date(),
+                    isRookie: false,
                 };
                 member2Mention = user2;
             }
