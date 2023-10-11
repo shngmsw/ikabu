@@ -1,10 +1,13 @@
 import { AttachmentBuilder, Message, PermissionsBitField } from 'discord.js';
 
+import { MemberService } from '../../db/member_service';
 import { UniqueChannelService } from '../../db/unique_channel_service';
+import { UniqueRoleService } from '../../db/unique_role_service';
 import { log4js_obj } from '../../log4js_settings';
 import { searchAPIMemberById } from '../common/manager/member_manager';
-import { randomBool, exists } from '../common/others';
+import { randomBool, exists, notExists } from '../common/others';
 import { ChannelKeySet } from '../constant/channel_key';
+import { RoleKeySet } from '../constant/role_key';
 import { stageInfo } from '../event/cron/stageinfo';
 import { deleteToken } from '../event/message_related/delete_token';
 import { dispand } from '../event/message_related/dispander';
@@ -19,6 +22,40 @@ const logger = log4js_obj.getLogger('message');
 
 export async function call(message: Message<true>) {
     try {
+        if (message.content.startsWith('/rookie_set')) {
+            // 一時的に設定用コマンドを追加
+            // 次のメンテナンスで削除する
+            const guild = await message.guild.fetch();
+            const member = await searchAPIMemberById(guild, message.author.id);
+            if (
+                exists(member) &&
+                member.permissions.has(PermissionsBitField.Flags.ManageChannels)
+            ) {
+                const rookieRoleId = await UniqueRoleService.getRoleIdByKey(
+                    guild.id,
+                    RoleKeySet.Rookie.key,
+                );
+
+                if (notExists(rookieRoleId)) return;
+
+                const allMembers = await guild.members.fetch();
+                const membersNum = allMembers.size;
+                let count = 0;
+                const sentMessage = await message.channel.send(
+                    `新入部員を保存中でし！ \`${count}/${membersNum}\``,
+                );
+                allMembers.forEach(async (member) => {
+                    if (member.roles.cache.find((role) => role.id === rookieRoleId)) {
+                        await MemberService.setRookieFlag(guild.id, member.id, true);
+                    } else {
+                        await MemberService.setRookieFlag(guild.id, member.id, false);
+                    }
+                    await sentMessage.edit(`新入部員を保存中でし！ \`${++count}/${membersNum}\``);
+                });
+                await sentMessage.edit('新入部員をDBに保存したでし！');
+            }
+        }
+
         if (message.author.bot) {
             if (message.content.startsWith('/poll')) {
                 if (message.author.username === 'ブキチ') {
