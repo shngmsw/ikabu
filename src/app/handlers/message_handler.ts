@@ -4,7 +4,7 @@ import { MemberService } from '../../db/member_service';
 import { UniqueChannelService } from '../../db/unique_channel_service';
 import { UniqueRoleService } from '../../db/unique_role_service';
 import { log4js_obj } from '../../log4js_settings';
-import { searchAPIMemberById } from '../common/manager/member_manager';
+import { searchAPIMemberById, searchDBMemberById } from '../common/manager/member_manager';
 import { randomBool, exists, notExists } from '../common/others';
 import { ChannelKeySet } from '../constant/channel_key';
 import { RoleKeySet } from '../constant/role_key';
@@ -45,6 +45,7 @@ export async function call(message: Message<true>) {
                     `新入部員を保存中でし！ \`${count}/${membersNum}\``,
                 );
                 allMembers.forEach(async (member) => {
+                    await searchDBMemberById(guild, member.id);
                     if (member.roles.cache.find((role) => role.id === rookieRoleId)) {
                         await MemberService.setRookieFlag(guild.id, member.id, true);
                     } else {
