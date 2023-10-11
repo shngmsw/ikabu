@@ -1,6 +1,7 @@
 import Discord, { GuildMember, Message, Role } from 'discord.js';
 
 import { sendIntentionConfirmReply } from './send_questionnaire';
+import { MemberService } from '../../../db/member_service';
 import { RecruitCountService } from '../../../db/recruit_count_service';
 import { UniqueRoleService } from '../../../db/unique_role_service';
 import { VoiceCountService } from '../../../db/voice_count_service';
@@ -28,6 +29,10 @@ export async function removeRookie(msg: Message<true>) {
         const hasRookieRole = member.roles.cache.find((role: Role) => role.id === rookieRoleId);
         if (hasRookieRole) {
             await unassignRoleFromMember(rookieRoleId, member);
+
+            // 新入部員フラグをfalseにする
+            await MemberService.setRookieFlag(guild.id, authorId, false);
+
             const embed = new Discord.EmbedBuilder();
             embed.setDescription(
                 '新入部員期間が終わったでし！\nこれからもイカ部心得を守ってイカ部生活をエンジョイするでし！',
