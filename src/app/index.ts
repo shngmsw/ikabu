@@ -27,7 +27,7 @@ import {
 
 import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
 import { searchChannelById } from './common/manager/channel_manager';
-import { searchAPIMemberById } from './common/manager/member_manager';
+import { searchAPIMemberById, searchDBMemberById } from './common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from './common/others';
 import { ChannelKeySet } from './constant/channel_key';
 import {
@@ -167,10 +167,12 @@ client.on(
 
             member = await searchAPIMemberById(guild, userId);
 
+            // DBのメンバー情報がない場合でもここで作成される
+            const storedMember = await searchDBMemberById(guild, userId);
+
             assertExistCheck(member, 'member');
             assertExistCheck(member.joinedAt, 'joinedAt');
-
-            member.nickname;
+            assertExistCheck(storedMember, 'storedMember');
 
             const updateMember: Member = {
                 guildId: guild.id,
@@ -180,15 +182,12 @@ client.on(
                     .displayAvatarURL()
                     .replace('.webp', '.png')
                     .replace('.webm', '.gif'),
-                joinedAt: member.joinedAt,
+                joinedAt: storedMember.joinedAt ?? member.joinedAt,
+                isRookie: storedMember.isRookie,
             };
 
-            // membersテーブルにレコードがあるか確認
-            if (notExists(await MemberService.getMemberByUserId(guild.id, userId))) {
-                await MemberService.registerMember(updateMember);
-            } else {
-                await MemberService.updateMemberProfile(updateMember);
-            }
+            // プロフィールアップデート
+            await MemberService.updateMember(updateMember);
         } catch (error) {
             const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
             await sendErrorLogs(loggerMU, error);
@@ -207,6 +206,10 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
             const guild = await client.guilds.fetch(guildId);
 
             const member = await searchAPIMemberById(guild, userId);
+            // DBのメンバー情報がない場合でもここで作成される
+            const storedMember = await searchDBMemberById(guild, userId);
+
+            assertExistCheck(storedMember, 'storedMember');
 
             if (notExists(member)) {
                 return await sendErrorLogs(
@@ -223,11 +226,12 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
                     .displayAvatarURL()
                     .replace('.webp', '.png')
                     .replace('.webm', '.gif'),
-                joinedAt: member.joinedAt,
+                joinedAt: storedMember.joinedAt ?? member.joinedAt,
+                isRookie: storedMember.isRookie,
             };
 
             // プロフィールアップデート
-            await MemberService.updateMemberProfile(updateMember);
+            await MemberService.updateMember(updateMember);
         }
     } catch (error) {
         await sendErrorLogs(loggerUU, error);
