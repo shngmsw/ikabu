@@ -46,6 +46,7 @@ model Member {
   displayName String        @map("display_name")
   iconUrl     String        @map("icon_url")
   joinedAt    DateTime?     @map("joined_at")
+  isRookie    Boolean       @default(true) @map("is_rookie")
   participant Participant[]
 
   @@unique([guildId, userId])

@@ -7,9 +7,9 @@ import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
 export class MemberService {
-    static async registerMember(member: Member) {
+    static async registerMemberObj(member: Member): Promise<Member | null> {
         try {
-            await prisma.member.upsert({
+            return await prisma.member.upsert({
                 where: {
                     guildId_userId: {
                         guildId: member.guildId,
@@ -26,16 +26,53 @@ export class MemberService {
                     displayName: member.displayName,
                     iconUrl: member.iconUrl,
                     joinedAt: member.joinedAt,
+                    isRookie: true,
                 },
             });
         } catch (error) {
             await sendErrorLogs(logger, error);
+            return null;
         }
     }
 
-    static async updateMemberProfile(member: Member) {
+    static async registerMember(
+        guildId: string,
+        userId: string,
+        displayName: string,
+        iconUrl: string,
+        joinedAt: Date,
+        isRookie?: boolean,
+    ): Promise<Member | null> {
         try {
-            await prisma.member.update({
+            return await prisma.member.upsert({
+                where: {
+                    guildId_userId: {
+                        guildId: guildId,
+                        userId: userId,
+                    },
+                },
+                update: {
+                    displayName: displayName,
+                    iconUrl: iconUrl,
+                },
+                create: {
+                    guildId: guildId,
+                    userId: userId,
+                    displayName: displayName,
+                    iconUrl: iconUrl,
+                    joinedAt: joinedAt,
+                    isRookie: isRookie ?? true,
+                },
+            });
+        } catch (error) {
+            await sendErrorLogs(logger, error);
+            return null;
+        }
+    }
+
+    static async updateMember(member: Member) {
+        try {
+            return await prisma.member.update({
                 where: {
                     guildId_userId: {
                         guildId: member.guildId,
@@ -45,6 +82,8 @@ export class MemberService {
                 data: {
                     displayName: member.displayName,
                     iconUrl: member.iconUrl,
+                    joinedAt: member.joinedAt,
+                    isRookie: member.isRookie,
                 },
             });
         } catch (error) {
@@ -52,9 +91,13 @@ export class MemberService {
         }
     }
 
-    static async updateJoinedAt(guildId: string, userId: string, joinedAt: Date) {
+    static async updateJoinedAt(
+        guildId: string,
+        userId: string,
+        joinedAt: Date,
+    ): Promise<Member | null> {
         try {
-            await prisma.member.update({
+            return await prisma.member.update({
                 where: {
                     guildId_userId: {
                         guildId: guildId,
@@ -67,10 +110,34 @@ export class MemberService {
             });
         } catch (error) {
             await sendErrorLogs(logger, error);
+            return null;
         }
     }
 
-    static async getMemberByUserId(guildId: string, userId: string) {
+    static async setRookieFlag(
+        guildId: string,
+        userId: string,
+        isRookie: boolean,
+    ): Promise<Member | null> {
+        try {
+            return await prisma.member.update({
+                where: {
+                    guildId_userId: {
+                        guildId: guildId,
+                        userId: userId,
+                    },
+                },
+                data: {
+                    isRookie: isRookie,
+                },
+            });
+        } catch (error) {
+            await sendErrorLogs(logger, error);
+            return null;
+        }
+    }
+
+    static async getMemberByUserId(guildId: string, userId: string): Promise<Member | null> {
         try {
             const member = await prisma.member.findUnique({
                 where: {
@@ -88,7 +155,7 @@ export class MemberService {
         }
     }
 
-    static async getMemberGuildIdsByUserId(userId: string) {
+    static async getMemberGuildIdsByUserId(userId: string): Promise<string[]> {
         try {
             const members = await prisma.member.findMany({
                 where: {
