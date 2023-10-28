@@ -113,7 +113,7 @@ async function sendNotifyToHost(
             components: buttons,
         });
 
-        await sleep(1800);
+        await sleep(30 * 60);
         // 30分後に承認/拒否ボタンを削除
         const checkNotifyMessage = await searchMessageById(
             guild,
