@@ -1,6 +1,7 @@
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
-import { memberListMessage } from './other_events.js';
+import { memberListText } from './other_events.js';
+import { sendCancelNotifyToHost } from './send_notify_to_host.js';
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
@@ -12,12 +13,7 @@ import {
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
-import {
-    assertExistCheck,
-    createMentionsFromIdList,
-    exists,
-    notExists,
-} from '../../../common/others.js';
+import { assertExistCheck, exists, notExists } from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
 import { StickyKey } from '../../../constant/sticky_key.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
@@ -148,13 +144,17 @@ export async function cancel(
                 await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.open);
 
                 // ホストに通知
-                await interaction.message.reply({
-                    content:
-                        createMentionsFromIdList(confirmedMemberIDList).join(' ') +
-                        `\n<@${member.userId}>たんがキャンセルしたでし！`,
-                });
+                sendCancelNotifyToHost(
+                    interaction.message,
+                    guild,
+                    recruitChannel,
+                    member,
+                    recruiter,
+                    [recruiter.userId],
+                );
+
                 await interaction.editReply({
-                    content: await memberListMessage(interaction, image1MsgId),
+                    content: await memberListText(interaction, image1MsgId),
                     components: recoveryThinkingButton(interaction, 'キャンセル'),
                 });
 

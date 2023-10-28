@@ -42,6 +42,8 @@ export const RecruitParam = {
     CancelNotify: 'ncr',
     CloseNotify: 'nclose',
     NewModalRecruit: 'newr',
+    Approve: 'apr',
+    Reject: 'rej',
 } as const;
 export type RecruitParam = ObjectValueList<typeof RecruitParam>;
 export function isRecruitParam(value: string): value is RecruitParam {
