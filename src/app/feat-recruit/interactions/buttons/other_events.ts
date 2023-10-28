@@ -55,7 +55,7 @@ export function getMemberMentions(recruitNum: number, participants: ParticipantM
     return mentionString;
 }
 
-export async function memberListMessage(
+export async function memberListText(
     interaction: ButtonInteraction<'cached' | 'raw'>,
     messageId: string,
 ) {
