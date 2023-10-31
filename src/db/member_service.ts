@@ -1,6 +1,10 @@
 import { Member } from '@prisma/client';
+import { GuildMember } from 'discord.js';
 
 import { prisma } from './prisma';
+import { UniqueRoleService } from './unique_role_service';
+import { exists } from '../app/common/others';
+import { RoleKeySet } from '../app/constant/role_key';
 import { sendErrorLogs } from '../app/logs/error/send_error_logs';
 import { modalRecruit } from '../constant';
 import { log4js_obj } from '../log4js_settings';
@@ -62,6 +66,58 @@ export class MemberService {
                     iconUrl: iconUrl,
                     joinedAt: joinedAt,
                     isRookie: isRookie ?? true,
+                },
+            });
+        } catch (error) {
+            await sendErrorLogs(logger, error);
+            return null;
+        }
+    }
+
+    /**
+     * GuildMemberオブジェクトをMemberテーブルに登録/更新 (項目: displayName, iconUrl, isRookie, (登録時: joinedAt))
+     * @param member GuildMember オブジェクト
+     * @returns 登録後のMemberオブジェクト
+     */
+    static async setGuildMemberToDB(member: GuildMember): Promise<Member | null> {
+        try {
+            const iconUrl = member
+                .displayAvatarURL()
+                .replace('.webp', '.png')
+                .replace('.webm', '.gif');
+
+            let hasRookieRole = false;
+            const rookieRoleId = await UniqueRoleService.getRoleIdByKey(
+                member.guild.id,
+                RoleKeySet.Rookie.key,
+            );
+
+            // rookieRoleが存在するサーバの場合、新入部員ロールを持っているか確認
+            if (exists(rookieRoleId)) {
+                const memberRoles = member.roles.cache.get(rookieRoleId);
+                if (exists(memberRoles)) {
+                    hasRookieRole = true;
+                }
+            }
+            return await prisma.member.upsert({
+                where: {
+                    guildId_userId: {
+                        guildId: member.guild.id,
+                        userId: member.user.id,
+                    },
+                },
+                update: {
+                    displayName: member.displayName,
+                    iconUrl: iconUrl,
+                    isRookie: hasRookieRole,
+                },
+                create: {
+                    guildId: member.guild.id,
+                    userId: member.user.id,
+                    displayName: member.displayName,
+                    iconUrl: iconUrl,
+                    joinedAt: member.joinedAt,
+                    isRookie: hasRookieRole,
                 },
             });
         } catch (error) {
