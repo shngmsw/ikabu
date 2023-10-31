@@ -77,9 +77,13 @@ export class MemberService {
     /**
      * GuildMemberオブジェクトをMemberテーブルに登録/更新 (項目: displayName, iconUrl, isRookie, (登録時: joinedAt))
      * @param member GuildMember オブジェクト
+     * @param isRookie isRookieをオーバーライドできます。省略すれば、新入部員ロールを持っているか確認します。
      * @returns 登録後のMemberオブジェクト
      */
-    static async setGuildMemberToDB(member: GuildMember): Promise<Member | null> {
+    static async setGuildMemberToDB(
+        member: GuildMember,
+        isRookie?: boolean,
+    ): Promise<Member | null> {
         try {
             const iconUrl = member
                 .displayAvatarURL()
@@ -87,18 +91,26 @@ export class MemberService {
                 .replace('.webm', '.gif');
 
             let hasRookieRole = false;
-            const rookieRoleId = await UniqueRoleService.getRoleIdByKey(
-                member.guild.id,
-                RoleKeySet.Rookie.key,
-            );
 
-            // rookieRoleが存在するサーバの場合、新入部員ロールを持っているか確認
-            if (exists(rookieRoleId)) {
-                const memberRoles = member.roles.cache.get(rookieRoleId);
-                if (exists(memberRoles)) {
-                    hasRookieRole = true;
+            if (exists(isRookie)) {
+                // isRookieが指定されている場合はその値を使う
+                hasRookieRole = isRookie;
+            } else {
+                // isRookieが指定されていない場合は新入部員ロールを持っているか確認する
+                const rookieRoleId = await UniqueRoleService.getRoleIdByKey(
+                    member.guild.id,
+                    RoleKeySet.Rookie.key,
+                );
+
+                // rookieRoleが存在するサーバの場合、新入部員ロールを持っているか確認
+                if (exists(rookieRoleId)) {
+                    const memberRoles = member.roles.cache.get(rookieRoleId);
+                    if (exists(memberRoles)) {
+                        hasRookieRole = true;
+                    }
                 }
             }
+
             return await prisma.member.upsert({
                 where: {
                     guildId_userId: {
