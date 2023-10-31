@@ -63,7 +63,9 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
         const guildMember = await searchAPIMemberById(guild, userId);
 
         if (notExists(guildMember)) {
-            logger.warn('member missing (ikabu DB) => member missing (Discord API)');
+            logger.warn(
+                `member missing (ikabu DB) => member missing (Discord API)\n [guildId: ${guild.id}, userId: ${userId}]`,
+            );
             return null;
         }
 
@@ -72,9 +74,14 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
         const newMember = await MemberService.saveMemberFromGuildMember(guildMember);
 
         if (exists(newMember)) {
-            logger.warn('member missing (ikabu DB) => member was registered successfully.');
+            logger.warn(
+                `member missing (ikabu DB) => member was registered successfully.\n [guildId: ${guild.id}, userId: ${userId}]`,
+            );
         } else {
-            await sendErrorLogs(logger, 'member missing (ikabu DB) => Failed to register.');
+            await sendErrorLogs(
+                logger,
+                `member missing (ikabu DB) => Failed to register.\n [guildId: ${guild.id}, userId: ${userId}]`,
+            );
             return null;
         }
 
@@ -84,16 +91,23 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
         const guildMember = await searchAPIMemberById(guild, userId);
 
         if (notExists(guildMember)) {
-            logger.warn('member Icon invalid => member missing (Discord API)');
+            logger.warn(
+                `member Icon invalid => member missing (Discord API)\n [guildId: ${guild.id}, userId: ${userId}]`,
+            );
             return null;
         }
 
         const newMember = await MemberService.saveMemberFromGuildMember(guildMember);
 
         if (exists(newMember)) {
-            logger.warn('member Icon invalid => Icon URL was updated successfully.');
+            logger.warn(
+                `member Icon invalid => Icon URL was updated successfully.\n [guildId: ${guild.id}, userId: ${userId}]`,
+            );
         } else {
-            await sendErrorLogs(logger, 'member Icon invalid => Failed to update Icon URL.');
+            await sendErrorLogs(
+                logger,
+                `member Icon invalid => Failed to update Icon URL.\n [guildId: ${guild.id}, userId: ${userId}]`,
+            );
             return null;
         }
 
