@@ -84,7 +84,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
 
             if (exists(storedMember)) {
                 // 退部していた部員のプロフィール更新()
-                await MemberService.setGuildMemberToDB(guildMember, storedMember.isRookie);
+                await MemberService.saveMemberFromGuildMember(guildMember, storedMember.isRookie);
 
                 if (storedMember.isRookie) {
                     await setRookieRole(guild.id, userId, beginnerRole);
@@ -96,7 +96,7 @@ export async function guildMemberAddEvent(newMember: GuildMember) {
                 }
             } else {
                 // 新入部員の情報を登録
-                await MemberService.setGuildMemberToDB(guildMember, true);
+                await MemberService.saveMemberFromGuildMember(guildMember, true);
 
                 await sleep(60 * 10);
                 await setRookieRole(guild.id, userId, beginnerRole);

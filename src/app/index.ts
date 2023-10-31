@@ -1,5 +1,4 @@
 // Discord bot implements
-import { Member } from '@prisma/client';
 import cron from 'cron';
 import {
     ActivityType,
@@ -27,7 +26,7 @@ import {
 
 import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
 import { searchChannelById } from './common/manager/channel_manager';
-import { searchAPIMemberById, searchDBMemberById } from './common/manager/member_manager';
+import { searchAPIMemberById } from './common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from './common/others';
 import { ChannelKeySet } from './constant/channel_key';
 import {
@@ -158,38 +157,28 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
 client.on(
     'guildMemberUpdate',
     async (oldMember: GuildMember | PartialGuildMember, newMember: GuildMember) => {
+        const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
         try {
             const guild = await newMember.guild.fetch();
             await updateGuildRoles(guild);
 
             const userId = newMember.user.id;
-            let member: GuildMember | null = newMember;
 
-            member = await searchAPIMemberById(guild, userId);
+            // 不完全なメンバーの場合を想定して、メンバー情報を取得し直す
+            const member = (await searchAPIMemberById(guild, userId)) ?? newMember;
 
-            // DBのメンバー情報がない場合でもここで作成される
-            const storedMember = await searchDBMemberById(guild, userId);
-
-            assertExistCheck(member, 'member');
             assertExistCheck(member.joinedAt, 'joinedAt');
-            assertExistCheck(storedMember, 'storedMember');
 
-            const updateMember: Member = {
-                guildId: guild.id,
-                userId: userId,
-                displayName: member.displayName,
-                iconUrl: member
-                    .displayAvatarURL()
-                    .replace('.webp', '.png')
-                    .replace('.webm', '.gif'),
-                joinedAt: storedMember.joinedAt ?? member.joinedAt,
-                isRookie: storedMember.isRookie,
-            };
+            // DBのメンバー情報を更新(ない場合は作成)
+            const storedMember = await MemberService.saveMemberFromGuildMember(member);
 
-            // プロフィールアップデート
-            await MemberService.updateMember(updateMember);
+            if (notExists(storedMember)) {
+                return await sendErrorLogs(
+                    loggerMU,
+                    `failed to set member to DB. userId: ${userId}, guildId: ${guild.id}`,
+                );
+            }
         } catch (error) {
-            const loggerMU = log4js_obj.getLogger('guildMemberUpdate');
             await sendErrorLogs(loggerMU, error);
         }
     },
@@ -206,10 +195,6 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
             const guild = await client.guilds.fetch(guildId);
 
             const member = await searchAPIMemberById(guild, userId);
-            // DBのメンバー情報がない場合でもここで作成される
-            const storedMember = await searchDBMemberById(guild, userId);
-
-            assertExistCheck(storedMember, 'storedMember');
 
             if (notExists(member)) {
                 return await sendErrorLogs(
@@ -218,20 +203,15 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
                 );
             }
 
-            const updateMember: Member = {
-                guildId: guildId,
-                userId: userId,
-                displayName: member.displayName,
-                iconUrl: member
-                    .displayAvatarURL()
-                    .replace('.webp', '.png')
-                    .replace('.webm', '.gif'),
-                joinedAt: storedMember.joinedAt ?? member.joinedAt,
-                isRookie: storedMember.isRookie,
-            };
+            // DBのメンバー情報を更新(ない場合は作成)
+            const storedMember = await MemberService.saveMemberFromGuildMember(member);
 
-            // プロフィールアップデート
-            await MemberService.updateMember(updateMember);
+            if (notExists(storedMember)) {
+                return await sendErrorLogs(
+                    loggerUU,
+                    `failed to set member to DB. userId: ${userId}, guildId: ${guildId}`,
+                );
+            }
         }
     } catch (error) {
         await sendErrorLogs(loggerUU, error);

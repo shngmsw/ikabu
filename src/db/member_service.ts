@@ -11,41 +11,23 @@ import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
 export class MemberService {
-    static async registerMemberObj(member: Member): Promise<Member | null> {
-        try {
-            return await prisma.member.upsert({
-                where: {
-                    guildId_userId: {
-                        guildId: member.guildId,
-                        userId: member.userId,
-                    },
-                },
-                update: {
-                    displayName: member.displayName,
-                    iconUrl: member.iconUrl,
-                },
-                create: {
-                    guildId: member.guildId,
-                    userId: member.userId,
-                    displayName: member.displayName,
-                    iconUrl: member.iconUrl,
-                    joinedAt: member.joinedAt,
-                    isRookie: true,
-                },
-            });
-        } catch (error) {
-            await sendErrorLogs(logger, error);
-            return null;
-        }
-    }
-
-    static async registerMember(
+    /**
+     * GuildMemberオブジェクトをMemberテーブルに登録/更新 (項目: displayName, iconUrl, isRookie, (登録時: joinedAt))
+     * @param guildId Guild ID
+     * @param userId User ID
+     * @param displayName ユーザ名
+     * @param iconUrl アイコン画像URL
+     * @param joinedAt サーバ参加日時(登録時のみ)
+     * @param isRookie 新入部員フラグ
+     * @returns 登録/更新したMemberオブジェクト
+     */
+    static async saveMember(
         guildId: string,
         userId: string,
         displayName: string,
         iconUrl: string,
         joinedAt: Date,
-        isRookie?: boolean,
+        isRookie: boolean,
     ): Promise<Member | null> {
         try {
             return await prisma.member.upsert({
@@ -58,6 +40,7 @@ export class MemberService {
                 update: {
                     displayName: displayName,
                     iconUrl: iconUrl,
+                    isRookie: isRookie,
                 },
                 create: {
                     guildId: guildId,
@@ -65,7 +48,7 @@ export class MemberService {
                     displayName: displayName,
                     iconUrl: iconUrl,
                     joinedAt: joinedAt,
-                    isRookie: isRookie ?? true,
+                    isRookie: isRookie,
                 },
             });
         } catch (error) {
@@ -78,9 +61,9 @@ export class MemberService {
      * GuildMemberオブジェクトをMemberテーブルに登録/更新 (項目: displayName, iconUrl, isRookie, (登録時: joinedAt))
      * @param member GuildMember オブジェクト
      * @param isRookie isRookieをオーバーライドできます。省略すれば、新入部員ロールを持っているか確認します。
-     * @returns 登録後のMemberオブジェクト
+     * @returns 登録/更新したMemberオブジェクト
      */
-    static async setGuildMemberToDB(
+    static async saveMemberFromGuildMember(
         member: GuildMember,
         isRookie?: boolean,
     ): Promise<Member | null> {
@@ -135,27 +118,6 @@ export class MemberService {
         } catch (error) {
             await sendErrorLogs(logger, error);
             return null;
-        }
-    }
-
-    static async updateMember(member: Member) {
-        try {
-            return await prisma.member.update({
-                where: {
-                    guildId_userId: {
-                        guildId: member.guildId,
-                        userId: member.userId,
-                    },
-                },
-                data: {
-                    displayName: member.displayName,
-                    iconUrl: member.iconUrl,
-                    joinedAt: member.joinedAt,
-                    isRookie: member.isRookie,
-                },
-            });
-        } catch (error) {
-            await sendErrorLogs(logger, error);
         }
     }
 

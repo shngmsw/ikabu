@@ -69,7 +69,7 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
 
         assertExistCheck(guildMember.joinedAt, 'joinedAt');
 
-        const newMember = await MemberService.setGuildMemberToDB(guildMember);
+        const newMember = await MemberService.saveMemberFromGuildMember(guildMember);
 
         if (exists(newMember)) {
             logger.warn('member missing (ikabu DB) => member was registered successfully.');
@@ -88,7 +88,7 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
             return null;
         }
 
-        const newMember = await MemberService.setGuildMemberToDB(guildMember);
+        const newMember = await MemberService.saveMemberFromGuildMember(guildMember);
 
         if (exists(newMember)) {
             logger.warn('member Icon invalid => Icon URL was updated successfully.');
