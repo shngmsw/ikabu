@@ -115,9 +115,12 @@ client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) 
         let joinedAt = member.joinedAt;
         // joinedAtがnullだったらDBからとってくる
         if (notExists(joinedAt)) {
-            const dbMember = await MemberService.getMemberByUserId(member.guild.id, member.user.id);
-            if (exists(dbMember)) {
-                joinedAt = dbMember.joinedAt;
+            const storedMember = await MemberService.getMemberByUserId(
+                member.guild.id,
+                member.user.id,
+            );
+            if (exists(storedMember)) {
+                joinedAt = storedMember.joinedAt;
             }
         }
 
