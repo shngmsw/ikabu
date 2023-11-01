@@ -1,47 +1,33 @@
 import { Member } from '@prisma/client';
+import { GuildMember } from 'discord.js';
 
 import { prisma } from './prisma';
+import { UniqueRoleService } from './unique_role_service';
+import { exists } from '../app/common/others';
+import { RoleKeySet } from '../app/constant/role_key';
 import { sendErrorLogs } from '../app/logs/error/send_error_logs';
 import { modalRecruit } from '../constant';
 import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
 
 export class MemberService {
-    static async registerMemberObj(member: Member): Promise<Member | null> {
-        try {
-            return await prisma.member.upsert({
-                where: {
-                    guildId_userId: {
-                        guildId: member.guildId,
-                        userId: member.userId,
-                    },
-                },
-                update: {
-                    displayName: member.displayName,
-                    iconUrl: member.iconUrl,
-                },
-                create: {
-                    guildId: member.guildId,
-                    userId: member.userId,
-                    displayName: member.displayName,
-                    iconUrl: member.iconUrl,
-                    joinedAt: member.joinedAt,
-                    isRookie: true,
-                },
-            });
-        } catch (error) {
-            await sendErrorLogs(logger, error);
-            return null;
-        }
-    }
-
-    static async registerMember(
+    /**
+     * GuildMemberオブジェクトをMemberテーブルに登録/更新 (項目: displayName, iconUrl, isRookie, (登録時: joinedAt))
+     * @param guildId Guild ID
+     * @param userId User ID
+     * @param displayName ユーザ名
+     * @param iconUrl アイコン画像URL
+     * @param joinedAt サーバ参加日時(登録時のみ)
+     * @param isRookie 新入部員フラグ
+     * @returns 登録/更新したMemberオブジェクト
+     */
+    static async saveMember(
         guildId: string,
         userId: string,
         displayName: string,
         iconUrl: string,
         joinedAt: Date,
-        isRookie?: boolean,
+        isRookie: boolean,
     ): Promise<Member | null> {
         try {
             return await prisma.member.upsert({
@@ -54,6 +40,7 @@ export class MemberService {
                 update: {
                     displayName: displayName,
                     iconUrl: iconUrl,
+                    isRookie: isRookie,
                 },
                 create: {
                     guildId: guildId,
@@ -61,7 +48,7 @@ export class MemberService {
                     displayName: displayName,
                     iconUrl: iconUrl,
                     joinedAt: joinedAt,
-                    isRookie: isRookie ?? true,
+                    isRookie: isRookie,
                 },
             });
         } catch (error) {
@@ -70,24 +57,67 @@ export class MemberService {
         }
     }
 
-    static async updateMember(member: Member) {
+    /**
+     * GuildMemberオブジェクトをMemberテーブルに登録/更新 (項目: displayName, iconUrl, isRookie, (登録時: joinedAt))
+     * @param member GuildMember オブジェクト
+     * @param isRookie isRookieをオーバーライドできます。省略すれば、新入部員ロールを持っているか確認します。
+     * @returns 登録/更新したMemberオブジェクト
+     */
+    static async saveMemberFromGuildMember(
+        member: GuildMember,
+        isRookie?: boolean,
+    ): Promise<Member | null> {
         try {
-            return await prisma.member.update({
+            const iconUrl = member
+                .displayAvatarURL()
+                .replace('.webp', '.png')
+                .replace('.webm', '.gif');
+
+            let hasRookieRole = false;
+
+            if (exists(isRookie)) {
+                // isRookieが指定されている場合はその値を使う
+                hasRookieRole = isRookie;
+            } else {
+                // isRookieが指定されていない場合は新入部員ロールを持っているか確認する
+                const rookieRoleId = await UniqueRoleService.getRoleIdByKey(
+                    member.guild.id,
+                    RoleKeySet.Rookie.key,
+                );
+
+                // rookieRoleが存在するサーバの場合、新入部員ロールを持っているか確認
+                if (exists(rookieRoleId)) {
+                    const memberRoles = member.roles.cache.get(rookieRoleId);
+                    if (exists(memberRoles)) {
+                        hasRookieRole = true;
+                    }
+                }
+            }
+
+            return await prisma.member.upsert({
                 where: {
                     guildId_userId: {
-                        guildId: member.guildId,
-                        userId: member.userId,
+                        guildId: member.guild.id,
+                        userId: member.user.id,
                     },
                 },
-                data: {
+                update: {
                     displayName: member.displayName,
-                    iconUrl: member.iconUrl,
+                    iconUrl: iconUrl,
+                    isRookie: hasRookieRole,
+                },
+                create: {
+                    guildId: member.guild.id,
+                    userId: member.user.id,
+                    displayName: member.displayName,
+                    iconUrl: iconUrl,
                     joinedAt: member.joinedAt,
-                    isRookie: member.isRookie,
+                    isRookie: hasRookieRole,
                 },
             });
         } catch (error) {
             await sendErrorLogs(logger, error);
+            return null;
         }
     }
 

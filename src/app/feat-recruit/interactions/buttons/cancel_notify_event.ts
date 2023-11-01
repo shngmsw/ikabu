@@ -1,6 +1,7 @@
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 
-import { memberListMessage } from './other_events.js';
+import { memberListText } from './other_events.js';
+import { sendCancelNotifyToHost } from './send_notify_to_host.js';
 import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log';
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
@@ -123,11 +124,17 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
                 await ParticipantService.deleteParticipant(guild.id, embedMessageId, member.userId);
 
                 // ホストに通知
-                await interaction.message.reply({
-                    content: `<@${recruiterId}> <@${member.userId}>たんがキャンセルしたでし！`,
-                });
+                sendCancelNotifyToHost(
+                    interaction.message,
+                    guild,
+                    recruitChannel,
+                    member,
+                    recruiter,
+                    [recruiter.userId],
+                );
+
                 await interaction.editReply({
-                    content: await memberListMessage(interaction, embedMessageId),
+                    content: await memberListText(interaction, embedMessageId),
                     components: recoveryThinkingButton(interaction, 'キャンセル'),
                 });
 

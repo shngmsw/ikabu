@@ -4,11 +4,9 @@ import { Guild, GuildMember, Interaction, Message } from 'discord.js';
 
 import { getGuildByInteraction } from './guild_manager';
 import { MemberService } from '../../../db/member_service';
-import { UniqueRoleService } from '../../../db/unique_role_service';
 import { log4js_obj } from '../../../log4js_settings';
-import { RoleKeySet } from '../../constant/role_key';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
-import { assertExistCheck, notExists } from '../others';
+import { assertExistCheck, exists, notExists } from '../others';
 
 const logger = log4js_obj.getLogger('MemberManager');
 
@@ -62,72 +60,60 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
 
     // membersテーブルにレコードがあるか確認
     if (notExists(member)) {
-        const memberRaw = await searchAPIMemberById(guild, userId);
+        const guildMember = await searchAPIMemberById(guild, userId);
 
-        if (notExists(memberRaw)) {
-            logger.warn('member missing (ikabu DB) => member missing (Discord API)');
+        if (notExists(guildMember)) {
+            logger.warn(
+                `member missing (ikabu DB) => member missing (Discord API)\n [guildId: ${guild.id}, userId: ${userId}]`,
+            );
             return null;
         }
-        assertExistCheck(memberRaw.joinedAt, 'joinedAt');
 
-        const roleId = await UniqueRoleService.getRoleIdByKey(guild.id, RoleKeySet.Rookie.key);
-        let newMember: Member | null;
-        if (memberRaw.roles.cache.find((role) => role.id === roleId)) {
-            newMember = await MemberService.registerMember(
-                guild.id,
-                userId,
-                memberRaw.displayName,
-                memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-                memberRaw.joinedAt,
-                true,
+        assertExistCheck(guildMember.joinedAt, 'joinedAt');
+
+        const newMember = await MemberService.saveMemberFromGuildMember(guildMember);
+
+        if (exists(newMember)) {
+            logger.warn(
+                `member missing (ikabu DB) => member was registered successfully.\n [guildId: ${guild.id}, userId: ${userId}]`,
             );
         } else {
-            newMember = await MemberService.registerMember(
-                guild.id,
-                userId,
-                memberRaw.displayName,
-                memberRaw.displayAvatarURL().replace('.webp', '.png').replace('.webm', '.gif'),
-                memberRaw.joinedAt,
-                false,
+            await sendErrorLogs(
+                logger,
+                `member missing (ikabu DB) => Failed to register.\n [guildId: ${guild.id}, userId: ${userId}]`,
             );
+            return null;
         }
 
-        if (notExists(newMember)) {
-            await sendErrorLogs(logger, 'Failed to register member.');
+        return newMember;
+    } else if (await isUrlValid(member.iconUrl)) {
+        // 画像URLが無効な場合
+        const guildMember = await searchAPIMemberById(guild, userId);
+
+        if (notExists(guildMember)) {
+            logger.warn(
+                `member Icon invalid => member missing (Discord API)\n [guildId: ${guild.id}, userId: ${userId}]`,
+            );
+            return null;
+        }
+
+        const newMember = await MemberService.saveMemberFromGuildMember(guildMember);
+
+        if (exists(newMember)) {
+            logger.warn(
+                `member Icon invalid => Icon URL was updated successfully.\n [guildId: ${guild.id}, userId: ${userId}]`,
+            );
+        } else {
+            await sendErrorLogs(
+                logger,
+                `member Icon invalid => Failed to update Icon URL.\n [guildId: ${guild.id}, userId: ${userId}]`,
+            );
             return null;
         }
 
         return newMember;
     } else {
-        if (await isUrlValid(member.iconUrl)) {
-            return member;
-        } else {
-            // 画像URLが無効な場合
-            const memberRaw = await searchAPIMemberById(guild, userId);
-
-            if (notExists(memberRaw)) {
-                logger.warn('member Icon invalid => member missing (Discord API)');
-                return null;
-            }
-
-            const newMember: Member = {
-                guildId: guild.id,
-                userId: userId,
-                displayName: memberRaw.displayName,
-                iconUrl: memberRaw
-                    .displayAvatarURL()
-                    .replace('.webp', '.png')
-                    .replace('.webm', '.gif'),
-                joinedAt: member.joinedAt,
-                isRookie: member.isRookie,
-            };
-
-            await MemberService.updateMember(newMember);
-
-            logger.warn('member Icon invalid => Icon URL was updated successfully.');
-
-            return newMember;
-        }
+        return member;
     }
 }
 

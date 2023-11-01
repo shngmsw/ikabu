@@ -4,6 +4,7 @@ import { cancel } from './cancel_event';
 import { cancelNotify } from './cancel_notify_event';
 import { close } from './close_event';
 import { closeNotify } from './close_notify_event';
+import { confirmJoinRequest } from './confirm_join_request';
 import { del } from './delete_event';
 import { join } from './join_event';
 import { joinNotify } from './join_notify_event';
@@ -43,6 +44,10 @@ export async function recruitButtonHandler(
             break;
         case RecruitParam.NewModalRecruit:
             await handleCreateModal(interaction, params);
+            break;
+        case RecruitParam.Approve:
+        case RecruitParam.Reject:
+            await confirmJoinRequest(interaction, params);
             break;
         default:
             break;

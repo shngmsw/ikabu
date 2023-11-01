@@ -20,7 +20,7 @@ export async function sendRadioRequest(interaction: ButtonInteraction<'cached' |
 
         if (notExists(channel) || !channel.isVoiceBased()) return;
 
-        assertExistCheck(sender, 'DBMember');
+        assertExistCheck(sender, 'storedMember');
 
         const members = channel.members;
 
