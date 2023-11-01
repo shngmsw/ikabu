@@ -86,7 +86,7 @@ export async function searchDBMemberById(guild: Guild, userId: string): Promise<
         }
 
         return newMember;
-    } else if (await isUrlValid(member.iconUrl)) {
+    } else if (!(await isUrlValid(member.iconUrl))) {
         // 画像URLが無効な場合
         const guildMember = await searchAPIMemberById(guild, userId);
 
