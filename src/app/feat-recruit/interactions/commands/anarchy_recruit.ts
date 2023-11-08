@@ -41,6 +41,9 @@ const logger = log4js_obj.getLogger('recruit');
 export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply({ ephemeral: false });
+
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
@@ -62,11 +65,11 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
     }
 
     if (recruitNum < 1 || recruitNum > 3) {
-        await interaction.reply({
-            content: '募集人数は1～3までで指定するでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数は1～3までで指定するでし！`,
             ephemeral: true,
         });
-        return;
     } else {
         memberCounter++;
     }
@@ -76,11 +79,11 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
     if (exists(user2)) memberCounter++;
 
     if (memberCounter > 4) {
-        await interaction.reply({
-            content: '募集人数がおかしいでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数がおかしいでし！`,
             ephemeral: true,
         });
-        return;
     }
 
     const availableChannel = [
@@ -101,23 +104,19 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
 
     if (voiceChannel instanceof VoiceChannel) {
         if (voiceChannel.members.size != 0 && !voiceChannel.members.has(hostMember.user.id)) {
-            await interaction.reply({
-                content: 'そのチャンネルは使用中でし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは使用中でし！`,
                 ephemeral: true,
             });
-            return;
         } else if (!availableChannel.includes(voiceChannel.name)) {
-            await interaction.reply({
-                content:
-                    'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！`,
                 ephemeral: true,
             });
-            return;
         }
     }
-
-    // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply();
 
     const anarchyRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
         guild.id,
@@ -128,11 +127,12 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
     if (exists(rank)) {
         const mentionId = await searchRoleIdByName(guild, rank);
         if (notExists(mentionId)) {
-            await interaction.editReply({
+            await interaction.deleteReply();
+            return await interaction.followUp({
                 content:
                     '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                ephemeral: true,
             });
-            return;
         }
         mention = `<@&${mentionId}>`;
     } else {
@@ -142,14 +142,19 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
         const schedule = await getSchedule();
 
         if (notExists(schedule)) {
-            return await interaction.editReply({
+            await interaction.deleteReply();
+            return await interaction.followUp({
                 content:
                     'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
             });
         }
 
         if (checkFes(schedule, type)) {
-            return await interaction.editReply(await getFestPeriodAlertText(guild.id));
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: await getFestPeriodAlertText(guild.id),
+                ephemeral: true,
+            });
         }
 
         const anarchyData = await getAnarchyOpenData(schedule, type);
@@ -171,10 +176,12 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
         if (notExists(condition)) condition = 'なし';
 
         if (notExists(anarchyData)) {
-            await interaction.editReply({
-                content: 'バンカラマッチの情報が取得できなかったでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content:
+                    'バンカラマッチの情報が取得できなかったでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                ephemeral: true,
             });
-            return;
         }
 
         await sendAnarchyMatch(

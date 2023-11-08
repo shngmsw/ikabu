@@ -17,6 +17,8 @@ import { getMemberMentions } from '../buttons/other_events';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function privateRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+    await interaction.deferReply({ ephemeral: false });
+
     const options = interaction.options;
     const startTime = options.getString('開始時刻', true);
     const time = options.getString('所要時間', true);
@@ -27,13 +29,12 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
         'https://cdn.wikimg.net/en/splatoonwiki/images/1/1a/Private-battles-badge%402x.png';
 
     if (exists(roomUrl) && !isRoomUrl(roomUrl)) {
-        return await interaction.reply({
+        await interaction.deleteReply();
+        return await interaction.followUp({
             content: `\`${roomUrl}\`はヘヤタテURLではないでし！`,
             ephemeral: true,
         });
     }
-
-    await interaction.deferReply();
 
     assertExistCheck(interaction.channel, 'channel');
 
