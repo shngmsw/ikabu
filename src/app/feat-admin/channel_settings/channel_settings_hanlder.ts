@@ -43,7 +43,7 @@ export async function channelSettingsHandler(
             });
         }
 
-        let dbChannel: Channel | null = null;
+        let storedChannel: Channel | null = null;
 
         if (exists(isVCToolsEnabled)) {
             const result = await vcToolsSetting(interaction, targetChannel, isVCToolsEnabled);
@@ -52,7 +52,7 @@ export async function channelSettingsHandler(
                     content: 'VCToolsの設定に失敗したでし！',
                 });
             } else {
-                dbChannel = result;
+                storedChannel = result;
             }
         }
 
@@ -63,22 +63,22 @@ export async function channelSettingsHandler(
                     content: '管理者限定チャンネルの設定に失敗したでし！',
                 });
             } else {
-                dbChannel = result;
+                storedChannel = result;
             }
         }
 
-        if (exists(dbChannel)) {
+        if (exists(storedChannel)) {
             await interaction.editReply({
                 content: '設定を更新したでし！\n',
             });
         } else {
-            dbChannel = await ChannelService.getChannel(guild.id, targetChannel.id);
+            storedChannel = await ChannelService.getChannel(guild.id, targetChannel.id);
             await interaction.editReply({
                 content: '設定を表示するでし！\n',
             });
         }
 
-        if (notExists(dbChannel)) {
+        if (notExists(storedChannel)) {
             return await interaction.followUp({
                 content: 'チャンネル情報が見つからなかったでし！',
             });
@@ -86,21 +86,21 @@ export async function channelSettingsHandler(
 
         let channelType = 'チャンネル';
 
-        if (dbChannel.type === ChannelType.GuildCategory) {
+        if (storedChannel.type === ChannelType.GuildCategory) {
             channelType = 'カテゴリ';
         }
 
         const embed = new EmbedBuilder();
         embed.setTitle(channelType + '設定');
-        embed.setDescription(`<#${dbChannel.channelId}>`);
+        embed.setDescription(`<#${storedChannel.channelId}>`);
         embed.addFields(
             {
                 name: 'VCTools',
-                value: dbChannel.isVCToolsEnabled ? '使用する' : '使用しない',
+                value: storedChannel.isVCToolsEnabled ? '使用する' : '使用しない',
             },
             {
                 name: '管理者限定',
-                value: dbChannel.isAdminChannel ? 'はい' : 'いいえ',
+                value: storedChannel.isAdminChannel ? 'はい' : 'いいえ',
             },
         );
         if (channelType === 'カテゴリ') {
