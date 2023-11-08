@@ -17,6 +17,7 @@ import {
 
 import { assertExistCheck } from './app/common/others.js';
 import { ChannelKeySet } from './app/constant/channel_key.js';
+import { RoleKeySet } from './app/constant/role_key.js';
 import { uniqueRoleSettings } from './app/feat-admin/unique_role_settings/command_builder.js';
 import { sendErrorLogs } from './app/logs/error/send_error_logs.js';
 import { commandNames } from './constant.js';
@@ -501,6 +502,17 @@ const eventMatch = new SlashCommandBuilder()
     )
     .setDMPermission(false);
 
+const rankOption = new SlashCommandStringOption()
+    .setName('募集ウデマエ')
+    .setDescription('募集するウデマエを選択してください')
+    .setChoices(
+        { name: RoleKeySet.RankC.name, value: RoleKeySet.RankC.key },
+        { name: RoleKeySet.RankB.name, value: RoleKeySet.RankB.key },
+        { name: RoleKeySet.RankA.name, value: RoleKeySet.RankA.key },
+        { name: RoleKeySet.RankS.name, value: RoleKeySet.RankS.key },
+        { name: RoleKeySet.RankSP.name, value: RoleKeySet.RankSP.key },
+    );
+
 const anarchyMatch = new SlashCommandBuilder()
     .setName(commandNames.anarchy)
     .setDescription('バンカラマッチ募集コマンド')
@@ -521,18 +533,7 @@ const anarchyMatch = new SlashCommandBuilder()
                     )
                     .setRequired(true),
             )
-            .addStringOption((option: SlashCommandStringOption) =>
-                option
-                    .setName('募集ウデマエ')
-                    .setDescription('募集するウデマエを選択してください')
-                    .setChoices(
-                        { name: 'C', value: 'C' },
-                        { name: 'B', value: 'B' },
-                        { name: 'A', value: 'A' },
-                        { name: 'S', value: 'S' },
-                        { name: 'S+', value: 'S+' },
-                    ),
-            )
+            .addStringOption(rankOption)
             .addStringOption((option: SlashCommandStringOption) =>
                 option
                     .setName('参加条件')
@@ -576,18 +577,7 @@ const anarchyMatch = new SlashCommandBuilder()
                     )
                     .setRequired(true),
             )
-            .addStringOption((option: SlashCommandStringOption) =>
-                option
-                    .setName('募集ウデマエ')
-                    .setDescription('募集するウデマエを選択してください')
-                    .setChoices(
-                        { name: 'C', value: 'C' },
-                        { name: 'B', value: 'B' },
-                        { name: 'A', value: 'A' },
-                        { name: 'S', value: 'S' },
-                        { name: 'S+', value: 'S+' },
-                    ),
-            )
+            .addStringOption(rankOption)
             .addStringOption((option: SlashCommandStringOption) =>
                 option
                     .setName('参加条件')
@@ -1181,7 +1171,7 @@ const buttonEnabler = new ContextMenuCommandBuilder()
     .setDMPermission(false);
 
 const recruitEditor = new ContextMenuCommandBuilder()
-    .setName(commandNames.recuitEditor)
+    .setName(commandNames.recruitEditor)
     .setType(ApplicationCommandType.Message)
     .setDMPermission(false);
 

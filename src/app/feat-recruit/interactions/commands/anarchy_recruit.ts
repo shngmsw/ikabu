@@ -7,7 +7,6 @@ import {
     VoiceChannel,
 } from 'discord.js';
 
-import { placeHold } from '../../../../constant';
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { UniqueRoleService } from '../../../../db/unique_role_service';
@@ -22,9 +21,15 @@ import { setButtonDisable } from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { searchRoleIdByName } from '../../../common/manager/role_manager';
-import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
-import { RoleKeySet } from '../../../constant/role_key';
+import {
+    assertExistCheck,
+    exists,
+    getDeveloperMention,
+    notExists,
+    rule2image,
+    sleep,
+} from '../../../common/others';
+import { RoleKeySet, getUniqueRoleNameByKey, isRoleKey } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { getFestPeriodAlertText } from '../../alert_texts/schedule_related_alerts';
 import {
@@ -42,10 +47,13 @@ const logger = log4js_obj.getLogger('recruit');
 export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply({ ephemeral: false });
+
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
-    let rank = options.getString('募集ウデマエ');
+    const rankRoleKey = options.getString('募集ウデマエ');
     const recruitNum = options.getInteger('募集人数', true);
     let condition = options.getString('参加条件');
     const guild = await getGuildByInteraction(interaction);
@@ -63,11 +71,11 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
     }
 
     if (recruitNum < 1 || recruitNum > 3) {
-        await interaction.reply({
-            content: '募集人数は1～3までで指定するでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数は1～3までで指定するでし！`,
             ephemeral: true,
         });
-        return;
     } else {
         memberCounter++;
     }
@@ -77,11 +85,11 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
     if (exists(user2)) memberCounter++;
 
     if (memberCounter > 4) {
-        await interaction.reply({
-            content: '募集人数がおかしいでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数がおかしいでし！`,
             ephemeral: true,
         });
-        return;
     }
 
     const availableChannel = [
@@ -102,55 +110,60 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
 
     if (voiceChannel instanceof VoiceChannel) {
         if (voiceChannel.members.size != 0 && !voiceChannel.members.has(hostMember.user.id)) {
-            await interaction.reply({
-                content: 'そのチャンネルは使用中でし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは使用中でし！`,
                 ephemeral: true,
             });
-            return;
         } else if (!availableChannel.includes(voiceChannel.name)) {
-            await interaction.reply({
-                content:
-                    'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！`,
                 ephemeral: true,
             });
-            return;
         }
     }
-
-    // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply();
 
     const anarchyRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
         guild.id,
         RoleKeySet.AnarchyRecruit.key,
     );
     let mention = `<@&${anarchyRecruitRoleId}>`;
+    let rank = '指定なし';
     // 募集条件がランクの場合はウデマエロールにメンション
-    if (exists(rank)) {
-        const mentionId = await searchRoleIdByName(guild, rank);
-        if (notExists(mentionId)) {
-            await interaction.editReply({
-                content:
-                    '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
-            });
-            return;
+    if (exists(rankRoleKey)) {
+        if (!isRoleKey(rankRoleKey)) {
+            return await sendErrorLogs(logger, 'rankRoleKey is not RoleKey');
         }
-        mention = `<@&${mentionId}>`;
-    } else {
-        rank = '指定なし';
+        rank = getUniqueRoleNameByKey(rankRoleKey);
+        const rankRoleId = await UniqueRoleService.getRoleIdByKey(guild.id, rankRoleKey);
+        if (notExists(rankRoleId)) {
+            await interaction.deleteReply();
+            return await interaction.channel.send(
+                (await getDeveloperMention(guild.id)) +
+                    `\nウデマエロール\`${rank}\`が設定されていないでし！`,
+            );
+        }
+        mention = `<@&${rankRoleId}>`;
     }
+
     try {
         const schedule = await getSchedule();
 
         if (notExists(schedule)) {
-            return await interaction.editReply({
+            await interaction.deleteReply();
+            return await interaction.followUp({
                 content:
                     'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
             });
         }
 
         if (checkFes(schedule, type)) {
-            return await interaction.editReply(await getFestPeriodAlertText(guild.id));
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: await getFestPeriodAlertText(guild.id),
+                ephemeral: true,
+            });
         }
 
         const anarchyData = await getAnarchyOpenData(schedule, type);
@@ -172,10 +185,12 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
         if (notExists(condition)) condition = 'なし';
 
         if (notExists(anarchyData)) {
-            await interaction.editReply({
-                content: 'バンカラマッチの情報が取得できなかったでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content:
+                    'バンカラマッチの情報が取得できなかったでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                ephemeral: true,
             });
-            return;
         }
 
         await sendAnarchyMatch(
@@ -220,64 +235,7 @@ async function sendAnarchyMatch(
     user2: User | null,
     anarchyData: MatchInfo,
 ) {
-    let ruleIcon: RuleIcon;
-    if (exists(anarchyData && anarchyData.rule)) {
-        switch (anarchyData.rule) {
-            case 'ガチエリア':
-                ruleIcon = {
-                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png',
-                    xPosition: 600,
-                    yPosition: 20,
-                    xScale: 90,
-                    yScale: 100,
-                };
-                break;
-            case 'ガチヤグラ':
-                ruleIcon = {
-                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png',
-                    xPosition: 595,
-                    yPosition: 20,
-                    xScale: 90,
-                    yScale: 100,
-                };
-                break;
-            case 'ガチホコバトル':
-                ruleIcon = {
-                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png',
-                    xPosition: 585,
-                    yPosition: 23,
-                    xScale: 110,
-                    yScale: 90,
-                };
-                break;
-            case 'ガチアサリ':
-                ruleIcon = {
-                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png',
-                    xPosition: 570,
-                    yPosition: 20,
-                    xScale: 120,
-                    yScale: 100,
-                };
-                break;
-            default:
-                ruleIcon = {
-                    url: placeHold.error100x100,
-                    xPosition: 595,
-                    yPosition: 20,
-                    xScale: 100,
-                    yScale: 100,
-                };
-                break;
-        }
-    } else {
-        ruleIcon = {
-            url: placeHold.error100x100,
-            xPosition: 595,
-            yPosition: 20,
-            xScale: 100,
-            yScale: 100,
-        };
-    }
+    const ruleIconUrl = rule2image(anarchyData.rule);
 
     assertExistCheck(interaction.channel, 'channel');
 
@@ -319,7 +277,7 @@ async function sendAnarchyMatch(
         name: 'ikabu_recruit.png',
     });
 
-    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, ruleIcon), {
+    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, ruleIconUrl), {
         name: 'rules.png',
     });
 

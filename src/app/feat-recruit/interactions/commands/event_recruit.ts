@@ -38,6 +38,9 @@ const logger = log4js_obj.getLogger('recruit');
 export async function eventRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply({ ephemeral: false });
+
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
@@ -51,11 +54,11 @@ export async function eventRecruit(interaction: ChatInputCommandInteraction<'cac
     let memberCounter = recruitNum; // プレイ人数のカウンター
 
     if (recruitNum < 1 || recruitNum > 3) {
-        await interaction.reply({
-            content: '募集人数は1～3までで指定するでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数は1～3までで指定するでし！`,
             ephemeral: true,
         });
-        return;
     } else {
         memberCounter++;
     }
@@ -65,11 +68,11 @@ export async function eventRecruit(interaction: ChatInputCommandInteraction<'cac
     if (exists(user2)) memberCounter++;
 
     if (memberCounter > 4) {
-        await interaction.reply({
-            content: '募集人数がおかしいでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数がおかしいでし！`,
             ephemeral: true,
         });
-        return;
     }
 
     const availableChannel = [
@@ -90,23 +93,19 @@ export async function eventRecruit(interaction: ChatInputCommandInteraction<'cac
 
     if (voiceChannel instanceof VoiceChannel) {
         if (voiceChannel.members.size != 0 && !voiceChannel.members.has(hostMember.user.id)) {
-            await interaction.reply({
-                content: 'そのチャンネルは使用中でし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは使用中でし！`,
                 ephemeral: true,
             });
-            return;
         } else if (!availableChannel.includes(voiceChannel.name)) {
-            await interaction.reply({
-                content:
-                    'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！`,
                 ephemeral: true,
             });
-            return;
         }
     }
-
-    // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply();
 
     const eventRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
         guild.id,
@@ -118,9 +117,11 @@ export async function eventRecruit(interaction: ChatInputCommandInteraction<'cac
         const schedule = await getSchedule();
 
         if (notExists(schedule)) {
-            return await interaction.editReply({
+            await interaction.deleteReply();
+            return await interaction.followUp({
                 content:
                     'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                ephemeral: true,
             });
         }
 

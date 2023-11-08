@@ -37,6 +37,9 @@ const logger = log4js_obj.getLogger('recruit');
 export async function fesRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply({ ephemeral: false });
+
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
@@ -58,11 +61,11 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<'cache
     }
 
     if (recruitNum < 1 || recruitNum > 3) {
-        await interaction.reply({
-            content: '募集人数は1～3までで指定するでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数は1～3までで指定するでし！`,
             ephemeral: true,
         });
-        return;
     } else {
         memberCounter++;
     }
@@ -72,11 +75,11 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<'cache
     if (exists(user2)) memberCounter++;
 
     if (memberCounter > 4) {
-        await interaction.reply({
-            content: '募集人数がおかしいでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数がおかしいでし！`,
             ephemeral: true,
         });
-        return;
     }
 
     const availableChannel = [
@@ -97,39 +100,38 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<'cache
 
     if (voiceChannel instanceof VoiceChannel) {
         if (voiceChannel.members.size != 0 && !voiceChannel.members.has(hostMember.user.id)) {
-            await interaction.reply({
-                content: 'そのチャンネルは使用中でし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは使用中でし！`,
                 ephemeral: true,
             });
-            return;
         } else if (!availableChannel.includes(voiceChannel.name)) {
-            await interaction.reply({
-                content:
-                    'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！`,
                 ephemeral: true,
             });
-            return;
         }
     }
-
-    // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply();
 
     try {
         const schedule = await getSchedule();
 
         if (notExists(schedule)) {
-            return await interaction.editReply({
+            await interaction.deleteReply();
+            return await interaction.followUp({
                 content:
                     'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                ephemeral: true,
             });
         }
 
         if (!checkFes(schedule, type)) {
-            await interaction.editReply({
+            await interaction.deleteReply();
+            return await interaction.followUp({
                 content: '募集を建てようとした期間はフェスが行われていないでし！',
+                ephemeral: true,
             });
-            return;
         }
 
         const fesData = await getFesRegularData(schedule, type);
@@ -160,10 +162,12 @@ export async function fesRecruit(interaction: ChatInputCommandInteraction<'cache
         if (notExists(condition)) condition = 'なし';
 
         if (notExists(fesData)) {
-            await interaction.editReply({
-                content: 'フェスマッチの情報が取得できなかったでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content:
+                    'フェスマッチの情報が取得できなかったでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                ephemeral: true,
             });
-            return;
         }
 
         await sendFesMatch(
@@ -205,11 +209,12 @@ async function sendFesMatch(
     assertExistCheck(teamRole, 'teamRole');
 
     if (notExists(mentionId)) {
-        await interaction.editReply({
+        await interaction.deleteReply();
+        return await interaction.followUp({
             content:
                 '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+            ephemeral: true,
         });
-        return;
     }
 
     const reservedChannel = interaction.options.getChannel('使用チャンネル');

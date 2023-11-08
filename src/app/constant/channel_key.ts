@@ -36,11 +36,12 @@ export function isChannelKey(value: string): value is ChannelKey {
 }
 
 // ChannelKeyを指定すると名前を返す関数
-export function getUniqueChannelNameByKey(channelKey: ChannelKey): string | null {
+export function getUniqueChannelNameByKey(channelKey: ChannelKey): string {
+    let channelName = 'empty';
     for (const channel of Object.values(ChannelKeySet)) {
         if (channel.key === channelKey) {
-            return channel.name;
+            channelName = channel.name;
         }
     }
-    return null; // キーが見つからない場合はnullを返す
+    return channelName;
 }

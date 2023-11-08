@@ -34,6 +34,8 @@ const logger = log4js_obj.getLogger('recruit');
 export async function otherGameRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
+    await interaction.deferReply({ ephemeral: false });
+
     const guild = await getGuildByInteraction(interaction);
     const options = interaction.options;
     const member = await searchAPIMemberById(guild, interaction.member.user.id);
@@ -59,23 +61,20 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction<
 
     if (voiceChannel instanceof VoiceChannel) {
         if (voiceChannel.members.size != 0 && !voiceChannel.members.has(member.user.id)) {
-            await interaction.reply({
-                content: 'そのチャンネルは使用中でし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは使用中でし！`,
                 ephemeral: true,
             });
-            return;
         } else if (!availableChannel.includes(voiceChannel.name)) {
-            await interaction.reply({
-                content:
-                    'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！`,
                 ephemeral: true,
             });
-            return;
         }
     }
 
-    // 募集がfollowUpでないとリグマと同じfunctionでeditできないため
-    await interaction.deferReply();
     const roles = await guild.roles.fetch();
     const recruitChannel = interaction.channel;
 

@@ -16,6 +16,9 @@ import { getMemberMentions } from '../buttons/other_events';
 
 export async function buttonRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
+
+    await interaction.deferReply({ ephemeral: true });
+
     const guild = await getGuildByInteraction(interaction);
 
     const privateRecruitChannelId = await UniqueChannelService.getChannelIdByKey(
@@ -28,7 +31,7 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
     );
 
     if (notExists(privateRecruitChannelId) || notExists(otherGamesRecruitChannelId)) {
-        await interaction.reply('募集に失敗したでし！');
+        await interaction.editReply('募集に失敗したでし！');
         return interaction.channel.send({
             content:
                 (await getDeveloperMention(guild.id)) + '募集チャンネルが設定されていないでし！',
@@ -72,8 +75,6 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
     }
 
     assertExistCheck(recruiter, 'recruiter');
-
-    await interaction.deferReply({ ephemeral: true });
 
     const sentMessage = await recruitChannel.send({
         content:

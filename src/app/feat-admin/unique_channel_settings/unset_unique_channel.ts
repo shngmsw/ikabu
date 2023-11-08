@@ -42,7 +42,7 @@ export async function unsetUniqueChannelCommand(
                 interaction.guildId,
                 deletedChannel.channelId,
             );
-            assertExistCheck(channel, 'DBChannel');
+            assertExistCheck(channel, 'storedChannel');
             await interaction.editReply({
                 content: `\`${channel.name}\`を\`${key}\`の設定から解除したでし！`,
             });

@@ -26,7 +26,7 @@ export const commandNames = {
     private: 'プラベ募集',
     buttonRecruit: '募集ボタン',
     buttonEnabler: 'ボタンを有効化する',
-    recuitEditor: '募集を編集',
+    recruitEditor: '募集を編集',
     voiceChannelMention: 'ボイスメンション',
     channelSetting: 'チャンネル設定',
     uniqueChannelSetting: '固有チャンネル設定',

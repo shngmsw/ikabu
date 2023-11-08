@@ -13,6 +13,11 @@ export const RoleKeySet = {
     ShiverRecruit: { name: 'フウカ募集', key: 'ROLE_ID_RECRUIT_SHIVER' },
     BigmanRecruit: { name: 'マンタロー募集', key: 'ROLE_ID_RECRUIT_BIGMAN' },
     OtherGamesRecruit: { name: '別ゲー募集', key: 'ROLE_ID_RECRUIT_OTHER_GAMES' },
+    RankSP: { name: 'S+', key: 'ROLE_ID_RANK_S_PLUS' },
+    RankS: { name: 'S', key: 'ROLE_ID_RANK_S' },
+    RankA: { name: 'A', key: 'ROLE_ID_RANK_A' },
+    RankB: { name: 'B', key: 'ROLE_ID_RANK_B' },
+    RankC: { name: 'C', key: 'ROLE_ID_RANK_C' },
 } as const;
 export type RoleKeySet = ObjectValueList<typeof RoleKeySet>;
 // RoleKeyタイプを派生させる
@@ -24,11 +29,12 @@ export function isRoleKey(value: string): value is RoleKey {
 }
 
 // RoleKeyを指定すると名前を返す関数
-export function getUniqueRoleNameByKey(roleKey: RoleKey): string | null {
+export function getUniqueRoleNameByKey(roleKey: RoleKey): string {
+    let roleName = 'empty';
     for (const role of Object.values(RoleKeySet)) {
         if (role.key === roleKey) {
-            return role.name;
+            roleName = role.name;
         }
     }
-    return null; // キーが見つからない場合はnullを返す
+    return roleName;
 }

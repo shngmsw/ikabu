@@ -61,11 +61,11 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction<'c
     }
 
     if (recruitNum < 1 || recruitNum > 7) {
-        await interaction.reply({
-            content: '募集人数は1～7までで指定するでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数は1～7までで指定するでし！`,
             ephemeral: true,
         });
-        return;
     } else {
         memberCounter++;
     }
@@ -76,11 +76,11 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction<'c
     if (exists(user3)) memberCounter++;
 
     if (memberCounter > 8) {
-        await interaction.reply({
-            content: '募集人数がおかしいでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数がおかしいでし！`,
             ephemeral: true,
         });
-        return;
     }
 
     const availableChannel = [
@@ -101,18 +101,17 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction<'c
 
     if (voiceChannel instanceof VoiceChannel) {
         if (voiceChannel.members.size != 0 && !voiceChannel.members.has(hostMember.user.id)) {
-            await interaction.reply({
-                content: 'そのチャンネルは使用中でし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは使用中でし！`,
                 ephemeral: true,
             });
-            return;
         } else if (!availableChannel.includes(voiceChannel.name)) {
-            await interaction.reply({
-                content:
-                    'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！`,
                 ephemeral: true,
             });
-            return;
         }
     }
 
@@ -123,14 +122,20 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction<'c
         const schedule = await getSchedule();
 
         if (notExists(schedule)) {
-            return await interaction.editReply({
+            await interaction.deleteReply();
+            return await interaction.followUp({
                 content:
                     'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                ephemeral: true,
             });
         }
 
         if (checkFes(schedule, type)) {
-            return await interaction.editReply(await getFestPeriodAlertText(guild.id));
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: await getFestPeriodAlertText(guild.id),
+                ephemeral: true,
+            });
         }
 
         const regularData = await getRegularData(schedule, type);
@@ -164,10 +169,12 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction<'c
         if (notExists(condition)) condition = 'なし';
 
         if (notExists(regularData)) {
-            await interaction.editReply({
-                content: 'レギュラーマッチの情報が取得できなかったでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content:
+                    'レギュラーマッチの情報が取得できなかったでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+                ephemeral: true,
             });
-            return;
         }
 
         await sendRegularMatch(

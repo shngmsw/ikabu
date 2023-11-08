@@ -27,16 +27,16 @@ export async function vcToolsSetting(
     try {
         const guild = await getGuildByInteraction(interaction);
 
-        const dbChannel = await ChannelService.setVCToolsEnabled(
+        const storedChannel = await ChannelService.setVCToolsEnabled(
             guild.id,
             targetChannel.id,
             isVCToolsEnabled,
         );
 
-        if (exists(dbChannel) && dbChannel.type === ChannelType.GuildCategory) {
+        if (exists(storedChannel) && storedChannel.type === ChannelType.GuildCategory) {
             const channels = await ChannelService.getChannelsByCategoryId(
                 guild.id,
-                dbChannel.channelId,
+                storedChannel.channelId,
             );
 
             for (const channel of channels) {
@@ -52,7 +52,7 @@ export async function vcToolsSetting(
             }
         }
 
-        return dbChannel;
+        return storedChannel;
     } catch (error) {
         await sendErrorLogs(logger, error);
     }
