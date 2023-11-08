@@ -9,7 +9,6 @@ import { MatchInfo } from '../../common/apis/splatoon3.ink/splatoon3_ink';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { exists, notExists } from '../../common/others';
-import { RuleIcon } from '../interactions/commands/anarchy_recruit';
 
 Canvas.registerFont(path.resolve('./fonts/Splatfont.ttf'), {
     family: 'Splatfont',
@@ -275,7 +274,7 @@ export async function recruitAnarchyCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleAnarchyCanvas(anarchyData: MatchInfo | null, ruleIcon: RuleIcon) {
+export async function ruleAnarchyCanvas(anarchyData: MatchInfo | null, ruleIconURL: string) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
 
     const ruleCtx = ruleCanvas.getContext('2d');
@@ -445,18 +444,8 @@ export async function ruleAnarchyCanvas(anarchyData: MatchInfo | null, ruleIcon:
     }
 
     ruleCtx.save();
-    const ruleImage = await Canvas.loadImage(ruleIcon.url);
-    ruleCtx.drawImage(
-        ruleImage,
-        0,
-        0,
-        ruleImage.width,
-        ruleImage.height,
-        ruleIcon.xPosition,
-        ruleIcon.yPosition,
-        ruleIcon.xScale,
-        ruleIcon.yScale,
-    );
+    const ruleImage = await Canvas.loadImage(ruleIconURL);
+    ruleCtx.drawImage(ruleImage, 0, 0, ruleImage.width, ruleImage.height, 570, 10, 120, 120);
     ruleCtx.restore();
 
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);

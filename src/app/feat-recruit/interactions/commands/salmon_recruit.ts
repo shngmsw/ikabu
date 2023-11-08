@@ -54,11 +54,11 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction<'ca
     let memberCounter = recruitNum; // プレイ人数のカウンター
 
     if (recruitNum < 1 || recruitNum > 3) {
-        await interaction.reply({
-            content: '募集人数は1～3までで指定するでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数は1～3までで指定するでし！`,
             ephemeral: true,
         });
-        return;
     } else {
         memberCounter++;
     }
@@ -68,11 +68,11 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction<'ca
     if (exists(user2)) memberCounter++;
 
     if (memberCounter > 4) {
-        await interaction.reply({
-            content: '募集人数がおかしいでし！',
+        await interaction.deleteReply();
+        return await interaction.followUp({
+            content: `\`${interaction.toString()}\`\n募集人数がおかしいでし！`,
             ephemeral: true,
         });
-        return;
     }
 
     const availableChannel = [
@@ -95,18 +95,17 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction<'ca
 
     if (voiceChannel instanceof VoiceChannel) {
         if (voiceChannel.members.size != 0 && !voiceChannel.members.has(hostMember.user.id)) {
-            await interaction.reply({
-                content: 'そのチャンネルは使用中でし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは使用中でし！`,
                 ephemeral: true,
             });
-            return;
         } else if (!availableChannel.includes(voiceChannel.name)) {
-            await interaction.reply({
-                content:
-                    'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content: `\`${interaction.toString()}\`\nそのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！`,
                 ephemeral: true,
             });
-            return;
         }
     }
 
@@ -116,32 +115,44 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction<'ca
     const schedule = await getSchedule();
 
     if (notExists(schedule)) {
-        return await interaction.editReply({
+        await interaction.deleteReply();
+        return await interaction.followUp({
             content:
                 'スケジュールの取得に失敗したでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
+            ephemeral: true,
         });
     }
 
     let type = RecruitType.SalmonRecruit;
     if (subcommand === 'run') {
         if (checkBigRun(schedule, 0)) {
-            return await interaction.editReply(
-                '現在ビッグラン開催中でし！\nビッグランの募集を建てる場合は`/サーモンラン募集 bigrun`を利用するでし！',
-            );
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content:
+                    '現在ビッグラン開催中でし！\nビッグランの募集を建てる場合は`/サーモンラン募集 bigrun`を利用するでし！',
+                ephemeral: true,
+            });
         }
         type = RecruitType.SalmonRecruit;
     } else if (subcommand === 'bigrun') {
         if (!checkBigRun(schedule, 0)) {
-            return await interaction.editReply(
-                '現在ビッグランは行われていないでし！\n通常スケジュールの募集を建てる場合は`/サーモンラン募集 run`を利用するでし！',
-            );
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content:
+                    '現在ビッグランは行われていないでし！\n通常スケジュールの募集を建てる場合は`/サーモンラン募集 run`を利用するでし！',
+                ephemeral: true,
+            });
         }
         type = RecruitType.BigRunRecruit;
     } else if (subcommand === 'contest') {
         if (!checkTeamContest(schedule, 0)) {
-            return await interaction.editReply(
-                '現在チームコンテストは行われていないでし！\n通常スケジュールの募集を建てる場合は`/サーモンラン募集 run`を利用するでし！',
-            );
+            await interaction.deleteReply();
+            return await interaction.followUp({
+                content:
+                    '現在チームコンテストは行われていないでし！\n通常スケジュールの募集を建てる場合は`/サーモンラン募集 run`を利用するでし！',
+
+                ephemeral: true,
+            });
         }
         type = RecruitType.TeamContestRecruit;
     }

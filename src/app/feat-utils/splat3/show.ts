@@ -7,7 +7,6 @@ import {
     CacheType,
 } from 'discord.js';
 
-import { placeHold } from '../../../constant';
 import { log4js_obj } from '../../../log4js_settings';
 import {
     getSchedule,
@@ -22,7 +21,7 @@ import {
 import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule';
 import { createRoundRect, fillTextWithStroke } from '../../common/canvas_components';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
-import { assertExistCheck, notExists } from '../../common/others';
+import { assertExistCheck, rule2image } from '../../common/others';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -329,22 +328,4 @@ async function salmonWeaponCanvas(
     weapon_ctx.clip();
 
     return weaponCanvas.toBuffer();
-}
-
-function rule2image(rule: string | undefined | null) {
-    if (notExists(rule)) {
-        return placeHold.error100x100;
-    }
-    switch (rule) {
-        case 'ガチエリア':
-            return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png';
-        case 'ガチヤグラ':
-            return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png';
-        case 'ガチホコバトル':
-            return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png';
-        case 'ガチアサリ':
-            return 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png';
-        default:
-            return placeHold.error100x100;
-    }
 }
