@@ -7,7 +7,6 @@ import {
     VoiceChannel,
 } from 'discord.js';
 
-import { placeHold } from '../../../../constant';
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { UniqueRoleService } from '../../../../db/unique_role_service';
@@ -23,7 +22,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { searchRoleIdByName } from '../../../common/manager/role_manager';
-import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
+import { assertExistCheck, exists, notExists, rule2image, sleep } from '../../../common/others';
 import { RoleKeySet } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { getFestPeriodAlertText } from '../../alert_texts/schedule_related_alerts';
@@ -220,64 +219,7 @@ async function sendAnarchyMatch(
     user2: User | null,
     anarchyData: MatchInfo,
 ) {
-    let ruleIcon: RuleIcon;
-    if (exists(anarchyData && anarchyData.rule)) {
-        switch (anarchyData.rule) {
-            case 'ガチエリア':
-                ruleIcon = {
-                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_area.png',
-                    xPosition: 600,
-                    yPosition: 20,
-                    xScale: 90,
-                    yScale: 100,
-                };
-                break;
-            case 'ガチヤグラ':
-                ruleIcon = {
-                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_yagura.png',
-                    xPosition: 595,
-                    yPosition: 20,
-                    xScale: 90,
-                    yScale: 100,
-                };
-                break;
-            case 'ガチホコバトル':
-                ruleIcon = {
-                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_hoko.png',
-                    xPosition: 585,
-                    yPosition: 23,
-                    xScale: 110,
-                    yScale: 90,
-                };
-                break;
-            case 'ガチアサリ':
-                ruleIcon = {
-                    url: 'https://cdn.glitch.com/4ea6ca87-8ea7-482c-ab74-7aee445ea445%2Fobject_asari.png',
-                    xPosition: 570,
-                    yPosition: 20,
-                    xScale: 120,
-                    yScale: 100,
-                };
-                break;
-            default:
-                ruleIcon = {
-                    url: placeHold.error100x100,
-                    xPosition: 595,
-                    yPosition: 20,
-                    xScale: 100,
-                    yScale: 100,
-                };
-                break;
-        }
-    } else {
-        ruleIcon = {
-            url: placeHold.error100x100,
-            xPosition: 595,
-            yPosition: 20,
-            xScale: 100,
-            yScale: 100,
-        };
-    }
+    const ruleIconUrl = rule2image(anarchyData.rule);
 
     assertExistCheck(interaction.channel, 'channel');
 
@@ -319,7 +261,7 @@ async function sendAnarchyMatch(
         name: 'ikabu_recruit.png',
     });
 
-    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, ruleIcon), {
+    const rule = new AttachmentBuilder(await ruleAnarchyCanvas(anarchyData, ruleIconUrl), {
         name: 'rules.png',
     });
 
