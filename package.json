@@ -21,7 +21,7 @@
     "@prisma/client": "5.4.2",
     "@types/sqlite3": "^3.1.8",
     "axios": "^1.4.0",
-    "canvas": "^2.9.1",
+    "canvas": "2.10.2",
     "config": "^3.3.7",
     "config-reloadable": "^1.0.9",
     "cron": "^2.3.1",
