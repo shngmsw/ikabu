@@ -114,12 +114,12 @@ export async function disableLimit(voiceState: VoiceState) {
 
     if (notExists(channel) || !channel.isTextBased()) return;
 
-    const dbChannel = await ChannelService.getChannel(guild.id, channel.id);
-    if (notExists(dbChannel) || dbChannel.type !== ChannelType.GuildVoice) {
+    const storedChannel = await ChannelService.getChannel(guild.id, channel.id);
+    if (notExists(storedChannel) || storedChannel.type !== ChannelType.GuildVoice) {
         return;
     }
 
-    if (!dbChannel.isVCToolsEnabled) {
+    if (!storedChannel.isVCToolsEnabled) {
         return;
     }
 

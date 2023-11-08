@@ -1171,7 +1171,7 @@ const buttonEnabler = new ContextMenuCommandBuilder()
     .setDMPermission(false);
 
 const recruitEditor = new ContextMenuCommandBuilder()
-    .setName(commandNames.recuitEditor)
+    .setName(commandNames.recruitEditor)
     .setType(ApplicationCommandType.Message)
     .setDMPermission(false);
 

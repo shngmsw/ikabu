@@ -39,18 +39,18 @@ export async function saveChannelAtLaunch(client: Client) {
 
         // 削除されたチャンネルをDBから削除する
         const dbChannels = await ChannelService.getAllGuildChannels(guild.id);
-        dbChannels.forEach(async (dbChannel) => {
-            if (notExists(channelCollection.get(dbChannel.channelId))) {
-                await ChannelService.delete(guild.id, dbChannel.channelId);
+        dbChannels.forEach(async (storedChannel) => {
+            if (notExists(channelCollection.get(storedChannel.channelId))) {
+                await ChannelService.delete(guild.id, storedChannel.channelId);
             }
         });
     });
 
     // 存在しないサーバーのチャンネルをDBから削除する
     const dbChannels = await ChannelService.getAllChannels();
-    dbChannels.forEach(async (dbChannel) => {
-        if (notExists(clientGuilds.get(dbChannel.guildId))) {
-            await ChannelService.delete(dbChannel.guildId, dbChannel.channelId);
+    dbChannels.forEach(async (storedChannel) => {
+        if (notExists(clientGuilds.get(storedChannel.guildId))) {
+            await ChannelService.delete(storedChannel.guildId, storedChannel.channelId);
         }
     });
 }

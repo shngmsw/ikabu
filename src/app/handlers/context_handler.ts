@@ -10,7 +10,7 @@ export async function call(interaction: MessageContextMenuCommandInteraction<Cac
     if (interaction.inGuild()) {
         if (interaction.commandName === commandNames.buttonEnabler) {
             await buttonEnable(interaction);
-        } else if (interaction.commandName === commandNames.recuitEditor) {
+        } else if (interaction.commandName === commandNames.recruitEditor) {
             await createRecruitEditor(interaction);
         }
     }

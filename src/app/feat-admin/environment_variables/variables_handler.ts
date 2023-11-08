@@ -19,15 +19,15 @@ export async function variablesHandler(interaction: ChatInputCommandInteraction<
         });
     }
 
-    const dbChannel = await ChannelService.getChannel(guild.id, interaction.channelId);
+    const storedChannel = await ChannelService.getChannel(guild.id, interaction.channelId);
 
-    if (notExists(dbChannel)) {
+    if (notExists(storedChannel)) {
         return await interaction.editReply({
             content: 'このチャンネルの情報を取得できないでし！',
         });
     }
 
-    if (!dbChannel.isAdminChannel) {
+    if (!storedChannel.isAdminChannel) {
         return await interaction.editReply({
             content: 'このチャンネルでは使えないでし！',
         });
