@@ -21,9 +21,15 @@ import { setButtonDisable } from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { searchRoleIdByName } from '../../../common/manager/role_manager';
-import { assertExistCheck, exists, notExists, rule2image, sleep } from '../../../common/others';
-import { RoleKeySet } from '../../../constant/role_key';
+import {
+    assertExistCheck,
+    exists,
+    getDeveloperMention,
+    notExists,
+    rule2image,
+    sleep,
+} from '../../../common/others';
+import { RoleKeySet, getUniqueRoleNameByKey, isRoleKey } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { getFestPeriodAlertText } from '../../alert_texts/schedule_related_alerts';
 import {
@@ -47,7 +53,7 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
-    let rank = options.getString('募集ウデマエ');
+    const rankRoleKey = options.getString('募集ウデマエ');
     const recruitNum = options.getInteger('募集人数', true);
     let condition = options.getString('参加条件');
     const guild = await getGuildByInteraction(interaction);
@@ -123,21 +129,24 @@ export async function anarchyRecruit(interaction: ChatInputCommandInteraction<'c
         RoleKeySet.AnarchyRecruit.key,
     );
     let mention = `<@&${anarchyRecruitRoleId}>`;
+    let rank = '指定なし';
     // 募集条件がランクの場合はウデマエロールにメンション
-    if (exists(rank)) {
-        const mentionId = await searchRoleIdByName(guild, rank);
-        if (notExists(mentionId)) {
-            await interaction.deleteReply();
-            return await interaction.followUp({
-                content:
-                    '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
-                ephemeral: true,
-            });
+    if (exists(rankRoleKey)) {
+        if (!isRoleKey(rankRoleKey)) {
+            return await sendErrorLogs(logger, 'rankRoleKey is not RoleKey');
         }
-        mention = `<@&${mentionId}>`;
-    } else {
-        rank = '指定なし';
+        rank = getUniqueRoleNameByKey(rankRoleKey);
+        const rankRoleId = await UniqueRoleService.getRoleIdByKey(guild.id, rankRoleKey);
+        if (notExists(rankRoleId)) {
+            await interaction.deleteReply();
+            return await interaction.channel.send(
+                (await getDeveloperMention(guild.id)) +
+                    `\nウデマエロール\`${rank}\`が設定されていないでし！`,
+            );
+        }
+        mention = `<@&${rankRoleId}>`;
     }
+
     try {
         const schedule = await getSchedule();
 
