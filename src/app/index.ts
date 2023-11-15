@@ -199,12 +199,8 @@ client.on('userUpdate', async (oldUser: User | PartialUser, newUser: User) => {
 
             const member = await searchAPIMemberById(guild, userId);
 
-            if (notExists(member)) {
-                return await sendErrorLogs(
-                    loggerUU,
-                    `member is missing. userId: ${userId}, guildId: ${guildId}`,
-                );
-            }
+            // 他鯖のテーブルには存在するが、実際には鯖から抜けている場合
+            if (notExists(member)) return;
 
             // DBのメンバー情報を更新(ない場合は作成)
             const storedMember = await MemberService.saveMemberFromGuildMember(member);
