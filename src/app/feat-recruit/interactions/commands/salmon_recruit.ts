@@ -41,6 +41,9 @@ const logger = log4js_obj.getLogger('recruit');
 export async function salmonRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+
     const options = interaction.options;
     const channel = interaction.channel;
     const voiceChannel = interaction.options.getChannel('使用チャンネル');
@@ -108,9 +111,6 @@ export async function salmonRecruit(interaction: ChatInputCommandInteraction<'ca
             });
         }
     }
-
-    // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply();
 
     const schedule = await getSchedule();
 
