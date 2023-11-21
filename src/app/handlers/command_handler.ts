@@ -1,8 +1,9 @@
 import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 import { commandNames } from '../../constant.js';
+import { log4js_obj } from '../../log4js_settings.js';
 import { getGuildByInteraction } from '../common/manager/guild_manager.js';
-import { assertExistCheck, getCloseEmbed, getCommandHelpEmbed } from '../common/others';
+import { assertExistCheck, exists, getCloseEmbed, getCommandHelpEmbed } from '../common/others';
 import { handleBan } from '../feat-admin/ban/ban';
 import { handleCreateRoom } from '../feat-admin/channel_manager/createRoom.js';
 import { handleDeleteCategory } from '../feat-admin/channel_manager/deleteCategory.js';
@@ -44,6 +45,9 @@ import { voiceLocker } from '../feat-utils/voice/voice_locker';
 import { voiceMention } from '../feat-utils/voice/voice_mention.js';
 import { handleVoicePick } from '../feat-utils/voice/vpick.js';
 import { sendCommandLog } from '../logs/commands/command_log';
+import { sendErrorLogs } from '../logs/error/send_error_logs.js';
+
+const logger = log4js_obj.getLogger('interaction');
 
 export async function call(interaction: ChatInputCommandInteraction<CacheType>) {
     await sendCommandLog(interaction);
@@ -66,115 +70,131 @@ async function guildOnlyCommandsHandler(
     const { commandName } = interaction;
     const { options } = interaction;
 
-    if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
-        await voiceLocker(interaction);
-    } else if (commandName === commandNames.close) {
-        if (!interaction.inGuild()) {
-            return;
+    try {
+        if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
+            await voiceLocker(interaction);
+        } else if (commandName === commandNames.close) {
+            if (!interaction.inGuild()) {
+                return;
+            }
+            assertExistCheck(interaction.channel, 'channel');
+            //serverコマンド
+            const guild = await getGuildByInteraction(interaction);
+            const embed = getCloseEmbed();
+            if (!interaction.replied) {
+                await interaction.reply({
+                    embeds: [embed, await getCommandHelpEmbed(guild, interaction.channel.name)],
+                    components: [createNewRecruitButton(interaction.channel.name)],
+                });
+            }
+        } else if (commandName === commandNames.team_divider) {
+            await dividerInitialMessage(interaction);
+        } else if (commandName === commandNames.regular) {
+            await regularRecruit(interaction);
+        } else if (commandName === commandNames.other_game) {
+            await otherGameRecruit(interaction);
+        } else if (commandName === commandNames.buttonRecruit) {
+            await buttonRecruit(interaction);
+        } else if (commandName === commandNames.anarchy) {
+            await anarchyRecruit(interaction);
+        } else if (commandName === commandNames.private) {
+            await privateRecruit(interaction);
+        } else if (commandName === commandNames.event) {
+            await eventRecruit(interaction);
+        } else if (commandName === commandNames.fesA) {
+            await fesRecruit(interaction);
+        } else if (commandName === commandNames.fesB) {
+            await fesRecruit(interaction);
+        } else if (commandName === commandNames.fesC) {
+            await fesRecruit(interaction);
+        } else if (commandName === commandNames.salmon) {
+            await salmonRecruit(interaction);
+        } else if (commandName === commandNames.experience) {
+            await handleIkabuExperience(interaction);
+        } else if (commandName === commandNames.voiceChannelMention) {
+            await voiceMention(interaction);
+        } else if (commandName === commandNames.channelSetting) {
+            await channelSettingsHandler(interaction);
+        } else if (commandName === commandNames.uniqueChannelSetting) {
+            await uniqueChannelSettingsHandler(interaction);
+        } else if (commandName === commandNames.uniqueRoleSetting) {
+            await uniqueRoleSettingsHandler(interaction);
+        } else if (commandName === commandNames.variablesSettings) {
+            await variablesHandler(interaction);
+        } else if (commandName == commandNames.voice_pick) {
+            await handleVoicePick(interaction);
+        } else if (commandName == commandNames.ban) {
+            await handleBan(interaction);
+        } else if (commandName == commandNames.joinedDateFixer) {
+            await joinedAtFixer(interaction);
+        } else if (commandName == commandNames.festivalSettings) {
+            await festSettingHandler(interaction);
+        } else if (commandName === commandNames.voice) {
+            // 'インタラクションに失敗'が出ないようにするため
+            await interaction.deferReply({ ephemeral: true });
+            await handleVoiceCommand(interaction);
+            await setting(interaction);
+        } else if (commandName == commandNames.ch_manager) {
+            const subCommand = options.getSubcommand();
+            switch (subCommand) {
+                case 'チャンネル作成':
+                    await handleCreateRoom(interaction);
+                    break;
+                case 'ロール作成':
+                    await handleCreateRole(interaction);
+                    break;
+                case 'ロール割当':
+                    await handleAssignRole(interaction);
+                    break;
+                case 'ロール解除':
+                    await handleUnassignRole(interaction);
+                    break;
+                case 'カテゴリー削除':
+                    await handleDeleteCategory(interaction);
+                    break;
+                case 'チャンネル削除':
+                    await handleDeleteChannel(interaction);
+                    break;
+                case 'ロール削除':
+                    await handleDeleteRole(interaction);
+                    break;
+            }
         }
-        assertExistCheck(interaction.channel, 'channel');
-        //serverコマンド
-        const guild = await getGuildByInteraction(interaction);
-        const embed = getCloseEmbed();
-        if (!interaction.replied) {
-            await interaction.reply({
-                embeds: [embed, await getCommandHelpEmbed(guild, interaction.channel.name)],
-                components: [createNewRecruitButton(interaction.channel.name)],
-            });
-        }
-    } else if (commandName === commandNames.team_divider) {
-        await dividerInitialMessage(interaction);
-    } else if (commandName === commandNames.regular) {
-        await regularRecruit(interaction);
-    } else if (commandName === commandNames.other_game) {
-        await otherGameRecruit(interaction);
-    } else if (commandName === commandNames.buttonRecruit) {
-        await buttonRecruit(interaction);
-    } else if (commandName === commandNames.anarchy) {
-        await anarchyRecruit(interaction);
-    } else if (commandName === commandNames.private) {
-        await privateRecruit(interaction);
-    } else if (commandName === commandNames.event) {
-        await eventRecruit(interaction);
-    } else if (commandName === commandNames.fesA) {
-        await fesRecruit(interaction);
-    } else if (commandName === commandNames.fesB) {
-        await fesRecruit(interaction);
-    } else if (commandName === commandNames.fesC) {
-        await fesRecruit(interaction);
-    } else if (commandName === commandNames.salmon) {
-        await salmonRecruit(interaction);
-    } else if (commandName === commandNames.experience) {
-        await handleIkabuExperience(interaction);
-    } else if (commandName === commandNames.voiceChannelMention) {
-        await voiceMention(interaction);
-    } else if (commandName === commandNames.channelSetting) {
-        await channelSettingsHandler(interaction);
-    } else if (commandName === commandNames.uniqueChannelSetting) {
-        await uniqueChannelSettingsHandler(interaction);
-    } else if (commandName === commandNames.uniqueRoleSetting) {
-        await uniqueRoleSettingsHandler(interaction);
-    } else if (commandName === commandNames.variablesSettings) {
-        await variablesHandler(interaction);
-    } else if (commandName == commandNames.voice_pick) {
-        await handleVoicePick(interaction);
-    } else if (commandName == commandNames.ban) {
-        await handleBan(interaction);
-    } else if (commandName == commandNames.joinedDateFixer) {
-        await joinedAtFixer(interaction);
-    } else if (commandName == commandNames.festivalSettings) {
-        await festSettingHandler(interaction);
-    } else if (commandName === commandNames.voice) {
-        // 'インタラクションに失敗'が出ないようにするため
-        await interaction.deferReply({ ephemeral: true });
-        await handleVoiceCommand(interaction);
-        await setting(interaction);
-    } else if (commandName == commandNames.ch_manager) {
-        const subCommand = options.getSubcommand();
-        switch (subCommand) {
-            case 'チャンネル作成':
-                await handleCreateRoom(interaction);
-                break;
-            case 'ロール作成':
-                await handleCreateRole(interaction);
-                break;
-            case 'ロール割当':
-                await handleAssignRole(interaction);
-                break;
-            case 'ロール解除':
-                await handleUnassignRole(interaction);
-                break;
-            case 'カテゴリー削除':
-                await handleDeleteCategory(interaction);
-                break;
-            case 'チャンネル削除':
-                await handleDeleteChannel(interaction);
-                break;
-            case 'ロール削除':
-                await handleDeleteRole(interaction);
-                break;
+    } catch (error) {
+        await sendErrorLogs(logger, error);
+        const commandChannel = interaction.channel;
+        if (exists(commandChannel)) {
+            await commandChannel.send('なんかエラーでてるわ');
         }
     }
 }
 
 async function CommandsHandler(interaction: ChatInputCommandInteraction<CacheType>) {
-    const { commandName } = interaction;
+    try {
+        const { commandName } = interaction;
 
-    if (commandName === commandNames.friend_code) {
-        await handleFriendCode(interaction);
-    } else if (commandName == commandNames.wiki) {
-        await handleWiki(interaction);
-    } else if (commandName == commandNames.kansen) {
-        await handleKansen(interaction);
-    } else if (commandName == commandNames.timer) {
-        await handleTimer(interaction);
-    } else if (commandName == commandNames.pick) {
-        await handlePick(interaction);
-    } else if (commandName == commandNames.buki) {
-        await handleBuki(interaction);
-    } else if (commandName == commandNames.show) {
-        await handleShow(interaction);
-    } else if (commandName == commandNames.help) {
-        await handleHelp(interaction);
+        if (commandName === commandNames.friend_code) {
+            await handleFriendCode(interaction);
+        } else if (commandName == commandNames.wiki) {
+            await handleWiki(interaction);
+        } else if (commandName == commandNames.kansen) {
+            await handleKansen(interaction);
+        } else if (commandName == commandNames.timer) {
+            await handleTimer(interaction);
+        } else if (commandName == commandNames.pick) {
+            await handlePick(interaction);
+        } else if (commandName == commandNames.buki) {
+            await handleBuki(interaction);
+        } else if (commandName == commandNames.show) {
+            await handleShow(interaction);
+        } else if (commandName == commandNames.help) {
+            await handleHelp(interaction);
+        }
+    } catch (error) {
+        await sendErrorLogs(logger, error);
+        const commandChannel = interaction.channel;
+        if (exists(commandChannel)) {
+            await commandChannel.send('なんかエラーでてるわ');
+        }
     }
 }
