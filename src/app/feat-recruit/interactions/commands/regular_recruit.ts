@@ -40,6 +40,9 @@ const logger = log4js_obj.getLogger('recruit');
 export async function regularRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
     assertExistCheck(interaction.channel, 'channel');
 
+    // 'インタラクションに失敗'が出ないようにするため
+    await interaction.deferReply();
+
     const options = interaction.options;
     const guild = await getGuildByInteraction(interaction);
     const hostMember = await searchAPIMemberById(guild, interaction.member.user.id);
@@ -114,9 +117,6 @@ export async function regularRecruit(interaction: ChatInputCommandInteraction<'c
             });
         }
     }
-
-    // 'インタラクションに失敗'が出ないようにするため
-    await interaction.deferReply();
 
     try {
         const schedule = await getSchedule();
