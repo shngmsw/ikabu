@@ -16,7 +16,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { searchChannelById } from '../../../common/manager/channel_manager';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
-import { createMentionsFromIdList, exists, sleep } from '../../../common/others';
+import { exists, sleep } from '../../../common/others';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { joinRequestConfirmButtons } from '../../buttons/create_join_request_buttons';
 import { messageLinkButtons } from '../../buttons/create_recruit_buttons';
@@ -30,7 +30,7 @@ export function sendJoinNotifyToHost(
     recruitChannel: TextBasedChannel,
     member: Member,
     recruiter: ParticipantMember,
-    confirmedMemberIDList: string[],
+    attendeeList: ParticipantMember[],
 ) {
     const text = `${member.displayName}たんが参加表明したでし！`;
     void sendNotifyToHost(
@@ -41,7 +41,7 @@ export function sendJoinNotifyToHost(
         recruitChannel,
         member,
         recruiter,
-        confirmedMemberIDList,
+        attendeeList,
         [joinRequestConfirmButtons(recruitId, message.id, member.userId)],
     );
 }
@@ -52,7 +52,7 @@ export function sendCancelNotifyToHost(
     recruitChannel: TextBasedChannel,
     member: Member,
     recruiter: ParticipantMember,
-    confirmedMemberIDList: string[],
+    attendeeList: ParticipantMember[],
 ) {
     const text = `${member.displayName}たんがキャンセルしたでし！`;
     void sendNotifyToHost(
@@ -63,7 +63,7 @@ export function sendCancelNotifyToHost(
         recruitChannel,
         member,
         recruiter,
-        confirmedMemberIDList,
+        attendeeList,
         [],
     );
 }
@@ -76,7 +76,7 @@ async function sendNotifyToHost(
     recruitChannel: TextBasedChannel,
     member: Member,
     recruiter: ParticipantMember,
-    confirmedMemberIDList: string[],
+    attendeeList: ParticipantMember[],
     buttons: ActionRowBuilder<ButtonBuilder>[],
 ) {
     try {
@@ -107,8 +107,13 @@ async function sendNotifyToHost(
             }
         }
 
+        let mentions = recruiter.member.mention;
+        for (const attendee of attendeeList) {
+            mentions += ` ${attendee.member.mention}`;
+        }
+
         const notifyMessage = await message.reply({
-            content: createMentionsFromIdList(confirmedMemberIDList).join(' '),
+            content: mentions,
             embeds: [embed],
             components: buttons,
         });

@@ -111,14 +111,6 @@ export function assertExistCheck<Type>(
     }
 }
 
-export function createMentionsFromIdList(idList: string[]) {
-    const mentionList = [];
-    for (const id of idList) {
-        mentionList.push(`<@${id}>`);
-    }
-    return mentionList;
-}
-
 // オブジェクト型でどれか一つのプロパティを必須にする
 export type RequireOne<T, K extends keyof T = keyof T> = K extends keyof T
     ? PartialRequire<T, K>

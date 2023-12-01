@@ -122,7 +122,7 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
                     recruitChannel,
                     member,
                     recruiter,
-                    [recruiter.userId],
+                    attendeeList,
                 );
 
                 await interaction.editReply({

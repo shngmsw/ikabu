@@ -44,6 +44,7 @@ model Member {
   guildId     String        @map("guild_id")
   userId      String        @map("user_id")
   displayName String        @map("display_name")
+  mention     String        @map("mention")
   iconUrl     String        @map("icon_url")
   joinedAt    DateTime?     @map("joined_at")
   isRookie    Boolean       @default(true) @map("is_rookie")

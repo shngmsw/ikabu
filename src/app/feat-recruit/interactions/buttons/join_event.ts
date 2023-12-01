@@ -125,7 +125,7 @@ export async function join(
                 recruitChannel,
                 member,
                 recruiter,
-                confirmedMemberIDList,
+                attendeeList,
             );
 
             // テキストの募集チャンネルにSticky Messageを送信
