@@ -150,7 +150,7 @@ export async function cancel(
                     recruitChannel,
                     member,
                     recruiter,
-                    [recruiter.userId],
+                    attendeeList,
                 );
 
                 await interaction.editReply({

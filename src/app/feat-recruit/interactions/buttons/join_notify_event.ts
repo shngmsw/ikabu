@@ -119,7 +119,7 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
                 recruitChannel,
                 member,
                 recruiter,
-                [recruiter.userId],
+                attendeeList,
             );
 
             // テキストの募集チャンネルにSticky Messageを送信
