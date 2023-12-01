@@ -8,7 +8,6 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import {
     disableThinkingButton,
     recoveryThinkingButton,
-    setButtonDisable,
 } from '../../../common/button_components.js';
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
@@ -34,10 +33,6 @@ export async function cancel(
 ) {
     if (!interaction.message.inGuild()) return;
     try {
-        await interaction.update({
-            components: setButtonDisable(interaction.message, interaction),
-        });
-
         const guild = await getGuildByInteraction(interaction);
         assertExistCheck(interaction.channel, 'channel');
         const channelId = params.get('vid');

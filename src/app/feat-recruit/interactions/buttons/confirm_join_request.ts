@@ -4,7 +4,7 @@ import { memberListText } from './other_events';
 import { ParticipantMember, ParticipantService } from '../../../../db/participant_service';
 import { RecruitService } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
+import { recoveryThinkingButton } from '../../../common/button_components';
 import { searchChannelById } from '../../../common/manager/channel_manager';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
@@ -24,9 +24,6 @@ export async function confirmJoinRequest(
     params: URLSearchParams,
 ) {
     try {
-        await interaction.update({
-            components: setButtonDisable(interaction.message, interaction),
-        });
         const guild = await getGuildByInteraction(interaction);
         const recruitMessageId = params.get('rid') ?? '';
 

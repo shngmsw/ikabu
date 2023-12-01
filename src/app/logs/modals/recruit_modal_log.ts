@@ -55,7 +55,7 @@ export async function sendRecruitModalLog(interaction: ModalSubmitInteraction<'r
     embed.setColor('#56C000');
     embed.setTimestamp(interaction.createdAt);
     assertExistCheck(process.env.COMMAND_LOG_WEBHOOK_URL, 'COMMAND_LOG_WEBHOOK_URL');
-    await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
+    void sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
 }
 
 export async function sendEditRecruitLog(
@@ -97,5 +97,5 @@ export async function sendEditRecruitLog(
     embed.setColor('#0070BB');
     embed.setTimestamp(editedAt);
     assertExistCheck(process.env.COMMAND_LOG_WEBHOOK_URL, 'COMMAND_LOG_WEBHOOK_URL');
-    await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
+    void sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
 }
