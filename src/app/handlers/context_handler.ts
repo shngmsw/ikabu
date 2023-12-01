@@ -6,7 +6,7 @@ import { createRecruitEditor } from '../feat-recruit/interactions/context_menus/
 import { sendCommandLog } from '../logs/commands/command_log';
 
 export async function call(interaction: MessageContextMenuCommandInteraction<CacheType>) {
-    void sendCommandLog(interaction);
+    await sendCommandLog(interaction);
     if (interaction.inGuild()) {
         if (interaction.commandName === commandNames.buttonEnabler) {
             await buttonEnable(interaction);

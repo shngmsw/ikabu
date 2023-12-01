@@ -32,5 +32,5 @@ export async function sendRecruitButtonLog(
     embed.setColor(color);
     embed.setTimestamp(interaction.createdAt);
     assertExistCheck(process.env.BUTTON_LOG_WEBHOOK_URL, 'BUTTON_LOG_WEBHOOK_URL');
-    await sendEmbedsWebhook(process.env.BUTTON_LOG_WEBHOOK_URL, [embed]);
+    void sendEmbedsWebhook(process.env.BUTTON_LOG_WEBHOOK_URL, [embed]);
 }
