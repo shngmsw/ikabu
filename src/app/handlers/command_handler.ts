@@ -50,7 +50,7 @@ import { sendErrorLogs } from '../logs/error/send_error_logs.js';
 const logger = log4js_obj.getLogger('interaction');
 
 export async function call(interaction: ChatInputCommandInteraction<CacheType>) {
-    await sendCommandLog(interaction);
+    void sendCommandLog(interaction);
 
     await CommandsHandler(interaction); // DMとGuild両方で動くコマンド
 
