@@ -4,7 +4,7 @@ import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
-import { setButtonDisable } from '../../../common/button_components';
+import { recoveryThinkingButton, setButtonDisable } from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
@@ -20,11 +20,6 @@ export async function del(
 ) {
     if (!interaction.message.inGuild()) return;
     try {
-        // 処理待ち
-        await interaction.deferReply({
-            ephemeral: true,
-        });
-
         assertExistCheck(interaction.channel, 'channel');
 
         const guild = await getGuildByInteraction(interaction);
@@ -49,10 +44,13 @@ export async function del(
         const participantsData = await ParticipantService.getAllParticipants(guild.id, image1MsgId);
 
         if (participantsData.length === 0) {
-            await interaction.message.edit({
+            await interaction.editReply({
                 components: setButtonDisable(interaction.message),
             });
-            await interaction.editReply({ content: 'この募集はもう削除できないでし！' });
+            await interaction.followUp({
+                content: 'この募集はもう削除できないでし！',
+                ephemeral: true,
+            });
             return;
         }
 
@@ -112,8 +110,9 @@ export async function del(
             const recruitData = await RecruitService.getRecruit(guild.id, image1MsgId);
 
             if (notExists(recruitData)) {
-                return await interaction.editReply({
+                return await interaction.followUp({
                     content: '募集データが存在しないでし！',
+                    ephemeral: true,
                 });
             }
 
@@ -123,8 +122,9 @@ export async function del(
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
-            await interaction.editReply({
+            await interaction.followUp({
                 content: '募集を削除したでし！\n次回は内容をしっかり確認してから送信するでし！',
+                ephemeral: true,
             });
 
             // テキストの募集チャンネルにSticky Messageを送信
@@ -133,7 +133,11 @@ export async function del(
             await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
         } else {
             await interaction.editReply({
+                components: recoveryThinkingButton(interaction, '募集を削除'),
+            });
+            await interaction.followUp({
                 content: '他人の募集は消せる訳無いでし！！！',
+                ephemeral: true,
             });
         }
     } catch (error) {

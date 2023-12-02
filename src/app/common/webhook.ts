@@ -9,7 +9,7 @@ import { EmbedBuilder } from 'discord.js';
 // }
 
 export async function sendEmbedsWebhook(url: string, embeds: EmbedBuilder[]) {
-    await axios.post(
+    void axios.post(
         url,
         { embeds: embeds }, // このオブジェクトがJSONとして送信される
     );

@@ -78,7 +78,7 @@ export async function sendCommandLog(
         embed.setColor('#CFCFCF');
         embed.setTimestamp(interaction.createdAt);
         assertExistCheck(process.env.COMMAND_LOG_WEBHOOK_URL, 'COMMAND_LOG_WEBHOOK_URL');
-        await sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
+        void sendEmbedsWebhook(process.env.COMMAND_LOG_WEBHOOK_URL, [embed]);
     } catch (error) {
         await sendErrorLogs(logger, error);
     }

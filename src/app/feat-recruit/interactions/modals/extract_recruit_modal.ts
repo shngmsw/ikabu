@@ -6,7 +6,7 @@ import { sendEventMatch } from './event_recruit_modal';
 import { sendFesMatch } from './fes_recruit_modal';
 import { sendRegularMatch } from './regular_recruit_modal';
 import { sendSalmonRun } from './salmon_recruit_modal';
-import { modalRecruit } from '../../../../constant';
+import { MemberService } from '../../../../db/member_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import {
     checkFes,
@@ -106,36 +106,15 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
         let member3: Member | null = null;
 
         if (attendeeNum >= 1) {
-            member1 = {
-                guildId: guild.id,
-                userId: 'attendee1',
-                displayName: '参加確定者1',
-                iconUrl: modalRecruit.placeHold,
-                joinedAt: new Date(),
-                isRookie: false,
-            };
+            member1 = await MemberService.getMemberByUserId(guild.id, 'attendee1');
         }
 
         if (attendeeNum >= 2) {
-            member2 = {
-                guildId: guild.id,
-                userId: 'attendee2',
-                displayName: '参加確定者2',
-                iconUrl: modalRecruit.placeHold,
-                joinedAt: new Date(),
-                isRookie: false,
-            };
+            member2 = await MemberService.getMemberByUserId(guild.id, 'attendee2');
         }
 
         if (attendeeNum >= 3) {
-            member3 = {
-                guildId: guild.id,
-                userId: 'attendee3',
-                displayName: '参加確定者3',
-                iconUrl: modalRecruit.placeHold,
-                joinedAt: new Date(),
-                isRookie: false,
-            };
+            member3 = await MemberService.getMemberByUserId(guild.id, 'attendee3');
         }
 
         if (notExists(regularData)) {
@@ -218,8 +197,6 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
 
     let member1: Member | null = null;
     let member2: Member | null = null;
-    let member1Mention = null;
-    let member2Mention = null;
 
     if (exists(user1) && user1 !== '') {
         // ユーザータグからメンバー取得
@@ -227,17 +204,8 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
         if (member !== undefined) {
             member1 = await searchDBMemberById(guild, member.user.id);
             assertExistCheck(member1, 'member1');
-            member1Mention = `<@${member1.userId}>`;
         } else {
-            member1 = {
-                guildId: guild.id,
-                userId: 'attendee1',
-                displayName: '参加確定者1',
-                iconUrl: modalRecruit.placeHold,
-                joinedAt: new Date(),
-                isRookie: false,
-            };
-            member1Mention = user1;
+            member1 = await MemberService.getMemberByUserId(guild.id, 'attendee1');
         }
     }
 
@@ -247,17 +215,8 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
         if (member !== undefined) {
             member2 = await searchDBMemberById(guild, member.user.id);
             assertExistCheck(member2, 'member2');
-            member2Mention = `<@${member2.userId}>`;
         } else {
-            member2 = {
-                guildId: guild.id,
-                userId: 'attendee2',
-                displayName: '参加確定者2',
-                iconUrl: modalRecruit.placeHold,
-                joinedAt: new Date(),
-                isRookie: false,
-            };
-            member2Mention = user2;
+            member2 = await MemberService.getMemberByUserId(guild.id, 'attendee2');
         }
     }
 
@@ -283,17 +242,17 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
 
         let txt = `### <@${hostMember.userId}>` + 'たんのイベマ募集\n';
         txt = txt + '```' + `${eventData.regulation.replace(/<br \/>/g, '\n')}` + '```\n';
-        if (exists(member1Mention) && exists(member2Mention)) {
+        if (exists(member1) && exists(member2)) {
             txt =
                 txt +
-                member1Mention +
+                member1.mention +
                 'たんと' +
-                member2Mention +
+                member2.mention +
                 'たんの参加が既に決定しているでし！';
-        } else if (exists(member1Mention)) {
-            txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
-        } else if (exists(member2Mention)) {
-            txt = txt + member2Mention + 'たんの参加が既に決定しているでし！';
+        } else if (exists(member1)) {
+            txt = txt + member1.mention + 'たんの参加が既に決定しているでし！';
+        } else if (exists(member2)) {
+            txt = txt + member2.mention + 'たんの参加が既に決定しているでし！';
         }
 
         if (isEmpty(condition)) condition = 'なし';
@@ -380,8 +339,6 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
 
     let member1: Member | null = null;
     let member2: Member | null = null;
-    let member1Mention = null;
-    let member2Mention = null;
 
     if (exists(user1) && user1 !== '') {
         // ユーザータグからメンバー取得
@@ -389,17 +346,8 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
         if (member !== undefined) {
             member1 = await searchDBMemberById(guild, member.user.id);
             assertExistCheck(member1, 'member1');
-            member1Mention = `<@${member1.userId}>`;
         } else {
-            member1 = {
-                guildId: guild.id,
-                userId: 'attendee1',
-                displayName: '参加確定者1',
-                iconUrl: modalRecruit.placeHold,
-                joinedAt: new Date(),
-                isRookie: false,
-            };
-            member1Mention = user1;
+            member1 = await MemberService.getMemberByUserId(guild.id, 'attendee1');
         }
     }
 
@@ -409,17 +357,8 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
         if (member !== undefined) {
             member2 = await searchDBMemberById(guild, member.user.id);
             assertExistCheck(member2, 'member2');
-            member2Mention = `<@${member2.userId}>`;
         } else {
-            member2 = {
-                guildId: guild.id,
-                userId: 'attendee2',
-                displayName: '参加確定者2',
-                iconUrl: modalRecruit.placeHold,
-                joinedAt: new Date(),
-                isRookie: false,
-            };
-            member2Mention = user2;
+            member2 = await MemberService.getMemberByUserId(guild.id, 'attendee2');
         }
     }
 
@@ -440,17 +379,17 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
         const anarchyData = await getAnarchyOpenData(schedule, type);
 
         let txt = `### <@${hostMember.userId}>` + 'たんのバンカラ募集\n';
-        if (exists(member1Mention) && exists(member2Mention)) {
+        if (exists(member1) && exists(member2)) {
             txt =
                 txt +
-                member1Mention +
+                member1.mention +
                 'たんと' +
-                member2Mention +
+                member2.mention +
                 'たんの参加が既に決定しているでし！';
-        } else if (exists(member1Mention)) {
-            txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
-        } else if (exists(member2Mention)) {
-            txt = txt + member2Mention + 'たんの参加が既に決定しているでし！';
+        } else if (exists(member1)) {
+            txt = txt + member1.mention + 'たんの参加が既に決定しているでし！';
+        } else if (exists(member2)) {
+            txt = txt + member2.mention + 'たんの参加が既に決定しているでし！';
         }
 
         if (isEmpty(condition)) condition = 'なし';
@@ -536,8 +475,6 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
 
         let member1: Member | null = null;
         let member2: Member | null = null;
-        let member1Mention = null;
-        let member2Mention = null;
 
         if (exists(user1) && user1 !== '') {
             // ユーザータグからメンバー取得
@@ -545,17 +482,8 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
             if (member !== undefined) {
                 member1 = await searchDBMemberById(guild, member.user.id);
                 assertExistCheck(member1, 'member1');
-                member1Mention = `<@${member1.userId}>`;
             } else {
-                member1 = {
-                    guildId: guild.id,
-                    userId: 'attendee1',
-                    displayName: '参加確定者1',
-                    iconUrl: modalRecruit.placeHold,
-                    joinedAt: new Date(),
-                    isRookie: false,
-                };
-                member1Mention = user1;
+                member1 = await MemberService.getMemberByUserId(guild.id, 'attendee1');
             }
         }
 
@@ -565,32 +493,23 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
             if (member !== undefined) {
                 member2 = await searchDBMemberById(guild, member.user.id);
                 assertExistCheck(member2, 'member2');
-                member2Mention = `<@${member2.userId}>`;
             } else {
-                member2 = {
-                    guildId: guild.id,
-                    userId: 'attendee2',
-                    displayName: '参加確定者2',
-                    iconUrl: modalRecruit.placeHold,
-                    joinedAt: new Date(),
-                    isRookie: false,
-                };
-                member2Mention = user2;
+                member2 = await MemberService.getMemberByUserId(guild.id, 'attendee2');
             }
         }
 
         let txt = `### <@${hostMember.userId}>` + 'たんのバイト募集\n';
-        if (exists(member1Mention) && exists(member2Mention)) {
+        if (exists(member1) && exists(member2)) {
             txt =
                 txt +
-                member1Mention +
+                member1.mention +
                 'たんと' +
-                member2Mention +
+                member2.mention +
                 'たんの参加が既に決定しているでし！';
-        } else if (exists(member1Mention)) {
-            txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
-        } else if (exists(member2Mention)) {
-            txt = txt + member2Mention + 'たんの参加が既に決定しているでし！';
+        } else if (exists(member1)) {
+            txt = txt + member1.mention + 'たんの参加が既に決定しているでし！';
+        } else if (exists(member2)) {
+            txt = txt + member2.mention + 'たんの参加が既に決定しているでし！';
         }
 
         txt += 'よければ合流しませんか？';
@@ -695,8 +614,6 @@ export async function modalFesRecruit(
 
         let member1: Member | null = null;
         let member2: Member | null = null;
-        let member1Mention = null;
-        let member2Mention = null;
 
         if (exists(user1) && user1 !== '') {
             // ユーザータグからメンバー取得
@@ -704,17 +621,8 @@ export async function modalFesRecruit(
             if (member !== undefined) {
                 member1 = await searchDBMemberById(guild, member.user.id);
                 assertExistCheck(member1, 'member1');
-                member1Mention = `<@${member1.userId}>`;
             } else {
-                member1 = {
-                    guildId: guild.id,
-                    userId: 'attendee1',
-                    displayName: '参加確定者1',
-                    iconUrl: modalRecruit.placeHold,
-                    joinedAt: new Date(),
-                    isRookie: false,
-                };
-                member1Mention = user1;
+                member1 = await MemberService.getMemberByUserId(guild.id, 'attendee1');
             }
         }
 
@@ -724,32 +632,23 @@ export async function modalFesRecruit(
             if (member !== undefined) {
                 member2 = await searchDBMemberById(guild, member.user.id);
                 assertExistCheck(member2, 'member2');
-                member2Mention = `<@${member2.userId}>`;
             } else {
-                member2 = {
-                    guildId: guild.id,
-                    userId: 'attendee2',
-                    displayName: '参加確定者2',
-                    iconUrl: modalRecruit.placeHold,
-                    joinedAt: new Date(),
-                    isRookie: false,
-                };
-                member2Mention = user2;
+                member2 = await MemberService.getMemberByUserId(guild.id, 'attendee2');
             }
         }
 
         let txt = `### <@${hostMember.userId}>` + 'たんのフェスマッチ募集\n';
-        if (exists(member1Mention) && exists(member2Mention)) {
+        if (exists(member1) && exists(member2)) {
             txt =
                 txt +
-                member1Mention +
+                member1.mention +
                 'たんと' +
-                member2Mention +
+                member2.mention +
                 'たんの参加が既に決定しているでし！';
-        } else if (exists(member1Mention)) {
-            txt = txt + member1Mention + 'たんの参加が既に決定しているでし！';
-        } else if (exists(member2Mention)) {
-            txt = txt + member2Mention + 'たんの参加が既に決定しているでし！';
+        } else if (exists(member1)) {
+            txt = txt + member1.mention + 'たんの参加が既に決定しているでし！';
+        } else if (exists(member2)) {
+            txt = txt + member2.mention + 'たんの参加が既に決定しているでし！';
         }
 
         if (isEmpty(condition)) condition = 'なし';

@@ -6,11 +6,7 @@ import { sendRecruitButtonLog } from '../.././../logs/buttons/recruit_button_log
 import { ParticipantService, ParticipantMember } from '../../../../db/participant_service.js';
 import { RecruitService } from '../../../../db/recruit_service.js';
 import { log4js_obj } from '../../../../log4js_settings.js';
-import {
-    disableThinkingButton,
-    recoveryThinkingButton,
-    setButtonDisable,
-} from '../../../common/button_components';
+import { disableThinkingButton, recoveryThinkingButton } from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
@@ -29,10 +25,6 @@ const logger = log4js_obj.getLogger('recruitButton');
 export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'raw'>) {
     if (!interaction.message.inGuild()) return;
     try {
-        await interaction.update({
-            components: setButtonDisable(interaction.message, interaction),
-        });
-
         const guild = await getGuildByInteraction(interaction);
         assertExistCheck(interaction.channel, 'channel');
 
@@ -130,7 +122,7 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
                     recruitChannel,
                     member,
                     recruiter,
-                    [recruiter.userId],
+                    attendeeList,
                 );
 
                 await interaction.editReply({

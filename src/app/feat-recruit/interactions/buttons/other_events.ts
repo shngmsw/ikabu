@@ -38,19 +38,19 @@ export async function unlock(
 }
 
 export function getMemberMentions(recruitNum: number, participants: ParticipantMember[]) {
-    const applicantList = []; // 参加希望者リスト
+    const applicantMentionList = []; // 参加希望者リスト
     for (const participant of participants) {
         if (participant.userType === 2) {
-            applicantList.push(participant);
+            applicantMentionList.push(participant.member.mention);
         }
     }
-    let counter = `\`[${applicantList.length}]\``;
+    let counter = `\`[${applicantMentionList.length}]\``;
     if (recruitNum !== -1) {
-        counter = `\`[${applicantList.length}/${recruitNum}]\``;
+        counter = `\`[${applicantMentionList.length}/${recruitNum}]\``;
     }
     let mentionString = '**【参加表明一覧】**' + counter;
-    for (const applicant of applicantList) {
-        mentionString = mentionString + `\n<@${applicant.userId}> `;
+    for (const applicantMention of applicantMentionList) {
+        mentionString += '\n' + applicantMention;
     }
     return mentionString;
 }
