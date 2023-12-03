@@ -29,7 +29,7 @@ export async function unlock(
             await channel.permissionOverwrites.delete(member, 'UnLock Voice Channel');
         }
 
-        await interaction.update({
+        await interaction.editReply({
             components: disableThinkingButton(interaction, 'ロック解除済み'),
         });
     } catch (error) {
