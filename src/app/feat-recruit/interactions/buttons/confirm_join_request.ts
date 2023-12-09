@@ -97,8 +97,20 @@ export async function confirmJoinRequest(
                 'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/stamp/reject.png',
             );
 
-            // participantsテーブルから自分のデータのみ削除
-            await ParticipantService.deleteParticipant(guild.id, recruitMessageId, participantId);
+            const participant = await ParticipantService.getParticipant(
+                guild.id,
+                recruitMessageId,
+                participantId,
+            );
+
+            if (exists(participant)) {
+                // participantsテーブルから対象者のデータのみ削除
+                await ParticipantService.deleteParticipant(
+                    guild.id,
+                    recruitMessageId,
+                    participantId,
+                );
+            }
 
             await regenerateCanvas(guild, recruitChannelId, recruitMessageId, RecruitOpCode.open);
 
