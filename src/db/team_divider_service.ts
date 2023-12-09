@@ -34,13 +34,28 @@ export class TeamDividerService {
         hideWin: boolean,
     ) {
         try {
-            await prisma.teamDivider.create({
-                data: {
+            await prisma.teamDivider.upsert({
+                where: {
+                    messageId_memberId_matchNum: {
+                        messageId: messageId,
+                        memberId: memberId,
+                        matchNum: matchNum,
+                    },
+                },
+                create: {
                     messageId: messageId,
                     memberId: memberId,
                     memberName: memberName,
                     team: team,
                     matchNum: matchNum,
+                    joinedMatchCount: joinedMatchCount,
+                    win: win,
+                    forceSpectate: forceSpectate,
+                    hideWin: hideWin,
+                },
+                update: {
+                    memberName: memberName,
+                    team: team,
                     joinedMatchCount: joinedMatchCount,
                     win: win,
                     forceSpectate: forceSpectate,
