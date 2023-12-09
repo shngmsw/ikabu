@@ -938,7 +938,7 @@ async function loadTeamEmbed(messageId: string, count: number, hostMember: Guild
             spectateString = usersString(spectators);
         }
 
-        if (spectators.length !== 0) {
+        if (wantSpectate.length !== 0) {
             wantSpectateString = usersString(wantSpectate);
         }
 
