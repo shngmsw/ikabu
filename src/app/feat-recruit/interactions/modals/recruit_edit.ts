@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, ModalSubmitInteraction } from 'discord.js';
+import { BaseGuildTextChannel, MessageFlags, ModalSubmitInteraction } from 'discord.js';
 
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
@@ -90,8 +90,10 @@ export async function recruitEdit(
         await sendEditRecruitLog(guild, oldRecruitData, newRecruitData, interaction.createdAt);
 
         if (interaction.channel instanceof BaseGuildTextChannel) {
-            const content = await availableRecruitString(guild, interaction.channel.id);
-            await sendStickyMessage(guild, channelId, StickyKey.AvailableRecruit, content);
+            await sendStickyMessage(guild, channelId, StickyKey.AvailableRecruit, {
+                content: await availableRecruitString(guild, interaction.channel.id),
+                flags: MessageFlags.SuppressNotifications,
+            });
         }
 
         await interaction.editReply(replyMessage);

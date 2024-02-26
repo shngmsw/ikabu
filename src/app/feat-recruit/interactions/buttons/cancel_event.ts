@@ -1,4 +1,4 @@
-import { ButtonInteraction, EmbedBuilder } from 'discord.js';
+import { ButtonInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
 
 import { memberListText } from './other_events.js';
 import { sendCancelNotifyToHost } from './send_notify_to_host.js';
@@ -154,13 +154,10 @@ export async function cancel(
                 });
 
                 if (recruitChannel.isTextBased()) {
-                    const content = await availableRecruitString(guild, recruitChannel.id);
-                    await sendStickyMessage(
-                        guild,
-                        recruitChannel.id,
-                        StickyKey.AvailableRecruit,
-                        content,
-                    );
+                    await sendStickyMessage(guild, recruitChannel.id, StickyKey.AvailableRecruit, {
+                        content: await availableRecruitString(guild, recruitChannel.id),
+                        flags: MessageFlags.SuppressNotifications,
+                    });
                 }
             } else {
                 await interaction.followUp({

@@ -1,4 +1,4 @@
-import { ButtonInteraction, EmbedBuilder } from 'discord.js';
+import { ButtonInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
 
 import { memberListText } from './other_events';
 import { ParticipantMember, ParticipantService } from '../../../../db/participant_service';
@@ -133,8 +133,10 @@ export async function confirmJoinRequest(
         const recruitChannel = await searchChannelById(guild, recruitChannelId);
 
         if (exists(recruitChannel) && recruitChannel.isTextBased()) {
-            const content = await availableRecruitString(guild, recruitChannel.id);
-            await sendStickyMessage(guild, recruitChannelId, StickyKey.AvailableRecruit, content);
+            await sendStickyMessage(guild, recruitChannelId, StickyKey.AvailableRecruit, {
+                content: await availableRecruitString(guild, recruitChannel.id),
+                flags: MessageFlags.SuppressNotifications,
+            });
         }
 
         await interaction.message.edit({
