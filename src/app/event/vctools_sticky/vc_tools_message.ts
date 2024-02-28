@@ -6,6 +6,7 @@ import {
     EmbedBuilder,
     Guild,
     Message,
+    MessageFlags,
     TextBasedChannel,
     VoiceBasedChannel,
     VoiceState,
@@ -76,11 +77,13 @@ export async function sendVCToolsSticky(
         if (showOnboarding) {
             await sendStickyMessage(guild, channel.id, StickyKey.VCToolsOnboardingEmbed, {
                 embeds: [createVCToolsEmbed(channel)],
+                flags: MessageFlags.SuppressNotifications,
             });
         }
 
         await sendStickyMessage(guild, channel.id, StickyKey.VCToolsButton, {
             components: createVCToolsButtons(channel),
+            flags: MessageFlags.SuppressNotifications,
         });
     } catch (error) {
         await sendErrorLogs(logger, error);

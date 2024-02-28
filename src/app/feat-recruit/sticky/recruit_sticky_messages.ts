@@ -1,5 +1,5 @@
 import { Recruit } from '@prisma/client';
-import { Channel, Guild, Message } from 'discord.js';
+import { Channel, Guild, Message, MessageFlags } from 'discord.js';
 
 import { ParticipantService } from '../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../db/recruit_service';
@@ -106,6 +106,7 @@ export async function sendRecruitSticky(stickyOptions: StickyOptions) {
         await sendStickyMessage(guild, channelId, StickyKey.AvailableRecruit, {
             content: content,
             components: exists(channelName) ? [createNewRecruitButton(channelName)] : [],
+            flags: MessageFlags.SuppressNotifications,
         });
     } catch (error) {
         await sendErrorLogs(logger, error);
@@ -125,6 +126,7 @@ export async function sendCloseEmbedSticky(guild: Guild, channel: Channel) {
             content: content,
             embeds: [helpEmbed],
             components: [createNewRecruitButton(channel.name)],
+            flags: MessageFlags.SuppressNotifications,
         });
     }
 }
