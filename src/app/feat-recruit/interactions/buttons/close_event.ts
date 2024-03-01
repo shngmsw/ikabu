@@ -146,9 +146,10 @@ export async function close(
                 // 参加後やりとりのスレッドをロックしてクローズ
                 const threadChannel = interaction.message.thread;
                 if (exists(threadChannel)) {
-                    await threadChannel.send(
-                        '募集は〆られたでし！\n1分後にこのスレッドはクローズされるでし！',
+                    const embed = new EmbedBuilder().setDescription(
+                        `募集は〆られたでし！\n1分後にこのスレッドはクローズされるでし！`,
                     );
+                    await threadChannel.send({ embeds: [embed] });
                     await sleep(60);
                     await threadChannel.setLocked(true);
                     await threadChannel.setArchived(true);
@@ -207,9 +208,10 @@ export async function close(
                 // 参加後やりとりのスレッドをロックしてクローズ
                 const threadChannel = interaction.message.thread;
                 if (exists(threadChannel)) {
-                    await threadChannel.send(
-                        '募集は〆られたでし！\n1分後にこのスレッドはクローズされるでし！',
+                    const embed = new EmbedBuilder().setDescription(
+                        `募集は〆られたでし！\n1分後にこのスレッドはクローズされるでし！`,
                     );
+                    await threadChannel.send({ embeds: [embed] });
                     await sleep(60);
                     await threadChannel.setLocked(true);
                     await threadChannel.setArchived(true);

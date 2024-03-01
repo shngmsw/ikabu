@@ -9,7 +9,7 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton } from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, exists, notExists } from '../../../common/others.js';
+import { assertExistCheck, exists, notExists, sleep } from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
 import { StickyKey } from '../../../constant/sticky_key.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
@@ -107,7 +107,20 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
                     });
                 }
             } else {
+                // 募集チャンネルにSticky Messageを送信する
                 await sendCloseEmbedSticky(guild, recruitChannel);
+
+                // 参加後やりとりのスレッドをロックしてクローズ
+                const threadChannel = interaction.message.thread;
+                if (exists(threadChannel)) {
+                    const embed = new EmbedBuilder().setDescription(
+                        `募集はキャンセルされたでし！\n1分後にこのスレッドはクローズされるでし！`,
+                    );
+                    await threadChannel.send({ embeds: [embed] });
+                    await sleep(60);
+                    await threadChannel.setLocked(true);
+                    await threadChannel.setArchived(true);
+                }
             }
         } else {
             // 参加済みかチェック

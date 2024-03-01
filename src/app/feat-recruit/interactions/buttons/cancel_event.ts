@@ -134,9 +134,10 @@ export async function cancel(
                 // 参加後やりとりのスレッドをロックしてクローズ
                 const threadChannel = interaction.message.thread;
                 if (exists(threadChannel)) {
-                    await threadChannel.send(
-                        '募集はキャンセルされたでし！\n1分後にこのスレッドはクローズされるでし！',
+                    const embed = new EmbedBuilder().setDescription(
+                        `募集はキャンセルされたでし！\n1分後にこのスレッドはクローズされるでし！`,
                     );
+                    await threadChannel.send({ embeds: [embed] });
                     await sleep(60);
                     await threadChannel.setLocked(true);
                     await threadChannel.setArchived(true);
