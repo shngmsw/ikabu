@@ -165,6 +165,8 @@ export async function sendSalmonRun(
                 name: recruiter.displayName + 'たんのサーモン募集',
             });
 
+            await threadChannel.members.add(recruiter.userId);
+
             threadButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
                 threadLinkButton(guild.id, threadChannel.id),
             );
