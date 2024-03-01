@@ -128,7 +128,6 @@ export async function join(
                 guild,
                 recruitChannel,
                 member,
-                interaction.user,
                 recruiter,
                 attendeeList,
             );

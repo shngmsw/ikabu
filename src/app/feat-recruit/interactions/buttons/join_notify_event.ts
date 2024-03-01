@@ -110,7 +110,6 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
                 guild,
                 recruitChannel,
                 member,
-                interaction.user,
                 recruiter,
                 attendeeList,
             );

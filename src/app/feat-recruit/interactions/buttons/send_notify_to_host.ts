@@ -10,7 +10,6 @@ import {
     GuildBasedChannel,
     Message,
     TextBasedChannel,
-    User,
 } from 'discord.js';
 
 import { ParticipantMember } from '../../../../db/participant_service';
@@ -31,7 +30,6 @@ export async function sendJoinNotifyToHost(
     guild: Guild,
     recruitChannel: TextBasedChannel,
     member: Member,
-    interactionUser: User,
     recruiter: ParticipantMember,
     attendeeList: ParticipantMember[],
 ) {
@@ -44,7 +42,7 @@ export async function sendJoinNotifyToHost(
             }));
 
         // 参加者がスレッドにいない場合は追加
-        await threadChannel.members.add(interactionUser);
+        await threadChannel.members.add(member.userId);
     }
 
     const text = `${member.displayName}たんが参加表明したでし！`;
