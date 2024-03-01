@@ -1,5 +1,10 @@
 import { Member } from '@prisma/client';
-import { AttachmentBuilder, ModalSubmitInteraction } from 'discord.js';
+import {
+    ActionRowBuilder,
+    AttachmentBuilder,
+    ButtonBuilder,
+    ModalSubmitInteraction,
+} from 'discord.js';
 
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
@@ -15,7 +20,11 @@ import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
 import { RoleKeySet } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
-import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
+import {
+    recruitActionRow,
+    recruitDeleteButton,
+    threadLinkButton,
+} from '../../buttons/create_recruit_buttons';
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../../canvases/big_run_canvas';
 import { RecruitOpCode } from '../../canvases/regenerate_canvas';
 import { recruitSalmonCanvas, ruleSalmonCanvas } from '../../canvases/salmon_canvas';
@@ -150,10 +159,27 @@ export async function sendSalmonRun(
                 mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
-        await buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
+        let threadButton: ActionRowBuilder<ButtonBuilder> | null = null;
+        if (!recruitChannel.isThread()) {
+            const threadChannel = await buttonMessage.startThread({
+                name: recruiter.displayName + 'たんのサーモン募集',
+            });
+
+            threadButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                threadLinkButton(guild.id, threadChannel.id),
+            );
+        }
+
         const deleteButtonMsg = await recruitChannel.send({
             components: [recruitDeleteButton(buttonMessage, image1Message, image2Message)],
         });
+
+        await buttonMessage.edit({
+            components: threadButton
+                ? [recruitActionRow(image1Message), threadButton]
+                : [recruitActionRow(image1Message)],
+        });
+
         await interaction.followUp({
             content:
                 '募集完了でし！\nこの方法での募集は推奨しないでし！\n次回は`/サーモンラン募集 run`を使ってみるでし！\nコマンドを使用すると、細かく条件を設定して募集したり、素早く募集を建てたりできるでし！',

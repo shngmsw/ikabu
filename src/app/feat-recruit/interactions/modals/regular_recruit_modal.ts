@@ -1,5 +1,11 @@
 import { Member } from '@prisma/client';
-import { AttachmentBuilder, ModalSubmitInteraction } from 'discord.js';
+import {
+    ActionRowBuilder,
+    AttachmentBuilder,
+    ButtonBuilder,
+    EmbedBuilder,
+    ModalSubmitInteraction,
+} from 'discord.js';
 
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
@@ -12,7 +18,11 @@ import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists, sleep } from '../../../common/others';
 import { RoleKeySet } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
-import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
+import {
+    recruitActionRow,
+    recruitDeleteButton,
+    threadLinkButton,
+} from '../../buttons/create_recruit_buttons';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
 import { recruitRegularCanvas, ruleRegularCanvas } from '../../canvases/regular_canvas';
 import { sendCloseEmbedSticky, sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
@@ -126,10 +136,29 @@ export async function sendRegularMatch(
                 mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
-        await buttonMessage.edit({ components: [recruitActionRow(image1Message)] });
+        let threadButton: ActionRowBuilder<ButtonBuilder> | null = null;
+        if (!recruitChannel.isThread()) {
+            const threadChannel = await buttonMessage.startThread({
+                name: recruiter.displayName + 'たんのナワバリ募集',
+            });
+
+            await threadChannel.members.add(recruiter.userId);
+
+            threadButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                threadLinkButton(guild.id, threadChannel.id),
+            );
+        }
+
         const deleteButtonMsg = await recruitChannel.send({
             components: [recruitDeleteButton(buttonMessage, image1Message, image2Message)],
         });
+
+        await buttonMessage.edit({
+            components: threadButton
+                ? [recruitActionRow(image1Message), threadButton]
+                : [recruitActionRow(image1Message)],
+        });
+
         await interaction.followUp({
             content:
                 '募集完了でし！\nこの方法での募集は推奨しないでし！\n次回は`/ナワバリ募集 now`を使ってみるでし！\nコマンドを使用すると次のスケジュールの募集を建てたり、素早く募集を建てたりできるでし！',
@@ -180,6 +209,17 @@ export async function sendRegularMatch(
         });
 
         await sendCloseEmbedSticky(guild, recruitChannel);
+
+        const threadChannel = buttonMessage.thread;
+        if (exists(threadChannel)) {
+            const embed = new EmbedBuilder().setDescription(
+                `募集は〆られたでし！\n1分後にこのスレッドはクローズされるでし！`,
+            );
+            await threadChannel.send({ embeds: [embed] });
+            await sleep(60);
+            await threadChannel.setLocked(true);
+            await threadChannel.setArchived(true);
+        }
     } catch (error) {
         await sendErrorLogs(logger, error);
     }
