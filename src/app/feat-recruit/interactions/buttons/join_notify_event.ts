@@ -104,12 +104,13 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
             const recruitChannel = interaction.channel;
 
             // ホストに通知
-            sendJoinNotifyToHost(
+            await sendJoinNotifyToHost(
                 interaction.message,
                 interaction.message.id,
                 guild,
                 recruitChannel,
                 member,
+                interaction.user,
                 recruiter,
                 attendeeList,
             );

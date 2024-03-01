@@ -116,7 +116,7 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
                 await ParticipantService.deleteParticipant(guild.id, embedMessageId, member.userId);
 
                 // ホストに通知
-                sendCancelNotifyToHost(
+                await sendCancelNotifyToHost(
                     interaction.message,
                     guild,
                     recruitChannel,

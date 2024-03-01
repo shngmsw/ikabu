@@ -139,7 +139,7 @@ export async function cancel(
                 await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.open);
 
                 // ホストに通知
-                sendCancelNotifyToHost(
+                await sendCancelNotifyToHost(
                     interaction.message,
                     guild,
                     recruitChannel,

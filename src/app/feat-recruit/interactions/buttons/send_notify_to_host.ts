@@ -1,6 +1,7 @@
 import { Member } from '@prisma/client';
 import {
     ActionRowBuilder,
+    AnyThreadChannel,
     ButtonBuilder,
     ChannelType,
     ColorResolvable,
@@ -9,6 +10,7 @@ import {
     GuildBasedChannel,
     Message,
     TextBasedChannel,
+    User,
 } from 'discord.js';
 
 import { ParticipantMember } from '../../../../db/participant_service';
@@ -23,15 +25,28 @@ import { messageLinkButtons } from '../../buttons/create_recruit_buttons';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
-export function sendJoinNotifyToHost(
+export async function sendJoinNotifyToHost(
     message: Message<true>,
     recruitId: string,
     guild: Guild,
     recruitChannel: TextBasedChannel,
     member: Member,
+    interactionUser: User,
     recruiter: ParticipantMember,
     attendeeList: ParticipantMember[],
 ) {
+    let threadChannel = null;
+    if (!recruitChannel.isThread()) {
+        threadChannel =
+            message.thread ??
+            (await message.startThread({
+                name: recruiter.member.displayName + 'たんの募集',
+            }));
+
+        // 参加者がスレッドにいない場合は追加
+        await threadChannel.members.add(interactionUser);
+    }
+
     const text = `${member.displayName}たんが参加表明したでし！`;
     void sendNotifyToHost(
         message,
@@ -39,6 +54,7 @@ export function sendJoinNotifyToHost(
         'Blurple',
         guild,
         recruitChannel,
+        threadChannel,
         member,
         recruiter,
         attendeeList,
@@ -46,7 +62,7 @@ export function sendJoinNotifyToHost(
     );
 }
 
-export function sendCancelNotifyToHost(
+export async function sendCancelNotifyToHost(
     message: Message<true>,
     guild: Guild,
     recruitChannel: TextBasedChannel,
@@ -54,6 +70,18 @@ export function sendCancelNotifyToHost(
     recruiter: ParticipantMember,
     attendeeList: ParticipantMember[],
 ) {
+    let threadChannel = null;
+    if (!recruitChannel.isThread()) {
+        threadChannel =
+            message.thread ??
+            (await message.startThread({
+                name: recruiter.member.displayName + 'たんの募集',
+            }));
+
+        // 参加者がスレッドにいる場合は削除
+        await threadChannel.members.remove(member.userId);
+    }
+
     const text = `${member.displayName}たんがキャンセルしたでし！`;
     void sendNotifyToHost(
         message,
@@ -61,6 +89,7 @@ export function sendCancelNotifyToHost(
         'Red',
         guild,
         recruitChannel,
+        threadChannel,
         member,
         recruiter,
         attendeeList,
@@ -74,6 +103,7 @@ async function sendNotifyToHost(
     embedColor: ColorResolvable,
     guild: Guild,
     recruitChannel: TextBasedChannel,
+    threadChannel: AnyThreadChannel | null,
     member: Member,
     recruiter: ParticipantMember,
     attendeeList: ParticipantMember[],
@@ -112,11 +142,20 @@ async function sendNotifyToHost(
             mentions += ` ${attendee.member.mention}`;
         }
 
-        const notifyMessage = await message.reply({
-            content: mentions,
-            embeds: [embed],
-            components: buttons,
-        });
+        let notifyMessage: Message<boolean>;
+        if (exists(threadChannel)) {
+            notifyMessage = await threadChannel.send({
+                content: mentions,
+                embeds: [embed],
+                components: buttons,
+            });
+        } else {
+            notifyMessage = await recruitChannel.send({
+                content: mentions,
+                embeds: [embed],
+                components: buttons,
+            });
+        }
 
         await sleep(30 * 60);
         // 30分後に承認/拒否ボタンを削除

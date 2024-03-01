@@ -118,12 +118,13 @@ export async function join(
             await regenerateCanvas(guild, recruitChannel.id, image1MsgId, RecruitOpCode.open);
 
             // 募集をしたメンバー全員に通知
-            sendJoinNotifyToHost(
+            await sendJoinNotifyToHost(
                 interaction.message,
                 image1MsgId,
                 guild,
                 recruitChannel,
                 member,
+                interaction.user,
                 recruiter,
                 attendeeList,
             );
