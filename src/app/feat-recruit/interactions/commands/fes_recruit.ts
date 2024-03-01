@@ -1,6 +1,7 @@
 import {
     AttachmentBuilder,
     ChatInputCommandInteraction,
+    EmbedBuilder,
     GuildMember,
     PermissionsBitField,
     User,
@@ -437,6 +438,17 @@ async function sendFesMatch(
         }
 
         await sendCloseEmbedSticky(guild, recruitChannel);
+
+        const threadChannel = sentMessage.thread;
+        if (exists(threadChannel)) {
+            const embed = new EmbedBuilder().setDescription(
+                `募集は〆られたでし！\n1分後にこのスレッドはクローズされるでし！`,
+            );
+            await threadChannel.send({ embeds: [embed] });
+            await sleep(60);
+            await threadChannel.setLocked(true);
+            await threadChannel.setArchived(true);
+        }
     } catch (error) {
         await sendErrorLogs(logger, error);
     }
