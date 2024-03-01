@@ -16,8 +16,7 @@ import { ParticipantMember } from '../../../../db/participant_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchChannelById } from '../../../common/manager/channel_manager';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
-import { searchMessageById } from '../../../common/manager/message_manager';
-import { exists, sleep } from '../../../common/others';
+import { exists } from '../../../common/others';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { joinRequestConfirmButtons } from '../../buttons/create_join_request_buttons';
 import { messageLinkButtons } from '../../buttons/create_recruit_buttons';
@@ -140,34 +139,18 @@ async function sendNotifyToHost(
             mentions += ` ${attendee.member.mention}`;
         }
 
-        let notifyMessage: Message<boolean>;
         if (exists(threadChannel)) {
-            notifyMessage = await threadChannel.send({
+            await threadChannel.send({
                 content: mentions,
                 embeds: [embed],
                 components: buttons,
             });
         } else {
-            notifyMessage = await recruitChannel.send({
+            await recruitChannel.send({
                 content: mentions,
                 embeds: [embed],
                 components: buttons,
             });
-        }
-
-        await sleep(30 * 60);
-        // 30分後に承認/拒否ボタンを削除
-        const checkNotifyMessage = await searchMessageById(
-            guild,
-            recruitChannel.id,
-            notifyMessage.id,
-        );
-        if (exists(checkNotifyMessage)) {
-            try {
-                await checkNotifyMessage.edit({ components: [] });
-            } catch (error) {
-                logger.warn('notify message was not found.');
-            }
         }
     } catch (error) {
         await sendErrorLogs(logger, error);
