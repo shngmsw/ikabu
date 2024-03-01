@@ -80,6 +80,15 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
         content:
             mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
     });
+
+    if (!recruitChannel.isThread()) {
+        const threadChannel = await sentMessage.startThread({
+            name: recruiter.displayName + 'たんの募集',
+        });
+
+        await threadChannel.members.add(interaction.user);
+    }
+
     // DBに募集情報を登録
     await RecruitService.registerRecruit(
         guild.id,

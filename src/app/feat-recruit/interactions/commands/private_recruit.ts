@@ -122,6 +122,15 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
             content:
                 mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
+
+        if (!recruitChannel.isThread()) {
+            const threadChannel = await sentMessage.startThread({
+                name: recruiter.displayName + 'たんのプラベ募集',
+            });
+
+            await threadChannel.members.add(interaction.user);
+        }
+
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         await sentMessage.edit({ components: [recruitActionRow(embedMessage)] });
         const deleteButtonMsg = await recruitChannel.send({

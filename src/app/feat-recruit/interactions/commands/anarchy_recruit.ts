@@ -333,6 +333,20 @@ async function sendAnarchyMatch(
                 mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
+        if (!recruitChannel.isThread()) {
+            const threadChannel = await sentMessage.startThread({
+                name: recruiter.displayName + 'たんのバンカラ募集',
+            });
+
+            await threadChannel.members.add(hostMember);
+            if (exists(user1)) {
+                await threadChannel.members.add(user1);
+            }
+            if (exists(user2)) {
+                await threadChannel.members.add(user2);
+            }
+        }
+
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
         const deleteButtonMsg = await recruitChannel.send({
             components: [recruitDeleteButton(sentMessage, image1Message, image2Message)],

@@ -352,6 +352,14 @@ async function sendOtherGames(
             content: mention + ' ボタンを押して参加表明するでし',
         });
 
+        if (!recruitChannel.isThread()) {
+            const threadChannel = await sentMessage.startThread({
+                name: recruiter.displayName + `たんの${title}募集`,
+            });
+
+            await threadChannel.members.add(member.user);
+        }
+
         if (!sentMessage.inGuild()) return;
         if (!embedMessage.inGuild()) return;
 
