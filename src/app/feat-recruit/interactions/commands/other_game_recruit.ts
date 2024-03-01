@@ -1,4 +1,6 @@
 import {
+    ActionRowBuilder,
+    ButtonBuilder,
     CacheType,
     ChatInputCommandInteraction,
     Collection,
@@ -25,6 +27,7 @@ import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import {
     embedRecruitDeleteButton,
     recruitActionRow,
+    threadLinkButton,
     unlockChannelButton,
 } from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
@@ -283,7 +286,7 @@ async function sendOtherGames(
 
     const condition = options.getString('内容または参加条件') ?? 'なし';
 
-    const reserveChannel = interaction.options.getChannel('使用チャンネル');
+    const reservedChannel = interaction.options.getChannel('使用チャンネル');
 
     const recruiter = await searchDBMemberById(guild, member.user.id);
 
@@ -310,10 +313,10 @@ async function sendOtherGames(
         .setTimestamp()
         .setThumbnail(logo);
 
-    if (exists(reserveChannel)) {
+    if (exists(reservedChannel)) {
         embed.addFields({
             name: '使用チャンネル',
-            value: '🔉 ' + reserveChannel.name,
+            value: '🔉 ' + reservedChannel.name,
         });
     }
 
@@ -352,12 +355,17 @@ async function sendOtherGames(
             content: mention + ' ボタンを押して参加表明するでし',
         });
 
+        let threadButton: ActionRowBuilder<ButtonBuilder> | null = null;
         if (!recruitChannel.isThread()) {
             const threadChannel = await sentMessage.startThread({
                 name: recruiter.displayName + `たんの${title}募集`,
             });
 
             await threadChannel.members.add(member.user);
+
+            threadButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                threadLinkButton(guild.id, threadChannel.id),
+            );
         }
 
         if (!sentMessage.inGuild()) return;
@@ -368,11 +376,17 @@ async function sendOtherGames(
             components: [embedRecruitDeleteButton(sentMessage, embedMessage)],
         });
 
-        if (reserveChannel instanceof VoiceChannel && member.voice.channelId != reserveChannel.id) {
-            await sentMessage.edit({
-                components: [recruitActionRow(embedMessage, reserveChannel.id)],
-            });
-            await reserveChannel.permissionOverwrites.set(
+        await sentMessage.edit({
+            components: threadButton
+                ? [recruitActionRow(embedMessage, reservedChannel?.id), threadButton]
+                : [recruitActionRow(embedMessage, reservedChannel?.id)],
+        });
+
+        if (
+            reservedChannel instanceof VoiceChannel &&
+            member.voice.channelId != reservedChannel.id
+        ) {
+            await reservedChannel.permissionOverwrites.set(
                 [
                     {
                         id: guild.roles.everyone.id,
@@ -388,11 +402,10 @@ async function sendOtherGames(
 
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
-                components: [unlockChannelButton(reserveChannel.id)],
+                components: [unlockChannelButton(reservedChannel.id)],
                 ephemeral: true,
             });
         } else {
-            await sentMessage.edit({ components: [recruitActionRow(embedMessage)] });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,
@@ -415,14 +428,14 @@ async function sendOtherGames(
             await deleteButtonCheck.delete();
         } else {
             if (
-                reserveChannel instanceof VoiceChannel &&
-                member.voice.channelId != reserveChannel.id
+                reservedChannel instanceof VoiceChannel &&
+                member.voice.channelId != reservedChannel.id
             ) {
-                await reserveChannel.permissionOverwrites.delete(
+                await reservedChannel.permissionOverwrites.delete(
                     guild.roles.everyone,
                     'UnLock Voice Channel',
                 );
-                await reserveChannel.permissionOverwrites.delete(
+                await reservedChannel.permissionOverwrites.delete(
                     member.user,
                     'UnLock Voice Channel',
                 );
@@ -432,12 +445,15 @@ async function sendOtherGames(
 
         // 2時間後にVCロック解除
         await sleep(7200 - 15);
-        if (reserveChannel instanceof VoiceChannel && member.voice.channelId != reserveChannel.id) {
-            await reserveChannel.permissionOverwrites.delete(
+        if (
+            reservedChannel instanceof VoiceChannel &&
+            member.voice.channelId != reservedChannel.id
+        ) {
+            await reservedChannel.permissionOverwrites.delete(
                 guild.roles.everyone,
                 'UnLock Voice Channel',
             );
-            await reserveChannel.permissionOverwrites.delete(member.user, 'UnLock Voice Channel');
+            await reservedChannel.permissionOverwrites.delete(member.user, 'UnLock Voice Channel');
         }
     } catch (error) {
         await sendErrorLogs(logger, error);

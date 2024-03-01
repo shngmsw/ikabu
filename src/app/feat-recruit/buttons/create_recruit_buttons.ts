@@ -173,15 +173,22 @@ export function nsoRoomLinkButton(url: string) {
     return button;
 }
 
-export function channelLinkButtons(guildId: string, channelId: string) {
+export function threadLinkButton(guildId: string, threadId: string) {
+    const threadLink = `https://discord.com/channels/${guildId}/${threadId}`;
+    const button = new ButtonBuilder()
+        .setLabel('参加者連絡に移動')
+        .setStyle(ButtonStyle.Link)
+        .setURL(threadLink);
+    return button;
+}
+
+export function channelLinkButton(guildId: string, channelId: string) {
     const channelLink = `https://discord.com/channels/${guildId}/${channelId}`;
-    const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
-        new ButtonBuilder()
-            .setLabel('チャンネルに移動')
-            .setStyle(ButtonStyle.Link)
-            .setURL(channelLink),
-    ]);
-    return buttons;
+    const button = new ButtonBuilder()
+        .setLabel('チャンネルに移動')
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink);
+    return button;
 }
 
 export function messageLinkButtons(

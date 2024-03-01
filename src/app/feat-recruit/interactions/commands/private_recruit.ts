@@ -1,4 +1,9 @@
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+} from 'discord.js';
 
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
@@ -10,7 +15,11 @@ import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { RoleKeySet } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
-import { embedRecruitDeleteButton, recruitActionRow } from '../../buttons/create_recruit_buttons';
+import {
+    embedRecruitDeleteButton,
+    recruitActionRow,
+    threadLinkButton,
+} from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
 
@@ -123,16 +132,26 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
                 mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
+        let threadButton: ActionRowBuilder<ButtonBuilder> | null = null;
         if (!recruitChannel.isThread()) {
             const threadChannel = await sentMessage.startThread({
                 name: recruiter.displayName + 'たんのプラベ募集',
             });
 
             await threadChannel.members.add(interaction.user);
+
+            threadButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                threadLinkButton(guild.id, threadChannel.id),
+            );
         }
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        await sentMessage.edit({ components: [recruitActionRow(embedMessage)] });
+        await sentMessage.edit({
+            components: threadButton
+                ? [recruitActionRow(embedMessage), threadButton]
+                : [recruitActionRow(embedMessage)],
+        });
+
         const deleteButtonMsg = await recruitChannel.send({
             components: [embedRecruitDeleteButton(sentMessage, embedMessage)],
         });

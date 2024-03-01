@@ -1,4 +1,4 @@
-import { ButtonInteraction } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction } from 'discord.js';
 
 import { memberListText } from './other_events.js';
 import { sendJoinNotifyToHost } from './send_notify_to_host.js';
@@ -14,7 +14,11 @@ import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
-import { channelLinkButtons, nsoRoomLinkButton } from '../../buttons/create_recruit_buttons.js';
+import {
+    channelLinkButton,
+    nsoRoomLinkButton,
+    threadLinkButton,
+} from '../../buttons/create_recruit_buttons.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
 import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
 
@@ -133,19 +137,21 @@ export async function join(
             const stickyChannelId = (await getStickyChannelId(recruitData)) ?? recruitChannel.id;
             await sendRecruitSticky({ channelOpt: { guild: guild, channelId: stickyChannelId } });
 
-            if (notExists(channelId)) {
-                await interaction.followUp({
-                    content: `<@${recruiterId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
-                    // components: [channelLinkButtons(interaction.guildId, thread_message.url)], TODO: スレッド内へのリンクボタンを作る
-                    ephemeral: true,
-                });
-            } else {
-                await interaction.followUp({
-                    content: `<@${recruiterId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
-                    components: [channelLinkButtons(guild.id, channelId)],
-                    ephemeral: true,
-                });
+            const threadChannel = interaction.message.thread;
+            const firstComponents: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder();
+
+            if (exists(threadChannel)) {
+                firstComponents.addComponents(threadLinkButton(guild.id, threadChannel.id));
             }
+            if (exists(channelId)) {
+                firstComponents.addComponents(channelLinkButton(guild.id, channelId));
+            }
+
+            await interaction.followUp({
+                content: `<@${recruiterId}>からの返答を待つでし！\n条件を満たさない場合は参加を断られる場合があるでし！`,
+                components: [firstComponents],
+                ephemeral: true,
+            });
 
             if (
                 recruitData.recruitType === RecruitType.PrivateRecruit &&

@@ -1,5 +1,7 @@
 import {
+    ActionRowBuilder,
     AttachmentBuilder,
+    ButtonBuilder,
     ChatInputCommandInteraction,
     EmbedBuilder,
     GuildMember,
@@ -29,6 +31,7 @@ import { getFestPeriodAlertText } from '../../alert_texts/schedule_related_alert
 import {
     recruitActionRow,
     recruitDeleteButton,
+    threadLinkButton,
     unlockChannelButton,
 } from '../../buttons/create_recruit_buttons';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
@@ -328,6 +331,7 @@ async function sendRegularMatch(
                 mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
         });
 
+        let threadButton: ActionRowBuilder<ButtonBuilder> | null = null;
         if (!recruitChannel.isThread()) {
             const threadChannel = await sentMessage.startThread({
                 name: recruiter.displayName + 'たんのナワバリ募集',
@@ -343,6 +347,10 @@ async function sendRegularMatch(
             if (exists(user3)) {
                 await threadChannel.members.add(user3);
             }
+
+            threadButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                threadLinkButton(guild.id, threadChannel.id),
+            );
         }
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
@@ -350,13 +358,16 @@ async function sendRegularMatch(
             components: [recruitDeleteButton(sentMessage, image1Message, image2Message)],
         });
 
+        await sentMessage.edit({
+            components: threadButton
+                ? [recruitActionRow(image1Message, reservedChannel?.id), threadButton]
+                : [recruitActionRow(image1Message, reservedChannel?.id)],
+        });
+
         if (
             reservedChannel instanceof VoiceChannel &&
             hostMember.voice.channelId != reservedChannel.id
         ) {
-            await sentMessage.edit({
-                components: [recruitActionRow(image1Message, reservedChannel.id)],
-            });
             await reservedChannel.permissionOverwrites.set(
                 [
                     {
@@ -377,7 +388,6 @@ async function sendRegularMatch(
                 ephemeral: true,
             });
         } else {
-            await sentMessage.edit({ components: [recruitActionRow(image1Message)] });
             await interaction.followUp({
                 content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
                 ephemeral: true,

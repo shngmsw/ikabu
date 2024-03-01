@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ChatInputCommandInteraction } from 'discord.js';
 
 import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
@@ -10,7 +10,7 @@ import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, getDeveloperMention, notExists } from '../../../common/others';
 import { ChannelKeySet } from '../../../constant/channel_key';
 import { RoleKeySet } from '../../../constant/role_key';
-import { notifyActionRow } from '../../buttons/create_recruit_buttons';
+import { notifyActionRow, threadLinkButton } from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
 
@@ -81,12 +81,17 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
             mention + ` ボタンを押して参加表明するでし！\n${getMemberMentions(recruitNum, [])}`,
     });
 
+    let threadButton: ActionRowBuilder<ButtonBuilder> | null = null;
     if (!recruitChannel.isThread()) {
         const threadChannel = await sentMessage.startThread({
             name: recruiter.displayName + 'たんの募集',
         });
 
         await threadChannel.members.add(interaction.user);
+
+        threadButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            threadLinkButton(guild.id, threadChannel.id),
+        );
     }
 
     // DBに募集情報を登録
@@ -118,5 +123,8 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
     await interaction.editReply({
         content: '募集完了でし！参加者が来るまで気長に待つでし！',
     });
-    await sentMessage.edit({ components: [notifyActionRow()] });
+
+    await sentMessage.edit({
+        components: threadButton ? [notifyActionRow(), threadButton] : [notifyActionRow()],
+    });
 }
