@@ -12,7 +12,7 @@ import {
 import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, exists, notExists } from '../../../common/others.js';
+import { assertExistCheck, exists, notExists, sleep } from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
 import { StickyKey } from '../../../constant/sticky_key.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
@@ -128,7 +128,19 @@ export async function cancel(
                     });
                 }
             } else {
+                // 募集チャンネルにSticky Messageを送信する
                 await sendCloseEmbedSticky(guild, recruitChannel);
+
+                // 参加後やりとりのスレッドをロックしてクローズ
+                const threadChannel = interaction.message.thread;
+                if (exists(threadChannel)) {
+                    await threadChannel.send(
+                        '募集はキャンセルされたでし！\n1分後にこのスレッドはクローズされるでし！',
+                    );
+                    await sleep(60);
+                    await threadChannel.setLocked(true);
+                    await threadChannel.setArchived(true);
+                }
             }
         } else {
             // 既に参加済みかチェック

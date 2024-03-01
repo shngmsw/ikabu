@@ -9,7 +9,13 @@ import { log4js_obj } from '../../../../log4js_settings.js';
 import { disableThinkingButton, recoveryThinkingButton } from '../../../common/button_components';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
-import { assertExistCheck, datetimeDiff, exists, notExists } from '../../../common/others.js';
+import {
+    assertExistCheck,
+    datetimeDiff,
+    exists,
+    notExists,
+    sleep,
+} from '../../../common/others.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import {
     getStickyChannelId,
@@ -111,7 +117,19 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
                     });
                 }
             } else {
+                // 募集チャンネルにSticky Messageを送信する
                 await sendCloseEmbedSticky(guild, recruitChannel);
+
+                // 参加後やりとりのスレッドをロックしてクローズ
+                const threadChannel = interaction.message.thread;
+                if (exists(threadChannel)) {
+                    await threadChannel.send(
+                        '募集は〆られたでし！\n1分後にこのスレッドはクローズされるでし！',
+                    );
+                    await sleep(60);
+                    await threadChannel.setLocked(true);
+                    await threadChannel.setArchived(true);
+                }
             }
         } else if (datetimeDiff(new Date(), interaction.message.createdAt) > 120) {
             const memberList = getMemberMentions(recruitData.recruitNum, participantsData);
@@ -147,7 +165,19 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
                     });
                 }
             } else {
+                // 募集チャンネルにSticky Messageを送信する
                 await sendCloseEmbedSticky(guild, recruitChannel);
+
+                // 参加後やりとりのスレッドをロックしてクローズ
+                const threadChannel = interaction.message.thread;
+                if (exists(threadChannel)) {
+                    await threadChannel.send(
+                        '募集は〆られたでし！\n1分後にこのスレッドはクローズされるでし！',
+                    );
+                    await sleep(60);
+                    await threadChannel.setLocked(true);
+                    await threadChannel.setArchived(true);
+                }
             }
         } else {
             await interaction.followUp({

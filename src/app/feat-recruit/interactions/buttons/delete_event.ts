@@ -100,6 +100,15 @@ export async function del(
             }
 
             if (exists(buttonMessage)) {
+                const threadChannel = buttonMessage.thread;
+                if (exists(threadChannel)) {
+                    try {
+                        await threadChannel.delete();
+                    } catch (error) {
+                        logger.warn('recruit thread has already been deleted');
+                    }
+                }
+
                 try {
                     await buttonMessage.delete();
                 } catch (error) {
