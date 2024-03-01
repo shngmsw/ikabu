@@ -31,16 +31,12 @@ export async function confirmJoinRequest(
 
         // 既に募集が終了している場合
         if (notExists(recruitData)) {
-            return await interaction.message.edit({ components: [] });
+            await interaction.message.edit({ components: [] });
+            return await interaction.followUp('募集が存在しないでし!');
         }
 
         const recruitChannelId = recruitData.channelId;
 
-        const recruitMessage = await searchMessageById(guild, recruitChannelId, recruitMessageId);
-        if (notExists(recruitMessage)) {
-            await interaction.message.edit({ components: [] });
-            return await interaction.followUp('募集メッセージが存在しないでし!');
-        }
         const recuritPram = params.get('d');
 
         if (!(await hasPermission(guild.id, interaction.member.user.id, recruitMessageId))) {
@@ -128,7 +124,9 @@ export async function confirmJoinRequest(
 
         embed.setDescription(text);
 
-        await recruitMessage.reply({ content: `<@${participantId}>`, embeds: [embed] });
+        if (notExists(interaction.channel)) return;
+
+        await interaction.channel.send({ content: `<@${participantId}>`, embeds: [embed] });
 
         const recruitChannel = await searchChannelById(guild, recruitChannelId);
 
