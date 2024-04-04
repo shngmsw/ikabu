@@ -5,6 +5,7 @@ import { setButtonEnable } from '../../common/button_components';
 import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
+import { ErrorTexts } from '../../constant/error_texts';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -43,7 +44,7 @@ export async function buttonEnable(
     } catch (error) {
         await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
-            await interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send(ErrorTexts.UndefinedError);
         }
     }
 }

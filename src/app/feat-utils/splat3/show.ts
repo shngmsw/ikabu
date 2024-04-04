@@ -22,6 +22,7 @@ import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule';
 import { createRoundRect, fillTextWithStroke } from '../../common/canvas_components';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
 import { assertExistCheck, rule2image } from '../../common/others';
+import { ErrorTexts } from '../../constant/error_texts';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -56,7 +57,7 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
             await sendRunInfo(interaction, schedule);
         }
     } catch (error) {
-        await interaction.followUp('なんかエラーでてるわ');
+        await interaction.followUp(ErrorTexts.UndefinedError);
         await sendErrorLogs(logger, error);
     }
 }
@@ -285,7 +286,7 @@ async function sendRunInfo(
             }
         }
     } catch (error) {
-        await interaction.followUp('なんかエラーでてるわ');
+        await interaction.followUp(ErrorTexts.UndefinedError);
         await sendErrorLogs(logger, error);
     }
 }

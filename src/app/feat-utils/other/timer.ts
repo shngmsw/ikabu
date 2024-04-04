@@ -7,7 +7,7 @@ export async function handleTimer(interaction: ChatInputCommandInteraction<Cache
     let count = options.getInteger('分');
 
     if (notExists(count)) {
-        return await interaction.reply('なんかエラー出てるわ');
+        return await interaction.reply(ErrorTexts.UndefinedError);
     }
 
     if (count > 10 || count <= 0) {
@@ -21,7 +21,7 @@ export async function handleTimer(interaction: ChatInputCommandInteraction<Cache
 
     const countdown = async function () {
         if (notExists(count)) {
-            return await interaction.followUp('なんかエラー出てるわ');
+            return await interaction.followUp(ErrorTexts.UndefinedError);
         }
         count--;
         await interaction.editReply(`残り\`${count}分\`でし`);
@@ -36,7 +36,7 @@ export async function handleTimer(interaction: ChatInputCommandInteraction<Cache
     const id = setInterval(async function () {
         await countdown();
         if (notExists(count)) {
-            return await interaction.followUp('なんかエラー出てるわ');
+            return await interaction.followUp(ErrorTexts.UndefinedError);
         }
         if (count <= 0) {
             clearInterval(id);

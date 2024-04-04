@@ -19,6 +19,7 @@ import {
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, isEmpty, isNotEmpty, notExists } from '../../../common/others';
+import { ErrorTexts } from '../../../constant/error_texts';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { sendRecruitModalLog } from '../../../logs/modals/recruit_modal_log';
 import { getFestPeriodAlertText } from '../../alert_texts/schedule_related_alerts';
@@ -138,7 +139,7 @@ export async function modalRegularRecruit(interaction: ModalSubmitInteraction<'c
         );
     } catch (error) {
         if (exists(channel)) {
-            await channel.send('なんかエラーでてるわ');
+            await channel.send(ErrorTexts.UndefinedError);
         }
         await sendErrorLogs(logger, error);
     }
@@ -277,7 +278,7 @@ export async function modalEventRecruit(interaction: ModalSubmitInteraction<'cac
         );
     } catch (error) {
         if (exists(channel)) {
-            await channel.send('なんかエラーでてるわ');
+            await channel.send(ErrorTexts.UndefinedError);
         }
         await sendErrorLogs(logger, error);
     }
@@ -415,7 +416,7 @@ export async function modalAnarchyRecruit(interaction: ModalSubmitInteraction<'c
         );
     } catch (error) {
         if (exists(channel)) {
-            await channel.send('なんかエラーでてるわ');
+            await channel.send(ErrorTexts.UndefinedError);
         }
         await sendErrorLogs(logger, error);
     }
@@ -528,7 +529,7 @@ export async function modalSalmonRecruit(interaction: ModalSubmitInteraction<'ca
         );
     } catch (error) {
         if (exists(channel)) {
-            await channel.send('なんかエラーでてるわ');
+            await channel.send(ErrorTexts.UndefinedError);
         }
         await sendErrorLogs(logger, error);
     }
@@ -674,7 +675,7 @@ export async function modalFesRecruit(
         );
     } catch (error) {
         if (exists(channel)) {
-            await channel.send('なんかエラーでてるわ');
+            await channel.send(ErrorTexts.UndefinedError);
         }
         await sendErrorLogs(logger, error);
     }

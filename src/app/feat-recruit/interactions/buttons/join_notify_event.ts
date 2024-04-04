@@ -10,6 +10,7 @@ import { disableThinkingButton, recoveryThinkingButton } from '../../../common/b
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, notExists } from '../../../common/others.js';
+import { ErrorTexts } from '../../../constant/error_texts.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages.js';
 
@@ -133,6 +134,6 @@ export async function joinNotify(interaction: ButtonInteraction<'cached' | 'raw'
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '参加'),
         });
-        await interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send(ErrorTexts.UndefinedError);
     }
 }

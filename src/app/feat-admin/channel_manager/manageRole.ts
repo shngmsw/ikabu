@@ -21,6 +21,7 @@ import {
     unassginRoleFromMembers,
 } from '../../common/manager/role_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
+import { ErrorTexts } from '../../constant/error_texts';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('RoleManager');
@@ -79,7 +80,7 @@ export async function handleCreateRole(interaction: ChatInputCommandInteraction<
         );
     } catch (error) {
         await sendErrorLogs(logger, error);
-        await interaction.followUp('なんかエラーでてるわ');
+        await interaction.followUp(ErrorTexts.UndefinedError);
     }
 }
 
@@ -198,7 +199,7 @@ export async function handleAssignRole(interaction: ChatInputCommandInteraction<
         );
     } catch (error) {
         await sendErrorLogs(logger, error);
-        await interaction.editReply('なんかエラーでてるわ');
+        await interaction.editReply(ErrorTexts.UndefinedError);
     }
 }
 
@@ -245,6 +246,6 @@ export async function handleUnassignRole(
         }
     } catch (error) {
         await sendErrorLogs(logger, error);
-        await interaction.editReply('なんかエラーでてるわ');
+        await interaction.editReply(ErrorTexts.UndefinedError);
     }
 }

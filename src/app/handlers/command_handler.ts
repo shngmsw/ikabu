@@ -4,6 +4,7 @@ import { commandNames } from '../../constant.js';
 import { log4js_obj } from '../../log4js_settings.js';
 import { getGuildByInteraction } from '../common/manager/guild_manager.js';
 import { assertExistCheck, exists, getCloseEmbed, getCommandHelpEmbed } from '../common/others';
+import { ErrorTexts } from '../constant/error_texts.js';
 import { handleBan } from '../feat-admin/ban/ban';
 import { handleCreateRoom } from '../feat-admin/channel_manager/createRoom.js';
 import { handleDeleteCategory } from '../feat-admin/channel_manager/deleteCategory.js';
@@ -164,7 +165,7 @@ async function guildOnlyCommandsHandler(
         await sendErrorLogs(logger, error);
         const commandChannel = interaction.channel;
         if (exists(commandChannel)) {
-            await commandChannel.send('なんかエラーでてるわ');
+            await commandChannel.send(ErrorTexts.UndefinedError);
         }
     }
 }
@@ -194,7 +195,7 @@ async function CommandsHandler(interaction: ChatInputCommandInteraction<CacheTyp
         await sendErrorLogs(logger, error);
         const commandChannel = interaction.channel;
         if (exists(commandChannel)) {
-            await commandChannel.send('なんかエラーでてるわ');
+            await commandChannel.send(ErrorTexts.UndefinedError);
         }
     }
 }
