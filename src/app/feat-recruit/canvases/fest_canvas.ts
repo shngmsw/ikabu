@@ -24,7 +24,7 @@ Canvas.registerFont(path.resolve('./fonts/SEGUISYM.TTF'), { family: 'SEGUI' });
 /*
  * 募集用のキャンバス(1枚目)を作成する
  */
-export async function recruitFesCanvas(
+export async function recruitFestCanvas(
     opCode: number,
     remaining: number,
     count: number,
@@ -257,7 +257,7 @@ export async function recruitFesCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleFesCanvas(fesData: MatchInfo | null) {
+export async function ruleFestCanvas(fesData: MatchInfo | null) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
     const ruleCtx = ruleCanvas.getContext('2d');
 

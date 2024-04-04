@@ -19,6 +19,7 @@ import { StickyKey } from '../../../constant/sticky_key.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
+import { removeVoiceChannelReservation } from '../../common/voice_channel_reservation.js';
 import {
     availableRecruitString,
     getStickyChannelId,
@@ -106,11 +107,7 @@ export async function cancel(
                 const channel = await searchChannelById(guild, channelId);
                 const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
                 if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
-                    await channel.permissionOverwrites.delete(
-                        guild.roles.everyone,
-                        'UnLock Voice Channel',
-                    );
-                    await channel.permissionOverwrites.delete(apiMember, 'UnLock Voice Channel');
+                    await removeVoiceChannelReservation(channel, apiMember);
                 }
             }
 

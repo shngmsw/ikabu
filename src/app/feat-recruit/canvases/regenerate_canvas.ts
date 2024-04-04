@@ -4,7 +4,7 @@ import { AttachmentBuilder, Guild, Message } from 'discord.js';
 import { recruitAnarchyCanvas } from './anarchy_canvas';
 import { recruitBigRunCanvas } from './big_run_canvas';
 import { recruitEventCanvas } from './event_canvas';
-import { recruitFesCanvas } from './fes_canvas';
+import { recruitFestCanvas } from './fest_canvas';
 import { recruitRegularCanvas } from './regular_canvas';
 import { recruitSalmonCanvas } from './salmon_canvas';
 import { ParticipantService, ParticipantMember } from '../../../db/participant_service';
@@ -299,7 +299,7 @@ async function regenFesCanvas(
 
     if (notExists(submitMembersList[0])) return;
 
-    const recruitBuffer = await recruitFesCanvas(
+    const recruitBuffer = await recruitFestCanvas(
         opCode,
         remainingNum,
         count,
