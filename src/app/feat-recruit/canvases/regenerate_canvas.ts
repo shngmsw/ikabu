@@ -30,9 +30,9 @@ export async function regenerateCanvas(
     opCode: number,
 ) {
     try {
-        const recruitData = await RecruitService.getRecruit(guild.id, messageId);
-        if (notExists(recruitData)) {
-            logger.warn('canvas was not regenerated! [recruitData was not found!]');
+        const recruit = await RecruitService.getRecruit(guild.id, messageId);
+        if (notExists(recruit)) {
+            logger.warn('canvas was not regenerated! [recruit was not found!]');
             return;
         }
         const participantsData = await ParticipantService.getAllParticipants(guild.id, messageId);
@@ -45,38 +45,20 @@ export async function regenerateCanvas(
             }
         }
         const applicantNum = applicantList.length;
-        switch (recruitData.recruitType) {
+        switch (recruit.recruitType) {
             case RecruitType.RegularRecruit:
-                await regenRegularCanvas(
-                    message,
-                    recruitData,
-                    participantsData,
-                    applicantNum,
-                    opCode,
-                );
+                await regenRegularCanvas(message, recruit, participantsData, applicantNum, opCode);
                 break;
             case RecruitType.EventRecruit:
-                await regenEventCanvas(
-                    message,
-                    recruitData,
-                    participantsData,
-                    applicantNum,
-                    opCode,
-                );
+                await regenEventCanvas(message, recruit, participantsData, applicantNum, opCode);
                 break;
             case RecruitType.AnarchyRecruit:
-                await regenAnarchyCanvas(
-                    message,
-                    recruitData,
-                    participantsData,
-                    applicantNum,
-                    opCode,
-                );
+                await regenAnarchyCanvas(message, recruit, participantsData, applicantNum, opCode);
                 break;
             case RecruitType.SalmonRecruit:
                 await regenSalmonCanvas(
                     message,
-                    recruitData,
+                    recruit,
                     participantsData,
                     applicantNum,
                     opCode,
@@ -84,21 +66,15 @@ export async function regenerateCanvas(
                 );
                 break;
             case RecruitType.FestivalRecruit:
-                await regenFesCanvas(message, recruitData, participantsData, applicantNum, opCode);
+                await regenFesCanvas(message, recruit, participantsData, applicantNum, opCode);
                 break;
             case RecruitType.BigRunRecruit:
-                await regenBigRunCanvas(
-                    message,
-                    recruitData,
-                    participantsData,
-                    applicantNum,
-                    opCode,
-                );
+                await regenBigRunCanvas(message, recruit, participantsData, applicantNum, opCode);
                 break;
             case RecruitType.TeamContestRecruit:
                 await regenSalmonCanvas(
                     message,
-                    recruitData,
+                    recruit,
                     participantsData,
                     applicantNum,
                     opCode,
@@ -113,16 +89,16 @@ export async function regenerateCanvas(
 
 async function regenRegularCanvas(
     message: Message<true>,
-    recruitData: Recruit,
+    recruit: Recruit,
     participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
 ) {
-    const recruitNum = recruitData.recruitNum;
+    const recruitNum = recruit.recruitNum;
     const remainingNum = recruitNum - applicantNum;
     const count = remainingNum + participantsData.length; // 全体の枠数
-    const channelName = recruitData.vcName;
-    const condition = recruitData.condition;
+    const channelName = recruit.vcName;
+    const condition = recruit.condition;
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
     participantsData.forEach(
@@ -146,16 +122,16 @@ async function regenRegularCanvas(
         condition,
         channelName,
     );
-    const recruit = new AttachmentBuilder(recruitBuffer, {
+    const recruitImage = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
 
-    await message.edit({ files: [recruit] });
+    await message.edit({ files: [recruitImage] });
 }
 
 async function regenEventCanvas(
     message: Message<true>,
-    recruitData: Recruit,
+    recruit: Recruit,
     participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
@@ -166,11 +142,11 @@ async function regenEventCanvas(
             applicantList.push(participant);
         }
     }
-    const recruitNum = recruitData.recruitNum;
+    const recruitNum = recruit.recruitNum;
     const remainingNum = recruitNum - applicantNum;
     const count = remainingNum + participantsData.length; // 全体の枠数
-    const channelName = recruitData.vcName;
-    const condition = recruitData.condition;
+    const channelName = recruit.vcName;
+    const condition = recruit.condition;
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
     participantsData.forEach(
@@ -190,16 +166,16 @@ async function regenEventCanvas(
         condition,
         channelName,
     );
-    const recruit = new AttachmentBuilder(recruitBuffer, {
+    const recruitImage = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
 
-    await message.edit({ files: [recruit] });
+    await message.edit({ files: [recruitImage] });
 }
 
 async function regenAnarchyCanvas(
     message: Message<true>,
-    recruitData: Recruit,
+    recruit: Recruit,
     participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
@@ -210,12 +186,12 @@ async function regenAnarchyCanvas(
             applicantList.push(participant);
         }
     }
-    const recruitNum = recruitData.recruitNum;
+    const recruitNum = recruit.recruitNum;
     const remainingNum = recruitNum - applicantNum;
     const count = remainingNum + participantsData.length; // 全体の枠数
-    const channelName = recruitData.vcName;
-    const condition = recruitData.condition;
-    const rank = recruitData.option;
+    const channelName = recruit.vcName;
+    const condition = recruit.condition;
+    const rank = recruit.option;
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
     participantsData.forEach(
@@ -236,16 +212,16 @@ async function regenAnarchyCanvas(
         rank,
         channelName,
     );
-    const recruit = new AttachmentBuilder(recruitBuffer, {
+    const recruitImage = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
 
-    await message.edit({ files: [recruit] });
+    await message.edit({ files: [recruitImage] });
 }
 
 async function regenSalmonCanvas(
     message: Message<true>,
-    recruitData: Recruit,
+    recruit: Recruit,
     participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
@@ -257,11 +233,11 @@ async function regenSalmonCanvas(
             applicantList.push(participant);
         }
     }
-    const recruitNum = recruitData.recruitNum;
+    const recruitNum = recruit.recruitNum;
     const remainingNum = recruitNum - applicantNum;
     const count = remainingNum + participantsData.length; // 全体の枠数
-    const channelName = recruitData.vcName;
-    const condition = recruitData.condition;
+    const channelName = recruit.vcName;
+    const condition = recruit.condition;
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
     participantsData.forEach(
@@ -283,16 +259,16 @@ async function regenSalmonCanvas(
         isTeamContest ? 'コンテスト' : undefined,
     );
 
-    const recruit = new AttachmentBuilder(recruitBuffer, {
+    const recruitImage = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
 
-    await message.edit({ files: [recruit] });
+    await message.edit({ files: [recruitImage] });
 }
 
 async function regenFesCanvas(
     message: Message<true>,
-    recruitData: Recruit,
+    recruit: Recruit,
     participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
@@ -303,12 +279,12 @@ async function regenFesCanvas(
             applicantList.push(participant);
         }
     }
-    const recruitNum = recruitData.recruitNum;
+    const recruitNum = recruit.recruitNum;
     const remainingNum = recruitNum - applicantNum;
     const count = remainingNum + participantsData.length; // 全体の枠数
-    const channelName = recruitData.vcName;
-    const condition = recruitData.condition;
-    const teamName = recruitData.option;
+    const channelName = recruit.vcName;
+    const condition = recruit.condition;
+    const teamName = recruit.option;
     assertExistCheck(teamName, 'teamName');
 
     const mentionId = await searchRoleIdByName(message.guild, teamName);
@@ -336,15 +312,15 @@ async function regenFesCanvas(
         condition,
         channelName,
     );
-    const recruit = new AttachmentBuilder(recruitBuffer, {
+    const recruitImage = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
 
-    await message.edit({ files: [recruit] });
+    await message.edit({ files: [recruitImage] });
 }
 async function regenBigRunCanvas(
     message: Message<true>,
-    recruitData: Recruit,
+    recruit: Recruit,
     participantsData: ParticipantMember[],
     applicantNum: number,
     opCode: number,
@@ -355,11 +331,11 @@ async function regenBigRunCanvas(
             applicantList.push(participant);
         }
     }
-    const recruitNum = recruitData.recruitNum;
+    const recruitNum = recruit.recruitNum;
     const remainingNum = recruitNum - applicantNum;
     const count = remainingNum + participantsData.length; // 全体の枠数
-    const channelName = recruitData.vcName;
-    const condition = recruitData.condition;
+    const channelName = recruit.vcName;
+    const condition = recruit.condition;
 
     const submitMembersList: (Member | null)[] = Array(count).fill(null); // 枠数までnull埋め
     participantsData.forEach(
@@ -380,9 +356,9 @@ async function regenBigRunCanvas(
         channelName,
     );
 
-    const recruit = new AttachmentBuilder(recruitBuffer, {
+    const recruitImage = new AttachmentBuilder(recruitBuffer, {
         name: 'ikabu_recruit.png',
     });
 
-    await message.edit({ files: [recruit] });
+    await message.edit({ files: [recruitImage] });
 }
