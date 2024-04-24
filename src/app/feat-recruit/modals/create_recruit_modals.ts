@@ -2,7 +2,7 @@ import { ButtonInteraction } from 'discord.js';
 
 import { createAnarchyModal } from './create_anarchy_modal';
 import { createEventModal } from './create_event_modal';
-import { createFesModal } from './create_fes_modal';
+import { createFestModal } from './create_fest_modal';
 import { createRegularModal } from './create_regular_modal';
 import { createSalmonModal } from './create_salmon_modal';
 
@@ -24,7 +24,7 @@ export async function handleCreateModal(
         case 'フウカ募集':
         case 'ウツホ募集':
         case 'マンタロー募集':
-            await createFesModal(interaction, channelName);
+            await createFestModal(interaction, channelName);
             break;
         case 'サーモン募集':
             await createSalmonModal(interaction);

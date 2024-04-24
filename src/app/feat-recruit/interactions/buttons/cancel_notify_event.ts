@@ -11,6 +11,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager.js'
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
+import { ErrorTexts } from '../../../constant/error_texts.js';
 import { StickyKey } from '../../../constant/sticky_key.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import {
@@ -151,6 +152,6 @@ export async function cancelNotify(interaction: ButtonInteraction<'cached' | 'ra
         await interaction.message.edit({
             components: disableThinkingButton(interaction, 'キャンセル'),
         });
-        await interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send(ErrorTexts.UndefinedError);
     }
 }

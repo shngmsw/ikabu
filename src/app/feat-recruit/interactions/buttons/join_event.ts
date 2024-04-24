@@ -12,6 +12,7 @@ import {
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
+import { ErrorTexts } from '../../../constant/error_texts.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import { channelLinkButtons, nsoRoomLinkButton } from '../../buttons/create_recruit_buttons.js';
@@ -167,6 +168,6 @@ export async function join(
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '参加'),
         });
-        await interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send(ErrorTexts.UndefinedError);
     }
 }

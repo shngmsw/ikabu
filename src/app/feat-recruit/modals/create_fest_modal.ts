@@ -6,13 +6,17 @@ import {
     TextInputStyle,
 } from 'discord.js';
 
-export async function createSalmonModal(interaction: ButtonInteraction<'cached' | 'raw'>) {
+export async function createFestModal(
+    interaction: ButtonInteraction<'cached' | 'raw'>,
+    channelName: string,
+) {
     const modalParams = new URLSearchParams();
-    modalParams.append('recm', 'salrec');
+    modalParams.append('recm', 'fesrec');
+    modalParams.append('cn', channelName);
 
     const modal = new ModalBuilder()
         .setCustomId(modalParams.toString())
-        .setTitle('サーモン募集を作成');
+        .setTitle(channelName + 'を作成');
 
     const recruitNumInput = new TextInputBuilder()
         .setCustomId('rNum')

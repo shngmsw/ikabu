@@ -23,6 +23,7 @@ import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { searchMessageById } from '../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists } from '../../common/others';
 import { TeamDividerParam } from '../../constant/button_id';
+import { ErrorTexts } from '../../constant/error_texts';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
@@ -93,7 +94,7 @@ export async function dividerInitialMessage(
         await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
             if (exists(interaction.channel)) {
-                await interaction.channel.send('なんかエラー出てるわ');
+                await interaction.channel.send(ErrorTexts.UndefinedError);
             }
         }
     }
@@ -192,7 +193,7 @@ export async function joinButton(
     } catch (error) {
         await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
-            await interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send(ErrorTexts.UndefinedError);
         }
     }
 }
@@ -274,7 +275,7 @@ export async function cancelButton(
     } catch (error) {
         await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
-            await interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send(ErrorTexts.UndefinedError);
         }
     }
 }
@@ -381,7 +382,7 @@ export async function registerButton(
 
         if (notExists(embed) || notExists(buttons) || notExists(correctButton)) {
             return await interaction.followUp({
-                content: 'なんかエラー出てるわ',
+                content: ErrorTexts.UndefinedError,
                 ephemeral: false,
             });
         }
@@ -400,7 +401,7 @@ export async function registerButton(
     } catch (error) {
         await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
-            await interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send(ErrorTexts.UndefinedError);
         }
     }
 }
@@ -598,14 +599,14 @@ async function matching(
             });
         } else {
             return await interaction.followUp({
-                content: 'なんかエラー出てるわ',
+                content: ErrorTexts.UndefinedError,
                 ephemeral: false,
             });
         }
     } catch (error) {
         await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
-            await interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send(ErrorTexts.UndefinedError);
         }
     }
 }
@@ -660,7 +661,7 @@ export async function spectateButton(
 
             if (notExists(embed)) {
                 return await interaction.followUp({
-                    content: 'なんかエラー出てるわ',
+                    content: ErrorTexts.UndefinedError,
                     ephemeral: false,
                 });
             }
@@ -691,7 +692,7 @@ export async function spectateButton(
 
             if (notExists(embed)) {
                 return await interaction.followUp({
-                    content: 'なんかエラー出てるわ',
+                    content: ErrorTexts.UndefinedError,
                     ephemeral: false,
                 });
             }
@@ -709,7 +710,7 @@ export async function spectateButton(
     } catch (error) {
         await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
-            await interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send(ErrorTexts.UndefinedError);
         }
     }
 }
@@ -755,7 +756,7 @@ export async function endButton(
     } catch (error) {
         await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
-            await interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send(ErrorTexts.UndefinedError);
         }
     }
 }
@@ -816,7 +817,7 @@ export async function correctButton(
     } catch (error) {
         await sendErrorLogs(logger, error);
         if (exists(interaction.channel)) {
-            await interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send(ErrorTexts.UndefinedError);
             await interaction.channel.send(
                 'しばらく経ってからボタンを押して見るでし！\nそれでもだめなら「サポートセンターまでご連絡お願い致します。」でし！',
             );
@@ -882,7 +883,7 @@ export async function hideButton(
         const embed = await loadTeamEmbed(messageId, count, hostMember);
         if (notExists(embed)) {
             return await interaction.followUp({
-                content: 'なんかエラー出てるわ',
+                content: ErrorTexts.UndefinedError,
                 ephemeral: false,
             });
         }
@@ -894,7 +895,7 @@ export async function hideButton(
         await sendErrorLogs(logger, error);
         if (exists(interaction.channel) && interaction.channel.isTextBased()) {
             if (exists(interaction.channel)) {
-                await interaction.channel.send('なんかエラー出てるわ');
+                await interaction.channel.send(ErrorTexts.UndefinedError);
             }
         }
     }

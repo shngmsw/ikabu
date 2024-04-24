@@ -4,14 +4,12 @@ import { CacheType, ModalSubmitInteraction } from 'discord.js';
 
 import { MemberService } from '../../db/member_service';
 import { exists } from '../common/others';
-import {
-    modalAnarchyRecruit,
-    modalEventRecruit,
-    modalFesRecruit,
-    modalRegularRecruit,
-    modalSalmonRecruit,
-} from '../feat-recruit/interactions/modals/extract_recruit_modal';
+import { anarchyRecruit } from '../feat-recruit/interactions/anarchy_recruit';
+import { eventRecruit } from '../feat-recruit/interactions/event_recruit';
+import { festRecruit } from '../feat-recruit/interactions/fest_recruit';
 import { recruitEdit } from '../feat-recruit/interactions/modals/recruit_edit';
+import { regularRecruit } from '../feat-recruit/interactions/regular_recruit';
+import { salmonRecruit } from '../feat-recruit/interactions/salmon_recruit';
 
 export async function call(interaction: ModalSubmitInteraction<CacheType>) {
     if (interaction.inGuild()) {
@@ -21,19 +19,19 @@ export async function call(interaction: ModalSubmitInteraction<CacheType>) {
 
             switch (params.get('recm')) {
                 case 'regrec':
-                    await modalRegularRecruit(interaction);
+                    await regularRecruit(interaction);
                     break;
                 case 'everec':
-                    await modalEventRecruit(interaction);
+                    await eventRecruit(interaction);
                     break;
                 case 'anarec':
-                    await modalAnarchyRecruit(interaction);
+                    await anarchyRecruit(interaction);
                     break;
                 case 'salrec':
-                    await modalSalmonRecruit(interaction);
+                    await salmonRecruit(interaction);
                     break;
                 case 'fesrec':
-                    await modalFesRecruit(interaction, params);
+                    await festRecruit(interaction);
                     break;
                 case 'recedit':
                     await recruitEdit(interaction, params);

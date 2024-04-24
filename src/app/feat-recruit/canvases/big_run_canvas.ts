@@ -2,16 +2,11 @@ import { Member } from '@prisma/client';
 import Canvas from 'canvas';
 
 import { RecruitOpCode } from './regenerate_canvas.js';
-import { modalRecruit } from '../../../constant.js';
-import { log4js_obj } from '../../../log4js_settings';
-import { getBigRunData } from '../../common/apis/splatoon3.ink/splatoon3_ink.js';
-import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule.js';
+import { modalRecruit, placeHold } from '../../../constant.js';
+import { SalmonInfo } from '../../common/apis/splatoon3.ink/splatoon3_ink.js';
 import { createRoundRect, drawArcImage, fillTextWithStroke } from '../../common/canvas_components';
 import { dateformat, formatDatetime } from '../../common/convert_datetime';
 import { exists, notExists } from '../../common/others.js';
-import { sendErrorLogs } from '../../logs/error/send_error_logs.js';
-
-const logger = log4js_obj.getLogger('recruit');
 
 /*
  * 募集用のキャンバス(1枚目)を作成する
@@ -240,103 +235,93 @@ export async function recruitBigRunCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleBigRunCanvas(data: Sp3Schedule) {
-    try {
-        const salmonData = await getBigRunData(data, 0);
-        if (notExists(salmonData)) return null;
+export async function ruleBigRunCanvas(data: SalmonInfo | null) {
+    const ruleCanvas = Canvas.createCanvas(720, 550);
+    const ruleCtx = ruleCanvas.getContext('2d');
+    const errorWeaponImage = await Canvas.loadImage(placeHold.error100x100);
 
-        const ruleCanvas = Canvas.createCanvas(720, 550);
-        const ruleCtx = ruleCanvas.getContext('2d');
+    const datetime = data
+        ? formatDatetime(data.startTime, dateformat.mdwhm) +
+          ' - ' +
+          formatDatetime(data.endTime, dateformat.mdwhm)
+        : 'えらー';
 
-        createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
-        ruleCtx.fillStyle = '#2F3136';
-        ruleCtx.fill();
-        ruleCtx.strokeStyle = '#FFFFFF';
-        ruleCtx.lineWidth = 4;
-        ruleCtx.stroke();
+    const stage = data ? data.stage : 'えらー';
+    const weapon1Image = data ? await Canvas.loadImage(data.weapon1) : errorWeaponImage;
+    const weapon2Image = data ? await Canvas.loadImage(data.weapon2) : errorWeaponImage;
+    const weapon3Image = data ? await Canvas.loadImage(data.weapon3) : errorWeaponImage;
+    const weapon4Image = data ? await Canvas.loadImage(data.weapon4) : errorWeaponImage;
 
-        fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 60);
+    createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
+    ruleCtx.fillStyle = '#2F3136';
+    ruleCtx.fill();
+    ruleCtx.strokeStyle = '#FFFFFF';
+    ruleCtx.lineWidth = 4;
+    ruleCtx.stroke();
 
-        const datetime =
-            formatDatetime(salmonData.startTime, dateformat.mdwhm) +
-            ' - ' +
-            formatDatetime(salmonData.endTime, dateformat.mdwhm);
+    fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 60);
 
-        const dateWidth = ruleCtx.measureText(datetime).width;
-        fillTextWithStroke(
-            ruleCtx,
-            datetime,
-            '37px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            (650 - dateWidth) / 2,
-            120,
-        );
+    const dateWidth = ruleCtx.measureText(datetime).width;
+    fillTextWithStroke(
+        ruleCtx,
+        datetime,
+        '37px Splatfont',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        (650 - dateWidth) / 2,
+        120,
+    );
 
-        fillTextWithStroke(ruleCtx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 180);
+    fillTextWithStroke(ruleCtx, '武器', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 180);
 
-        const weapon1Image = await Canvas.loadImage(salmonData.weapon1);
-        ruleCtx.drawImage(weapon1Image, 50, 205, 85, 85);
+    ruleCtx.drawImage(weapon1Image, 50, 205, 85, 85);
+    ruleCtx.drawImage(weapon2Image, 150, 205, 85, 85);
+    ruleCtx.drawImage(weapon3Image, 50, 305, 85, 85);
+    ruleCtx.drawImage(weapon4Image, 150, 305, 85, 85);
 
-        const weapon2Image = await Canvas.loadImage(salmonData.weapon2);
-        ruleCtx.drawImage(weapon2Image, 150, 205, 85, 85);
+    fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 310, 180);
 
-        const weapon3Image = await Canvas.loadImage(salmonData.weapon3);
-        ruleCtx.drawImage(weapon3Image, 50, 305, 85, 85);
+    const stageWidth = ruleCtx.measureText(stage).width;
+    fillTextWithStroke(
+        ruleCtx,
+        stage,
+        '38px Splatfont',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        110 + (700 - stageWidth) / 2,
+        235,
+    );
 
-        const weapon4Image = await Canvas.loadImage(salmonData.weapon4);
-        ruleCtx.drawImage(weapon4Image, 150, 305, 85, 85);
+    const illust = await Canvas.loadImage(
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/BIGRUN_illust.png',
+    );
+    ruleCtx.drawImage(illust, 380, 240, 330, 160);
 
-        fillTextWithStroke(
-            ruleCtx,
-            'ステージ',
-            '33px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            310,
-            180,
-        );
-
-        const stageWidth = ruleCtx.measureText(salmonData.stage).width;
-        fillTextWithStroke(
-            ruleCtx,
-            salmonData.stage,
-            '38px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            110 + (700 - stageWidth) / 2,
-            235,
-        );
-
-        const illust = await Canvas.loadImage(
-            'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/BIGRUN_illust.png',
-        );
-        ruleCtx.drawImage(illust, 380, 240, 330, 160);
-
-        ruleCtx.save();
-        ruleCtx.beginPath();
-        ruleCtx.rect(240, 410, 250, 135);
+    ruleCtx.save();
+    ruleCtx.beginPath();
+    ruleCtx.rect(240, 410, 250, 135);
+    if (exists(data) && exists(data.stageImage)) {
         ruleCtx.clip();
-        const stageImage = await Canvas.loadImage(salmonData.stageImage);
+        const stageImage = await Canvas.loadImage(data.stageImage);
         ruleCtx.drawImage(stageImage, 240, 410, 250, 135);
-        ruleCtx.restore();
-
-        ruleCtx.save();
-        ruleCtx.beginPath();
-        createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
-        ruleCtx.clip();
-        const bigRunFotter = await Canvas.loadImage(
-            'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/BIGRUN_footer.png',
-        );
-        ruleCtx.drawImage(bigRunFotter, -5, 400, 730, 160);
-        ruleCtx.restore();
-
-        const rule = ruleCanvas.toBuffer();
-        return rule;
-    } catch (error) {
-        await sendErrorLogs(logger, error);
+    } else {
+        ruleCtx.fillStyle = '#000000';
+        ruleCtx.fill();
     }
+    ruleCtx.restore();
+
+    ruleCtx.save();
+    ruleCtx.beginPath();
+    createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
+    ruleCtx.clip();
+    const bigRunFotter = await Canvas.loadImage(
+        'https://raw.githubusercontent.com/shngmsw/ikabu/main/images/recruit/BIGRUN_footer.png',
+    );
+    ruleCtx.drawImage(bigRunFotter, -5, 400, 730, 160);
+    ruleCtx.restore();
+
+    const buffer = ruleCanvas.toBuffer();
+    return buffer;
 }

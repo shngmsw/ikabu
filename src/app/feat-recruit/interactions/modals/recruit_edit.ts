@@ -6,6 +6,7 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { assertExistCheck, notExists } from '../../../common/others';
 import { sendStickyMessage } from '../../../common/sticky_message';
+import { ErrorTexts } from '../../../constant/error_texts';
 import { StickyKey } from '../../../constant/sticky_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { sendEditRecruitLog } from '../../../logs/modals/recruit_modal_log';
@@ -100,7 +101,7 @@ export async function recruitEdit(
     } catch (error) {
         await sendErrorLogs(logger, error);
         if (interaction.channel instanceof BaseGuildTextChannel) {
-            await interaction.channel.send('なんかエラー出てるわ');
+            await interaction.channel.send(ErrorTexts.UndefinedError);
         }
     }
 }

@@ -5,6 +5,7 @@ import { exists, notExists } from '../common/others';
 import { vcToolsStickyFromVoiceState } from '../event/vctools_sticky/vc_tools_message';
 import { disableLimit } from '../event/vctools_sticky/voice_lock';
 import { endCall, startCall } from '../event/voice_count/voice_count';
+import { removeVoiceChannelReservation } from '../feat-recruit/common/voice_channel_reservation';
 import { autokill } from '../feat-utils/voice/tts/discordjs_voice';
 import { sendErrorLogs } from '../logs/error/send_error_logs';
 
@@ -49,14 +50,7 @@ async function deleteLimitPermission(newState: VoiceState) {
         const newChannel = await newState.guild.channels.fetch(newState.channelId);
         if (exists(newChannel) && newChannel.isVoiceBased()) {
             if (newChannel.members.size !== 0 && exists(newState.member)) {
-                await newChannel.permissionOverwrites.delete(
-                    newState.guild.roles.everyone,
-                    'UnLock Voice Channel',
-                );
-                await newChannel.permissionOverwrites.delete(
-                    newState.member,
-                    'UnLock Voice Channel',
-                );
+                await removeVoiceChannelReservation(newChannel, newState.member);
             }
         }
     }

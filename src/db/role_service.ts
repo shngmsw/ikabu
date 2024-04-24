@@ -78,6 +78,20 @@ export class RoleService {
         }
     }
 
+    static async searchRole(guildId: string, roleName: string) {
+        try {
+            return await prisma.role.findFirst({
+                where: {
+                    guildId: guildId,
+                    name: roleName,
+                },
+            });
+        } catch (error) {
+            await sendErrorLogs(logger, error);
+            return null;
+        }
+    }
+
     static async getAllGuildRoles(guildId: string) {
         try {
             return await prisma.role.findMany({

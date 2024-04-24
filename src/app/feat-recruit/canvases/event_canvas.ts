@@ -259,10 +259,20 @@ export async function recruitEventCanvas(
 /*
  * ルール情報のキャンバス(2枚目)を作成する
  */
-export async function ruleEventCanvas(eventData: EventMatchInfo) {
+export async function ruleEventCanvas(eventData: EventMatchInfo | null) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
-
     const ruleCtx = ruleCanvas.getContext('2d');
+
+    const title = eventData ? eventData.title : 'えらー';
+    const rule = eventData ? eventData.rule : 'えらー';
+    const date = eventData ? formatDatetime(eventData.startTime, dateformat.ymdw) : 'えらー';
+    const time = eventData
+        ? formatDatetime(eventData.startTime, dateformat.hm) +
+          ' - ' +
+          formatDatetime(eventData.endTime, dateformat.hm)
+        : 'えらー';
+    const stage1 = eventData ? eventData.stage1 : 'えらー';
+    const stage2 = eventData ? eventData.stage2 : 'えらー';
 
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
     ruleCtx.fillStyle = '#2F3136';
@@ -273,24 +283,15 @@ export async function ruleEventCanvas(eventData: EventMatchInfo) {
 
     ruleCtx.save();
     ruleCtx.textAlign = 'right';
-    fillTextWithStroke(
-        ruleCtx,
-        eventData.title,
-        '38px Splatfont',
-        '#FFE02EFB',
-        '#2D3130',
-        1,
-        690,
-        65,
-    );
+    fillTextWithStroke(ruleCtx, title, '38px Splatfont', '#FFE02EFB', '#2D3130', 1, 690, 65);
     ruleCtx.restore();
 
     fillTextWithStroke(ruleCtx, 'ルール', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
-    const ruleWidth = ruleCtx.measureText(eventData.rule).width;
+    const ruleWidth = ruleCtx.measureText(rule).width;
     fillTextWithStroke(
         ruleCtx,
-        eventData.rule,
+        rule,
         '45px Splatfont',
         '#FFFFFF',
         '#2D3130',
@@ -300,12 +301,6 @@ export async function ruleEventCanvas(eventData: EventMatchInfo) {
     ); // 中央寄せ
 
     fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
-
-    const date = formatDatetime(eventData.startTime, dateformat.ymdw);
-    const time =
-        formatDatetime(eventData.startTime, dateformat.hm) +
-        ' - ' +
-        formatDatetime(eventData.endTime, dateformat.hm);
 
     const dateWidth = ruleCtx.measureText(date).width;
     fillTextWithStroke(
@@ -335,53 +330,57 @@ export async function ruleEventCanvas(eventData: EventMatchInfo) {
 
     ruleCtx.save();
     ruleCtx.textAlign = 'center';
-    fillTextWithStroke(
-        ruleCtx,
-        eventData.stage1,
-        '32px Splatfont',
-        '#FFFFFF',
-        '#2D3130',
-        1,
-        190,
-        440,
-    );
-    fillTextWithStroke(
-        ruleCtx,
-        eventData.stage2,
-        '32px Splatfont',
-        '#FFFFFF',
-        '#2D3130',
-        1,
-        190,
-        490,
-    );
+    fillTextWithStroke(ruleCtx, stage1, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
+    fillTextWithStroke(ruleCtx, stage2, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
     ruleCtx.restore();
 
-    const stage1Image = await Canvas.loadImage(eventData.stageImage1);
-    ruleCtx.save();
-    ruleCtx.beginPath();
-    createRoundRect(ruleCtx, 370, 130, 308, 176, 10);
-    ruleCtx.clip();
-    ruleCtx.drawImage(stage1Image, 370, 130, 308, 176);
-    ruleCtx.strokeStyle = '#FFFFFF';
-    ruleCtx.lineWidth = 6.0;
-    ruleCtx.stroke();
-    ruleCtx.restore();
+    if (exists(eventData) && exists(eventData.stageImage1) && exists(eventData.stageImage2)) {
+        const stage1Image = await Canvas.loadImage(eventData.stageImage1);
+        ruleCtx.save();
+        ruleCtx.beginPath();
+        createRoundRect(ruleCtx, 370, 130, 308, 176, 10);
+        ruleCtx.clip();
+        ruleCtx.drawImage(stage1Image, 370, 130, 308, 176);
+        ruleCtx.strokeStyle = '#FFFFFF';
+        ruleCtx.lineWidth = 6.0;
+        ruleCtx.stroke();
+        ruleCtx.restore();
 
-    const stage2Image = await Canvas.loadImage(eventData.stageImage2);
-    ruleCtx.save();
-    ruleCtx.beginPath();
-    createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
-    ruleCtx.clip();
-    ruleCtx.drawImage(stage2Image, 370, 340, 308, 176);
-    ruleCtx.strokeStyle = '#FFFFFF';
-    ruleCtx.lineWidth = 6.0;
-    ruleCtx.stroke();
-    ruleCtx.restore();
+        const stage2Image = await Canvas.loadImage(eventData.stageImage2);
+        ruleCtx.save();
+        ruleCtx.beginPath();
+        createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
+        ruleCtx.clip();
+        ruleCtx.drawImage(stage2Image, 370, 340, 308, 176);
+        ruleCtx.strokeStyle = '#FFFFFF';
+        ruleCtx.lineWidth = 6.0;
+        ruleCtx.stroke();
+        ruleCtx.restore();
+    } else {
+        ruleCtx.save();
+        ruleCtx.beginPath();
+        createRoundRect(ruleCtx, 370, 130, 308, 176, 10);
+        ruleCtx.fillStyle = '#000000';
+        ruleCtx.fill();
+        ruleCtx.strokeStyle = '#FFFFFF';
+        ruleCtx.lineWidth = 6.0;
+        ruleCtx.stroke();
+        ruleCtx.restore();
+
+        ruleCtx.save();
+        ruleCtx.beginPath();
+        createRoundRect(ruleCtx, 370, 340, 308, 176, 10);
+        ruleCtx.fillStyle = '#000000';
+        ruleCtx.fill();
+        ruleCtx.strokeStyle = '#FFFFFF';
+        ruleCtx.lineWidth = 6.0;
+        ruleCtx.stroke();
+        ruleCtx.restore();
+    }
 
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
     ruleCtx.clip();
 
-    const rule = ruleCanvas.toBuffer();
-    return rule;
+    const buffer = ruleCanvas.toBuffer();
+    return buffer;
 }
