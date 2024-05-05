@@ -1,12 +1,13 @@
-import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
-import { REST } from '@discordjs/rest';
 import {
     ApplicationCommandType,
     ChannelType,
+    ContextMenuCommandBuilder,
     PermissionFlagsBits,
+    REST,
     Routes,
     SlashCommandAttachmentOption,
     SlashCommandBooleanOption,
+    SlashCommandBuilder,
     SlashCommandChannelOption,
     SlashCommandIntegerOption,
     SlashCommandMentionableOption,
@@ -111,14 +112,14 @@ const pick = new SlashCommandBuilder()
 
 const vpick = new SlashCommandBuilder()
     .setName(commandNames.voice_pick)
+    .setDMPermission(false)
     .setDescription('VCに接続しているメンバーからランダムに抽出します。')
     .addIntegerOption((option: SlashCommandIntegerOption) =>
         option
             .setName('ピックする人数')
             .setDescription('2人以上ピックしたい場合は指定してください。')
             .setRequired(false),
-    )
-    .setDMPermission(false);
+    );
 
 const buki = new SlashCommandBuilder()
     .setName(commandNames.buki)
@@ -181,6 +182,7 @@ const help = new SlashCommandBuilder()
 
 const ban = new SlashCommandBuilder()
     .setName(commandNames.ban)
+    .setDMPermission(false)
     .setDescription('banします。')
     .addUserOption((option: SlashCommandUserOption) =>
         option.setName('ban対象').setDescription('banする人を指定してください。').setRequired(true),
@@ -190,9 +192,7 @@ const ban = new SlashCommandBuilder()
             .setName('ban理由')
             .setDescription('ban対象の人にブキチがDMします。')
             .setRequired(true),
-    )
-    .setDMPermission(false);
-
+    );
 const chManager = new SlashCommandBuilder()
     .setName(commandNames.ch_manager)
     .setDescription('チャンネルを作ったり削除したりできます。')
@@ -1298,6 +1298,7 @@ const variablesSettings = new SlashCommandBuilder()
 
 const joinedDateFixer = new SlashCommandBuilder()
     .setName(commandNames.joinedDateFixer)
+    .setDMPermission(false)
     .setDescription('入部日を修正します。(開発者限定コマンド)')
     .addUserOption((option: SlashCommandUserOption) =>
         option
@@ -1328,8 +1329,7 @@ const joinedDateFixer = new SlashCommandBuilder()
             .setName('強制設定')
             .setDescription('入部日を強制的に設定します。【後の日付でも設定可能】')
             .setRequired(false),
-    )
-    .setDMPermission(false);
+    );
 
 const festStart = new SlashCommandSubcommandBuilder()
     .setName('開始')
