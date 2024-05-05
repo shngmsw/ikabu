@@ -9,6 +9,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
+import { ErrorTexts } from '../../../constant/error_texts';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { getStickyChannelId, sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
@@ -145,6 +146,6 @@ export async function del(
         await interaction.message.edit({
             components: setButtonDisable(interaction.message),
         });
-        await interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send(ErrorTexts.UndefinedError);
     }
 }

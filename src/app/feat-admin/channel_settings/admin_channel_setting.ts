@@ -5,6 +5,7 @@ import {
     ChatInputCommandInteraction,
     ForumChannel,
     GuildTextBasedChannel,
+    MediaChannel,
 } from 'discord.js';
 
 import { ChannelService } from '../../../db/channel_service';
@@ -20,6 +21,7 @@ export async function adminChannelSetting(
     targetChannel:
         | CategoryChannel
         | ForumChannel
+        | MediaChannel
         | APIInteractionDataResolvedChannel
         | GuildTextBasedChannel,
     isAdminChannel: boolean,

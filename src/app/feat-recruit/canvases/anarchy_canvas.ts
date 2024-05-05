@@ -276,8 +276,17 @@ export async function recruitAnarchyCanvas(
  */
 export async function ruleAnarchyCanvas(anarchyData: MatchInfo | null, ruleIconURL: string) {
     const ruleCanvas = Canvas.createCanvas(720, 550);
-
     const ruleCtx = ruleCanvas.getContext('2d');
+
+    const date = anarchyData ? formatDatetime(anarchyData.startTime, dateformat.ymdw) : 'えらー';
+    const time = anarchyData
+        ? formatDatetime(anarchyData.startTime, dateformat.hm) +
+          ' - ' +
+          formatDatetime(anarchyData.endTime, dateformat.hm)
+        : 'えらー';
+    const rule = anarchyData && anarchyData.rule ? anarchyData.rule : 'えらー';
+    const stage1 = anarchyData && anarchyData.stage1 ? anarchyData.stage1 : 'えらー';
+    const stage2 = anarchyData && anarchyData.stage2 ? anarchyData.stage2 : 'えらー';
 
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
     ruleCtx.fillStyle = '#2F3136';
@@ -288,115 +297,49 @@ export async function ruleAnarchyCanvas(anarchyData: MatchInfo | null, ruleIconU
 
     fillTextWithStroke(ruleCtx, 'ルール', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 80);
 
-    if (exists(anarchyData) && exists(anarchyData.rule)) {
-        const ruleWidth = ruleCtx.measureText(anarchyData.rule).width;
-        fillTextWithStroke(
-            ruleCtx,
-            anarchyData.rule,
-            '45px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            (320 - ruleWidth) / 2,
-            145,
-        ); // 中央寄せ
-    } else {
-        const ruleWidth = ruleCtx.measureText('えらー').width;
-        fillTextWithStroke(
-            ruleCtx,
-            'えらー',
-            '45px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            (320 - ruleWidth) / 2,
-            145,
-        ); // 中央寄せ
-    }
+    const ruleWidth = ruleCtx.measureText(rule).width;
+    fillTextWithStroke(
+        ruleCtx,
+        rule,
+        '45px Splatfont',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        (320 - ruleWidth) / 2,
+        145,
+    ); // 中央寄せ
 
     fillTextWithStroke(ruleCtx, '日時', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 220);
-    if (exists(anarchyData) && exists(anarchyData.startTime) && exists(anarchyData.endTime)) {
-        const date = formatDatetime(anarchyData.startTime, dateformat.ymdw);
-        const time =
-            formatDatetime(anarchyData.startTime, dateformat.hm) +
-            ' - ' +
-            formatDatetime(anarchyData.endTime, dateformat.hm);
 
-        const dateWidth = ruleCtx.measureText(date).width;
-        fillTextWithStroke(
-            ruleCtx,
-            date,
-            '35px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            (350 - dateWidth) / 2,
-            270,
-        ); // 中央寄せ
-        const timeWidth = ruleCtx.measureText(time).width;
-        fillTextWithStroke(
-            ruleCtx,
-            time,
-            '35px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            15 + (350 - timeWidth) / 2,
-            320,
-        ); // 中央寄せ
-    } else {
-        const dateWidth = ruleCtx.measureText('えらー').width;
-        fillTextWithStroke(
-            ruleCtx,
-            'えらー',
-            '35px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            (350 - dateWidth) / 2,
-            270,
-        ); // 中央寄せ
-        const timeWidth = ruleCtx.measureText('えらー').width;
-        fillTextWithStroke(
-            ruleCtx,
-            'えらー',
-            '35px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            15 + (350 - timeWidth) / 2,
-            320,
-        ); // 中央寄せ
-    }
+    const dateWidth = ruleCtx.measureText(date).width;
+    fillTextWithStroke(
+        ruleCtx,
+        date,
+        '35px Splatfont',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        (350 - dateWidth) / 2,
+        270,
+    ); // 中央寄せ
+    const timeWidth = ruleCtx.measureText(time).width;
+    fillTextWithStroke(
+        ruleCtx,
+        time,
+        '35px Splatfont',
+        '#FFFFFF',
+        '#2D3130',
+        1,
+        15 + (350 - timeWidth) / 2,
+        320,
+    ); // 中央寄せ
 
     fillTextWithStroke(ruleCtx, 'ステージ', '33px Splatfont', '#FFFFFF', '#2D3130', 1, 35, 390);
     ruleCtx.save();
     ruleCtx.textAlign = 'center';
-    if (exists(anarchyData) && exists(anarchyData.stage1) && exists(anarchyData.stage2)) {
-        fillTextWithStroke(
-            ruleCtx,
-            anarchyData.stage1,
-            '32px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            190,
-            440,
-        );
-        fillTextWithStroke(
-            ruleCtx,
-            anarchyData.stage2,
-            '32px Splatfont',
-            '#FFFFFF',
-            '#2D3130',
-            1,
-            190,
-            490,
-        );
-    } else {
-        fillTextWithStroke(ruleCtx, 'えらー', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
-        fillTextWithStroke(ruleCtx, 'えらー', '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
-    }
+    fillTextWithStroke(ruleCtx, stage1, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 440);
+    fillTextWithStroke(ruleCtx, stage2, '32px Splatfont', '#FFFFFF', '#2D3130', 1, 190, 490);
+
     ruleCtx.restore();
 
     if (exists(anarchyData) && exists(anarchyData.stageImage1) && exists(anarchyData.stageImage2)) {
@@ -451,6 +394,6 @@ export async function ruleAnarchyCanvas(anarchyData: MatchInfo | null, ruleIconU
     createRoundRect(ruleCtx, 1, 1, 718, 548, 30);
     ruleCtx.clip();
 
-    const rule = ruleCanvas.toBuffer();
-    return rule;
+    const buffer = ruleCanvas.toBuffer();
+    return buffer;
 }

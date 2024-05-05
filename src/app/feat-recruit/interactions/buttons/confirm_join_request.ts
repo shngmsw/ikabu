@@ -12,6 +12,7 @@ import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, notExists } from '../../../common/others';
 import { sendStickyMessage } from '../../../common/sticky_message';
 import { RecruitParam } from '../../../constant/button_id';
+import { ErrorTexts } from '../../../constant/error_texts';
 import { StickyKey } from '../../../constant/sticky_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas';
@@ -147,7 +148,7 @@ export async function confirmJoinRequest(
         await interaction.message.edit({
             components: [],
         });
-        await interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send(ErrorTexts.UndefinedError);
         await interaction.channel?.send('手動で返信するでし！');
     }
 }

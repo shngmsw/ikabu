@@ -22,21 +22,6 @@ export async function createRegularModal(interaction: ButtonInteraction<'cached'
         .setMaxLength(1)
         .setRequired(true);
 
-    const participantsNumInput = new TextInputBuilder()
-        .setCustomId('pNum')
-        .setLabel('既にいる参加者の数 (あなたを除く)')
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder('例: 2')
-        .setMaxLength(1)
-        .setRequired(true);
-
-    const participantsList = new TextInputBuilder()
-        .setCustomId('pList')
-        .setLabel('あなた以外の参加者名を入力')
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder('例: ブキチ, スパイキー')
-        .setRequired(false);
-
     const conditionInput = new TextInputBuilder()
         .setCustomId('condition')
         .setLabel('参加条件')
@@ -46,11 +31,9 @@ export async function createRegularModal(interaction: ButtonInteraction<'cached'
         .setRequired(true);
 
     const actionRow1 = new ActionRowBuilder<TextInputBuilder>().addComponents(recruitNumInput);
-    const actionRow2 = new ActionRowBuilder<TextInputBuilder>().addComponents(participantsNumInput);
-    const actionRow3 = new ActionRowBuilder<TextInputBuilder>().addComponents(participantsList);
-    const actionRow4 = new ActionRowBuilder<TextInputBuilder>().addComponents(conditionInput);
+    const actionRow2 = new ActionRowBuilder<TextInputBuilder>().addComponents(conditionInput);
 
-    modal.addComponents(actionRow1, actionRow2, actionRow3, actionRow4);
+    modal.addComponents(actionRow1, actionRow2);
 
     await interaction.showModal(modal);
 }

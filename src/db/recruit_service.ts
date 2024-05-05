@@ -1,4 +1,5 @@
 import { prisma } from './prisma.js';
+import { ObjectValueList } from '../app/constant/constant_common.js';
 import { sendErrorLogs } from '../app/logs/error/send_error_logs.js';
 import { log4js_obj } from '../log4js_settings';
 const logger = log4js_obj.getLogger('database');
@@ -14,7 +15,11 @@ export const RecruitType = {
     BigRunRecruit: 7,
     TeamContestRecruit: 8,
     OtherGameRecruit: 10,
-};
+} as const;
+export type RecruitType = ObjectValueList<typeof RecruitType>;
+export function isRecruitType(value: number): value is RecruitType {
+    return Object.values(RecruitType).some((v) => v === value);
+}
 
 export class RecruitService {
     static async registerRecruit(

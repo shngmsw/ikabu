@@ -9,6 +9,7 @@ import { getGuildByInteraction } from '../../../common/manager/guild_manager.js'
 import { searchAPIMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
+import { removeVoiceChannelReservation } from '../../common/voice_channel_reservation.js';
 
 const logger = log4js_obj.getLogger('recruitButton');
 
@@ -25,8 +26,7 @@ export async function unlock(
         const member = await searchAPIMemberById(guild, interaction.member.user.id);
         assertExistCheck(member, 'member');
         if (exists(member) && exists(channel) && channel.isVoiceBased()) {
-            await channel.permissionOverwrites.delete(guild.roles.everyone, 'UnLock Voice Channel');
-            await channel.permissionOverwrites.delete(member, 'UnLock Voice Channel');
+            await removeVoiceChannelReservation(channel, member);
         }
 
         await interaction.editReply({

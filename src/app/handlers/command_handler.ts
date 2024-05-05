@@ -4,6 +4,7 @@ import { commandNames } from '../../constant.js';
 import { log4js_obj } from '../../log4js_settings.js';
 import { getGuildByInteraction } from '../common/manager/guild_manager.js';
 import { assertExistCheck, exists, getCloseEmbed, getCommandHelpEmbed } from '../common/others';
+import { ErrorTexts } from '../constant/error_texts.js';
 import { handleBan } from '../feat-admin/ban/ban';
 import { handleCreateRoom } from '../feat-admin/channel_manager/createRoom.js';
 import { handleDeleteCategory } from '../feat-admin/channel_manager/deleteCategory.js';
@@ -21,14 +22,14 @@ import { joinedAtFixer } from '../feat-admin/joined_date_fixer/fix_joined_date.j
 import { uniqueChannelSettingsHandler } from '../feat-admin/unique_channel_settings/unique_channel_settings_hanlder.js';
 import { uniqueRoleSettingsHandler } from '../feat-admin/unique_role_settings/unique_role_settings_hanlder.js';
 import { createNewRecruitButton } from '../feat-recruit/buttons/create_recruit_buttons';
-import { anarchyRecruit } from '../feat-recruit/interactions/commands/anarchy_recruit';
+import { anarchyRecruit } from '../feat-recruit/interactions/anarchy_recruit.js';
 import { buttonRecruit } from '../feat-recruit/interactions/commands/button_recruit.js';
-import { eventRecruit } from '../feat-recruit/interactions/commands/event_recruit';
-import { fesRecruit } from '../feat-recruit/interactions/commands/fes_recruit';
 import { otherGameRecruit } from '../feat-recruit/interactions/commands/other_game_recruit';
 import { privateRecruit } from '../feat-recruit/interactions/commands/private_recruit';
-import { regularRecruit } from '../feat-recruit/interactions/commands/regular_recruit';
-import { salmonRecruit } from '../feat-recruit/interactions/commands/salmon_recruit';
+import { eventRecruit } from '../feat-recruit/interactions/event_recruit.js';
+import { festRecruit } from '../feat-recruit/interactions/fest_recruit.js';
+import { regularRecruit } from '../feat-recruit/interactions/regular_recruit.js';
+import { salmonRecruit } from '../feat-recruit/interactions/salmon_recruit.js';
 import { handleIkabuExperience } from '../feat-utils/other/experience.js';
 import { handleFriendCode } from '../feat-utils/other/friendcode';
 import { handleHelp } from '../feat-utils/other/help.js';
@@ -102,11 +103,11 @@ async function guildOnlyCommandsHandler(
         } else if (commandName === commandNames.event) {
             await eventRecruit(interaction);
         } else if (commandName === commandNames.fesA) {
-            await fesRecruit(interaction);
+            await festRecruit(interaction);
         } else if (commandName === commandNames.fesB) {
-            await fesRecruit(interaction);
+            await festRecruit(interaction);
         } else if (commandName === commandNames.fesC) {
-            await fesRecruit(interaction);
+            await festRecruit(interaction);
         } else if (commandName === commandNames.salmon) {
             await salmonRecruit(interaction);
         } else if (commandName === commandNames.experience) {
@@ -164,7 +165,7 @@ async function guildOnlyCommandsHandler(
         await sendErrorLogs(logger, error);
         const commandChannel = interaction.channel;
         if (exists(commandChannel)) {
-            await commandChannel.send('なんかエラーでてるわ');
+            await commandChannel.send(ErrorTexts.UndefinedError);
         }
     }
 }
@@ -194,7 +195,7 @@ async function CommandsHandler(interaction: ChatInputCommandInteraction<CacheTyp
         await sendErrorLogs(logger, error);
         const commandChannel = interaction.channel;
         if (exists(commandChannel)) {
-            await commandChannel.send('なんかエラーでてるわ');
+            await commandChannel.send(ErrorTexts.UndefinedError);
         }
     }
 }

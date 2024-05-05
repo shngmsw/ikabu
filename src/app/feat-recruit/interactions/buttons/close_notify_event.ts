@@ -10,6 +10,7 @@ import { disableThinkingButton, recoveryThinkingButton } from '../../../common/b
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
 import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, datetimeDiff, exists, notExists } from '../../../common/others.js';
+import { ErrorTexts } from '../../../constant/error_texts.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import {
     getStickyChannelId,
@@ -163,6 +164,6 @@ export async function closeNotify(interaction: ButtonInteraction<'cached' | 'raw
         await interaction.message.edit({
             components: disableThinkingButton(interaction, '〆'),
         });
-        await interaction.channel?.send('なんかエラー出てるわ');
+        await interaction.channel?.send(ErrorTexts.UndefinedError);
     }
 }
