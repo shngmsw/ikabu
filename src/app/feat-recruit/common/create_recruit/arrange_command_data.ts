@@ -188,8 +188,8 @@ export async function arrangeRecruitData(
             });
         } else {
             await recruitChannel.send(ErrorTexts.UndefinedError);
+            await sendErrorLogs(logger, error);
         }
-        await sendErrorLogs(logger, error);
         throw new Error();
     }
 }
