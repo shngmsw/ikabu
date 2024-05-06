@@ -19,13 +19,9 @@ export async function checkRecruitSchedule(
     type: number,
     recruitType: RecruitType,
 ): Promise<checkRecruitScheduleResponse> {
-    const isDuringFest = checkFes(schedule, type);
-    const isDuringBigRun = checkBigRun(schedule, type);
-    const isDuringTeamContest = checkTeamContest(schedule, type);
-
     switch (recruitType) {
         case RecruitType.FestivalRecruit:
-            if (!isDuringFest) {
+            if (!checkFes(schedule, type)) {
                 // フェス期間外にフェス募集を建てようとした場合
                 return {
                     canRecruit: false,
@@ -36,7 +32,7 @@ export async function checkRecruitSchedule(
 
         case RecruitType.RegularRecruit:
         case RecruitType.AnarchyRecruit:
-            if (isDuringFest) {
+            if (checkFes(schedule, type)) {
                 // フェス期間中にナワバリ募集またはバンカラ募集を建てようとした場合
                 return {
                     canRecruit: false,
@@ -47,6 +43,25 @@ export async function checkRecruitSchedule(
 
         case RecruitType.EventRecruit:
             break;
+        case RecruitType.SalmonRecruit:
+        case RecruitType.BigRunRecruit:
+        case RecruitType.TeamContestRecruit:
+            return await checkSalmonGroupCondtion(schedule, type, recruitType);
+        default:
+            break;
+    }
+    return { canRecruit: true, recruitDateErrorMessage: '' };
+}
+
+async function checkSalmonGroupCondtion(
+    schedule: Sp3Schedule,
+    type: number,
+    recruitType: RecruitType,
+) {
+    const isDuringBigRun = checkBigRun(schedule, type);
+    const isDuringTeamContest = checkTeamContest(schedule, type);
+
+    switch (recruitType) {
         case RecruitType.SalmonRecruit:
             if (isDuringBigRun) {
                 // ビッグラン期間中に通常のサーモン募集を建てようとした場合
