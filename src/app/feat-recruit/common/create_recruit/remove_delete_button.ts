@@ -1,7 +1,7 @@
-import { RecruitData } from './arrange_command_data';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { exists } from '../../../common/others';
+import { RecruitData } from '../../types/recruit_data';
 import {
     isVoiceChannelLockNeeded,
     removeVoiceChannelReservation,

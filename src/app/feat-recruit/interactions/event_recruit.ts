@@ -9,7 +9,7 @@ import { RoleKeySet } from '../../constant/role_key';
 import { recruitEventCanvas, ruleEventCanvas } from '../canvases/event_canvas';
 import { RecruitOpCode } from '../canvases/regenerate_canvas';
 import { recruitAutoClose } from '../common/auto_close';
-import { RecruitData, arrangeRecruitData } from '../common/create_recruit/arrange_command_data';
+import { arrangeRecruitData } from '../common/create_recruit/arrange_command_data';
 import { arrangeModalRecruitData } from '../common/create_recruit/arrange_modal_data';
 import { removeDeleteButton } from '../common/create_recruit/remove_delete_button';
 import {
@@ -17,6 +17,7 @@ import {
     RecruitImageBuffers,
 } from '../common/create_recruit/send_recruit_message';
 import { sendRecruitSticky } from '../sticky/recruit_sticky_messages';
+import { RecruitData } from '../types/recruit_data';
 
 export async function eventRecruit(
     interaction:

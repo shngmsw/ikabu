@@ -5,13 +5,13 @@ import {
     ModalSubmitInteraction,
 } from 'discord.js';
 
-import { RecruitData } from './arrange_command_data';
 import {
     recruitActionRow,
     recruitDeleteButton,
     unlockChannelButton,
 } from '../../buttons/create_recruit_buttons';
 import { getMemberMentions } from '../../interactions/buttons/other_events';
+import { RecruitData } from '../../types/recruit_data';
 import { isVoiceChannelLockNeeded, reserveVoiceChannel } from '../voice_channel_reservation';
 
 type RecruitMessageList = {
