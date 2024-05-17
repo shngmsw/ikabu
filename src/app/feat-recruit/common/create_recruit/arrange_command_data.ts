@@ -180,7 +180,6 @@ export async function arrangeRecruitData(
     } catch (error) {
         if (error instanceof RecruitConditionError) {
             // 募集条件のチェックを行う
-
             await interaction.deleteReply();
             await interaction.followUp({
                 content: `\`${interaction.toString()}\`\n${error.getErrorMessage()}`,

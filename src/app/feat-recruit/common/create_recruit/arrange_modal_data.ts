@@ -139,7 +139,6 @@ export async function arrangeModalRecruitData(
     } catch (error) {
         if (error instanceof RecruitConditionError) {
             // 募集条件のチェックを行う
-
             await interaction.deleteReply();
             await interaction.followUp({
                 content: `\`${interaction.toString()}\`\n${error.getErrorMessage()}`,
@@ -147,8 +146,8 @@ export async function arrangeModalRecruitData(
             });
         } else {
             await recruitChannel.send(ErrorTexts.UndefinedError);
+            await sendErrorLogs(logger, error);
         }
-        await sendErrorLogs(logger, error);
         throw new Error();
     }
 }
