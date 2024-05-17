@@ -1,6 +1,5 @@
 import { Message } from 'discord.js';
 
-import { RecruitData } from './create_recruit/arrange_command_data';
 import {
     isVoiceChannelLockNeeded,
     removeVoiceChannelReservation,
@@ -12,6 +11,7 @@ import { notExists } from '../../common/others';
 import { regenerateCanvas, RecruitOpCode } from '../canvases/regenerate_canvas';
 import { getMemberMentions } from '../interactions/buttons/other_events';
 import { sendCloseEmbedSticky } from '../sticky/recruit_sticky_messages';
+import { RecruitData } from '../types/recruit_data';
 
 export async function recruitAutoClose(
     recruitData: RecruitData,
