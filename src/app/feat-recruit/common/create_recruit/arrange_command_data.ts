@@ -154,6 +154,6 @@ export async function arrangeRecruitData(
             await recruitChannel.send(ErrorTexts.UndefinedError);
             await sendErrorLogs(logger, error);
         }
-        throw new Error();
+        throw error;
     }
 }
