@@ -1,16 +1,8 @@
-import { Member } from '@prisma/client';
-import {
-    Guild,
-    GuildMember,
-    GuildTextBasedChannel,
-    ModalSubmitInteraction,
-    VoiceBasedChannel,
-} from 'discord.js';
+import { ModalSubmitInteraction } from 'discord.js';
 
 import { RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { getSchedule } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
-import { Sp3Schedule } from '../../../common/apis/splatoon3.ink/types/schedule';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
 import {
@@ -28,36 +20,10 @@ import {
     checkRegularRecruitNum,
 } from '../../common/condition_checks/recruit_num_check';
 import { checkRecruitSchedule } from '../../common/condition_checks/schedule_check';
+import { RecruitConditionError } from '../../types/recruit_condition_error';
+import { RecruitData } from '../../types/recruit_data';
+
 const logger = log4js_obj.getLogger('recruit');
-
-export type RecruitData = {
-    guild: Guild;
-    interactionMember: GuildMember;
-    recruitChannel: GuildTextBasedChannel;
-    scheduleNum: number;
-    txt: string;
-    recruitNum: number;
-    condition: string;
-    count: number;
-    recruiter: Member;
-    attendee1: Member | null;
-    attendee2: Member | null;
-    attendee3: Member | null;
-    schedule: Sp3Schedule;
-    voiceChannel: VoiceBasedChannel | null;
-};
-
-export class RecruitConditionError extends Error {
-    private errorMessage: string | undefined;
-    constructor(errorMessage?: string) {
-        super();
-        this.errorMessage = errorMessage;
-    }
-
-    public getErrorMessage() {
-        return this.errorMessage ?? ErrorTexts.UndefinedError;
-    }
-}
 
 export async function arrangeModalRecruitData(
     interaction: ModalSubmitInteraction<'cached' | 'raw'>,
