@@ -51,17 +51,20 @@ import { sendErrorLogs } from '../logs/error/send_error_logs.js';
 const logger = log4js_obj.getLogger('interaction');
 
 export async function call(interaction: ChatInputCommandInteraction<CacheType>) {
-    await sendCommandLog(interaction);
+    try {
+        sendCommandLog(interaction);
+    } catch (error) {
+        await sendErrorLogs(logger, error);
+    }
 
     await CommandsHandler(interaction); // DMとGuild両方で動くコマンド
 
-    if (interaction.inGuild()) {
+    if (interaction.inCachedGuild()) {
         // Guildのみで動くコマンド
         await guildOnlyCommandsHandler(interaction);
-    } else {
+    } else if (exists(interaction.channel) && interaction.channel.isDMBased()) {
         // DMのみで動くコマンド
     }
-
     return;
 }
 
