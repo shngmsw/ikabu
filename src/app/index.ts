@@ -27,7 +27,7 @@ import {
 import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
 import { searchChannelById } from './common/manager/channel_manager';
 import { searchAPIMemberById } from './common/manager/member_manager';
-import { assertExistCheck, exists, notExists } from './common/others';
+import { assertExistCheck, exists, getDeveloperMention, notExists } from './common/others';
 import { ChannelKeySet } from './constant/channel_key';
 import {
     deleteChannel,
@@ -303,8 +303,20 @@ client.on(
 
 client.on('interactionCreate', async (interaction: Interaction<CacheType>) => {
     try {
+        // RawGuildのInteractionが送られてくる頻度を確認するためのログ
+        if (interaction.inRawGuild()) {
+            const guildId = interaction.guildId;
+            const guild = await client.guilds.fetch(guildId);
+            logger.warn(`raw guild interaction: ${guild.name}, guild fetched!`);
+            if (exists(interaction.channel)) {
+                await interaction.channel.send(
+                    (await getDeveloperMention(interaction.guildId)) +
+                        'サーバー情報が取得できなかったでし！',
+                );
+            }
+        }
+
         if (interaction.isRepliable()) {
-            // 各handlerの内どれかしか呼ばれないためawaitしない
             if (interaction.isButton()) {
                 void buttonHandler.call(interaction);
             } else if (interaction.isModalSubmit()) {
