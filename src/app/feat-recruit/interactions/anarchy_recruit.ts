@@ -46,8 +46,9 @@ export async function anarchyRecruit(
     let rank: string;
 
     if (interaction.isCommand()) {
-        recruitRoleId = await getAnarchyRecruitRoleId(interaction);
-        rank = interaction.options.getString('募集ウデマエ') ?? '指定なし'; // バンカラマッチ用のウデマエ指定
+        const recruitRankRole = await getAnarchyRecruitRole(interaction);
+        recruitRoleId = recruitRankRole.recruitRoleId;
+        rank = recruitRankRole.rank;
 
         try {
             recruitData = await arrangeRecruitData(interaction, recruitName, recruitType);
@@ -129,9 +130,13 @@ async function getAnarchyImageBuffers(
     return { recruitBuffer: recruitBuffer, ruleBuffer: ruleBuffer };
 }
 
-async function getAnarchyRecruitRoleId(
+type AnarchyRecruitRankRole = {
+    recruitRoleId: string | null;
+    rank: string;
+};
+async function getAnarchyRecruitRole(
     interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
-): Promise<string | null> {
+): Promise<AnarchyRecruitRankRole> {
     assertExistCheck(interaction.channel, 'channel');
     const anarchyRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
         interaction.guildId,
@@ -142,15 +147,16 @@ async function getAnarchyRecruitRoleId(
             (await getDeveloperMention(interaction.guildId)) +
                 `\nバンカラ募集ロールが設定されていないでし！`,
         );
-        return null;
+        return { recruitRoleId: null, rank: 'えらー' };
     }
+
     const rankRoleKey = interaction.options.getString('募集ウデマエ');
     let rank = '指定なし';
     // 募集条件がランクの場合はウデマエロールにメンション
     if (exists(rankRoleKey)) {
         if (!isRoleKey(rankRoleKey)) {
             await sendErrorLogs(logger, 'rankRoleKey is not RoleKey');
-            return null;
+            return { recruitRoleId: anarchyRecruitRoleId, rank: 'えらー' };
         }
         rank = getUniqueRoleNameByKey(rankRoleKey);
         const rankRoleId = await UniqueRoleService.getRoleIdByKey(interaction.guildId, rankRoleKey);
@@ -159,10 +165,10 @@ async function getAnarchyRecruitRoleId(
                 (await getDeveloperMention(interaction.guildId)) +
                     `\nウデマエロール\`${rank}\`が設定されていないでし！`,
             );
-            return null;
+            return { recruitRoleId: anarchyRecruitRoleId, rank: 'えらー' };
         }
-        return rankRoleId;
+        return { recruitRoleId: rankRoleId, rank: rank };
     } else {
-        return anarchyRecruitRoleId;
+        return { recruitRoleId: anarchyRecruitRoleId, rank: '指定なし' };
     }
 }
