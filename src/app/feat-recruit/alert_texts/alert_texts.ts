@@ -7,6 +7,7 @@ export const RecruitAlertTexts = {
     InvalidRecruitNum: '募集人数がおかしいでし！',
     RecruitNumOutOfRange: '募集人数は1～3までで指定するでし！',
     RegularRecruitNumOutOfRange: '募集人数は1～7までで指定するでし！',
+    NotDuringEvent: '現在イベントマッチは開催されていないでし！',
     NotDuringFest: '募集を建てようとした期間はフェスが行われていないでし！',
     DuringBigRun:
         '募集を建てようとした期間はビッグランが行われているでし！\nビッグランの募集を建てる場合は`/サーモンラン募集 bigrun`を利用するでし！',

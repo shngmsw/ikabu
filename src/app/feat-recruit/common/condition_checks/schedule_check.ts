@@ -3,8 +3,10 @@ import {
     checkFes,
     checkBigRun,
     checkTeamContest,
+    getEventData,
 } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
 import { Sp3Schedule } from '../../../common/apis/splatoon3.ink/types/schedule';
+import { notExists } from '../../../common/others';
 import { RecruitAlertTexts } from '../../alert_texts/alert_texts';
 import { getFestPeriodAlertText } from '../../alert_texts/schedule_related_alerts';
 
@@ -42,6 +44,12 @@ export async function checkRecruitSchedule(
             break;
 
         case RecruitType.EventRecruit:
+            if (notExists(await getEventData(schedule))) {
+                return {
+                    canRecruit: false,
+                    recruitDateErrorMessage: RecruitAlertTexts.NotDuringEvent,
+                };
+            }
             break;
         case RecruitType.SalmonRecruit:
         case RecruitType.BigRunRecruit:
