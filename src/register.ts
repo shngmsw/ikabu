@@ -19,6 +19,7 @@ import {
 import { assertExistCheck } from './app/common/others.js';
 import { ChannelKeySet } from './app/constant/channel_key.js';
 import { RoleKeySet } from './app/constant/role_key.js';
+import { shutdown } from './app/feat-admin/shutdown/command_builder.js';
 import { uniqueRoleSettings } from './app/feat-admin/unique_role_settings/command_builder.js';
 import { sendErrorLogs } from './app/logs/error/send_error_logs.js';
 import { commandNames } from './constant.js';
@@ -1353,6 +1354,7 @@ const festivalSettings = new SlashCommandBuilder()
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels);
 
 const commands = [
+    shutdown,
     voiceLock,
     friendCode,
     wiki,

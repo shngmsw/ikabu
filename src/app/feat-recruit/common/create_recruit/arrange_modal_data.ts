@@ -14,6 +14,7 @@ import {
 } from '../../../common/others';
 import { ErrorTexts } from '../../../constant/error_texts';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
+import { sendRecruitModalLog } from '../../../logs/modals/recruit_modal_log';
 import { RecruitAlertTexts } from '../../alert_texts/alert_texts';
 import {
     checkRecruitNum,
@@ -38,6 +39,8 @@ export async function arrangeModalRecruitData(
     const scheduleNum = 0;
 
     try {
+        await sendRecruitModalLog(interaction);
+
         const schedule = await getSchedule();
         if (notExists(schedule)) {
             throw new RecruitConditionError(
@@ -57,6 +60,11 @@ export async function arrangeModalRecruitData(
 
         const voiceChannel = null;
         const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
+
+        if (Number.isNaN(recruitNum)) {
+            throw new RecruitConditionError(RecruitAlertTexts.RecruitNumIsNaN);
+        }
+
         let condition = interaction.fields.getTextInputValue('condition');
         if (isEmpty(condition)) condition = 'なし';
 
@@ -107,7 +115,7 @@ export async function arrangeModalRecruitData(
             // 募集条件のチェックを行う
             await interaction.deleteReply();
             await interaction.followUp({
-                content: `\`${interaction.toString()}\`\n${error.getErrorMessage()}`,
+                content: `${error.getErrorMessage()}`,
                 ephemeral: true,
             });
         } else {

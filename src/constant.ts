@@ -1,4 +1,5 @@
 export const commandNames = {
+    shutdown: 'shutdown',
     vclock: 'ボイスロック',
     close: 'close',
     friend_code: 'friend_code',
