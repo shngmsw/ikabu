@@ -14,6 +14,7 @@ import {
 } from '../../../common/others';
 import { ErrorTexts } from '../../../constant/error_texts';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
+import { sendRecruitModalLog } from '../../../logs/modals/recruit_modal_log';
 import { RecruitAlertTexts } from '../../alert_texts/alert_texts';
 import {
     checkRecruitNum,
@@ -38,6 +39,8 @@ export async function arrangeModalRecruitData(
     const scheduleNum = 0;
 
     try {
+        await sendRecruitModalLog(interaction);
+
         const schedule = await getSchedule();
         if (notExists(schedule)) {
             throw new RecruitConditionError(
