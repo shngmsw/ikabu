@@ -13,5 +13,8 @@ export async function shutdown(interaction: ChatInputCommandInteraction<'cached'
         content: 'BOTをシャットダウンするでし！\n再起動までしばらく待つでし！',
     });
 
-    process.exit(0);
+    await interaction.client.destroy().then(
+        () => process.exit(0), // クライアントの切断に成功したらプロセスを終了する
+        () => interaction.editReply('クライアントの切断に失敗したでし！'), // クライアントの切断に失敗したらエラーメッセージを送信する
+    );
 }
