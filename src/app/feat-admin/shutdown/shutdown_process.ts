@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
 
-export async function shutdownBot(interaction: ChatInputCommandInteraction<'cached'>) {
+export async function shutdown(interaction: ChatInputCommandInteraction<'cached'>) {
     const member = interaction.member;
     if (!member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
         return await interaction.reply({
