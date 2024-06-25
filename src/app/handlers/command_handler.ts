@@ -19,7 +19,7 @@ import { channelSettingsHandler } from '../feat-admin/channel_settings/channel_s
 import { variablesHandler } from '../feat-admin/environment_variables/variables_handler';
 import { festSettingHandler } from '../feat-admin/fest_setting/fest_settings.js';
 import { joinedAtFixer } from '../feat-admin/joined_date_fixer/fix_joined_date.js';
-import { shutdownBot } from '../feat-admin/shutdown/shutdown.js';
+import { shutdownBot } from '../feat-admin/shutdown/shutdown_process';
 import { uniqueChannelSettingsHandler } from '../feat-admin/unique_channel_settings/unique_channel_settings_hanlder.js';
 import { uniqueRoleSettingsHandler } from '../feat-admin/unique_role_settings/unique_role_settings_hanlder.js';
 import { createNewRecruitButton } from '../feat-recruit/buttons/create_recruit_buttons';
