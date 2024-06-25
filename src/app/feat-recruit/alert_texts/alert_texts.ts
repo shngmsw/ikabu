@@ -5,6 +5,7 @@ export const RecruitAlertTexts = {
     ScheduleLoadError: 'スケジュールの取得に失敗したでし！',
     RuleDataLoadError: 'マッチ情報の取得に失敗したでし！',
     InvalidRecruitNum: '募集人数がおかしいでし！',
+    RecruitNumIsNaN: '募集人数は半角数字で指定するでし！',
     RecruitNumOutOfRange: '募集人数は1～3までで指定するでし！',
     RegularRecruitNumOutOfRange: '募集人数は1～7までで指定するでし！',
     NotDuringEvent: '現在イベントマッチは開催されていないでし！',
