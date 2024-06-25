@@ -57,6 +57,11 @@ export async function arrangeModalRecruitData(
 
         const voiceChannel = null;
         const recruitNum = Number(interaction.fields.getTextInputValue('rNum'));
+
+        if (Number.isNaN(recruitNum)) {
+            throw new RecruitConditionError(RecruitAlertTexts.RecruitNumIsNaN);
+        }
+
         let condition = interaction.fields.getTextInputValue('condition');
         if (isEmpty(condition)) condition = 'なし';
 
@@ -107,7 +112,7 @@ export async function arrangeModalRecruitData(
             // 募集条件のチェックを行う
             await interaction.deleteReply();
             await interaction.followUp({
-                content: `\`${interaction.toString()}\`\n${error.getErrorMessage()}`,
+                content: `${error.getErrorMessage()}`,
                 ephemeral: true,
             });
         } else {
