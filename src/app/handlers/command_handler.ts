@@ -81,8 +81,6 @@ async function guildOnlyCommandsHandler(
             if (commandName === commandNames.shutdown) {
                 await shutdown(interaction);
             }
-
-            return;
         }
 
         if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
