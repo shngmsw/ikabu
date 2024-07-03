@@ -5,15 +5,7 @@ import { log4js_obj } from '../../log4js_settings.js';
 import { exists } from '../common/others';
 import { ErrorTexts } from '../constant/error_texts.js';
 import { handleBan } from '../feat-admin/ban/ban';
-import { handleCreateRoom } from '../feat-admin/channel_manager/createRoom.js';
-import { handleDeleteCategory } from '../feat-admin/channel_manager/deleteCategory.js';
-import { handleDeleteChannel } from '../feat-admin/channel_manager/deleteChannel.js';
-import {
-    handleCreateRole,
-    handleDeleteRole,
-    handleAssignRole,
-    handleUnassignRole,
-} from '../feat-admin/channel_manager/manageRole.js';
+import { channelManagerHandler } from '../feat-admin/channel_manager/channel_manager_handler.js';
 import { channelSettingsHandler } from '../feat-admin/channel_settings/channel_settings_hanlder.js';
 import { variablesHandler } from '../feat-admin/environment_variables/variables_handler';
 import { festSettingHandler } from '../feat-admin/fest_setting/fest_settings.js';
@@ -71,7 +63,6 @@ async function guildOnlyCommandsHandler(
     interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
 ) {
     const { commandName } = interaction;
-    const { options } = interaction;
 
     try {
         if (interaction.inCachedGuild()) {
@@ -129,33 +120,8 @@ async function guildOnlyCommandsHandler(
                 await handleIkabuExperience(interaction);
             } else if (commandName === commandNames.voice) {
                 await handleTTSCommand(interaction);
-            }
-        }
-
-        if (commandName == commandNames.ch_manager) {
-            const subCommand = options.getSubcommand();
-            switch (subCommand) {
-                case 'チャンネル作成':
-                    await handleCreateRoom(interaction);
-                    break;
-                case 'ロール作成':
-                    await handleCreateRole(interaction);
-                    break;
-                case 'ロール割当':
-                    await handleAssignRole(interaction);
-                    break;
-                case 'ロール解除':
-                    await handleUnassignRole(interaction);
-                    break;
-                case 'カテゴリー削除':
-                    await handleDeleteCategory(interaction);
-                    break;
-                case 'チャンネル削除':
-                    await handleDeleteChannel(interaction);
-                    break;
-                case 'ロール削除':
-                    await handleDeleteRole(interaction);
-                    break;
+            } else if (commandName == commandNames.ch_manager) {
+                await channelManagerHandler(interaction);
             }
         }
     } catch (error) {
