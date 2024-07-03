@@ -4,14 +4,12 @@ import { deleteVariables } from './delete_variables';
 import { setVariables } from './set_variables';
 import { showVariables } from './show_variables';
 import { ChannelService } from '../../../db/channel_service';
-import { getGuildByInteraction } from '../../common/manager/guild_manager';
-import { getAPIMemberByInteraction } from '../../common/manager/member_manager';
 import { notExists } from '../../common/others';
 
-export async function variablesHandler(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function variablesHandler(interaction: ChatInputCommandInteraction<'cached'>) {
     await interaction.deferReply({ ephemeral: true });
-    const guild = await getGuildByInteraction(interaction);
-    const member = await getAPIMemberByInteraction(interaction);
+    const guild = interaction.guild;
+    const member = interaction.member;
 
     if (!member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
         return await interaction.editReply({

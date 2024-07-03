@@ -116,13 +116,13 @@ async function guildOnlyCommandsHandler(
                 await uniqueChannelSettingsHandler(interaction);
             } else if (commandName === commandNames.uniqueRoleSetting) {
                 await uniqueRoleSettingsHandler(interaction);
+            } else if (commandName === commandNames.variablesSettings) {
+                await variablesHandler(interaction);
             }
         }
 
         if (commandName === commandNames.experience) {
             await handleIkabuExperience(interaction);
-        } else if (commandName === commandNames.variablesSettings) {
-            await variablesHandler(interaction);
         } else if (commandName == commandNames.voice_pick) {
             await handleVoicePick(interaction);
         } else if (commandName == commandNames.ban) {
