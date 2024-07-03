@@ -10,7 +10,7 @@ import { sendErrorLogs } from '../../logs/error/send_error_logs';
 const logger = log4js_obj.getLogger('interaction');
 
 export async function festEnd(
-    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+    interaction: ChatInputCommandInteraction<'cached'>,
     guild: Guild,
     categoryChannel: CategoryChannel,
 ) {

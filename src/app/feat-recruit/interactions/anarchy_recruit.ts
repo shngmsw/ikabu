@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction, ModalSubmitInteraction } from 'discord.js';
 
-import { registerRecruitData } from './registerRecruitData';
 import { RecruitType } from '../../../db/recruit_service';
 import { UniqueRoleService } from '../../../db/unique_role_service';
 import { log4js_obj } from '../../../log4js_settings';
@@ -20,6 +19,7 @@ import { RecruitOpCode } from '../canvases/regenerate_canvas';
 import { recruitAutoClose } from '../common/auto_close';
 import { arrangeRecruitData } from '../common/create_recruit/arrange_command_data';
 import { arrangeModalRecruitData } from '../common/create_recruit/arrange_modal_data';
+import { registerRecruitData } from '../common/create_recruit/register_recruit_data';
 import { removeDeleteButton } from '../common/create_recruit/remove_delete_button';
 import {
     sendRecruitCanvas,
@@ -31,9 +31,7 @@ import { RecruitData } from '../types/recruit_data';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function anarchyRecruit(
-    interaction:
-        | ChatInputCommandInteraction<'cached' | 'raw'>
-        | ModalSubmitInteraction<'cached' | 'raw'>,
+    interaction: ChatInputCommandInteraction<'cached'> | ModalSubmitInteraction<'cached' | 'raw'>,
 ) {
     assertExistCheck(interaction.channel, 'channel');
     // 'インタラクションに失敗'が出ないようにするため

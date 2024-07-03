@@ -3,18 +3,17 @@ import { ChatInputCommandInteraction } from 'discord.js';
 import { MemberService } from '../../../db/member_service';
 import { UniqueRoleService } from '../../../db/unique_role_service';
 import { log4js_obj } from '../../../log4js_settings';
-import { getGuildByInteraction } from '../../common/manager/guild_manager';
-import { getAPIMemberByInteraction, searchDBMemberById } from '../../common/manager/member_manager';
+import { searchDBMemberById } from '../../common/manager/member_manager';
 import { exists, notExists } from '../../common/others';
 import { RoleKeySet } from '../../constant/role_key';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function joinedAtFixer(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function joinedAtFixer(interaction: ChatInputCommandInteraction<'cached'>) {
     try {
-        const guild = await getGuildByInteraction(interaction);
-        const member = await getAPIMemberByInteraction(interaction);
+        const guild = interaction.guild;
+        const member = interaction.member;
 
         const developerRoleId = await UniqueRoleService.getRoleIdByKey(
             guild.id,

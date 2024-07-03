@@ -23,16 +23,14 @@ const logger = log4js_obj.getLogger('interaction');
 /*
  * スラコマ打たれたときの動作
  */
-export async function voiceLocker(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
-    const guild = await getGuildByInteraction(interaction);
-    const author = await searchAPIMemberById(guild, interaction.member.user.id);
-    assertExistCheck(author, 'author');
+export async function voiceLocker(interaction: ChatInputCommandInteraction<'cached'>) {
+    const member = interaction.member;
     const channel = interaction.channel;
     assertExistCheck(channel, 'channel');
     const limitNum = interaction.options.getInteger('人数');
 
     // ボイスチャンネル未接続or違うボイスチャンネル接続中だと弾く
-    if (notExists(author.voice.channel) || author.voice.channel.id != channel.id) {
+    if (notExists(member.voice.channel) || member.voice.channel.id != channel.id) {
         await interaction.reply({
             content: '接続中のボイスチャンネルでコマンドを打つでし！',
             ephemeral: true,

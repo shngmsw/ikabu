@@ -3,8 +3,7 @@ import { ChannelType, ChatInputCommandInteraction } from 'discord.js';
 import { RecruitType } from '../../../../db/recruit_service';
 import { log4js_obj } from '../../../../log4js_settings';
 import { getSchedule } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
-import { getGuildByInteraction } from '../../../common/manager/guild_manager';
-import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
+import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, getDeveloperMention, notExists } from '../../../common/others';
 import { ErrorTexts } from '../../../constant/error_texts';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
@@ -21,15 +20,14 @@ import { RecruitData } from '../../types/recruit_data';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function arrangeRecruitData(
-    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+    interaction: ChatInputCommandInteraction<'cached'>,
     recruitName: string,
     recruitType: RecruitType,
 ): Promise<RecruitData> {
-    const guild = await getGuildByInteraction(interaction);
+    const guild = interaction.guild;
     const options = interaction.options;
-    const interactionMember = await searchAPIMemberById(guild, interaction.member.user.id);
+    const interactionMember = interaction.member;
     const recruitChannel = interaction.channel;
-    assertExistCheck(interactionMember, 'GuildMember');
     assertExistCheck(recruitChannel, 'interaction.channel');
 
     let scheduleNum = 0;
