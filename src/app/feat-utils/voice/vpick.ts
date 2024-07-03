@@ -1,18 +1,14 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
-import { getGuildByInteraction } from '../../common/manager/guild_manager';
-import { searchAPIMemberById } from '../../common/manager/member_manager';
-import { assertExistCheck, notExists } from '../../common/others';
+import { notExists } from '../../common/others';
 
-export async function handleVoicePick(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function handleVoicePick(interaction: ChatInputCommandInteraction<'cached'>) {
     if (notExists(interaction.channel)) return;
 
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    const guild = await getGuildByInteraction(interaction);
-    const member = await searchAPIMemberById(guild, interaction.member.user.id);
-    assertExistCheck(member, 'member');
+    const member = interaction.member;
 
     const { options } = interaction;
     // 発言したヒトが接続してるボイチャから数字分のヒトをランダム抽出
