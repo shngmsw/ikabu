@@ -59,7 +59,7 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
     return;
 }
 
-async function CachedGuildCommandsHandler(interaction: ChatInputCommandInteraction<'cached'>) {
+async function cachedGuildCommandsHandler(interaction: ChatInputCommandInteraction<'cached'>) {
     const { commandName } = interaction;
 
     try {
