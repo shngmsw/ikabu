@@ -1,20 +1,18 @@
 import { ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
 
 import { log4js_obj } from '../../../log4js_settings';
-import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, exists } from '../../common/others';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('ban');
 
-export async function handleBan(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function handleBan(interaction: ChatInputCommandInteraction<'cached'>) {
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply({ ephemeral: false });
 
-    const guild = await getGuildByInteraction(interaction);
-    const member = await searchAPIMemberById(guild, interaction.member.user.id);
-    assertExistCheck(member, 'member');
+    const guild = interaction.guild;
+    const member = interaction.member;
     const options = interaction.options;
     const banTarget = options.getUser('ban対象', true);
     const reason = options.getString('ban理由');
