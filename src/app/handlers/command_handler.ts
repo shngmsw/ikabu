@@ -110,15 +110,15 @@ async function guildOnlyCommandsHandler(
                 await buttonRecruit(interaction);
             } else if (commandName === commandNames.voiceChannelMention) {
                 await voiceMention(interaction);
+            } else if (commandName === commandNames.channelSetting) {
+                await channelSettingsHandler(interaction);
+            } else if (commandName === commandNames.uniqueChannelSetting) {
+                await uniqueChannelSettingsHandler(interaction);
             }
         }
 
         if (commandName === commandNames.experience) {
             await handleIkabuExperience(interaction);
-        } else if (commandName === commandNames.channelSetting) {
-            await channelSettingsHandler(interaction);
-        } else if (commandName === commandNames.uniqueChannelSetting) {
-            await uniqueChannelSettingsHandler(interaction);
         } else if (commandName === commandNames.uniqueRoleSetting) {
             await uniqueRoleSettingsHandler(interaction);
         } else if (commandName === commandNames.variablesSettings) {

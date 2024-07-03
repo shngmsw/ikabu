@@ -4,18 +4,17 @@ import { setUniqueChannelCommand } from './set_unique_channel';
 import { showAllUniqueChannelSettings } from './show_all_unique_channel';
 import { unsetUniqueChannelCommand } from './unset_unique_channel';
 import { log4js_obj } from '../../../log4js_settings';
-import { getAPIMemberByInteraction } from '../../common/manager/member_manager';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
 export async function uniqueChannelSettingsHandler(
-    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
+    interaction: ChatInputCommandInteraction<'cached'>,
 ) {
     try {
         await interaction.deferReply({ ephemeral: false });
 
-        const member = await getAPIMemberByInteraction(interaction);
+        const member = interaction.member;
 
         if (!member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
             return await interaction.editReply({

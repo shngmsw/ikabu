@@ -10,21 +10,17 @@ import { adminChannelSetting } from './admin_channel_setting';
 import { vcToolsSetting } from './vcTools_setting';
 import { ChannelService } from '../../../db/channel_service';
 import { log4js_obj } from '../../../log4js_settings';
-import { getGuildByInteraction } from '../../common/manager/guild_manager';
-import { getAPIMemberByInteraction } from '../../common/manager/member_manager';
 import { exists, notExists } from '../../common/others';
 import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function channelSettingsHandler(
-    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
-) {
+export async function channelSettingsHandler(interaction: ChatInputCommandInteraction<'cached'>) {
     try {
         await interaction.deferReply({ ephemeral: false });
 
-        const guild = await getGuildByInteraction(interaction);
-        const member = await getAPIMemberByInteraction(interaction);
+        const guild = interaction.guild;
+        const member = interaction.member;
 
         if (!member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
             return await interaction.editReply({
