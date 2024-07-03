@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction, ModalSubmitInteraction } from 'discord.js';
 
-import { registerRecruitData } from './registerRecruitData';
 import { RecruitType } from '../../../db/recruit_service';
 import { UniqueRoleService } from '../../../db/unique_role_service';
 import {
@@ -17,6 +16,7 @@ import { RecruitOpCode } from '../canvases/regenerate_canvas';
 import { recruitSalmonCanvas, ruleSalmonCanvas } from '../canvases/salmon_canvas';
 import { arrangeRecruitData } from '../common/create_recruit/arrange_command_data';
 import { arrangeModalRecruitData } from '../common/create_recruit/arrange_modal_data';
+import { registerRecruitData } from '../common/create_recruit/register_recruit_data';
 import { removeDeleteButton } from '../common/create_recruit/remove_delete_button';
 import {
     sendRecruitCanvas,
