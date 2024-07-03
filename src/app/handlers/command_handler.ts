@@ -86,12 +86,12 @@ async function guildOnlyCommandsHandler(
                 await voiceLocker(interaction);
             } else if (commandName === commandNames.close) {
                 await closeCommand(interaction);
+            } else if (commandName === commandNames.team_divider) {
+                await dividerInitialMessage(interaction);
             }
         }
 
-        if (commandName === commandNames.team_divider) {
-            await dividerInitialMessage(interaction);
-        } else if (commandName === commandNames.regular) {
+        if (commandName === commandNames.regular) {
             await regularRecruit(interaction);
         } else if (commandName === commandNames.other_game) {
             await otherGameRecruit(interaction);
