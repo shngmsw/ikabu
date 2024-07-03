@@ -106,12 +106,12 @@ async function guildOnlyCommandsHandler(
                 await otherGameRecruit(interaction);
             } else if (commandName === commandNames.private) {
                 await privateRecruit(interaction);
+            } else if (commandName === commandNames.buttonRecruit) {
+                await buttonRecruit(interaction);
             }
         }
 
-        if (commandName === commandNames.buttonRecruit) {
-            await buttonRecruit(interaction);
-        } else if (commandName === commandNames.experience) {
+        if (commandName === commandNames.experience) {
             await handleIkabuExperience(interaction);
         } else if (commandName === commandNames.voiceChannelMention) {
             await voiceMention(interaction);
