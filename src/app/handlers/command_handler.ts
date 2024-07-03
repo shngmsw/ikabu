@@ -52,77 +52,72 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
 
     if (interaction.inCachedGuild()) {
         // Guildのみで動くコマンド
-        await guildOnlyCommandsHandler(interaction);
+        await CachedGuildCommandsHandler(interaction);
     } else if (exists(interaction.channel) && interaction.channel.isDMBased()) {
         // DMのみで動くコマンド
     }
     return;
 }
 
-async function guildOnlyCommandsHandler(
-    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
-) {
+async function CachedGuildCommandsHandler(interaction: ChatInputCommandInteraction<'cached'>) {
     const { commandName } = interaction;
 
     try {
-        if (interaction.inCachedGuild()) {
-            // 後々、すべてのギルドコマンドをCahedGuildとして処理するようにしたい
-            if (commandName === commandNames.shutdown) {
-                await shutdown(interaction);
-            } else if (
-                commandName === commandNames.vclock &&
-                !(interaction.replied || interaction.deferred)
-            ) {
-                await voiceLocker(interaction);
-            } else if (commandName === commandNames.close) {
-                await closeCommand(interaction);
-            } else if (commandName === commandNames.team_divider) {
-                await dividerInitialMessage(interaction);
-            } else if (commandName === commandNames.regular) {
-                await regularRecruit(interaction);
-            } else if (commandName === commandNames.anarchy) {
-                await anarchyRecruit(interaction);
-            } else if (commandName === commandNames.event) {
-                await eventRecruit(interaction);
-            } else if (commandName === commandNames.salmon) {
-                await salmonRecruit(interaction);
-            } else if (commandName === commandNames.fesA) {
-                await festRecruit(interaction);
-            } else if (commandName === commandNames.fesB) {
-                await festRecruit(interaction);
-            } else if (commandName === commandNames.fesC) {
-                await festRecruit(interaction);
-            } else if (commandName === commandNames.other_game) {
-                await otherGameRecruit(interaction);
-            } else if (commandName === commandNames.private) {
-                await privateRecruit(interaction);
-            } else if (commandName === commandNames.buttonRecruit) {
-                await buttonRecruit(interaction);
-            } else if (commandName === commandNames.voiceChannelMention) {
-                await voiceMention(interaction);
-            } else if (commandName === commandNames.channelSetting) {
-                await channelSettingsHandler(interaction);
-            } else if (commandName === commandNames.uniqueChannelSetting) {
-                await uniqueChannelSettingsHandler(interaction);
-            } else if (commandName === commandNames.uniqueRoleSetting) {
-                await uniqueRoleSettingsHandler(interaction);
-            } else if (commandName === commandNames.variablesSettings) {
-                await variablesHandler(interaction);
-            } else if (commandName == commandNames.voice_pick) {
-                await handleVoicePick(interaction);
-            } else if (commandName == commandNames.ban) {
-                await handleBan(interaction);
-            } else if (commandName == commandNames.joinedDateFixer) {
-                await joinedAtFixer(interaction);
-            } else if (commandName == commandNames.festivalSettings) {
-                await festSettingHandler(interaction);
-            } else if (commandName === commandNames.experience) {
-                await handleIkabuExperience(interaction);
-            } else if (commandName === commandNames.voice) {
-                await handleTTSCommand(interaction);
-            } else if (commandName == commandNames.ch_manager) {
-                await channelManagerHandler(interaction);
-            }
+        if (commandName === commandNames.shutdown) {
+            await shutdown(interaction);
+        } else if (
+            commandName === commandNames.vclock &&
+            !(interaction.replied || interaction.deferred)
+        ) {
+            await voiceLocker(interaction);
+        } else if (commandName === commandNames.close) {
+            await closeCommand(interaction);
+        } else if (commandName === commandNames.team_divider) {
+            await dividerInitialMessage(interaction);
+        } else if (commandName === commandNames.regular) {
+            await regularRecruit(interaction);
+        } else if (commandName === commandNames.anarchy) {
+            await anarchyRecruit(interaction);
+        } else if (commandName === commandNames.event) {
+            await eventRecruit(interaction);
+        } else if (commandName === commandNames.salmon) {
+            await salmonRecruit(interaction);
+        } else if (commandName === commandNames.fesA) {
+            await festRecruit(interaction);
+        } else if (commandName === commandNames.fesB) {
+            await festRecruit(interaction);
+        } else if (commandName === commandNames.fesC) {
+            await festRecruit(interaction);
+        } else if (commandName === commandNames.other_game) {
+            await otherGameRecruit(interaction);
+        } else if (commandName === commandNames.private) {
+            await privateRecruit(interaction);
+        } else if (commandName === commandNames.buttonRecruit) {
+            await buttonRecruit(interaction);
+        } else if (commandName === commandNames.voiceChannelMention) {
+            await voiceMention(interaction);
+        } else if (commandName === commandNames.channelSetting) {
+            await channelSettingsHandler(interaction);
+        } else if (commandName === commandNames.uniqueChannelSetting) {
+            await uniqueChannelSettingsHandler(interaction);
+        } else if (commandName === commandNames.uniqueRoleSetting) {
+            await uniqueRoleSettingsHandler(interaction);
+        } else if (commandName === commandNames.variablesSettings) {
+            await variablesHandler(interaction);
+        } else if (commandName == commandNames.voice_pick) {
+            await handleVoicePick(interaction);
+        } else if (commandName == commandNames.ban) {
+            await handleBan(interaction);
+        } else if (commandName == commandNames.joinedDateFixer) {
+            await joinedAtFixer(interaction);
+        } else if (commandName == commandNames.festivalSettings) {
+            await festSettingHandler(interaction);
+        } else if (commandName === commandNames.experience) {
+            await handleIkabuExperience(interaction);
+        } else if (commandName === commandNames.voice) {
+            await handleTTSCommand(interaction);
+        } else if (commandName == commandNames.ch_manager) {
+            await channelManagerHandler(interaction);
         }
     } catch (error) {
         await sendErrorLogs(logger, error);
