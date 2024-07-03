@@ -12,7 +12,7 @@ import {
 } from '@discordjs/voice';
 import { ButtonInteraction, ChatInputCommandInteraction, Message, VoiceState } from 'discord.js';
 
-import { modeApi, bufferToStream } from './voice_bot_node';
+import { modeApi, bufferToStream, setting } from './voice_bot_node';
 import { log4js_obj } from '../../../../log4js_settings';
 import { searchAPIMemberById } from '../../../common/manager/member_manager';
 import { exists, getDeveloperMention, isEmpty, notExists } from '../../../common/others';
@@ -36,9 +36,7 @@ type Subscription = {
 const channels = new Map();
 
 export const joinTTS = async (
-    interaction:
-        | ChatInputCommandInteraction<'cached' | 'raw'>
-        | ButtonInteraction<'cached' | 'raw'>,
+    interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached' | 'raw'>,
 ) => {
     try {
         if (!interaction.inCachedGuild()) return;
@@ -90,9 +88,7 @@ export const joinTTS = async (
 };
 
 export const killTTS = async (
-    interaction:
-        | ChatInputCommandInteraction<'cached' | 'raw'>
-        | ButtonInteraction<'cached' | 'raw'>,
+    interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached' | 'raw'>,
 ) => {
     try {
         const guildId = interaction.guildId;
@@ -153,19 +149,22 @@ export async function autokill(oldState: VoiceState) {
     }
 }
 
-export async function handleVoiceCommand(
-    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
-) {
+export async function handleTTSCommand(interaction: ChatInputCommandInteraction<'cached'>) {
     try {
-        if (!interaction.isCommand()) return;
-        const { options } = interaction;
-        const subCommand = options.getSubcommand();
+        // 'インタラクションに失敗'が出ないようにするため
+        await interaction.deferReply({ ephemeral: true });
+
+        const subCommand = interaction.options.getSubcommand();
+
         switch (subCommand) {
             case 'join':
                 await joinTTS(interaction);
                 break;
             case 'kill':
                 await killTTS(interaction);
+                break;
+            case 'type':
+                await setting(interaction);
                 break;
         }
     } catch (error) {

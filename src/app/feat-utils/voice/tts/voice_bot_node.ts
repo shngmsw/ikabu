@@ -7,7 +7,7 @@ import { Readable } from 'stream';
 
 import conf from 'config-reloadable';
 import { SHA256 } from 'crypto-js';
-import { CacheType, ChatInputCommandInteraction, Message } from 'discord.js';
+import { ChatInputCommandInteraction, Message } from 'discord.js';
 
 import VoiceTextApi, { VoiceTextApiParams } from '../../../common/apis/voice-text/voice_text';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
@@ -187,17 +187,12 @@ async function messageReplace(message: Message<true>) {
     return yomiage_message;
 }
 
-export async function setting(interaction: ChatInputCommandInteraction<CacheType>) {
-    if (!interaction.isCommand()) return;
-    if (!interaction.guild) return;
+export async function setting(interaction: ChatInputCommandInteraction<'cached'>) {
     const { options } = interaction;
-    const subCommand = options.getSubcommand();
 
-    if (exists(subCommand) && subCommand === 'type') {
-        const type = options.getString('音声の種類', true);
-        voicePattern1 = type;
-        const voiceMessage = `読み上げ音声を${voiceLists1[type]}に設定したでし`;
+    const type = options.getString('音声の種類', true);
+    voicePattern1 = type;
+    const voiceMessage = `読み上げ音声を${voiceLists1[type]}に設定したでし`;
 
-        await interaction.editReply(voiceMessage);
-    }
+    await interaction.editReply(voiceMessage);
 }

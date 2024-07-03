@@ -40,8 +40,7 @@ import { handleWiki } from '../feat-utils/other/wiki.js';
 import { handleBuki } from '../feat-utils/splat3/buki';
 import { handleShow } from '../feat-utils/splat3/show';
 import { dividerInitialMessage } from '../feat-utils/team_divider/divider';
-import { handleVoiceCommand } from '../feat-utils/voice/tts/discordjs_voice';
-import { setting } from '../feat-utils/voice/tts/voice_bot_node';
+import { handleTTSCommand } from '../feat-utils/voice/tts/discordjs_voice';
 import { voiceLocker } from '../feat-utils/voice/voice_locker';
 import { voiceMention } from '../feat-utils/voice/voice_mention.js';
 import { handleVoicePick } from '../feat-utils/voice/vpick.js';
@@ -128,15 +127,12 @@ async function guildOnlyCommandsHandler(
                 await festSettingHandler(interaction);
             } else if (commandName === commandNames.experience) {
                 await handleIkabuExperience(interaction);
+            } else if (commandName === commandNames.voice) {
+                await handleTTSCommand(interaction);
             }
         }
 
-        if (commandName === commandNames.voice) {
-            // 'インタラクションに失敗'が出ないようにするため
-            await interaction.deferReply({ ephemeral: true });
-            await handleVoiceCommand(interaction);
-            await setting(interaction);
-        } else if (commandName == commandNames.ch_manager) {
+        if (commandName == commandNames.ch_manager) {
             const subCommand = options.getSubcommand();
             switch (subCommand) {
                 case 'チャンネル作成':
