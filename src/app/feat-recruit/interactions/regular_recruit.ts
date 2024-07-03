@@ -20,9 +20,7 @@ import { sendRecruitSticky } from '../sticky/recruit_sticky_messages';
 import { RecruitData } from '../types/recruit_data';
 
 export async function regularRecruit(
-    interaction:
-        | ChatInputCommandInteraction<'cached' | 'raw'>
-        | ModalSubmitInteraction<'cached' | 'raw'>,
+    interaction: ChatInputCommandInteraction<'cached'> | ModalSubmitInteraction<'cached' | 'raw'>,
 ) {
     assertExistCheck(interaction.channel, 'channel');
     // 'インタラクションに失敗'が出ないようにするため

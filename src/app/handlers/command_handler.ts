@@ -88,29 +88,29 @@ async function guildOnlyCommandsHandler(
                 await closeCommand(interaction);
             } else if (commandName === commandNames.team_divider) {
                 await dividerInitialMessage(interaction);
+            } else if (commandName === commandNames.regular) {
+                await regularRecruit(interaction);
+            } else if (commandName === commandNames.anarchy) {
+                await anarchyRecruit(interaction);
+            } else if (commandName === commandNames.event) {
+                await eventRecruit(interaction);
+            } else if (commandName === commandNames.salmon) {
+                await salmonRecruit(interaction);
+            } else if (commandName === commandNames.fesA) {
+                await festRecruit(interaction);
+            } else if (commandName === commandNames.fesB) {
+                await festRecruit(interaction);
+            } else if (commandName === commandNames.fesC) {
+                await festRecruit(interaction);
             }
         }
 
-        if (commandName === commandNames.regular) {
-            await regularRecruit(interaction);
-        } else if (commandName === commandNames.other_game) {
+        if (commandName === commandNames.other_game) {
             await otherGameRecruit(interaction);
         } else if (commandName === commandNames.buttonRecruit) {
             await buttonRecruit(interaction);
-        } else if (commandName === commandNames.anarchy) {
-            await anarchyRecruit(interaction);
         } else if (commandName === commandNames.private) {
             await privateRecruit(interaction);
-        } else if (commandName === commandNames.event) {
-            await eventRecruit(interaction);
-        } else if (commandName === commandNames.fesA) {
-            await festRecruit(interaction);
-        } else if (commandName === commandNames.fesB) {
-            await festRecruit(interaction);
-        } else if (commandName === commandNames.fesC) {
-            await festRecruit(interaction);
-        } else if (commandName === commandNames.salmon) {
-            await salmonRecruit(interaction);
         } else if (commandName === commandNames.experience) {
             await handleIkabuExperience(interaction);
         } else if (commandName === commandNames.voiceChannelMention) {

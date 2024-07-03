@@ -31,9 +31,7 @@ import { RecruitData } from '../types/recruit_data';
 const logger = log4js_obj.getLogger('recruit');
 
 export async function anarchyRecruit(
-    interaction:
-        | ChatInputCommandInteraction<'cached' | 'raw'>
-        | ModalSubmitInteraction<'cached' | 'raw'>,
+    interaction: ChatInputCommandInteraction<'cached'> | ModalSubmitInteraction<'cached' | 'raw'>,
 ) {
     assertExistCheck(interaction.channel, 'channel');
     // 'インタラクションに失敗'が出ないようにするため
