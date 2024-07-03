@@ -80,12 +80,15 @@ async function guildOnlyCommandsHandler(
             // 後々、すべてのギルドコマンドをCahedGuildとして処理するようにしたい
             if (commandName === commandNames.shutdown) {
                 await shutdown(interaction);
+            } else if (
+                commandName === commandNames.vclock &&
+                !(interaction.replied || interaction.deferred)
+            ) {
+                await voiceLocker(interaction);
             }
         }
 
-        if (commandName === commandNames.vclock && !(interaction.replied || interaction.deferred)) {
-            await voiceLocker(interaction);
-        } else if (commandName === commandNames.close) {
+        if (commandName === commandNames.close) {
             if (!interaction.inGuild()) {
                 return;
             }
