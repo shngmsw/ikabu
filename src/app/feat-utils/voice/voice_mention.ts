@@ -2,7 +2,6 @@ import { EmbedBuilder, ChatInputCommandInteraction, GuildMember } from 'discord.
 
 import { log4js_obj } from '../../../log4js_settings';
 import { searchChannelById } from '../../common/manager/channel_manager';
-import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchAPIMemberById, getMemberColor } from '../../common/manager/member_manager';
 import { isNotEmpty, isEmpty, notExists, assertExistCheck, exists } from '../../common/others';
 import { ErrorTexts } from '../../constant/error_texts';
@@ -10,11 +9,11 @@ import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('interaction');
 
-export async function voiceMention(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function voiceMention(interaction: ChatInputCommandInteraction<'cached'>) {
     try {
         await interaction.deferReply({ ephemeral: false });
 
-        const guild = await getGuildByInteraction(interaction);
+        const guild = interaction.guild;
 
         let text = interaction.options.getString('メッセージ', true);
         let voiceChannel = interaction.options.getChannel('チャンネル');
