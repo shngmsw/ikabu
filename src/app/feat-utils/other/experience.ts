@@ -3,9 +3,9 @@ import path from 'path';
 import Canvas from 'canvas';
 import Discord, { ChatInputCommandInteraction } from 'discord.js';
 
-import { getGuildByInteraction } from '../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../common/manager/member_manager';
 import { assertExistCheck, dateDiff, notExists } from '../../common/others';
+
 const backgroundImgPaths = [
     './images/over4years.jpg',
     './images/4years.jpg',
@@ -15,16 +15,16 @@ const backgroundImgPaths = [
     './images/0.5year.jpg',
     './images/1month.jpg',
 ];
+
 const colorCodes = ['#db4240', '#9849c9', '#2eddff', '#5d8e9c', '#f0c46e', '#86828f', '#ad745c'];
-export async function handleIkabuExperience(
-    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
-) {
+
+export async function handleIkabuExperience(interaction: ChatInputCommandInteraction<'cached'>) {
     assertExistCheck(interaction.channel, 'channel');
 
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
 
-    const guild = await getGuildByInteraction(interaction);
+    const guild = interaction.guild;
     const member = await searchDBMemberById(guild, interaction.member.user.id);
     assertExistCheck(member, 'member');
     const joinDate = member.joinedAt;

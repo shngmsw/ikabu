@@ -4,7 +4,6 @@ import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { UniqueRoleService } from '../../../../db/unique_role_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
@@ -16,7 +15,7 @@ import { getMemberMentions } from '../buttons/other_events';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function privateRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function privateRecruit(interaction: ChatInputCommandInteraction<'cached'>) {
     await interaction.deferReply({ ephemeral: false });
 
     const options = interaction.options;
@@ -38,7 +37,7 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
 
     assertExistCheck(interaction.channel, 'channel');
 
-    const guild = await getGuildByInteraction(interaction);
+    const guild = interaction.guild;
     const recruiter = await searchDBMemberById(guild, interaction.member.user.id);
     const recruitChannel = interaction.channel;
 

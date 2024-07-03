@@ -32,13 +32,9 @@ const logger = log4js_obj.getLogger('interaction');
  * チーム分けコマンド実行時の登録メッセージを出す
  * @param {*} interaction コマンドのインタラクション
  */
-export async function dividerInitialMessage(
-    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
-) {
+export async function dividerInitialMessage(interaction: ChatInputCommandInteraction<'cached'>) {
     try {
-        const guild = await getGuildByInteraction(interaction);
-        const member = await searchAPIMemberById(guild, interaction.member.user.id);
-        assertExistCheck(member, 'member');
+        const member = interaction.member;
         const hostId = member.id;
         const teamNum = interaction.options.getInteger('各チームのメンバー数', true);
         let hideWin = interaction.options.getBoolean('勝利数と勝率を隠す');

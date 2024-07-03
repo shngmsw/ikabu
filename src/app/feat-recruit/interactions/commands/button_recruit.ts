@@ -5,7 +5,6 @@ import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { UniqueChannelService } from '../../../../db/unique_channel_service';
 import { UniqueRoleService } from '../../../../db/unique_role_service';
 import { searchChannelById } from '../../../common/manager/channel_manager';
-import { getGuildByInteraction } from '../../../common/manager/guild_manager';
 import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { assertExistCheck, exists, getDeveloperMention, notExists } from '../../../common/others';
 import { ChannelKeySet } from '../../../constant/channel_key';
@@ -14,12 +13,12 @@ import { notifyActionRow } from '../../buttons/create_recruit_buttons';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 import { getMemberMentions } from '../buttons/other_events';
 
-export async function buttonRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function buttonRecruit(interaction: ChatInputCommandInteraction<'cached'>) {
     assertExistCheck(interaction.channel, 'channel');
 
     await interaction.deferReply({ ephemeral: true });
 
-    const guild = await getGuildByInteraction(interaction);
+    const guild = interaction.guild;
 
     const privateRecruitChannelId = await UniqueChannelService.getChannelIdByKey(
         guild.id,
