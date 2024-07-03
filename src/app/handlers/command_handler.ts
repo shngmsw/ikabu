@@ -52,7 +52,7 @@ export async function call(interaction: ChatInputCommandInteraction<CacheType>) 
 
     if (interaction.inCachedGuild()) {
         // Guildのみで動くコマンド
-        await CachedGuildCommandsHandler(interaction);
+        await cachedGuildCommandsHandler(interaction);
     } else if (exists(interaction.channel) && interaction.channel.isDMBased()) {
         // DMのみで動くコマンド
     }
