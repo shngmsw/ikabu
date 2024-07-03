@@ -4,18 +4,14 @@ import { festEnd } from './fest_end';
 import { festStart } from './fest_start';
 import { UniqueChannelService } from '../../../db/unique_channel_service';
 import { searchChannelById } from '../../common/manager/channel_manager';
-import { getGuildByInteraction } from '../../common/manager/guild_manager';
-import { searchAPIMemberById } from '../../common/manager/member_manager';
 import { notExists } from '../../common/others';
 import { ChannelKeySet } from '../../constant/channel_key';
 
-export async function festSettingHandler(
-    interaction: ChatInputCommandInteraction<'cached' | 'raw'>,
-) {
+export async function festSettingHandler(interaction: ChatInputCommandInteraction<'cached'>) {
     await interaction.deferReply({ ephemeral: false });
 
-    const guild = await getGuildByInteraction(interaction);
-    const member = await searchAPIMemberById(guild, interaction.member.user.id);
+    const guild = interaction.guild;
+    const member = interaction.member;
 
     if (notExists(member)) {
         return await interaction.editReply('メンバー情報が取得できなかったでし！');

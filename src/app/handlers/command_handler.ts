@@ -124,13 +124,13 @@ async function guildOnlyCommandsHandler(
                 await handleBan(interaction);
             } else if (commandName == commandNames.joinedDateFixer) {
                 await joinedAtFixer(interaction);
+            } else if (commandName == commandNames.festivalSettings) {
+                await festSettingHandler(interaction);
             }
         }
 
         if (commandName === commandNames.experience) {
             await handleIkabuExperience(interaction);
-        } else if (commandName == commandNames.festivalSettings) {
-            await festSettingHandler(interaction);
         } else if (commandName === commandNames.voice) {
             // 'インタラクションに失敗'が出ないようにするため
             await interaction.deferReply({ ephemeral: true });
