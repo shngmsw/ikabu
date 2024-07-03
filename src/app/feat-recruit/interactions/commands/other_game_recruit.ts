@@ -15,8 +15,7 @@ import { ParticipantService } from '../../../../db/participant_service';
 import { RecruitService, RecruitType } from '../../../../db/recruit_service';
 import { UniqueRoleService } from '../../../../db/unique_role_service';
 import { log4js_obj } from '../../../../log4js_settings';
-import { getGuildByInteraction } from '../../../common/manager/guild_manager';
-import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager';
+import { searchDBMemberById } from '../../../common/manager/member_manager';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { RoleKeySet } from '../../../constant/role_key';
@@ -36,14 +35,14 @@ import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
 
-export async function otherGameRecruit(interaction: ChatInputCommandInteraction<'cached' | 'raw'>) {
+export async function otherGameRecruit(interaction: ChatInputCommandInteraction<'cached'>) {
     assertExistCheck(interaction.channel, 'channel');
 
     await interaction.deferReply({ ephemeral: false });
 
-    const guild = await getGuildByInteraction(interaction);
+    const guild = interaction.guild;
     const options = interaction.options;
-    const member = await searchAPIMemberById(guild, interaction.member.user.id);
+    const member = interaction.member;
     assertExistCheck(member, 'member');
 
     const voiceChannel = options.getChannel('使用チャンネル', false, [

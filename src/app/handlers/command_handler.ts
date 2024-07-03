@@ -102,12 +102,12 @@ async function guildOnlyCommandsHandler(
                 await festRecruit(interaction);
             } else if (commandName === commandNames.fesC) {
                 await festRecruit(interaction);
+            } else if (commandName === commandNames.other_game) {
+                await otherGameRecruit(interaction);
             }
         }
 
-        if (commandName === commandNames.other_game) {
-            await otherGameRecruit(interaction);
-        } else if (commandName === commandNames.buttonRecruit) {
+        if (commandName === commandNames.buttonRecruit) {
             await buttonRecruit(interaction);
         } else if (commandName === commandNames.private) {
             await privateRecruit(interaction);
