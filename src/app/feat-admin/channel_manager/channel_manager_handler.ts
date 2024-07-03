@@ -1,14 +1,14 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
-import { handleCreateRoom } from './createRoom';
-import { handleDeleteCategory } from './deleteCategory';
-import { handleDeleteChannel } from './deleteChannel';
+import { handleCreateRoom } from './create_room';
+import { handleDeleteCategory } from './delete_category';
+import { handleDeleteChannel } from './delete_channel';
 import {
-    handleCreateRole,
     handleAssignRole,
-    handleUnassignRole,
+    handleCreateRole,
     handleDeleteRole,
-} from './manageRole';
+    handleUnassignRole,
+} from './manage_role';
 
 export async function channelManagerHandler(interaction: ChatInputCommandInteraction<'cached'>) {
     const subCommand = interaction.options.getSubcommand();
