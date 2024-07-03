@@ -2,8 +2,7 @@ import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 import { commandNames } from '../../constant.js';
 import { log4js_obj } from '../../log4js_settings.js';
-import { getGuildByInteraction } from '../common/manager/guild_manager.js';
-import { assertExistCheck, exists, getCloseEmbed, getCommandHelpEmbed } from '../common/others';
+import { exists } from '../common/others';
 import { ErrorTexts } from '../constant/error_texts.js';
 import { handleBan } from '../feat-admin/ban/ban';
 import { handleCreateRoom } from '../feat-admin/channel_manager/createRoom.js';
@@ -22,9 +21,9 @@ import { joinedAtFixer } from '../feat-admin/joined_date_fixer/fix_joined_date.j
 import { shutdown } from '../feat-admin/shutdown/shutdown_process';
 import { uniqueChannelSettingsHandler } from '../feat-admin/unique_channel_settings/unique_channel_settings_hanlder.js';
 import { uniqueRoleSettingsHandler } from '../feat-admin/unique_role_settings/unique_role_settings_hanlder.js';
-import { createNewRecruitButton } from '../feat-recruit/buttons/create_recruit_buttons';
 import { anarchyRecruit } from '../feat-recruit/interactions/anarchy_recruit.js';
 import { buttonRecruit } from '../feat-recruit/interactions/commands/button_recruit.js';
+import { closeCommand } from '../feat-recruit/interactions/commands/close.js';
 import { otherGameRecruit } from '../feat-recruit/interactions/commands/other_game_recruit';
 import { privateRecruit } from '../feat-recruit/interactions/commands/private_recruit';
 import { eventRecruit } from '../feat-recruit/interactions/event_recruit.js';
@@ -85,24 +84,12 @@ async function guildOnlyCommandsHandler(
                 !(interaction.replied || interaction.deferred)
             ) {
                 await voiceLocker(interaction);
+            } else if (commandName === commandNames.close) {
+                await closeCommand(interaction);
             }
         }
 
-        if (commandName === commandNames.close) {
-            if (!interaction.inGuild()) {
-                return;
-            }
-            assertExistCheck(interaction.channel, 'channel');
-            //serverコマンド
-            const guild = await getGuildByInteraction(interaction);
-            const embed = getCloseEmbed();
-            if (!interaction.replied) {
-                await interaction.reply({
-                    embeds: [embed, await getCommandHelpEmbed(guild, interaction.channel.name)],
-                    components: [createNewRecruitButton(interaction.channel.name)],
-                });
-            }
-        } else if (commandName === commandNames.team_divider) {
+        if (commandName === commandNames.team_divider) {
             await dividerInitialMessage(interaction);
         } else if (commandName === commandNames.regular) {
             await regularRecruit(interaction);
