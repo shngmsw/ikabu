@@ -1032,7 +1032,11 @@ const otherGame = new SlashCommandBuilder()
                 option
                     .setName('募集人数')
                     .setDescription('募集人数')
-                    .setChoices({ name: '@1', value: '1' }, { name: '@2', value: '2' })
+                    .setChoices(
+                        { name: '@1', value: '1' },
+                        { name: '@2', value: '2' },
+                        { name: '@3', value: '3' },
+                    )
                     .setRequired(true),
             )
             .addChannelOption((option: SlashCommandChannelOption) =>
