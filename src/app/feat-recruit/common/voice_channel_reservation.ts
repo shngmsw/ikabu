@@ -28,7 +28,7 @@ export async function removeVoiceChannelReservation(
     voiceChannel: VoiceBasedChannel,
     recruiter: GuildMember,
 ) {
-    if (voiceChannel instanceof VoiceChannel && recruiter.voice.channelId !== voiceChannel.id) {
+    if (voiceChannel instanceof VoiceChannel && recruiter.voice.channelId === voiceChannel.id) {
         await voiceChannel.permissionOverwrites.delete(
             voiceChannel.guild.roles.everyone,
             'UnLock Voice Channel',
