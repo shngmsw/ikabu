@@ -30,6 +30,7 @@ export class RecruitService {
         recruitNum: number,
         condition: string,
         vcName: string | null,
+        eventId: string | null,
         recruitType: number,
         option?: string | null,
     ) {
@@ -43,6 +44,7 @@ export class RecruitService {
                     recruitNum: recruitNum,
                     condition: condition,
                     vcName: vcName,
+                    eventId: eventId,
                     recruitType: recruitType,
                     option: option,
                 },
