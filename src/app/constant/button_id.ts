@@ -37,7 +37,7 @@ export const RecruitParam = {
     Cancel: 'cr',
     Delete: 'del',
     Close: 'close',
-    Unlock: 'unl',
+    EndEvent: 'enev',
     JoinNotify: 'njr',
     CancelNotify: 'ncr',
     CloseNotify: 'nclose',
