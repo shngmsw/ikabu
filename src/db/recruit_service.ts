@@ -122,6 +122,21 @@ export class RecruitService {
         }
     }
 
+    static async getRecruitByEventId(guildId: string, eventId: string) {
+        try {
+            const recruit = await prisma.recruit.findFirst({
+                where: {
+                    guildId: guildId,
+                    eventId: eventId,
+                },
+            });
+            return recruit;
+        } catch (error) {
+            await sendErrorLogs(logger, error);
+            return null;
+        }
+    }
+
     static async getRecruitsByRecruitType(guildId: string, recruitType: number) {
         try {
             const recruits = await prisma.recruit.findMany({
