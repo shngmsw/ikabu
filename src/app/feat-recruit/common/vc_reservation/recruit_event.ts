@@ -149,7 +149,7 @@ async function endRecruitEvent(reserveMessage: Message<true>, eventId: string, u
         if (exists(userId)) {
             logger.info(`Event[${event.id}] has been completed by ${userId}.`);
         } else {
-            logger.info(`Event[${event.id}] has been completed.`);
+            logger.info(`Event[${event.id}] set "Completed".`);
         }
         await reserveMessage.edit({
             embeds: [],
