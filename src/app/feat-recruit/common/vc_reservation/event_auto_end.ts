@@ -7,7 +7,7 @@ import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('voiceStateUpdate');
 
-export async function eventAutoEnd(voiceState: VoiceState) {
+export async function endEventOnRecruiterLeave(voiceState: VoiceState) {
     try {
         const guild = voiceState.guild;
         const voiceChannel = voiceState.channel;
