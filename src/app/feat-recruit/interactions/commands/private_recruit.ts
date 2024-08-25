@@ -100,6 +100,7 @@ export async function privateRecruit(interaction: ChatInputCommandInteraction<'c
             recruitNum,
             condition,
             null,
+            null,
             RecruitType.PrivateRecruit,
             roomUrl,
         );

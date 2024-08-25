@@ -88,6 +88,7 @@ export async function buttonRecruit(interaction: ChatInputCommandInteraction<'ca
         recruitNum,
         'dummy',
         null,
+        null,
         recruitType,
     );
 

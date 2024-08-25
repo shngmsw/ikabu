@@ -3,7 +3,7 @@ import { ChatInputCommandInteraction, ModalSubmitInteraction } from 'discord.js'
 import { RecruitType } from '../../../db/recruit_service';
 import { UniqueRoleService } from '../../../db/unique_role_service';
 import { getEventData, EventMatchInfo } from '../../common/apis/splatoon3.ink/splatoon3_ink';
-import { assertExistCheck, sleep } from '../../common/others';
+import { assertExistCheck, exists, sleep } from '../../common/others';
 import { RoleKeySet } from '../../constant/role_key';
 import { recruitEventCanvas, ruleEventCanvas } from '../canvases/event_canvas';
 import { RecruitOpCode } from '../canvases/regenerate_canvas';
@@ -16,6 +16,7 @@ import {
     sendRecruitCanvas,
     RecruitImageBuffers,
 } from '../common/create_recruit/send_recruit_message';
+import { createRecruitEvent } from '../common/vc_reservation/recruit_event';
 import { sendRecruitSticky } from '../sticky/recruit_sticky_messages';
 import { RecruitData } from '../types/recruit_data';
 
@@ -61,10 +62,26 @@ export async function eventRecruit(
         eventBuffers,
     );
 
+    let eventId: string | null = null;
+    if (exists(recruitData.voiceChannel)) {
+        eventId = (
+            await createRecruitEvent(
+                recruitData.guild,
+                `イベントマッチ - ${recruitData.recruiter.displayName}`,
+                recruitData.recruiter.userId,
+                recruitData.voiceChannel,
+                eventBuffers.ruleBuffer,
+                eventData?.startTime ?? new Date(),
+                eventData?.endTime ?? new Date(),
+            )
+        ).id;
+    }
+
     await registerRecruitData(
         recruitMessageList.recruitMessage.id,
         recruitType,
         recruitData,
+        eventId,
         eventData?.title ?? 'えらー',
     );
 

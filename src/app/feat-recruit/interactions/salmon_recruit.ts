@@ -9,7 +9,7 @@ import {
     getSalmonData,
     getTeamContestData,
 } from '../../common/apis/splatoon3.ink/splatoon3_ink';
-import { assertExistCheck, sleep } from '../../common/others';
+import { assertExistCheck, exists, sleep } from '../../common/others';
 import { RoleKeySet } from '../../constant/role_key';
 import { recruitBigRunCanvas, ruleBigRunCanvas } from '../canvases/big_run_canvas';
 import { RecruitOpCode } from '../canvases/regenerate_canvas';
@@ -22,10 +22,7 @@ import {
     sendRecruitCanvas,
     RecruitImageBuffers,
 } from '../common/create_recruit/send_recruit_message';
-import {
-    isVoiceChannelLockNeeded,
-    removeVoiceChannelReservation,
-} from '../common/voice_channel_reservation';
+import { createRecruitEvent } from '../common/vc_reservation/recruit_event';
 import { sendRecruitSticky } from '../sticky/recruit_sticky_messages';
 import { RecruitData } from '../types/recruit_data';
 
@@ -80,7 +77,27 @@ export async function salmonRecruit(
         salmonBuffers,
     );
 
-    await registerRecruitData(recruitMessageList.recruitMessage.id, recruitType, recruitData, null);
+    let eventId: string | null = null;
+    if (exists(recruitData.voiceChannel)) {
+        eventId = (
+            await createRecruitEvent(
+                recruitData.guild,
+                `サーモンラン - ${recruitData.recruiter.displayName}`,
+                recruitData.recruiter.userId,
+                recruitData.voiceChannel,
+                salmonBuffers.ruleBuffer,
+                new Date(),
+            )
+        ).id;
+    }
+
+    await registerRecruitData(
+        recruitMessageList.recruitMessage.id,
+        recruitType,
+        recruitData,
+        eventId,
+        null,
+    );
 
     // 募集リスト更新
     await sendRecruitSticky({
@@ -91,16 +108,6 @@ export async function salmonRecruit(
     await sleep(15);
 
     await removeDeleteButton(recruitData, recruitMessageList.deleteButtonMessage.id);
-
-    // 2時間後にVCロックを解除する
-    await sleep(7200 - 15);
-
-    if (isVoiceChannelLockNeeded(recruitData.voiceChannel, recruitData.interactionMember)) {
-        await removeVoiceChannelReservation(
-            recruitData.voiceChannel,
-            recruitData.interactionMember,
-        );
-    }
 }
 
 async function getSalmonImageBuffers(
