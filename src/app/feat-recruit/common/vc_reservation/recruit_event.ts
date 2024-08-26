@@ -80,7 +80,13 @@ export async function createRecruitEvent(
                 const secDiff = Math.floor((endTime.getTime() - new Date().getTime()) / 1000);
                 await sleep(secDiff);
 
-                await endRecruitEvent(reserveMessage, event.id);
+                try {
+                    await endRecruitEvent(reserveMessage, event.id);
+                } catch (error) {
+                    if (!(error instanceof RecruitEventError)) {
+                        throw error;
+                    }
+                }
             }
         },
         null,
