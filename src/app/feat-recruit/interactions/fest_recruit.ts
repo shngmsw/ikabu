@@ -3,8 +3,14 @@ import { ChatInputCommandInteraction, ModalSubmitInteraction } from 'discord.js'
 
 import { RecruitType } from '../../../db/recruit_service';
 import { RoleService } from '../../../db/role_service';
-import { getFesRegularData } from '../../common/apis/splatoon3.ink/splatoon3_ink';
-import { assertExistCheck, sleep, notExists, getDeveloperMention } from '../../common/others';
+import { getFesRegularData, MatchInfo } from '../../common/apis/splatoon3.ink/splatoon3_ink';
+import {
+    assertExistCheck,
+    sleep,
+    notExists,
+    getDeveloperMention,
+    exists,
+} from '../../common/others';
 import { recruitFestCanvas, ruleFestCanvas } from '../canvases/fest_canvas';
 import { RecruitOpCode } from '../canvases/regenerate_canvas';
 import { recruitAutoClose } from '../common/auto_close';
@@ -16,6 +22,7 @@ import {
     sendRecruitCanvas,
     RecruitImageBuffers,
 } from '../common/create_recruit/send_recruit_message';
+import { createRecruitEvent } from '../common/vc_reservation/recruit_event';
 import { sendRecruitSticky } from '../sticky/recruit_sticky_messages';
 import { RecruitData } from '../types/recruit_data';
 
@@ -48,7 +55,10 @@ export async function festRecruit(
         throw new Error('interaction type is invalid');
     }
 
-    const festBuffers = await getFestImageBuffers(recruitData, recruitRole);
+    const festData = await getFesRegularData(recruitData.schedule, recruitData.scheduleNum);
+    assertExistCheck(festData, 'festData');
+
+    const festBuffers = await getFestImageBuffers(recruitData, festData, recruitRole);
 
     const recruitMessageList = await sendRecruitCanvas(
         interaction,
@@ -57,10 +67,26 @@ export async function festRecruit(
         festBuffers,
     );
 
+    let eventId: string | null = null;
+    if (exists(recruitData.voiceChannel)) {
+        eventId = (
+            await createRecruitEvent(
+                recruitData.guild,
+                `フェスマッチ - ${recruitData.recruiter.displayName}`,
+                recruitData.recruiter.userId,
+                recruitData.voiceChannel,
+                festBuffers.ruleBuffer,
+                festData.startTime,
+                festData.endTime,
+            )
+        ).id;
+    }
+
     await registerRecruitData(
         recruitMessageList.recruitMessage.id,
         recruitType,
         recruitData,
+        eventId,
         teamName,
     );
 
@@ -86,6 +112,7 @@ export async function festRecruit(
 
 async function getFestImageBuffers(
     recruitData: RecruitData,
+    festData: MatchInfo,
     teamRole: Role,
 ): Promise<RecruitImageBuffers> {
     const voiceChannel = recruitData.voiceChannel;
@@ -105,7 +132,6 @@ async function getFestImageBuffers(
         voiceChannelName,
     );
 
-    const festData = await getFesRegularData(recruitData.schedule, recruitData.scheduleNum);
     const ruleBuffer = await ruleFestCanvas(festData);
 
     return { recruitBuffer: recruitBuffer, ruleBuffer: ruleBuffer };

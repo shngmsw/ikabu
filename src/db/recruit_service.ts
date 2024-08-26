@@ -30,6 +30,7 @@ export class RecruitService {
         recruitNum: number,
         condition: string,
         vcName: string | null,
+        eventId: string | null,
         recruitType: number,
         option?: string | null,
     ) {
@@ -43,6 +44,7 @@ export class RecruitService {
                     recruitNum: recruitNum,
                     condition: condition,
                     vcName: vcName,
+                    eventId: eventId,
                     recruitType: recruitType,
                     option: option,
                 },
@@ -111,6 +113,21 @@ export class RecruitService {
                         guildId: guildId,
                         messageId: messageId,
                     },
+                },
+            });
+            return recruit;
+        } catch (error) {
+            await sendErrorLogs(logger, error);
+            return null;
+        }
+    }
+
+    static async getRecruitByEventId(guildId: string, eventId: string) {
+        try {
+            const recruit = await prisma.recruit.findFirst({
+                where: {
+                    guildId: guildId,
+                    eventId: eventId,
                 },
             });
             return recruit;

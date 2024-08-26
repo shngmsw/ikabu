@@ -133,6 +133,7 @@ model Recruit {
   recruitNum  Int      @map("recruit_num")
   condition   String   @default("なし")
   vcName      String?  @map("vc_name")
+  eventId     String?  @map("event_id")
   recruitType Int      @map("recruit_type")
   option      String?
   createdAt   DateTime @default(now()) @map("created_at")

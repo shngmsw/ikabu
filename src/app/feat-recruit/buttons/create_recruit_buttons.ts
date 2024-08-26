@@ -53,16 +53,10 @@ export function recruitActionRow(imageMessage: Message<true>, channelId?: string
     const cancelParams = new URLSearchParams();
     cancelParams.append('d', RecruitParam.Cancel);
     cancelParams.append('imid1', imageMessage.id);
-    if (exists(channelId)) {
-        cancelParams.append('vid', channelId);
-    }
 
     const closeParams = new URLSearchParams();
     closeParams.append('d', RecruitParam.Close);
     closeParams.append('imid1', imageMessage.id);
-    if (exists(channelId)) {
-        closeParams.append('vid', channelId);
-    }
 
     return new ActionRowBuilder<ButtonBuilder>().addComponents([
         new ButtonBuilder()
@@ -104,20 +98,6 @@ export function notifyActionRow() {
             .setLabel('〆')
             .setStyle(ButtonStyle.Secondary),
     ]);
-}
-
-export function unlockChannelButton(channelId: string) {
-    const buttonParams = new URLSearchParams();
-    buttonParams.append('d', RecruitParam.Unlock);
-    buttonParams.append('vid', channelId);
-
-    const button = new ActionRowBuilder<ButtonBuilder>().addComponents([
-        new ButtonBuilder()
-            .setCustomId(buttonParams.toString())
-            .setLabel('ボイスチャンネルのロック解除')
-            .setStyle(ButtonStyle.Secondary),
-    ]);
-    return button;
 }
 
 export function createNewRecruitButton(channelName: string) {

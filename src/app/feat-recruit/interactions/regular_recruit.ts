@@ -2,8 +2,8 @@ import { ChatInputCommandInteraction, ModalSubmitInteraction } from 'discord.js'
 
 import { RecruitType } from '../../../db/recruit_service';
 import { UniqueRoleService } from '../../../db/unique_role_service';
-import { getRegularData } from '../../common/apis/splatoon3.ink/splatoon3_ink';
-import { assertExistCheck, sleep } from '../../common/others';
+import { getRegularData, MatchInfo } from '../../common/apis/splatoon3.ink/splatoon3_ink';
+import { assertExistCheck, exists, sleep } from '../../common/others';
 import { RoleKeySet } from '../../constant/role_key';
 import { RecruitOpCode } from '../canvases/regenerate_canvas';
 import { recruitRegularCanvas, ruleRegularCanvas } from '../canvases/regular_canvas';
@@ -16,6 +16,7 @@ import {
     sendRecruitCanvas,
     RecruitImageBuffers,
 } from '../common/create_recruit/send_recruit_message';
+import { createRecruitEvent } from '../common/vc_reservation/recruit_event';
 import { sendRecruitSticky } from '../sticky/recruit_sticky_messages';
 import { RecruitData } from '../types/recruit_data';
 
@@ -50,7 +51,10 @@ export async function regularRecruit(
         throw new Error('interaction type is invalid');
     }
 
-    const regularBuffers = await getRegularImageBuffers(recruitData);
+    const regularData = await getRegularData(recruitData.schedule, recruitData.scheduleNum);
+    assertExistCheck(regularData, 'regularData');
+
+    const regularBuffers = await getRegularImageBuffers(recruitData, regularData);
 
     const recruitMessageList = await sendRecruitCanvas(
         interaction,
@@ -59,7 +63,28 @@ export async function regularRecruit(
         regularBuffers,
     );
 
-    await registerRecruitData(recruitMessageList.recruitMessage.id, recruitType, recruitData, null);
+    let eventId: string | null = null;
+    if (exists(recruitData.voiceChannel)) {
+        eventId = (
+            await createRecruitEvent(
+                recruitData.guild,
+                `レギュラーマッチ - ${recruitData.recruiter.displayName}`,
+                recruitData.recruiter.userId,
+                recruitData.voiceChannel,
+                regularBuffers.ruleBuffer,
+                regularData.startTime,
+                regularData.endTime,
+            )
+        ).id;
+    }
+
+    await registerRecruitData(
+        recruitMessageList.recruitMessage.id,
+        recruitType,
+        recruitData,
+        eventId,
+        null,
+    );
 
     // 募集リスト更新
     await sendRecruitSticky({
@@ -81,7 +106,10 @@ export async function regularRecruit(
     );
 }
 
-async function getRegularImageBuffers(recruitData: RecruitData): Promise<RecruitImageBuffers> {
+async function getRegularImageBuffers(
+    recruitData: RecruitData,
+    regularData: MatchInfo,
+): Promise<RecruitImageBuffers> {
     const voiceChannel = recruitData.voiceChannel;
     const voiceChannelName = voiceChannel ? voiceChannel.name : null;
 
@@ -101,7 +129,6 @@ async function getRegularImageBuffers(recruitData: RecruitData): Promise<Recruit
         voiceChannelName,
     );
 
-    const regularData = await getRegularData(recruitData.schedule, recruitData.scheduleNum);
     const ruleBuffer = await ruleRegularCanvas(regularData);
 
     return { recruitBuffer: recruitBuffer, ruleBuffer: ruleBuffer };

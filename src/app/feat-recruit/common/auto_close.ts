@@ -1,9 +1,5 @@
 import { Message } from 'discord.js';
 
-import {
-    isVoiceChannelLockNeeded,
-    removeVoiceChannelReservation,
-} from './voice_channel_reservation';
 import { ParticipantService } from '../../../db/participant_service';
 import { RecruitService } from '../../../db/recruit_service';
 import { setButtonDisable } from '../../common/button_components';
@@ -39,8 +35,5 @@ export async function recruitAutoClose(
         components: setButtonDisable(buttonMessage),
     });
 
-    if (isVoiceChannelLockNeeded(recruitData.voiceChannel, recruiter)) {
-        await removeVoiceChannelReservation(recruitData.voiceChannel, recruiter);
-    }
     await sendCloseEmbedSticky(guild, recruitChannel);
 }

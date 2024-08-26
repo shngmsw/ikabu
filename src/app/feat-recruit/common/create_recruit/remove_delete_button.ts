@@ -2,10 +2,6 @@ import { log4js_obj } from '../../../../log4js_settings';
 import { searchMessageById } from '../../../common/manager/message_manager';
 import { exists } from '../../../common/others';
 import { RecruitData } from '../../types/recruit_data';
-import {
-    isVoiceChannelLockNeeded,
-    removeVoiceChannelReservation,
-} from '../voice_channel_reservation';
 
 const logger = log4js_obj.getLogger('recruit');
 
@@ -21,13 +17,6 @@ export async function removeDeleteButton(recruitData: RecruitData, deleteButtonM
             await deleteButtonMessage.delete();
         } catch (error) {
             logger.warn('recruit delete button has already been deleted');
-        }
-    } else {
-        if (isVoiceChannelLockNeeded(recruitData.voiceChannel, recruitData.interactionMember)) {
-            await removeVoiceChannelReservation(
-                recruitData.voiceChannel,
-                recruitData.interactionMember,
-            );
         }
     }
 }

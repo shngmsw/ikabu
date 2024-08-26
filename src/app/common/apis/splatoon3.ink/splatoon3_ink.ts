@@ -303,8 +303,8 @@ export function getTeamContestList(schedule: Sp3Schedule) {
 }
 
 export type MatchInfo = {
-    startTime: string;
-    endTime: string;
+    startTime: Date;
+    endTime: Date;
     rule?: string;
     stage1?: string;
     stage2?: string;
@@ -329,8 +329,8 @@ export async function getRegularData(schedule: Sp3Schedule, num: number) {
         const regularSetting = regularList[num].regularMatchSetting;
 
         const result: MatchInfo = {
-            startTime: regularList[num].startTime,
-            endTime: regularList[num].endTime,
+            startTime: new Date(regularList[num].startTime),
+            endTime: new Date(regularList[num].endTime),
         };
 
         const locale = await getLocale();
@@ -371,8 +371,8 @@ export async function getAnarchyChallengeData(schedule: Sp3Schedule, num: number
         const anarchySettings = anarchyList[num].bankaraMatchSettings; // aSettings[0]: Challenge
 
         const result: MatchInfo = {
-            startTime: anarchyList[num].startTime,
-            endTime: anarchyList[num].endTime,
+            startTime: new Date(anarchyList[num].startTime),
+            endTime: new Date(anarchyList[num].endTime),
         };
 
         const locale = await getLocale();
@@ -413,8 +413,8 @@ export async function getAnarchyOpenData(schedule: Sp3Schedule, num: number) {
         const anarchySettings = anarchyList[num].bankaraMatchSettings; // aSettings[1]: Open
 
         const result: MatchInfo = {
-            startTime: anarchyList[num].startTime,
-            endTime: anarchyList[num].endTime,
+            startTime: new Date(anarchyList[num].startTime),
+            endTime: new Date(anarchyList[num].endTime),
         };
 
         const locale = await getLocale();
@@ -442,8 +442,8 @@ export type EventMatchInfo = {
     title: string;
     description: string;
     regulation: string;
-    startTime: string;
-    endTime: string;
+    startTime: Date;
+    endTime: Date;
     rule: string;
     stage1: string;
     stage2: string;
@@ -475,8 +475,8 @@ export async function getEventData(schedule: Sp3Schedule) {
                     )
                 ) {
                     targetEvent = event;
-                    startTime = timePeriod.startTime;
-                    endTime = timePeriod.endTime;
+                    startTime = new Date(timePeriod.startTime);
+                    endTime = new Date(timePeriod.endTime);
                 }
             }
         }
@@ -593,8 +593,8 @@ export async function getXMatchData(schedule: Sp3Schedule, num: number) {
         const xMatchSettings = xMatchList[num].xMatchSetting;
 
         const result: MatchInfo = {
-            startTime: xMatchList[num].startTime,
-            endTime: xMatchList[num].endTime,
+            startTime: new Date(xMatchList[num].startTime),
+            endTime: new Date(xMatchList[num].endTime),
         };
 
         const locale = await getLocale();
@@ -634,8 +634,8 @@ export async function getFesChallengeData(schedule: Sp3Schedule, num: number) {
         const festSettings = festList[num].festMatchSettings;
 
         const result: MatchInfo = {
-            startTime: festList[num].startTime,
-            endTime: festList[num].endTime,
+            startTime: new Date(festList[num].startTime),
+            endTime: new Date(festList[num].endTime),
         };
 
         const locale = await getLocale();
@@ -676,8 +676,8 @@ export async function getFesRegularData(schedule: Sp3Schedule, num: number) {
         const festSettings = festList[num].festMatchSettings;
 
         const result: MatchInfo = {
-            startTime: festList[num].startTime,
-            endTime: festList[num].endTime,
+            startTime: new Date(festList[num].startTime),
+            endTime: new Date(festList[num].endTime),
         };
 
         const locale = await getLocale();

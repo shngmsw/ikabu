@@ -1,5 +1,6 @@
 export const RecruitAlertTexts = {
-    ChannelAlreadyReserved: 'そのチャンネルは使用中でし！',
+    ChannelAlreadyUsed: 'そのチャンネルは使用中でし！',
+    ChannelAlreadyReserved: 'そのチャンネルには既に別の予定があるでし！',
     ChannelNotAvailableForReservation:
         'そのチャンネルは指定できないでし！\n🔉alfa ～ 🔉mikeの間のチャンネルで指定するでし！',
     ScheduleLoadError: 'スケジュールの取得に失敗したでし！',
