@@ -174,6 +174,12 @@ async function endRecruitEvent(reserveMessage: Message<true>, eventId: string, u
             components: [],
         });
     }
+
+    const eventJob = activeJobs.get(eventId);
+    if (exists(eventJob)) {
+        eventJob.stop();
+        activeJobs.delete(eventId);
+    }
 }
 
 export async function endRecruitEventButton(
