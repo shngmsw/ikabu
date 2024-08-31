@@ -105,6 +105,7 @@ export async function cancelRecruitEvent(guild: Guild, eventId: string) {
         eventJob.stop();
         activeJobs.delete(eventId);
     } else {
+        logger.info(`Event[${eventId}] not found.`);
         return;
     }
 
