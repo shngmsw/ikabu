@@ -104,6 +104,8 @@ export async function cancelRecruitEvent(guild: Guild, eventId: string) {
     if (exists(eventJob)) {
         eventJob.stop();
         activeJobs.delete(eventId);
+    } else {
+        return;
     }
 
     const event = await guild.scheduledEvents.fetch(eventId);
