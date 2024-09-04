@@ -5,14 +5,9 @@ import {
     ModalSubmitInteraction,
 } from 'discord.js';
 
-import {
-    recruitActionRow,
-    recruitDeleteButton,
-    unlockChannelButton,
-} from '../../buttons/create_recruit_buttons';
+import { recruitActionRow, recruitDeleteButton } from '../../buttons/create_recruit_buttons';
 import { getMemberMentions } from '../../interactions/buttons/other_events';
 import { RecruitData } from '../../types/recruit_data';
-import { isVoiceChannelLockNeeded, reserveVoiceChannel } from '../voice_channel_reservation';
 
 type RecruitMessageList = {
     recruitMessage: Message<true>;
@@ -34,8 +29,6 @@ export async function sendRecruitCanvas(
     recruitData: RecruitData,
     imageBuffers: RecruitImageBuffers,
 ): Promise<RecruitMessageList> {
-    const voiceChannel = recruitData.voiceChannel;
-    const recruiter = recruitData.interactionMember;
     const recruitChannel = recruitData.recruitChannel;
 
     const recruit = new AttachmentBuilder(imageBuffers.recruitBuffer, {
@@ -61,17 +54,9 @@ export async function sendRecruitCanvas(
         )}`,
     });
 
-    const isLockNeeded = isVoiceChannelLockNeeded(voiceChannel, recruiter);
-
     buttonMessage = await buttonMessage.edit({
-        components: isLockNeeded
-            ? [recruitActionRow(recruitMessage, voiceChannel.id)]
-            : [recruitActionRow(recruitMessage)],
+        components: [recruitActionRow(recruitMessage)],
     });
-
-    if (isLockNeeded) {
-        await reserveVoiceChannel(voiceChannel, recruiter);
-    }
 
     const deleteButtonMessage = await recruitChannel.send({
         components: [recruitDeleteButton(buttonMessage, recruitMessage, ruleMessage)],
@@ -79,7 +64,6 @@ export async function sendRecruitCanvas(
 
     await interaction.followUp({
         content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
-        components: isLockNeeded ? [unlockChannelButton(voiceChannel.id)] : [],
         ephemeral: true,
     });
 

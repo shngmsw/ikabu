@@ -7,6 +7,7 @@ export async function registerRecruitData(
     recruitId: string,
     recruitType: RecruitType,
     recruitData: RecruitData,
+    eventId: string | null,
     option: string | null,
 ) {
     const guildId = recruitData.guild.id;
@@ -19,6 +20,7 @@ export async function registerRecruitData(
         recruitData.recruitNum,
         recruitData.condition,
         recruitData.voiceChannel ? recruitData.voiceChannel.name : null,
+        eventId,
         recruitType,
         option,
     );

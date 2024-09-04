@@ -3,7 +3,7 @@ import { ChatInputCommandInteraction, ModalSubmitInteraction } from 'discord.js'
 import { RecruitType } from '../../../db/recruit_service';
 import { UniqueRoleService } from '../../../db/unique_role_service';
 import { log4js_obj } from '../../../log4js_settings';
-import { getAnarchyOpenData } from '../../common/apis/splatoon3.ink/splatoon3_ink';
+import { getAnarchyOpenData, MatchInfo } from '../../common/apis/splatoon3.ink/splatoon3_ink';
 import {
     assertExistCheck,
     sleep,
@@ -25,6 +25,7 @@ import {
     sendRecruitCanvas,
     RecruitImageBuffers,
 } from '../common/create_recruit/send_recruit_message';
+import { createRecruitEvent } from '../common/vc_reservation/recruit_event';
 import { sendRecruitSticky } from '../sticky/recruit_sticky_messages';
 import { RecruitData } from '../types/recruit_data';
 
@@ -69,7 +70,10 @@ export async function anarchyRecruit(
         throw new Error('interaction type is invalid');
     }
 
-    const anarchyBuffers = await getAnarchyImageBuffers(recruitData, rank);
+    const anarchyData = await getAnarchyOpenData(recruitData.schedule, recruitData.scheduleNum);
+    assertExistCheck(anarchyData, 'anarchyOpenData');
+
+    const anarchyBuffers = await getAnarchyImageBuffers(recruitData, anarchyData, rank);
 
     const recruitMessageList = await sendRecruitCanvas(
         interaction,
@@ -78,7 +82,28 @@ export async function anarchyRecruit(
         anarchyBuffers,
     );
 
-    await registerRecruitData(recruitMessageList.recruitMessage.id, recruitType, recruitData, rank);
+    let eventId: string | null = null;
+    if (exists(recruitData.voiceChannel)) {
+        eventId = (
+            await createRecruitEvent(
+                recruitData.guild,
+                `バンカラマッチ - ${recruitData.recruiter.displayName}`,
+                recruitData.recruiter.userId,
+                recruitData.voiceChannel,
+                anarchyBuffers.ruleBuffer,
+                anarchyData.startTime,
+                anarchyData.endTime,
+            )
+        ).id;
+    }
+
+    await registerRecruitData(
+        recruitMessageList.recruitMessage.id,
+        recruitType,
+        recruitData,
+        eventId,
+        rank,
+    );
 
     // 募集リスト更新
     await sendRecruitSticky({
@@ -102,6 +127,7 @@ export async function anarchyRecruit(
 
 async function getAnarchyImageBuffers(
     recruitData: RecruitData,
+    anarchyData: MatchInfo,
     rank: string,
 ): Promise<RecruitImageBuffers> {
     const voiceChannel = recruitData.voiceChannel;
@@ -120,8 +146,6 @@ async function getAnarchyImageBuffers(
         voiceChannelName,
     );
 
-    const anarchyData = await getAnarchyOpenData(recruitData.schedule, recruitData.scheduleNum);
-    assertExistCheck(anarchyData, 'anarchyOpenData');
     const ruleIconUrl = rule2image(anarchyData.rule);
     const ruleBuffer = await ruleAnarchyCanvas(anarchyData, ruleIconUrl);
 

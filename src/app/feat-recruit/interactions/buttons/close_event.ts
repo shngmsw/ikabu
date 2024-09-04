@@ -9,16 +9,14 @@ import {
     disableThinkingButton,
     recoveryThinkingButton,
 } from '../../../common/button_components.js';
-import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
-import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
+import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { searchMessageById } from '../../../common/manager/message_manager.js';
 import { assertExistCheck, datetimeDiff, exists, notExists } from '../../../common/others.js';
 import { ErrorTexts } from '../../../constant/error_texts.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import { regenerateCanvas, RecruitOpCode } from '../../canvases/regenerate_canvas.js';
-import { removeVoiceChannelReservation } from '../../common/voice_channel_reservation.js';
 import {
     getStickyChannelId,
     sendCloseEmbedSticky,
@@ -36,7 +34,6 @@ export async function close(
         assertExistCheck(interaction.channel, 'channel');
 
         const guild = await getGuildByInteraction(interaction);
-        const channelId = params.get('vid');
         const image1MsgId = params.get('imid1');
         assertExistCheck(image1MsgId, "params.get('imid1')");
 
@@ -109,14 +106,6 @@ export async function close(
                 await increaseJoinCount(applicantIdList);
             }
 
-            if (exists(channelId)) {
-                const channel = await searchChannelById(guild, channelId);
-                const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
-                if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
-                    await removeVoiceChannelReservation(channel, apiMember);
-                }
-            }
-
             await buttonMessage.edit({
                 content: `<@${recruiterId}>たんの募集は〆！\n${memberList}`,
                 components: disableThinkingButton(interaction, '〆'),
@@ -149,14 +138,6 @@ export async function close(
             if (guild.id === process.env.SERVER_ID) {
                 await increaseRecruitCount(confirmedMemberIDList);
                 await increaseJoinCount(applicantIdList);
-            }
-
-            if (exists(channelId)) {
-                const channel = await searchChannelById(guild, channelId);
-                const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
-                if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
-                    await removeVoiceChannelReservation(channel, apiMember);
-                }
             }
 
             await buttonMessage.edit({

@@ -20,17 +20,9 @@ import { searchMessageById } from '../../../common/manager/message_manager';
 import { assertExistCheck, exists, sleep } from '../../../common/others';
 import { RoleKeySet } from '../../../constant/role_key';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
-import {
-    embedRecruitDeleteButton,
-    recruitActionRow,
-    unlockChannelButton,
-} from '../../buttons/create_recruit_buttons';
+import { embedRecruitDeleteButton, recruitActionRow } from '../../buttons/create_recruit_buttons';
 import { getVCReserveErrorMessage } from '../../common/condition_checks/vc_reserve_check';
-import {
-    isVoiceChannelLockNeeded,
-    reserveVoiceChannel,
-    removeVoiceChannelReservation,
-} from '../../common/voice_channel_reservation';
+import { createRecruitEvent } from '../../common/vc_reservation/recruit_event';
 import { sendRecruitSticky } from '../../sticky/recruit_sticky_messages';
 
 const logger = log4js_obj.getLogger('recruit');
@@ -51,9 +43,15 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction<
     ]);
 
     if (exists(voiceChannel)) {
-        const voiceChannelReserveErrorMessage = getVCReserveErrorMessage(voiceChannel, member.id);
+        const voiceChannelReserveErrorMessage = await getVCReserveErrorMessage(
+            guild.id,
+            voiceChannel,
+            member.id,
+        );
+
         if (exists(voiceChannelReserveErrorMessage)) {
-            return;
+            await interaction.deleteReply();
+            return await interaction.followUp(voiceChannelReserveErrorMessage);
         }
     }
 
@@ -313,6 +311,21 @@ async function sendOtherGames(
             recruitNum = -1;
         }
 
+        // 募集イベントの作成
+        let eventId: string | null = null;
+        if (exists(voiceChannel)) {
+            eventId = (
+                await createRecruitEvent(
+                    guild,
+                    `${title} - ${recruiter.displayName}`,
+                    recruiter.userId,
+                    voiceChannel,
+                    image,
+                    new Date(),
+                )
+            ).id;
+        }
+
         // DBに募集情報を登録
         await RecruitService.registerRecruit(
             guild.id,
@@ -321,7 +334,8 @@ async function sendOtherGames(
             recruiter.userId,
             recruitNum,
             condition,
-            null,
+            exists(voiceChannel) ? voiceChannel.name : null,
+            eventId,
             RecruitType.OtherGameRecruit,
         );
 
@@ -345,21 +359,12 @@ async function sendOtherGames(
             components: [embedRecruitDeleteButton(sentMessage, embedMessage)],
         });
 
-        const isLockNeeded = isVoiceChannelLockNeeded(voiceChannel, member);
-
         await sentMessage.edit({
-            components: isLockNeeded
-                ? [recruitActionRow(embedMessage, voiceChannel.id)]
-                : [recruitActionRow(embedMessage)],
+            components: [recruitActionRow(embedMessage)],
         });
-
-        if (isLockNeeded) {
-            await reserveVoiceChannel(voiceChannel, member);
-        }
 
         await interaction.followUp({
             content: '募集完了でし！参加者が来るまで待つでし！\n15秒間は募集を取り消せるでし！',
-            components: isLockNeeded ? [unlockChannelButton(voiceChannel.id)] : [],
             ephemeral: true,
         });
 
@@ -375,19 +380,11 @@ async function sendOtherGames(
             recruitChannel.id,
             deleteButtonMsg.id,
         );
+
         if (exists(deleteButtonCheck)) {
             await deleteButtonCheck.delete();
         } else {
-            if (isLockNeeded) {
-                await removeVoiceChannelReservation(voiceChannel, member);
-            }
             return;
-        }
-
-        // 2時間後にVCロック解除
-        await sleep(7200 - 15);
-        if (isLockNeeded) {
-            await removeVoiceChannelReservation(voiceChannel, member);
         }
     } catch (error) {
         await sendErrorLogs(logger, error);

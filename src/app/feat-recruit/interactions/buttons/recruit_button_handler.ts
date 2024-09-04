@@ -8,12 +8,12 @@ import { confirmJoinRequest } from './confirm_join_request';
 import { del } from './delete_event';
 import { join } from './join_event';
 import { joinNotify } from './join_notify_event';
-import { unlock } from './other_events';
 import { log4js_obj } from '../../../../log4js_settings';
 import { setButtonDisable } from '../../../common/button_components';
 import { exists } from '../../../common/others';
 import { RecruitParam } from '../../../constant/button_id';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
+import { endRecruitEventButton } from '../../common/vc_reservation/recruit_event';
 import { handleCreateModal } from '../../modals/create_recruit_modals';
 
 const logger = log4js_obj.getLogger('recruitButton');
@@ -59,8 +59,8 @@ export async function recruitButtonHandler(
         case RecruitParam.Close:
             await close(interaction, params);
             break;
-        case RecruitParam.Unlock:
-            await unlock(interaction, params);
+        case RecruitParam.EndEvent:
+            await endRecruitEventButton(interaction, params);
             break;
         case RecruitParam.JoinNotify:
             await joinNotify(interaction);

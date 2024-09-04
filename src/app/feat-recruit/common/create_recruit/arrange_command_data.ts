@@ -89,7 +89,8 @@ export async function arrangeRecruitData(
         }
 
         if (exists(voiceChannel)) {
-            const voiceChannelReserveErrorMessage = getVCReserveErrorMessage(
+            const voiceChannelReserveErrorMessage = await getVCReserveErrorMessage(
+                guild.id,
                 voiceChannel,
                 recruiter.userId,
             );

@@ -9,9 +9,8 @@ import {
     disableThinkingButton,
     recoveryThinkingButton,
 } from '../../../common/button_components.js';
-import { searchChannelById } from '../../../common/manager/channel_manager.js';
 import { getGuildByInteraction } from '../../../common/manager/guild_manager.js';
-import { searchAPIMemberById, searchDBMemberById } from '../../../common/manager/member_manager.js';
+import { searchDBMemberById } from '../../../common/manager/member_manager.js';
 import { assertExistCheck, exists, notExists } from '../../../common/others.js';
 import { sendStickyMessage } from '../../../common/sticky_message.js';
 import { ErrorTexts } from '../../../constant/error_texts.js';
@@ -19,7 +18,7 @@ import { StickyKey } from '../../../constant/sticky_key.js';
 import { sendRecruitButtonLog } from '../../../logs/buttons/recruit_button_log.js';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs.js';
 import { RecruitOpCode, regenerateCanvas } from '../../canvases/regenerate_canvas.js';
-import { removeVoiceChannelReservation } from '../../common/voice_channel_reservation.js';
+import { cancelRecruitEvent } from '../../common/vc_reservation/recruit_event.js';
 import {
     availableRecruitString,
     getStickyChannelId,
@@ -37,7 +36,6 @@ export async function cancel(
     try {
         const guild = await getGuildByInteraction(interaction);
         assertExistCheck(interaction.channel, 'channel');
-        const channelId = params.get('vid');
         const image1MsgId = params.get('imid1');
         assertExistCheck(image1MsgId, "params.get('imid1')");
 
@@ -103,12 +101,8 @@ export async function cancel(
             // participantsテーブルから該当募集のメンバー全員削除
             await ParticipantService.deleteAllParticipant(guild.id, image1MsgId);
 
-            if (exists(channelId)) {
-                const channel = await searchChannelById(guild, channelId);
-                const apiMember = await searchAPIMemberById(guild, interaction.member.user.id);
-                if (exists(apiMember) && exists(channel) && channel.isVoiceBased()) {
-                    await removeVoiceChannelReservation(channel, apiMember);
-                }
+            if (exists(recruitData.eventId)) {
+                await cancelRecruitEvent(guild, recruitData.eventId);
             }
 
             await buttonMessage.edit({

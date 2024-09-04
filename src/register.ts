@@ -434,6 +434,13 @@ const regularMatch = new SlashCommandBuilder()
                     .setDescription('プレイ内容や参加条件など')
                     .setRequired(false),
             )
+            .addChannelOption((option: SlashCommandChannelOption) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
+            )
             .addUserOption((option: SlashCommandUserOption) =>
                 option
                     .setName('参加者1')
@@ -595,6 +602,13 @@ const anarchyMatch = new SlashCommandBuilder()
                 option
                     .setName('参加者2')
                     .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
+            )
+            .addChannelOption((option: SlashCommandChannelOption) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
             ),
     )
@@ -814,6 +828,13 @@ const fesA = new SlashCommandBuilder()
                     .setName('参加者2')
                     .setDescription('既に決定している参加者を指定してください。')
                     .setRequired(false),
+            )
+            .addChannelOption((option: SlashCommandChannelOption) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
             ),
     )
     .setDMPermission(false);
@@ -898,6 +919,13 @@ const fesB = new SlashCommandBuilder()
                     .setName('参加者2')
                     .setDescription('既に決定している参加者を指定してください。')
                     .setRequired(false),
+            )
+            .addChannelOption((option: SlashCommandChannelOption) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
+                    .setRequired(false),
             ),
     )
     .setDMPermission(false);
@@ -981,6 +1009,13 @@ const fesC = new SlashCommandBuilder()
                 option
                     .setName('参加者2')
                     .setDescription('既に決定している参加者を指定してください。')
+                    .setRequired(false),
+            )
+            .addChannelOption((option: SlashCommandChannelOption) =>
+                option
+                    .setName('使用チャンネル')
+                    .setDescription('使用するボイスチャンネルを指定できます。')
+                    .addChannelTypes(ChannelType.GuildVoice)
                     .setRequired(false),
             ),
     )
