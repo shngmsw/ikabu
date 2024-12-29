@@ -1,8 +1,14 @@
 import NodeCache from 'node-cache';
 import fetch from 'node-fetch';
 
+import { getBankaraDummyProperties } from './types/bankara_properties';
+import { getEventDummyProperties } from './types/event_properties';
+import { getFestDummyProperties } from './types/fest_properties';
 import { Sp3Locale } from './types/locale';
+import { getRegularDummyProperties } from './types/regular_properties';
+import { getSalmonRegularDummyProperties } from './types/salmon_properties';
 import { Sp3Schedule } from './types/schedule';
+import { getXDummyProperties } from './types/x_properties';
 import { log4js_obj } from '../../../../log4js_settings';
 import { sendErrorLogs } from '../../../logs/error/send_error_logs';
 import { isDateWithinRange } from '../../datetime';
@@ -14,24 +20,51 @@ const logger = log4js_obj.getLogger();
 
 const storageCache = new NodeCache();
 
+export let inFallbackMode = false;
+
 export async function getSchedule() {
     try {
         const schedule = storageCache.get('sp3_schedule') as Sp3Schedule;
 
         if (notExists(schedule)) {
             logger.warn('schedule data was not found. (fetch)');
-            return await updateSchedule();
+            return await getFallbackSchedule();
         }
 
-        // レギュラーのデータが12個未満ならフェッチする
-        if (getRegularList(schedule).length < 12) {
-            return await updateSchedule();
+        if (getRegularList(schedule).length < 3 || inFallbackMode) {
+            return getFallbackSchedule();
+        } else if (getRegularList(schedule).length < 12) {
+            // レギュラーのデータが12個未満ならフェッチする
+            return (await updateSchedule()) ?? (await getFallbackSchedule());
         } else {
             return schedule;
         }
     } catch (error) {
         await sendErrorLogs(logger, error);
-        return null;
+        return getDummySchedule();
+    }
+}
+
+async function getFallbackSchedule() {
+    const schedule = await updateSchedule();
+    if (notExists(schedule)) {
+        inFallbackMode = true;
+        logger.warn('splatoon3.ink is down. (fallback)');
+        return getDummySchedule();
+    }
+
+    const regularNodes = schedule.regularSchedules.nodes;
+    const now = new Date();
+    const startTimeFirst = new Date(regularNodes[0].startTime);
+    const endTimeFirst = new Date(regularNodes[0].endTime);
+    if (startTimeFirst <= now && now <= endTimeFirst && getRegularList(schedule).length >= 2) {
+        inFallbackMode = false;
+        logger.info('splatoon3.ink is recovered.');
+        return schedule;
+    } else {
+        inFallbackMode = true;
+        logger.warn('splatoon3.ink is down. (fallback)');
+        return getDummySchedule();
     }
 }
 
@@ -334,7 +367,7 @@ export async function getRegularData(schedule: Sp3Schedule, num: number) {
         };
 
         const locale = await getLocale();
-        if (!checkFes(schedule, num) && exists(regularSetting)) {
+        if (!checkFes(schedule, num) && exists(regularSetting) && !inFallbackMode) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, regularSetting.vsRule.id);
                 result.stage1 = await stage2txt(locale, regularSetting.vsStages[0].id);
@@ -376,7 +409,7 @@ export async function getAnarchyChallengeData(schedule: Sp3Schedule, num: number
         };
 
         const locale = await getLocale();
-        if (!checkFes(schedule, num) && exists(anarchySettings)) {
+        if (!checkFes(schedule, num) && exists(anarchySettings) && !inFallbackMode) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, anarchySettings[0].vsRule.id);
                 result.stage1 = await stage2txt(locale, anarchySettings[0].vsStages[0].id);
@@ -418,7 +451,7 @@ export async function getAnarchyOpenData(schedule: Sp3Schedule, num: number) {
         };
 
         const locale = await getLocale();
-        if (!checkFes(schedule, num) && exists(anarchySettings)) {
+        if (!checkFes(schedule, num) && exists(anarchySettings) && !inFallbackMode) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, anarchySettings[1].vsRule.id);
                 result.stage1 = await stage2txt(locale, anarchySettings[1].vsStages[0].id);
@@ -529,8 +562,8 @@ export async function getEventData(schedule: Sp3Schedule) {
 }
 
 export type SalmonInfo = {
-    startTime: string;
-    endTime: string;
+    startTime: Date;
+    endTime: Date;
     stage: string;
     weapon1: string;
     weapon2: string;
@@ -557,8 +590,8 @@ export async function getSalmonData(schedule: Sp3Schedule, num: number) {
 
         const locale = await getLocale();
         const result: SalmonInfo = {
-            startTime: salmonList[num].startTime,
-            endTime: salmonList[num].endTime,
+            startTime: new Date(salmonList[num].startTime),
+            endTime: new Date(salmonList[num].endTime),
             stage: exists(locale)
                 ? await stage2txt(locale, salmonSetting.coopStage.id)
                 : salmonSetting.coopStage.name,
@@ -598,7 +631,7 @@ export async function getXMatchData(schedule: Sp3Schedule, num: number) {
         };
 
         const locale = await getLocale();
-        if (!checkFes(schedule, num) && exists(xMatchSettings)) {
+        if (!checkFes(schedule, num) && exists(xMatchSettings) && !inFallbackMode) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, xMatchSettings.vsRule.id);
                 result.stage1 = await stage2txt(locale, xMatchSettings.vsStages[0].id);
@@ -639,7 +672,7 @@ export async function getFesChallengeData(schedule: Sp3Schedule, num: number) {
         };
 
         const locale = await getLocale();
-        if (checkFes(schedule, num) && exists(festSettings)) {
+        if (checkFes(schedule, num) && exists(festSettings) && !inFallbackMode) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, festSettings[1].vsRule.id);
                 result.stage1 = await stage2txt(locale, festSettings[1].vsStages[0].id);
@@ -681,7 +714,7 @@ export async function getFesRegularData(schedule: Sp3Schedule, num: number) {
         };
 
         const locale = await getLocale();
-        if (checkFes(schedule, num) && exists(festSettings)) {
+        if (checkFes(schedule, num) && exists(festSettings) && !inFallbackMode) {
             if (exists(locale)) {
                 result.rule = await rule2txt(locale, festSettings[1].vsRule.id);
                 result.stage1 = await stage2txt(locale, festSettings[1].vsStages[0].id);
@@ -714,8 +747,8 @@ export async function getBigRunData(schedule: Sp3Schedule, num: number) {
 
         const locale = await getLocale();
         const result: SalmonInfo = {
-            startTime: bigRunList[num].startTime,
-            endTime: bigRunList[num].endTime,
+            startTime: new Date(bigRunList[num].startTime),
+            endTime: new Date(bigRunList[num].endTime),
             stage: exists(locale)
                 ? await stage2txt(locale, bigRunSetting.coopStage.id)
                 : bigRunSetting.coopStage.name,
@@ -745,8 +778,8 @@ export async function getTeamContestData(schedule: Sp3Schedule, num: number) {
 
         const locale = await getLocale();
         const result: SalmonInfo = {
-            startTime: teamContestList[num].startTime,
-            endTime: teamContestList[num].endTime,
+            startTime: new Date(teamContestList[num].startTime),
+            endTime: new Date(teamContestList[num].endTime),
             stage: exists(locale)
                 ? await stage2txt(locale, teamContestSetting.coopStage.id)
                 : teamContestSetting.coopStage.name,
@@ -849,3 +882,60 @@ export async function event2txt(
         };
     }
 }
+
+const getDummySchedule = (): Sp3Schedule => {
+    const now = new Date();
+    const startTime1 = new Date();
+    const currentHour = now.getHours();
+
+    if (currentHour === 0) {
+        // 0 時台の場合 -> 日付を前日にして 23 時にする
+        startTime1.setDate(now.getDate() - 1);
+        startTime1.setHours(23, 0, 0, 0);
+    } else if (currentHour % 2 === 0) {
+        // 偶数時の場合 -> 1 時間引いて奇数にする
+        startTime1.setHours(currentHour - 1, 0, 0, 0);
+    } else {
+        // 分・秒を 0 に設定
+        startTime1.setHours(currentHour, 0, 0, 0);
+    }
+
+    // 2時間 - 1ms後の時間を取得
+    const endTime1 = new Date(startTime1.getTime() + 2 * 60 * 60 * 1000);
+    const startTime2 = new Date(startTime1.getTime() + 2 * 60 * 60 * 1000);
+    const endTime2 = new Date(startTime2.getTime() + 2 * 60 * 60 * 1000);
+
+    return {
+        regularSchedules: {
+            nodes: [
+                getRegularDummyProperties(startTime1, endTime1),
+                getRegularDummyProperties(startTime2, endTime2),
+            ],
+        },
+        bankaraSchedules: {
+            nodes: [
+                getBankaraDummyProperties(startTime1, endTime1),
+                getBankaraDummyProperties(startTime2, endTime2),
+            ],
+        },
+        xSchedules: {
+            nodes: [
+                getXDummyProperties(startTime1, endTime1),
+                getXDummyProperties(startTime2, endTime2),
+            ],
+        },
+        festSchedules: {
+            nodes: [
+                getFestDummyProperties(startTime1, endTime1),
+                getFestDummyProperties(startTime2, endTime2),
+            ],
+        },
+        coopGroupingSchedule: {
+            bannerImage: { url: '' },
+            regularSchedules: { nodes: [getSalmonRegularDummyProperties(startTime1, endTime1)] },
+            bigRunSchedules: { nodes: [] },
+            teamContestSchedules: { nodes: [] },
+        },
+        eventSchedules: { nodes: [getEventDummyProperties(startTime1, endTime1)] },
+    };
+};
