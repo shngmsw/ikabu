@@ -4,6 +4,7 @@ import {
     checkBigRun,
     checkTeamContest,
     getEventData,
+    inFallbackMode,
 } from '../../../common/apis/splatoon3.ink/splatoon3_ink';
 import { Sp3Schedule } from '../../../common/apis/splatoon3.ink/types/schedule';
 import { notExists } from '../../../common/others';
@@ -23,7 +24,7 @@ export async function checkRecruitSchedule(
 ): Promise<checkRecruitScheduleResponse> {
     switch (recruitType) {
         case RecruitType.FestivalRecruit:
-            if (!checkFes(schedule, type)) {
+            if (!checkFes(schedule, type) && !inFallbackMode) {
                 // フェス期間外にフェス募集を建てようとした場合
                 return {
                     canRecruit: false,
@@ -34,7 +35,7 @@ export async function checkRecruitSchedule(
 
         case RecruitType.RegularRecruit:
         case RecruitType.AnarchyRecruit:
-            if (checkFes(schedule, type)) {
+            if (checkFes(schedule, type) && !inFallbackMode) {
                 // フェス期間中にナワバリ募集またはバンカラ募集を建てようとした場合
                 return {
                     canRecruit: false,
@@ -44,7 +45,7 @@ export async function checkRecruitSchedule(
             break;
 
         case RecruitType.EventRecruit:
-            if (notExists(await getEventData(schedule))) {
+            if (notExists(await getEventData(schedule)) && !inFallbackMode) {
                 return {
                     canRecruit: false,
                     recruitDateErrorMessage: RecruitAlertTexts.NotDuringEvent,

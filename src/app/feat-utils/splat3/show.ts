@@ -17,6 +17,7 @@ import {
     getAnarchyChallengeData,
     getAnarchyOpenData,
     getXMatchData,
+    inFallbackMode,
 } from '../../common/apis/splatoon3.ink/splatoon3_ink';
 import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule';
 import { createRoundRect, fillTextWithStroke } from '../../common/canvas_components';
@@ -34,7 +35,11 @@ export async function handleShow(interaction: ChatInputCommandInteraction<CacheT
         const { options } = interaction;
         const subCommand = options.getSubcommand();
         const schedule = await getSchedule();
-        assertExistCheck(schedule, 'schedule');
+
+        if (inFallbackMode) {
+            return interaction.editReply('現在スケジュール情報が取得できないでし！');
+        }
+
         if (subCommand === `now`) {
             if (checkFes(schedule, 0)) {
                 await sendFesInfo(interaction, schedule, 0);
