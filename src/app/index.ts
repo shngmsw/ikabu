@@ -24,7 +24,11 @@ import {
     VoiceState,
 } from 'discord.js';
 
-import { updateLocale, updateSchedule } from './common/apis/splatoon3.ink/splatoon3_ink';
+import {
+    inFallbackMode,
+    updateLocale,
+    updateSchedule,
+} from './common/apis/splatoon3.ink/splatoon3_ink';
 import { searchChannelById } from './common/manager/channel_manager';
 import { searchAPIMemberById } from './common/manager/member_manager';
 import { assertExistCheck, exists, getDeveloperMention, notExists } from './common/others';
@@ -413,9 +417,10 @@ const job = new cron.CronJob(
         try {
             const guild = await client.guilds.fetch(process.env.SERVER_ID || '');
 
-            // イベント作成
-            // イベントマッチの作成
-            await subscribeSplatEventMatch(guild);
+            if (!inFallbackMode) {
+                // イベントマッチのイベント作成
+                await subscribeSplatEventMatch(guild);
+            }
             // ステージ情報の送信
             await stageInfo(guild);
         } catch (error) {

@@ -1,3 +1,5 @@
+import { placeHold } from '../../../../../constant';
+
 export type SalmonRegularProperties = {
     startTime: string;
     endTime: string;
@@ -148,3 +150,46 @@ export type TeamContestProperties = {
         ];
     };
 };
+
+export function getSalmonRegularDummyProperties(
+    startTime: Date,
+    endTime: Date,
+): SalmonRegularProperties {
+    return {
+        startTime: startTime.toString(),
+        endTime: endTime.toString(),
+        setting: {
+            __typename: 'SalmonRegularSetting',
+            coopStage: {
+                id: 'dummy_stage_id',
+                name: 'dummy_stage',
+                thumbnailImage: { url: placeHold.error100x100 },
+                image: { url: placeHold.error100x100 },
+            },
+            __isCoopSetting: 'SalmonRegularSetting',
+            weapons: [
+                {
+                    __splatoon3ink_id: 'dummy_weapon_id',
+                    name: 'dummy_weapon',
+                    image: { url: placeHold.error100x100 },
+                },
+                {
+                    __splatoon3ink_id: 'dummy_weapon_id',
+                    name: 'dummy_weapon',
+                    image: { url: placeHold.error100x100 },
+                },
+                {
+                    __splatoon3ink_id: 'dummy_weapon_id',
+                    name: 'dummy_weapon',
+                    image: { url: placeHold.error100x100 },
+                },
+                {
+                    __splatoon3ink_id: 'dummy_weapon_id',
+                    name: 'dummy_weapon',
+                    image: { url: placeHold.error100x100 },
+                },
+            ],
+        },
+        __splatoon3ink_king_salmonid_guess: 'dummy_salmon_id',
+    };
+}
