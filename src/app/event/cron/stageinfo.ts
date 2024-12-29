@@ -10,6 +10,7 @@ import {
     getXMatchData,
     checkFes,
     getSchedule,
+    inFallbackMode,
 } from '../../common/apis/splatoon3.ink/splatoon3_ink';
 import { Sp3Schedule } from '../../common/apis/splatoon3.ink/types/schedule';
 import { formatDatetime, dateformat } from '../../common/convert_datetime.js';
@@ -82,7 +83,10 @@ async function getAOEmbed(schedule: Sp3Schedule) {
         assertExistCheck(anarchyData, 'anarchyData');
         let stage;
         let rule;
-        if (checkFes(schedule, i)) {
+        if (inFallbackMode) {
+            rule = '不明';
+            stage = 'バンカラマッチのデータが取得できなかったでし';
+        } else if (checkFes(schedule, i)) {
             rule = 'フェス期間中';
             stage = 'フェス期間中はお休みでし';
         } else {
@@ -107,7 +111,10 @@ async function getACEmbed(schedule: Sp3Schedule) {
         assertExistCheck(anarchyData, 'anarchyData');
         let stage;
         let rule;
-        if (checkFes(schedule, i)) {
+        if (inFallbackMode) {
+            rule = '不明';
+            stage = 'バンカラマッチのデータが取得できなかったでし';
+        } else if (checkFes(schedule, i)) {
             rule = 'フェス期間中';
             stage = 'フェス期間中はお休みでし';
         } else {
@@ -132,7 +139,10 @@ async function getXMatchEmbed(schedule: Sp3Schedule) {
         assertExistCheck(xData, 'xData');
         let stage;
         let rule;
-        if (checkFes(schedule, i)) {
+        if (inFallbackMode) {
+            rule = '不明';
+            stage = 'Xマッチのデータが取得できなかったでし';
+        } else if (checkFes(schedule, i)) {
             rule = 'フェス期間中';
             stage = 'フェス期間中はお休みでし';
         } else {
