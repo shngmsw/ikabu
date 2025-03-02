@@ -60,8 +60,8 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction<
 
     if (options.getSubcommand() === 'apex') {
         await apexLegends(interaction, guild, recruitChannel, member, roles);
-    } else if (options.getSubcommand() === 'mhr') {
-        await monsterHunterRise(interaction, guild, recruitChannel, member, roles);
+    } else if (options.getSubcommand() === 'mhw') {
+        await monsterHunterWilds(interaction, guild, recruitChannel, member, roles);
     } else if (options.getSubcommand() === 'overwatch') {
         await overwatch(interaction, guild, recruitChannel, member, roles);
     } else if (options.getSubcommand() === 'valo') {
@@ -71,7 +71,7 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction<
     }
 }
 
-async function monsterHunterRise(
+async function monsterHunterWilds(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
     recruitChannel: TextBasedChannel,
@@ -83,15 +83,15 @@ async function monsterHunterRise(
         await sendErrorMessage(recruitChannel);
         return;
     }
-    const title = 'MONSTER HUNTER RISE';
+    const title = 'MONSTER HUNTER WILDS';
     const recruitNumText = interaction.options.getString('募集人数', true);
     const mention = role.toString();
-    const txt = `### <@${member.user.id}>` + 'たんのモンハンライズ募集\n';
-    const color = '#b71008';
+    const txt = `### <@${member.user.id}>` + 'たんのモンハンワイルズ募集\n';
+    const color = '#e39820';
     const image =
-        'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak.jpg';
+        'https://github.com/shngmsw/ikabu/blob/b6c6b98d28f530e862473e419c3576e79de734ad/images/games/MonsterHunterWilds.png?raw=true';
     const logo =
-        'https://raw.githubusercontent.com/shngmsw/ikabu/stg/images/games/MonsterHunterRiseSunBreak_logo.png';
+        'https://github.com/shngmsw/ikabu/blob/b6c6b98d28f530e862473e419c3576e79de734ad/images/games/MonsterHunterWilds_logo.png?raw=true';
     await sendOtherGames(
         interaction,
         guild,

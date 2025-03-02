@@ -180,8 +180,8 @@ export async function handleHelp(interaction: ChatInputCommandInteraction<CacheT
                             inline: true,
                         },
                         {
-                            name: '/別ゲー募集 mhr',
-                            value: '```モンスターハンターライズの募集```',
+                            name: '/別ゲー募集 mhw',
+                            value: '```モンスターハンターワイルズの募集```',
                             inline: true,
                         },
                         {

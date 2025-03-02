@@ -1087,8 +1087,8 @@ const otherGame = new SlashCommandBuilder()
     )
     .addSubcommand((subcommand: SlashCommandSubcommandBuilder) =>
         subcommand
-            .setName('mhr')
-            .setDescription('モンスターハンターライズ:サンブレイクの募集')
+            .setName('mhw')
+            .setDescription('モンスターハンターワイルズの募集')
             .addStringOption((option: SlashCommandStringOption) =>
                 option
                     .setName('募集人数')
