@@ -89,9 +89,9 @@ async function monsterHunterWilds(
     const txt = `### <@${member.user.id}>` + 'たんのモンハンワイルズ募集\n';
     const color = '#e39820';
     const image =
-        'https://github.com/shngmsw/ikabu/blob/b6c6b98d28f530e862473e419c3576e79de734ad/images/games/MonsterHunterWilds.png?raw=true';
+        'https://github.com/shngmsw/ikabu/blob/stg/images/games/MonsterHunterWilds.png?raw=true';
     const logo =
-        'https://github.com/shngmsw/ikabu/blob/b6c6b98d28f530e862473e419c3576e79de734ad/images/games/MonsterHunterWilds_logo.png?raw=true';
+        'https://github.com/shngmsw/ikabu/blob/stg/images/games/MonsterHunterWilds_logo.png?raw=true';
     await sendOtherGames(
         interaction,
         guild,
