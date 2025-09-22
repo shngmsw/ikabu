@@ -54,6 +54,12 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
     if (amount > 10) {
         return await interaction.reply('一度に指定できるのは10個まででし！');
     }
+    if (amount <= 0) {
+        return await interaction.reply({
+            content: '1以上の数を指定してくださいでし！',
+            ephemeral: true,
+        });
+    }
 
     // 'インタラクションに失敗'が出ないようにするため
     await interaction.deferReply();
