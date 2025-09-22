@@ -52,7 +52,16 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
     const bukiType = options.getString('ブキ種');
     const amount = options.getInteger('ブキの数') ?? 1;
     if (amount > 10) {
-        return await interaction.reply('一度に指定できるのは10個まででし！');
+        return await interaction.reply({
+            content: '一度に指定できるのは10個まででし！',
+            ephemeral: true,
+        });
+    }
+    if (amount <= 0) {
+        return await interaction.reply({
+            content: '1以上の数を指定するでし！',
+            ephemeral: true,
+        });
     }
 
     // 'インタラクションに失敗'が出ないようにするため
