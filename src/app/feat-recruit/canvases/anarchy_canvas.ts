@@ -247,7 +247,7 @@ export async function recruitAnarchyCanvas(
             600,
             600,
         );
-        recruitCtx.restore;
+        recruitCtx.restore();
     } else if (opCode === RecruitOpCode.close) {
         recruitCtx.save();
         const cancelStamp = await Canvas.loadImage(
@@ -264,7 +264,7 @@ export async function recruitAnarchyCanvas(
             500,
             340,
         );
-        recruitCtx.restore;
+        recruitCtx.restore();
     }
 
     const recruit = recruitCanvas.toBuffer();

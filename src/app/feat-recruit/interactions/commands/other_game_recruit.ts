@@ -75,7 +75,7 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction<
 async function monsterHunterWilds(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
     roles: Collection<string, Role>,
 ) {
@@ -111,7 +111,7 @@ async function monsterHunterWilds(
 async function apexLegends(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
     roles: Collection<string, Role>,
 ) {
@@ -147,7 +147,7 @@ async function apexLegends(
 async function overwatch(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
     roles: Collection<string, Role>,
 ) {
@@ -182,7 +182,7 @@ async function overwatch(
 async function valorant(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
     roles: Collection<string, Role>,
 ) {
@@ -217,7 +217,7 @@ async function valorant(
 async function others(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
 ) {
     const otherGamesRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
@@ -250,7 +250,7 @@ async function others(
 async function sendOtherGames(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
     title: string,
     recruitNumText: string,
@@ -348,8 +348,7 @@ async function sendOtherGames(
             0,
         );
 
-        if (!recruitChannel.isTextBased()) return;
-        const sentMessage = await (recruitChannel as GuildTextBasedChannel).send({
+        const sentMessage = await recruitChannel.send({
             content: mention + ' ボタンを押して参加表明するでし',
         });
 
@@ -357,8 +356,7 @@ async function sendOtherGames(
         if (!embedMessage.inGuild()) return;
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        if (!recruitChannel.isTextBased()) return;
-        const deleteButtonMsg = await (recruitChannel as GuildTextBasedChannel).send({
+        const deleteButtonMsg = await recruitChannel.send({
             components: [embedRecruitDeleteButton(sentMessage, embedMessage)],
         });
 
@@ -394,9 +392,8 @@ async function sendOtherGames(
     }
 }
 
-async function sendErrorMessage(channel: TextBasedChannel) {
-    if (!channel.isTextBased()) return;
-    await (channel as GuildTextBasedChannel).send(
+async function sendErrorMessage(channel: GuildTextBasedChannel) {
+    await channel.send(
         '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
     );
 }
