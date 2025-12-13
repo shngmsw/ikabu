@@ -26,6 +26,19 @@
 - データベースファイル: `ikabu.sqlite3`（プロジェクトルート）
 - Prisma設定: `prisma.config.ts`
 
+### データベースURL設定
+
+`DATABASE_URL`環境変数を使用してデータベースの場所を指定できます。指定がない場合は、プロジェクトルートの`ikabu.sqlite3`が使用されます。
+
+**DATABASE_URLの形式:**
+- 相対パス: `file:./path/to/db.sqlite3`
+- 絶対パス: `file:/absolute/path/to/db.sqlite3`
+
+例: `.env`ファイルに以下のように設定します:
+```
+DATABASE_URL=file:./ikabu.sqlite3
+```
+
 ## デプロイ
 
 - 本番環境へのデプロイは、`main`ブランチへのマージ後、GitHub Actionsによって自動的にデプロイされます。
