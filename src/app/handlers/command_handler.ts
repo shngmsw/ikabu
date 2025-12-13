@@ -1,4 +1,4 @@
-import { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import { CacheType, ChatInputCommandInteraction, TextChannel } from 'discord.js';
 
 import { commandNames } from '../../constant.js';
 import { log4js_obj } from '../../log4js_settings.js';
@@ -153,7 +153,9 @@ async function CommandsHandler(interaction: ChatInputCommandInteraction<CacheTyp
         await sendErrorLogs(logger, error);
         const commandChannel = interaction.channel;
         if (exists(commandChannel)) {
-            await commandChannel.send(ErrorTexts.UndefinedError);
+            if (commandChannel.isTextBased()) {
+                await (commandChannel as TextChannel).send(ErrorTexts.UndefinedError);
+            }
         }
     }
 }

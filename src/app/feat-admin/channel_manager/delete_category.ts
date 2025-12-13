@@ -53,7 +53,7 @@ export async function handleDeleteCategory(
 
         request(attachment.url).pipe(
             parse(async function (err, data) {
-                let categoryIdList = [];
+                let categoryIdList: string[] = [];
                 try {
                     for (const i in data) {
                         categoryIdList.push(data[i][0]);

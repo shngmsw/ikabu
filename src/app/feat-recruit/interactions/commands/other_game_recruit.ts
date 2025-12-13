@@ -9,6 +9,7 @@ import {
     ColorResolvable,
     EmbedBuilder,
     ChannelType,
+    GuildTextBasedChannel,
 } from 'discord.js';
 
 import { ParticipantService } from '../../../../db/participant_service';
@@ -347,7 +348,8 @@ async function sendOtherGames(
             0,
         );
 
-        const sentMessage = await recruitChannel.send({
+        if (!recruitChannel.isTextBased()) return;
+        const sentMessage = await (recruitChannel as GuildTextBasedChannel).send({
             content: mention + ' ボタンを押して参加表明するでし',
         });
 
@@ -355,7 +357,8 @@ async function sendOtherGames(
         if (!embedMessage.inGuild()) return;
 
         // 募集文を削除してもボタンが動くように、bot投稿メッセージのメッセージIDでボタン作る
-        const deleteButtonMsg = await recruitChannel.send({
+        if (!recruitChannel.isTextBased()) return;
+        const deleteButtonMsg = await (recruitChannel as GuildTextBasedChannel).send({
             components: [embedRecruitDeleteButton(sentMessage, embedMessage)],
         });
 
@@ -392,7 +395,8 @@ async function sendOtherGames(
 }
 
 async function sendErrorMessage(channel: TextBasedChannel) {
-    await channel.send(
+    if (!channel.isTextBased()) return;
+    await (channel as GuildTextBasedChannel).send(
         '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
     );
 }

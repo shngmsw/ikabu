@@ -4,6 +4,9 @@
   "//3": "updating this file will download and update your packages",
   "name": "ikabu",
   "version": "0.0.1",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "description": "A simple Node app built on Express, instantly up and running.",
   "main": "server.js",
   "scripts": {
@@ -13,15 +16,17 @@
     "migrate-deploy": "prisma migrate deploy",
     "prisma-generate": "prisma generate",
     "lint": "eslint .",
-    "fix": "npm run lint -- --fix"
+    "fix": "npm run lint -- --fix",
+    "test": "vitest"
   },
   "dependencies": {
-    "@discordjs/opus": "0.9.0",
-    "@discordjs/voice": "0.16.1",
-    "@prisma/client": "5.13.0",
+    "@discordjs/voice": "^0.19.0",
+    "@prisma/adapter-better-sqlite3": "^7.1.0",
+    "@prisma/client": "^7.1.0",
     "@types/sqlite3": "^3.1.8",
     "axios": "^1.8.2",
-    "canvas": "2.10.2",
+    "better-sqlite3": "^12.5.0",
+    "canvas": "^3.2.0",
     "config": "^3.3.7",
     "config-reloadable": "^1.0.9",
     "cron": "^2.3.1",
@@ -32,7 +37,7 @@
     "date-fns": "^2.30.0",
     "date-fns-tz": "^1.3.7",
     "date-utils": "^1.2.21",
-    "discord.js": "14.15.1",
+    "discord.js": "^14.25.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "ffmpeg-static": "^5.0.0",
@@ -44,7 +49,7 @@
     "node-fetch": "^2.6.7",
     "opusscript": "^0.0.8",
     "pg": "^8.7.3",
-    "sqlite3": "^5.1.2",
+    "sqlite3": "^5.1.7",
     "tweetnacl": "^1.0.3",
     "wikijs": "^6.3.3",
     "ytdl-core": "^4.11.0"
@@ -64,7 +69,7 @@
     "@types/crypto-js": "^4.1.1",
     "@types/eslint": "^8.4.3",
     "@types/eslint-plugin-prettier": "^3.1.0",
-    "@types/node": "^18.15.10",
+    "@types/node": "^25.0.1",
     "@types/node-cron": "^3.0.8",
     "@types/node-fetch": "^2.6.2",
     "@types/prettier": "^2.6.3",
@@ -80,13 +85,13 @@
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-unused-imports": "^2.0.0",
     "prettier": "2.8.7",
-    "prisma": "5.13.0",
-    "ts-migrate": "^0.1.35",
-    "ts-node": "^10.9.1",
-    "typescript": "5.1.3"
+    "prisma": "^7.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
   },
   "volta": {
-    "node": "18.18.2",
+    "node": "24.0.0",
     "npm": "10.5.1"
   }
 }

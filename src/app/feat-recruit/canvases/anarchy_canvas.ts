@@ -219,7 +219,7 @@ export async function recruitAnarchyCanvas(
     recruitCtx.textAlign = 'right';
     fillTextWithStroke(
         recruitCtx,
-        '募集ウデマエ: ' + rank ?? 'ERROR',
+        '募集ウデマエ: ' + (rank ?? 'ERROR'),
         '38px "Splatfont"',
         '#FFFFFF',
         '#2D3130',
