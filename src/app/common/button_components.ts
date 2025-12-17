@@ -34,9 +34,8 @@ export function recoveryThinkingButton(interaction: ButtonInteraction<CacheType>
                         if (interaction.customId === buttonComponent.customId) {
                             const newButton = new ButtonBuilder();
                             newButton.setLabel(label);
-                            if (buttonComponent.customId)
-                                newButton.setCustomId(buttonComponent.customId);
-                            if (buttonComponent.style) newButton.setStyle(buttonComponent.style);
+                            newButton.setCustomId(buttonComponent.customId);
+                            newButton.setStyle(buttonComponent.style);
                             newButton.setDisabled(false);
                             return newButton;
                         } else {
