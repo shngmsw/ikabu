@@ -1,4 +1,4 @@
-import { CacheType, ChatInputCommandInteraction, TextChannel } from 'discord.js';
+import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 import { commandNames } from '../../constant.js';
 import { log4js_obj } from '../../log4js_settings.js';
