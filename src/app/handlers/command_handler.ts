@@ -153,8 +153,8 @@ async function CommandsHandler(interaction: ChatInputCommandInteraction<CacheTyp
         await sendErrorLogs(logger, error);
         const commandChannel = interaction.channel;
         if (exists(commandChannel)) {
-            if (commandChannel.isTextBased()) {
-                await (commandChannel as TextChannel).send(ErrorTexts.UndefinedError);
+            if (commandChannel.isSendable()) {
+                await commandChannel.send(ErrorTexts.UndefinedError);
             }
         }
     }
