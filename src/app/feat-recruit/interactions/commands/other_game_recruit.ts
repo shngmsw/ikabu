@@ -2,7 +2,6 @@ import {
     ChatInputCommandInteraction,
     CacheType,
     Guild,
-    TextBasedChannel,
     GuildMember,
     Collection,
     Role,
