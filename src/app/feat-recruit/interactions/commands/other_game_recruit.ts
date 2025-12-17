@@ -2,13 +2,13 @@ import {
     ChatInputCommandInteraction,
     CacheType,
     Guild,
-    TextBasedChannel,
     GuildMember,
     Collection,
     Role,
     ColorResolvable,
     EmbedBuilder,
     ChannelType,
+    GuildTextBasedChannel,
 } from 'discord.js';
 
 import { ParticipantService } from '../../../../db/participant_service';
@@ -74,7 +74,7 @@ export async function otherGameRecruit(interaction: ChatInputCommandInteraction<
 async function monsterHunterWilds(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
     roles: Collection<string, Role>,
 ) {
@@ -110,7 +110,7 @@ async function monsterHunterWilds(
 async function apexLegends(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
     roles: Collection<string, Role>,
 ) {
@@ -146,7 +146,7 @@ async function apexLegends(
 async function overwatch(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
     roles: Collection<string, Role>,
 ) {
@@ -181,7 +181,7 @@ async function overwatch(
 async function valorant(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
     roles: Collection<string, Role>,
 ) {
@@ -216,7 +216,7 @@ async function valorant(
 async function others(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
 ) {
     const otherGamesRecruitRoleId = await UniqueRoleService.getRoleIdByKey(
@@ -249,7 +249,7 @@ async function others(
 async function sendOtherGames(
     interaction: ChatInputCommandInteraction<CacheType>,
     guild: Guild,
-    recruitChannel: TextBasedChannel,
+    recruitChannel: GuildTextBasedChannel,
     member: GuildMember,
     title: string,
     recruitNumText: string,
@@ -391,7 +391,7 @@ async function sendOtherGames(
     }
 }
 
-async function sendErrorMessage(channel: TextBasedChannel) {
+async function sendErrorMessage(channel: GuildTextBasedChannel) {
     await channel.send(
         '設定がおかしいでし！\n「お手数ですがサポートセンターまでご連絡お願いします。」でし！',
     );

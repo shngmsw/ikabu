@@ -20,13 +20,10 @@ export async function sendRecruitModalLog(interaction: ModalSubmitInteraction<'r
     let commandLog = '';
 
     for (const subcomponents of components) {
-        if (subcomponents.components[0].type === ComponentType.TextInput) {
-            commandLog =
-                commandLog +
-                subcomponents.components[0].customId +
-                ': ' +
-                subcomponents.components[0].value +
-                '\n';
+        if (!('components' in subcomponents)) continue;
+        const firstComponent = subcomponents.components[0];
+        if (firstComponent.type === ComponentType.TextInput) {
+            commandLog = commandLog + firstComponent.customId + ': ' + firstComponent.value + '\n';
         }
     }
 

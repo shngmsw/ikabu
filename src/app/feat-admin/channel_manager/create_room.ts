@@ -102,7 +102,7 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
                     try {
                         const categoryName = data[i][INDEX_CATEGORY_NAME];
                         const channelName = data[i][INDEX_CHANNEL_NAME];
-                        let channelType = data[i][INDEX_CHANNEL_TYPE];
+                        const channelType = data[i][INDEX_CHANNEL_TYPE];
                         let channelId = null;
                         const roleName = data[i][INDEX_ROLE_NAME];
                         let roleColor = data[i][INDEX_COLOR_CODE];
@@ -120,27 +120,34 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
                             );
                         }
 
-                        if (channelName != '') {
-                            channelType = checkChannelType(channelType);
+                        let validatedChannelType: ChannelType | string = '';
 
-                            if (channelType !== '') {
-                                if (channelType !== 'ERROR!') {
+                        if (channelName != '') {
+                            validatedChannelType = checkChannelType(channelType);
+
+                            if (validatedChannelType !== '') {
+                                if (validatedChannelType !== 'ERROR!') {
                                     channelId = await createChannel(
                                         guild,
                                         channelName,
-                                        channelType,
+                                        validatedChannelType as ChannelType,
                                         categoryId,
                                     );
                                 }
                             }
                         } else {
-                            channelType = checkChannelType(channelType);
+                            validatedChannelType = checkChannelType(channelType);
                         }
 
                         const roleId = await createRole(guild, roleName);
 
                         if (exists(roleId) && exists(channelId)) {
-                            await setRoleToChanel(guild, roleId, channelId, channelType);
+                            await setRoleToChanel(
+                                guild,
+                                roleId,
+                                channelId,
+                                validatedChannelType as string,
+                            );
 
                             const role = await searchRoleById(guild, roleId);
                             assertExistCheck(role);
@@ -152,21 +159,25 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
                         }
 
                         resultData.push([
-                            categoryId,
+                            categoryId ?? '',
                             categoryName,
-                            channelId,
+                            channelId ?? '',
                             channelName,
-                            channelType,
-                            roleId,
+                            String(validatedChannelType),
+                            roleId ?? '',
                             roleName,
                             roleColor,
                         ]);
 
                         if (exists(roleId)) {
                             for (let j = INDEX_MEMBER_ID_START; j < data[i].length; j++) {
-                                let memberId = data[i][j].trim();
-                                memberId = await setRoleToMember(guild, roleId, memberId);
-                                resultData[i].push(memberId);
+                                const memberIdString = data[i][j].trim();
+                                const resultMemberId = await setRoleToMember(
+                                    guild,
+                                    roleId,
+                                    memberIdString,
+                                );
+                                resultData[i].push(resultMemberId ?? '');
                             }
                         }
 
@@ -212,9 +223,7 @@ export async function handleCreateRoom(interaction: ChatInputCommandInteraction<
     }
 }
 
-function checkChannelType(
-    channelType: 'txt' | 'TEXT' | 'GUILD_TEXT' | 'vc' | 'VOICE' | 'GUILD_VOICE' | '',
-) {
+function checkChannelType(channelType: string) {
     if (channelType == 'txt' || channelType == 'TEXT' || channelType == 'GUILD_TEXT') {
         return ChannelType.GuildText;
     } else if (channelType == 'vc' || channelType == 'VOICE' || channelType == 'GUILD_VOICE') {

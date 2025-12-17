@@ -12,7 +12,7 @@ import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('default');
 
-export async function sendCloseButton(thread: AnyThreadChannel<boolean>) {
+export async function sendCloseButton(thread: AnyThreadChannel) {
     try {
         const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents([
             new ButtonBuilder()

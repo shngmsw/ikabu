@@ -7,7 +7,7 @@ import { sendErrorLogs } from '../../logs/error/send_error_logs';
 
 const logger = log4js_obj.getLogger('default');
 
-export async function editThreadTag(thread: AnyThreadChannel<boolean>) {
+export async function editThreadTag(thread: AnyThreadChannel) {
     try {
         if (
             notExists(process.env.TAG_ID_SUPPORT_PROGRESS) ||
