@@ -15,8 +15,29 @@
 
 ## 環境
 
-- Node.js: `16.13.0`
-- Discord.js: `14.11.0`
+- Node.js: `>=24.0.0`
+- Discord.js: `14.25.1`
+- Prisma: `7.1.0`
+
+## データベース
+
+このプロジェクトはSQLiteデータベースを使用しています。Prisma 7.xでは`@prisma/adapter-better-sqlite3`ドライバーアダプターを使用しています。
+
+- データベースファイル: `ikabu.sqlite3`（プロジェクトルート）
+- Prisma設定: `prisma.config.ts`
+
+### データベースURL設定
+
+`DATABASE_URL`環境変数を使用してデータベースの場所を指定できます。指定がない場合は、プロジェクトルートの`ikabu.sqlite3`が使用されます。
+
+**DATABASE_URLの形式:**
+- 相対パス: `file:./path/to/db.sqlite3`
+- 絶対パス: `file:/absolute/path/to/db.sqlite3`
+
+例: `.env`ファイルに以下のように設定します:
+```
+DATABASE_URL=file:./ikabu.sqlite3
+```
 
 ## デプロイ
 
@@ -31,9 +52,9 @@
 
 `.env`ファイルを読み込み、TypeScriptをコンパイルして、サーバーを開始します。
 
-### `npm run migrate-dev`
+### `npm run create-migrate`
 
-`Prisma migrate dev`を実行し、マイグレーションを作成します。
+`Prisma migrate dev --create-only`を実行し、マイグレーションを作成します。
 Databaseのスキーマ変更内容を元にmigrationsにDDLを生成します。
 
 ### `npm run migrate-deploy`
@@ -46,11 +67,15 @@ Databaseのスキーマ変更内容を元にmigrationsにDDLを生成します�
 
 ### `npm run lint`
 
-`eslint`と`prettier`を実行して、コードを検証します。
+`eslint`を実行して、コードを検証します。
 
 ### `npm run fix`
 
-`eslint`と`prettier`を実行して、コードを自動で修正します。
+`eslint`を実行して、コードを自動で修正します。
+
+### `npm run test`
+
+`vitest`を実行して、テストを実行します。
 
 ## ライセンス
 

@@ -13,7 +13,7 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 2018,
-    project: "./tsconfig.json",
+    project: ["./tsconfig.json", "./tsconfig.eslint.json"],
     sourceType: "module",
   },
   plugins: ["@typescript-eslint", "prettier", "import", "unused-imports"],
@@ -42,6 +42,7 @@ module.exports = {
       },
     ],
     "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-explicit-any": "error",
     // prettier/prettier
     "prettier/prettier": [
       "warn",

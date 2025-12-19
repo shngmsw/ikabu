@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:../ikabu.sqlite3?connection_limit=1"
 }
 
 model Channel {

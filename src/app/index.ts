@@ -346,7 +346,7 @@ client.on('interactionCreate', async (interaction: Interaction<CacheType>) => {
     }
 });
 
-client.on('threadCreate', async (thread: AnyThreadChannel<boolean>) => {
+client.on('threadCreate', async (thread: AnyThreadChannel) => {
     const supportChannelId = await UniqueChannelService.getChannelIdByKey(
         thread.guildId,
         ChannelKeySet.SupportCenter.key,

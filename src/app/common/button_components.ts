@@ -20,14 +20,15 @@ import { assertExistCheck, exists } from './others';
  */
 export function recoveryThinkingButton(interaction: ButtonInteraction<CacheType>, label: string) {
     const message = interaction.message;
-    const newActionRow = message.components.map(
+    const newActionRow = (message.components as ActionRow<MessageActionRowComponent>[]).map(
         (oldActionRow: ActionRow<MessageActionRowComponent>) => {
             const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
             updatedActionRow.addComponents(
                 oldActionRow.components
-                    .filter<ButtonComponent>(
-                        (value): value is ButtonComponent => value.type === ComponentType.Button,
+                    .filter(
+                        (component): component is ButtonComponent =>
+                            component.type === ComponentType.Button,
                     )
                     .map((buttonComponent: ButtonComponent) => {
                         if (interaction.customId === buttonComponent.customId) {
@@ -58,21 +59,23 @@ export function recoveryThinkingButton(interaction: ButtonInteraction<CacheType>
  */
 export function disableThinkingButton(interaction: ButtonInteraction<CacheType>, label: string) {
     const message = interaction.message;
-    const newActionRow = message.components.map(
+    const newActionRow = (message.components as ActionRow<MessageActionRowComponent>[]).map(
         (oldActionRow: ActionRow<MessageActionRowComponent>) => {
             const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
             updatedActionRow.addComponents(
                 oldActionRow.components
-                    .filter<ButtonComponent>(
-                        (value): value is ButtonComponent => value.type === ComponentType.Button,
+                    .filter(
+                        (component): component is ButtonComponent =>
+                            component.type === ComponentType.Button,
                     )
                     .map((buttonComponent: ButtonComponent) => {
                         if (interaction.customId === buttonComponent.customId) {
                             const newButton = new ButtonBuilder();
                             newButton.setLabel(label);
-                            newButton.setCustomId(buttonComponent.customId);
-                            newButton.setStyle(buttonComponent.style);
+                            if (buttonComponent.customId)
+                                newButton.setCustomId(buttonComponent.customId);
+                            if (buttonComponent.style) newButton.setStyle(buttonComponent.style);
                             newButton.setDisabled(true);
                             return newButton;
                         } else {
@@ -94,14 +97,15 @@ export function disableThinkingButton(interaction: ButtonInteraction<CacheType>,
  * @returns 新しいActionRowオブジェクト
  */
 export function setButtonEnable(message: Message<boolean>) {
-    const newActionRow = message.components.map(
+    const newActionRow = (message.components as ActionRow<MessageActionRowComponent>[]).map(
         (oldActionRow: ActionRow<MessageActionRowComponent>) => {
             const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
             updatedActionRow.addComponents(
                 oldActionRow.components
-                    .filter<ButtonComponent>(
-                        (value): value is ButtonComponent => value.type === ComponentType.Button,
+                    .filter(
+                        (component): component is ButtonComponent =>
+                            component.type === ComponentType.Button,
                     )
                     .map((buttonComponent: ButtonComponent) => {
                         const newButton = ButtonBuilder.from(buttonComponent);
@@ -125,14 +129,15 @@ export function setButtonDisable(
     message: Message<boolean>,
     interaction?: ButtonInteraction<CacheType>,
 ) {
-    const newActionRow = message.components.map(
+    const newActionRow = (message.components as ActionRow<MessageActionRowComponent>[]).map(
         (oldActionRow: ActionRow<MessageActionRowComponent>) => {
             const updatedActionRow = new ActionRowBuilder<ButtonBuilder>();
 
             updatedActionRow.addComponents(
                 oldActionRow.components
-                    .filter<ButtonComponent>(
-                        (value): value is ButtonComponent => value.type === ComponentType.Button,
+                    .filter(
+                        (component): component is ButtonComponent =>
+                            component.type === ComponentType.Button,
                     )
                     .map((buttonComponent: ButtonComponent) => {
                         let newButton;
@@ -142,8 +147,9 @@ export function setButtonDisable(
                         ) {
                             assertExistCheck(process.env.RECRUIT_LOADING_EMOJI_ID);
                             newButton = new ButtonBuilder();
-                            newButton.setStyle(buttonComponent.style);
-                            newButton.setCustomId(buttonComponent.customId);
+                            if (buttonComponent.style) newButton.setStyle(buttonComponent.style);
+                            if (buttonComponent.customId)
+                                newButton.setCustomId(buttonComponent.customId);
                             newButton.setEmoji(process.env.RECRUIT_LOADING_EMOJI_ID);
                             newButton.setDisabled(true);
                         } else {
