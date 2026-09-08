@@ -2,6 +2,7 @@ import { ObjectValueList } from './constant_common';
 
 // 固有の機能ロールを増やすときはここに追加するだけでOK
 export const RoleKeySet = {
+    Supporter: { name: 'サポーター', key: 'ROLE_ID_SUPPORTER' },
     Developer: { name: 'DEVELOPER', key: 'ROLE_ID_DEVELOPER' },
     Rookie: { name: '新入部員', key: 'ROLE_ID_ROOKIE' },
     PrivateRecruit: { name: 'プラベ募集', key: 'ROLE_ID_RECRUIT_PRIVATE' },

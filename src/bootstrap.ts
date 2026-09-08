@@ -1,6 +1,7 @@
 import { env, validateEnv } from '@/config/env';
 import { registerDiscordEvents } from '@/gateway/events';
 import { client } from '@/infra/discord/client';
+import { weaponCatalog } from '@/infra/external/stat_ink/weapon_catalog';
 import { startHealthCheckServer } from '@/infra/http/health_check';
 import { log4js_obj } from '@/infra/logging/log4js';
 import { startRecruitCloseJob } from '@/jobs/recruit_close_job';
@@ -29,6 +30,7 @@ export async function bootstrap() {
     startHealthCheckServer();
 
     // 5. Discord に接続する。以降 clientReady が発火して初期化が走る
+    await weaponCatalog.get();
     await client.login(env.discordBotToken);
 
     logger.info('bootstrap finished');

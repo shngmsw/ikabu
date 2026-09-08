@@ -15,6 +15,10 @@ const logger = log4js_obj.getLogger();
 /** Discord から届いた interaction を、種類ごとのハンドラへ振り分ける */
 export async function routeInteraction(client: Client, interaction: Interaction<CacheType>) {
     try {
+        if (interaction.isAutocomplete()) {
+            await commandHandler.autocomplete(interaction);
+            return;
+        }
         // RawGuildのInteractionが送られてくる頻度を確認するためのログ
         if (interaction.inRawGuild()) {
             const guildId = interaction.guildId;

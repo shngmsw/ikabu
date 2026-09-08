@@ -92,8 +92,8 @@ export async function handleHelp(interaction: ChatInputCommandInteraction<CacheT
                             inline: true,
                         },
                         {
-                            name: '/イカ部歴',
-                            value: '```自分のイカ部歴を表示```',
+                            name: '/プロフィール（/イカ部歴）',
+                            value: '```入部日、イカ部歴、フレンドコード、チャット数、ブキ、ロールバッジを表示。ブキは /プロフィール設定 で登録、解除できます。```',
                             inline: true,
                         },
                         {

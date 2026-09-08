@@ -6,53 +6,17 @@ import {
     MessageFlags,
     User,
 } from 'discord.js';
-import fetch from 'node-fetch';
 
 import { ErrorTexts } from '@/config/constants/error_texts';
+import { weaponCatalog } from '@/infra/external/stat_ink/weapon_catalog';
 import { log4js_obj } from '@/infra/logging/log4js';
 import { sendErrorLogs } from '@/infra/logging/send_error_logs';
 import { exists } from '@/shared/assert';
 import { getGuildByInteraction } from '@/shared/discord_helpers/guild_manager';
 import { searchDBMemberById } from '@/shared/discord_helpers/member_manager';
 import { randomSelect } from '@/shared/random';
-const weaponsUrl = 'https://stat.ink/api/v3/weapon';
 
 const logger = log4js_obj.getLogger('interaction');
-
-type Weapon = {
-    key: string;
-    aliases: string[];
-    type: {
-        key: string;
-        aliases: [];
-        name: {
-            en_US: string;
-            ja_JP: string;
-        };
-    };
-    name: {
-        en_US: string;
-        ja_JP: string;
-    };
-    main: string;
-    sub: {
-        key: string;
-        aliases: [];
-        name: {
-            en_US: string;
-            ja_JP: string;
-        };
-    };
-    special: {
-        key: string;
-        aliases: [];
-        name: {
-            en_US: string;
-            ja_JP: string;
-        };
-    };
-    reskin_of: string;
-};
 
 export async function handleBuki(interaction: ChatInputCommandInteraction<CacheType>) {
     const { options } = interaction;
@@ -75,8 +39,8 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
     await interaction.deferReply();
 
     try {
-        const response = await fetch(weaponsUrl);
-        const weapons = (await response.json()) as Weapon[];
+        const weapons = await weaponCatalog.get();
+        if (!weapons.length) throw new Error('ブキ一覧を取得できませんでした');
 
         let member: User | Member | null;
         if (interaction.inGuild()) {
@@ -86,7 +50,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
             member = interaction.user;
         }
 
-        const bukis = weapons.filter(function (value: Weapon) {
+        const bukis = weapons.filter(function (value) {
             if (exists(bukiType)) {
                 // 特定のbukiTypeが指定されているとき
                 return bukiType === value.type.key;
@@ -94,7 +58,7 @@ export async function handleBuki(interaction: ChatInputCommandInteraction<CacheT
                 return true;
             }
         });
-        const bukiNames = bukis.map(function (value: Weapon) {
+        const bukiNames = bukis.map(function (value) {
             const embed = new EmbedBuilder()
                 .setColor(0xf02d7d)
                 .setTitle(value.name.ja_JP)

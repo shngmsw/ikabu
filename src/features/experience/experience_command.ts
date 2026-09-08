@@ -6,7 +6,7 @@ import type { GuildChatInputCommand } from '@/shared/command_types';
 
 const experience = new SlashCommandBuilder()
     .setName('イカ部歴')
-    .setDescription('イカ部歴を表示します。')
+    .setDescription('イカ部歴を含む自分のプロフィールを表示します。')
     .setDMPermission(false);
 
 export const experienceCommand: GuildChatInputCommand = {
