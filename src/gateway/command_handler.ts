@@ -1,4 +1,4 @@
-import { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 import { ErrorTexts } from '@/config/constants/error_texts';
 import { sendCommandLog } from '@/infra/logging/command_log';
@@ -70,5 +70,17 @@ async function CommandsHandler(interaction: ChatInputCommandInteraction<CacheTyp
                 await commandChannel.send(ErrorTexts.UndefinedError);
             }
         }
+    }
+}
+
+export async function autocomplete(interaction: AutocompleteInteraction<CacheType>) {
+    const command = interaction.inCachedGuild()
+        ? (guildCommands.get(interaction.commandName) ??
+          globalCommands.get(interaction.commandName))
+        : globalCommands.get(interaction.commandName);
+    if (command?.autocomplete) {
+        await command.autocomplete(interaction);
+    } else {
+        await interaction.respond([]);
     }
 }

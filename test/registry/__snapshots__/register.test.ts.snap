@@ -722,7 +722,7 @@ exports[`コマンド定義 > 登録するSlash CommandのJSON表現を維持す
     "contexts": undefined,
     "default_member_permissions": undefined,
     "default_permission": undefined,
-    "description": "イカ部歴を表示します。",
+    "description": "イカ部歴を含む自分のプロフィールを表示します。",
     "description_localizations": undefined,
     "dm_permission": false,
     "integration_types": undefined,
@@ -730,6 +730,64 @@ exports[`コマンド定義 > 登録するSlash CommandのJSON表現を維持す
     "name_localizations": undefined,
     "nsfw": undefined,
     "options": [],
+    "type": 1,
+  },
+  {
+    "contexts": undefined,
+    "default_member_permissions": undefined,
+    "default_permission": undefined,
+    "description": "イカ部歴やブキ、バッジをまとめた自分のプロフィールを表示します。",
+    "description_localizations": undefined,
+    "dm_permission": false,
+    "integration_types": undefined,
+    "name": "プロフィール",
+    "name_localizations": undefined,
+    "nsfw": undefined,
+    "options": [],
+    "type": 1,
+  },
+  {
+    "contexts": undefined,
+    "default_member_permissions": undefined,
+    "default_permission": undefined,
+    "description": "自分のプロフィールを編集します。",
+    "description_localizations": undefined,
+    "dm_permission": false,
+    "integration_types": undefined,
+    "name": "プロフィール設定",
+    "name_localizations": undefined,
+    "nsfw": undefined,
+    "options": [
+      {
+        "description": "好きなブキを登録、変更します。",
+        "description_localizations": undefined,
+        "name": "ブキ",
+        "name_localizations": undefined,
+        "options": [
+          {
+            "autocomplete": true,
+            "choices": undefined,
+            "description": "文字を入力して絞り込み、表示されたブキ候補から選択",
+            "description_localizations": undefined,
+            "max_length": 40,
+            "min_length": 1,
+            "name": "名前",
+            "name_localizations": undefined,
+            "required": true,
+            "type": 3,
+          },
+        ],
+        "type": 1,
+      },
+      {
+        "description": "好きなブキの登録を解除します。",
+        "description_localizations": undefined,
+        "name": "ブキ解除",
+        "name_localizations": undefined,
+        "options": [],
+        "type": 1,
+      },
+    ],
     "type": 1,
   },
   {
@@ -3062,6 +3120,11 @@ exports[`コマンド定義 > 登録するSlash CommandのJSON表現を維持す
             "autocomplete": undefined,
             "choices": [
               {
+                "name": "サポーター",
+                "name_localizations": undefined,
+                "value": "ROLE_ID_SUPPORTER",
+              },
+              {
                 "name": "DEVELOPER",
                 "name_localizations": undefined,
                 "value": "ROLE_ID_DEVELOPER",
@@ -3176,6 +3239,11 @@ exports[`コマンド定義 > 登録するSlash CommandのJSON表現を維持す
           {
             "autocomplete": undefined,
             "choices": [
+              {
+                "name": "サポーター",
+                "name_localizations": undefined,
+                "value": "ROLE_ID_SUPPORTER",
+              },
               {
                 "name": "DEVELOPER",
                 "name_localizations": undefined,

@@ -5,6 +5,7 @@ import { channelManagerCommand } from '@/features/channel_manager/channel_manage
 import { channelSettingsCommand } from '@/features/channel_settings/channel_settings_command';
 import { variablesSettingsCommand } from '@/features/environment_variables/variables_settings_command';
 import { experienceCommand } from '@/features/experience/experience_command';
+import { profileCommand, profileSettingsCommand } from '@/features/experience/profile_command';
 import { festivalSettingsCommand } from '@/features/fest_setting/festival_settings_command';
 import { friendCodeCommand } from '@/features/friend_code/friend_code_command';
 import { helpCommand } from '@/features/help/help_command';
@@ -67,6 +68,8 @@ export const commands: CommandModule[] = [
     banCommand,
     channelManagerCommand,
     experienceCommand,
+    profileCommand,
+    profileSettingsCommand,
     voiceCommand,
     closeRecruitCommand,
     otherGameCommand,

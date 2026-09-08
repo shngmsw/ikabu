@@ -183,3 +183,18 @@ model Reaction {
   @@unique([emojiId, emojiName])
   @@map("reaction")
 }
+
+model Profile {
+  userId         String @id @map("user_id")
+  favoriteWeapon String @map("favorite_weapon")
+
+  @@map("profile")
+}
+
+model WeaponCatalog {
+  id        Int      @id
+  payload   String
+  fetchedAt DateTime @map("fetched_at")
+
+  @@map("weapon_catalog")
+}
