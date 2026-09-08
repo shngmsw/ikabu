@@ -1,4 +1,5 @@
 import type {
+    AutocompleteInteraction,
     CacheType,
     ChatInputCommandInteraction,
     MessageContextMenuCommandInteraction,
@@ -17,6 +18,7 @@ export interface CommandDefinition {
 /** Guild でのみ動くスラッシュコマンド */
 export interface GuildChatInputCommand {
     kind: 'chatInput';
+    autocomplete?: (interaction: AutocompleteInteraction<CacheType>) => Promise<unknown>;
     guildOnly: true;
     definition: CommandDefinition;
     execute: (interaction: ChatInputCommandInteraction<'cached'>) => Promise<unknown>;
@@ -25,6 +27,7 @@ export interface GuildChatInputCommand {
 /** DM でも Guild でも動くスラッシュコマンド */
 export interface GlobalChatInputCommand {
     kind: 'chatInput';
+    autocomplete?: (interaction: AutocompleteInteraction<CacheType>) => Promise<unknown>;
     guildOnly: false;
     definition: CommandDefinition;
     execute: (interaction: ChatInputCommandInteraction<CacheType>) => Promise<unknown>;

@@ -29,7 +29,11 @@ vi.mock('@/infra/db/repositories/unique_role_service', () => ({
 vi.mock('@/features/experience/profile_card', () => ({ renderProfileCard: mocks.render }));
 
 import { handleIkabuExperience } from '@/features/experience/experience';
-import { handleProfile, handleProfileSettings } from '@/features/experience/profile';
+import {
+    autocompleteProfileWeapon,
+    handleProfile,
+    handleProfileSettings,
+} from '@/features/experience/profile';
 import { profileCommand, profileSettingsCommand } from '@/features/experience/profile_command';
 
 function interaction() {
@@ -44,7 +48,7 @@ function interaction() {
         },
         options: {
             getSubcommand: vi.fn().mockReturnValue('ブキ'),
-            getString: vi.fn().mockReturnValue(' スプラシューター '),
+            getString: vi.fn().mockReturnValue('sshooter'),
         },
         deferReply: vi.fn(),
         editReply: vi.fn(),
@@ -140,7 +144,14 @@ describe('プロフィール設定', () => {
         expect(mocks.save).toHaveBeenCalledWith('self', 'スプラシューター');
         expect(i.deferReply).toHaveBeenCalledWith({ flags: MessageFlags.Ephemeral });
     });
-    it.each(['   ', 'ブキ\nブキ', 'あ'.repeat(41)])('不正な入力は保存しない: %s', async (value) => {
+    it.each([
+        '   ',
+        'ブキ\nブキ',
+        'あ'.repeat(41),
+        '好きな名前',
+        'スプラシューター',
+        'nonexistent_weapon',
+    ])('不正な入力は保存しない: %s', async (value) => {
         const i = interaction();
         i.options.getString.mockReturnValue(value);
         await handleProfileSettings(i as unknown as Interaction);
@@ -153,4 +164,18 @@ describe('プロフィール設定', () => {
         expect(mocks.clear).toHaveBeenCalledWith('self');
         expect(mocks.save).not.toHaveBeenCalled();
     });
+});
+
+it('ブキ候補は表示名とIDの組で返す', async () => {
+    const respond = vi.fn();
+    await autocompleteProfileWeapon({
+        options: {
+            getSubcommand: () => 'ブキ',
+            getFocused: () => ({ name: '名前', value: 'すぷらしゅーたー' }),
+        },
+        respond,
+    } as never);
+    expect(respond).toHaveBeenCalledWith(
+        expect.arrayContaining([{ name: 'スプラシューター', value: 'sshooter' }]),
+    );
 });

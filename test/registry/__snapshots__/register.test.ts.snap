@@ -765,9 +765,9 @@ exports[`コマンド定義 > 登録するSlash CommandのJSON表現を維持す
         "name_localizations": undefined,
         "options": [
           {
-            "autocomplete": undefined,
+            "autocomplete": true,
             "choices": undefined,
-            "description": "好きなブキの名前",
+            "description": "文字を入力して絞り込み、表示されたブキ候補から選択",
             "description_localizations": undefined,
             "max_length": 40,
             "min_length": 1,

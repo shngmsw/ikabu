@@ -1,5 +1,11 @@
-import { AttachmentBuilder, ChatInputCommandInteraction, MessageFlags } from 'discord.js';
+import {
+    AttachmentBuilder,
+    AutocompleteInteraction,
+    ChatInputCommandInteraction,
+    MessageFlags,
+} from 'discord.js';
 
+import { PROFILE_WEAPONS } from '@/config/constants/profile_weapons';
 import { RoleKeySet } from '@/config/constants/role_key';
 import { FriendCodeService } from '@/infra/db/repositories/friend_code_service';
 import { MemberService } from '@/infra/db/repositories/member_service';
@@ -8,6 +14,7 @@ import { ProfileService } from '@/infra/db/repositories/profile_service';
 import { UniqueRoleService } from '@/infra/db/repositories/unique_role_service';
 
 import { renderProfileCard } from './profile_card';
+import { findProfileWeapons } from './profile_weapons';
 
 export async function handleProfile(interaction: ChatInputCommandInteraction<'cached'>) {
     await interaction.deferReply();
@@ -59,11 +66,21 @@ export async function handleProfileSettings(interaction: ChatInputCommandInterac
         await interaction.editReply('好きなブキの登録を解除したでし！');
         return;
     }
-    const weapon = interaction.options.getString('名前', true).trim();
-    if (!weapon || /[\r\n\t]/u.test(weapon) || weapon.length > 40) {
-        await interaction.editReply('ブキの名前は1〜40文字、改行なしで入力してほしいでし！');
+    const key = interaction.options.getString('名前', true);
+    const weapon = PROFILE_WEAPONS.find((candidate) => candidate.key === key);
+    if (!weapon) {
+        await interaction.editReply('ブキは表示された候補から選んでほしいでし！');
         return;
     }
-    await ProfileService.setWeapon(interaction.user.id, weapon);
+    await ProfileService.setWeapon(interaction.user.id, weapon.name);
     await interaction.editReply('好きなブキを登録したでし！ `/プロフィール` で確認できるでし！');
+}
+
+export async function autocompleteProfileWeapon(interaction: AutocompleteInteraction) {
+    const focused = interaction.options.getFocused(true);
+    if (interaction.options.getSubcommand() !== 'ブキ' || focused.name !== '名前') {
+        await interaction.respond([]);
+        return;
+    }
+    await interaction.respond(findProfileWeapons(String(focused.value)));
 }

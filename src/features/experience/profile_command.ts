@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 
-import { handleProfile, handleProfileSettings } from './profile';
+import { autocompleteProfileWeapon, handleProfile, handleProfileSettings } from './profile';
 
 import type { GuildChatInputCommand } from '@/shared/command_types';
 
@@ -28,7 +28,8 @@ export const profileSettingsCommand: GuildChatInputCommand = {
                 .addStringOption((option) =>
                     option
                         .setName('名前')
-                        .setDescription('好きなブキの名前')
+                        .setDescription('文字を入力して絞り込み、表示されたブキ候補から選択')
+                        .setAutocomplete(true)
                         .setRequired(true)
                         .setMinLength(1)
                         .setMaxLength(40),
@@ -38,4 +39,5 @@ export const profileSettingsCommand: GuildChatInputCommand = {
             sub.setName('ブキ解除').setDescription('好きなブキの登録を解除します。'),
         ),
     execute: handleProfileSettings,
+    autocomplete: autocompleteProfileWeapon,
 };

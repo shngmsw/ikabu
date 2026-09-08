@@ -26,6 +26,7 @@ const names = [
     'handleIkabuExperience',
     'handleProfile',
     'handleProfileSettings',
+    'autocompleteProfileWeapon',
     'handleTTSCommand',
     'channelManagerHandler',
     'handleFriendCode',
@@ -66,6 +67,7 @@ const mocks = vi.hoisted(
                 'handleIkabuExperience',
                 'handleProfile',
                 'handleProfileSettings',
+                'autocompleteProfileWeapon',
                 'handleTTSCommand',
                 'channelManagerHandler',
                 'handleFriendCode',
@@ -140,6 +142,7 @@ vi.mock('@/features/experience/experience', () => ({
 vi.mock('@/features/experience/profile', () => ({
     handleProfile: mocks.handleProfile,
     handleProfileSettings: mocks.handleProfileSettings,
+    autocompleteProfileWeapon: mocks.autocompleteProfileWeapon,
 }));
 vi.mock('@/features/friend_code/friendcode', () => ({
     handleFriendCode: mocks.handleFriendCode,
@@ -166,7 +169,7 @@ vi.mock('@/features/ban/ban', () => ({ handleBan: mocks.handleBan }));
 vi.mock('@/infra/logging/command_log', () => ({ sendCommandLog: mocks.sendCommandLog }));
 vi.mock('@/infra/logging/send_error_logs', () => ({ sendErrorLogs: mocks.sendErrorLogs }));
 
-import { call } from '@/gateway/command_handler';
+import { autocomplete, call } from '@/gateway/command_handler';
 
 // [Discord に登録されるコマンド名, dispatch されるべきハンドラ]
 const cases: [string, string][] = [
@@ -238,5 +241,29 @@ describe('command_handler dispatch', () => {
             channel: null,
         } as never);
         expect(mocks.voiceLocker).not.toHaveBeenCalled();
+    });
+});
+
+describe('autocomplete dispatch', () => {
+    beforeEach(() => vi.clearAllMocks());
+    it('プロフィール設定の候補を登録済みハンドラへ渡す', async () => {
+        const interaction = {
+            commandName: 'プロフィール設定',
+            inCachedGuild: () => true,
+            respond: vi.fn(),
+        };
+        await autocomplete(interaction as never);
+        expect(mocks.autocompleteProfileWeapon).toHaveBeenCalledWith(interaction);
+        expect(interaction.respond).not.toHaveBeenCalled();
+    });
+    it.each([
+        ['プロフィール設定', false],
+        ['unknown', true],
+        ['イカ部歴', true],
+    ])('候補非対応のコマンドは空で返す %s %s', async (commandName, cached) => {
+        const interaction = { commandName, inCachedGuild: () => cached, respond: vi.fn() };
+        await autocomplete(interaction as never);
+        expect(interaction.respond).toHaveBeenCalledWith([]);
+        expect(mocks.autocompleteProfileWeapon).not.toHaveBeenCalled();
     });
 });
