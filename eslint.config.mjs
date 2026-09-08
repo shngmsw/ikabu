@@ -40,6 +40,8 @@ export default tseslint.config(
                         'test/*.ts',
                         'test/config/constants/*.ts',
                         'test/gateway/*.ts',
+                        'test/features/omikuji/*.ts',
+                        'scripts/*.ts',
                         'test/infra/db/*.ts',
                         'test/infra/external/splatoon3-ink/*.ts',
                         'test/infra/logging/*.ts',

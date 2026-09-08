@@ -10,6 +10,7 @@ import { friendCodeCommand } from '@/features/friend_code/friend_code_command';
 import { helpCommand } from '@/features/help/help_command';
 import { joinedDateFixerCommand } from '@/features/joined_date_fixer/joined_date_fixer_command';
 import { kansenCommand } from '@/features/kansen/kansen_command';
+import { omikujiCommand } from '@/features/omikuji/omikuji_command';
 import { pickCommand } from '@/features/pick/pick_command';
 import { anarchyRecruitCommand } from '@/features/recruit/create/anarchy_recruit_command';
 import { buttonRecruitCommand } from '@/features/recruit/create/button_recruit_command';
@@ -60,6 +61,7 @@ export const commands: CommandModule[] = [
     teamDividerCommand,
     timerCommand,
     pickCommand,
+    omikujiCommand,
     vpickCommand,
     bukiCommand,
     showCommand,
