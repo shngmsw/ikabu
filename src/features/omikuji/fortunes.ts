@@ -21,13 +21,13 @@ export const fortunes = [
         id: 'kichi',
         name: '吉',
         color: 0x88b9e5,
-        message: 'いつもの調子がいちばん。自分のペースでいくでし！',
+        message: 'いつもの調子がいちばん。ナイスのひと声を忘れずに！',
     },
     {
         id: 'kyo',
         name: '凶',
         color: 0xb0a2d7,
-        message: 'ひと息つくのも作戦でし。焦らず、次のチャンスへ！',
+        message: 'ひと息つくのも作戦でし。深追いせず、次のチャンスへ！',
     },
     {
         id: 'daikyo',
