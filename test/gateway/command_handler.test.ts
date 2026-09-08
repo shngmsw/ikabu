@@ -24,6 +24,8 @@ const names = [
     'joinedAtFixer',
     'festSettingHandler',
     'handleIkabuExperience',
+    'handleProfile',
+    'handleProfileSettings',
     'handleTTSCommand',
     'channelManagerHandler',
     'handleFriendCode',
@@ -62,6 +64,8 @@ const mocks = vi.hoisted(
                 'joinedAtFixer',
                 'festSettingHandler',
                 'handleIkabuExperience',
+                'handleProfile',
+                'handleProfileSettings',
                 'handleTTSCommand',
                 'channelManagerHandler',
                 'handleFriendCode',
@@ -133,6 +137,10 @@ vi.mock('@/features/recruit/create/salmon_recruit', () => ({
 vi.mock('@/features/experience/experience', () => ({
     handleIkabuExperience: mocks.handleIkabuExperience,
 }));
+vi.mock('@/features/experience/profile', () => ({
+    handleProfile: mocks.handleProfile,
+    handleProfileSettings: mocks.handleProfileSettings,
+}));
 vi.mock('@/features/friend_code/friendcode', () => ({
     handleFriendCode: mocks.handleFriendCode,
 }));
@@ -187,6 +195,8 @@ const cases: [string, string][] = [
     ['入部日修正', 'joinedAtFixer'],
     ['フェスカテゴリ設定', 'festSettingHandler'],
     ['イカ部歴', 'handleIkabuExperience'],
+    ['プロフィール', 'handleProfile'],
+    ['プロフィール設定', 'handleProfileSettings'],
     ['voice', 'handleTTSCommand'],
     ['ch_management', 'channelManagerHandler'],
     ['friend_code', 'handleFriendCode'],
