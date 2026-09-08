@@ -5,13 +5,13 @@ import {
     MessageFlags,
 } from 'discord.js';
 
-import { PROFILE_WEAPONS } from '@/config/constants/profile_weapons';
 import { RoleKeySet } from '@/config/constants/role_key';
 import { FriendCodeService } from '@/infra/db/repositories/friend_code_service';
 import { MemberService } from '@/infra/db/repositories/member_service';
 import { MessageCountService } from '@/infra/db/repositories/message_count_service';
 import { ProfileService } from '@/infra/db/repositories/profile_service';
 import { UniqueRoleService } from '@/infra/db/repositories/unique_role_service';
+import { weaponCatalog } from '@/infra/external/stat_ink/weapon_catalog';
 
 import { renderProfileCard } from './profile_card';
 import { findProfileWeapons } from './profile_weapons';
@@ -67,12 +67,19 @@ export async function handleProfileSettings(interaction: ChatInputCommandInterac
         return;
     }
     const key = interaction.options.getString('名前', true);
-    const weapon = PROFILE_WEAPONS.find((candidate) => candidate.key === key);
+    const weapons = await weaponCatalog.get();
+    if (!weapons.length) {
+        await interaction.editReply(
+            'ブキ一覧を取得できなかったでし。少し待ってからもう一度試してほしいでし！',
+        );
+        return;
+    }
+    const weapon = weapons.find((candidate) => candidate.key === key);
     if (!weapon) {
         await interaction.editReply('ブキは表示された候補から選んでほしいでし！');
         return;
     }
-    await ProfileService.setWeapon(interaction.user.id, weapon.name);
+    await ProfileService.setWeapon(interaction.user.id, weapon.name.ja_JP);
     await interaction.editReply('好きなブキを登録したでし！ `/プロフィール` で確認できるでし！');
 }
 
@@ -82,5 +89,5 @@ export async function autocompleteProfileWeapon(interaction: AutocompleteInterac
         await interaction.respond([]);
         return;
     }
-    await interaction.respond(findProfileWeapons(String(focused.value)));
+    await interaction.respond(findProfileWeapons(String(focused.value), weaponCatalog.getCached()));
 }

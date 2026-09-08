@@ -190,3 +190,11 @@ model Profile {
 
   @@map("profile")
 }
+
+model WeaponCatalog {
+  id        Int      @id
+  payload   String
+  fetchedAt DateTime @map("fetched_at")
+
+  @@map("weapon_catalog")
+}

@@ -1,4 +1,4 @@
-import { PROFILE_WEAPONS } from '@/config/constants/profile_weapons';
+import { Weapon } from '@/infra/external/stat_ink/weapon';
 
 function normalize(value: string) {
     return value
@@ -8,11 +8,13 @@ function normalize(value: string) {
         .replace(/\s/gu, '');
 }
 
-export function findProfileWeapons(query: string) {
+export function findProfileWeapons(query: string, weapons: Weapon[]) {
     const search = normalize(query);
-    return PROFILE_WEAPONS.filter(
-        (weapon) => normalize(weapon.name).includes(search) || weapon.key.includes(search),
-    )
+    return weapons
+        .filter(
+            (weapon) =>
+                normalize(weapon.name.ja_JP).includes(search) || weapon.key.includes(search),
+        )
         .slice(0, 25)
-        .map((weapon) => ({ name: weapon.name, value: weapon.key }));
+        .map((weapon) => ({ name: weapon.name.ja_JP, value: weapon.key }));
 }

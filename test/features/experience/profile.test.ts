@@ -10,6 +10,11 @@ const mocks = vi.hoisted(() => ({
     render: vi.fn(),
     save: vi.fn(),
     clear: vi.fn(),
+    weapons: vi.fn(),
+    cached: vi.fn(),
+}));
+vi.mock('@/infra/external/stat_ink/weapon_catalog', () => ({
+    weaponCatalog: { get: mocks.weapons, getCached: mocks.cached },
 }));
 vi.mock('@/infra/db/repositories/member_service', () => ({
     MemberService: { getMemberByUserId: mocks.member },
@@ -36,6 +41,8 @@ import {
 } from '@/features/experience/profile';
 import { profileCommand, profileSettingsCommand } from '@/features/experience/profile_command';
 
+import { weapon } from '../../fixtures/weapons';
+
 function interaction() {
     return {
         user: { id: 'self' },
@@ -60,6 +67,8 @@ beforeEach(() => {
     vi.resetAllMocks();
     for (const fn of [mocks.member, mocks.friend, mocks.messages, mocks.profile, mocks.supporter])
         fn.mockResolvedValue(null);
+    mocks.weapons.mockResolvedValue([weapon()]);
+    mocks.cached.mockReturnValue([weapon()]);
     mocks.render.mockResolvedValue(Buffer.from('png'));
 });
 
@@ -156,6 +165,13 @@ describe('プロフィール設定', () => {
         i.options.getString.mockReturnValue(value);
         await handleProfileSettings(i as unknown as Interaction);
         expect(mocks.save).not.toHaveBeenCalled();
+    });
+    it('一覧を取得できない場合は保存せず再試行を案内する', async () => {
+        mocks.weapons.mockResolvedValue([]);
+        const i = interaction();
+        await handleProfileSettings(i as unknown as Interaction);
+        expect(mocks.save).not.toHaveBeenCalled();
+        expect(i.editReply).toHaveBeenCalledWith(expect.stringContaining('もう一度'));
     });
     it('本人のブキを解除する', async () => {
         const i = interaction();
